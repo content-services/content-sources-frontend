@@ -93,10 +93,18 @@ const ContentListTable = () => {
         'Name',
         'Url',
         'Arch',
-        'Version',
+        'Versions',
         'Account ID',
         'Org ID'
     ];
+
+    const versionDisplay = (versions: Array<string>): string => {
+        if (versions.length === 0) {
+            return 'Any';
+        } else {
+            return versions.join(', ');
+        }
+    };
 
     if (isLoading) {
         return (
@@ -153,7 +161,7 @@ const ContentListTable = () => {
                             name,
                             url,
                             distribution_arch,
-                            distribution_version,
+                            distribution_versions,
                             account_id,
                             org_id
                         }) => (
@@ -161,7 +169,8 @@ const ContentListTable = () => {
                                 <Td>{name}</Td>
                                 <Td>{url}</Td>
                                 <Td>{distribution_arch}</Td>
-                                <Td>{distribution_version}</Td>
+                                <Td>{versionDisplay(distribution_versions)}
+                                </Td>
                                 <Td>{account_id}</Td>
                                 <Td>{org_id}</Td>
                                 <Td isActionCell>

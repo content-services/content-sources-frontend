@@ -4,7 +4,7 @@ export interface ContentItem {
     uuid: string;
     name: string;
     url: string;
-    distribution_version: string;
+    distribution_versions: Array<string>;
     distribution_arch: string;
     account_id: string;
     org_id: string;
