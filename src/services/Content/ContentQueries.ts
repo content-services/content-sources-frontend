@@ -2,20 +2,34 @@ import { AlertVariant } from '@patternfly/react-core';
 import { QueryClient, useMutation, useQuery } from 'react-query';
 
 import { useNotification } from './../Notifications/Notifications';
-import { ContentListResponse, deleteContentListItem, getContentList } from './ContentApi';
+import {
+  filterData,
+  ContentListResponse,
+  ContentRepoParamsResponse,
+  deleteContentListItem,
+  getContentList,
+  getContentRepoParams
+} from './ContentApi';
 
 export const CONTENT_LIST_KEY = 'CONTENT_LIST_KEY';
+export const CONTENT_REPO_PARAMS_KEY = 'CONTENT_REPO_PARAMS_KEY';
 
-export const useContentListQuery = (page: number, limit: number) =>
+export const useContentListQuery = (page: number, limit: number, filterData: filterData) =>
   useQuery<ContentListResponse>(
-    [CONTENT_LIST_KEY, page, limit],
-    () => getContentList(page, limit),
+    [CONTENT_LIST_KEY, page, limit, filterData],
+    () => getContentList(page, limit, filterData),
     {
       keepPreviousData: true,
       staleTime: 20000,
       optimisticResults: true,
     },
   );
+
+export const useContentRepoParamsQuery = () =>
+    useQuery<ContentRepoParamsResponse>(
+        [CONTENT_REPO_PARAMS_KEY],
+        () => getContentRepoParams()
+    );
 
 export const useDeleteContentItemMutate = (
   queryClient: QueryClient,

@@ -30,12 +30,28 @@ export interface ContentListResponse {
   meta: Meta;
 }
 
-export const getContentList: (page: number, limit: number) => Promise<ContentListResponse> = async (
+export interface ContentRepoParamsResponse {
+  distribution_versions: Array<{ name: string, label:string }>;
+  distribution_arches: Array<{ name: string, label:string }>;
+}
+
+export type filterData = {
+  searchQuery: string;
+  versions: Array<string>;
+  arches: Array<string>;
+}
+
+export const getContentList: (page: number, limit: number, filterData: filterData) => Promise<ContentListResponse> = async (
   page,
   limit,
+  filterData,
 ) => {
+
+  const searchQuery = filterData.searchQuery;
+  const versionParam = filterData.versions.join(',');
+  const archParam = filterData.arches.join(',');
   const { data } = await axios.get(
-    `/api/content_sources/v1/repositories/?offset=${(page - 1) * limit}&limit=${limit}`,
+    `/api/content_sources/v1/repositories/?offset=${(page - 1) * limit}&limit=${limit}&search=${searchQuery}&version=${versionParam}&arch=${archParam}`,
   );
   return data;
 };
@@ -44,3 +60,10 @@ export const deleteContentListItem: (uuid: string) => Promise<void> = async (uui
   const { data } = await axios.delete(`/api/content_sources/v1/repositories/${uuid}`);
   return data;
 };
+
+export const getContentRepoParams: () => Promise<ContentRepoParamsResponse> = async () => {
+  const { data } = await axios.get(
+      '/api/content_sources/v1/repository_parameters/'
+  );
+  return data;
+}

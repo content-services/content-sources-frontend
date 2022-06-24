@@ -8,33 +8,28 @@ import {
   Pagination,
   PaginationVariant,
   Spinner,
-  TextInput,
 } from '@patternfly/react-core';
-import {
-  ActionsColumn,
-  IAction,
-  TableComposable,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from '@patternfly/react-table';
+import { ActionsColumn, IAction, TableComposable, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
-import { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { useQueryClient } from 'react-query';
 import { ContentItem } from '../../services/Content/ContentApi';
 
-import {
-  useContentListQuery,
-  useDeleteContentItemMutate,
-} from '../../services/Content/ContentQueries';
+import { useContentListQuery, useDeleteContentItemMutate } from '../../services/Content/ContentQueries';
+import ContentListFilters from './ContentListFilters';
+import ContentListChips from './ContentListChips';
+import { ContentListContext } from './ContentListContext';
 
 const useStyles = createUseStyles({
   actionContainer: {
     backgroundColor: global_BackgroundColor_100.value,
     justifyContent: 'space-between',
+    padding: '16px 24px',
+  },
+  chipsContainer: {
+    backgroundColor: global_BackgroundColor_100.value,
+    justifyContent: 'flex-start',
     padding: '16px 24px',
   },
   invisible: {
@@ -51,6 +46,10 @@ const ContentListTable = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
 
+  const {
+    filterData
+  } = useContext(ContentListContext)
+
   const hasActionPermissions = true; // TODO: Incorporate permissions here later.
 
   const {
@@ -59,7 +58,11 @@ const ContentListTable = () => {
     isError,
     isFetching,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useContentListQuery(page, perPage);
+  } = useContentListQuery(
+      page,
+      perPage,
+      filterData,
+    );
 
   const { mutate, isLoading: isDeleting } = useDeleteContentItemMutate(queryClient, page, perPage);
 
@@ -108,82 +111,80 @@ const ContentListTable = () => {
     meta: { count },
   } = data;
   return (
-    <Grid>
-      <Flex className={classes.actionContainer}>
-        <FlexItem>
-          <Flex>
-            <FlexItem>
-              <TextInput id='search' placeholder='Search' iconVariant='search' />
-            </FlexItem>
-            <FlexItem />
-          </Flex>
-        </FlexItem>
-        <FlexItem>
-          <Pagination
-            perPageComponent='button'
-            itemCount={count}
-            perPage={perPage}
-            page={page}
-            onSetPage={onSetPage}
-            widgetId='pagination-options-menu-top'
-            isCompact
-            onPerPageSelect={onPerPageSelect}
-          />
-        </FlexItem>
-      </Flex>
-      <TableComposable aria-label='content sources table' variant='compact' borders={false}>
-        <Thead>
-          <Tr>
-            {columnHeaders.map((columnHeader) => (
-              <Th key={columnHeader}>{columnHeader}</Th>
-            ))}
-            <Th>
-              <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {contentList.map(
-            ({
-              uuid,
-              name,
-              url,
-              distribution_arch,
-              distribution_versions,
-              account_id,
-              org_id,
-            }: ContentItem) => (
-              <Tr key={uuid}>
-                <Td>{name}</Td>
-                <Td>{url}</Td>
-                <Td>{distribution_arch ? distribution_arch : 'Any'}</Td>
-                <Td>{versionDisplay(distribution_versions)}</Td>
-                <Td>{account_id}</Td>
-                <Td>{org_id}</Td>
-                <Td isActionCell>
-                  {hasActionPermissions ? <ActionsColumn items={rowActions({ uuid })} /> : null}
-                </Td>
-              </Tr>
-            ),
-          )}
-        </Tbody>
-      </TableComposable>
-      <Flex className={classes.actionContainer}>
-        <FlexItem />
-        <FlexItem>
-          <Pagination
-            perPageComponent='button'
-            itemCount={count}
-            perPage={perPage}
-            page={page}
-            onSetPage={onSetPage}
-            widgetId='pagination-options-menu-bottom'
-            variant={PaginationVariant.bottom}
-            onPerPageSelect={onPerPageSelect}
-          />
-        </FlexItem>
-      </Flex>
-    </Grid>
+      <Grid>
+        <Flex className={classes.actionContainer}>
+          <FlexItem>
+              <ContentListFilters/>
+          </FlexItem>
+          <FlexItem>
+            <Pagination
+              perPageComponent='button'
+              itemCount={count}
+              perPage={perPage}
+              page={page}
+              onSetPage={onSetPage}
+              widgetId='pagination-options-menu-top'
+              isCompact
+              onPerPageSelect={onPerPageSelect}
+            />
+          </FlexItem>
+        </Flex>
+        <Flex className={classes.chipsContainer}>
+          <ContentListChips/>
+        </Flex>
+        <TableComposable aria-label='content sources table' variant='compact' borders={false}>
+          <Thead>
+            <Tr>
+              {columnHeaders.map((columnHeader) => (
+                <Th key={columnHeader}>{columnHeader}</Th>
+              ))}
+              <Th>
+                <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
+              </Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {contentList.map(
+              ({
+                uuid,
+                name,
+                url,
+                distribution_arch,
+                distribution_versions,
+                account_id,
+                org_id,
+              }: ContentItem) => (
+                <Tr key={uuid}>
+                  <Td>{name}</Td>
+                  <Td>{url}</Td>
+                  <Td>{distribution_arch ? distribution_arch : 'Any'}</Td>
+                  <Td>{versionDisplay(distribution_versions)}</Td>
+                  <Td>{account_id}</Td>
+                  <Td>{org_id}</Td>
+                  <Td isActionCell>
+                    {hasActionPermissions ? <ActionsColumn items={rowActions({ uuid })} /> : null}
+                  </Td>
+                </Tr>
+              ),
+            )}
+          </Tbody>
+        </TableComposable>
+        <Flex className={classes.actionContainer}>
+          <FlexItem />
+          <FlexItem>
+            <Pagination
+              perPageComponent='button'
+              itemCount={count}
+              perPage={perPage}
+              page={page}
+              onSetPage={onSetPage}
+              widgetId='pagination-options-menu-bottom'
+              variant={PaginationVariant.bottom}
+              onPerPageSelect={onPerPageSelect}
+            />
+          </FlexItem>
+        </Flex>
+      </Grid>
   );
 };
 

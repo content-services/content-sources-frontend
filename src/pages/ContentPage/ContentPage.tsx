@@ -11,6 +11,7 @@ import { createUseStyles } from 'react-jss';
 import { withRouter } from 'react-router-dom';
 
 import ContentListTable from '../../components/ContentListTable/ContentListTable';
+import ContentListContextProvider from '../../components/ContentListTable/ContentListContext';
 
 const useStyles = createUseStyles({
   subtext: {
@@ -42,7 +43,9 @@ const SamplePage = () => {
         </>
       </PageHeader>
       <Main>
-        <ContentListTable />
+        <ContentListContextProvider>
+          <ContentListTable />
+        </ContentListContextProvider>
       </Main>
     </>
   );
