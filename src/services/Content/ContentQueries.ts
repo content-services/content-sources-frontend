@@ -8,7 +8,7 @@ import {
   ContentRepoParamsResponse,
   deleteContentListItem,
   getContentList,
-  getContentRepoParams
+  getContentRepoParams,
 } from './ContentApi';
 
 export const CONTENT_LIST_KEY = 'CONTENT_LIST_KEY';
@@ -26,10 +26,7 @@ export const useContentListQuery = (page: number, limit: number, filterData: fil
   );
 
 export const useContentRepoParamsQuery = () =>
-    useQuery<ContentRepoParamsResponse>(
-        [CONTENT_REPO_PARAMS_KEY],
-        () => getContentRepoParams()
-    );
+  useQuery<ContentRepoParamsResponse>([CONTENT_REPO_PARAMS_KEY], () => getContentRepoParams());
 
 export const useDeleteContentItemMutate = (
   queryClient: QueryClient,
