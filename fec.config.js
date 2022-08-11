@@ -2,11 +2,8 @@ module.exports = {
   debug: true,
   useProxy: true,
   proxyVerbose: true,
-  /**
-   * Change to false after your app is registered in configuration files
-   */
   interceptChromeConfig: false,
-  appUrl: '/staging/starter',
+  appUrl: '/apps/content-sources',
   routes: {
     '/api/content_sources/': { host: 'http://localhost:8000' },
   },
