@@ -6,9 +6,8 @@ import {
   PageHeaderTitle,
 } from '@redhat-cloud-services/frontend-components';
 import { PageHeaderProps as _PageHeaderProps } from '@redhat-cloud-services/frontend-components/PageHeader/PageHeader';
-import { FunctionComponent, ReactElement, useEffect } from 'react';
+import { FunctionComponent, ReactElement } from 'react';
 import { createUseStyles } from 'react-jss';
-import { withRouter } from 'react-router-dom';
 
 import ContentListTable from '../../components/ContentListTable/ContentListTable';
 
@@ -25,11 +24,8 @@ interface PageHeaderProps extends _PageHeaderProps {
 
 const PageHeader = _PageHeader as FunctionComponent<PageHeaderProps>;
 
-const SamplePage = () => {
+const ContentPage = () => {
   const classes = useStyles();
-  useEffect(() => {
-    insights?.chrome?.appAction?.('view-list-page');
-  }, []);
 
   return (
     <>
@@ -48,4 +44,4 @@ const SamplePage = () => {
   );
 };
 
-export default withRouter(SamplePage);
+export default ContentPage;
