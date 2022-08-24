@@ -9,7 +9,16 @@ export COMPONENT_NAME="content-sources-backend"  # name of resourceTemplate comp
 export IMAGE="quay.io/cloudservices/content-sources-frontend"
 export WORKSPACE=${WORKSPACE:-$APP_ROOT} # if running in jenkins, use the build's workspace
 export APP_ROOT=$(pwd)
-export NODE_BUILD_VERSION=15
+
+# set NODE_BUILD_VERSION based on nvmrc or default to 16
+if test -f "${APP_ROOT}/.nvmrc"; then
+    # -P for perl, look-behind for v, match the major version number, look ahead for .
+    # -o output only matched major version number, don't output (?=) groups
+    export NODE_BUILD_VERSION=$(grep -Po '(?<=v)[0-9]+(?=\.)' .nvmrc)
+else
+    export NODE_BUILD_VERSION=16
+fi
+
 COMMON_BUILDER=https://raw.githubusercontent.com/RedHatInsights/insights-frontend-builder-common/master
 
 # --------------------------------------------
