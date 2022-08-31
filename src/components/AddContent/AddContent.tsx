@@ -316,6 +316,7 @@ const AddContent = ({ isLoading }: Props) => {
     <>
       <Button
         id='createContentSourceButton'
+        ouiaId='create_content_source'
         variant='primary'
         isDisabled={isLoading}
         onClick={handleModalToggle}

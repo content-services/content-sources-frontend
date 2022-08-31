@@ -38,7 +38,7 @@ const EmptyTableState = ({ notFiltered, clearFilters }: Props) => {
       {notFiltered ? (
         <AddContent />
       ) : (
-        <Button variant='link' onClick={clearFilters}>
+        <Button ouiaId='clear_filters' variant='link' onClick={clearFilters}>
           Clear all filters
         </Button>
       )}
