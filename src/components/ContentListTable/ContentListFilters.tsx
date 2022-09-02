@@ -131,6 +131,7 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
           <TextInput
             isDisabled={isLoading}
             id='search'
+            ouiaId='filter_search'
             placeholder='Filter by name/url'
             iconVariant='search'
             onChange={(value) => setSearchQuery(value)}
@@ -140,6 +141,7 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
         return (
           <DropdownSelect
             toggleId='versionSelect'
+            ouiaId='filter_version'
             isDisabled={isLoading}
             options={Object.keys(versionNamesLabels)}
             variant={SelectVariant.checkbox}
@@ -152,6 +154,7 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
         return (
           <DropdownSelect
             toggleId='archSelect'
+            ouiaId='filter_arch'
             isDisabled={isLoading}
             options={Object.keys(archNamesLabels)}
             variant={SelectVariant.checkbox}
@@ -172,6 +175,7 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
           <FlexItem>
             <DropdownSelect
               toggleId='filterSelectionDropdown'
+              ouiaId='filter_type'
               isDisabled={isLoading}
               options={filters}
               variant={SelectVariant.single}

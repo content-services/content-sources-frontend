@@ -393,7 +393,7 @@ const AddContent = ({ isLoading }: Props) => {
             </Stack>
           }
         >
-          <TableComposable aria-label='Expandable table'>
+          <TableComposable ouiaId='modal_table_expandable' aria-label='Expandable table'>
             <Hide hide={createDataLengthOf1}>
               <Tbody isExpanded={allExpanded}>
                 <Tr onClick={expandAllToggle} className={classes.toggleAllRow}>

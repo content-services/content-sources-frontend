@@ -197,7 +197,12 @@ const ContentListTable = () => {
       </Hide>
       <Hide hide={countIsZero || isLoading}>
         <>
-          <TableComposable aria-label='content sources table' variant='compact' borders={false}>
+          <TableComposable
+            aria-label='content sources table'
+            ouiaId='content_sources_table'
+            variant='compact'
+            borders={false}
+          >
             <Thead>
               <Tr>
                 {columnHeaders.map((columnHeader) => (
