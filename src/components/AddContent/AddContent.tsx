@@ -327,6 +327,7 @@ const AddContent = ({ isLoading }: Props) => {
         <Modal
           variant={ModalVariant.medium}
           title='Add Custom Content'
+          ouiaId='add_custom_repository'
           help={
             <Popover
               headerContent={<div>Help Popover</div>}
@@ -359,6 +360,7 @@ const AddContent = ({ isLoading }: Props) => {
                   variant='link'
                   onClick={addRepository}
                   icon={<PlusCircleIcon />}
+                  ouiaId='add_row'
                 >
                   Add another repository
                 </Button>
@@ -367,6 +369,7 @@ const AddContent = ({ isLoading }: Props) => {
                 <Button
                   className={classes.saveButton}
                   key='confirm'
+                  ouiaId='modal_save'
                   variant='primary'
                   isLoading={isAdding}
                   isDisabled={!formik.isValid || isAdding}
@@ -377,7 +380,12 @@ const AddContent = ({ isLoading }: Props) => {
                 >
                   Save
                 </Button>
-                <Button key='cancel' variant='link' onClick={closeModal}>
+                <Button
+                  key='cancel'
+                  variant='link'
+                  onClick={closeModal}
+                  ouiaId='modal_cancel'
+                >
                   Cancel
                 </Button>
                 <Button
