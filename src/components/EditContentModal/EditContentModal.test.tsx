@@ -17,6 +17,8 @@ const singleEditValues = [
     distribution_versions: ['7'],
     package_count: 24,
     distribution_arch: 'x86_64',
+    status: 'Pending',
+    last_introspection_error: '',
     account_id: '6414238',
     org_id: '13446804',
   },

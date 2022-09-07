@@ -9,6 +9,8 @@ export interface ContentItem {
   distribution_arch: string;
   account_id: string;
   org_id: string;
+  status: string;
+  last_introspection_error: string;
 }
 
 export interface CreateContentRequestItem {

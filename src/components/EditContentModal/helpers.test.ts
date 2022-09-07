@@ -38,6 +38,8 @@ it('mapToDefaultFormikValues', () => {
       package_count: 25,
       distribution_versions: ['version1', 'etc'],
       distribution_arch: 'stuffAndThings',
+      status: 'stuffAndThings',
+      last_introspection_error: 'stuffAndThings',
       account_id: 'stuffAndThings',
       org_id: 'stuffAndThings',
     },
