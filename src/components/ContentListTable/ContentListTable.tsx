@@ -97,15 +97,14 @@ const ContentListTable = () => {
     },
   } = useRepositoryParams();
 
-  const columnHeaders = ['Name', 'Url', 'Architecture', 'Versions', 'Status', 'Packages'];
   const columnSortAttributes = [
     'name',
-    'url',
     'distribution_arch',
     'distribution_versions',
     'status',
     'package_count',
   ];
+
   const sortString = (): string =>
     columnSortAttributes[activeSortIndex] + ':' + activeSortDirection;
 
@@ -149,6 +148,7 @@ const ContentListTable = () => {
     },
     columnIndex,
   });
+  const columnHeaders = ['Name', 'Architecture', 'Versions', 'Packages', 'Status'];
 
   const archesDisplay = (arch: string) => distArches.find(({ label }) => arch === label)?.name;
 
@@ -271,7 +271,6 @@ const ContentListTable = () => {
                 const {
                   uuid,
                   name,
-                  url,
                   distribution_arch,
                   package_count,
                   distribution_versions,
@@ -281,7 +280,6 @@ const ContentListTable = () => {
                 return (
                   <Tr key={uuid}>
                     <Td>{name}</Td>
-                    <Td>{url}</Td>
                     <Td>{archesDisplay(distribution_arch)}</Td>
                     <Td>{versionDisplay(distribution_versions)}</Td>
                     <Td>{package_count}</Td>
