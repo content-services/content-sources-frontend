@@ -5,7 +5,7 @@ module.exports = {
   interceptChromeConfig: true,
   appUrl: '/apps/content-sources',
   routes: {
-    '/api/content_sources/': { host: 'http://localhost:8000' },
+    '/api/content-sources/': { host: 'http://localhost:8000' },
   },
   /**
    * Add additional webpack plugins

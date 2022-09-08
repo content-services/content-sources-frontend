@@ -84,7 +84,7 @@ export const getContentList: (
   const versionParam = filterData.versions.join(',');
   const archParam = filterData.arches.join(',');
   const { data } = await axios.get(
-    `/api/content_sources/v1/repositories/?offset=${
+    `/api/content-sources/v1/repositories/?offset=${
       (page - 1) * limit
     }&limit=${limit}&search=${searchQuery}&version=${versionParam}&arch=${archParam}`,
   );
@@ -92,19 +92,19 @@ export const getContentList: (
 };
 
 export const deleteContentListItem: (uuid: string) => Promise<void> = async (uuid: string) => {
-  const { data } = await axios.delete(`/api/content_sources/v1/repositories/${uuid}`);
+  const { data } = await axios.delete(`/api/content-sources/v1/repositories/${uuid}`);
   return data;
 };
 
 export const AddContentListItems: (request: CreateContentRequest) => Promise<void> = async (
   request,
 ) => {
-  const { data } = await axios.post('/api/content_sources/v1.0/repositories/bulk_create/', request);
+  const { data } = await axios.post('/api/content-sources/v1.0/repositories/bulk_create/', request);
   return data;
 };
 
 export const getRepositoryParams: () => Promise<RepositoryParamsResponse> = async () => {
-  const { data } = await axios.get('/api/content_sources/v1/repository_parameters/');
+  const { data } = await axios.get('/api/content-sources/v1/repository_parameters/');
   return data;
 };
 
@@ -112,7 +112,7 @@ export const validateContentListItems: (
   request: CreateContentRequest,
 ) => Promise<ValidationResponse> = async (request) => {
   const { data } = await axios.post(
-    '/api/content_sources/v1.0/repository_parameters/validate/',
+    '/api/content-sources/v1.0/repository_parameters/validate/',
     request,
   );
   return data;
