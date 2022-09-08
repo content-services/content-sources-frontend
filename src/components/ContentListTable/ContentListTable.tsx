@@ -87,7 +87,10 @@ const ContentListTable = () => {
     isLoading: repositoryParamsLoading,
     error: repositoryParamsError,
     isError: repositoryParamsIsError,
-    data: { distribution_versions: distVersions } = { distribution_versions: [] },
+    data: { distribution_versions: distVersions, distribution_arches: distArches } = {
+      distribution_versions: [],
+      distribution_arches: [],
+    },
   } = useRepositoryParams();
 
   const {
@@ -117,18 +120,15 @@ const ContentListTable = () => {
     setPage(newPage);
   };
 
-  const columnHeaders = ['Name', 'Url', 'Arch', 'Packages', 'Versions'];
+  const columnHeaders = ['Name', 'Url', 'Architecture', 'Version', 'Packages'];
 
-  const versionDisplay = (versions: Array<string>): string => {
-    if (!versions?.length) {
-      return 'Any';
-    } else {
-      return distVersions
-        .filter(({ label }) => versions?.includes(label))
-        .map(({ name }) => name)
-        .join(', ');
-    }
-  };
+  const archesDisplay = (arch: string) => distArches.find(({ label }) => arch === label)?.name;
+
+  const versionDisplay = (versions: Array<string>): string =>
+    distVersions
+      .filter(({ label }) => versions?.includes(label))
+      .map(({ name }) => name)
+      .join(', ');
 
   // Error is caught in the wrapper component
   if (isError) throw error;
@@ -244,9 +244,9 @@ const ContentListTable = () => {
                   <Tr key={uuid}>
                     <Td>{name}</Td>
                     <Td>{url}</Td>
-                    <Td>{distribution_arch ? distribution_arch : 'Any'}</Td>
-                    <Td>{package_count}</Td>
+                    <Td>{archesDisplay(distribution_arch)}</Td>
                     <Td>{versionDisplay(distribution_versions)}</Td>
+                    <Td>{package_count}</Td>
                     <Td isActionCell>
                       {hasActionPermissions ? <ActionsColumn items={rowActions(rowData)} /> : ''}
                     </Td>

@@ -104,7 +104,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
     queryClient.getQueryData<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY) || {};
 
   const { distributionArches, distributionVersions } = useMemo(() => {
-    const distributionArches = { 'Any architecture': '' };
+    const distributionArches = {};
     const distributionVersions = {};
     distArches.forEach(({ name, label }) => (distributionArches[name] = label));
     distVersions.forEach(({ name, label }) => (distributionVersions[name] = label));
@@ -197,6 +197,20 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
 
   const urlOnBlur = (index: number) => {
     updateArchAndVersion(index);
+  };
+
+  const setVersionSelected = (value: string[], index: number) => {
+    let valueToUpdate = value.map((val) => distributionVersions[val]);
+    if (value.length === 0 || valueToUpdate[value.length - 1] === 'any') {
+      valueToUpdate = ['any'];
+    }
+    if (valueToUpdate.length > 1 && valueToUpdate.includes('any')) {
+      valueToUpdate = valueToUpdate.filter((val) => val !== 'any');
+    }
+
+    updateVariable(index, {
+      versions: valueToUpdate,
+    });
   };
 
   return (
@@ -352,7 +366,9 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                       toggleId={'archSelection' + index}
                       options={Object.keys(distributionArches)}
                       variant={SelectVariant.single}
-                      selectedProp={arch}
+                      selectedProp={Object.keys(distributionArches).find(
+                        (key: string) => arch === distributionArches[key],
+                      )}
                       setSelected={(value) =>
                         updateVariable(index, { arch: distributionArches[value] })
                       }
@@ -380,11 +396,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         versions?.includes(distributionVersions[key]),
                       )}
                       placeholderText={versions?.length ? '' : 'Any version'}
-                      setSelected={(value) =>
-                        updateVariable(index, {
-                          versions: value.map((val) => distributionVersions[val]),
-                        })
-                      }
+                      setSelected={(value) => setVersionSelected(value, index)}
                     />
                   </FormGroup>
                   <Hide hide>

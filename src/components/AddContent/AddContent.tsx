@@ -101,8 +101,8 @@ const defaultValues: FormikValues = {
   name: '',
   url: '',
   gpgKey: '',
-  arch: '',
-  versions: [],
+  arch: 'any',
+  versions: ['any'],
   gpgLoading: false,
   expanded: true,
 };
@@ -124,7 +124,7 @@ const AddContent = ({ isLoading }: Props) => {
     queryClient.getQueryData<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY) || {};
 
   const { distributionArches, distributionVersions } = useMemo(() => {
-    const distributionArches = { 'Any architecture': '' };
+    const distributionArches = {};
     const distributionVersions = {};
     distArches.forEach(({ name, label }) => (distributionArches[name] = label));
     distVersions.forEach(({ name, label }) => (distributionVersions[name] = label));
@@ -275,12 +275,26 @@ const AddContent = ({ isLoading }: Props) => {
       name: magicURLList[index].replace('https://', '').replace('www.', '').split('.')[0],
       url: magicURLList[index],
       gpgKey: '',
-      arch: !(index % 3) ? 'x86_64' : '',
-      versions: !(index % 2) ? ['7'] : [],
+      arch: !(index % 3) ? 'x86_64' : 'any',
+      versions: !(index % 2) ? ['7'] : ['any'],
       gpgLoading: false,
       expanded: false,
     }));
     formik.setValues(newValues);
+  };
+
+  const setVersionSelected = (value: string[], index: number) => {
+    let valueToUpdate = value.map((val) => distributionVersions[val]);
+    if (value.length === 0 || valueToUpdate[value.length - 1] === 'any') {
+      valueToUpdate = ['any'];
+    }
+    if (valueToUpdate.length > 1 && valueToUpdate.includes('any')) {
+      valueToUpdate = valueToUpdate.filter((val) => val !== 'any');
+    }
+
+    updateVariable(index, {
+      versions: valueToUpdate,
+    });
   };
 
   return (
@@ -480,7 +494,9 @@ const AddContent = ({ isLoading }: Props) => {
                             toggleId={'archSelection' + index}
                             options={Object.keys(distributionArches)}
                             variant={SelectVariant.single}
-                            selectedProp={arch}
+                            selectedProp={Object.keys(distributionArches).find(
+                              (key: string) => arch === distributionArches[key],
+                            )}
                             setSelected={(value) =>
                               updateVariable(index, { arch: distributionArches[value] })
                             }
@@ -507,11 +523,7 @@ const AddContent = ({ isLoading }: Props) => {
                               versions?.includes(distributionVersions[key]),
                             )}
                             placeholderText={versions?.length ? '' : 'Any version'}
-                            setSelected={(value) =>
-                              updateVariable(index, {
-                                versions: value.map((val) => distributionVersions[val]),
-                              })
-                            }
+                            setSelected={(value) => setVersionSelected(value, index)}
                           />
                         </FormGroup>
                         <Hide hide>
