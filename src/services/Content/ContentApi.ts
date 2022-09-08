@@ -21,6 +21,17 @@ export interface CreateContentRequestItem {
 
 export type CreateContentRequest = Array<CreateContentRequestItem>;
 
+export interface EditContentRequestItem {
+  uuid: string;
+  name: string;
+  url: string;
+  distribution_arch: string;
+  distribution_versions: string[];
+  gpgKey: string;
+}
+
+export type EditContentRequest = Array<EditContentRequestItem>;
+
 export type ContentList = Array<ContentItem>;
 
 export type Links = {
@@ -101,6 +112,16 @@ export const AddContentListItems: (request: CreateContentRequest) => Promise<voi
   request,
 ) => {
   const { data } = await axios.post('/api/content-sources/v1.0/repositories/bulk_create/', request);
+  return data;
+};
+
+export const EditContentListItem: (request: EditContentRequestItem) => Promise<void> = async (
+  request,
+) => {
+  const { data } = await axios.patch(
+    `/api/content-sources/v1.0/repositories/${request.uuid}`,
+    request,
+  );
   return data;
 };
 

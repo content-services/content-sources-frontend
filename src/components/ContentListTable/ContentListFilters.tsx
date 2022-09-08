@@ -134,6 +134,7 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
             ouiaId='filter_search'
             placeholder='Filter by name/url'
             iconVariant='search'
+            value={searchQuery}
             onChange={(value) => setSearchQuery(value)}
           />
         );

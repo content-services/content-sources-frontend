@@ -23,8 +23,14 @@ import { useFormik } from 'formik';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import Hide from '../Hide/Hide';
-import { isValidURL, mapFormikToAPIValues, mapValidationData } from './helpers';
-import * as Yup from 'yup';
+import {
+  isValidURL,
+  mapFormikToAPIValues,
+  mapValidationData,
+  makeValidationSchema,
+  magicURLList,
+  FormikValues,
+} from './helpers';
 import useDebounce from '../../services/useDebounce';
 import ContentValidity from './components/ContentValidity';
 import {
@@ -55,7 +61,7 @@ const useStyles = createUseStyles({
     borderBottom: 'none!important',
     '& td': {
       color: global_link_Color.value + '!important',
-      padding: '12px 0 24px!important',
+      padding: '8px 0!important',
     },
     '& svg': {
       fill: global_link_Color.value + '!important',
@@ -65,7 +71,7 @@ const useStyles = createUseStyles({
   colHeader: {
     '& td': {
       '&:not(:last-child)': { cursor: 'pointer' },
-      padding: '12px 0!important',
+      padding: '8px 0!important',
     },
   },
   mainContentCol: {
@@ -83,6 +89,7 @@ const useStyles = createUseStyles({
   },
   saveButton: {
     marginRight: '36px',
+    transition: 'unset!important',
   },
   removeButton: {
     display: 'flex!important',
@@ -90,38 +97,7 @@ const useStyles = createUseStyles({
   },
 });
 
-// This adds the uniqueProperty function to the below schema validation
-Yup.addMethod(Yup.object, 'uniqueProperty', function (propertyName, message) {
-  return this.test('unique', message, function (value) {
-    if (!value || !value[propertyName]) {
-      return true;
-    }
-    if (
-      this.parent.filter((v) => v !== value).some((v) => v[propertyName] === value[propertyName])
-    ) {
-      throw this.createError({
-        path: `${this.path}.${propertyName}`,
-      });
-    }
-
-    return true;
-  });
-});
-
-const validationSchema = Yup.array(
-  Yup.object()
-    .shape({
-      name: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Required'),
-      url: Yup.string().url('Invalid URL').required('Required'),
-      gpgKey: Yup.string().optional(),
-    })
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore-next-line
-    .uniqueProperty('name', 'Names must be unique')
-    .uniqueProperty('url', 'Url\'s must be unique'),
-);
-
-const defaultValues = {
+const defaultValues: FormikValues = {
   name: '',
   url: '',
   gpgKey: '',
@@ -139,7 +115,7 @@ const AddContent = ({ isLoading }: Props) => {
     initialValues: [defaultValues],
     validateOnBlur: false,
     validateOnChange: false,
-    validationSchema,
+    validationSchema: makeValidationSchema(),
     initialTouched: [{ name: false, url: false }],
     onSubmit: () => undefined,
   });
@@ -192,10 +168,10 @@ const AddContent = ({ isLoading }: Props) => {
 
   const addRepository = () => {
     formik.setTouched([...formik.touched, { name: false, url: false }]);
-    formik.setValues(
-      [...formik.values.map((vals) => ({ ...vals, expanded: false })), defaultValues],
-      true,
-    );
+    formik.setValues([
+      ...formik.values.map((vals) => ({ ...vals, expanded: false })),
+      defaultValues,
+    ]);
   };
 
   const removeRepository = (index: number) => {
@@ -205,12 +181,13 @@ const AddContent = ({ isLoading }: Props) => {
     const newTouched = formik.touched;
     newTouched.splice(index, 1);
 
-    formik.setTouched(newTouched);
-    formik.setValues(newValues, true);
-  };
+    const newErrors = formik.errors;
+    newErrors.splice(index, 1);
 
-  const setAllTouched = () =>
-    formik.setTouched(formik.touched.map((values) => ({ ...values, name: true, url: true })));
+    formik.setTouched(newTouched);
+    formik.setErrors(newErrors);
+    formik.setValues(newValues);
+  };
 
   const getFieldValidation = (
     index: number,
@@ -241,12 +218,13 @@ const AddContent = ({ isLoading }: Props) => {
     }
   };
 
-  const debouncedValues = useDebounce(formik.values);
+  let debouncedValues = useDebounce(formik.values) || []; // Initial value of []
 
   const { mutateAsync: validateContentList } = useValidateContentList();
 
   useEffect(() => {
-    if (isModalOpen)
+    if (isModalOpen) {
+      if (debouncedValues.length !== formik.values.length) debouncedValues = formik.values;
       validateContentList(debouncedValues.map(({ name, url }) => ({ name, url }))).then(
         async (validationData) => {
           const formikErrors = await formik.validateForm(debouncedValues);
@@ -254,7 +232,8 @@ const AddContent = ({ isLoading }: Props) => {
           formik.setErrors(mappedErrorData);
         },
       );
-  }, [debouncedValues, formik.touched, isModalOpen]);
+    }
+  }, [debouncedValues, debouncedValues.length, formik.touched, isModalOpen]);
 
   const onToggle = (index: number) => {
     if (formik.values[index]?.expanded) {
@@ -292,20 +271,12 @@ const AddContent = ({ isLoading }: Props) => {
   const magicButtonThatWillBeDeletedAtSomePoint = () => {
     const baseArray = Array.from(Array(20).keys());
     formik.setTouched(baseArray.map(() => ({ name: true, url: true })));
-    const currentRandoName = Math.random()
-      .toString(36)
-      .replace(/[^a-z]+/g, '');
     const newValues = baseArray.map((index) => ({
-      name: 'AwesomeName' + currentRandoName + index,
-      url:
-        'https://google.ca/' +
-        currentRandoName +
-        index +
-        (!(index % 3) ? '/x86_64' : '') +
-        (!(index % 2) ? '/el7' : ''),
+      name: magicURLList[index].replace('https://', '').replace('www.', '').split('.')[0],
+      url: magicURLList[index],
       gpgKey: '',
       arch: !(index % 3) ? 'x86_64' : '',
-      versions: (!(index % 2) ? ['el7'] : []) as never[],
+      versions: !(index % 2) ? ['7'] : [],
       gpgLoading: false,
       expanded: false,
     }));
@@ -372,20 +343,14 @@ const AddContent = ({ isLoading }: Props) => {
                   ouiaId='modal_save'
                   variant='primary'
                   isLoading={isAdding}
-                  isDisabled={!formik.isValid || isAdding}
-                  onClick={() => {
-                    setAllTouched();
-                    addContent().then(closeModal);
-                  }}
+                  isDisabled={
+                    !formik.isValid || isAdding || formik.values?.length !== debouncedValues?.length
+                  }
+                  onClick={() => addContent().then(closeModal)}
                 >
                   Save
                 </Button>
-                <Button
-                  key='cancel'
-                  variant='link'
-                  onClick={closeModal}
-                  ouiaId='modal_cancel'
-                >
+                <Button key='cancel' variant='link' onClick={closeModal} ouiaId='modal_cancel'>
                   Cancel
                 </Button>
                 <Button
@@ -419,40 +384,42 @@ const AddContent = ({ isLoading }: Props) => {
             </Hide>
             {formik.values.map(
               ({ expanded, name, url, arch, gpgKey, versions, gpgLoading }, index) => (
-                <Tbody key={index} isExpanded={expanded}>
-                  <Tr className={classes.colHeader}>
-                    <Td
-                      onClick={() => onToggle(index)}
-                      className={classes.toggleAction}
-                      isActionCell
-                      expand={{
-                        rowIndex: index,
-                        isExpanded: expanded,
-                      }}
-                    />
-                    <Td width={35} onClick={() => onToggle(index)} dataLabel={name}>
-                      {name || 'New content'}
-                    </Td>
-                    <Td onClick={() => onToggle(index)} dataLabel='validity'>
-                      <ContentValidity
-                        touched={formik.touched[index]}
-                        errors={formik.errors[index]}
+                <Tbody key={index} isExpanded={createDataLengthOf1 ? undefined : expanded}>
+                  <Hide hide={createDataLengthOf1}>
+                    <Tr className={classes.colHeader}>
+                      <Td
+                        onClick={() => onToggle(index)}
+                        className={classes.toggleAction}
+                        isActionCell
+                        expand={{
+                          rowIndex: index,
+                          isExpanded: expanded,
+                        }}
                       />
-                    </Td>
-                    <Td dataLabel='removeButton' className={classes.removeButton}>
-                      <Hide hide={formik.values.length === 1}>
-                        <Button
-                          onClick={() => removeRepository(index)}
-                          variant='link'
-                          icon={<MinusCircleIcon />}
-                        >
-                          Remove
-                        </Button>
-                      </Hide>
-                    </Td>
-                  </Tr>
-                  <Tr isExpanded={expanded}>
-                    <Td colSpan={4} className={classes.mainContentCol}>
+                      <Td width={35} onClick={() => onToggle(index)} dataLabel={name}>
+                        {name || 'New content'}
+                      </Td>
+                      <Td onClick={() => onToggle(index)} dataLabel='validity'>
+                        <ContentValidity
+                          touched={formik.touched[index]}
+                          errors={formik.errors[index]}
+                        />
+                      </Td>
+                      <Td dataLabel='removeButton' className={classes.removeButton}>
+                        <Hide hide={formik.values.length === 1}>
+                          <Button
+                            onClick={() => removeRepository(index)}
+                            variant='link'
+                            icon={<MinusCircleIcon />}
+                          >
+                            Remove
+                          </Button>
+                        </Hide>
+                      </Td>
+                    </Tr>
+                  </Hide>
+                  <Tr isExpanded={createDataLengthOf1 ? undefined : expanded}>
+                    <Td colSpan={4} className={createDataLengthOf1 ? '' : classes.mainContentCol}>
                       <Form>
                         <FormGroup
                           label='Name'
@@ -536,8 +503,10 @@ const AddContent = ({ isLoading }: Props) => {
                             toggleId={'versionSelection' + index}
                             options={Object.keys(distributionVersions)}
                             variant={SelectVariant.typeaheadMulti}
-                            selectedProp={versions}
-                            placeholderText={versions.length ? '' : 'Any version'}
+                            selectedProp={Object.keys(distributionVersions).filter((key: string) =>
+                              versions?.includes(distributionVersions[key]),
+                            )}
+                            placeholderText={versions?.length ? '' : 'Any version'}
                             setSelected={(value) =>
                               updateVariable(index, {
                                 versions: value.map((val) => distributionVersions[val]),

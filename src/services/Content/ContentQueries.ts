@@ -12,6 +12,8 @@ import {
   CreateContentRequest,
   FilterData,
   validateContentListItems,
+  EditContentListItem,
+  EditContentRequest,
 } from './ContentApi';
 
 export const CONTENT_LIST_KEY = 'CONTENT_LIST_KEY';
@@ -62,6 +64,45 @@ export const useAddContentQuery = (queryClient: QueryClient, request: CreateCont
       notify({
         variant: AlertVariant.danger,
         title: 'Error adding items to content list',
+        description,
+      });
+    },
+  });
+};
+
+export const useEditContentQuery = (queryClient: QueryClient, request: EditContentRequest) => {
+  const { notify } = useNotification();
+  return useMutation(() => EditContentListItem(request[0]), {
+    onSuccess: () => {
+      notify({
+        variant: AlertVariant.success,
+        title: `Successfully edited ${request.length} ${request.length > 1 ? 'items' : 'item'}.`,
+      });
+      queryClient.invalidateQueries(CONTENT_LIST_KEY);
+    },
+    onError: (err: { response?: { data: string | Array<{ error: string | null }> } }) => {
+      let description = 'An error occurred.';
+
+      switch (typeof err?.response?.data) {
+        case 'string':
+          description = err?.response?.data;
+          break;
+        case 'object':
+          // Only show the first error
+          err?.response?.data.find(({ error }) => {
+            if (error) {
+              description = error;
+              return true;
+            }
+          })?.error;
+          break;
+        default:
+          break;
+      }
+
+      notify({
+        variant: AlertVariant.danger,
+        title: 'Error editing items on content list',
         description,
       });
     },

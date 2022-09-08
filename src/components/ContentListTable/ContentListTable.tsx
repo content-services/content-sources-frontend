@@ -35,6 +35,7 @@ import ContentListFilters from './ContentListFilters';
 import Hide from '../Hide/Hide';
 import EmptyTableState from './components/EmptyTableState';
 import { useQueryClient } from 'react-query';
+import EditContentModal from '../EditContentModal/EditContentModal';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -66,6 +67,8 @@ const ContentListTable = () => {
   const storedPerPage = Number(localStorage.getItem('perPage')) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editValues, setEditValues] = useState<ContentItem[]>([]);
 
   const [filterData, setFilterData] = useState<FilterData>({
     searchQuery: '',
@@ -84,6 +87,7 @@ const ContentListTable = () => {
     isLoading: repositoryParamsLoading,
     error: repositoryParamsError,
     isError: repositoryParamsIsError,
+    data: { distribution_versions: distVersions } = { distribution_versions: [] },
   } = useRepositoryParams();
 
   const {
@@ -116,10 +120,13 @@ const ContentListTable = () => {
   const columnHeaders = ['Name', 'Url', 'Arch', 'Packages', 'Versions'];
 
   const versionDisplay = (versions: Array<string>): string => {
-    if (versions.length === 0) {
+    if (!versions?.length) {
       return 'Any';
     } else {
-      return versions.join(', ');
+      return distVersions
+        .filter(({ label }) => versions?.includes(label))
+        .map(({ name }) => name)
+        .join(', ');
     }
   };
 
@@ -133,17 +140,25 @@ const ContentListTable = () => {
   } = data;
 
   const rowActions = useCallback(
-    (uuid: string): IAction[] => [
+    (rowData: ContentItem): IAction[] => [
       {
-        isDisabled: actionTakingPlace,
+        isDisabled: actionTakingPlace || !rowData?.uuid,
         title: 'Delete',
         onClick: () =>
-          deleteItem(uuid).then(() => {
+          deleteItem(rowData?.uuid).then(() => {
             // If this is the last item on a page, go to previous page.
             if (page > 1 && count / perPage + 1 >= page && (count - 1) % perPage === 0) {
               setPage(page - 1);
             }
           }),
+      },
+      {
+        isDisabled: actionTakingPlace,
+        title: 'Edit',
+        onClick: () => {
+          setEditValues([rowData]);
+          setEditModalOpen(true);
+        },
       },
     ],
     [actionTakingPlace],
@@ -160,6 +175,14 @@ const ContentListTable = () => {
 
   return (
     <Grid className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}>
+      <EditContentModal
+        values={editValues}
+        open={editModalOpen}
+        setClosed={() => {
+          setEditModalOpen(false);
+          setEditValues([]);
+        }}
+      />
       <Flex className={classes.topContainer}>
         <ContentListFilters
           isLoading={isLoading}
@@ -214,8 +237,10 @@ const ContentListTable = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {contentList.map(
-                ({ uuid, name, url, distribution_arch, package_count, distribution_versions }: ContentItem) => (
+              {contentList.map((rowData: ContentItem) => {
+                const { uuid, name, url, distribution_arch, package_count, distribution_versions } =
+                  rowData;
+                return (
                   <Tr key={uuid}>
                     <Td>{name}</Td>
                     <Td>{url}</Td>
@@ -223,11 +248,11 @@ const ContentListTable = () => {
                     <Td>{package_count}</Td>
                     <Td>{versionDisplay(distribution_versions)}</Td>
                     <Td isActionCell>
-                      {hasActionPermissions ? <ActionsColumn items={rowActions(uuid)} /> : ''}
+                      {hasActionPermissions ? <ActionsColumn items={rowActions(rowData)} /> : ''}
                     </Td>
                   </Tr>
-                ),
-              )}
+                );
+              })}
             </Tbody>
           </TableComposable>
           <Flex className={classes.bottomContainer}>
