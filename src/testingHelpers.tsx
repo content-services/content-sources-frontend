@@ -29,6 +29,10 @@ export const ReactQueryTestWrapper = ({ children }: Props) => (
 export const testRepositoryParamsResponse: RepositoryParamsResponse = {
   distribution_versions: [
     {
+      name: 'Any OS version',
+      label: 'any',
+    },
+    {
       name: 'el7',
       label: '7',
     },
@@ -42,6 +46,7 @@ export const testRepositoryParamsResponse: RepositoryParamsResponse = {
     },
   ],
   distribution_arches: [
+    { name: 'Any architecture', label: 'any' },
     {
       name: 'x86_64',
       label: 'x86_64',
