@@ -24,6 +24,7 @@ it('mapFormikToAPIValues', () => {
       versions: ['el7'],
       gpgLoading: false,
       expanded: false,
+      metadataVerification: false,
     },
   ];
 
@@ -33,7 +34,8 @@ it('mapFormikToAPIValues', () => {
       url: 'https://google.ca/wtmsgnum0/x86_64/el7',
       distribution_arch: 'x86_64',
       distribution_versions: ['el7'],
-      gpgKey: '',
+      gpg_key: '',
+      metadata_verification: false,
     },
   ];
 

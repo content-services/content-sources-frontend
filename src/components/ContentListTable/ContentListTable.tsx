@@ -284,10 +284,10 @@ const ContentListTable = () => {
                     <Td>{url}</Td>
                     <Td>{archesDisplay(distribution_arch)}</Td>
                     <Td>{versionDisplay(distribution_versions)}</Td>
+                    <Td>{package_count}</Td>
                     <Td>
                       <StatusIcon status={status} error={last_introspection_error} />
                     </Td>
-                    <Td>{package_count}</Td>
                     <Td isActionCell>
                       {hasActionPermissions ? <ActionsColumn items={rowActions(rowData)} /> : ''}
                     </Td>

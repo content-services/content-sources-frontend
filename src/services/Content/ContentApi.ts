@@ -11,6 +11,8 @@ export interface ContentItem {
   org_id: string;
   status: string;
   last_introspection_error: string;
+  gpg_key: string;
+  metadata_verification: boolean;
 }
 
 export interface CreateContentRequestItem {
@@ -18,7 +20,8 @@ export interface CreateContentRequestItem {
   url: string;
   distribution_versions?: Array<string>;
   distribution_arch?: string;
-  gpgKey?: string;
+  gpg_key?: string;
+  metadata_verification?: boolean;
 }
 
 export type CreateContentRequest = Array<CreateContentRequestItem>;
@@ -29,7 +32,8 @@ export interface EditContentRequestItem {
   url: string;
   distribution_arch: string;
   distribution_versions: string[];
-  gpgKey: string;
+  gpg_key: string;
+  metadata_verification: boolean;
 }
 
 export type EditContentRequest = Array<EditContentRequestItem>;

@@ -5,12 +5,12 @@ import {
   FormGroup,
   Modal,
   ModalVariant,
-  Popover,
+  Popover, Radio,
   SelectVariant,
   Stack,
   StackItem,
   TextInput,
-  Tooltip,
+  Tooltip
 } from '@patternfly/react-core';
 import {
   OutlinedQuestionCircleIcon,
@@ -105,6 +105,7 @@ const defaultValues: FormikValues = {
   versions: ['any'],
   gpgLoading: false,
   expanded: true,
+  metadataVerification: false,
 };
 
 const AddContent = ({ isLoading }: Props) => {
@@ -279,6 +280,7 @@ const AddContent = ({ isLoading }: Props) => {
       versions: !(index % 2) ? ['7'] : ['any'],
       gpgLoading: false,
       expanded: false,
+      metadataVerification: false,
     }));
     formik.setValues(newValues);
   };
@@ -397,7 +399,7 @@ const AddContent = ({ isLoading }: Props) => {
               </Tbody>
             </Hide>
             {formik.values.map(
-              ({ expanded, name, url, arch, gpgKey, versions, gpgLoading }, index) => (
+              ({ expanded, name, url, arch, gpgKey, versions, gpgLoading, metadataVerification }, index) => (
                 <Tbody key={index} isExpanded={createDataLengthOf1 ? undefined : expanded}>
                   <Hide hide={createDataLengthOf1}>
                     <Tr className={classes.colHeader}>
@@ -526,7 +528,6 @@ const AddContent = ({ isLoading }: Props) => {
                             setSelected={(value) => setVersionSelected(value, index)}
                           />
                         </FormGroup>
-                        <Hide hide>
                           <FormGroup
                             label='GPG key'
                             labelIcon={
@@ -570,7 +571,22 @@ const AddContent = ({ isLoading }: Props) => {
                               browseButtonText='Upload'
                             />
                           </FormGroup>
-                        </Hide>
+                        <FormGroup fieldId="metadataVerification" label="Use GPG key for" isInline>
+                          <Radio
+                            id="package verification only"
+                            name="package-verification-only"
+                            label="Package verification only"
+                            isChecked={!metadataVerification}
+                            onChange={() => updateVariable(index, {metadataVerification: false})}
+                          />
+                          <Radio
+                            id="package and repository verification"
+                            name="package-and-repository-verification"
+                            label="Package and repository verification"
+                            isChecked={metadataVerification}
+                            onChange={() => updateVariable(index, {metadataVerification: true})}
+                          />
+                        </FormGroup>
                       </Form>
                     </Td>
                   </Tr>

@@ -12,6 +12,7 @@ it('mapFormikToEditAPIValues', () => {
       gpgLoading: false,
       expanded: false,
       uuid: 'stuff',
+      metadataVerification: false
     },
   ];
 
@@ -21,8 +22,9 @@ it('mapFormikToEditAPIValues', () => {
       url: 'https://google.ca/wtmsgnum0/x86_64/el7',
       distribution_arch: 'x86_64',
       distribution_versions: ['el7'],
-      gpgKey: '',
+      gpg_key: '',
       uuid: 'stuff',
+      metadata_verification: false,
     },
   ];
 
@@ -42,6 +44,8 @@ it('mapToDefaultFormikValues', () => {
       last_introspection_error: 'stuffAndThings',
       account_id: 'stuffAndThings',
       org_id: 'stuffAndThings',
+      gpg_key: 'stuffAndThings',
+      metadata_verification: false,
     },
   ];
   const mapped = [
@@ -50,8 +54,9 @@ it('mapToDefaultFormikValues', () => {
       url: 'stuffAndThings',
       arch: 'stuffAndThings',
       versions: ['version1', 'etc'],
-      gpgKey: '',
+      gpgKey: 'stuffAndThings',
       gpgLoading: false,
+      metadataVerification: false,
       expanded: true,
       uuid: 'stuffAndThings',
     },

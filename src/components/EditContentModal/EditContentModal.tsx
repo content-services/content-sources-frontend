@@ -5,12 +5,12 @@ import {
   FormGroup,
   Modal,
   ModalVariant,
-  Popover,
+  Popover, Radio,
   SelectVariant,
   Stack,
   StackItem,
   TextInput,
-  Tooltip,
+  Tooltip
 } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { TableComposable, Tbody, Td, Tr } from '@patternfly/react-table';
@@ -283,7 +283,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
             </Tr>
           </Tbody>
         </Hide>
-        {formik.values.map(({ expanded, name, url, arch, gpgKey, versions, gpgLoading }, index) => (
+        {formik.values.map(({ expanded, name, url, arch, gpgKey, versions, gpgLoading , metadataVerification}, index) => (
           <Tbody key={index} isExpanded={createDataLengthOf1 ? undefined : expanded}>
             <Hide hide={createDataLengthOf1}>
               <Tr className={classes.colHeader}>
@@ -399,7 +399,6 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                       setSelected={(value) => setVersionSelected(value, index)}
                     />
                   </FormGroup>
-                  <Hide hide>
                     <FormGroup
                       label='GPG key'
                       labelIcon={
@@ -411,6 +410,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         </Tooltip>
                       }
                       fieldId='gpgKey'
+                      validated={getFieldValidation(index, 'gpgKey')}
                     >
                       <FileUpload
                         id='gpgKey-uploader'
@@ -419,8 +419,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         textAreaPlaceholder='Paste GPG key or URL here'
                         value={gpgKey}
                         isLoading={gpgLoading}
-                        // filename={filename}
-                        // onFileInputChange={(e, { name }) => console.log(name)}
+                        validated={getFieldValidation(index, 'gpgKey')}
                         onDataChange={(value) => updateVariable(index, { gpgKey: value })}
                         onTextChange={(value) => {
                           if (isValidURL(value)) {
@@ -443,7 +442,23 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         browseButtonText='Upload'
                       />
                     </FormGroup>
-                  </Hide>
+                    <FormGroup fieldId="metadataVerification" label="Use GPG key for" isInline validated={getFieldValidation(index, 'metadataVerification')}>
+                      <Radio
+                        id="package verification only"
+                        name="package-verification-only"
+                        label="Package verification only"
+                        isValid={false}
+                        isChecked={!metadataVerification}
+                        onChange={() => updateVariable(index, {metadataVerification: false})}
+                      />
+                      <Radio
+                        id="package and repository verification"
+                        name="package-and-repository-verification"
+                        label="Package and repository verification"
+                        isChecked={metadataVerification}
+                        onChange={() => updateVariable(index, {metadataVerification: true})}
+                      />
+                    </FormGroup>
                 </Form>
               </Td>
             </Tr>

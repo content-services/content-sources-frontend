@@ -11,6 +11,7 @@ export interface FormikValues {
   arch: string;
   versions: string[];
   gpgLoading: boolean;
+  metadataVerification: boolean;
   expanded: boolean;
 }
 
@@ -23,12 +24,13 @@ export const isValidURL = (val: string) => {
 };
 
 export const mapFormikToAPIValues = (formikValues: FormikValues[]) =>
-  formikValues.map(({ name, url, arch, versions, gpgKey }) => ({
+  formikValues.map(({ name, url, arch, versions, gpgKey, metadataVerification }) => ({
     name,
     url,
     distribution_arch: arch,
     distribution_versions: versions,
-    gpgKey,
+    gpg_key: gpgKey,
+    metadata_verification: metadataVerification
   }));
 
 const mapNoMetaDataError = (validationData: ValidationResponse) =>
