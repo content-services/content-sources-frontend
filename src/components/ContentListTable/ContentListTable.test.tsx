@@ -30,8 +30,8 @@ it('expect ContentListTable to render with a loading skeleton', () => {
     </ReactQueryTestWrapper>,
   );
 
-  expect(queryByText('No content sources')).toBeInTheDocument();
-  expect(queryByText('To get started, create a content source.')).toBeInTheDocument();
+  expect(queryByText('No custom repositories')).toBeInTheDocument();
+  expect(queryByText('To get started, create a custom repository')).toBeInTheDocument();
 });
 
 it('Render a loading state', () => {

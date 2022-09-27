@@ -309,12 +309,12 @@ const AddContent = ({ isLoading }: Props) => {
         isDisabled={isLoading}
         onClick={handleModalToggle}
       >
-        Create a content source
+        Add repositories
       </Button>
       {isModalOpen ? (
         <Modal
           variant={ModalVariant.medium}
-          title='Add Custom Content'
+          title='Add custom repositories'
           ouiaId='add_custom_repository'
           help={
             <Popover

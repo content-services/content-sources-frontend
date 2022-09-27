@@ -28,7 +28,7 @@ it('expect AddContent button to render and be disabled', () => {
     </ReactQueryTestWrapper>,
   );
 
-  const button = queryByText('Create a content source');
+  const button = queryByText('Add repositories');
   expect(button).toBeInTheDocument();
   expect(button).toHaveAttribute('disabled');
 });
@@ -47,16 +47,16 @@ it('expect AddContent modal to open/close successfully', async () => {
     </ReactQueryTestWrapper>,
   );
 
-  const button = queryByText('Create a content source');
+  const button = queryByText('Add repositories');
   expect(button).toBeInTheDocument();
   await act(async () => {
     button?.click();
   });
-  expect(queryByText('Add Custom Content')).toBeInTheDocument();
+  expect(queryByText('Add custom repositories')).toBeInTheDocument();
   await act(async () => {
     queryByText('Cancel')?.click();
   });
-  expect(queryByText('Add Custom Content')).not.toBeInTheDocument();
+  expect(queryByText('Add custom repositories')).not.toBeInTheDocument();
 });
 
 it('expect "name" input to show a validation error', async () => {
@@ -73,7 +73,7 @@ it('expect "name" input to show a validation error', async () => {
     </ReactQueryTestWrapper>,
   );
 
-  const button = queryByText('Create a content source');
+  const button = queryByText('Add repositories');
   expect(button).toBeInTheDocument();
   await act(async () => {
     button?.click();
@@ -103,7 +103,7 @@ it('expect "url" input to show a validation error', async () => {
     </ReactQueryTestWrapper>,
   );
 
-  const button = queryByText('Create a content source');
+  const button = queryByText('Add repositories');
   expect(button).toBeInTheDocument();
   await act(async () => {
     button?.click();
@@ -136,7 +136,7 @@ it('Add content', async () => {
     </ReactQueryTestWrapper>,
   );
 
-  const button = queryByText('Create a content source');
+  const button = queryByText('Add repositories');
   expect(button).toBeInTheDocument();
   await act(async () => {
     button?.click();
@@ -193,5 +193,5 @@ it('Add content', async () => {
       fireEvent.click(saveButton);
     });
   }
-  expect(queryByText('Add Custom Content')).not.toBeInTheDocument();
+  expect(queryByText('Add custom repository')).not.toBeInTheDocument();
 });

@@ -67,7 +67,7 @@ const StatusIcon = ({ status, error }: Props) => {
         <Tooltip position='top-start' content='Repository has not been introspected yet'>
           <Flex alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
             <FlexItem spacer={{ default: 'spacerSm' }}>
-              <InfoCircleIcon title='blue' color={blue} />
+              <InfoCircleIcon color={blue} />
             </FlexItem>
             <FlexItem>
               <StatusText color='blue'>Pending</StatusText>

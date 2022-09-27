@@ -28,12 +28,14 @@ const EmptyTableState = ({ notFiltered, clearFilters }: Props) => {
     <EmptyState variant={EmptyStateVariant.full} className={classes.emptyStateContainer}>
       <EmptyStateIcon icon={notFiltered ? PlusCircleIcon : SearchIcon} />
       <Title headingLevel='h2' size='lg'>
-        {notFiltered ? 'No content sources' : 'No content sources match the filter criteria.'}
+        {notFiltered
+          ? 'No custom repositories'
+          : 'No custom repositories match the filter criteria'}
       </Title>
       <EmptyStateBody>
         {notFiltered
-          ? 'To get started, create a content source.'
-          : 'Clear all filters to show more results.'}
+          ? 'To get started, create a custom repository'
+          : 'Clear all filters to show more results'}
       </EmptyStateBody>
       {notFiltered ? (
         <AddContent />

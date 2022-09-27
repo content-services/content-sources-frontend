@@ -13,9 +13,13 @@ import {
   TextInput,
   Tooltip,
 } from '@patternfly/react-core';
-import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
+import { CheckCircleIcon, OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { TableComposable, Tbody, Td, Tr } from '@patternfly/react-table';
-import { global_Color_200, global_link_Color } from '@patternfly/react-tokens';
+import {
+  global_Color_200,
+  global_success_color_100,
+  global_link_Color,
+} from '@patternfly/react-tokens';
 import { useFormik } from 'formik';
 import { useEffect, useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
@@ -38,6 +42,8 @@ import {
   mapToDefaultFormikValues,
 } from './helpers';
 import { isEqual } from 'lodash';
+
+const green = global_success_color_100.value;
 
 const useStyles = createUseStyles({
   description: {
@@ -217,7 +223,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
   return (
     <Modal
       variant={ModalVariant.medium}
-      title='Edit Content Source'
+      title='Edit custom repository'
       help={
         <Popover
           headerContent={<div>Help Popover</div>}
@@ -418,7 +424,6 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         </Tooltip>
                       }
                       fieldId='gpgKey'
-                      validated={getFieldValidation(index, 'gpgKey')}
                     >
                       <FileUpload
                         id='gpgKey-uploader'
@@ -450,12 +455,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         browseButtonText='Upload'
                       />
                     </FormGroup>
-                    <FormGroup
-                      fieldId='metadataVerification'
-                      label='Use GPG key for'
-                      isInline
-                      validated={getFieldValidation(index, 'metadataVerification')}
-                    >
+                    <FormGroup fieldId='metadataVerification' label='Use GPG key for' isInline>
                       <Radio
                         id='package verification only'
                         name='package-verification-only'
@@ -471,6 +471,9 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         isChecked={metadataVerification}
                         onChange={() => updateVariable(index, { metadataVerification: true })}
                       />
+                      <Hide hide={getFieldValidation(index, 'metadataVerification') !== 'success'}>
+                        <CheckCircleIcon noVerticalAlign color={green} />
+                      </Hide>
                     </FormGroup>
                   </Form>
                 </Td>

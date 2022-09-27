@@ -24,6 +24,13 @@ export interface CreateContentRequestItem {
   metadata_verification?: boolean;
 }
 
+export interface CreateContentResponseItem {
+  error: string;
+  repository: ContentItem;
+}
+
+export type CreateContentRequestResponse = CreateContentResponseItem[];
+
 export type CreateContentRequest = Array<CreateContentRequestItem>;
 
 export interface EditContentRequestItem {
@@ -115,9 +122,9 @@ export const deleteContentListItem: (uuid: string) => Promise<void> = async (uui
   return data;
 };
 
-export const AddContentListItems: (request: CreateContentRequest) => Promise<void> = async (
-  request,
-) => {
+export const AddContentListItems: (
+  request: CreateContentRequest,
+) => Promise<CreateContentRequestResponse> = async (request) => {
   const { data } = await axios.post('/api/content-sources/v1.0/repositories/bulk_create/', request);
   return data;
 };

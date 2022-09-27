@@ -10,8 +10,8 @@ import {
   TextInput,
 } from '@patternfly/react-core';
 import DropdownSelect from '../DropdownSelect/DropdownSelect';
-import { FilterIcon } from '@patternfly/react-icons';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
+import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
+import { global_BackgroundColor_100, global_secondary_color_100 } from '@patternfly/react-tokens';
 import Hide from '../Hide/Hide';
 import { FilterData, RepositoryParamsResponse } from '../../services/Content/ContentApi';
 import { useQueryClient } from 'react-query';
@@ -34,6 +34,17 @@ const useStyles = createUseStyles({
   },
   clearFilters: {
     marginLeft: '16px',
+  },
+  searchInput: {
+    paddingRight: '35px',
+    marginRight: '-23px',
+  },
+  searchIcon: {
+    color: global_secondary_color_100.value,
+    position: 'relative',
+    top: '3px',
+    left: '-5px',
+    pointerEvents: 'none',
   },
 });
 
@@ -128,15 +139,18 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
     switch (filterType) {
       case 'Name/URL':
         return (
-          <TextInput
-            isDisabled={isLoading}
-            id='search'
-            ouiaId='filter_search'
-            placeholder='Filter by name/url'
-            iconVariant='search'
-            value={searchQuery}
-            onChange={(value) => setSearchQuery(value)}
-          />
+          <Flex>
+            <TextInput
+              isDisabled={isLoading}
+              id='search'
+              ouiaId='filter_search'
+              placeholder='Filter by name/url'
+              value={searchQuery}
+              onChange={(value) => setSearchQuery(value)}
+              className={classes.searchInput}
+            />
+            <SearchIcon size='sm' className={classes.searchIcon} />
+          </Flex>
         );
       case 'Version':
         return (

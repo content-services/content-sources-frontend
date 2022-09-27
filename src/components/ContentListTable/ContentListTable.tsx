@@ -38,6 +38,8 @@ import EmptyTableState from './components/EmptyTableState';
 import { useQueryClient } from 'react-query';
 import EditContentModal from '../EditContentModal/EditContentModal';
 import StatusIcon from './components/StatusIcon';
+import UrlWithExternalIcon from '../UrlWithLinkIcon/UrlWithLinkIcon';
+import PackageCount from './components/PackageCount';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -249,10 +251,9 @@ const ContentListTable = () => {
       <Hide hide={countIsZero || isLoading}>
         <>
           <TableComposable
-            aria-label='content sources table'
+            aria-label='Custom repositories table'
             ouiaId='content_sources_table'
             variant='compact'
-            borders={false}
           >
             <Thead>
               <Tr>
@@ -271,6 +272,7 @@ const ContentListTable = () => {
                 const {
                   uuid,
                   name,
+                  url,
                   distribution_arch,
                   package_count,
                   distribution_versions,
@@ -279,10 +281,16 @@ const ContentListTable = () => {
                 } = rowData;
                 return (
                   <Tr key={uuid}>
-                    <Td>{name}</Td>
+                    <Td>
+                      {name}
+                      <br />
+                      <UrlWithExternalIcon href={url} />
+                    </Td>
                     <Td>{archesDisplay(distribution_arch)}</Td>
                     <Td>{versionDisplay(distribution_versions)}</Td>
-                    <Td>{package_count}</Td>
+                    <Td>
+                      <PackageCount count={package_count} status={status} />
+                    </Td>
                     <Td>
                       <StatusIcon status={status} error={last_introspection_error} />
                     </Td>

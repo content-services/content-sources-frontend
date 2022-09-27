@@ -21,7 +21,7 @@ it('Catch the child\'s error and show it on the dom', () => {
   );
 
   expect(queryByText('Content Sources')).toBeInTheDocument();
-  expect(queryByText('There was a problem trying to process your request.')).toBeInTheDocument();
+  expect(queryByText('There was a problem trying to process your request')).toBeInTheDocument();
   expect(queryByText(errorText)).not.toBeInTheDocument();
 });
 
@@ -36,7 +36,5 @@ it('Render without an error page shown', () => {
   );
 
   expect(queryByText(WontErrorText)).toBeInTheDocument();
-  expect(
-    queryByText('There was a problem trying to process your request.'),
-  ).not.toBeInTheDocument();
+  expect(queryByText('There was a problem trying to process your request')).not.toBeInTheDocument();
 });

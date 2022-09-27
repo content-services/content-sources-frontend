@@ -31,9 +31,9 @@ const ContentPage = () => {
     <>
       <PageHeader>
         <>
-          <PageHeaderTitle title='Content Sources' />
+          <PageHeaderTitle title='Custom Repositories' />
           <Text className={classes.subtext}>
-            View all custom content sources within your organization
+            View all custom repositories within your organization
           </Text>
         </>
       </PageHeader>

@@ -40,14 +40,19 @@ export const useAddContentQuery = (queryClient: QueryClient, request: CreateCont
   const { notify } = useNotification();
   return useMutation(() => AddContentListItems(request), {
     onSuccess: () => {
+      const title =
+        request?.length > 1
+          ? `${request?.length} custom repositories added`
+          : `Custom repository "${request?.[0]?.name}" added`;
       notify({
         variant: AlertVariant.success,
-        title: `Successfully added ${request.length} ${request.length > 1 ? 'items' : 'item'}.`,
+        title,
+        description: 'Repository introspection may take some time',
       });
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
     },
     onError: (err: { response?: { data: string | Array<{ error: string | null }> } }) => {
-      let description = 'An error occurred.';
+      let description = 'An error occurred';
 
       switch (typeof err?.response?.data) {
         case 'string':
@@ -81,12 +86,12 @@ export const useEditContentQuery = (queryClient: QueryClient, request: EditConte
     onSuccess: () => {
       notify({
         variant: AlertVariant.success,
-        title: `Successfully edited ${request.length} ${request.length > 1 ? 'items' : 'item'}.`,
+        title: `Successfully edited ${request.length} ${request.length > 1 ? 'items' : 'item'}`,
       });
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
     },
     onError: (err: { response?: { data: string | Array<{ error: string | null }> } }) => {
-      let description = 'An error occurred.';
+      let description = 'An error occurred';
 
       switch (typeof err?.response?.data) {
         case 'string':
