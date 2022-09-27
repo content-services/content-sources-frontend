@@ -1,5 +1,10 @@
 import { createUseStyles } from 'react-jss';
-import { global_danger_color_200, global_info_color_200, global_success_color_200, global_warning_color_200 } from '@patternfly/react-tokens';
+import {
+  global_danger_color_200,
+  global_info_color_200,
+  global_success_color_200,
+  global_warning_color_200,
+} from '@patternfly/react-tokens';
 
 const red = global_danger_color_200.value;
 const green = global_success_color_200.value;
@@ -14,16 +19,14 @@ const useStyles = createUseStyles({
 });
 
 interface Props {
-  color: 'red' | 'green' | 'gold' | 'blue'
-  children?: React.ReactNode
+  color: 'red' | 'green' | 'gold' | 'blue';
+  children?: React.ReactNode;
 }
 
 const StatusText = ({ color, children }: Props) => {
   const classes = useStyles();
 
-  return (
-    <span className={classes[color]}>{children}</span>
-  )
+  return <span className={classes[color]}>{children}</span>;
 };
 
 export default StatusText;

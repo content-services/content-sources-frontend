@@ -30,7 +30,7 @@ export const mapFormikToAPIValues = (formikValues: FormikValues[]) =>
     distribution_arch: arch,
     distribution_versions: versions,
     gpg_key: gpgKey,
-    metadata_verification: metadataVerification
+    metadata_verification: metadataVerification,
   }));
 
 const mapNoMetaDataError = (validationData: ValidationResponse) =>

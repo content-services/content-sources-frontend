@@ -5,12 +5,13 @@ import {
   FormGroup,
   Modal,
   ModalVariant,
-  Popover, Radio,
+  Popover,
+  Radio,
   SelectVariant,
   Stack,
   StackItem,
   TextInput,
-  Tooltip
+  Tooltip,
 } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { TableComposable, Tbody, Td, Tr } from '@patternfly/react-table';
@@ -283,122 +284,129 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
             </Tr>
           </Tbody>
         </Hide>
-        {formik.values.map(({ expanded, name, url, arch, gpgKey, versions, gpgLoading , metadataVerification}, index) => (
-          <Tbody key={index} isExpanded={createDataLengthOf1 ? undefined : expanded}>
-            <Hide hide={createDataLengthOf1}>
-              <Tr className={classes.colHeader}>
-                <Td
-                  onClick={() => onToggle(index)}
-                  className={classes.toggleAction}
-                  isActionCell
-                  expand={{
-                    rowIndex: index,
-                    isExpanded: expanded,
-                  }}
-                />
-                <Td width={35} onClick={() => onToggle(index)} dataLabel={name}>
-                  {name || 'New content'}
-                </Td>
-                <Td onClick={() => onToggle(index)} dataLabel='validity'>
-                  <ContentValidity touched={formik.touched[index]} errors={formik.errors[index]} />
-                </Td>
-              </Tr>
-            </Hide>
-            <Tr isExpanded={createDataLengthOf1 ? undefined : expanded}>
-              <Td colSpan={4} className={createDataLengthOf1 ? '' : classes.mainContentCol}>
-                <Form>
-                  <FormGroup
-                    label='Name'
-                    isRequired
-                    fieldId='namegroup'
-                    validated={getFieldValidation(index, 'name')}
-                    helperTextInvalid={formik.errors[index]?.name}
-                  >
-                    <TextInput
-                      isRequired
-                      id='name'
-                      name='name'
+        {formik.values.map(
+          (
+            { expanded, name, url, arch, gpgKey, versions, gpgLoading, metadataVerification },
+            index,
+          ) => (
+            <Tbody key={index} isExpanded={createDataLengthOf1 ? undefined : expanded}>
+              <Hide hide={createDataLengthOf1}>
+                <Tr className={classes.colHeader}>
+                  <Td
+                    onClick={() => onToggle(index)}
+                    className={classes.toggleAction}
+                    isActionCell
+                    expand={{
+                      rowIndex: index,
+                      isExpanded: expanded,
+                    }}
+                  />
+                  <Td width={35} onClick={() => onToggle(index)} dataLabel={name}>
+                    {name || 'New content'}
+                  </Td>
+                  <Td onClick={() => onToggle(index)} dataLabel='validity'>
+                    <ContentValidity
+                      touched={formik.touched[index]}
+                      errors={formik.errors[index]}
+                    />
+                  </Td>
+                </Tr>
+              </Hide>
+              <Tr isExpanded={createDataLengthOf1 ? undefined : expanded}>
+                <Td colSpan={4} className={createDataLengthOf1 ? '' : classes.mainContentCol}>
+                  <Form>
+                    <FormGroup
                       label='Name'
-                      type='text'
-                      validated={getFieldValidation(index, 'name')}
-                      onChange={(value) => {
-                        updateVariable(index, { name: value });
-                      }}
-                      value={name || ''}
-                      placeholder='Enter name'
-                    />
-                  </FormGroup>
-                  <FormGroup
-                    label='URL'
-                    isRequired
-                    fieldId='url'
-                    validated={getFieldValidation(index, 'url')}
-                    helperTextInvalid={formik.errors[index]?.url}
-                  >
-                    <TextInput
                       isRequired
-                      type='url'
+                      fieldId='namegroup'
+                      validated={getFieldValidation(index, 'name')}
+                      helperTextInvalid={formik.errors[index]?.name}
+                    >
+                      <TextInput
+                        isRequired
+                        id='name'
+                        name='name'
+                        label='Name'
+                        type='text'
+                        validated={getFieldValidation(index, 'name')}
+                        onChange={(value) => {
+                          updateVariable(index, { name: value });
+                        }}
+                        value={name || ''}
+                        placeholder='Enter name'
+                      />
+                    </FormGroup>
+                    <FormGroup
+                      label='URL'
+                      isRequired
+                      fieldId='url'
                       validated={getFieldValidation(index, 'url')}
-                      onBlur={() => urlOnBlur(index)}
-                      onChange={(value) => updateVariable(index, { url: value })}
-                      value={url || ''}
-                      placeholder='https://'
-                      id='url'
-                      name='url'
-                      label='Url'
-                    />
-                  </FormGroup>
-                  <FormGroup
-                    label='Restrict architecture'
-                    labelIcon={
-                      <Tooltip content='Something super important and stuff'>
-                        <OutlinedQuestionCircleIcon
-                          className='pf-u-ml-xs'
-                          color={global_Color_200.value}
-                        />
-                      </Tooltip>
-                    }
-                    fieldId='arch'
-                  >
-                    <DropdownSelect
-                      validated={getFieldValidation(index, 'arch')}
-                      menuAppendTo={document.body}
-                      toggleId={'archSelection' + index}
-                      options={Object.keys(distributionArches)}
-                      variant={SelectVariant.single}
-                      selectedProp={Object.keys(distributionArches).find(
-                        (key: string) => arch === distributionArches[key],
-                      )}
-                      setSelected={(value) =>
-                        updateVariable(index, { arch: distributionArches[value] })
+                      helperTextInvalid={formik.errors[index]?.url}
+                    >
+                      <TextInput
+                        isRequired
+                        type='url'
+                        validated={getFieldValidation(index, 'url')}
+                        onBlur={() => urlOnBlur(index)}
+                        onChange={(value) => updateVariable(index, { url: value })}
+                        value={url || ''}
+                        placeholder='https://'
+                        id='url'
+                        name='url'
+                        label='Url'
+                      />
+                    </FormGroup>
+                    <FormGroup
+                      label='Restrict architecture'
+                      labelIcon={
+                        <Tooltip content='Something super important and stuff'>
+                          <OutlinedQuestionCircleIcon
+                            className='pf-u-ml-xs'
+                            color={global_Color_200.value}
+                          />
+                        </Tooltip>
                       }
-                    />
-                  </FormGroup>
-                  <FormGroup
-                    label='Restrict OS version'
-                    labelIcon={
-                      <Tooltip content='Something super important and stuff'>
-                        <OutlinedQuestionCircleIcon
-                          className='pf-u-ml-xs'
-                          color={global_Color_200.value}
-                        />
-                      </Tooltip>
-                    }
-                    fieldId='version'
-                  >
-                    <DropdownSelect
-                      validated={getFieldValidation(index, 'versions')}
-                      menuAppendTo={document.body}
-                      toggleId={'versionSelection' + index}
-                      options={Object.keys(distributionVersions)}
-                      variant={SelectVariant.typeaheadMulti}
-                      selectedProp={Object.keys(distributionVersions).filter((key: string) =>
-                        versions?.includes(distributionVersions[key]),
-                      )}
-                      placeholderText={versions?.length ? '' : 'Any version'}
-                      setSelected={(value) => setVersionSelected(value, index)}
-                    />
-                  </FormGroup>
+                      fieldId='arch'
+                    >
+                      <DropdownSelect
+                        validated={getFieldValidation(index, 'arch')}
+                        menuAppendTo={document.body}
+                        toggleId={'archSelection' + index}
+                        options={Object.keys(distributionArches)}
+                        variant={SelectVariant.single}
+                        selectedProp={Object.keys(distributionArches).find(
+                          (key: string) => arch === distributionArches[key],
+                        )}
+                        setSelected={(value) =>
+                          updateVariable(index, { arch: distributionArches[value] })
+                        }
+                      />
+                    </FormGroup>
+                    <FormGroup
+                      label='Restrict OS version'
+                      labelIcon={
+                        <Tooltip content='Something super important and stuff'>
+                          <OutlinedQuestionCircleIcon
+                            className='pf-u-ml-xs'
+                            color={global_Color_200.value}
+                          />
+                        </Tooltip>
+                      }
+                      fieldId='version'
+                    >
+                      <DropdownSelect
+                        validated={getFieldValidation(index, 'versions')}
+                        menuAppendTo={document.body}
+                        toggleId={'versionSelection' + index}
+                        options={Object.keys(distributionVersions)}
+                        variant={SelectVariant.typeaheadMulti}
+                        selectedProp={Object.keys(distributionVersions).filter((key: string) =>
+                          versions?.includes(distributionVersions[key]),
+                        )}
+                        placeholderText={versions?.length ? '' : 'Any version'}
+                        setSelected={(value) => setVersionSelected(value, index)}
+                      />
+                    </FormGroup>
                     <FormGroup
                       label='GPG key'
                       labelIcon={
@@ -442,28 +450,34 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         browseButtonText='Upload'
                       />
                     </FormGroup>
-                    <FormGroup fieldId="metadataVerification" label="Use GPG key for" isInline validated={getFieldValidation(index, 'metadataVerification')}>
+                    <FormGroup
+                      fieldId='metadataVerification'
+                      label='Use GPG key for'
+                      isInline
+                      validated={getFieldValidation(index, 'metadataVerification')}
+                    >
                       <Radio
-                        id="package verification only"
-                        name="package-verification-only"
-                        label="Package verification only"
+                        id='package verification only'
+                        name='package-verification-only'
+                        label='Package verification only'
                         isValid={false}
                         isChecked={!metadataVerification}
-                        onChange={() => updateVariable(index, {metadataVerification: false})}
+                        onChange={() => updateVariable(index, { metadataVerification: false })}
                       />
                       <Radio
-                        id="package and repository verification"
-                        name="package-and-repository-verification"
-                        label="Package and repository verification"
+                        id='package and repository verification'
+                        name='package-and-repository-verification'
+                        label='Package and repository verification'
                         isChecked={metadataVerification}
-                        onChange={() => updateVariable(index, {metadataVerification: true})}
+                        onChange={() => updateVariable(index, { metadataVerification: true })}
                       />
                     </FormGroup>
-                </Form>
-              </Td>
-            </Tr>
-          </Tbody>
-        ))}
+                  </Form>
+                </Td>
+              </Tr>
+            </Tbody>
+          ),
+        )}
       </TableComposable>
     </Modal>
   );

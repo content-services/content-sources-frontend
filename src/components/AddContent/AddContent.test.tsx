@@ -146,7 +146,7 @@ it('Add content', async () => {
   expect(nameInput).toBeInTheDocument();
   const urlInput = queryByPlaceholderText('https://');
   expect(urlInput).toBeInTheDocument();
-  const gpgKeyInput = queryByPlaceholderText('Paste GPG key or URL here')
+  const gpgKeyInput = queryByPlaceholderText('Paste GPG key or URL here');
   if (urlInput && nameInput && gpgKeyInput) {
     await act(async () => {
       fireEvent.change(urlInput, { target: { value: 'https://google.com/' } });

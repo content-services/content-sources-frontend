@@ -12,7 +12,7 @@ it('mapFormikToEditAPIValues', () => {
       gpgLoading: false,
       expanded: false,
       uuid: 'stuff',
-      metadataVerification: false
+      metadataVerification: false,
     },
   ];
 

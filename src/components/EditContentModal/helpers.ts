@@ -30,21 +30,26 @@ export const mapFormikToEditAPIValues = (formikValues: FormikEditValues[]): Edit
 
 export const mapToDefaultFormikValues = (values: EditContentProps['values']): FormikEditValues[] =>
   values.map(
-    ({ name,
-      url,
-      distribution_arch: arch,
-      distribution_versions: versions,
-      uuid, gpg_key: gpgKey,
-      metadata_verification: metadataVerification },
-      index) => ({
+    (
+      {
         name,
         url,
-        arch,
-        versions,
-        gpgKey,
-        gpgLoading: false,
-        metadataVerification,
-        expanded: index + 1 === values.length,
+        distribution_arch: arch,
+        distribution_versions: versions,
         uuid,
+        gpg_key: gpgKey,
+        metadata_verification: metadataVerification,
+      },
+      index,
+    ) => ({
+      name,
+      url,
+      arch,
+      versions,
+      gpgKey,
+      gpgLoading: false,
+      metadataVerification,
+      expanded: index + 1 === values.length,
+      uuid,
     }),
   );

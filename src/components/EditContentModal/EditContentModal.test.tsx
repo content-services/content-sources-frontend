@@ -22,7 +22,7 @@ const singleEditValues = [
     account_id: '6414238',
     org_id: '13446804',
     gpg_key: 'test gpg key',
-    metadata_verification: false
+    metadata_verification: false,
   },
 ];
 
