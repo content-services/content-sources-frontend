@@ -19,8 +19,11 @@ const PackageCount = ({ count, status }: Props) => {
 
   if (!count && status === 'Pending') {
     return (
-      <Tooltip isContentLeftAligned content='Repository has not been introspected yet'>
-        <Text className={classes.text}>N/A</Text>
+      <Tooltip 
+        isContentLeftAligned
+        content={<Text ouiaId='package_count_tooltip' className={classes.text}>Repository has not been introspected yet</Text>}
+      >
+        <Text ouiaId='package_count_tooltip' className={classes.text}>N/A</Text>
       </Tooltip>
     );
   }
