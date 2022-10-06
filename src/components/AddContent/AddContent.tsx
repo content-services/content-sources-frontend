@@ -37,6 +37,7 @@ import ContentValidity from './components/ContentValidity';
 import {
   REPOSITORY_PARAMS_KEY,
   useAddContentQuery,
+  useFetchGpgKey,
   useValidateContentList,
 } from '../../services/Content/ContentQueries';
 import { RepositoryParamsResponse } from '../../services/Content/ContentApi';
@@ -125,6 +126,8 @@ const AddContent = ({ isLoading }: Props) => {
 
   const { distribution_arches: distArches = [], distribution_versions: distVersions = [] } =
     queryClient.getQueryData<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY) || {};
+
+  const { fetchGpgKey } = useFetchGpgKey();
 
   const { distributionArches, distributionVersions } = useMemo(() => {
     const distributionArches = {};
@@ -568,19 +571,17 @@ const AddContent = ({ isLoading }: Props) => {
                             textAreaPlaceholder='Paste GPG key or URL here'
                             value={gpgKey}
                             isLoading={gpgLoading}
-                            // filename={filename}
-                            // onFileInputChange={(e, { name }) => console.log(name)}
+                            spellCheck={false}
                             onDataChange={(value) => updateVariable(index, { gpgKey: value })}
-                            onTextChange={(value) => {
+                            onPaste={async ({ clipboardData }) => {
+                              const value = clipboardData.getData('text');
                               if (isValidURL(value)) {
                                 updateVariable(index, { gpgLoading: true });
-                                // TODO: add call to GPGkey api
-                                return setTimeout(
-                                  () => updateVariable(index, { gpgLoading: false }),
-                                  1500,
-                                );
+                                const gpgData = await fetchGpgKey(value);
+                                updateVariable(index, { gpgKey: gpgData, gpgLoading: false });
                               }
-
+                            }}
+                            onTextChange={(value) =>
                               updateVariable(index, {
                                 gpgKey: value,
                                 ...(gpgKey === '' && !!value
@@ -589,8 +590,8 @@ const AddContent = ({ isLoading }: Props) => {
                                         !!validationList?.[index]?.url?.metadata_signature_present,
                                     }
                                   : {}),
-                              });
-                            }}
+                              })
+                            }
                             onClearClick={() => updateVariable(index, { gpgKey: '' })}
                             dropzoneProps={{
                               accept: '.txt',

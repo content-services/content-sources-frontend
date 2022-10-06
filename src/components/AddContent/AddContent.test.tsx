@@ -5,12 +5,17 @@ import {
   ReactQueryTestWrapper,
 } from '../../testingHelpers';
 import AddContent from './AddContent';
-import { useAddContentQuery, useValidateContentList } from '../../services/Content/ContentQueries';
+import {
+  useAddContentQuery,
+  useFetchGpgKey,
+  useValidateContentList,
+} from '../../services/Content/ContentQueries';
 import useDebounce from '../../services/useDebounce';
 
 jest.mock('../../services/Content/ContentQueries', () => ({
   useAddContentQuery: jest.fn(),
   useValidateContentList: jest.fn(),
+  useFetchGpgKey: jest.fn(),
 }));
 
 jest.mock('../../services/useDebounce', () => jest.fn());
@@ -28,6 +33,7 @@ it('expect AddContent button to render and be disabled', () => {
     isLoading: false,
     mutateAsync: async () => defaultValidationErrorData,
   }));
+  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText } = render(
     <ReactQueryTestWrapper>
@@ -47,6 +53,7 @@ it('expect AddContent modal to open/close successfully', async () => {
     mutateAsync: async () => defaultValidationErrorData,
   }));
   (useDebounce as jest.Mock).mockImplementation((value) => value);
+  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText } = render(
     <ReactQueryTestWrapper>
@@ -73,6 +80,7 @@ it('expect "name" input to show a validation error', async () => {
     mutateAsync: async () => defaultValidationErrorData,
   }));
   (useDebounce as jest.Mock).mockImplementation((value) => value);
+  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText, queryByPlaceholderText } = render(
     <ReactQueryTestWrapper>
@@ -103,6 +111,7 @@ it('expect "url" input to show a validation error', async () => {
     mutateAsync: async () => defaultValidationErrorData,
   }));
   (useDebounce as jest.Mock).mockImplementation((value) => value);
+  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText, queryByPlaceholderText } = render(
     <ReactQueryTestWrapper>
@@ -222,6 +231,7 @@ it('Add content', async () => {
     data: passingValidationErrorData,
   }));
   (useDebounce as jest.Mock).mockImplementation((value) => value);
+  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText, queryByPlaceholderText, queryAllByText } = render(
     <ReactQueryTestWrapper>

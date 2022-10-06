@@ -14,6 +14,7 @@ import {
   validateContentListItems,
   EditContentListItem,
   EditContentRequest,
+  getGpgKey,
 } from './ContentApi';
 
 export const CONTENT_LIST_KEY = 'CONTENT_LIST_KEY';
@@ -207,3 +208,26 @@ export const useRepositoryParams = () =>
     keepPreviousData: true,
     staleTime: Infinity,
   });
+
+export const useFetchGpgKey = () => {
+  const { notify } = useNotification();
+
+  const fetchGpgKey = async (url: string): Promise<string> => {
+    let gpg_key = url;
+    try {
+      const data = await getGpgKey(url);
+      gpg_key = data.gpg_key;
+    } catch ({ response = {} }) {
+      const { data } = response as { data: { message: string | undefined } | string };
+      const description = typeof data === 'string' ? data : data?.message;
+      notify({
+        variant: AlertVariant.danger,
+        title: 'Error fetching gpg key from provided url',
+        description,
+      });
+    }
+    return gpg_key;
+  };
+
+  return { fetchGpgKey };
+};

@@ -70,6 +70,10 @@ export interface RepositoryParamsResponse {
   distribution_arches: Array<NameLabel>;
 }
 
+export interface GpgKeyResponse {
+  gpg_key: string;
+}
+
 export type NameLabel = {
   name: string;
   label: string;
@@ -151,6 +155,14 @@ export const validateContentListItems: (
   const { data } = await axios.post(
     '/api/content-sources/v1.0/repository_parameters/validate/',
     request,
+  );
+  return data;
+};
+
+export const getGpgKey: (url: string) => Promise<GpgKeyResponse> = async (url: string) => {
+  const { data } = await axios.post(
+    '/api/content-sources/v1/repository_parameters/external_gpg_key/',
+    { url },
   );
   return data;
 };

@@ -5,7 +5,11 @@ import {
 } from '../../testingHelpers';
 import EditContentModal from './EditContentModal';
 import { act, fireEvent, render } from '@testing-library/react';
-import { useEditContentQuery, useValidateContentList } from '../../services/Content/ContentQueries';
+import {
+  useEditContentQuery,
+  useFetchGpgKey,
+  useValidateContentList,
+} from '../../services/Content/ContentQueries';
 import useDebounce from '../../services/useDebounce';
 import { useQueryClient } from 'react-query';
 
@@ -29,6 +33,7 @@ const singleEditValues = [
 jest.mock('../../services/Content/ContentQueries', () => ({
   useEditContentQuery: jest.fn(),
   useValidateContentList: jest.fn(),
+  useFetchGpgKey: jest.fn(),
 }));
 
 jest.mock('react-query', () => ({
@@ -48,6 +53,7 @@ it('Open, confirming values, edit an item, enabling Save button', async () => {
   (useQueryClient as jest.Mock).mockImplementation(() => ({
     getQueryData: () => testRepositoryParamsResponse,
   }));
+  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText, queryByPlaceholderText, queryAllByLabelText } = render(
     <ReactQueryTestWrapper>

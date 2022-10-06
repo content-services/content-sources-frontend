@@ -28,6 +28,7 @@ import useDebounce from '../../services/useDebounce';
 import {
   REPOSITORY_PARAMS_KEY,
   useEditContentQuery,
+  useFetchGpgKey,
   useValidateContentList,
 } from '../../services/Content/ContentQueries';
 import { RepositoryParamsResponse } from '../../services/Content/ContentApi';
@@ -128,6 +129,8 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
     queryClient,
     mapFormikToEditAPIValues(formik.values),
   );
+
+  const { fetchGpgKey } = useFetchGpgKey();
 
   const createDataLengthOf1 = formik.values.length === 1;
 
@@ -449,16 +452,17 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         value={gpgKey}
                         isLoading={gpgLoading}
                         validated={getFieldValidation(index, 'gpgKey')}
+                        spellCheck={false}
                         onDataChange={(value) => updateVariable(index, { gpgKey: value })}
-                        onTextChange={(value) => {
+                        onPaste={async ({ clipboardData }) => {
+                          const value = clipboardData.getData('text');
                           if (isValidURL(value)) {
                             updateVariable(index, { gpgLoading: true });
-                            // TODO: add call to GPGkey api
-                            return setTimeout(
-                              () => updateVariable(index, { gpgLoading: false }),
-                              1500,
-                            );
+                            const gpgData = await fetchGpgKey(value);
+                            updateVariable(index, { gpgKey: gpgData, gpgLoading: false });
                           }
+                        }}
+                        onTextChange={(value) =>
                           updateVariable(index, {
                             gpgKey: value,
                             ...(gpgKey === '' && !!value
@@ -467,8 +471,8 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                                     !!validationList?.[index]?.url?.metadata_signature_present,
                                 }
                               : {}),
-                          });
-                        }}
+                          })
+                        }
                         onClearClick={() => updateVariable(index, { gpgKey: '' })}
                         dropzoneProps={{
                           accept: '.txt',
