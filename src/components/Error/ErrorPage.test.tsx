@@ -10,7 +10,7 @@ const WillError = () => {
 const WontErrorText = 'Oh Yeah!';
 const WontError = () => <h1>{WontErrorText}</h1>;
 
-it('Catch the child\'s error and show it on the dom', () => {
+it("Catch the child's error and show it on the dom", () => {
   const { queryByText } = render(
     <div>
       <ErrorPage>

@@ -57,6 +57,7 @@ it('mapValidationData', () => {
           'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
         http_code: 0,
         metadata_present: false,
+        metadata_signature_present: false,
       },
     },
   ];

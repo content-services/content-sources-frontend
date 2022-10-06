@@ -52,10 +52,11 @@ export const mapValidationData = (
   formikErrors: FormikErrors<FormikValues | undefined>[],
 ) => {
   const updatedValidationData = mapNoMetaDataError(validationData);
-  const errors = updatedValidationData.map(({ name, url }, index: number) => ({
+  const errors = updatedValidationData.map(({ name, url, gpg_key: gpgKey }, index: number) => ({
     // First apply the errors found in the ValidationAPI
     ...(name?.error ? { name: name?.error } : {}),
     ...(url?.error ? { url: url?.error } : {}),
+    ...(gpgKey?.error ? { gpgKey: gpgKey?.error } : {}),
     // Overwrite any errors with errors found within the UI itself
     ...formikErrors[index],
   }));
@@ -91,7 +92,6 @@ export const makeValidationSchema = () => {
       .shape({
         name: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Required'),
         url: Yup.string().url('Invalid URL').required('Required'),
-        gpgKey: Yup.string().optional(),
       })
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore-next-line

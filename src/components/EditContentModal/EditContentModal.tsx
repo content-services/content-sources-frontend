@@ -42,6 +42,7 @@ import {
   mapToDefaultFormikValues,
 } from './helpers';
 import { isEqual } from 'lodash';
+import OptionalTooltip from '../OptionalTooltip/OptionalTooltip';
 
 const green = global_success_color_100.value;
 
@@ -162,17 +163,23 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
 
   const debouncedValues = useDebounce(formik.values);
 
-  const { mutateAsync: validateContentList } = useValidateContentList();
+  const { mutateAsync: validateContentList, data: validationList } = useValidateContentList();
 
   useEffect(() => {
     if (open)
-      validateContentList(debouncedValues.map(({ name, url, uuid }) => ({ name, url, uuid }))).then(
-        async (validationData) => {
-          const formikErrors = await formik.validateForm(debouncedValues);
-          const mappedErrorData = mapValidationData(validationData, formikErrors);
-          formik.setErrors(mappedErrorData);
-        },
-      );
+      validateContentList(
+        debouncedValues.map(({ name, url, gpgKey, metadataVerification, uuid }) => ({
+          name,
+          url,
+          gpg_key: gpgKey,
+          metadata_verification: metadataVerification,
+          uuid,
+        })),
+      ).then(async (validationData) => {
+        const formikErrors = await formik.validateForm(debouncedValues);
+        const mappedErrorData = mapValidationData(validationData, formikErrors);
+        formik.setErrors(mappedErrorData);
+      });
   }, [debouncedValues, values, open]);
 
   const onToggle = (index: number) => {
@@ -183,14 +190,17 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
 
   const updateArchAndVersion = (index: number) => {
     const url = formik.values[index]?.url;
-    if (isValidURL(url)) {
+    if (
+      isValidURL(url) &&
+      (formik.values[index]?.arch === 'any' || formik.values[index].versions[0] === 'any')
+    ) {
       const arch =
-        formik.values[index]?.arch ||
+        (formik.values[index]?.arch !== 'any' && formik.values[index]?.arch) ||
         distArches.find(({ name, label }) => url.includes(name) || url.includes(label))?.label ||
         '';
 
       let versions: Array<string> = [];
-      if (formik.values[index]?.versions?.length) {
+      if (formik.values[index]?.versions?.length && formik.values[index].versions[0] !== 'any') {
         versions = formik.values[index]?.versions;
       } else {
         const newVersion = distVersions.find(
@@ -354,7 +364,11 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         type='url'
                         validated={getFieldValidation(index, 'url')}
                         onBlur={() => urlOnBlur(index)}
-                        onChange={(value) => updateVariable(index, { url: value })}
+                        onChange={(value) => {
+                          if (url !== value) {
+                            updateVariable(index, { url: value });
+                          }
+                        }}
                         value={url || ''}
                         placeholder='https://'
                         id='url'
@@ -424,6 +438,8 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         </Tooltip>
                       }
                       fieldId='gpgKey'
+                      validated={getFieldValidation(index, 'gpgKey')}
+                      helperTextInvalid={formik.errors[index]?.gpgKey}
                     >
                       <FileUpload
                         id='gpgKey-uploader'
@@ -443,7 +459,15 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                               1500,
                             );
                           }
-                          updateVariable(index, { gpgKey: value });
+                          updateVariable(index, {
+                            gpgKey: value,
+                            ...(gpgKey === '' && !!value
+                              ? {
+                                  metadataVerification:
+                                    !!validationList?.[index]?.url?.metadata_signature_present,
+                                }
+                              : {}),
+                          });
                         }}
                         onClearClick={() => updateVariable(index, { gpgKey: '' })}
                         dropzoneProps={{
@@ -455,26 +479,40 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         browseButtonText='Upload'
                       />
                     </FormGroup>
-                    <FormGroup fieldId='metadataVerification' label='Use GPG key for' isInline>
-                      <Radio
-                        id='package verification only'
-                        name='package-verification-only'
-                        label='Package verification only'
-                        isValid={false}
-                        isChecked={!metadataVerification}
-                        onChange={() => updateVariable(index, { metadataVerification: false })}
-                      />
-                      <Radio
-                        id='package and repository verification'
-                        name='package-and-repository-verification'
-                        label='Package and repository verification'
-                        isChecked={metadataVerification}
-                        onChange={() => updateVariable(index, { metadataVerification: true })}
-                      />
-                      <Hide hide={getFieldValidation(index, 'metadataVerification') !== 'success'}>
-                        <CheckCircleIcon noVerticalAlign color={green} />
-                      </Hide>
-                    </FormGroup>
+                    <Hide hide={!gpgKey}>
+                      <FormGroup fieldId='metadataVerification' label='Use GPG key for' isInline>
+                        <Radio
+                          isDisabled={
+                            validationList?.[index]?.url?.metadata_signature_present !== true
+                          }
+                          id='package verification only'
+                          name='package-verification-only'
+                          label='Package verification only'
+                          isChecked={!metadataVerification}
+                          onChange={() => updateVariable(index, { metadataVerification: false })}
+                        />
+                        <OptionalTooltip
+                          show={validationList?.[index]?.url?.metadata_signature_present !== true}
+                          content="This repository's metadata is not signed, metadata verification is not possible."
+                        >
+                          <Radio
+                            isDisabled={
+                              validationList?.[index]?.url?.metadata_signature_present !== true
+                            }
+                            id='Package and metadata verification'
+                            name='package-and-repository-verification'
+                            label='Package and metadata verification'
+                            isChecked={metadataVerification}
+                            onChange={() => updateVariable(index, { metadataVerification: true })}
+                          />
+                        </OptionalTooltip>
+                        <Hide
+                          hide={getFieldValidation(index, 'metadataVerification') !== 'success'}
+                        >
+                          <CheckCircleIcon noVerticalAlign color={green} />
+                        </Hide>
+                      </FormGroup>
+                    </Hide>
                   </Form>
                 </Td>
               </Tr>

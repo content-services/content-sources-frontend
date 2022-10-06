@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { RepositoryParamsResponse } from './services/Content/ContentApi';
+import { RepositoryParamsResponse, ValidationResponse } from './services/Content/ContentApi';
 
 const queryClient = new QueryClient({
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -66,7 +66,7 @@ export const testRepositoryParamsResponse: RepositoryParamsResponse = {
   ],
 };
 
-export const defaultValidationErrorData = [
+export const defaultValidationErrorData: ValidationResponse = [
   {
     name: {
       skipped: false,
@@ -79,13 +79,19 @@ export const defaultValidationErrorData = [
       error: 'URL cannot be blank',
       http_code: 0,
       metadata_present: false,
+      metadata_signature_present: false,
     },
   },
 ];
 
-export const passingValidationErrorData = [
+export const passingValidationErrorData: ValidationResponse = [
   {
     name: {
+      skipped: false,
+      valid: true,
+      error: '',
+    },
+    gpg_key: {
       skipped: false,
       valid: true,
       error: '',
@@ -94,8 +100,9 @@ export const passingValidationErrorData = [
       skipped: false,
       valid: true,
       error: '',
-      http_code: 0,
+      http_code: 200,
       metadata_present: true,
+      metadata_signature_present: true,
     },
   },
 ];

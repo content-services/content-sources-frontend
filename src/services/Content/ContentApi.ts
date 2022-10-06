@@ -90,6 +90,7 @@ export type ValidateItem = {
 export interface ValidationUrl extends ValidateItem {
   http_code: number;
   metadata_present: boolean;
+  metadata_signature_present: boolean;
 }
 
 export type ValidationResponse = {
@@ -97,7 +98,7 @@ export type ValidationResponse = {
   url?: ValidationUrl;
   distribution_versions?: ValidateItem;
   distribution_arch?: ValidateItem;
-  gpgKey?: ValidateItem;
+  gpg_key?: ValidateItem;
 }[];
 
 export const getContentList: (
