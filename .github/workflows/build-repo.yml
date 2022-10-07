@@ -1,10 +1,8 @@
 name: Release workflow
 on:
-  workflow_run:
-    workflows: [lint-test]
-    branches: [main]
-    types:
-      - completed
+  push:
+    branches:
+      - main
 jobs:
   pull-scripts:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
