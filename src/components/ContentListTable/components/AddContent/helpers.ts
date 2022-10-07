@@ -1,7 +1,7 @@
 import { isEmpty } from 'lodash';
 import * as Yup from 'yup';
 import { FormikErrors } from 'formik';
-import { ValidationResponse } from '../../services/Content/ContentApi';
+import { ValidationResponse } from '../../../../services/Content/ContentApi';
 import ERROR_CODE from './httpErrorCodes.json';
 
 export interface FormikValues {

@@ -8,7 +8,7 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon, PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons';
 import { createUseStyles } from 'react-jss';
-import AddContent from '../../AddContent/AddContent';
+import AddContent from './AddContent/AddContent';
 
 const useStyles = createUseStyles({
   emptyStateContainer: {

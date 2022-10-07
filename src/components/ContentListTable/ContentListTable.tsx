@@ -32,13 +32,13 @@ import {
   useDeleteContentItemMutate,
   useRepositoryParams,
 } from '../../services/Content/ContentQueries';
-import ContentListFilters from './ContentListFilters';
+import ContentListFilters from './components/ContentListFilters';
 import Hide from '../Hide/Hide';
 import EmptyTableState from './components/EmptyTableState';
 import { useQueryClient } from 'react-query';
-import EditContentModal from '../EditContentModal/EditContentModal';
+import EditContentModal from './components/EditContentModal/EditContentModal';
 import StatusIcon from './components/StatusIcon';
-import UrlWithExternalIcon from '../UrlWithLinkIcon/UrlWithLinkIcon';
+import UrlWithExternalIcon from './components/UrlWithLinkIcon/UrlWithLinkIcon';
 import PackageCount from './components/PackageCount';
 
 const useStyles = createUseStyles({

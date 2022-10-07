@@ -1,4 +1,4 @@
-import { ContentItem, EditContentRequest } from './../../services/Content/ContentApi';
+import { ContentItem, EditContentRequest } from '../../../../services/Content/ContentApi';
 export interface EditContentProps {
   setClosed: () => void;
   open: boolean;

@@ -1,24 +1,24 @@
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import {
   defaultValidationErrorData,
   passingValidationErrorData,
   ReactQueryTestWrapper,
-} from '../../testingHelpers';
+} from '../../../../testingHelpers';
 import AddContent from './AddContent';
 import {
   useAddContentQuery,
   useFetchGpgKey,
   useValidateContentList,
-} from '../../services/Content/ContentQueries';
-import useDebounce from '../../services/useDebounce';
+} from '../../../../services/Content/ContentQueries';
+import useDebounce from '../../../../services/useDebounce';
 
-jest.mock('../../services/Content/ContentQueries', () => ({
+jest.mock('../../../../services/Content/ContentQueries', () => ({
   useAddContentQuery: jest.fn(),
   useValidateContentList: jest.fn(),
   useFetchGpgKey: jest.fn(),
 }));
 
-jest.mock('../../services/useDebounce', () => jest.fn());
+jest.mock('../../../../services/useDebounce', () => jest.fn());
 
 const passingValidationMetaDataSigNotPresent = [
   {

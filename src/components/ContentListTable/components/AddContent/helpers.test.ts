@@ -1,4 +1,4 @@
-import { ValidationResponse } from './../../services/Content/ContentApi';
+import { ValidationResponse } from '../../../../services/Content/ContentApi';
 import { REGEX_URL, isValidURL, mapFormikToAPIValues, mapValidationData } from './helpers';
 
 it('REGEX_URL', () => {

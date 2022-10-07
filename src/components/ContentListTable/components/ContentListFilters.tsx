@@ -9,15 +9,15 @@ import {
   SelectVariant,
   TextInput,
 } from '@patternfly/react-core';
-import DropdownSelect from '../DropdownSelect/DropdownSelect';
+import DropdownSelect from '../../DropdownSelect/DropdownSelect';
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import { global_BackgroundColor_100, global_secondary_color_100 } from '@patternfly/react-tokens';
-import Hide from '../Hide/Hide';
-import { FilterData, RepositoryParamsResponse } from '../../services/Content/ContentApi';
+import Hide from '../../Hide/Hide';
+import { FilterData, RepositoryParamsResponse } from '../../../services/Content/ContentApi';
 import { useQueryClient } from 'react-query';
-import { REPOSITORY_PARAMS_KEY } from '../../services/Content/ContentQueries';
-import useDebounce from '../../services/useDebounce';
-import AddContent from '../AddContent/AddContent';
+import { REPOSITORY_PARAMS_KEY } from '../../../services/Content/ContentQueries';
+import useDebounce from '../../../services/useDebounce';
+import AddContent from './AddContent/AddContent';
 import { createUseStyles } from 'react-jss';
 import { isEmpty } from 'lodash';
 

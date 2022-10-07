@@ -23,16 +23,16 @@ import {
 import { useFormik } from 'formik';
 import { useEffect, useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
-import Hide from '../Hide/Hide';
-import useDebounce from '../../services/useDebounce';
+import Hide from '../../../Hide/Hide';
+import useDebounce from '../../../../services/useDebounce';
 import {
   REPOSITORY_PARAMS_KEY,
   useEditContentQuery,
   useFetchGpgKey,
   useValidateContentList,
-} from '../../services/Content/ContentQueries';
-import { RepositoryParamsResponse } from '../../services/Content/ContentApi';
-import DropdownSelect from '../DropdownSelect/DropdownSelect';
+} from '../../../../services/Content/ContentQueries';
+import { RepositoryParamsResponse } from '../../../../services/Content/ContentApi';
+import DropdownSelect from '../../../DropdownSelect/DropdownSelect';
 import { useQueryClient } from 'react-query';
 import { isValidURL, makeValidationSchema, mapValidationData } from '../AddContent/helpers';
 import ContentValidity from '../AddContent/components/ContentValidity';
@@ -43,7 +43,7 @@ import {
   mapToDefaultFormikValues,
 } from './helpers';
 import { isEqual } from 'lodash';
-import OptionalTooltip from '../OptionalTooltip/OptionalTooltip';
+import OptionalTooltip from '../../../OptionalTooltip/OptionalTooltip';
 
 const green = global_success_color_100.value;
 
@@ -457,7 +457,16 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                           if (isValidURL(value)) {
                             updateVariable(index, { gpgLoading: true });
                             const gpgData = await fetchGpgKey(value);
-                            updateVariable(index, { gpgKey: gpgData, gpgLoading: false });
+                            updateVariable(index, {
+                              gpgKey: gpgData,
+                              gpgLoading: false,
+                              ...(gpgKey === '' && !!value
+                                ? {
+                                    metadataVerification:
+                                      !!validationList?.[index]?.url?.metadata_signature_present,
+                                  }
+                                : {}),
+                            });
                           }
                         }}
                         onTextChange={(value) =>

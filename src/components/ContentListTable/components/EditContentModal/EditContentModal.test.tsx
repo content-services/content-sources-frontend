@@ -2,15 +2,15 @@ import {
   passingValidationErrorData,
   ReactQueryTestWrapper,
   testRepositoryParamsResponse,
-} from '../../testingHelpers';
+} from '../../../../testingHelpers';
 import EditContentModal from './EditContentModal';
 import { act, fireEvent, render } from '@testing-library/react';
 import {
   useEditContentQuery,
   useFetchGpgKey,
   useValidateContentList,
-} from '../../services/Content/ContentQueries';
-import useDebounce from '../../services/useDebounce';
+} from '../../../../services/Content/ContentQueries';
+import useDebounce from '../../../../services/useDebounce';
 import { useQueryClient } from 'react-query';
 
 const singleEditValues = [
@@ -30,7 +30,7 @@ const singleEditValues = [
   },
 ];
 
-jest.mock('../../services/Content/ContentQueries', () => ({
+jest.mock('../../../../services/Content/ContentQueries', () => ({
   useEditContentQuery: jest.fn(),
   useValidateContentList: jest.fn(),
   useFetchGpgKey: jest.fn(),
@@ -41,7 +41,7 @@ jest.mock('react-query', () => ({
   useQueryClient: jest.fn(),
 }));
 
-jest.mock('../../services/useDebounce', () => jest.fn());
+jest.mock('../../../../services/useDebounce', () => jest.fn());
 
 it('Open, confirming values, edit an item, enabling Save button', async () => {
   (useEditContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
