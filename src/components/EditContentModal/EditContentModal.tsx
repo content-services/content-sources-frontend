@@ -224,6 +224,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
     <Modal
       variant={ModalVariant.medium}
       title='Edit custom repository'
+      ouiaId='edit_custom_repository'
       help={
         <Popover
           headerContent={<div>Help Popover</div>}
