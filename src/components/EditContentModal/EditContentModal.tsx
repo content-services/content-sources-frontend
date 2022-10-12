@@ -234,15 +234,11 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
     <Modal
       variant={ModalVariant.medium}
       title='Edit custom repository'
+      ouiaId='edit_custom_repository'
       help={
         <Popover
           headerContent={<div>Help Popover</div>}
-          bodyContent={
-            <div>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id feugiat augue, nec
-              fringilla turpis.
-            </div>
-          }
+          bodyContent={<div>Use this form to edit the values of an existing repository.</div>}
           footerContent='Popover Footer'
         >
           <Button variant='plain' aria-label='Help'>
@@ -378,8 +374,9 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                     </FormGroup>
                     <FormGroup
                       label='Restrict architecture'
+                      aria-label='restrict_to_architecture'
                       labelIcon={
-                        <Tooltip content='Something super important and stuff'>
+                        <Tooltip content='Optional: Select value to restrict package architecture'>
                           <OutlinedQuestionCircleIcon
                             className='pf-u-ml-xs'
                             color={global_Color_200.value}
@@ -404,8 +401,9 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                     </FormGroup>
                     <FormGroup
                       label='Restrict OS version'
+                      aria-label='restrict_to_os_version'
                       labelIcon={
-                        <Tooltip content='Something super important and stuff'>
+                        <Tooltip content='Optional: Select value to restrict package OS version'>
                           <OutlinedQuestionCircleIcon
                             className='pf-u-ml-xs'
                             color={global_Color_200.value}
@@ -430,7 +428,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                     <FormGroup
                       label='GPG key'
                       labelIcon={
-                        <Tooltip content='Something super important and stuff'>
+                        <Tooltip content='Optional: Add GPG Key file or URL'>
                           <OutlinedQuestionCircleIcon
                             className='pf-u-ml-xs'
                             color={global_Color_200.value}
@@ -443,6 +441,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                     >
                       <FileUpload
                         id='gpgKey-uploader'
+                        aria-label='gpgkey_file_to_upload'
                         type='text'
                         filenamePlaceholder='Drag a file here or upload one'
                         textAreaPlaceholder='Paste GPG key or URL here'
