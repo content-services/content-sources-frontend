@@ -327,7 +327,7 @@ const AddContent = ({ isLoading }: Props) => {
           ouiaId='add_custom_repository'
           help={
             <Popover
-              headerContent={<div>Help Popover</div>}
+              headerContent={<div>Add a custom repository</div>}
               bodyContent={<div>Use this form to enter the values for a new repository.</div>}
               footerContent='Popover Footer'
             >

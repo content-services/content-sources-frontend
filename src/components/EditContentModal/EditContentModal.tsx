@@ -237,7 +237,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
       ouiaId='edit_custom_repository'
       help={
         <Popover
-          headerContent={<div>Help Popover</div>}
+          headerContent={<div>Edit custom repository</div>}
           bodyContent={<div>Use this form to edit the values of an existing repository.</div>}
           footerContent='Popover Footer'
         >
