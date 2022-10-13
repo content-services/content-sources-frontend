@@ -329,7 +329,7 @@ const AddContent = ({ isLoading }: Props) => {
             <Popover
               headerContent={<div>Add a custom repository</div>}
               bodyContent={<div>Use this form to enter the values for a new repository.</div>}
-              footerContent='Popover Footer'
+             
             >
               <Button variant='plain' aria-label='Help'>
                 <OutlinedQuestionCircleIcon />
