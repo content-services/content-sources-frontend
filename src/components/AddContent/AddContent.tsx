@@ -327,14 +327,20 @@ const AddContent = ({ isLoading }: Props) => {
           ouiaId='add_custom_repository'
           help={
             <Popover
-              headerContent={<div>Help Popover</div>}
+              headerContent={<div>Add a custom repository</div>}
               bodyContent={
                 <div>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id feugiat augue,
-                  nec fringilla turpis.
+                  This form let you add the information for
+                  a new custom repository.
+
+                  When adding the fields be sure the mandatory
+                  ones are filled.
+
+                  If some field is not validated the field will be marked
+                  in red color.
                 </div>
               }
-              footerContent='Popover Footer'
+              footerContent='* mandatory fields'
             >
               <Button variant='plain' aria-label='Help'>
                 <OutlinedQuestionCircleIcon />
@@ -499,7 +505,7 @@ const AddContent = ({ isLoading }: Props) => {
                         <FormGroup
                           label='Restrict architecture'
                           labelIcon={
-                            <Tooltip content='Something super important and stuff'>
+                            <Tooltip content='The base architecture used for installing packages for the repository'>
                               <OutlinedQuestionCircleIcon
                                 className='pf-u-ml-xs'
                                 color={global_Color_200.value}
@@ -524,7 +530,7 @@ const AddContent = ({ isLoading }: Props) => {
                         <FormGroup
                           label='Restrict OS version'
                           labelIcon={
-                            <Tooltip content='Something super important and stuff'>
+                            <Tooltip content='Restrict the repository to the used only for the os version indicated'>
                               <OutlinedQuestionCircleIcon
                                 className='pf-u-ml-xs'
                                 color={global_Color_200.value}
@@ -548,7 +554,7 @@ const AddContent = ({ isLoading }: Props) => {
                         <FormGroup
                           label='GPG key'
                           labelIcon={
-                            <Tooltip content='Something super important and stuff'>
+                            <Tooltip content='It can be the GPG Key content armored, or the url where the GPG key is found in Internet'>
                               <OutlinedQuestionCircleIcon
                                 className='pf-u-ml-xs'
                                 color={global_Color_200.value}
