@@ -258,7 +258,7 @@ it('Add content', async () => {
       fireEvent.change(nameInput, { target: { value: 'superCoolName' } });
     });
     await act(async () => {
-      fireEvent.change(gpgKeyInput, { target: { value: 'test gpg key' } });
+      fireEvent.change(gpgKeyInput, { target: { value: 'test GPG key' } });
     });
     await act(async () => {
       fireEvent.blur(urlInput);
@@ -272,7 +272,7 @@ it('Add content', async () => {
   }
 
   expect(queryByText('Use GPG key for')).toBeInTheDocument();
-  expect(queryByText('test gpg key')).toBeInTheDocument();
+  expect(queryByText('test GPG key')).toBeInTheDocument();
 
   expect(queryByText('Invalid URL')).not.toBeInTheDocument();
   const addAnotherButton = queryByText('Add another repository');

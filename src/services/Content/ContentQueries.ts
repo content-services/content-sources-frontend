@@ -15,11 +15,14 @@ import {
   EditContentListItem,
   EditContentRequest,
   getGpgKey,
+  PackagesResponse,
+  getPackages,
 } from './ContentApi';
 
 export const CONTENT_LIST_KEY = 'CONTENT_LIST_KEY';
 export const REPOSITORY_PARAMS_KEY = 'REPOSITORY_PARAMS_KEY';
 export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
+export const PACKAGES_KEY = 'PACKAGES_KEY';
 
 export const useContentListQuery = (
   page: number,
@@ -222,7 +225,7 @@ export const useFetchGpgKey = () => {
       const description = typeof data === 'string' ? data : data?.message;
       notify({
         variant: AlertVariant.danger,
-        title: 'Error fetching gpg key from provided url',
+        title: 'Error fetching GPG key from provided url',
         description,
       });
     }
@@ -231,3 +234,30 @@ export const useFetchGpgKey = () => {
 
   return { fetchGpgKey };
 };
+
+export const useGetPackagesQuery = (
+  uuid: string,
+  count: number,
+  page: number,
+  limit: number,
+  searchQuery: string,
+  sortBy: string,
+) =>
+  useQuery<PackagesResponse>(
+    [PACKAGES_KEY, uuid, page, limit, searchQuery, sortBy, count],
+    () => getPackages(uuid, page, limit, searchQuery, sortBy),
+    {
+      keepPreviousData: true,
+      optimisticResults: true,
+      staleTime: 60000,
+      onError: (err) => {
+        const { notify } = useNotification();
+        const error = err as Error; // Forced Type
+        notify({
+          variant: AlertVariant.danger,
+          title: 'Error fetching rpm packages',
+          description: error?.message,
+        });
+      },
+    },
+  );

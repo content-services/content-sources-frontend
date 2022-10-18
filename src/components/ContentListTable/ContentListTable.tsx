@@ -150,6 +150,7 @@ const ContentListTable = () => {
     },
     columnIndex,
   });
+
   const columnHeaders = ['Name', 'Architecture', 'Versions', 'Packages', 'Status'];
 
   const archesDisplay = (arch: string) => distArches.find(({ label }) => arch === label)?.name;
@@ -274,7 +275,6 @@ const ContentListTable = () => {
                   name,
                   url,
                   distribution_arch,
-                  package_count,
                   distribution_versions,
                   status,
                   last_introspection_error,
@@ -289,7 +289,7 @@ const ContentListTable = () => {
                     <Td>{archesDisplay(distribution_arch)}</Td>
                     <Td>{versionDisplay(distribution_versions)}</Td>
                     <Td>
-                      <PackageCount count={package_count} status={status} />
+                      <PackageCount rowData={rowData} />
                     </Td>
                     <Td>
                       <StatusIcon status={status} error={last_introspection_error} />

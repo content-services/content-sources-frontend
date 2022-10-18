@@ -51,6 +51,7 @@ export type Links = {
   first: string;
   last: string;
   next: string;
+  prev: string;
 };
 
 export type Meta = {
@@ -104,6 +105,23 @@ export type ValidationResponse = {
   distribution_arch?: ValidateItem;
   gpg_key?: ValidateItem;
 }[];
+
+export interface PackageItem {
+  arch: string;
+  checksum: string;
+  epoch: number;
+  name: string;
+  release: string;
+  summary: string;
+  uuid: string;
+  version: string;
+}
+
+export type PackagesResponse = {
+  data: PackageItem[];
+  links: Links;
+  meta: Meta;
+};
 
 export const getContentList: (
   page: number,
@@ -163,6 +181,27 @@ export const getGpgKey: (url: string) => Promise<GpgKeyResponse> = async (url: s
   const { data } = await axios.post(
     '/api/content-sources/v1/repository_parameters/external_gpg_key/',
     { url },
+  );
+  return data;
+};
+
+export const getPackages: (
+  uuid: string,
+  page: number,
+  limit: number,
+  searchQuery: string,
+  sortBy: string,
+) => Promise<PackagesResponse> = async (
+  uuid: string,
+  page: number,
+  limit: number,
+  searchQuery: string,
+  sortBy: string,
+) => {
+  const { data } = await axios.get(
+    `/api/content-sources/v1.0/repositories/${uuid}/rpms?offset=${
+      (page - 1) * limit
+    }&limit=${limit}&search=${searchQuery}&sort_by=${sortBy}`,
   );
   return data;
 };

@@ -25,7 +25,7 @@ const singleEditValues = [
     last_introspection_error: '',
     account_id: '6414238',
     org_id: '13446804',
-    gpg_key: 'test gpg key',
+    gpg_key: 'test GPG key',
     metadata_verification: false,
   },
 ];
@@ -88,7 +88,7 @@ it('Open, confirming values, edit an item, enabling Save button', async () => {
       fireEvent.click(el8MenuSelect);
     });
   }
-  expect(queryByText('test gpg key')).toBeInTheDocument();
+  expect(queryByText('test GPG key')).toBeInTheDocument();
   expect(queryByText('Package verification only')).toBeInTheDocument();
   expect(queryByText('Package and metadata verification')).toBeInTheDocument();
   expect(queryByText('No changes')).not.toBeInTheDocument();
