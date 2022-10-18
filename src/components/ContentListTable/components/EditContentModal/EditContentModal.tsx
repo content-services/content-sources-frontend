@@ -282,7 +282,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
         </Stack>
       }
     >
-      <TableComposable aria-label='Expandable table'>
+      <TableComposable aria-label='Table for edit modal' ouiaId='edit_modal_table'>
         <Hide hide={createDataLengthOf1}>
           <Tbody isExpanded={allExpanded}>
             <Tr onClick={expandAllToggle} className={classes.toggleAllRow}>
@@ -341,6 +341,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         id='name'
                         name='name'
                         label='Name'
+                        ouiaId='input_name'
                         type='text'
                         validated={getFieldValidation(index, 'name')}
                         onChange={(value) => {
@@ -372,6 +373,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         id='url'
                         name='url'
                         label='Url'
+                        ouiaId='input_url'
                       />
                     </FormGroup>
                     <FormGroup

@@ -389,7 +389,7 @@ const AddContent = ({ isLoading }: Props) => {
             </Stack>
           }
         >
-          <TableComposable ouiaId='modal_table_expandable' aria-label='Expandable table'>
+          <TableComposable aria-label='Table for repo add modal' ouiaId='add_modal_table'>
             <Hide hide={createDataLengthOf1}>
               <Tbody isExpanded={allExpanded}>
                 <Tr onClick={expandAllToggle} className={classes.toggleAllRow}>
@@ -459,6 +459,7 @@ const AddContent = ({ isLoading }: Props) => {
                             id='name'
                             name='name'
                             label='Name'
+                            ouiaId='input_name'
                             type='text'
                             validated={getFieldValidation(index, 'name')}
                             onBlur={() => updateTouched(index, 'name')}
@@ -491,6 +492,7 @@ const AddContent = ({ isLoading }: Props) => {
                             id='url'
                             name='url'
                             label='Url'
+                            ouiaId='input_url'
                           />
                         </FormGroup>
                         <FormGroup
