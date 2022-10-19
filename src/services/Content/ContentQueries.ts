@@ -17,6 +17,7 @@ import {
   getGpgKey,
   PackagesResponse,
   getPackages,
+  ErrorResponse,
 } from './ContentApi';
 
 export const CONTENT_LIST_KEY = 'CONTENT_LIST_KEY';
@@ -55,7 +56,7 @@ export const useAddContentQuery = (queryClient: QueryClient, request: CreateCont
       });
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
     },
-    onError: (err: { response?: { data: string | Array<{ error: string | null }> } }) => {
+    onError: (err: { response?: { data: ErrorResponse } }) => {
       let description = 'An error occurred';
 
       switch (typeof err?.response?.data) {
@@ -64,12 +65,12 @@ export const useAddContentQuery = (queryClient: QueryClient, request: CreateCont
           break;
         case 'object':
           // Only show the first error
-          err?.response?.data.find(({ error }) => {
-            if (error) {
-              description = error;
+          err?.response?.data.errors?.find(({ detail }) => {
+            if (detail) {
+              description = detail;
               return true;
             }
-          })?.error;
+          })?.detail;
           break;
         default:
           break;
@@ -94,7 +95,7 @@ export const useEditContentQuery = (queryClient: QueryClient, request: EditConte
       });
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
     },
-    onError: (err: { response?: { data: string | Array<{ error: string | null }> } }) => {
+    onError: (err: { response?: { data: ErrorResponse } }) => {
       let description = 'An error occurred';
 
       switch (typeof err?.response?.data) {
@@ -103,12 +104,12 @@ export const useEditContentQuery = (queryClient: QueryClient, request: EditConte
           break;
         case 'object':
           // Only show the first error
-          err?.response?.data.find(({ error }) => {
-            if (error) {
-              description = error;
+          err?.response?.data.errors?.find(({ detail }) => {
+            if (detail) {
+              description = detail;
               return true;
             }
-          })?.error;
+          })?.detail;
           break;
         default:
           break;

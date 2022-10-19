@@ -24,12 +24,17 @@ export interface CreateContentRequestItem {
   metadata_verification?: boolean;
 }
 
-export interface CreateContentResponseItem {
-  error: string;
-  repository: ContentItem;
+export interface ErrorItem {
+  status: number;
+  title?: string;
+  detail?: string;
 }
 
-export type CreateContentRequestResponse = CreateContentResponseItem[];
+export interface ErrorResponse {
+  errors: ErrorItem[];
+}
+
+export type CreateContentRequestResponse = ContentItem[] | ErrorResponse;
 
 export type CreateContentRequest = Array<CreateContentRequestItem>;
 
