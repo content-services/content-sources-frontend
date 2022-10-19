@@ -390,6 +390,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                       fieldId='arch'
                     >
                       <DropdownSelect
+                        ouiaId='restrict_to_architecture'
                         validated={getFieldValidation(index, 'arch')}
                         menuAppendTo={document.body}
                         toggleId={'archSelection' + index}
@@ -417,6 +418,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                       fieldId='version'
                     >
                       <DropdownSelect
+                        ouiaId='restrict_to_os_version'
                         validated={getFieldValidation(index, 'versions')}
                         menuAppendTo={document.body}
                         toggleId={'versionSelection' + index}

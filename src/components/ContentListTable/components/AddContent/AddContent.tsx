@@ -509,6 +509,7 @@ const AddContent = ({ isLoading }: Props) => {
                           fieldId='arch'
                         >
                           <DropdownSelect
+                            ouiaId='restrict_to_architecture'
                             menuAppendTo={document.body}
                             toggleId={'archSelection' + index}
                             options={Object.keys(distributionArches)}
@@ -535,6 +536,7 @@ const AddContent = ({ isLoading }: Props) => {
                           fieldId='version'
                         >
                           <DropdownSelect
+                            ouiaId='restrict_to_os_version'
                             menuAppendTo={document.body}
                             toggleId={'versionSelection' + index}
                             options={Object.keys(distributionVersions)}
