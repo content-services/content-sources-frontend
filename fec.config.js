@@ -3,7 +3,7 @@ module.exports = {
   useProxy: true,
   proxyVerbose: true,
   interceptChromeConfig: true,
-  appUrl: '/apps/content-sources',
+  appUrl: '/insights/content',
   routes: {
     '/api/content-sources/': { host: 'http://localhost:8000' },
   },

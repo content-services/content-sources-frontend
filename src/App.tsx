@@ -5,16 +5,16 @@ import NotificationsPortal from '@redhat-cloud-services/frontend-components-noti
 import { notificationsReducer } from '@redhat-cloud-services/frontend-components-notifications/redux';
 import { getRegistry as _getRegistry } from '@redhat-cloud-services/frontend-components-utilities/Registry';
 import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
 
 import pckg from '../package.json';
-import { Routes } from './Routes';
+import Routes from './Routes';
+import { useNavigate } from 'react-router-dom';
 
 // Example of how to re-implement inaccurately typed imports
 const getRegistry = _getRegistry as unknown as () => { register: ({ notifications }) => void };
 
 const App = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const chrome = useChrome();
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const App = () => {
       const { updateDocumentTitle, on: onChromeEvent } = chrome.init();
       // You can use directly the name of your app
       updateDocumentTitle(pckg.insights.appname);
-      unregister = onChromeEvent('APP_NAVIGATION', (event) => history.push(`/${event.navId}`));
+      unregister = onChromeEvent('APP_NAVIGATION', (event) => navigate(`/${event.navId}`));
     }
 
     return () => {
