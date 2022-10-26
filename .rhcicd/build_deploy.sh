@@ -9,7 +9,14 @@ export COMPONENT="content-sources"
 export IMAGE="quay.io/cloudservices/content-sources-frontend"
 export WORKSPACE=${WORKSPACE:-$APP_ROOT} # if running in jenkins, use the build's workspace
 export APP_ROOT=$(pwd)
-export NODE_BUILD_VERSION=16
+
+# set NODE_BUILD_VERSION based on nvmrc or default to 16
+if [[ -n $(<.nvmrc) ]]; then
+    export NODE_BUILD_VERSION=$(<.nvmrc)
+else
+    export NODE_BUILD_VERSION=16
+fi
+
 COMMON_BUILDER=https://raw.githubusercontent.com/RedHatInsights/insights-frontend-builder-common/master
 
 set -exv

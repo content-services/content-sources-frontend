@@ -11,10 +11,8 @@ export WORKSPACE=${WORKSPACE:-$APP_ROOT} # if running in jenkins, use the build'
 export APP_ROOT=$(pwd)
 
 # set NODE_BUILD_VERSION based on nvmrc or default to 16
-if test -f "${APP_ROOT}/.nvmrc"; then
-    # -P for perl, look-behind for v, match the major version number, look ahead for .
-    # -o output only matched major version number, don't output (?=) groups
-    export NODE_BUILD_VERSION=$(grep -Po '(?<=v)[0-9]+(?=\.)' .nvmrc)
+if [[ -n $(<.nvmrc) ]]; then
+    export NODE_BUILD_VERSION=$(<.nvmrc)
 else
     export NODE_BUILD_VERSION=16
 fi
