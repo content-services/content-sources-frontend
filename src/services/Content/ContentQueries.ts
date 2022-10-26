@@ -225,7 +225,7 @@ export const useFetchGpgKey = () => {
       const description = typeof data === 'string' ? data : data?.message;
       notify({
         variant: AlertVariant.danger,
-        title: 'Error fetching GPG key from provided url',
+        title: 'Error fetching GPG key from provided URL',
         description,
       });
     }
