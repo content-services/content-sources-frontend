@@ -582,25 +582,25 @@ const AddContent = ({ isLoading }: Props) => {
                                 updateVariable(index, {
                                   gpgKey: gpgData,
                                   gpgLoading: false,
-                                  ...(gpgKey === '' && !!value
-                                    ? {
-                                        metadataVerification:
-                                          !!validationList?.[index]?.url
-                                            ?.metadata_signature_present,
-                                      }
-                                    : {}),
+                                  //   ...(gpgKey === '' && !!value
+                                  //     ? {
+                                  //         metadataVerification:
+                                  //           !!validationList?.[index]?.url
+                                  //             ?.metadata_signature_present,
+                                  //       }
+                                  //     : {}),
                                 });
                               }
                             }}
                             onTextChange={(value) =>
                               updateVariable(index, {
                                 gpgKey: value,
-                                ...(gpgKey === '' && !!value
-                                  ? {
-                                      metadataVerification:
-                                        !!validationList?.[index]?.url?.metadata_signature_present,
-                                    }
-                                  : {}),
+                                // ...(gpgKey === '' && !!value
+                                //   ? {
+                                //       metadataVerification:
+                                //         !!validationList?.[index]?.url?.metadata_signature_present,
+                                //     }
+                                //   : {}),
                               })
                             }
                             onClearClick={() => updateVariable(index, { gpgKey: '' })}
@@ -613,7 +613,8 @@ const AddContent = ({ isLoading }: Props) => {
                             browseButtonText='Upload'
                           />
                         </FormGroup>
-                        <Hide hide={!gpgKey}>
+                        <Hide hide>
+                          {/* <Hide hide={!gpgKey}> */}
                           <FormGroup
                             fieldId='metadataVerification'
                             label='Use GPG key for'
