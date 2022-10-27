@@ -261,6 +261,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
             <Button
               className={classes.saveButton}
               key='confirm'
+              ouiaId='edit_modal_save'
               variant='primary'
               isLoading={isEditing}
               isDisabled={
@@ -275,7 +276,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
             >
               {valuesHaveChanged ? 'Save changes' : 'No changes'}
             </Button>
-            <Button key='cancel' variant='link' onClick={closeModal}>
+            <Button key='cancel' variant='link' onClick={closeModal} ouiaId='edit_modal_cancel'>
               Cancel
             </Button>
           </StackItem>
