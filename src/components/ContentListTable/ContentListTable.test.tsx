@@ -16,6 +16,10 @@ jest.mock('../../middleware/AppContext', () => ({
   useAppContext: () => ({}),
 }));
 
+jest.mock('../../middleware/AppContext', () => ({
+  useAppContext: jest.fn(),
+}));
+
 it('expect ContentListTable to render with a loading skeleton', () => {
   (useRepositoryParams as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (useContentListQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
