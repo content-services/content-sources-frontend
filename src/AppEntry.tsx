@@ -1,11 +1,12 @@
 import { getBaseName } from '@redhat-cloud-services/insights-common-typescript';
 import React, { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Provider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import * as Redux from 'redux';
 
 import App from './App';
+import { ContextProvider } from './middleware/AppContext';
 import { createStore, resetStore } from './store';
 
 const queryClient = new QueryClient({
@@ -35,13 +36,15 @@ const AppEntry: React.FunctionComponent<AppEntryProps> = ({ logger }) => {
   }, []);
 
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <Router basename={getBaseName(window.location.pathname)}>
-          <App />
-        </Router>
-      </QueryClientProvider>
-    </Provider>
+    <ReduxProvider store={store}>
+      <ContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <Router basename={getBaseName(window.location.pathname)}>
+            <App />
+          </Router>
+        </QueryClientProvider>
+      </ContextProvider>
+    </ReduxProvider>
   );
 };
 

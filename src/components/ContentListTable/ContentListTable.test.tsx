@@ -1,31 +1,24 @@
 import { render } from '@testing-library/react';
 import { ReactQueryTestWrapper, testRepositoryParamsResponse } from '../../testingHelpers';
 import ContentListTable from './ContentListTable';
-import {
-  useAddContentQuery,
-  useContentListQuery,
-  useDeleteContentItemMutate,
-  useFetchGpgKey,
-  useRepositoryParams,
-  useValidateContentList,
-} from '../../services/Content/ContentQueries';
+import { useContentListQuery, useRepositoryParams } from '../../services/Content/ContentQueries';
 
 jest.mock('../../services/Content/ContentQueries', () => ({
   useRepositoryParams: jest.fn(),
   useContentListQuery: jest.fn(),
-  useAddContentQuery: jest.fn(),
-  useValidateContentList: jest.fn(),
-  useDeleteContentItemMutate: jest.fn(),
-  useFetchGpgKey: jest.fn(),
+  useAddContentQuery: () => ({ isLoading: false }),
+  useValidateContentList: () => ({ isLoading: false }),
+  useDeleteContentItemMutate: () => ({ isLoading: false }),
+  useFetchGpgKey: () => ({ fetchGpgKey: () => '' }),
+}));
+
+jest.mock('../../middleware/AppContext', () => ({
+  useAppContext: () => ({}),
 }));
 
 it('expect ContentListTable to render with a loading skeleton', () => {
   (useRepositoryParams as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (useContentListQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useAddContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useValidateContentList as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useDeleteContentItemMutate as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText } = render(
     <ReactQueryTestWrapper>
@@ -45,10 +38,6 @@ it('Render a loading state', () => {
   (useContentListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: true,
   }));
-  (useAddContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useValidateContentList as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useDeleteContentItemMutate as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText, queryByLabelText } = render(
     <ReactQueryTestWrapper>
@@ -83,10 +72,6 @@ it('Render with a single row', () => {
       meta: { count: 1, limit: 20, offset: 0 },
     },
   }));
-  (useAddContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useValidateContentList as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useDeleteContentItemMutate as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText } = render(
     <ReactQueryTestWrapper>

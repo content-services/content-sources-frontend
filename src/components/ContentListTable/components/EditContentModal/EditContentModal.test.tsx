@@ -5,12 +5,7 @@ import {
 } from '../../../../testingHelpers';
 import EditContentModal from './EditContentModal';
 import { act, fireEvent, render } from '@testing-library/react';
-import {
-  useEditContentQuery,
-  useFetchGpgKey,
-  useValidateContentList,
-} from '../../../../services/Content/ContentQueries';
-import useDebounce from '../../../../services/useDebounce';
+import { useValidateContentList } from '../../../../services/Content/ContentQueries';
 import { useQueryClient } from 'react-query';
 
 const singleEditValues = [
@@ -31,9 +26,9 @@ const singleEditValues = [
 ];
 
 jest.mock('../../../../services/Content/ContentQueries', () => ({
-  useEditContentQuery: jest.fn(),
+  useEditContentQuery: () => ({ isLoading: false }),
   useValidateContentList: jest.fn(),
-  useFetchGpgKey: jest.fn(),
+  useFetchGpgKey: () => ({ fetchGpgKey: () => '' }),
 }));
 
 jest.mock('react-query', () => ({
@@ -41,19 +36,17 @@ jest.mock('react-query', () => ({
   useQueryClient: jest.fn(),
 }));
 
-jest.mock('../../../../services/useDebounce', () => jest.fn());
+jest.mock('../../../../services/useDebounce', () => (value) => value);
+jest.mock('../../../../middleware/AppContext', () => ({ useAppContext: () => ({}) }));
 
 it('Open, confirming values, edit an item, enabling Save button', async () => {
-  (useEditContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (useValidateContentList as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     mutateAsync: async () => passingValidationErrorData,
   }));
-  (useDebounce as jest.Mock).mockImplementation((value) => value);
   (useQueryClient as jest.Mock).mockImplementation(() => ({
     getQueryData: () => testRepositoryParamsResponse,
   }));
-  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText, queryByPlaceholderText, queryAllByLabelText } = render(
     <ReactQueryTestWrapper>

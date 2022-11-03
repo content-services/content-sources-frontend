@@ -44,6 +44,8 @@ import { RepositoryParamsResponse } from '../../../../services/Content/ContentAp
 import DropdownSelect from '../../../DropdownSelect/DropdownSelect';
 import { useQueryClient } from 'react-query';
 import OptionalTooltip from '../../../OptionalTooltip/OptionalTooltip';
+import { useAppContext } from '../../../../middleware/AppContext';
+import { isEmpty } from 'lodash';
 
 interface Props {
   isLoading?: boolean;
@@ -112,6 +114,8 @@ const defaultValues: FormikValues = {
 };
 
 const AddContent = ({ isLoading }: Props) => {
+  const { hidePackageVerification } = useAppContext();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const classes = useStyles();
   const queryClient = useQueryClient();
@@ -262,7 +266,7 @@ const AddContent = ({ isLoading }: Props) => {
       const arch =
         (formik.values[index]?.arch !== 'any' && formik.values[index]?.arch) ||
         distArches.find(({ name, label }) => url.includes(name) || url.includes(label))?.label ||
-        '';
+        'any';
 
       let versions: Array<string> = [];
       if (formik.values[index]?.versions?.length && formik.values[index].versions[0] !== 'any') {
@@ -272,6 +276,7 @@ const AddContent = ({ isLoading }: Props) => {
           ({ name, label }) => url.includes(name) || url.includes(label),
         )?.label;
         if (newVersion) versions = [newVersion];
+        if (isEmpty(versions)) versions = ['any'];
       }
       updateVariable(index, { arch, versions });
     }
@@ -582,7 +587,7 @@ const AddContent = ({ isLoading }: Props) => {
                                 updateVariable(index, {
                                   gpgKey: gpgData,
                                   gpgLoading: false,
-                                  ...(gpgKey === '' && !!value
+                                  ...(!hidePackageVerification && gpgKey === '' && !!value
                                     ? {
                                         metadataVerification:
                                           !!validationList?.[index]?.url
@@ -595,7 +600,7 @@ const AddContent = ({ isLoading }: Props) => {
                             onTextChange={(value) =>
                               updateVariable(index, {
                                 gpgKey: value,
-                                ...(gpgKey === '' && !!value
+                                ...(!hidePackageVerification && gpgKey === '' && !!value
                                   ? {
                                       metadataVerification:
                                         !!validationList?.[index]?.url?.metadata_signature_present,
@@ -613,7 +618,7 @@ const AddContent = ({ isLoading }: Props) => {
                             browseButtonText='Upload'
                           />
                         </FormGroup>
-                        <Hide hide={!gpgKey}>
+                        <Hide hide={hidePackageVerification || !gpgKey}>
                           <FormGroup
                             fieldId='metadataVerification'
                             label='Use GPG key for'

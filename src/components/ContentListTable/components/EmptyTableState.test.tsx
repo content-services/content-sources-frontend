@@ -6,6 +6,10 @@ jest.mock('../../../services/Notifications/Notifications', () => ({
   useNotification: () => ({ notify: () => null }),
 }));
 
+jest.mock('../../../middleware/AppContext', () => ({
+  useAppContext: () => ({}),
+}));
+
 it('Render with notFiltered is set to "true"', () => {
   const { queryByText } = render(
     <ReactQueryTestWrapper>

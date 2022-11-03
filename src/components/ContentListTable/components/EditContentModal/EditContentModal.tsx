@@ -42,8 +42,9 @@ import {
   mapFormikToEditAPIValues,
   mapToDefaultFormikValues,
 } from './helpers';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import OptionalTooltip from '../../../OptionalTooltip/OptionalTooltip';
+import { useAppContext } from '../../../../middleware/AppContext';
 
 const green = global_success_color_100.value;
 
@@ -93,6 +94,7 @@ const useStyles = createUseStyles({
 
 const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
   if (!open) return <></>;
+  const { hidePackageVerification } = useAppContext();
   const initialValues = mapToDefaultFormikValues(values);
   const classes = useStyles();
   const queryClient = useQueryClient();
@@ -200,7 +202,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
       const arch =
         (formik.values[index]?.arch !== 'any' && formik.values[index]?.arch) ||
         distArches.find(({ name, label }) => url.includes(name) || url.includes(label))?.label ||
-        '';
+        'any';
 
       let versions: Array<string> = [];
       if (formik.values[index]?.versions?.length && formik.values[index].versions[0] !== 'any') {
@@ -210,6 +212,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
           ({ name, label }) => url.includes(name) || url.includes(label),
         )?.label;
         if (newVersion) versions = [newVersion];
+        if (isEmpty(versions)) versions = ['any'];
       }
       updateVariable(index, { arch, versions });
     }
@@ -464,7 +467,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                             updateVariable(index, {
                               gpgKey: gpgData,
                               gpgLoading: false,
-                              ...(gpgKey === '' && !!value
+                              ...(!hidePackageVerification && gpgKey === '' && !!value
                                 ? {
                                     metadataVerification:
                                       !!validationList?.[index]?.url?.metadata_signature_present,
@@ -476,7 +479,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         onTextChange={(value) =>
                           updateVariable(index, {
                             gpgKey: value,
-                            ...(gpgKey === '' && !!value
+                            ...(!hidePackageVerification && gpgKey === '' && !!value
                               ? {
                                   metadataVerification:
                                     !!validationList?.[index]?.url?.metadata_signature_present,
@@ -494,7 +497,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                         browseButtonText='Upload'
                       />
                     </FormGroup>
-                    <Hide hide={!gpgKey}>
+                    <Hide hide={hidePackageVerification || !gpgKey}>
                       <FormGroup fieldId='metadataVerification' label='Use GPG key for' isInline>
                         <Radio
                           isDisabled={

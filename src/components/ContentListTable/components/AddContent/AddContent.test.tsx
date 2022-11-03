@@ -10,7 +10,6 @@ import {
   useFetchGpgKey,
   useValidateContentList,
 } from '../../../../services/Content/ContentQueries';
-import useDebounce from '../../../../services/useDebounce';
 
 jest.mock('../../../../services/Content/ContentQueries', () => ({
   useAddContentQuery: jest.fn(),
@@ -18,7 +17,16 @@ jest.mock('../../../../services/Content/ContentQueries', () => ({
   useFetchGpgKey: jest.fn(),
 }));
 
-jest.mock('../../../../services/useDebounce', () => jest.fn());
+(useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
+
+(useAddContentQuery as jest.Mock).mockImplementation(() => ({
+  isLoading: false,
+  mutateAsync: async () => null,
+}));
+
+jest.mock('../../../../services/useDebounce', () => (value) => value);
+
+jest.mock('../../../../middleware/AppContext', () => ({ useAppContext: () => ({}) }));
 
 const passingValidationMetaDataSigNotPresent = [
   {
@@ -28,12 +36,10 @@ const passingValidationMetaDataSigNotPresent = [
 ];
 
 it('expect AddContent button to render and be disabled', () => {
-  (useAddContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (useValidateContentList as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     mutateAsync: async () => defaultValidationErrorData,
   }));
-  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText } = render(
     <ReactQueryTestWrapper>
@@ -47,13 +53,10 @@ it('expect AddContent button to render and be disabled', () => {
 });
 
 it('expect AddContent modal to open/close successfully', async () => {
-  (useAddContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (useValidateContentList as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     mutateAsync: async () => defaultValidationErrorData,
   }));
-  (useDebounce as jest.Mock).mockImplementation((value) => value);
-  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText } = render(
     <ReactQueryTestWrapper>
@@ -74,13 +77,10 @@ it('expect AddContent modal to open/close successfully', async () => {
 });
 
 it('expect "name" input to show a validation error', async () => {
-  (useAddContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (useValidateContentList as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     mutateAsync: async () => defaultValidationErrorData,
   }));
-  (useDebounce as jest.Mock).mockImplementation((value) => value);
-  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText, queryByPlaceholderText } = render(
     <ReactQueryTestWrapper>
@@ -105,13 +105,10 @@ it('expect "name" input to show a validation error', async () => {
 });
 
 it('expect "url" input to show a validation error', async () => {
-  (useAddContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (useValidateContentList as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     mutateAsync: async () => defaultValidationErrorData,
   }));
-  (useDebounce as jest.Mock).mockImplementation((value) => value);
-  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText, queryByPlaceholderText } = render(
     <ReactQueryTestWrapper>
@@ -136,13 +133,11 @@ it('expect "url" input to show a validation error', async () => {
 });
 
 it('expect "Package and metadata verification" to be pre-selected', async () => {
-  (useAddContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (useValidateContentList as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     mutateAsync: async () => passingValidationErrorData,
     data: passingValidationErrorData,
   }));
-  (useDebounce as jest.Mock).mockImplementation((value) => value);
 
   const { queryByText, queryByPlaceholderText, queryByLabelText } = render(
     <ReactQueryTestWrapper>
@@ -179,14 +174,11 @@ it('expect "Package and metadata verification" to be pre-selected', async () => 
 });
 
 it('expect "Package verification only" to be pre-selected', async () => {
-  (useAddContentQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-
   (useValidateContentList as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     mutateAsync: async () => passingValidationMetaDataSigNotPresent,
     data: passingValidationMetaDataSigNotPresent,
   }));
-  (useDebounce as jest.Mock).mockImplementation((value) => value);
 
   const { queryByText, queryByPlaceholderText, queryByLabelText } = render(
     <ReactQueryTestWrapper>
@@ -221,17 +213,11 @@ it('expect "Package verification only" to be pre-selected', async () => {
 });
 
 it('Add content', async () => {
-  (useAddContentQuery as jest.Mock).mockImplementation(() => ({
-    isLoading: false,
-    mutateAsync: async () => null,
-  }));
   (useValidateContentList as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     mutateAsync: async () => passingValidationErrorData,
     data: passingValidationErrorData,
   }));
-  (useDebounce as jest.Mock).mockImplementation((value) => value);
-  (useFetchGpgKey as jest.Mock).mockImplementation(() => ({ fetchGpgKey: () => '' }));
 
   const { queryByText, queryByPlaceholderText, queryAllByText } = render(
     <ReactQueryTestWrapper>
