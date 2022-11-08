@@ -30,6 +30,7 @@ objects:
             module: "./RootApp"
             routes:
               - pathname: /insights/content  # TODO ensure this matches routes/webpack config?
+              - pathname: /settings/content
 
 parameters:
   - name: ENV_NAME
