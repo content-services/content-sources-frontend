@@ -43,12 +43,12 @@ import {
 import { RepositoryParamsResponse } from '../../../../services/Content/ContentApi';
 import DropdownSelect from '../../../DropdownSelect/DropdownSelect';
 import { useQueryClient } from 'react-query';
-import OptionalTooltip from '../../../OptionalTooltip/OptionalTooltip';
+import ConditionalTooltip from '../../../ConditionalTooltip/ConditionalTooltip';
 import { useAppContext } from '../../../../middleware/AppContext';
 import { isEmpty } from 'lodash';
 
 interface Props {
-  isLoading?: boolean;
+  isDisabled?: boolean;
 }
 
 const useStyles = createUseStyles({
@@ -113,7 +113,7 @@ const defaultValues: FormikValues = {
   metadataVerification: false,
 };
 
-const AddContent = ({ isLoading }: Props) => {
+const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
   const { hidePackageVerification } = useAppContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -318,12 +318,12 @@ const AddContent = ({ isLoading }: Props) => {
   };
 
   return (
-    <>
+    <div>
       <Button
         id='createContentSourceButton'
         ouiaId='create_content_source'
         variant='primary'
-        isDisabled={isLoading}
+        isDisabled={isButtonDisabled}
         onClick={handleModalToggle}
       >
         Add repositories
@@ -636,7 +636,7 @@ const AddContent = ({ isLoading }: Props) => {
                                 updateVariable(index, { metadataVerification: false })
                               }
                             />
-                            <OptionalTooltip
+                            <ConditionalTooltip
                               show={
                                 validationList?.[index]?.url?.metadata_signature_present !== true
                               }
@@ -654,7 +654,7 @@ const AddContent = ({ isLoading }: Props) => {
                                   updateVariable(index, { metadataVerification: true })
                                 }
                               />
-                            </OptionalTooltip>
+                            </ConditionalTooltip>
                           </FormGroup>
                         </Hide>
                       </Form>
@@ -668,7 +668,7 @@ const AddContent = ({ isLoading }: Props) => {
       ) : (
         ''
       )}
-    </>
+    </div>
   );
 };
 

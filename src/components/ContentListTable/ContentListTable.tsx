@@ -40,6 +40,8 @@ import EditContentModal from './components/EditContentModal/EditContentModal';
 import StatusIcon from './components/StatusIcon';
 import UrlWithExternalIcon from './components/UrlWithLinkIcon/UrlWithLinkIcon';
 import PackageCount from './components/PackageCount';
+import { useAppContext } from '../../middleware/AppContext';
+import ConditionalTooltip from '../ConditionalTooltip/ConditionalTooltip';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -68,6 +70,7 @@ const useStyles = createUseStyles({
 const ContentListTable = () => {
   const classes = useStyles();
   const queryClient = useQueryClient();
+  const { rbac } = useAppContext();
   const storedPerPage = Number(localStorage.getItem('perPage')) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
@@ -86,8 +89,6 @@ const ContentListTable = () => {
 
   const notFiltered =
     !filterData.arches?.length && filterData.searchQuery === '' && !filterData.versions?.length;
-
-  const hasActionPermissions = true; // TODO: Incorporate permissions here later.
 
   const {
     isLoading: repositoryParamsLoading,
@@ -173,7 +174,6 @@ const ContentListTable = () => {
   const rowActions = useCallback(
     (rowData: ContentItem): IAction[] => [
       {
-        isDisabled: actionTakingPlace || !rowData?.uuid,
         title: 'Delete',
         onClick: () =>
           deleteItem(rowData?.uuid).then(() => {
@@ -295,7 +295,13 @@ const ContentListTable = () => {
                       <StatusIcon status={status} error={last_introspection_error} />
                     </Td>
                     <Td isActionCell>
-                      {hasActionPermissions ? <ActionsColumn items={rowActions(rowData)} /> : ''}
+                      <ConditionalTooltip
+                        content='You do not have the required permissions to perform this action.'
+                        show={!rbac?.write}
+                        setDisabled
+                      >
+                        <ActionsColumn items={rowActions(rowData)} />
+                      </ConditionalTooltip>
                     </Td>
                   </Tr>
                 );

@@ -43,7 +43,7 @@ import {
   mapToDefaultFormikValues,
 } from './helpers';
 import { isEmpty, isEqual } from 'lodash';
-import OptionalTooltip from '../../../OptionalTooltip/OptionalTooltip';
+import ConditionalTooltip from '../../../ConditionalTooltip/ConditionalTooltip';
 import { useAppContext } from '../../../../middleware/AppContext';
 
 const green = global_success_color_100.value;
@@ -510,7 +510,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                           isChecked={!metadataVerification}
                           onChange={() => updateVariable(index, { metadataVerification: false })}
                         />
-                        <OptionalTooltip
+                        <ConditionalTooltip
                           show={validationList?.[index]?.url?.metadata_signature_present !== true}
                           content="This repository's metadata is not signed, metadata verification is not possible."
                         >
@@ -524,7 +524,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                             isChecked={metadataVerification}
                             onChange={() => updateVariable(index, { metadataVerification: true })}
                           />
-                        </OptionalTooltip>
+                        </ConditionalTooltip>
                         <Hide
                           hide={getFieldValidation(index, 'metadataVerification') !== 'success'}
                         >

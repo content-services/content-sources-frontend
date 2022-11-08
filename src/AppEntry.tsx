@@ -21,7 +21,7 @@ interface AppEntryProps {
   logger?: Redux.Middleware;
 }
 
-const AppEntry: React.FunctionComponent<AppEntryProps> = ({ logger }) => {
+export default function AppEntry({ logger }: AppEntryProps) {
   const store = React.useMemo(() => {
     resetStore();
     if (logger) {
@@ -46,6 +46,4 @@ const AppEntry: React.FunctionComponent<AppEntryProps> = ({ logger }) => {
       </ContextProvider>
     </ReduxProvider>
   );
-};
-
-export default AppEntry;
+}

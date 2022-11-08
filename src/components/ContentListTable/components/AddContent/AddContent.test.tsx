@@ -43,7 +43,7 @@ it('expect AddContent button to render and be disabled', () => {
 
   const { queryByText } = render(
     <ReactQueryTestWrapper>
-      <AddContent isLoading />
+      <AddContent isDisabled />
     </ReactQueryTestWrapper>,
   );
 

@@ -20,6 +20,8 @@ import useDebounce from '../../../services/useDebounce';
 import AddContent from './AddContent/AddContent';
 import { createUseStyles } from 'react-jss';
 import { isEmpty } from 'lodash';
+import { useAppContext } from '../../../middleware/AppContext';
+import ConditionalTooltip from '../../ConditionalTooltip/ConditionalTooltip';
 
 interface Props {
   isLoading?: boolean;
@@ -52,6 +54,7 @@ export type Filters = 'Name/URL' | 'Version' | 'Architecture';
 
 const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => {
   const classes = useStyles();
+  const { rbac } = useAppContext();
   const queryClient = useQueryClient();
   const filters = ['Name/URL', 'Version', 'Architecture'];
   const [filterType, setFilterType] = useState<Filters>('Name/URL');
@@ -204,7 +207,13 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
         </InputGroup>
       </FlexItem>
       <FlexItem>
-        <AddContent isLoading={isLoading} />
+        <ConditionalTooltip
+          content='You do not have the required permissions to perform this action.'
+          show={!rbac?.write}
+          setDisabled
+        >
+          <AddContent isDisabled={isLoading} />
+        </ConditionalTooltip>
       </FlexItem>
       <Hide hide={!(selectedVersions.length || selectedArches.length || searchQuery != '')}>
         <FlexItem fullWidth={{ default: 'fullWidth' }} className={classes.chipsContainer}>

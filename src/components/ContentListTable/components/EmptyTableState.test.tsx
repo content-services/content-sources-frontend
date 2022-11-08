@@ -1,5 +1,4 @@
 import { render } from '@testing-library/react';
-import { useAppContext } from '../../../middleware/AppContext';
 import { ReactQueryTestWrapper } from '../../../testingHelpers';
 import EmptyTableState from './EmptyTableState';
 
@@ -12,7 +11,6 @@ jest.mock('../../../middleware/AppContext', () => ({
 }));
 
 it('Render with notFiltered is set to "true"', () => {
-  (useAppContext as jest.Mock).mockImplementation(() => ({ packageVerification: true }));
   const { queryByText } = render(
     <ReactQueryTestWrapper>
       <EmptyTableState notFiltered clearFilters={() => null} />

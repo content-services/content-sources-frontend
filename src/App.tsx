@@ -1,44 +1,64 @@
 import '@redhat-cloud-services/frontend-components-utilities/styles/_all';
-
-import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import NotificationsPortal from '@redhat-cloud-services/frontend-components-notifications/NotificationPortal';
-import { notificationsReducer } from '@redhat-cloud-services/frontend-components-notifications/redux';
-import { getRegistry as _getRegistry } from '@redhat-cloud-services/frontend-components-utilities/Registry';
-import { useEffect } from 'react';
-
-import pckg from '../package.json';
 import Routes from './Routes';
+import { useAppContext } from './middleware/AppContext';
+import { NoPermissionsPage } from './components/NoPermissionsPage/NoPermissionsPage';
 import { useNavigate } from 'react-router-dom';
+import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
+import { insights } from '../package.json';
 
-// Example of how to re-implement inaccurately typed imports
+import { getRegistry as _getRegistry } from '@redhat-cloud-services/frontend-components-utilities/Registry';
+import { notificationsReducer } from '@redhat-cloud-services/frontend-components-notifications/redux';
+import { fetchRBAC } from '@redhat-cloud-services/insights-common-typescript';
+import { useEffect } from 'react';
+import { Bullseye, Spinner } from '@patternfly/react-core';
+
 const getRegistry = _getRegistry as unknown as () => { register: ({ notifications }) => void };
+const { appname } = insights;
 
-const App = () => {
+export default function App() {
+  const { rbac, setRbac } = useAppContext();
   const navigate = useNavigate();
   const chrome = useChrome();
 
   useEffect(() => {
     let unregister;
-    if (chrome) {
+    if (chrome && !unregister) {
+      // Get chrome and register app
       const registry = getRegistry();
       registry.register({ notifications: notificationsReducer });
       const { updateDocumentTitle, on: onChromeEvent } = chrome.init();
-      // You can use directly the name of your app
-      updateDocumentTitle(pckg.insights.appname);
+      updateDocumentTitle(appname);
       unregister = onChromeEvent('APP_NAVIGATION', (event) => navigate(`/${event.navId}`));
+    }
+
+    if (chrome && !rbac) {
+      // Get permissions and store them in context
+      chrome.auth.getUser().then(async () => fetchRBAC(appname).then(setRbac));
     }
 
     return () => {
       unregister();
     };
-  }, [chrome, history]);
+    // This ensures that we only run this once, on a change from falsey > truthy
+  }, [!!chrome]);
 
-  return (
-    <>
-      <NotificationsPortal />
-      <Routes />
-    </>
-  );
-};
+  switch (true) {
+    case !rbac:
+      return (
+        <Bullseye>
+          <Spinner size='xl' />
+        </Bullseye>
+      );
+    case rbac?.read:
+      return (
+        <>
+          <NotificationsPortal />
+          <Routes />
+        </>
+      );
 
-export default App;
+    default:
+      return <NoPermissionsPage />;
+  }
+}

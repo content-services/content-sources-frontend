@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import OptionalTooltip from './OptionalTooltip';
+import ConditionalTooltip from './ConditionalTooltip';
 
 const text = 'Hello';
 const content = <h1>{text}</h1>;
@@ -8,9 +8,9 @@ const content = <h1>{text}</h1>;
 it('Render content when show is true', async () => {
   const { queryByText } = render(
     <div>
-      <OptionalTooltip content={content} show={true}>
+      <ConditionalTooltip content={content} show={true}>
         <div>Test</div>
-      </OptionalTooltip>
+      </ConditionalTooltip>
     </div>,
   );
 
@@ -29,9 +29,9 @@ it('Render content when show is true', async () => {
 it('Hide content when show is false', async () => {
   const { queryByText } = render(
     <div>
-      <OptionalTooltip content={content} show={false}>
+      <ConditionalTooltip content={content} show={false}>
         <div>Test</div>
-      </OptionalTooltip>
+      </ConditionalTooltip>
     </div>,
   );
 
