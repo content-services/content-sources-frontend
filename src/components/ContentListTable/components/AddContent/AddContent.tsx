@@ -273,7 +273,7 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
         versions = formik.values[index]?.versions;
       } else {
         const newVersion = distVersions.find(
-          ({ name, label }) => url.includes(name) || url.includes(label),
+          ({ name, label }) => url.includes(name) || url.includes('/' + label),
         )?.label;
         if (newVersion) versions = [newVersion];
         if (isEmpty(versions)) versions = ['any'];
