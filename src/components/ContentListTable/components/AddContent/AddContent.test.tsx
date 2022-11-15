@@ -26,7 +26,9 @@ jest.mock('../../../../services/Content/ContentQueries', () => ({
 
 jest.mock('../../../../services/useDebounce', () => (value) => value);
 
-jest.mock('../../../../middleware/AppContext', () => ({ useAppContext: () => ({}) }));
+jest.mock('../../../../middleware/AppContext', () => ({
+  useAppContext: () => ({ rbac: { read: true, write: true } }),
+}));
 
 const passingValidationMetaDataSigNotPresent = [
   {

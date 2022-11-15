@@ -9,7 +9,7 @@ it('Render content when show is true', async () => {
   const { queryByText } = render(
     <div>
       <ConditionalTooltip content={content} show={true}>
-        <div>Test</div>
+        <>Test</>
       </ConditionalTooltip>
     </div>,
   );

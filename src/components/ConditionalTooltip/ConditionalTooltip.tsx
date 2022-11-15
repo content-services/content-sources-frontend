@@ -9,7 +9,9 @@ interface Props extends TooltipProps {
 const ConditionalTooltip = ({ show, children, setDisabled, ...rest }: Props) =>
   show ? (
     <Tooltip {...rest}>
-      {children && cloneElement(children, setDisabled ? { isDisabled: setDisabled } : undefined)}
+      <div>
+        {children && cloneElement(children, setDisabled ? { isDisabled: setDisabled } : undefined)}
+      </div>
     </Tooltip>
   ) : (
     <>{children}</>

@@ -15,6 +15,9 @@ const useStyles = createUseStyles({
     display: 'flex',
     flexGrow: 1,
   },
+  emptStateBody: {
+    marginBottom: '16px',
+  },
 });
 
 interface Props {
@@ -32,7 +35,7 @@ const EmptyTableState = ({ notFiltered, clearFilters }: Props) => {
           ? 'No custom repositories'
           : 'No custom repositories match the filter criteria'}
       </Title>
-      <EmptyStateBody>
+      <EmptyStateBody className={classes.emptStateBody}>
         {notFiltered
           ? 'To get started, create a custom repository'
           : 'Clear all filters to show more results'}

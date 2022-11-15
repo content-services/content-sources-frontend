@@ -114,7 +114,7 @@ const defaultValues: FormikValues = {
 };
 
 const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
-  const { hidePackageVerification } = useAppContext();
+  const { hidePackageVerification, rbac } = useAppContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const classes = useStyles();
@@ -318,16 +318,22 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
   };
 
   return (
-    <div>
-      <Button
-        id='createContentSourceButton'
-        ouiaId='create_content_source'
-        variant='primary'
-        isDisabled={isButtonDisabled}
-        onClick={handleModalToggle}
+    <>
+      <ConditionalTooltip
+        content='You do not have the required permissions to perform this action.'
+        show={!rbac?.write}
+        setDisabled
       >
-        Add repositories
-      </Button>
+        <Button
+          id='createContentSourceButton'
+          ouiaId='create_content_source'
+          variant='primary'
+          isDisabled={isButtonDisabled}
+          onClick={handleModalToggle}
+        >
+          Add repositories
+        </Button>
+      </ConditionalTooltip>
       {isModalOpen ? (
         <Modal
           variant={ModalVariant.medium}
@@ -668,7 +674,7 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
       ) : (
         ''
       )}
-    </div>
+    </>
   );
 };
 
