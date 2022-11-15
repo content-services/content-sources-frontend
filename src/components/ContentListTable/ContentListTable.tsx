@@ -104,8 +104,8 @@ const ContentListTable = () => {
     'name',
     'distribution_arch',
     'distribution_versions',
-    'status',
     'package_count',
+    'status',
   ];
 
   const sortString = (): string =>
