@@ -32,6 +32,14 @@ const PackageCount = ({ rowData }: Props) => {
     );
   }
 
+  if (rowData.status === 'Invalid') {
+    return (
+      <Tooltip isContentLeftAligned content='Repository is invalid please review it'>
+        <Text className={classes.text}>N/A</Text>
+      </Tooltip>
+    )
+  }
+
   return (
     <>
       <Hide hide={!modalOpen}>
