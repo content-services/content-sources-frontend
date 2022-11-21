@@ -152,6 +152,7 @@ export default function PackageModal({
       key={uuid}
       hasNoBodyWrapper
       aria-label='RPM package modal'
+      ouiaId='rpm_package_modal'
       variant={ModalVariant.medium}
       title='Packages'
       description={
