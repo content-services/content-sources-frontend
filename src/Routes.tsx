@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorPage } from './components/Error/ErrorPage';
 import ContentPage from './pages/ContentPage/ContentPage';
 
-export const DEFAULT_ROUTE = '/';
+export const DEFAULT_ROUTE = '';
 
 export default function MainRoutes() {
   return (

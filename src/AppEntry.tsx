@@ -1,8 +1,6 @@
-import { getBaseName } from '@redhat-cloud-services/insights-common-typescript';
 import React, { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider as ReduxProvider } from 'react-redux';
-import { BrowserRouter as Router } from 'react-router-dom';
 import * as Redux from 'redux';
 
 import App from './App';
@@ -39,9 +37,7 @@ export default function AppEntry({ logger }: AppEntryProps) {
     <ReduxProvider store={store}>
       <ContextProvider>
         <QueryClientProvider client={queryClient}>
-          <Router basename={getBaseName(window.location.pathname)}>
-            <App />
-          </Router>
+          <App />
         </QueryClientProvider>
       </ContextProvider>
     </ReduxProvider>

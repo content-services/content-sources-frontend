@@ -12,4 +12,8 @@ module.exports = {
    * Add additional webpack plugins
    */
   plugins: [],
+  moduleFederation: {
+    exclude: ['react-router-dom'],
+    shared: [{ 'react-router-dom': { singleton: true } }],
+  },
 };
