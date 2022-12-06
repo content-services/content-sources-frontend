@@ -9,10 +9,10 @@ import {
   SelectVariant,
   TextInput,
 } from '@patternfly/react-core';
-import DropdownSelect from '../../DropdownSelect/DropdownSelect';
+import DropdownSelect from '../../../components/DropdownSelect/DropdownSelect';
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import { global_BackgroundColor_100, global_secondary_color_100 } from '@patternfly/react-tokens';
-import Hide from '../../Hide/Hide';
+import Hide from '../../../components/Hide/Hide';
 import { FilterData, RepositoryParamsResponse } from '../../../services/Content/ContentApi';
 import { useQueryClient } from 'react-query';
 import { REPOSITORY_PARAMS_KEY } from '../../../services/Content/ContentQueries';
@@ -21,7 +21,7 @@ import AddContent from './AddContent/AddContent';
 import { createUseStyles } from 'react-jss';
 import { isEmpty } from 'lodash';
 import { useAppContext } from '../../../middleware/AppContext';
-import ConditionalTooltip from '../../ConditionalTooltip/ConditionalTooltip';
+import ConditionalTooltip from '../../../components/ConditionalTooltip/ConditionalTooltip';
 
 interface Props {
   isLoading?: boolean;

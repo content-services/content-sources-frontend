@@ -23,7 +23,7 @@ import {
 import { useFormik } from 'formik';
 import { useEffect, useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
-import Hide from '../../../Hide/Hide';
+import Hide from '../../../../components/Hide/Hide';
 import useDebounce from '../../../../services/useDebounce';
 import {
   REPOSITORY_PARAMS_KEY,
@@ -32,7 +32,7 @@ import {
   useValidateContentList,
 } from '../../../../services/Content/ContentQueries';
 import { RepositoryParamsResponse } from '../../../../services/Content/ContentApi';
-import DropdownSelect from '../../../DropdownSelect/DropdownSelect';
+import DropdownSelect from '../../../../components/DropdownSelect/DropdownSelect';
 import { useQueryClient } from 'react-query';
 import { isValidURL, makeValidationSchema, mapValidationData } from '../AddContent/helpers';
 import ContentValidity from '../AddContent/components/ContentValidity';
@@ -43,7 +43,7 @@ import {
   mapToDefaultFormikValues,
 } from './helpers';
 import { isEmpty, isEqual } from 'lodash';
-import ConditionalTooltip from '../../../ConditionalTooltip/ConditionalTooltip';
+import ConditionalTooltip from '../../../../components/ConditionalTooltip/ConditionalTooltip';
 import { useAppContext } from '../../../../middleware/AppContext';
 
 const green = global_success_color_100.value;
@@ -238,6 +238,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
 
   return (
     <Modal
+      position='top'
       variant={ModalVariant.medium}
       title='Edit custom repository'
       ouiaId='edit_custom_repository'

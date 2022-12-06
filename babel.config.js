@@ -1,7 +1,7 @@
 require.extensions['.css'] = () => undefined;
 
 module.exports = {
-  presets: ['@babel/env', '@babel/react'],
+  presets: [['@babel/env', { modules: 'commonjs' }], '@babel/react'],
   plugins: [
     '@babel/plugin-transform-runtime',
     '@babel/plugin-syntax-dynamic-import',

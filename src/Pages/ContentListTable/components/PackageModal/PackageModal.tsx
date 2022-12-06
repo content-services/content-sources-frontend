@@ -30,7 +30,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
-import Hide from '../../../Hide/Hide';
+import Hide from '../../../../components/Hide/Hide';
 import { ContentItem, PackageItem } from '../../../../services/Content/ContentApi';
 import { useGetPackagesQuery } from '../../../../services/Content/ContentQueries';
 import { SearchIcon } from '@patternfly/react-icons';
@@ -150,6 +150,7 @@ export default function PackageModal({
   return (
     <Modal
       key={uuid}
+      position='top'
       hasNoBodyWrapper
       aria-label='RPM package modal'
       ouiaId='rpm_package_modal'

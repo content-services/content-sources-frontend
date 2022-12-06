@@ -18,12 +18,32 @@ import {
   PackagesResponse,
   getPackages,
   ErrorResponse,
+  getPopularRepositories,
+  PopularRepositoriesResponse,
+  CreateContentRequestResponse,
+  ContentItem,
 } from './ContentApi';
 
 export const CONTENT_LIST_KEY = 'CONTENT_LIST_KEY';
+export const POPULAR_REPOSITORIES_LIST_KEY = 'POPULAR_REPOSITORIES_LIST_KEY';
 export const REPOSITORY_PARAMS_KEY = 'REPOSITORY_PARAMS_KEY';
 export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
 export const PACKAGES_KEY = 'PACKAGES_KEY';
+
+export const usePopularRepositoriesQuery = (
+  page: number,
+  limit: number,
+  filterData?: Partial<FilterData>,
+  sortBy?: string,
+) =>
+  useQuery<PopularRepositoriesResponse>(
+    [POPULAR_REPOSITORIES_LIST_KEY, page, limit, sortBy, ...Object.values(filterData || {})], // NOTE: Update this if larger list!!!!
+    () => getPopularRepositories(page, limit, filterData, sortBy),
+    {
+      keepPreviousData: true,
+      staleTime: 20000,
+    },
+  );
 
 export const useContentListQuery = (
   page: number,
@@ -37,24 +57,29 @@ export const useContentListQuery = (
     {
       keepPreviousData: true,
       staleTime: 20000,
-      optimisticResults: true,
+      //   optimisticResults: true,
     },
   );
 
 export const useAddContentQuery = (queryClient: QueryClient, request: CreateContentRequest) => {
   const { notify } = useNotification();
   return useMutation(() => AddContentListItems(request), {
-    onSuccess: () => {
-      const title =
-        request?.length > 1
-          ? `${request?.length} custom repositories added`
-          : `Custom repository "${request?.[0]?.name}" added`;
+    onSuccess: (data: CreateContentRequestResponse) => {
+      const hasPending = (data as ContentItem[]).some(({ status }) => status === 'Pending');
+
       notify({
         variant: AlertVariant.success,
-        title,
-        description: 'Repository introspection may take some time',
+        title:
+          request?.length > 1
+            ? `${request?.length} custom repositories added`
+            : `Custom repository "${request?.[0]?.name}" added`,
+        description: hasPending
+          ? 'Repository introspection in progress'
+          : 'Repository introspection data already available',
       });
+
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
     },
     onError: (err: { response?: { data: ErrorResponse } }) => {
       let description = 'An error occurred';
@@ -94,6 +119,7 @@ export const useEditContentQuery = (queryClient: QueryClient, request: EditConte
         title: `Successfully edited ${request.length} ${request.length > 1 ? 'items' : 'item'}`,
       });
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
     },
     onError: (err: { response?: { data: ErrorResponse } }) => {
       let description = 'An error occurred';
@@ -142,14 +168,14 @@ export const useDeleteContentItemMutate = (
   queryClient: QueryClient,
   page: number,
   perPage: number,
-  filterData: FilterData,
-  sortString: string,
+  filterData?: FilterData,
+  sortString?: string,
 ) => {
   const contentListKeyArray = [
     CONTENT_LIST_KEY,
     page,
     perPage,
-    ...Object.values(filterData),
+    ...Object.values(filterData || {}),
     sortString,
   ];
   const { notify } = useNotification();
@@ -188,6 +214,7 @@ export const useDeleteContentItemMutate = (
         return data;
       });
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
     },
     // If the mutation fails, use the context returned from onMutate to roll back
     onError: (err, _newData, context) => {

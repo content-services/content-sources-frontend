@@ -15,6 +15,17 @@ export interface ContentItem {
   metadata_verification: boolean;
 }
 
+export interface PopularRepositories {
+  uuid: string;
+  existing_name: string;
+  suggested_name: string;
+  url: string;
+  distribution_versions: Array<string>;
+  distribution_arch: string;
+  gpg_key: string;
+  metadata_verification: boolean;
+}
+
 export interface CreateContentRequestItem {
   name: string;
   url: string;
@@ -67,6 +78,12 @@ export type Meta = {
 
 export interface ContentListResponse {
   data: ContentList;
+  links: Links;
+  meta: Meta;
+}
+
+export interface PopularRepositoriesResponse {
+  data: PopularRepositories[];
   links: Links;
   meta: Meta;
 }
@@ -126,6 +143,23 @@ export type PackagesResponse = {
   data: PackageItem[];
   links: Links;
   meta: Meta;
+};
+
+export const getPopularRepositories: (
+  page: number,
+  limit: number,
+  filterData?: Partial<FilterData>,
+  sortBy?: string,
+) => Promise<PopularRepositoriesResponse> = async (page, limit, filterData, sortBy) => {
+  const searchQuery = filterData?.searchQuery;
+  const versionParam = filterData?.versions?.join(',');
+  const archParam = filterData?.arches?.join(',');
+  const { data } = await axios.get(
+    `/api/content-sources/v1/popular_repositories/?offset=${
+      (page - 1) * limit
+    }&limit=${limit}&search=${searchQuery}&version=${versionParam}&arch=${archParam}&sort_by=${sortBy}`,
+  );
+  return data;
 };
 
 export const getContentList: (

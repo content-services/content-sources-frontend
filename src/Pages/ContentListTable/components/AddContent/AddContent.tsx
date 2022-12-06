@@ -23,7 +23,7 @@ import { global_Color_200, global_link_Color } from '@patternfly/react-tokens';
 import { useFormik } from 'formik';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import Hide from '../../../Hide/Hide';
+import Hide from '../../../../components/Hide/Hide';
 import {
   isValidURL,
   mapFormikToAPIValues,
@@ -41,9 +41,9 @@ import {
   useValidateContentList,
 } from '../../../../services/Content/ContentQueries';
 import { RepositoryParamsResponse } from '../../../../services/Content/ContentApi';
-import DropdownSelect from '../../../DropdownSelect/DropdownSelect';
+import DropdownSelect from '../../../../components/DropdownSelect/DropdownSelect';
 import { useQueryClient } from 'react-query';
-import ConditionalTooltip from '../../../ConditionalTooltip/ConditionalTooltip';
+import ConditionalTooltip from '../../../../components/ConditionalTooltip/ConditionalTooltip';
 import { useAppContext } from '../../../../middleware/AppContext';
 import { isEmpty } from 'lodash';
 
@@ -336,6 +336,7 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
       </ConditionalTooltip>
       {isModalOpen ? (
         <Modal
+          position='top'
           variant={ModalVariant.medium}
           title='Add custom repositories'
           ouiaId='add_custom_repository'

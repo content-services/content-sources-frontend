@@ -2,7 +2,7 @@ import { Button, Text, Tooltip } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { global_disabled_color_100 } from '@patternfly/react-tokens';
 import { useState } from 'react';
-import Hide from '../../Hide/Hide';
+import Hide from '../../../components/Hide/Hide';
 import { ContentItem } from '../../../services/Content/ContentApi';
 import PackageModal from './PackageModal/PackageModal';
 

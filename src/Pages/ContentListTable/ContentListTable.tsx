@@ -33,15 +33,15 @@ import {
   useRepositoryParams,
 } from '../../services/Content/ContentQueries';
 import ContentListFilters from './components/ContentListFilters';
-import Hide from '../Hide/Hide';
+import Hide from '../../components/Hide/Hide';
 import EmptyTableState from './components/EmptyTableState';
 import { useQueryClient } from 'react-query';
 import EditContentModal from './components/EditContentModal/EditContentModal';
 import StatusIcon from './components/StatusIcon';
-import UrlWithExternalIcon from './components/UrlWithLinkIcon/UrlWithLinkIcon';
+import UrlWithExternalIcon from '../../components/UrlWithLinkIcon/UrlWithLinkIcon';
 import PackageCount from './components/PackageCount';
 import { useAppContext } from '../../middleware/AppContext';
-import ConditionalTooltip from '../ConditionalTooltip/ConditionalTooltip';
+import ConditionalTooltip from '../../components/ConditionalTooltip/ConditionalTooltip';
 
 const useStyles = createUseStyles({
   mainContainer: {
