@@ -23,6 +23,7 @@ interface PageHeaderProps extends _PageHeaderProps {
 const useStyles = createUseStyles({
   subtext: {
     color: global_Color_100.value,
+    paddingTop: '8px',
   },
   tabs: {
     backgroundColor: global_BackgroundColor_100.value,
@@ -68,7 +69,7 @@ export default function MainRoutes() {
       <PageHeader>
         <PageHeaderTitle title='Custom Repositories' />
         <Text className={classes.subtext}>
-          View all custom repositories within your organization
+          View all custom repositories within your organization.
         </Text>
       </PageHeader>
       <Tabs className={classes.tabs} ouiaId='routed-tabs' activeKey={currentRoute}>

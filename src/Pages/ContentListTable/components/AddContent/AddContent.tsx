@@ -53,6 +53,7 @@ interface Props {
 
 const useStyles = createUseStyles({
   description: {
+    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
     color: global_Color_200.value,
   },
   removeSideBorder: {
@@ -99,6 +100,9 @@ const useStyles = createUseStyles({
   removeButton: {
     display: 'flex!important',
     justifyContent: 'flex-end',
+  },
+  singleContentCol: {
+    padding: '8px 0px 0px !important',
   },
 });
 
@@ -457,7 +461,12 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
                     </Tr>
                   </Hide>
                   <Tr isExpanded={createDataLengthOf1 ? undefined : expanded}>
-                    <Td colSpan={4} className={createDataLengthOf1 ? '' : classes.mainContentCol}>
+                    <Td
+                      colSpan={4}
+                      className={
+                        createDataLengthOf1 ? classes.singleContentCol : classes.mainContentCol
+                      }
+                    >
                       <Form>
                         <FormGroup
                           label='Name'

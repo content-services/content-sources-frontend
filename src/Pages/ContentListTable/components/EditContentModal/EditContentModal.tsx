@@ -50,6 +50,7 @@ const green = global_success_color_100.value;
 
 const useStyles = createUseStyles({
   description: {
+    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
     color: global_Color_200.value,
   },
   removeSideBorder: {
@@ -89,6 +90,9 @@ const useStyles = createUseStyles({
   saveButton: {
     marginRight: '36px',
     transition: 'unset!important',
+  },
+  singleContentCol: {
+    padding: '8px 0px 0px !important',
   },
 });
 
@@ -332,7 +336,12 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                 </Tr>
               </Hide>
               <Tr isExpanded={createDataLengthOf1 ? undefined : expanded}>
-                <Td colSpan={4} className={createDataLengthOf1 ? '' : classes.mainContentCol}>
+                <Td
+                  colSpan={4}
+                  className={
+                    createDataLengthOf1 ? classes.singleContentCol : classes.mainContentCol
+                  }
+                >
                   <Form>
                     <FormGroup
                       label='Name'

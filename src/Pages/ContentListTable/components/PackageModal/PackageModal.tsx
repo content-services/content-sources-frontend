@@ -39,6 +39,8 @@ import EmptyPackageState from './components/EmptyPackageState';
 
 const useStyles = createUseStyles({
   description: {
+    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
+    paddingBottom: '8px',
     color: global_Color_200.value,
   },
   mainContainer: {
@@ -157,7 +159,7 @@ export default function PackageModal({
       variant={ModalVariant.medium}
       title='Packages'
       description={
-        <p>
+        <p className={classes.description}>
           View list of packages for <b>{name}</b>
         </p>
       }
