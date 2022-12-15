@@ -45,7 +45,7 @@ import DropdownSelect from '../../../../components/DropdownSelect/DropdownSelect
 import { useQueryClient } from 'react-query';
 import ConditionalTooltip from '../../../../components/ConditionalTooltip/ConditionalTooltip';
 import { useAppContext } from '../../../../middleware/AppContext';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 
 interface Props {
   isDisabled?: boolean;
@@ -113,10 +113,12 @@ const defaultValues: FormikValues = {
   metadataVerification: false,
 };
 
+const defaultTouchedState = { name: false, url: false, gpgKey: false };
+
 const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
   const { hidePackageVerification, rbac } = useAppContext();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [changeVerified, setChangeVerified] = useState(false);
   const classes = useStyles();
   const queryClient = useQueryClient();
   const formik = useFormik({
@@ -124,7 +126,7 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
     validateOnBlur: false,
     validateOnChange: false,
     validationSchema: makeValidationSchema(),
-    initialTouched: [{ name: false, url: false }],
+    initialTouched: [defaultTouchedState],
     onSubmit: () => undefined,
   });
 
@@ -145,6 +147,7 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+    formik.setTouched([defaultTouchedState]);
     formik.resetForm();
   };
 
@@ -162,26 +165,20 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
     setTouchedOnLastItemIfUntouchedAndCollapsed();
   };
 
-  const updateVariable = (index: number, newValue) => {
+  const updateVariable = (index: number, newValue, callback?: () => void) => {
+    setChangeVerified(false);
     const updatedData = [...formik.values];
     updatedData[index] = { ...updatedData[index], ...newValue };
-    formik.setValues(updatedData);
-  };
-
-  const updateTouched = (index: number, field: 'name' | 'url' | 'gpgKey') => {
-    if (!formik.touched[index]?.[field]) {
-      const updatedTouched = [...formik.touched];
-      updatedTouched[index] = { ...updatedTouched[index], [field]: true };
-      formik.setTouched(updatedTouched);
-    }
+    formik.setValues(updatedData).then(callback);
   };
 
   const addRepository = () => {
-    formik.setTouched([...formik.touched, { name: false, url: false }]);
+    formik.setTouched([...formik.touched, defaultTouchedState]);
     formik.setValues([
       ...formik.values.map((vals) => ({ ...vals, expanded: false })),
       defaultValues,
     ]);
+    setChangeVerified(false);
   };
 
   const removeRepository = (index: number) => {
@@ -233,22 +230,37 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
   const { mutateAsync: validateContentList, data: validationList } = useValidateContentList();
 
   useEffect(() => {
+    // If validate is getting called to often, we could useDeepCompare
     if (isModalOpen) {
       if (debouncedValues.length !== formik.values.length) debouncedValues = formik.values;
+      const newTouchedValues = [...formik.touched];
       validateContentList(
-        debouncedValues.map(({ name, url, gpgKey, metadataVerification }) => ({
-          name,
-          url,
-          gpg_key: gpgKey,
-          metadata_verification: metadataVerification,
-        })),
+        debouncedValues.map(({ name, url, gpgKey, metadataVerification }, index) => {
+          if (!newTouchedValues[index]?.name && name) {
+            newTouchedValues[index] = { ...newTouchedValues[index], name: true };
+          }
+          if (!newTouchedValues[index]?.url && url) {
+            newTouchedValues[index] = { ...newTouchedValues[index], url: true };
+          }
+          if (!newTouchedValues[index]?.gpgKey && gpgKey) {
+            newTouchedValues[index] = { ...newTouchedValues[index], gpgKey: true };
+          }
+          return {
+            name,
+            url,
+            gpg_key: gpgKey,
+            metadata_verification: metadataVerification,
+          };
+        }),
       ).then(async (validationData) => {
         const formikErrors = await formik.validateForm(debouncedValues);
         const mappedErrorData = mapValidationData(validationData, formikErrors);
         formik.setErrors(mappedErrorData);
+        setChangeVerified(true);
+        formik.setTouched(newTouchedValues);
       });
     }
-  }, [debouncedValues, debouncedValues.length, formik.touched, isModalOpen]);
+  }, [debouncedValues, debouncedValues.length, isModalOpen]);
 
   const onToggle = (index: number) => {
     if (formik.values[index]?.expanded) {
@@ -278,18 +290,16 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
         if (newVersion) versions = [newVersion];
         if (isEmpty(versions)) versions = ['any'];
       }
-      updateVariable(index, { arch, versions });
+      if (formik.values[index]?.arch !== arch && !isEqual(versions, formik.values[index]?.arch)) {
+        const updatedData = [...formik.values];
+        updatedData[index] = { ...updatedData[index], ...{ arch, versions } };
+        formik.setValues(updatedData);
+      }
     }
-  };
-
-  const urlOnBlur = (index: number) => {
-    updateTouched(index, 'url');
-    updateArchAndVersion(index);
   };
 
   const magicButtonThatWillBeDeletedAtSomePoint = () => {
     const baseArray = Array.from(Array(20).keys());
-    formik.setTouched(baseArray.map(() => ({ name: true, url: true })));
     const newValues = baseArray.map((index) => ({
       name: (Math.random() + 1).toString(36).substring(7),
       url: magicURLList[index],
@@ -379,7 +389,10 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
                   variant='primary'
                   isLoading={isAdding}
                   isDisabled={
-                    !formik.isValid || isAdding || formik.values?.length !== debouncedValues?.length
+                    !changeVerified ||
+                    !formik.isValid ||
+                    isAdding ||
+                    formik.values?.length !== debouncedValues?.length
                   }
                   onClick={() => addContent().then(closeModal)}
                 >
@@ -474,7 +487,6 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
                             ouiaId='input_name'
                             type='text'
                             validated={getFieldValidation(index, 'name')}
-                            onBlur={() => updateTouched(index, 'name')}
                             onChange={(value) => {
                               updateVariable(index, { name: value });
                             }}
@@ -493,7 +505,7 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
                             isRequired
                             type='url'
                             validated={getFieldValidation(index, 'url')}
-                            onBlur={() => urlOnBlur(index)}
+                            onBlur={() => updateArchAndVersion(index)}
                             onChange={(value) => {
                               if (url !== value) {
                                 updateVariable(index, { url: value });
@@ -575,7 +587,6 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
                           helperTextInvalid={formik.errors[index]?.gpgKey}
                         >
                           <FileUpload
-                            onBlur={() => updateTouched(index, 'gpgKey')}
                             validated={getFieldValidation(index, 'gpgKey')}
                             id='gpgKey-uploader'
                             aria-label='gpgkey_file_to_upload'

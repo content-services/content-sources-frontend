@@ -21,7 +21,7 @@ import {
   global_link_Color,
 } from '@patternfly/react-tokens';
 import { useFormik } from 'formik';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import Hide from '../../../../components/Hide/Hide';
 import useDebounce from '../../../../services/useDebounce';
@@ -96,6 +96,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
   if (!open) return <></>;
   const { hidePackageVerification } = useAppContext();
   const initialValues = mapToDefaultFormikValues(values);
+  const [changeVerified, setChangeVerified] = useState(false);
   const classes = useStyles();
   const queryClient = useQueryClient();
   const formik = useFormik({
@@ -143,6 +144,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
   };
 
   const updateVariable = (index: number, newValue) => {
+    setChangeVerified(false);
     const updatedData = [...formik.values];
     updatedData[index] = { ...updatedData[index], ...newValue };
     formik.setValues(updatedData);
@@ -184,6 +186,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
         const formikErrors = await formik.validateForm(debouncedValues);
         const mappedErrorData = mapValidationData(validationData, formikErrors);
         formik.setErrors(mappedErrorData);
+        setChangeVerified(true);
       });
   }, [debouncedValues, values, open]);
 
@@ -214,7 +217,11 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
         if (newVersion) versions = [newVersion];
         if (isEmpty(versions)) versions = ['any'];
       }
-      updateVariable(index, { arch, versions });
+      if (formik.values[index]?.arch !== arch && !isEqual(versions, formik.values[index]?.arch)) {
+        const updatedData = [...formik.values];
+        updatedData[index] = { ...updatedData[index], ...{ arch, versions } };
+        formik.setValues(updatedData);
+      }
     }
   };
 
@@ -269,6 +276,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
               variant='primary'
               isLoading={isEditing}
               isDisabled={
+                !changeVerified ||
                 !formik.isValid ||
                 isEditing ||
                 !valuesHaveChanged ||
