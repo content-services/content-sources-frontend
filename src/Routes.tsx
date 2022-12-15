@@ -1,9 +1,8 @@
 import { FunctionComponent, ReactElement, useMemo } from 'react';
-import { Tab, Tabs, TabTitleText, Text } from '@patternfly/react-core';
+import { Grid, Tab, Tabs, TabTitleText, Text } from '@patternfly/react-core';
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { global_Color_100, global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import {
-  Main,
   PageHeader as _PageHeader,
   PageHeaderTitle,
 } from '@redhat-cloud-services/frontend-components';
@@ -39,6 +38,9 @@ const useStyles = createUseStyles({
     '&:focus-visible': {
       outlineOffset: '-6px',
     },
+  },
+  containerMargin: {
+    margin: '24px',
   },
 });
 
@@ -95,9 +97,9 @@ export default function MainRoutes() {
             path={route}
             element={
               <ErrorPage>
-                <Main>
+                <Grid className={classes.containerMargin}>
                   <Element />
-                </Main>
+                </Grid>
               </ErrorPage>
             }
           />

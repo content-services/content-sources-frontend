@@ -24,9 +24,8 @@ export default function AppEntry({ logger }: AppEntryProps) {
     resetStore();
     if (logger) {
       return createStore(logger).store;
-    } else {
-      return createStore().store;
     }
+    return createStore().store;
   }, [logger]);
 
   useEffect(() => {

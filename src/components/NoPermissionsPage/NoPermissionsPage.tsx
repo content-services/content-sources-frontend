@@ -3,11 +3,11 @@ import {
   EmptyStateBody,
   EmptyStateIcon,
   EmptyStateVariant,
+  Grid,
   Title,
 } from '@patternfly/react-core';
 import { LockIcon } from '@patternfly/react-icons';
 import {
-  Main,
   PageHeader as _PageHeader,
   PageHeaderTitle,
 } from '@redhat-cloud-services/frontend-components';
@@ -22,7 +22,7 @@ export const NoPermissionsPage: React.FunctionComponent = () => (
     <PageHeader>
       <PageHeaderTitle title='Repositories' />
     </PageHeader>
-    <Main>
+    <Grid style={{ margin: '24px' }}>
       <EmptyState variant={EmptyStateVariant.full}>
         <EmptyStateIcon icon={LockIcon} />
         <Title headingLevel='h5' size='lg'>
@@ -32,6 +32,6 @@ export const NoPermissionsPage: React.FunctionComponent = () => (
           Contact your organization administrator(s) for more information.
         </EmptyStateBody>
       </EmptyState>
-    </Main>
+    </Grid>
   </>
 );
