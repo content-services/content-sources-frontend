@@ -97,6 +97,9 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
   const { hidePackageVerification } = useAppContext();
   const initialValues = mapToDefaultFormikValues(values);
   const [changeVerified, setChangeVerified] = useState(false);
+  const [gpgKeyList, setGpgKeyList] = useState<Array<string>>(
+    initialValues.map(({ gpgKey }) => gpgKey),
+  );
   const classes = useStyles();
   const queryClient = useQueryClient();
   const formik = useFormik({
@@ -112,8 +115,61 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
     () => !isEqual(initialValues, formik.values),
     [initialValues, formik.values],
   );
+
+  const updateGpgKey = (index: number, value: string) => {
+    setChangeVerified(false);
+    const updatedData: Array<string> = [...gpgKeyList];
+    updatedData[index] = value;
+    setGpgKeyList(updatedData);
+  };
+
+  const { fetchGpgKey } = useFetchGpgKey();
+
+  const debouncedGpgKeyList = useDebounce(gpgKeyList, 300);
+
+  const updateGpgKeyList = async (list: Array<string>) => {
+    const updatedData = await Promise.all(
+      [...formik.values].map(async (values, index) => {
+        const updateValue = list[index];
+        if (isValidURL(updateValue)) {
+          const result = await fetchGpgKey(updateValue);
+          // If successful
+          if (result !== updateValue) {
+            updateGpgKey(index, result);
+            return {
+              ...values,
+              gpgKey: result,
+              ...(!hidePackageVerification && values.gpgKey === '' && !!updateValue
+                ? {
+                    metadataVerification:
+                      !!validationList?.[index]?.url?.metadata_signature_present,
+                  }
+                : {}),
+            };
+          }
+        }
+
+        return {
+          ...values,
+          gpgKey: updateValue,
+          ...(!hidePackageVerification && values.gpgKey === '' && !!updateValue
+            ? {
+                metadataVerification: !!validationList?.[index]?.url?.metadata_signature_present,
+              }
+            : {}),
+        };
+      }),
+    );
+
+    formik.setValues(updatedData);
+  };
+
   const { distribution_arches: distArches = [], distribution_versions: distVersions = [] } =
     queryClient.getQueryData<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY) || {};
+
+  useEffect(() => {
+    updateGpgKeyList(debouncedGpgKeyList);
+  }, [debouncedGpgKeyList]);
 
   const { distributionArches, distributionVersions } = useMemo(() => {
     const distributionArches = {};
@@ -126,14 +182,13 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
   const closeModal = () => {
     setClosed();
     formik.resetForm();
+    setGpgKeyList(['']);
   };
 
   const { mutateAsync: editContent, isLoading: isEditing } = useEditContentQuery(
     queryClient,
     mapFormikToEditAPIValues(formik.values),
   );
-
-  const { fetchGpgKey } = useFetchGpgKey();
 
   const createDataLengthOf1 = formik.values.length === 1;
 
@@ -459,45 +514,18 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                       helperTextInvalid={formik.errors[index]?.gpgKey}
                     >
                       <FileUpload
+                        validated={getFieldValidation(index, 'gpgKey')}
                         id='gpgKey-uploader'
                         aria-label='gpgkey_file_to_upload'
                         type='text'
                         filenamePlaceholder='Drag a file here or upload one'
                         textAreaPlaceholder='Paste GPG key or URL here'
-                        value={gpgKey}
+                        value={gpgKeyList[index]}
                         isLoading={gpgLoading}
-                        validated={getFieldValidation(index, 'gpgKey')}
                         spellCheck={false}
-                        onDataChange={(value) => updateVariable(index, { gpgKey: value })}
-                        onPaste={async ({ clipboardData }) => {
-                          const value = clipboardData.getData('text');
-                          if (isValidURL(value)) {
-                            updateVariable(index, { gpgLoading: true });
-                            const gpgData = await fetchGpgKey(value);
-                            updateVariable(index, {
-                              gpgKey: gpgData,
-                              gpgLoading: false,
-                              ...(!hidePackageVerification && gpgKey === '' && !!value
-                                ? {
-                                    metadataVerification:
-                                      !!validationList?.[index]?.url?.metadata_signature_present,
-                                  }
-                                : {}),
-                            });
-                          }
-                        }}
-                        onTextChange={(value) =>
-                          updateVariable(index, {
-                            gpgKey: value,
-                            ...(!hidePackageVerification && gpgKey === '' && !!value
-                              ? {
-                                  metadataVerification:
-                                    !!validationList?.[index]?.url?.metadata_signature_present,
-                                }
-                              : {}),
-                          })
-                        }
-                        onClearClick={() => updateVariable(index, { gpgKey: '' })}
+                        onDataChange={(value) => updateGpgKey(index, value)}
+                        onTextChange={(value) => updateGpgKey(index, value)}
+                        onClearClick={() => updateGpgKey(index, '')}
                         dropzoneProps={{
                           accept: '.txt',
                           maxSize: 4096,
