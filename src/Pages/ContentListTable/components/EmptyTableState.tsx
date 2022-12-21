@@ -30,7 +30,7 @@ const EmptyTableState = ({ notFiltered, clearFilters }: Props) => {
   return (
     <EmptyState variant={EmptyStateVariant.full} className={classes.emptyStateContainer}>
       <EmptyStateIcon icon={notFiltered ? PlusCircleIcon : SearchIcon} />
-      <Title headingLevel='h2' size='lg'>
+      <Title headingLevel='h2' size='lg' ouiaId='empty_custom_title'>
         {notFiltered
           ? 'No custom repositories'
           : 'No custom repositories match the filter criteria'}

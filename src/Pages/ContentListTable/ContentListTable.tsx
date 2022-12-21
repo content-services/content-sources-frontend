@@ -253,7 +253,7 @@ const ContentListTable = () => {
         <>
           <TableComposable
             aria-label='Custom repositories table'
-            ouiaId='content_sources_table'
+            ouiaId='custom_repositories_table'
             variant='compact'
           >
             <Thead>

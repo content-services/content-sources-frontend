@@ -237,7 +237,7 @@ const PopularRepositoriesTable = () => {
               <TextInput
                 isDisabled={isLoading}
                 id='search'
-                ouiaId='filter_search'
+                ouiaId='popular_filter_search'
                 placeholder='Filter by name/url'
                 value={searchValue}
                 onChange={setSearchValue}
@@ -255,6 +255,7 @@ const PopularRepositoriesTable = () => {
                   onClick={addSelected}
                   className={classes.addRepositoriesButton}
                   isDisabled={!atLeastOneRepoChecked}
+                  ouiaId='add_checked_repos'
                 >
                   Add repositories
                 </Button>
@@ -291,8 +292,8 @@ const PopularRepositoriesTable = () => {
       <Hide hide={isLoading}>
         <>
           <TableComposable
-            aria-label='Custom repositories table'
-            ouiaId='content_sources_table'
+            aria-label='Popular repositories table'
+            ouiaId='popular_repos_table'
             variant='compact'
           >
             <Thead>
@@ -367,6 +368,7 @@ const PopularRepositoriesTable = () => {
                             isDisabled={uuid === selectedUUID}
                             onClick={() => setSelectedUUID(uuid)}
                             variant='danger'
+                            ouiaId='remove_popular_repo'
                           >
                             Remove
                           </Button>
@@ -386,6 +388,7 @@ const PopularRepositoriesTable = () => {
                                 },
                               ])
                             }
+                            ouiaId='add_popular_repo'
                           >
                             Add
                           </Button>

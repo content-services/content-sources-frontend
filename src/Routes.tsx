@@ -70,7 +70,7 @@ export default function MainRoutes() {
     <>
       <PageHeader>
         <PageHeaderTitle title='Custom Repositories' />
-        <Text className={classes.subtext}>
+        <Text className={classes.subtext} ouiaId='custom_repositories_description'>
           View all custom repositories within your organization.
         </Text>
       </PageHeader>
