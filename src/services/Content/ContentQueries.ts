@@ -1,4 +1,5 @@
 import { AlertVariant } from '@patternfly/react-core';
+import { useState } from 'react';
 import { QueryClient, useMutation, useQuery } from 'react-query';
 
 import { useNotification } from './../Notifications/Notifications';
@@ -30,6 +31,8 @@ export const REPOSITORY_PARAMS_KEY = 'REPOSITORY_PARAMS_KEY';
 export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
 export const PACKAGES_KEY = 'PACKAGES_KEY';
 
+const CONTENT_LIST_POLLING_TIME = 15000; // 15 seconds
+
 export const usePopularRepositoriesQuery = (
   page: number,
   limit: number,
@@ -50,16 +53,43 @@ export const useContentListQuery = (
   limit: number,
   filterData: FilterData,
   sortBy: string,
-) =>
-  useQuery<ContentListResponse>(
+) => {
+  const [polling, setPolling] = useState(false);
+  const [pollCount, setPollCount] = useState(0);
+
+  return useQuery<ContentListResponse>(
     [CONTENT_LIST_KEY, page, limit, sortBy, ...Object.values(filterData)],
     () => getContentList(page, limit, filterData, sortBy),
     {
+      onSuccess: (data) => {
+        const containsPending = data?.data?.some(({ status }) => status === 'Pending');
+        if (polling && containsPending) {
+          // Count each consecutive time polling occurs
+          setPollCount(pollCount + 1);
+        }
+        if (polling && !containsPending) {
+          // We were polling, but now the data is valid, we stop the count.
+          setPollCount(0);
+        }
+        if (pollCount > 40) {
+          // If polling occurs 40 times in a row, we stop it. Likely a data/kafka issue has occurred with the API.
+          return setPolling(false);
+        }
+        // This sets the polling state based whether the data contains any "Pending" status
+        return setPolling(containsPending);
+      },
+      onError: () => {
+        setPolling(false);
+        setPollCount(0);
+      },
+      refetchInterval: polling ? CONTENT_LIST_POLLING_TIME : undefined,
+      refetchIntervalInBackground: false, // This prevents endless polling when our app isn't the focus tab in a browser
+      refetchOnWindowFocus: polling, // If polling and navigate to another tab, on refocus, we want to poll once more. (This is based off of the stalestime below)
       keepPreviousData: true,
       staleTime: 20000,
-      //   optimisticResults: true,
     },
   );
+};
 
 export const useAddContentQuery = (queryClient: QueryClient, request: CreateContentRequest) => {
   const { notify } = useNotification();
