@@ -29,7 +29,6 @@ import {
   mapFormikToAPIValues,
   mapValidationData,
   makeValidationSchema,
-  magicURLList,
   FormikValues,
 } from './helpers';
 import useDebounce from '../../../../services/useDebounce';
@@ -302,21 +301,6 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
     }
   };
 
-  const magicButtonThatWillBeDeletedAtSomePoint = () => {
-    const baseArray = Array.from(Array(20).keys());
-    const newValues = baseArray.map((index) => ({
-      name: (Math.random() + 1).toString(36).substring(7),
-      url: magicURLList[index],
-      gpgKey: '',
-      arch: !(index % 3) ? 'x86_64' : 'any',
-      versions: !(index % 2) ? ['7'] : ['any'],
-      gpgLoading: false,
-      expanded: false,
-      metadataVerification: false,
-    }));
-    formik.setValues(newValues);
-  };
-
   const setVersionSelected = (value: string[], index: number) => {
     let valueToUpdate = value.map((val) => distributionVersions[val]);
     if (value.length === 0 || valueToUpdate[value.length - 1] === 'any') {
@@ -404,15 +388,6 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
                 </Button>
                 <Button key='cancel' variant='link' onClick={closeModal} ouiaId='modal_cancel'>
                   Cancel
-                </Button>
-                <Button
-                  key='magic'
-                  variant='link'
-                  isDisabled={formik.values.length > 19}
-                  color='green'
-                  onClick={magicButtonThatWillBeDeletedAtSomePoint}
-                >
-                  Add 20
                 </Button>
               </StackItem>
             </Stack>
