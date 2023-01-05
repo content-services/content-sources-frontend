@@ -2,28 +2,33 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   ExclamationTriangleIcon,
-  InfoCircleIcon,
 } from '@patternfly/react-icons';
-import { Flex, FlexItem, Tooltip } from '@patternfly/react-core';
+import { Flex, FlexItem, Spinner, Tooltip } from '@patternfly/react-core';
 import StatusText from './StatusText';
 import {
   global_danger_color_100,
   global_success_color_100,
   global_warning_color_100,
-  global_info_color_100,
 } from '@patternfly/react-tokens';
+import { createUseStyles } from 'react-jss';
 
 const red = global_danger_color_100.value;
 const green = global_success_color_100.value;
 const gold = global_warning_color_100.value;
-const blue = global_info_color_100.value;
 
+const useStyles = createUseStyles({
+  spinner: {
+    animationDuration: '6s !important',
+    margin: '-3px 0',
+  },
+});
 interface Props {
   status?: string;
   error?: string;
 }
 
 const StatusIcon = ({ status, error }: Props) => {
+  const classes = useStyles();
   switch (status) {
     case 'Valid':
       return (
@@ -67,14 +72,15 @@ const StatusIcon = ({ status, error }: Props) => {
         <Tooltip position='top-start' content='Repository has not been introspected yet'>
           <Flex alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
             <FlexItem spacer={{ default: 'spacerSm' }}>
-              <InfoCircleIcon color={blue} />
+              <Spinner size='md' className={classes.spinner} />
             </FlexItem>
             <FlexItem>
-              <StatusText color='blue'>Pending</StatusText>
+              <StatusText color='blue'>In progress</StatusText>
             </FlexItem>
           </Flex>
         </Tooltip>
       );
+
     default:
       return <></>;
   }

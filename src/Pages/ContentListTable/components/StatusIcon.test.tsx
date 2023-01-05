@@ -4,7 +4,7 @@ import StatusIcon from './StatusIcon';
 it('Render with Pending status', () => {
   const { queryByText } = render(<StatusIcon status='Pending' />);
 
-  const SelectComponent = queryByText('Pending');
+  const SelectComponent = queryByText('In progress');
   expect(SelectComponent).toBeInTheDocument();
 });
 
