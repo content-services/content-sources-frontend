@@ -58,6 +58,7 @@ export const useContentListQuery = (
   const [pollCount, setPollCount] = useState(0);
 
   return useQuery<ContentListResponse>(
+    // Below MUST match the "contentListKeyArray" seen below in the useDeleteContent.
     [CONTENT_LIST_KEY, page, limit, sortBy, ...Object.values(filterData)],
     () => getContentList(page, limit, filterData, sortBy),
     {
@@ -201,12 +202,13 @@ export const useDeleteContentItemMutate = (
   filterData?: FilterData,
   sortString?: string,
 ) => {
+  // Below MUST match the "useContentList" key found above or updates will fail.
   const contentListKeyArray = [
     CONTENT_LIST_KEY,
     page,
     perPage,
-    ...Object.values(filterData || {}),
     sortString,
+    ...Object.values(filterData || {}),
   ];
   const { notify } = useNotification();
   return useMutation(deleteContentListItem, {
