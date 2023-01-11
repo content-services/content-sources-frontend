@@ -2,6 +2,7 @@ import { render } from '@testing-library/react';
 import { ReactQueryTestWrapper, testRepositoryParamsResponse } from '../../testingHelpers';
 import ContentListTable from './ContentListTable';
 import { useContentListQuery, useRepositoryParams } from '../../services/Content/ContentQueries';
+import AddContent from './components/AddContent/AddContent';
 
 jest.mock('../../services/Content/ContentQueries', () => ({
   useRepositoryParams: jest.fn(),
@@ -15,6 +16,10 @@ jest.mock('../../services/Content/ContentQueries', () => ({
 jest.mock('../../middleware/AppContext', () => ({
   useAppContext: () => ({}),
 }));
+
+jest.mock('./components/AddContent/AddContent');
+
+(AddContent as jest.Mock).mockImplementation(() => 'Add Content');
 
 it('expect ContentListTable to render with a loading skeleton', () => {
   (useRepositoryParams as jest.Mock).mockImplementation(() => ({ isLoading: false }));
