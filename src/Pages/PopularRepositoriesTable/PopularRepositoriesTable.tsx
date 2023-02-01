@@ -43,10 +43,7 @@ const useStyles = createUseStyles({
     display: 'flex',
     flexDirection: 'column',
   },
-  mainContainer100Height: {
-    composes: ['$mainContainer'], // This extends another class within this stylesheet
-    minHeight: '100%',
-  },
+
   topContainer: {
     justifyContent: 'space-between',
     padding: '16px 24px', // This is needed
@@ -146,7 +143,10 @@ const PopularRepositoriesTable = () => {
 
   useEffect(() => {
     if (selectedData.length != 0) {
-      addContentQuery().then(undefined, () => setSelectedData([]));
+      addContentQuery().then(
+        () => setSelectedData([]),
+        () => setSelectedData([]),
+      );
     }
   }, [selectedData]);
 
@@ -281,7 +281,7 @@ const PopularRepositoriesTable = () => {
         </FlexItem>
       </Flex>
       <Hide hide={!isLoading}>
-        <Grid className={classes.mainContainer100Height}>
+        <Grid className={classes.mainContainer}>
           <SkeletonTable
             rowSize={perPage}
             colSize={columnHeaders.length}
@@ -365,7 +365,7 @@ const PopularRepositoriesTable = () => {
                       >
                         {uuid ? (
                           <Button
-                            isDisabled={uuid === selectedUUID}
+                            isDisabled={uuid === selectedUUID || isFetching || isDeleting}
                             onClick={() => setSelectedUUID(uuid)}
                             variant='danger'
                             ouiaId='remove_popular_repo'
@@ -375,19 +375,19 @@ const PopularRepositoriesTable = () => {
                         ) : (
                           <Button
                             variant='secondary'
-                            isDisabled={selectedData[key]?.url === url}
-                            onClick={() =>
-                              setSelectedData([
-                                {
-                                  name: suggested_name,
-                                  url,
-                                  distribution_versions,
-                                  distribution_arch,
-                                  gpg_key,
-                                  metadata_verification,
-                                },
-                              ])
-                            }
+                            isDisabled={selectedData[key]?.url === url || isFetching || isAdding}
+                            onClick={() => {
+                              const newData: CreateContentRequest = [];
+                              newData[key] = {
+                                name: suggested_name,
+                                url,
+                                distribution_versions,
+                                distribution_arch,
+                                gpg_key,
+                                metadata_verification,
+                              };
+                              setSelectedData(newData);
+                            }}
                             ouiaId='add_popular_repo'
                           >
                             Add

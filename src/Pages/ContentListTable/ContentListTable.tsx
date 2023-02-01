@@ -241,7 +241,7 @@ const ContentListTable = () => {
         </FlexItem>
       </Flex>
       <Hide hide={!isLoading}>
-        <Grid className={classes.mainContainer100Height}>
+        <Grid className={classes.mainContainer}>
           <SkeletonTable
             rowSize={perPage}
             colSize={columnHeaders.length}

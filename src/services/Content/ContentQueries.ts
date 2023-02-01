@@ -94,7 +94,7 @@ export const useContentListQuery = (
 
 export const useAddContentQuery = (queryClient: QueryClient, request: CreateContentRequest) => {
   const { notify } = useNotification();
-  return useMutation(() => AddContentListItems(request), {
+  return useMutation(() => AddContentListItems(request.filter((item) => !!item)), {
     onSuccess: (data: CreateContentRequestResponse) => {
       const hasPending = (data as ContentItem[]).some(({ status }) => status === 'Pending');
 
