@@ -49,6 +49,9 @@ source "${CICD_ROOT}/deploy_ephemeral_env.sh"
 export COMPONENT_NAME="content-sources-backend"
 source "$CICD_ROOT/cji_smoke_test.sh"
 
+SONAR_PR_CHECK="true"
+source $WORKSPACE/.rhcicd/sonarqube.sh
+
 # Post a comment with test run IDs to the PR
 # The contents of this script can be found at:
 # https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd/post_test_results.sh
