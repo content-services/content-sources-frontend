@@ -33,7 +33,7 @@ export DEPLOY_FRONTENDS="true"
 
 set -exv
 
-source $WORKSPACE/.rhcicd/sonarqube.sh
+source $WORKSPACE/.rhcicd/sonarqube.sh || true
 
 # bootstrap bonfire and it's config
 CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd

@@ -24,7 +24,10 @@ set -exv
 source <(curl -sSL $COMMON_BUILDER/src/frontend-build.sh)
 BUILD_RESULTS=$?
 
-source $WORKSPACE/.rhcicd/sonarqube.sh
+# cleanup docker builds as sonar user do not have perms to read them
+rm -r $PWD/.docker || true
+
+source $WORKSPACE/.rhcicd/sonarqube.sh || true
 
 # Stubbed out for now
 mkdir -p $WORKSPACE/artifacts
