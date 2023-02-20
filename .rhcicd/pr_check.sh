@@ -33,6 +33,8 @@ export DEPLOY_FRONTENDS="true"
 
 set -exv
 
+source $WORKSPACE/.rhcicd/sonarqube.sh
+
 # bootstrap bonfire and it's config
 CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd
 curl -s "$CICD_URL/bootstrap.sh" > .cicd_bootstrap.sh && source .cicd_bootstrap.sh
@@ -48,9 +50,6 @@ source "${CICD_ROOT}/deploy_ephemeral_env.sh"
 # https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd/cji_smoke_test.sh
 export COMPONENT_NAME="content-sources-backend"
 source "$CICD_ROOT/cji_smoke_test.sh"
-
-SONAR_PR_CHECK="true"
-source $WORKSPACE/.rhcicd/sonarqube.sh
 
 # Post a comment with test run IDs to the PR
 # The contents of this script can be found at:

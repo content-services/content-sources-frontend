@@ -24,7 +24,6 @@ set -exv
 source <(curl -sSL $COMMON_BUILDER/src/frontend-build.sh)
 BUILD_RESULTS=$?
 
-SONAR_PR_CHECK="false"
 source $WORKSPACE/.rhcicd/sonarqube.sh
 
 # Stubbed out for now
