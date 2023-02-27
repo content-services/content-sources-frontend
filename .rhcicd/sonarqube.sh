@@ -28,7 +28,7 @@ podman run \
  -Dsonar.projectVersion=${COMMIT_SHORT} \
  -Dsonar.sources=/usr/src/. \
  -Dsonar.tests=/usr/src/. \
- -Dsonar.test.inclusions=**/*.test.js \
+ -Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx \
  -Dsonar.exclusions=node_modules/**/*,**/*.test.js,**/*.html,**/*.yml,**/*.yaml,**/*.json,**/mocks/*" \
 images.paas.redhat.com/alm/sonar-scanner-alpine:latest -X
 
