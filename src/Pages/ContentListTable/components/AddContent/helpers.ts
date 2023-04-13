@@ -2,7 +2,7 @@ import { isEmpty } from 'lodash';
 import * as Yup from 'yup';
 import { FormikErrors } from 'formik';
 import { ValidationResponse } from '../../../../services/Content/ContentApi';
-import {NotificationPayload} from '../../../../services/Notifications/Notifications'
+import { NotificationPayload } from '../../../../services/Notifications/Notifications';
 import ERROR_CODE from './httpErrorCodes.json';
 import { AlertVariant } from '@patternfly/react-core';
 
@@ -105,15 +105,15 @@ export const makeValidationSchema = () => {
 
 export const maxUploadSize = 8096;
 export const failedFileUpload = (files: File[], notify: (arg: NotificationPayload) => void) => {
- let description = 'Check the file and try again.';
- if(files.length != 1) {
-     description = 'Only a single file upload is supported.'
- } else if (files[0].size > maxUploadSize) {
-     description = 'The file is larger than ' + maxUploadSize + ' bytes.';
- }
- notify({
-     variant: AlertVariant.danger,
-     title: 'There was an problem uploading the file.',
-     description,
- })
+  let description = 'Check the file and try again.';
+  if (files.length != 1) {
+    description = 'Only a single file upload is supported.';
+  } else if (files[0].size > maxUploadSize) {
+    description = 'The file is larger than ' + maxUploadSize + ' bytes.';
+  }
+  notify({
+    variant: AlertVariant.danger,
+    title: 'There was an problem uploading the file.',
+    description,
+  });
 };
