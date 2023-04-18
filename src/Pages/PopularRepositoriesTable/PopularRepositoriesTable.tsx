@@ -298,6 +298,7 @@ const PopularRepositoriesTable = () => {
           <TableComposable
             aria-label='Popular repositories table'
             ouiaId='popular_repos_table'
+            ouiaId='data-ouia-page-safe'
             variant='compact'
           >
             <Thead>
@@ -316,7 +317,7 @@ const PopularRepositoriesTable = () => {
                   <Th key={columnHeader + 'column'}>{columnHeader}</Th>
                 ))}
                 <Th>
-                  <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
+                  <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} data-ouia-safe="false" />
                 </Th>
               </Tr>
             </Thead>
