@@ -1,4 +1,4 @@
-Prod-beta branch
+Prod Stable branch
 
 ## Initial etc/hosts setup
 
