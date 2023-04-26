@@ -103,7 +103,7 @@ export const makeValidationSchema = () => {
   );
 };
 
-export const maxUploadSize = 8096;
+export const maxUploadSize = 32000;
 export const failedFileUpload = (files: File[], notify: (arg: NotificationPayload) => void) => {
   let description = 'Check the file and try again.';
   if (files.length != 1) {
