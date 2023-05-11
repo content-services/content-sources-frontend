@@ -1,26 +1,15 @@
 import { render } from '@testing-library/react';
 import PackageModal from './PackageModal';
 import { ContentItem, PackageItem } from '../../../../services/Content/ContentApi';
-import { ReactQueryTestWrapper } from '../../../../testingHelpers';
+import { ReactQueryTestWrapper, defaultContentItem } from '../../../../testingHelpers';
 import { useGetPackagesQuery } from '../../../../services/Content/ContentQueries';
 
 const rowData: ContentItem = {
+  ...defaultContentItem,
   // Used variables
   uuid: 'boop-beep-boop-blop',
   name: 'steve',
   package_count: 0,
-  // Placeholders for TS
-  url: '',
-  distribution_versions: [],
-  distribution_arch: '',
-  account_id: '',
-  org_id: '',
-  status: '',
-  last_introspection_error: '',
-  last_introspection_time: '2023-03-07 17:13:48.619192 -0500 EST',
-  failed_introspections_count: 0,
-  gpg_key: '',
-  metadata_verification: false,
 };
 
 const packageItem: PackageItem = {

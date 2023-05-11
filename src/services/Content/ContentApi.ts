@@ -17,7 +17,7 @@ export interface ContentItem {
   metadata_verification: boolean;
 }
 
-export interface PopularRepositories {
+export interface PopularRepository {
   uuid: string;
   existing_name: string;
   suggested_name: string;
@@ -85,7 +85,7 @@ export interface ContentListResponse {
 }
 
 export interface PopularRepositoriesResponse {
-  data: PopularRepositories[];
+  data: PopularRepository[];
   links: Links;
   meta: Meta;
 }
