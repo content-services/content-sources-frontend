@@ -1,29 +1,17 @@
-import { FunctionComponent, ReactElement, useMemo } from 'react';
-import { Grid, Tab, Tabs, TabTitleText, Text } from '@patternfly/react-core';
+import { useMemo } from 'react';
+import { Grid, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
-import { global_Color_100, global_BackgroundColor_100 } from '@patternfly/react-tokens';
-import {
-  PageHeader as _PageHeader,
-  PageHeaderTitle,
-} from '@redhat-cloud-services/frontend-components';
-import { PageHeaderProps as _PageHeaderProps } from '@redhat-cloud-services/frontend-components/PageHeader/PageHeader';
+import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
+
 import { createUseStyles } from 'react-jss';
 import { ErrorPage } from './components/Error/ErrorPage';
 import ContentListTable from './Pages/ContentListTable/ContentListTable';
 import PopularRepositoriesTable from './Pages/PopularRepositoriesTable/PopularRepositoriesTable';
 import { last } from 'lodash';
-
-// Example of how to extend inaccurately typed imports
-const PageHeader = _PageHeader as FunctionComponent<PageHeaderProps>;
-interface PageHeaderProps extends _PageHeaderProps {
-  children?: ReactElement | Array<ReactElement>;
-}
+import Header from './components/Header/Header';
+import QuickStart from './components/QuickStart/QuickStart';
 
 const useStyles = createUseStyles({
-  subtext: {
-    color: global_Color_100.value,
-    paddingTop: '8px',
-  },
   tabs: {
     backgroundColor: global_BackgroundColor_100.value,
   },
@@ -68,12 +56,8 @@ export default function MainRoutes() {
   const currentRoute = useMemo(() => last(pathname.split('/')), [pathname]);
   return (
     <>
-      <PageHeader>
-        <PageHeaderTitle title='Custom Repositories' />
-        <Text className={classes.subtext} ouiaId='custom_repositories_description'>
-          View all custom repositories within your organization.
-        </Text>
-      </PageHeader>
+      <Header />
+
       <Tabs className={classes.tabs} ouiaId='routed-tabs' activeKey={currentRoute}>
         {tabbedRoutes.map(({ title, route }) => (
           <Tab
@@ -92,6 +76,7 @@ export default function MainRoutes() {
           />
         ))}
       </Tabs>
+      <QuickStart />
       <Routes key={locationKey}>
         {tabbedRoutes.map(({ route, Element }, key) => (
           <Route
