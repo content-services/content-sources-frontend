@@ -4,7 +4,8 @@ import {
   failedFileUpload,
   isValidURL,
   mapFormikToAPIValues,
-  mapValidationData, maxUploadSize
+  mapValidationData,
+  maxUploadSize,
 } from './helpers';
 
 it('REGEX_URL', () => {
@@ -80,7 +81,7 @@ it('mapValidationData', () => {
 it('Notifies on file upload failure due to size', () => {
   const notif = jest.fn((payload) => payload);
   const f = new File([''], 'filename', { type: 'text/html' });
-  Object.defineProperty(f, 'size', { value: maxUploadSize+1 });
+  Object.defineProperty(f, 'size', { value: maxUploadSize + 1 });
 
   failedFileUpload([f], notif);
   expect(notif.mock.calls).toHaveLength(1);
