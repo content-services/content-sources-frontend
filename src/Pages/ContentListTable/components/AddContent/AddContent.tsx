@@ -144,7 +144,7 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
     setGpgKeyList(updatedData);
   };
 
-  const { fetchGpgKey } = useFetchGpgKey();
+  const { fetchGpgKey, isLoading: isFetchingGpgKey } = useFetchGpgKey();
 
   const debouncedGpgKeyList = useDebounce(gpgKeyList, 300);
 
@@ -284,7 +284,11 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
 
   let debouncedValues = useDebounce(formik.values) || []; // Initial value of []
 
-  const { mutateAsync: validateContentList, data: validationList } = useValidateContentList();
+  const {
+    mutateAsync: validateContentList,
+    data: validationList,
+    isLoading: isValidating,
+  } = useValidateContentList();
 
   useEffect(() => {
     // If validate is getting called to often, we could useDeepCompare
@@ -371,6 +375,8 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
 
   const { notify } = useNotification();
 
+  const actionTakingPlace = isFetchingGpgKey || isAdding || isValidating || !changeVerified;
+
   return (
     <>
       <ConditionalTooltip
@@ -394,6 +400,7 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
           variant={ModalVariant.medium}
           title='Add custom repositories'
           ouiaId='add_custom_repository'
+          ouiaSafe={!actionTakingPlace}
           help={
             <Popover
               headerContent={<div>Add a custom repository</div>}

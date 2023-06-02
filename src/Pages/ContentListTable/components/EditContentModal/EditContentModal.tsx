@@ -133,7 +133,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
     updatedData[index] = value;
     setGpgKeyList(updatedData);
   };
-  const { fetchGpgKey } = useFetchGpgKey();
+  const { fetchGpgKey, isLoading: isFetchingGpgKey } = useFetchGpgKey();
 
   const debouncedGpgKeyList = useDebounce(gpgKeyList, 300);
 
@@ -235,7 +235,11 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
 
   const debouncedValues = useDebounce(formik.values);
 
-  const { mutateAsync: validateContentList, data: validationList } = useValidateContentList();
+  const {
+    mutateAsync: validateContentList,
+    data: validationList,
+    isLoading: isValidating,
+  } = useValidateContentList();
 
   useEffect(() => {
     if (open)
@@ -310,12 +314,15 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
 
   const { notify } = useNotification();
 
+  const actionTakingPlace = isFetchingGpgKey || isEditing || isValidating || !changeVerified;
+
   return (
     <Modal
       position='top'
       variant={ModalVariant.medium}
       title='Edit custom repository'
       ouiaId='edit_custom_repository'
+      ouiaSafe={!actionTakingPlace}
       help={
         <Popover
           headerContent={<div>Edit custom repository</div>}

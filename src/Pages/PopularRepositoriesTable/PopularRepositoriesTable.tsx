@@ -233,7 +233,11 @@ const PopularRepositoriesTable = () => {
   } = data;
 
   return (
-    <Grid className={classes.mainContainer}>
+    <Grid
+      data-ouia-safe={!actionTakingPlace}
+      data-ouia-component-id='popular_repositories_page'
+      className={classes.mainContainer}
+    >
       <Flex className={classes.topContainer}>
         <FlexItem>
           <InputGroup>

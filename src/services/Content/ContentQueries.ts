@@ -401,13 +401,15 @@ export const useRepositoryParams = () =>
 
 export const useFetchGpgKey = () => {
   const { notify } = useNotification();
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchGpgKey = async (url: string): Promise<string> => {
+    setIsLoading(true);
     let gpg_key = url;
     try {
       const data = await getGpgKey(url);
       gpg_key = data.gpg_key;
-    } catch ({ response = {} }) {
+    } catch ({ response = {} }: any) {
       const { data } = response as { data: { message: string | undefined } | string };
       const description = typeof data === 'string' ? data : data?.message;
       notify({
@@ -416,10 +418,11 @@ export const useFetchGpgKey = () => {
         description,
       });
     }
+    setIsLoading(false);
     return gpg_key;
   };
 
-  return { fetchGpgKey };
+  return { fetchGpgKey, isLoading };
 };
 
 export const useGetPackagesQuery = (

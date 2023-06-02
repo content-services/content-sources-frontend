@@ -232,13 +232,17 @@ const ContentListTable = () => {
 
   if (countIsZero && notFiltered && !isLoading)
     return (
-      <Bullseye>
+      <Bullseye data-ouia-safe={!actionTakingPlace} data-ouia-component-id='content_list_page'>
         <EmptyTableState notFiltered={notFiltered} clearFilters={clearFilters} />
       </Bullseye>
     );
 
   return (
-    <Grid className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}>
+    <Grid
+      data-ouia-safe={!actionTakingPlace}
+      data-ouia-component-id='content_list_page'
+      className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
+    >
       <EditContentModal
         values={editValues}
         open={editModalOpen}

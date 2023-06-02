@@ -35,6 +35,7 @@ export interface CreateContentRequestItem {
   distribution_arch?: string;
   gpg_key?: string;
   metadata_verification?: boolean;
+  snapshot?: boolean;
 }
 
 export interface ErrorItem {
