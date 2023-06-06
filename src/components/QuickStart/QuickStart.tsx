@@ -73,6 +73,7 @@ export default function QuickStart() {
             )
           }
           variant='link'
+          ouiaId='Quickstart_link'
           onClick={activateQuickStart}
           isDisabled={quickStartLoading}
         >
