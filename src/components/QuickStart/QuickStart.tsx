@@ -60,6 +60,7 @@ export default function QuickStart() {
         isExpanded={isExpanded}
         displaySize='large'
         aria-label='quickStart-expansion'
+        data-ouia-component-id='quickstart_expand'
       >
         <Text>For help getting started, access the quick start below:</Text>
         <Button
