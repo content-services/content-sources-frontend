@@ -13,7 +13,7 @@ import {
   StackItem,
   Tooltip,
 } from '@patternfly/react-core';
-import StatusText from './StatusText';
+import StatusText from '../../../components/StatusText/StatusText';
 import {
   global_danger_color_100,
   global_success_color_100,

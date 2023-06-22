@@ -39,7 +39,7 @@ import {
 } from '../../services/Content/ContentQueries';
 import ContentListFilters from './components/ContentListFilters';
 import Hide from '../../components/Hide/Hide';
-import EmptyTableState from './components/EmptyTableState';
+import EmptyTableState from '../../components/EmptyTableState/EmptyTableState';
 import { useQueryClient } from 'react-query';
 import EditContentModal from './components/EditContentModal/EditContentModal';
 import StatusIcon from './components/StatusIcon';
@@ -48,6 +48,7 @@ import PackageCount from './components/PackageCount';
 import { useAppContext } from '../../middleware/AppContext';
 import ConditionalTooltip from '../../components/ConditionalTooltip/ConditionalTooltip';
 import dayjs from 'dayjs';
+import AddContent from './components/AddContent/AddContent';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -228,12 +229,21 @@ const ContentListTable = () => {
     [actionTakingPlace],
   );
 
+  const itemName = 'custom repositories';
+  const notFilteredBody = 'To get started, create a custom repository';
+
   const countIsZero = count === 0;
 
   if (countIsZero && notFiltered && !isLoading)
     return (
       <Bullseye data-ouia-safe={!actionTakingPlace} data-ouia-component-id='content_list_page'>
-        <EmptyTableState notFiltered={notFiltered} clearFilters={clearFilters} />
+        <EmptyTableState
+          notFiltered={notFiltered}
+          clearFilters={clearFilters}
+          itemName={itemName}
+          notFilteredBody={notFilteredBody}
+          notFilteredButton={<AddContent />}
+        />
       </Bullseye>
     );
 
@@ -368,7 +378,13 @@ const ContentListTable = () => {
         </>
       </Hide>
       <Hide hide={!countIsZero || isLoading}>
-        <EmptyTableState notFiltered={notFiltered} clearFilters={clearFilters} />
+        <EmptyTableState
+          notFiltered={notFiltered}
+          clearFilters={clearFilters}
+          itemName={itemName}
+          notFilteredBody={notFilteredBody}
+          notFilteredButton={<AddContent />}
+        />
       </Hide>
     </Grid>
   );

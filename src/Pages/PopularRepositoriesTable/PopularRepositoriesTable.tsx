@@ -35,7 +35,7 @@ import ConditionalTooltip from '../../components/ConditionalTooltip/ConditionalT
 import UrlWithExternalIcon from '../../components/UrlWithLinkIcon/UrlWithLinkIcon';
 import { SearchIcon } from '@patternfly/react-icons';
 import useDebounce from '../../Hooks/useDebounce';
-import EmptyTableState from './components/EmptyTableState';
+import EmptyTableState from '../../components/EmptyTableState/EmptyTableState';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -427,7 +427,11 @@ const PopularRepositoriesTable = () => {
         </>
       </Hide>
       <Hide hide={data.data.length !== 0 || isLoading}>
-        <EmptyTableState clearFilters={() => setSearchValue('')} />
+        <EmptyTableState
+          clearFilters={() => setSearchValue('')}
+          notFiltered={true}
+          itemName='popular repositories'
+        />
       </Hide>
     </Grid>
   );

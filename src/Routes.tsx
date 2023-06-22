@@ -10,6 +10,7 @@ import PopularRepositoriesTable from './Pages/PopularRepositoriesTable/PopularRe
 import { last } from 'lodash';
 import Header from './components/Header/Header';
 import QuickStart from './components/QuickStart/QuickStart';
+import AdminTaskTable from './Pages/AdminTaskTable/AdminTaskTable';
 
 const useStyles = createUseStyles({
   tabs: {
@@ -35,6 +36,7 @@ const useStyles = createUseStyles({
 
 export const DEFAULT_ROUTE = '';
 export const POPULAR_REPOSITORIES_ROUTE = 'popular-repositories';
+export const ADMIN_TASKS_ROUTE = 'admin-tasks';
 
 const tabbedRoutes = [
   {
@@ -46,6 +48,11 @@ const tabbedRoutes = [
     title: 'Popular repositories',
     route: POPULAR_REPOSITORIES_ROUTE,
     Element: PopularRepositoriesTable,
+  },
+  {
+    title: 'Admin tasks',
+    route: ADMIN_TASKS_ROUTE,
+    Element: AdminTaskTable,
   },
 ];
 
