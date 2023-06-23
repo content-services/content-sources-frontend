@@ -23,7 +23,8 @@ export interface AdminTask {
   started_at: string;
   finished_at: string;
   error: string;
-  payload: SnapshotPayload | Record<string, unknown>;
+  payload: Record<string, unknown>;
+  pulp?: SnapshotPayload;
 }
 
 export type AdminTaskList = AdminTask[];

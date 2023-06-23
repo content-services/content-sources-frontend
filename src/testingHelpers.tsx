@@ -160,7 +160,7 @@ export const defaultIntrospectTask: AdminTask = {
 export const defaultSnapshotTask: AdminTask = {
   ...defaultIntrospectTask,
   typename: 'snapshot',
-  payload: {
+  pulp: {
     sync: {
       syncData: 'syncValue',
     },

@@ -73,6 +73,12 @@ it('Open snapshot details and click tabs', async () => {
   expect(detailsContent).toBeInTheDocument();
   expect(detailsContent).not.toHaveAttribute('hidden');
 
+  const payloadTab = queryByText('Payload') as Element;
+  expect(payloadTab).toBeInTheDocument();
+  const payloadContent = document.getElementById('Payload');
+  expect(payloadContent).toBeInTheDocument();
+  expect(payloadContent).toHaveAttribute('hidden');
+
   const syncTab = queryByText('Sync') as Element;
   expect(syncTab).toBeInTheDocument();
   const syncContent = document.getElementById('Sync');
@@ -93,6 +99,7 @@ it('Open snapshot details and click tabs', async () => {
 
   fireEvent.click(distributionTab);
   expect(detailsContent).toHaveAttribute('hidden');
+  expect(payloadContent).toHaveAttribute('hidden');
   expect(syncContent).toHaveAttribute('hidden');
   expect(distributionContent).not.toHaveAttribute('hidden');
   expect(publicationContent).toHaveAttribute('hidden');
@@ -101,12 +108,12 @@ it('Open snapshot details and click tabs', async () => {
 it('Open snapshot task without all pulp tasks', async () => {
   const missingDistribution: AdminTask = {
     ...defaultSnapshotTask,
-    payload: {
-      ...defaultSnapshotTask.payload,
+    pulp: {
+      ...defaultSnapshotTask.pulp,
       distribution: undefined,
     },
   };
-  render(
+  const { queryByText } = render(
     <ReactQueryTestWrapper>
       <ViewPayloadModal
         open
@@ -118,6 +125,10 @@ it('Open snapshot task without all pulp tasks', async () => {
   );
 
   const modal = document.getElementsByClassName('pf-c-tab-content');
-  // Details, sync, publication
-  expect(modal).toHaveLength(3);
+  // Details, payload, sync, publication
+  expect(modal).toHaveLength(4);
+  expect(queryByText('Task details')).toBeInTheDocument();
+  expect(queryByText('Payload')).toBeInTheDocument();
+  expect(queryByText('Sync')).toBeInTheDocument();
+  expect(queryByText('Publication')).toBeInTheDocument();
 });

@@ -55,40 +55,42 @@ const ViewPayloadModal = ({ adminTask, open, isFetching, setClosed }: ViewPayloa
       return tabs;
     }
 
+    tabs.push({
+      title: 'Payload',
+      data: adminTask.payload,
+      contentRef: createRef<HTMLElement>(),
+    });
+
     switch (adminTask.typename) {
       case 'snapshot': {
-        const payload = adminTask.payload as SnapshotPayload;
-        if (payload.sync) {
-          tabs.push({
-            title: 'Sync',
-            data: payload.sync,
-            contentRef: createRef<HTMLElement>(),
-          });
+        const pulp = adminTask.pulp;
+        if (pulp) {
+          if (pulp.sync) {
+            tabs.push({
+              title: 'Sync',
+              data: pulp.sync,
+              contentRef: createRef<HTMLElement>(),
+            });
+          }
+          if (pulp.distribution) {
+            tabs.push({
+              title: 'Distribution',
+              data: pulp.distribution,
+              contentRef: createRef<HTMLElement>(),
+            });
+          }
+          if (pulp.publication) {
+            tabs.push({
+              title: 'Publication',
+              data: pulp.publication,
+              contentRef: createRef<HTMLElement>(),
+            });
+          }
         }
-        if (payload.distribution) {
-          tabs.push({
-            title: 'Distribution',
-            data: payload.distribution,
-            contentRef: createRef<HTMLElement>(),
-          });
-        }
-        if (payload.publication) {
-          tabs.push({
-            title: 'Publication',
-            data: payload.publication,
-            contentRef: createRef<HTMLElement>(),
-          });
-        }
-        return tabs;
+        break;
       }
-      default:
-        tabs.push({
-          title: 'Payload',
-          data: adminTask.payload,
-          contentRef: createRef<HTMLElement>(),
-        });
-        return tabs;
     }
+    return tabs;
   }, [adminTask?.uuid]);
 
   const actionTakingPlace = isFetching;
