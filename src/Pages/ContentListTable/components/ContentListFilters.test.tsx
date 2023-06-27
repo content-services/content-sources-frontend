@@ -12,7 +12,7 @@ jest.mock('../../../middleware/AppContext', () => ({
   useAppContext: () => ({}),
 }));
 
-jest.mock('../../../services/useDebounce', () => (value) => value);
+jest.mock('../../../Hooks/useDebounce', () => (value) => value);
 jest.mock('react-query');
 
 beforeAll(() => {
