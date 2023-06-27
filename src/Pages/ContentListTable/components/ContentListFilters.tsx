@@ -16,7 +16,7 @@ import Hide from '../../../components/Hide/Hide';
 import { FilterData, RepositoryParamsResponse } from '../../../services/Content/ContentApi';
 import { useQueryClient } from 'react-query';
 import { REPOSITORY_PARAMS_KEY } from '../../../services/Content/ContentQueries';
-import useDebounce from '../../../services/useDebounce';
+import useDebounce from '../../../Hooks/useDebounce';
 import AddContent from './AddContent/AddContent';
 import { createUseStyles } from 'react-jss';
 import { isEmpty } from 'lodash';

@@ -24,7 +24,7 @@ import { useFormik } from 'formik';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import Hide from '../../../../components/Hide/Hide';
-import useDebounce from '../../../../services/useDebounce';
+import useDebounce from '../../../../Hooks/useDebounce';
 import {
   REPOSITORY_PARAMS_KEY,
   useEditContentQuery,
@@ -52,6 +52,7 @@ import { isEmpty, isEqual } from 'lodash';
 import ConditionalTooltip from '../../../../components/ConditionalTooltip/ConditionalTooltip';
 import { useAppContext } from '../../../../middleware/AppContext';
 import { useNotification } from '../../../../services/Notifications/Notifications';
+import useDeepCompareEffect from '../../../../Hooks/useDeepCompareEffect';
 
 const green = global_success_color_100.value;
 
@@ -100,6 +101,11 @@ const useStyles = createUseStyles({
   },
   singleContentCol: {
     padding: '8px 0px 0px !important',
+  },
+  gpgKeyInput: {
+    '& .pf-c-form-control': {
+      backgroundPositionX: 'calc(100% - 1.3em)',
+    },
   },
 });
 
@@ -241,7 +247,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
     isLoading: isValidating,
   } = useValidateContentList();
 
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     if (open)
       validateContentList(
         debouncedValues.map(({ name, url, gpgKey, metadataVerification, uuid }) => ({
@@ -348,11 +354,11 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
               key='confirm'
               ouiaId='edit_modal_save'
               variant='primary'
-              isLoading={isEditing}
+              isLoading={actionTakingPlace}
               isDisabled={
                 !changeVerified ||
                 !formik.isValid ||
-                isEditing ||
+                actionTakingPlace ||
                 !valuesHaveChanged ||
                 !isEqual(formik.values, debouncedValues)
               }
@@ -538,6 +544,7 @@ const EditContentModal = ({ values, open, setClosed }: EditContentProps) => {
                       helperTextInvalid={formik.errors[index]?.gpgKey}
                     >
                       <FileUpload
+                        className={classes.gpgKeyInput}
                         validated={getFieldValidation(index, 'gpgKey')}
                         id='gpgKey-uploader'
                         aria-label='gpgkey_file_to_upload'

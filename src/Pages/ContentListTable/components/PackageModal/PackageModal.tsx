@@ -34,7 +34,7 @@ import Hide from '../../../../components/Hide/Hide';
 import { ContentItem, PackageItem } from '../../../../services/Content/ContentApi';
 import { useGetPackagesQuery } from '../../../../services/Content/ContentQueries';
 import { SearchIcon } from '@patternfly/react-icons';
-import useDebounce from '../../../../services/useDebounce';
+import useDebounce from '../../../../Hooks/useDebounce';
 import EmptyPackageState from './components/EmptyPackageState';
 
 const useStyles = createUseStyles({

@@ -33,7 +33,6 @@ import {
   maxUploadSize,
   failedFileUpload,
 } from './helpers';
-import useDebounce from '../../../../services/useDebounce';
 import { useNotification } from '../../../../services/Notifications/Notifications';
 import ContentValidity from './components/ContentValidity';
 import {
@@ -48,6 +47,8 @@ import { useQueryClient } from 'react-query';
 import ConditionalTooltip from '../../../../components/ConditionalTooltip/ConditionalTooltip';
 import { useAppContext } from '../../../../middleware/AppContext';
 import { isEmpty, isEqual } from 'lodash';
+import useDeepCompareEffect from '../../../../Hooks/useDeepCompareEffect';
+import useDebounce from '../../../../Hooks/useDebounce';
 
 interface Props {
   isDisabled?: boolean;
@@ -105,6 +106,11 @@ const useStyles = createUseStyles({
   },
   singleContentCol: {
     padding: '8px 0px 0px !important',
+  },
+  gpgKeyInput: {
+    '& .pf-c-form-control': {
+      backgroundPositionX: 'calc(100% - 1.3em)',
+    },
   },
 });
 
@@ -263,6 +269,8 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
     switch (true) {
       case errors && touched:
         return 'error';
+      case field === 'gpgKey':
+        return 'default';
       case value && touched:
         return 'success';
       default:
@@ -290,7 +298,7 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
     isLoading: isValidating,
   } = useValidateContentList();
 
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     // If validate is getting called to often, we could useDeepCompare
     if (isModalOpen) {
       if (debouncedValues.length !== formik.values.length) debouncedValues = formik.values;
@@ -438,11 +446,11 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
                   key='confirm'
                   ouiaId='modal_save'
                   variant='primary'
-                  isLoading={isAdding}
+                  isLoading={actionTakingPlace}
                   isDisabled={
                     !changeVerified ||
                     !formik.isValid ||
-                    isAdding ||
+                    actionTakingPlace ||
                     formik.values?.length !== debouncedValues?.length
                   }
                   onClick={() => addContent().then(closeModal)}
@@ -634,6 +642,7 @@ const AddContent = ({ isDisabled: isButtonDisabled }: Props) => {
                           helperTextInvalid={formik.errors[index]?.gpgKey}
                         >
                           <FileUpload
+                            className={classes.gpgKeyInput}
                             validated={getFieldValidation(index, 'gpgKey')}
                             id='gpgKey-uploader'
                             aria-label='gpgkey_file_to_upload'

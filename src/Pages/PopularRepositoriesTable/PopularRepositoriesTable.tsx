@@ -34,7 +34,7 @@ import { useAppContext } from '../../middleware/AppContext';
 import ConditionalTooltip from '../../components/ConditionalTooltip/ConditionalTooltip';
 import UrlWithExternalIcon from '../../components/UrlWithLinkIcon/UrlWithLinkIcon';
 import { SearchIcon } from '@patternfly/react-icons';
-import useDebounce from '../../services/useDebounce';
+import useDebounce from '../../Hooks/useDebounce';
 import EmptyTableState from './components/EmptyTableState';
 
 const useStyles = createUseStyles({
