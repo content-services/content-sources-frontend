@@ -56,7 +56,7 @@ it('Render with a single row', () => {
     </ReactQueryTestWrapper>,
   );
 
-  expect(queryByText(defaultIntrospectTask.account_id)).toBeInTheDocument();
+  expect(queryByText(defaultIntrospectTask.account_id as string)).toBeInTheDocument();
   expect(queryByText(defaultIntrospectTask.org_id)).toBeInTheDocument();
   // Capitalize first letter
   expect(

@@ -12,7 +12,7 @@ it('Render with all fields', () => {
   const { queryByText } = render(<AdminTaskInfo adminTask={defaultIntrospectTask} />);
 
   expect(queryByText(defaultIntrospectTask.uuid)).toBeInTheDocument();
-  expect(queryByText(defaultIntrospectTask.account_id)).toBeInTheDocument();
+  expect(queryByText(defaultIntrospectTask.account_id as string)).toBeInTheDocument();
   expect(queryByText(defaultIntrospectTask.org_id)).toBeInTheDocument();
   expect(queryByText(defaultIntrospectTask.typename)).toBeInTheDocument();
   expect(queryByText(defaultIntrospectTask.status)).toBeInTheDocument();

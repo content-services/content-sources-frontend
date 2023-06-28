@@ -1,16 +1,13 @@
 import {
   Bullseye,
-  Button,
   Modal,
   ModalVariant,
-  Popover,
   Spinner,
   Tab,
   TabContent,
   TabTitleText,
   Tabs,
 } from '@patternfly/react-core';
-import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { createUseStyles } from 'react-jss';
 import { createRef, useMemo, useState } from 'react';
 import { AdminTask } from '../../../../services/AdminTasks/AdminTaskApi';
@@ -105,16 +102,6 @@ const ViewPayloadModal = ({ adminTask, open, isFetching, setClosed }: ViewPayloa
       ouiaId='task_details'
       ouiaSafe={!actionTakingPlace}
       aria-label='Task details'
-      help={
-        <Popover
-          headerContent={<div>Task Details</div>}
-          bodyContent={<div>Use this to view the full details of a task.</div>}
-        >
-          <Button variant='plain' aria-label='Help'>
-            <OutlinedQuestionCircleIcon />
-          </Button>
-        </Popover>
-      }
       isOpen={open}
       onClose={setClosed}
       header={
