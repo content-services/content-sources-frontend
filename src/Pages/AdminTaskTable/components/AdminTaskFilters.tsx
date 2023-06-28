@@ -13,7 +13,7 @@ import DropdownSelect from '../../../components/DropdownSelect/DropdownSelect';
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import { global_BackgroundColor_100, global_secondary_color_100 } from '@patternfly/react-tokens';
 import Hide from '../../../components/Hide/Hide';
-import useDebounce from '../../../services/useDebounce';
+import useDebounce from '../../../Hooks/useDebounce';
 import { createUseStyles } from 'react-jss';
 import { AdminTaskFilterData } from '../../../services/AdminTasks/AdminTaskApi';
 

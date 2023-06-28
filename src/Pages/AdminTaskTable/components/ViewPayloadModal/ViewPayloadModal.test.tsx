@@ -11,7 +11,7 @@ jest.mock('../../../../services/Notifications/Notifications', () => ({
   useNotification: () => ({ notify: () => null }),
 }));
 
-jest.mock('../../../../services/useDebounce', () => (value) => value);
+jest.mock('../../../../Hooks/useDebounce', () => (value) => value);
 jest.mock('../../../../middleware/AppContext', () => ({ useAppContext: () => ({}) }));
 
 it('Render loading spinner', async () => {
