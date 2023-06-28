@@ -15,7 +15,7 @@ export interface SnapshotPayload {
 
 export interface AdminTask {
   uuid: string;
-  account_id: string;
+  account_id?: string;
   org_id: string;
   typename: string;
   status: 'running' | 'failed' | 'completed' | 'canceled' | 'pending';

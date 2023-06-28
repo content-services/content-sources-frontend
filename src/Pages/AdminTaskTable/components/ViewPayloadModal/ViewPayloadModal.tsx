@@ -13,7 +13,7 @@ import {
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { createUseStyles } from 'react-jss';
 import { createRef, useMemo, useState } from 'react';
-import { AdminTask, SnapshotPayload } from '../../../../services/AdminTasks/AdminTaskApi';
+import { AdminTask } from '../../../../services/AdminTasks/AdminTaskApi';
 import AdminTaskInfo from './components/AdminTaskInfo';
 import ReactJson from 'react-json-view';
 import Hide from '../../../../components/Hide/Hide';
@@ -38,7 +38,6 @@ export interface TabData {
 }
 
 const ViewPayloadModal = ({ adminTask, open, isFetching, setClosed }: ViewPayloadProps) => {
-  if (!open) return <></>;
   const classes = useStyles();
 
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
@@ -96,6 +95,8 @@ const ViewPayloadModal = ({ adminTask, open, isFetching, setClosed }: ViewPayloa
   const actionTakingPlace = isFetching;
 
   const isLoading = !adminTask || isFetching;
+
+  if (!open) return <></>;
 
   return (
     <Modal

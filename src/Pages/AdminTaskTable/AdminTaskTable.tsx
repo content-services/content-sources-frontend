@@ -67,8 +67,8 @@ const AdminTaskTable = () => {
   const storedPerPage = Number(localStorage.getItem('perPage')) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
-  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [activeSortIndex, setActiveSortIndex] = useState<number>(3); // queued_at
+  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('desc');
   const [payloadOpen, setPayloadOpen] = useState(false);
   const { fetchAdminTask, isLoading: isFetchingAdminTask } = useFetchAdminTaskQuery();
   const [adminTask, setAdminTask] = useState<AdminTask | null>(null);
@@ -228,7 +228,7 @@ const AdminTaskTable = () => {
                 ({ uuid, account_id, org_id, status, queued_at, typename }: AdminTask) => (
                   <Tr key={uuid}>
                     <Td>{org_id}</Td>
-                    <Td>{account_id}</Td>
+                    <Td>{account_id ? account_id : 'Unknown'}</Td>
                     <Td>{typename}</Td>
                     <Td>{formatDate(queued_at)}</Td>
                     <Td>
