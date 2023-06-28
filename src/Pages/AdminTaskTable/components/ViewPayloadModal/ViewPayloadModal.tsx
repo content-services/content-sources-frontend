@@ -103,7 +103,10 @@ const ViewPayloadModal = ({ adminTask, open, isFetching, setClosed }: ViewPayloa
       ouiaSafe={!actionTakingPlace}
       aria-label='Task details'
       isOpen={open}
-      onClose={setClosed}
+      onClose={() => {
+        setActiveTabKey(0);
+        setClosed();
+      }}
       header={
         <Tabs
           activeKey={activeTabKey}
