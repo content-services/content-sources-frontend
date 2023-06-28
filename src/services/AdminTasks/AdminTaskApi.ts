@@ -7,7 +7,7 @@ export interface AdminTaskFilterData {
   orgId: string;
 }
 
-export interface SnapshotPayload {
+export interface PulpData {
   sync?: Record<string, unknown>;
   publication?: Record<string, unknown>;
   distribution?: Record<string, unknown>;
@@ -24,7 +24,7 @@ export interface AdminTask {
   finished_at: string;
   error: string;
   payload: Record<string, unknown>;
-  pulp?: SnapshotPayload;
+  pulp?: PulpData;
 }
 
 export type AdminTaskList = AdminTask[];
