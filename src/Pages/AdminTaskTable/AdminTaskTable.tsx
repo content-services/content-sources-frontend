@@ -74,9 +74,9 @@ const AdminTaskTable = () => {
   const [adminTask, setAdminTask] = useState<AdminTask | null>(null);
 
   const [filterData, setFilterData] = useState<AdminTaskFilterData>({
-    statuses: [],
     accountId: '',
     orgId: '',
+    statuses: [],
   });
 
   const clearFilters = () => setFilterData({ statuses: [], accountId: '', orgId: '' });
