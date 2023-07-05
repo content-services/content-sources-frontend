@@ -23,7 +23,7 @@ export interface AdminTask {
   started_at: string;
   finished_at: string;
   error: string;
-  payload: Record<string, unknown>;
+  payload?: Record<string, unknown>;
   pulp?: PulpData;
 }
 
@@ -43,7 +43,7 @@ export const getAdminTasks: (
 ) => Promise<AdminTaskListResponse> = async (page, limit, filterData, sortBy) => {
   const accountIdParam = filterData.accountId;
   const orgIdParam = filterData.orgId;
-  const statusParam = filterData?.statuses?.join(',');
+  const statusParam = filterData?.statuses?.join(',').toLowerCase();
   const { data } = await axios.get(
     `/api/content-sources/v1/admin/tasks/?offset=${
       (page - 1) * limit

@@ -6,29 +6,50 @@ import {
 import ViewPayloadModal from './ViewPayloadModal';
 import { fireEvent, render } from '@testing-library/react';
 import { AdminTask } from '../../../../services/AdminTasks/AdminTaskApi';
+import { useFetchAdminTaskQuery } from '../../../../services/AdminTasks/AdminTaskQueries';
 
 jest.mock('../../../../services/Notifications/Notifications', () => ({
   useNotification: () => ({ notify: () => null }),
+}));
+
+jest.mock('../../../../services/AdminTasks/AdminTaskQueries', () => ({
+  useFetchAdminTaskQuery: jest.fn(),
 }));
 
 jest.mock('../../../../Hooks/useDebounce', () => (value) => value);
 jest.mock('../../../../middleware/AppContext', () => ({ useAppContext: () => ({}) }));
 
 it('Render loading spinner', async () => {
+  (useFetchAdminTaskQuery as jest.Mock).mockImplementation(() => ({
+    isFetching: true,
+    isLoading: true,
+    data: undefined,
+  }));
   render(
     <ReactQueryTestWrapper>
-      <ViewPayloadModal open isFetching={true} adminTask={null} setClosed={() => undefined} />
+      <ViewPayloadModal
+        open
+        uuid={defaultIntrospectTask.uuid}
+        status={defaultIntrospectTask.status}
+        setClosed={() => undefined}
+      />
     </ReactQueryTestWrapper>,
   );
 });
 
 it('Open introspect task details and click tabs', async () => {
+  (useFetchAdminTaskQuery as jest.Mock).mockImplementation(() => ({
+    isFetching: false,
+    isLoading: false,
+    data: defaultIntrospectTask,
+  }));
+
   const { queryByText } = render(
     <ReactQueryTestWrapper>
       <ViewPayloadModal
         open
-        isFetching={false}
-        adminTask={defaultIntrospectTask}
+        uuid={defaultIntrospectTask.uuid}
+        status={defaultIntrospectTask.status}
         setClosed={() => undefined}
       />
     </ReactQueryTestWrapper>,
@@ -54,12 +75,18 @@ it('Open introspect task details and click tabs', async () => {
 });
 
 it('Open snapshot details and click tabs', async () => {
+  (useFetchAdminTaskQuery as jest.Mock).mockImplementation(() => ({
+    isFetching: false,
+    isLoading: false,
+    data: defaultSnapshotTask,
+  }));
+
   const { queryByText } = render(
     <ReactQueryTestWrapper>
       <ViewPayloadModal
         open
-        isFetching={false}
-        adminTask={defaultSnapshotTask}
+        uuid={defaultSnapshotTask.uuid}
+        status={defaultSnapshotTask.status}
         setClosed={() => undefined}
       />
     </ReactQueryTestWrapper>,
@@ -113,12 +140,18 @@ it('Open snapshot task without all pulp tasks', async () => {
       distribution: undefined,
     },
   };
+  (useFetchAdminTaskQuery as jest.Mock).mockImplementation(() => ({
+    isFetching: false,
+    isLoading: false,
+    data: missingDistribution,
+  }));
+
   const { queryByText } = render(
     <ReactQueryTestWrapper>
       <ViewPayloadModal
         open
-        isFetching={false}
-        adminTask={missingDistribution}
+        uuid={missingDistribution.uuid}
+        status={missingDistribution.status}
         setClosed={() => undefined}
       />
     </ReactQueryTestWrapper>,

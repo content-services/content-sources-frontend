@@ -30,10 +30,7 @@ import AdminTaskFilters from './components/AdminTaskFilters';
 import ViewPayloadModal from './components/ViewPayloadModal/ViewPayloadModal';
 import dayjs from 'dayjs';
 import StatusIcon from './components/StatusIcon';
-import {
-  useAdminTaskListQuery,
-  useFetchAdminTaskQuery,
-} from '../../services/AdminTasks/AdminTaskQueries';
+import { useAdminTaskListQuery } from '../../services/AdminTasks/AdminTaskQueries';
 import { AdminTaskFilterData, AdminTask } from '../../services/AdminTasks/AdminTaskApi';
 
 const useStyles = createUseStyles({
@@ -70,8 +67,7 @@ const AdminTaskTable = () => {
   const [activeSortIndex, setActiveSortIndex] = useState<number>(3); // queued_at
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('desc');
   const [payloadOpen, setPayloadOpen] = useState(false);
-  const { fetchAdminTask, isLoading: isFetchingAdminTask } = useFetchAdminTaskQuery();
-  const [adminTask, setAdminTask] = useState<AdminTask | null>(null);
+  const [adminTask, setAdminTask] = useState<AdminTask | undefined>(undefined);
 
   const [filterData, setFilterData] = useState<AdminTaskFilterData>({
     accountId: '',
@@ -161,13 +157,10 @@ const AdminTaskTable = () => {
       className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
     >
       <ViewPayloadModal
-        setClosed={() => {
-          setAdminTask(null);
-          setPayloadOpen(false);
-        }}
-        isFetching={isFetchingAdminTask}
+        setClosed={() => setPayloadOpen(false)}
         open={payloadOpen}
-        adminTask={adminTask}
+        uuid={adminTask?.uuid}
+        status={adminTask?.status}
       />
       <Flex className={classes.topContainer}>
         <AdminTaskFilters
@@ -224,32 +217,29 @@ const AdminTaskTable = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {adminTaskList.map(
-                ({ uuid, account_id, org_id, status, queued_at, typename }: AdminTask) => (
-                  <Tr key={uuid}>
-                    <Td>{org_id}</Td>
-                    <Td>{account_id ? account_id : 'Unknown'}</Td>
-                    <Td>{typename}</Td>
-                    <Td>{formatDate(queued_at)}</Td>
-                    <Td>
-                      <StatusIcon status={status} />
-                    </Td>
-                    <Td width={10}>
-                      <Button
-                        onClick={async () => {
-                          setPayloadOpen(true);
-                          const adminTask = await fetchAdminTask(uuid);
-                          setAdminTask(adminTask);
-                        }}
-                        variant='secondary'
-                        ouiaId='view_task_details'
-                      >
-                        View Details
-                      </Button>
-                    </Td>
-                  </Tr>
-                ),
-              )}
+              {adminTaskList.map((adminTask: AdminTask) => (
+                <Tr key={adminTask.uuid}>
+                  <Td>{adminTask.org_id}</Td>
+                  <Td>{adminTask.account_id ? adminTask.account_id : 'Unknown'}</Td>
+                  <Td>{adminTask.typename}</Td>
+                  <Td>{formatDate(adminTask.queued_at)}</Td>
+                  <Td>
+                    <StatusIcon status={adminTask.status} />
+                  </Td>
+                  <Td width={10}>
+                    <Button
+                      onClick={async () => {
+                        setPayloadOpen(true);
+                        setAdminTask(adminTask);
+                      }}
+                      variant='secondary'
+                      ouiaId='view_task_details'
+                    >
+                      View Details
+                    </Button>
+                  </Td>
+                </Tr>
+              ))}
             </Tbody>
           </TableComposable>
           <Flex className={classes.bottomContainer}>

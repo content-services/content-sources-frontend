@@ -14,6 +14,7 @@ import { AdminTask } from '../../../../services/AdminTasks/AdminTaskApi';
 import AdminTaskInfo from './components/AdminTaskInfo';
 import ReactJson from 'react-json-view';
 import Hide from '../../../../components/Hide/Hide';
+import { useFetchAdminTaskQuery } from '../../../../services/AdminTasks/AdminTaskQueries';
 
 const useStyles = createUseStyles({
   jsonView: {
@@ -24,8 +25,8 @@ const useStyles = createUseStyles({
 export interface ViewPayloadProps {
   setClosed: () => void;
   open: boolean;
-  isFetching: boolean;
-  adminTask: AdminTask | null;
+  uuid?: string;
+  status?: AdminTask['status'];
 }
 
 export interface TabData {
@@ -34,11 +35,13 @@ export interface TabData {
   contentRef: React.RefObject<HTMLElement>;
 }
 
-const ViewPayloadModal = ({ adminTask, open, isFetching, setClosed }: ViewPayloadProps) => {
+const ViewPayloadModal = ({ uuid, status, open, setClosed }: ViewPayloadProps) => {
   const classes = useStyles();
 
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
   const detailRef = createRef<HTMLElement>();
+
+  const { isLoading, isFetching, data: adminTask } = useFetchAdminTaskQuery(uuid, status);
 
   const handleTabClick = (_, tabIndex: string | number) => {
     setActiveTabKey(tabIndex);
@@ -51,11 +54,13 @@ const ViewPayloadModal = ({ adminTask, open, isFetching, setClosed }: ViewPayloa
       return tabs;
     }
 
-    tabs.push({
-      title: 'Payload',
-      data: adminTask.payload,
-      contentRef: createRef<HTMLElement>(),
-    });
+    if (adminTask.payload) {
+      tabs.push({
+        title: 'Payload',
+        data: adminTask.payload,
+        contentRef: createRef<HTMLElement>(),
+      });
+    }
 
     switch (adminTask.typename) {
       case 'snapshot': {
@@ -87,11 +92,9 @@ const ViewPayloadModal = ({ adminTask, open, isFetching, setClosed }: ViewPayloa
       }
     }
     return tabs;
-  }, [adminTask?.uuid]);
+  }, [adminTask?.uuid, isFetching]);
 
   const actionTakingPlace = isFetching;
-
-  const isLoading = !adminTask || isFetching;
 
   if (!open) return <></>;
 
@@ -108,30 +111,32 @@ const ViewPayloadModal = ({ adminTask, open, isFetching, setClosed }: ViewPayloa
         setClosed();
       }}
       header={
-        <Tabs
-          activeKey={activeTabKey}
-          onSelect={handleTabClick}
-          aria-label='Task tabs'
-          ouiaId='task-tabs'
-        >
-          <Tab
-            title={<TabTitleText>Task details</TabTitleText>}
-            aria-label='Task details'
-            ouiaId='task-details'
-            eventKey={0}
-            tabContentRef={detailRef}
-          />
-          {tabs.map(({ title, contentRef }) => (
+        <Hide hide={isLoading}>
+          <Tabs
+            activeKey={activeTabKey}
+            onSelect={handleTabClick}
+            aria-label='Task tabs'
+            ouiaId='task-tabs'
+          >
             <Tab
-              key={title}
-              eventKey={title}
-              aria-label={title}
-              ouiaId={title}
-              tabContentRef={contentRef}
-              title={<TabTitleText>{title}</TabTitleText>}
+              title={<TabTitleText>Task details</TabTitleText>}
+              aria-label='Task details'
+              ouiaId='task-details'
+              eventKey={0}
+              tabContentRef={detailRef}
             />
-          ))}
-        </Tabs>
+            {tabs.map(({ title, contentRef }) => (
+              <Tab
+                key={title}
+                eventKey={title}
+                aria-label={title}
+                ouiaId={title}
+                tabContentRef={contentRef}
+                title={<TabTitleText>{title}</TabTitleText>}
+              />
+            ))}
+          </Tabs>
+        </Hide>
       }
     >
       <Hide hide={!isLoading}>

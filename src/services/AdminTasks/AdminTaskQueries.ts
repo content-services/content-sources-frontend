@@ -11,6 +11,7 @@ import {
 } from './AdminTaskApi';
 
 export const ADMIN_TASK_LIST_KEY = 'ADMIN_TASK_LIST_KEY';
+export const ADMIN_TASK_KEY = 'ADMIN_TASK_KEY';
 
 const ADMIN_TASK_LIST_POLLING_TIME = 15000; // 15 seconds
 
@@ -57,27 +58,23 @@ export const useAdminTaskListQuery = (
   );
 };
 
-export const useFetchAdminTaskQuery = () => {
-  const [isLoading, setIsLoading] = useState(false);
+export const useFetchAdminTaskQuery = (uuid?: string, status?: AdminTask['status']) => {
   const { notify } = useNotification();
 
-  const fetchAdminTask = async (uuid: string): Promise<AdminTask | null> => {
-    setIsLoading(true);
-    let adminTask: AdminTask | null = null;
-    try {
-      adminTask = await getAdminTask(uuid);
-    } catch ({ response = {} }: any) {
-      const { data } = response as { data: { message: string | undefined } | string };
-      const description = typeof data === 'string' ? data : data?.message;
-      notify({
-        variant: AlertVariant.danger,
-        title: 'Error fetching admin task from UUID',
-        description,
-      });
-    }
-    setIsLoading(false);
-    return adminTask;
-  };
-
-  return { fetchAdminTask, isLoading };
+  return useQuery<AdminTask>(
+    [ADMIN_TASK_KEY, uuid, status],
+    () => getAdminTask(uuid as string), // Will be disabled if undefined
+    {
+      onError(err) {
+        const { data } = err as { data: { message: string | undefined } | string };
+        const description = typeof data === 'string' ? data : data?.message;
+        notify({
+          variant: AlertVariant.danger,
+          title: 'Error fetching admin task from UUID',
+          description,
+        });
+      },
+      enabled: !!uuid,
+    },
+  );
 };

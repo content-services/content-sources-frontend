@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   Chip,
@@ -98,8 +98,11 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
     });
   }, [debouncedAccountId, debouncedOrgId, debouncedSelectedStatuses]);
 
-  const getSelectionByType = (): ReactElement => {
-    switch (filterType) {
+  interface FilterProps {
+    filter: AdminTaskFilters;
+  }
+  const Filter = ({ filter }: FilterProps) => {
+    switch (filter) {
       case 'Account ID':
         return (
           <Flex>
@@ -166,7 +169,9 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
               toggleIcon={<FilterIcon />}
             />
           </FlexItem>
-          <FlexItem>{getSelectionByType()}</FlexItem>
+          <FlexItem>
+            <Filter filter={filterType} />
+          </FlexItem>
         </InputGroup>
       </FlexItem>
       <Hide hide={!(accountId !== '' || orgId !== '' || selectedStatuses.length)}>

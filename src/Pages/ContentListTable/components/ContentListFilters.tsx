@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   Chip,
@@ -154,8 +154,11 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
     }
   }, [distribution_arches, distribution_versions]);
 
-  const getSelectionByType = (): ReactElement => {
-    switch (filterType) {
+  interface FilterProps {
+    filter: Filters;
+  }
+  const Filter = ({ filter }: FilterProps) => {
+    switch (filter) {
       case 'Name/URL':
         return (
           <Flex>
@@ -235,7 +238,9 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
               toggleIcon={<FilterIcon />}
             />
           </FlexItem>
-          <FlexItem>{getSelectionByType()}</FlexItem>
+          <FlexItem>
+            <Filter filter={filterType} />
+          </FlexItem>
         </InputGroup>
       </FlexItem>
       <FlexItem>
