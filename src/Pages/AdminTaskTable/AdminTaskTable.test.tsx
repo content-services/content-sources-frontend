@@ -24,6 +24,9 @@ it('expect AdminTaskTable to render with a loading skeleton', () => {
   );
 
   expect(queryByText('No tasks')).toBeInTheDocument();
+  expect(
+    queryByText('Certain actions, such as repository introspection, will start a task'),
+  ).toBeInTheDocument();
 });
 
 it('Render a loading state', () => {

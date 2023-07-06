@@ -136,6 +136,7 @@ const AdminTaskTable = () => {
   } = data;
 
   const itemName = 'tasks';
+  const notFilteredBody = 'Certain actions, such as repository introspection, will start a task';
 
   const countIsZero = count === 0;
 
@@ -146,6 +147,7 @@ const AdminTaskTable = () => {
           notFiltered={notFiltered}
           clearFilters={clearFilters}
           itemName={itemName}
+          notFilteredBody={notFilteredBody}
         />
       </Bullseye>
     );
@@ -265,6 +267,7 @@ const AdminTaskTable = () => {
           notFiltered={notFiltered}
           clearFilters={clearFilters}
           itemName={itemName}
+          notFilteredBody={notFilteredBody}
         />
       </Hide>
     </Grid>
