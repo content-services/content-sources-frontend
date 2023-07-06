@@ -172,20 +172,69 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
             />
           </FlexItem>
           <FlexItem>
-            <Filter
-              filterType={filterType}
-              isLoading={isLoading}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              versionNamesLabels={versionNamesLabels}
-              selectedVersions={selectedVersions}
-              setSelectedVersions={setSelectedVersions}
-              archNamesLabels={archNamesLabels}
-              selectedArches={selectedArches}
-              setSelectedArches={setSelectedArches}
-              selectedStatuses={selectedStatuses}
-              setSelectedStatuses={setSelectedStatuses}
-            />
+            {(() => {
+              switch (filterType) {
+                case 'Name/URL':
+                  return (
+                    <Flex>
+                      <TextInput
+                        isDisabled={isLoading}
+                        id='search'
+                        ouiaId='filter_search'
+                        placeholder='Filter by name/url'
+                        value={searchQuery}
+                        onChange={(value) => setSearchQuery(value)}
+                        className={classes.searchInput}
+                      />
+                      <SearchIcon size='sm' className={classes.searchIcon} />
+                    </Flex>
+                  );
+                case 'Version':
+                  return (
+                    <DropdownSelect
+                      toggleAriaLabel='filter version'
+                      toggleId='versionSelect'
+                      ouiaId='filter_version'
+                      isDisabled={isLoading}
+                      options={Object.keys(versionNamesLabels)}
+                      variant={SelectVariant.checkbox}
+                      selectedProp={selectedVersions}
+                      setSelected={setSelectedVersions}
+                      placeholderText='Filter by version'
+                    />
+                  );
+                case 'Architecture':
+                  return (
+                    <DropdownSelect
+                      toggleAriaLabel='filter architecture'
+                      toggleId='archSelect'
+                      ouiaId='filter_arch'
+                      isDisabled={isLoading}
+                      options={Object.keys(archNamesLabels)}
+                      variant={SelectVariant.checkbox}
+                      selectedProp={selectedArches}
+                      setSelected={setSelectedArches}
+                      placeholderText='Filter by architecture'
+                    />
+                  );
+                case 'Status':
+                  return (
+                    <DropdownSelect
+                      toggleAriaLabel='filter status'
+                      toggleId='statusSelect'
+                      ouiaId='filter_status'
+                      isDisabled={isLoading}
+                      options={statusValues}
+                      variant={SelectVariant.checkbox}
+                      selectedProp={selectedStatuses}
+                      setSelected={setSelectedStatuses}
+                      placeholderText='Filter by status'
+                    />
+                  );
+                default:
+                  return <></>;
+              }
+            })()}
           </FlexItem>
         </InputGroup>
       </FlexItem>
@@ -255,100 +304,6 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
       </Hide>
     </Flex>
   );
-};
-
-interface FilterProps {
-  filterType: Filters;
-  isLoading: boolean | undefined;
-  searchQuery: string;
-  setSearchQuery: (searchQuery: string) => void;
-  versionNamesLabels: Record<string, unknown>;
-  selectedVersions: string[];
-  setSelectedVersions: (selectedVersions: string[]) => void;
-  archNamesLabels: Record<string, unknown>;
-  selectedArches: string[];
-  setSelectedArches: (selectedArches: string[]) => void;
-  selectedStatuses: string[];
-  setSelectedStatuses: (selectedStatuses: string[]) => void;
-}
-
-const Filter = ({
-  filterType,
-  isLoading,
-  searchQuery,
-  setSearchQuery,
-  versionNamesLabels,
-  selectedVersions,
-  setSelectedVersions,
-  archNamesLabels,
-  selectedArches,
-  setSelectedArches,
-  selectedStatuses,
-  setSelectedStatuses,
-}: FilterProps) => {
-  const classes = useStyles();
-
-  switch (filterType) {
-    case 'Name/URL':
-      return (
-        <Flex>
-          <TextInput
-            isDisabled={isLoading}
-            id='search'
-            ouiaId='filter_search'
-            placeholder='Filter by name/url'
-            value={searchQuery}
-            onChange={(value) => setSearchQuery(value)}
-            className={classes.searchInput}
-          />
-          <SearchIcon size='sm' className={classes.searchIcon} />
-        </Flex>
-      );
-    case 'Version':
-      return (
-        <DropdownSelect
-          toggleAriaLabel='filter version'
-          toggleId='versionSelect'
-          ouiaId='filter_version'
-          isDisabled={isLoading}
-          options={Object.keys(versionNamesLabels)}
-          variant={SelectVariant.checkbox}
-          selectedProp={selectedVersions}
-          setSelected={setSelectedVersions}
-          placeholderText='Filter by version'
-        />
-      );
-    case 'Architecture':
-      return (
-        <DropdownSelect
-          toggleAriaLabel='filter architecture'
-          toggleId='archSelect'
-          ouiaId='filter_arch'
-          isDisabled={isLoading}
-          options={Object.keys(archNamesLabels)}
-          variant={SelectVariant.checkbox}
-          selectedProp={selectedArches}
-          setSelected={setSelectedArches}
-          placeholderText='Filter by architecture'
-        />
-      );
-    case 'Status':
-      return (
-        <DropdownSelect
-          toggleAriaLabel='filter status'
-          toggleId='statusSelect'
-          ouiaId='filter_status'
-          isDisabled={isLoading}
-          options={statusValues}
-          variant={SelectVariant.checkbox}
-          selectedProp={selectedStatuses}
-          setSelected={setSelectedStatuses}
-          placeholderText='Filter by status'
-        />
-      );
-    default:
-      return <></>;
-  }
 };
 
 export default ContentListFilters;
