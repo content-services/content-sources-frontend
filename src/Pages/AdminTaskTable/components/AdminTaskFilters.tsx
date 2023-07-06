@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Chip,
@@ -98,6 +98,57 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
     });
   }, [debouncedAccountId, debouncedOrgId, debouncedSelectedStatuses]);
 
+  const Filter = useMemo(() => {
+    switch (filterType) {
+      case 'Account ID':
+        return (
+          <Flex>
+            <TextInput
+              isDisabled={isLoading}
+              id='account-id'
+              ouiaId='filter_account_id'
+              placeholder='Filter by account ID'
+              value={accountId}
+              onChange={(value) => setAccountId(value)}
+              className={classes.searchInput}
+            />
+            <SearchIcon size='sm' className={classes.searchIcon} />
+          </Flex>
+        );
+      case 'Org ID':
+        return (
+          <Flex>
+            <TextInput
+              isDisabled={isLoading}
+              id='org-id'
+              ouiaId='filter_org_id'
+              placeholder='Filter by org ID'
+              value={orgId}
+              onChange={(value) => setOrgId(value)}
+              className={classes.searchInput}
+            />
+            <SearchIcon size='sm' className={classes.searchIcon} />
+          </Flex>
+        );
+      case 'Status':
+        return (
+          <DropdownSelect
+            toggleAriaLabel='filter status'
+            toggleId='statusSelect'
+            ouiaId='filter_status'
+            isDisabled={isLoading}
+            options={statusValues}
+            variant={SelectVariant.checkbox}
+            selectedProp={selectedStatuses}
+            setSelected={setSelectedStatuses}
+            placeholderText='Filter by status'
+          />
+        );
+      default:
+        return <></>;
+    }
+  }, [filterType, isLoading, accountId, orgId, selectedStatuses]);
+
   return (
     <Flex>
       <FlexItem>
@@ -115,58 +166,7 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
               toggleIcon={<FilterIcon />}
             />
           </FlexItem>
-          <FlexItem>
-            {(() => {
-              switch (filterType) {
-                case 'Account ID':
-                  return (
-                    <Flex>
-                      <TextInput
-                        isDisabled={isLoading}
-                        id='account-id'
-                        ouiaId='filter_account_id'
-                        placeholder='Filter by account ID'
-                        value={accountId}
-                        onChange={(value) => setAccountId(value)}
-                        className={classes.searchInput}
-                      />
-                      <SearchIcon size='sm' className={classes.searchIcon} />
-                    </Flex>
-                  );
-                case 'Org ID':
-                  return (
-                    <Flex>
-                      <TextInput
-                        isDisabled={isLoading}
-                        id='org-id'
-                        ouiaId='filter_org_id'
-                        placeholder='Filter by org ID'
-                        value={orgId}
-                        onChange={(value) => setOrgId(value)}
-                        className={classes.searchInput}
-                      />
-                      <SearchIcon size='sm' className={classes.searchIcon} />
-                    </Flex>
-                  );
-                case 'Status':
-                  return (
-                    <DropdownSelect
-                      toggleAriaLabel='filter status'
-                      toggleId='statusSelect'
-                      ouiaId='filter_status'
-                      isDisabled={isLoading}
-                      options={statusValues}
-                      variant={SelectVariant.checkbox}
-                      selectedProp={selectedStatuses}
-                      setSelected={setSelectedStatuses}
-                      placeholderText='Filter by status'
-                    />
-                  );
-                default:
-                  return <></>;
-              }
-            })()}
-          </FlexItem>
+          <FlexItem>{Filter}</FlexItem>
         </InputGroup>
       </FlexItem>
       <Hide hide={!(accountId !== '' || orgId !== '' || selectedStatuses.length)}>
