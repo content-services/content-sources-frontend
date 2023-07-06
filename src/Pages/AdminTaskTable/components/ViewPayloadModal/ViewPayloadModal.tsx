@@ -159,7 +159,13 @@ const ViewPayloadModal = ({ uuid, status, open, setClosed }: ViewPayloadProps) =
             ref={contentRef}
             hidden
           >
-            <ReactJson name={null} src={data} />
+            <ReactJson
+              name={null}
+              src={data}
+              enableClipboard={(copy) => {
+                navigator.clipboard.writeText(JSON.stringify(copy.src, null, '\t'));
+              }}
+            />
           </TabContent>
         ))}
       </Hide>
