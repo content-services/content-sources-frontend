@@ -27,6 +27,7 @@ import {
   introspectRepository,
   IntrospectRepositoryRequestItem,
 } from './ContentApi';
+import { ADMIN_TASK_LIST_KEY } from '../AdminTasks/AdminTaskQueries';
 
 export const CONTENT_LIST_KEY = 'CONTENT_LIST_KEY';
 export const POPULAR_REPOSITORIES_LIST_KEY = 'POPULAR_REPOSITORIES_LIST_KEY';
@@ -115,6 +116,7 @@ export const useAddContentQuery = (queryClient: QueryClient, request: CreateCont
       });
 
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
       queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
     },
     onError: (err: { response?: { data: ErrorResponse } }) => {
@@ -193,6 +195,7 @@ export const useAddPopularRepositoryQuery = (
       });
 
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
       queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
     },
     onError: (err, _newData, context) => {
@@ -221,6 +224,7 @@ export const useEditContentQuery = (queryClient: QueryClient, request: EditConte
         title: `Successfully edited ${request.length} ${request.length > 1 ? 'items' : 'item'}`,
       });
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
       queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
     },
     onError: (err: { response?: { data: ErrorResponse } }) => {
@@ -302,6 +306,7 @@ export const useDeletePopularRepositoryMutate = (
     },
     onSuccess: () => {
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
       queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
     },
     // If the mutation fails, use the context returned from onMutate to roll back
@@ -373,6 +378,7 @@ export const useDeleteContentItemMutate = (
         return data;
       });
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
       queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
     },
     // If the mutation fails, use the context returned from onMutate to roll back
@@ -496,6 +502,7 @@ export const useIntrospectRepositoryMutate = (
         variant: AlertVariant.success,
         title: 'Repository introspection in progress',
       });
+      queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
     },
     // If the mutation fails, use the context returned from onMutate to roll back
     onError: (err: { response?: { data: ErrorResponse } }, _newData, context) => {
