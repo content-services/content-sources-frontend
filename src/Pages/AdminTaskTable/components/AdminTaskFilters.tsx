@@ -98,60 +98,6 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
     });
   }, [debouncedAccountId, debouncedOrgId, debouncedSelectedStatuses]);
 
-  interface FilterProps {
-    filter: AdminTaskFilters;
-  }
-  const Filter = ({ filter }: FilterProps) => {
-    switch (filter) {
-      case 'Account ID':
-        return (
-          <Flex>
-            <TextInput
-              isDisabled={isLoading}
-              id='account-id'
-              ouiaId='filter_account_id'
-              placeholder='Filter by account ID'
-              value={accountId}
-              onChange={(value) => setAccountId(value)}
-              className={classes.searchInput}
-            />
-            <SearchIcon size='sm' className={classes.searchIcon} />
-          </Flex>
-        );
-      case 'Org ID':
-        return (
-          <Flex>
-            <TextInput
-              isDisabled={isLoading}
-              id='org-id'
-              ouiaId='filter_org_id'
-              placeholder='Filter by org ID'
-              value={orgId}
-              onChange={(value) => setOrgId(value)}
-              className={classes.searchInput}
-            />
-            <SearchIcon size='sm' className={classes.searchIcon} />
-          </Flex>
-        );
-      case 'Status':
-        return (
-          <DropdownSelect
-            toggleAriaLabel='filter status'
-            toggleId='statusSelect'
-            ouiaId='filter_status'
-            isDisabled={isLoading}
-            options={statusValues}
-            variant={SelectVariant.checkbox}
-            selectedProp={selectedStatuses}
-            setSelected={setSelectedStatuses}
-            placeholderText='Filter by status'
-          />
-        );
-      default:
-        return <></>;
-    }
-  };
-
   return (
     <Flex>
       <FlexItem>
@@ -170,7 +116,16 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
             />
           </FlexItem>
           <FlexItem>
-            <Filter filter={filterType} />
+            <Filter
+              filterType={filterType}
+              isLoading={isLoading}
+              accountId={accountId}
+              setAccountId={setAccountId}
+              orgId={orgId}
+              setOrgId={setOrgId}
+              selectedStatuses={selectedStatuses}
+              setSelectedStatuses={setSelectedStatuses}
+            />
           </FlexItem>
         </InputGroup>
       </FlexItem>
@@ -211,6 +166,78 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
       </Hide>
     </Flex>
   );
+};
+
+interface FilterProps {
+  filterType: AdminTaskFilters;
+  isLoading: boolean | undefined;
+  accountId: string;
+  setAccountId: (accountId: string) => void;
+  orgId: string;
+  setOrgId: (orgId: string) => void;
+  selectedStatuses: string[];
+  setSelectedStatuses: (selectedStatuses: string[]) => void;
+}
+
+const Filter = ({
+  filterType,
+  isLoading,
+  accountId,
+  setAccountId,
+  orgId,
+  setOrgId,
+  selectedStatuses,
+  setSelectedStatuses,
+}: FilterProps) => {
+  const classes = useStyles();
+  switch (filterType) {
+    case 'Account ID':
+      return (
+        <Flex>
+          <TextInput
+            isDisabled={isLoading}
+            id='account-id'
+            ouiaId='filter_account_id'
+            placeholder='Filter by account ID'
+            value={accountId}
+            onChange={(value) => setAccountId(value)}
+            className={classes.searchInput}
+          />
+          <SearchIcon size='sm' className={classes.searchIcon} />
+        </Flex>
+      );
+    case 'Org ID':
+      return (
+        <Flex>
+          <TextInput
+            isDisabled={isLoading}
+            id='org-id'
+            ouiaId='filter_org_id'
+            placeholder='Filter by org ID'
+            value={orgId}
+            onChange={(value) => setOrgId(value)}
+            className={classes.searchInput}
+          />
+          <SearchIcon size='sm' className={classes.searchIcon} />
+        </Flex>
+      );
+    case 'Status':
+      return (
+        <DropdownSelect
+          toggleAriaLabel='filter status'
+          toggleId='statusSelect'
+          ouiaId='filter_status'
+          isDisabled={isLoading}
+          options={statusValues}
+          variant={SelectVariant.checkbox}
+          selectedProp={selectedStatuses}
+          setSelected={setSelectedStatuses}
+          placeholderText='Filter by status'
+        />
+      );
+    default:
+      return <></>;
+  }
 };
 
 export default AdminTaskFilters;
