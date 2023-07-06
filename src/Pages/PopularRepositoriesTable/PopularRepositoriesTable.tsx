@@ -77,6 +77,8 @@ const useStyles = createUseStyles({
   },
 });
 
+const perPageKey = 'popularRepositoriesperPage';
+
 const PopularRepositoriesTable = () => {
   const classes = useStyles();
   const queryClient = useQueryClient();
@@ -85,7 +87,7 @@ const PopularRepositoriesTable = () => {
   const [selectedData, setSelectedData] = useState<CreateContentRequest>([]);
   const [selectedUUID, setSelectedUUID] = useState<string>('');
 
-  const storedPerPage = Number(localStorage.getItem('perPage')) || 20;
+  const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearchValue = useDebounce(searchValue);
@@ -190,7 +192,7 @@ const PopularRepositoriesTable = () => {
 
   const onPerPageSelect: OnPerPageSelect = (_, newPerPage, newPage) => {
     // Save this value through page refresh for use on next reload
-    localStorage.setItem('perPage', newPerPage.toString());
+    localStorage.setItem(perPageKey, newPerPage.toString());
     setPerPage(newPerPage);
     setPage(newPage);
   };

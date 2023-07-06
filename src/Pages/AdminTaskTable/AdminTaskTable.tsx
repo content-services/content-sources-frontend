@@ -59,9 +59,11 @@ const useStyles = createUseStyles({
 
 export const formatDate = (date: string): string => dayjs(date).format('DD MMM YYYY HH:mm UTCZ');
 
+const perPageKey = 'adminTaskPerPage';
+
 const AdminTaskTable = () => {
   const classes = useStyles();
-  const storedPerPage = Number(localStorage.getItem('perPage')) || 20;
+  const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
   const [activeSortIndex, setActiveSortIndex] = useState<number>(3); // queued_at
@@ -107,7 +109,7 @@ const AdminTaskTable = () => {
 
   const onPerPageSelect: OnPerPageSelect = (_, newPerPage, newPage) => {
     // Save this value through page refresh for use on next reload
-    localStorage.setItem('perPage', newPerPage.toString());
+    localStorage.setItem(perPageKey, newPerPage.toString());
     setPerPage(newPerPage);
     setPage(newPage);
   };

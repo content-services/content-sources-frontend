@@ -74,11 +74,13 @@ const useStyles = createUseStyles({
   },
 });
 
+const perPageKey = 'contentListPerPage';
+
 const ContentListTable = () => {
   const classes = useStyles();
   const queryClient = useQueryClient();
   const { rbac } = useAppContext();
-  const storedPerPage = Number(localStorage.getItem('perPage')) || 20;
+  const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -153,7 +155,7 @@ const ContentListTable = () => {
 
   const onPerPageSelect: OnPerPageSelect = (_, newPerPage, newPage) => {
     // Save this value through page refresh for use on next reload
-    localStorage.setItem('perPage', newPerPage.toString());
+    localStorage.setItem(perPageKey, newPerPage.toString());
     setPerPage(newPerPage);
     setPage(newPage);
   };
