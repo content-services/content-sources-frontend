@@ -76,12 +76,14 @@ interface Props {
   closeModal: () => void;
 }
 
+const perPageKey = 'packagePerPage';
+
 export default function PackageModal({
   rowData: { name, uuid, package_count: packageCount },
   closeModal,
 }: Props) {
   const classes = useStyles();
-  const storedPerPage = Number(localStorage.getItem('packagePerPage')) || 20;
+  const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
   const [searchQuery, setSearchQuery] = useState('');
@@ -118,7 +120,7 @@ export default function PackageModal({
 
     setPerPage(newPerPage);
     setPage(newPage);
-    localStorage.setItem('packagePerPage', newPerPage.toString());
+    localStorage.setItem(perPageKey, newPerPage.toString());
   };
 
   const sortParams = (columnIndex: number, isDisabled: boolean): ThProps['sort'] | undefined => {
