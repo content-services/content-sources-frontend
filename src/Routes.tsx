@@ -58,7 +58,7 @@ export default function MainRoutes() {
         Element: PopularRepositoriesTable,
       },
     ];
-    if (features?.admintasks.enabled && features.admintasks.accessible) {
+    if (features?.admintasks?.enabled && features.admintasks?.accessible) {
       tabs.push({
         title: 'Admin tasks',
         route: ADMIN_TASKS_ROUTE,
@@ -66,7 +66,7 @@ export default function MainRoutes() {
       });
     }
     return tabs;
-  }, [features?.admintasks.enabled, features?.admintasks.accessible]);
+  }, [features?.admintasks?.enabled, features?.admintasks?.accessible]);
 
   return (
     <>

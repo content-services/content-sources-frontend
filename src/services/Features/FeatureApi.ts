@@ -6,8 +6,8 @@ export interface Feature {
 }
 
 export interface Features {
-  snapshots: Feature;
-  admintasks: Feature;
+  snapshots?: Feature;
+  admintasks?: Feature;
 }
 
 export const getFeatures: () => Promise<Features> = async () => {
