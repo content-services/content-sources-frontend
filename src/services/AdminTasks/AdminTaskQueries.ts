@@ -75,6 +75,8 @@ export const useFetchAdminTaskQuery = (uuid?: string, status?: AdminTask['status
         });
       },
       enabled: !!uuid,
+      keepPreviousData: true,
+      staleTime: 20000,
     },
   );
 };
