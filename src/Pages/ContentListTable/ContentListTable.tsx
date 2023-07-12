@@ -23,7 +23,7 @@ import {
   Tr,
 } from '@patternfly/react-table';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import {
   ContentItem,
@@ -33,6 +33,7 @@ import {
 import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
 
 import {
+  useBulkDeleteContentItemMutate,
   useContentListQuery,
   useDeleteContentItemMutate,
   useIntrospectRepositoryMutate,
@@ -72,6 +73,9 @@ const useStyles = createUseStyles({
   invisible: {
     opacity: 0,
   },
+  checkboxMinWidth: {
+    minWidth: '45px!important',
+  },
 });
 
 const perPageKey = 'contentListPerPage';
@@ -86,6 +90,7 @@ const ContentListTable = () => {
   const [perPage, setPerPage] = useState(storedPerPage);
   const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [checkedRepositories, setCheckedRepositories] = useState(new Set<string>());
 
   const [filterData, setFilterData] = useState<FilterData>({
     searchQuery: '',
@@ -147,8 +152,19 @@ const ContentListTable = () => {
   const introspectRepoForUuid = (uuid: string): Promise<void> =>
     introspectRepository({ uuid: uuid, reset_count: true } as IntrospectRepositoryRequestItem);
 
+  const { mutateAsync: deleteItems, isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
+    queryClient,
+    checkedRepositories,
+    setCheckedRepositories,
+    page,
+    perPage,
+    filterData,
+    sortString(),
+  );
+
   // Other update actions will be added to this later.
-  const actionTakingPlace = isDeleting || isFetching || repositoryParamsLoading || isIntrospecting;
+  const actionTakingPlace =
+    isDeleting || isFetching || repositoryParamsLoading || isIntrospecting || isDeletingItems;
 
   const onSetPage: OnSetPage = (_, newPage) => setPage(newPage);
 
@@ -207,6 +223,7 @@ const ContentListTable = () => {
         title: 'Delete',
         onClick: () =>
           deleteItem(rowData?.uuid).then(() => {
+            onSelectRepo(rowData.uuid, false); // Remove from checked repositories
             // If this is the last item on a page, go to previous page.
             if (page > 1 && count / perPage + 1 >= page && (count - 1) % perPage === 0) {
               setPage(page - 1);
@@ -228,6 +245,56 @@ const ContentListTable = () => {
     ],
     [actionTakingPlace],
   );
+
+  const clearCheckedRepositories = () => setCheckedRepositories(new Set<string>());
+
+  const selectAllRepos = (_, checked: boolean) => {
+    if (checked) {
+      const newSet = new Set<string>(checkedRepositories);
+      data.data
+        .filter((contentItem) => repoCanBeChecked(contentItem))
+        .forEach((contentItem) => newSet.add(contentItem.uuid));
+      setCheckedRepositories(newSet);
+    } else {
+      const newSet = new Set<string>(checkedRepositories);
+      for (const contentItem of data.data) {
+        newSet.delete(contentItem.uuid);
+      }
+      setCheckedRepositories(newSet);
+    }
+  };
+
+  const repoCanBeChecked = (contentItem: ContentItem) => contentItem.status !== 'Pending';
+
+  const atLeastOneRepoChecked = useMemo(() => checkedRepositories.size >= 1, [checkedRepositories]);
+
+  const areAllReposSelected = useMemo(
+    () =>
+      data.data.every(
+        (contentItem) =>
+          !repoCanBeChecked(contentItem) || checkedRepositories.has(contentItem.uuid),
+      ),
+    [data, checkedRepositories],
+  );
+
+  const onSelectRepo = (uuid: string, value: boolean) => {
+    const newValue = checkedRepositories;
+    if (value) {
+      newValue.add(uuid);
+    } else {
+      newValue.delete(uuid);
+    }
+    setCheckedRepositories(new Set<string>(newValue));
+  };
+
+  const deleteCheckedRepos = async () => {
+    await deleteItems(checkedRepositories);
+    const newMaxPage = Math.ceil((count - checkedRepositories.size) / perPage);
+    if (page > 1 && newMaxPage < page) {
+      setPage(newMaxPage);
+    }
+    clearCheckedRepositories();
+  };
 
   const itemName = 'custom repositories';
   const notFilteredBody = 'To get started, create a custom repository';
@@ -313,6 +380,15 @@ const ContentListTable = () => {
               >
                 <Thead>
                   <Tr>
+                    <Hide hide={!rbac?.write}>
+                      <Th
+                        className={classes.checkboxMinWidth}
+                        select={{
+                          onSelect: selectAllRepos,
+                          isSelected: areAllReposSelected,
+                        }}
+                      />
+                    </Hide>
                     {columnHeaders.map((columnHeader, index) => (
                       <Th key={columnHeader + 'column'} sort={sortParams(index)}>
                         {columnHeader}
@@ -324,7 +400,7 @@ const ContentListTable = () => {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {contentList.map((rowData: ContentItem) => {
+                  {contentList.map((rowData: ContentItem, index) => {
                     const {
                       uuid,
                       name,
@@ -335,6 +411,17 @@ const ContentListTable = () => {
                     } = rowData;
                     return (
                       <Tr key={uuid}>
+                        <Hide hide={!rbac?.write}>
+                          <Td
+                            select={{
+                              rowIndex: index,
+                              onSelect: (_event, isSelecting) =>
+                                onSelectRepo(rowData.uuid, isSelecting),
+                              isSelected: checkedRepositories.has(rowData.uuid),
+                              disable: !repoCanBeChecked(rowData),
+                            }}
+                          />
+                        </Hide>
                         <Td>
                           {name}
                           <br />

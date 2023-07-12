@@ -27,6 +27,8 @@ interface Props {
   isLoading?: boolean;
   setFilterData: (filterData: FilterData) => void;
   filterData: FilterData;
+  atLeastOneRepoChecked: boolean;
+  deleteCheckedRepos: () => void;
 }
 
 const useStyles = createUseStyles({
@@ -53,7 +55,13 @@ const useStyles = createUseStyles({
 const statusValues = ['Invalid', 'Pending', 'Unavailable', 'Valid'];
 export type Filters = 'Name/URL' | 'Version' | 'Architecture' | 'Status';
 
-const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => {
+const ContentListFilters = ({
+  isLoading,
+  setFilterData,
+  filterData,
+  atLeastOneRepoChecked,
+  deleteCheckedRepos,
+}: Props) => {
   const classes = useStyles();
   const { rbac } = useAppContext();
   const queryClient = useQueryClient();
@@ -263,6 +271,16 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
           >
             Add repositories
           </Button>
+        </ConditionalTooltip>
+        <ConditionalTooltip
+          content='You do not have the required permissions to perform this action.'
+          show={!rbac?.write}
+          setDisabled
+        >
+          <ContentActions
+            atLeastOneRepoChecked={atLeastOneRepoChecked}
+            deleteCheckedRepos={deleteCheckedRepos}
+          />
         </ConditionalTooltip>
       </FlexItem>
       <Hide

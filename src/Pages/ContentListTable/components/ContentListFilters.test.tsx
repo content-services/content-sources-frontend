@@ -36,6 +36,8 @@ it('Render loading state (disabled)', async () => {
         arches: [],
         statuses: [],
       }}
+      atLeastOneRepoChecked={false}
+      deleteCheckedRepos={() => null}
     />,
   );
 
@@ -53,6 +55,8 @@ it('Select a filter of each type and ensure chips are present', async () => {
         arches: [],
         statuses: [],
       }}
+      atLeastOneRepoChecked={false}
+      deleteCheckedRepos={() => null}
     />,
   );
 

@@ -200,6 +200,13 @@ export const deleteContentListItem: (uuid: string) => Promise<void> = async (uui
   return data;
 };
 
+export const deleteContentListItems: (uuids: string[]) => Promise<void> = async (
+  uuids: string[],
+) => {
+  const { data } = await axios.post('/api/content-sources/v1/repositories/bulk_delete/', { uuids });
+  return data;
+};
+
 export const AddContentListItems: (
   request: CreateContentRequest,
 ) => Promise<CreateContentRequestResponse> = async (request) => {
