@@ -1,6 +1,10 @@
 import { render, fireEvent } from '@testing-library/react';
 import ContentActions from './ContentActions';
 
+jest.mock('../../../middleware/AppContext', () => ({
+  useAppContext: () => ({ rbac: { read: true, write: true } }),
+}));
+
 it('Render no checked repos', async () => {
   const { queryByText } = render(
     <ContentActions atLeastOneRepoChecked={false} deleteCheckedRepos={() => null} />,

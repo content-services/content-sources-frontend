@@ -1,5 +1,7 @@
 import { Dropdown, DropdownItem, KebabToggle } from '@patternfly/react-core';
 import { useState } from 'react';
+import ConditionalTooltip from '../../../components/ConditionalTooltip/ConditionalTooltip';
+import { useAppContext } from '../../../middleware/AppContext';
 
 interface Props {
   atLeastOneRepoChecked: boolean;
@@ -7,6 +9,7 @@ interface Props {
 }
 
 const ContentActions = ({ atLeastOneRepoChecked, deleteCheckedRepos }: Props) => {
+  const { rbac } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
 
   const onToggle = (isOpen: boolean) => {
@@ -24,9 +27,16 @@ const ContentActions = ({ atLeastOneRepoChecked, deleteCheckedRepos }: Props) =>
   };
 
   const dropdownItems = [
-    <DropdownItem isDisabled={!atLeastOneRepoChecked} key='delete' onClick={deleteCheckedRepos}>
-      Remove all
-    </DropdownItem>,
+    <ConditionalTooltip
+      content='You do not have the required permissions to perform this action.'
+      show={!rbac?.write}
+      key='delete'
+      setDisabled
+    >
+      <DropdownItem isDisabled={!atLeastOneRepoChecked} onClick={deleteCheckedRepos}>
+        Remove all
+      </DropdownItem>
+    </ConditionalTooltip>,
   ];
 
   return (

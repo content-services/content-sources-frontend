@@ -50,6 +50,11 @@ const useStyles = createUseStyles({
     left: '-5px',
     pointerEvents: 'none',
   },
+  // Needed to fix styling when "Add repositories" button is disabled
+  repositoryActions: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
 });
 
 const statusValues = ['Invalid', 'Pending', 'Unavailable', 'Valid'];
@@ -256,7 +261,7 @@ const ContentListFilters = ({
           <FlexItem>{Filter}</FlexItem>
         </InputGroup>
       </FlexItem>
-      <FlexItem>
+      <FlexItem className={classes.repositoryActions}>
         <ConditionalTooltip
           content='You do not have the required permissions to perform this action.'
           show={!rbac?.write}
@@ -272,16 +277,10 @@ const ContentListFilters = ({
             Add repositories
           </Button>
         </ConditionalTooltip>
-        <ConditionalTooltip
-          content='You do not have the required permissions to perform this action.'
-          show={!rbac?.write}
-          setDisabled
-        >
-          <ContentActions
-            atLeastOneRepoChecked={atLeastOneRepoChecked}
-            deleteCheckedRepos={deleteCheckedRepos}
-          />
-        </ConditionalTooltip>
+        <ContentActions
+          atLeastOneRepoChecked={atLeastOneRepoChecked}
+          deleteCheckedRepos={deleteCheckedRepos}
+        />
       </FlexItem>
       <Hide
         hide={
