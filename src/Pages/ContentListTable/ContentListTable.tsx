@@ -344,6 +344,9 @@ const ContentListTable = () => {
                 setPage(1);
               }}
               filterData={filterData}
+              atLeastOneRepoChecked={atLeastOneRepoChecked}
+              numberOfReposChecked={checkedRepositories.size}
+              deleteCheckedRepos={deleteCheckedRepos}
             />
             <FlexItem>
               <Hide hide={countIsZero}>

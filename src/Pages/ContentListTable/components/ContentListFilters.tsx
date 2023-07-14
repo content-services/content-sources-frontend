@@ -28,6 +28,7 @@ interface Props {
   setFilterData: (filterData: FilterData) => void;
   filterData: FilterData;
   atLeastOneRepoChecked: boolean;
+  numberOfReposChecked: number;
   deleteCheckedRepos: () => void;
 }
 
@@ -65,6 +66,7 @@ const ContentListFilters = ({
   setFilterData,
   filterData,
   atLeastOneRepoChecked,
+  numberOfReposChecked,
   deleteCheckedRepos,
 }: Props) => {
   const classes = useStyles();
@@ -279,6 +281,7 @@ const ContentListFilters = ({
         </ConditionalTooltip>
         <ContentActions
           atLeastOneRepoChecked={atLeastOneRepoChecked}
+          numberOfReposChecked={numberOfReposChecked}
           deleteCheckedRepos={deleteCheckedRepos}
         />
       </FlexItem>

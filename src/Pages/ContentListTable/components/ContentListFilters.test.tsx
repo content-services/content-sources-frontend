@@ -37,6 +37,7 @@ it('Render loading state (disabled)', async () => {
         statuses: [],
       }}
       atLeastOneRepoChecked={false}
+      numberOfReposChecked={0}
       deleteCheckedRepos={() => null}
     />,
   );
@@ -56,6 +57,7 @@ it('Select a filter of each type and ensure chips are present', async () => {
         statuses: [],
       }}
       atLeastOneRepoChecked={false}
+      numberOfReposChecked={0}
       deleteCheckedRepos={() => null}
     />,
   );

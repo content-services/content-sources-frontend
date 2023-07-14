@@ -5,10 +5,15 @@ import { useAppContext } from '../../../middleware/AppContext';
 
 interface Props {
   atLeastOneRepoChecked: boolean;
+  numberOfReposChecked: number;
   deleteCheckedRepos: () => void;
 }
 
-const ContentActions = ({ atLeastOneRepoChecked, deleteCheckedRepos }: Props) => {
+const ContentActions = ({
+  atLeastOneRepoChecked,
+  numberOfReposChecked,
+  deleteCheckedRepos,
+}: Props) => {
   const { rbac } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -34,7 +39,7 @@ const ContentActions = ({ atLeastOneRepoChecked, deleteCheckedRepos }: Props) =>
       setDisabled
     >
       <DropdownItem isDisabled={!atLeastOneRepoChecked} onClick={deleteCheckedRepos}>
-        Remove all
+        Remove {numberOfReposChecked} repositories
       </DropdownItem>
     </ConditionalTooltip>,
   ];
