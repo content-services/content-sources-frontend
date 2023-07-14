@@ -268,14 +268,22 @@ const ContentListTable = () => {
 
   const atLeastOneRepoChecked = useMemo(() => checkedRepositories.size >= 1, [checkedRepositories]);
 
-  const areAllReposSelected = useMemo(
-    () =>
-      data.data.every(
-        (contentItem) =>
-          !repoCanBeChecked(contentItem) || checkedRepositories.has(contentItem.uuid),
-      ),
+  const areAllReposPending = useMemo(
+    () => data.data.every((contentItem) => !repoCanBeChecked(contentItem)),
     [data, checkedRepositories],
   );
+
+  const areAllReposSelected = useMemo(() => {
+    let atLeastOneSelectedOnPage = false;
+    const allSelectedOrPending = data.data.every((contentItem) => {
+      if (checkedRepositories.has(contentItem.uuid)) {
+        atLeastOneSelectedOnPage = true;
+      }
+      return !repoCanBeChecked(contentItem) || checkedRepositories.has(contentItem.uuid);
+    });
+    // Returns false if all repos on current page are pending (none selected)
+    return allSelectedOrPending && atLeastOneSelectedOnPage;
+  }, [data, checkedRepositories]);
 
   const onSelectRepo = (uuid: string, value: boolean) => {
     const newValue = checkedRepositories;
