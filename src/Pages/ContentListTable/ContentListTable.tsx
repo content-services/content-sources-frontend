@@ -285,14 +285,15 @@ const ContentListTable = () => {
     return allSelectedOrPending && atLeastOneSelectedOnPage;
   }, [data, checkedRepositories]);
 
+
   const onSelectRepo = (uuid: string, value: boolean) => {
-    const newValue = checkedRepositories;
+    const newSet = new Set<string>(checkedRepositories);
     if (value) {
-      newValue.add(uuid);
+      newSet.add(uuid);
     } else {
-      newValue.delete(uuid);
+      newSet.delete(uuid);
     }
-    setCheckedRepositories(new Set<string>(newValue));
+    setCheckedRepositories(newSet);
   };
 
   const deleteCheckedRepos = async () => {

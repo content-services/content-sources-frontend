@@ -417,6 +417,7 @@ export const useBulkDeleteContentItemMutate = (
         return data;
       });
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
       queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
     },
     // If the mutation fails, use the context returned from onMutate to roll back
@@ -425,7 +426,7 @@ export const useBulkDeleteContentItemMutate = (
         const error = err as Error; // Forced Type
 
         // Not found repositories are unchecked
-        const newSelected = new Set(selected);
+        const newSelected = new Set<string>(selected);
         err.response?.data.errors.forEach((error, index) => {
           if (error.status === 404) {
             newSelected.delete(uuids[index]);
