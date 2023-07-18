@@ -279,11 +279,17 @@ const ContentListFilters = ({
             Add repositories
           </Button>
         </ConditionalTooltip>
-        <ContentActions
-          atLeastOneRepoChecked={atLeastOneRepoChecked}
-          numberOfReposChecked={numberOfReposChecked}
-          deleteCheckedRepos={deleteCheckedRepos}
-        />
+        <ConditionalTooltip
+          content='You do not have the required permissions to perform this action.'
+          show={!rbac?.write}
+          setDisabled
+        >
+          <ContentActions
+            atLeastOneRepoChecked={atLeastOneRepoChecked}
+            numberOfReposChecked={numberOfReposChecked}
+            deleteCheckedRepos={deleteCheckedRepos}
+          />
+        </ConditionalTooltip>
       </FlexItem>
       <Hide
         hide={
