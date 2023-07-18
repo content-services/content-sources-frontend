@@ -285,7 +285,6 @@ const ContentListTable = () => {
     return allSelectedOrPending && atLeastOneSelectedOnPage;
   }, [data, checkedRepositories]);
 
-
   const onSelectRepo = (uuid: string, value: boolean) => {
     const newSet = new Set<string>(checkedRepositories);
     if (value) {
