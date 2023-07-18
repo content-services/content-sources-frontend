@@ -243,7 +243,7 @@ const ContentListTable = () => {
         onClick: () => introspectRepoForUuid(rowData?.uuid),
       },
     ],
-    [actionTakingPlace],
+    [actionTakingPlace, checkedRepositories],
   );
 
   const clearCheckedRepositories = () => setCheckedRepositories(new Set<string>());
