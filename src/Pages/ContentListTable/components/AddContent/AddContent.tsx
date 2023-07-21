@@ -1,5 +1,6 @@
 import {
   Button,
+  Switch,
   FileUpload,
   Form,
   FormGroup,
@@ -12,6 +13,7 @@ import {
   StackItem,
   TextInput,
   Tooltip,
+  Alert,
 } from '@patternfly/react-core';
 import {
   OutlinedQuestionCircleIcon,
@@ -32,7 +34,7 @@ import {
   FormikValues,
   maxUploadSize,
   failedFileUpload,
-  defaultFormikValues,
+  getDefaultFormikValues,
 } from './helpers';
 import useNotification from '../../../../Hooks/useNotification';
 import ContentValidity from './components/ContentValidity';
@@ -52,6 +54,7 @@ import useDebounce from '../../../../Hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
 import { useClearCheckedRepositories } from '../../ContentListTable';
 import useRootPath from '../../../../Hooks/useRootPath';
+import { useAppContext } from '../../../../middleware/AppContext';
 
 const useStyles = createUseStyles({
   description: {
@@ -120,10 +123,15 @@ const AddContent = () => {
   const rootPath = useRootPath();
   const [changeVerified, setChangeVerified] = useState(false);
   const [gpgKeyList, setGpgKeyList] = useState<Array<string>>(['']);
+  const { features } = useAppContext();
+  const snapshottingEnabled = useMemo(
+    () => !!features?.snapshots?.enabled && !!features?.snapshots?.accessible,
+    [!!features?.snapshots?.enabled],
+  );
   const classes = useStyles();
   const queryClient = useQueryClient();
   const formik = useFormik({
-    initialValues: [defaultFormikValues],
+    initialValues: [getDefaultFormikValues({ snapshot: snapshottingEnabled })],
     validateOnBlur: false,
     validateOnChange: false,
     validationSchema: makeValidationSchema(),
@@ -228,7 +236,7 @@ const AddContent = () => {
     formik.setTouched([...formik.touched, defaultTouchedState]);
     formik.setValues([
       ...formik.values.map((vals) => ({ ...vals, expanded: false })),
-      defaultFormikValues,
+      getDefaultFormikValues(),
     ]);
     setChangeVerified(false);
   };
@@ -452,7 +460,17 @@ const AddContent = () => {
         </Hide>
         {formik.values.map(
           (
-            { expanded, name, url, arch, gpgKey, versions, gpgLoading, metadataVerification },
+            {
+              expanded,
+              name,
+              url,
+              arch,
+              gpgKey,
+              versions,
+              gpgLoading,
+              metadataVerification,
+              snapshot,
+            },
             index,
           ) => (
             <Tbody key={index} isExpanded={createDataLengthOf1 ? undefined : expanded}>
@@ -497,6 +515,35 @@ const AddContent = () => {
                   }
                 >
                   <Form>
+                    <Hide hide={!snapshottingEnabled}>
+                      <FormGroup fieldId='snapshot'>
+                        <Switch
+                          id='snapshot-switch'
+                          hasCheckIcon
+                          label='Snapshot creation enabled'
+                          labelOff='Snapshot creation disabled'
+                          isChecked={snapshot}
+                          onChange={() => {
+                            updateVariable(index, { snapshot: !snapshot });
+                          }}
+                        />
+                        <Tooltip content='Automatically create daily snapshots of this repository.'>
+                          <OutlinedQuestionCircleIcon
+                            className='pf-u-ml-xs'
+                            color={global_Color_200.value}
+                          />
+                        </Tooltip>
+                        <Hide hide={snapshot}>
+                          <Alert
+                            variant='warning'
+                            style={{ paddingTop: '10px' }}
+                            title='Disabling snapshots may result in a higher risk of losing content or unintentionally modifying it irreversibly.'
+                            isInline
+                            isPlain
+                          />
+                        </Hide>
+                      </FormGroup>
+                    </Hide>
                     <FormGroup
                       label='Name'
                       isRequired

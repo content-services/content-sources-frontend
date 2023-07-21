@@ -32,6 +32,7 @@ it('mapFormikToAPIValues', () => {
       gpgLoading: false,
       expanded: false,
       metadataVerification: false,
+      snapshot: true,
     },
   ];
 
@@ -43,6 +44,7 @@ it('mapFormikToAPIValues', () => {
       distribution_versions: ['el7'],
       gpg_key: '',
       metadata_verification: false,
+      snapshot: true,
     },
   ];
 

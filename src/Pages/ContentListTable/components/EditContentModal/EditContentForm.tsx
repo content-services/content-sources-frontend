@@ -1,10 +1,14 @@
 import {
+  Alert,
+  Button,
   FileUpload,
   Form,
   FormGroup,
+  Popover,
   Radio,
   SelectVariant,
   TextInput,
+  Switch,
   Tooltip,
 } from '@patternfly/react-core';
 import { CheckCircleIcon, OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
@@ -44,6 +48,7 @@ import { isEmpty, isEqual } from 'lodash';
 import ConditionalTooltip from '../../../../components/ConditionalTooltip/ConditionalTooltip';
 import useNotification from '../../../../Hooks/useNotification';
 import useDeepCompareEffect from '../../../../Hooks/useDeepCompareEffect';
+import { useAppContext } from '../../../../middleware/AppContext';
 
 const green = global_success_color_100.value;
 
@@ -119,6 +124,12 @@ const EditContentForm = ({
   );
   const classes = useStyles();
   const queryClient = useQueryClient();
+  const { features } = useAppContext();
+  const snapshottingEnabled = useMemo(
+    () => !!features?.snapshots?.enabled && !!features?.snapshots?.accessible,
+    [!!features?.snapshots?.enabled],
+  );
+
   const formik = useFormik({
     initialValues: initialValues,
     validateOnBlur: false,
@@ -334,7 +345,17 @@ const EditContentForm = ({
       </Hide>
       {formik.values.map(
         (
-          { expanded, name, url, arch, gpgKey, versions, gpgLoading, metadataVerification },
+          {
+            expanded,
+            name,
+            url,
+            arch,
+            gpgKey,
+            versions,
+            gpgLoading,
+            metadataVerification,
+            snapshot,
+          },
           index,
         ) => (
           <Tbody key={index} isExpanded={createDataLengthOf1 ? undefined : expanded}>
@@ -363,6 +384,35 @@ const EditContentForm = ({
                 className={createDataLengthOf1 ? classes.singleContentCol : classes.mainContentCol}
               >
                 <Form>
+                  <Hide hide={!snapshottingEnabled}>
+                    <FormGroup fieldId='snapshot'>
+                      <Switch
+                        id='snapshot-switch'
+                        hasCheckIcon
+                        label='Snapshot creation enabled'
+                        labelOff='Snapshot creation disabled'
+                        isChecked={snapshot}
+                        onChange={() => {
+                          updateVariable(index, { snapshot: !snapshot });
+                        }}
+                      />
+                      <Tooltip content='Automatically create daily snapshots of this repository.'>
+                        <OutlinedQuestionCircleIcon
+                          className='pf-u-ml-xs'
+                          color={global_Color_200.value}
+                        />
+                      </Tooltip>
+                      <Hide hide={snapshot}>
+                        <Alert
+                          variant='warning'
+                          style={{ paddingTop: '10px' }}
+                          title='Disabling snapshots may result in a higher risk of losing content or unintentionally modifying it irreversibly.'
+                          isInline
+                          isPlain
+                        />
+                      </Hide>
+                    </FormGroup>
+                  </Hide>
                   <FormGroup
                     label='Name'
                     isRequired

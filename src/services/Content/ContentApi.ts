@@ -61,6 +61,7 @@ export interface EditContentRequestItem {
   distribution_versions: string[];
   gpg_key: string;
   metadata_verification: boolean;
+  snapshot: boolean;
 }
 
 export type EditContentRequest = Array<EditContentRequestItem>;

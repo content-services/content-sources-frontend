@@ -13,6 +13,7 @@ it('mapFormikToEditAPIValues', () => {
       expanded: false,
       uuid: 'stuff',
       metadataVerification: false,
+      snapshot: false,
     },
   ];
 
@@ -24,6 +25,7 @@ it('mapFormikToEditAPIValues', () => {
       distribution_versions: ['el7'],
       gpg_key: '',
       uuid: 'stuff',
+      snapshot: false,
       metadata_verification: false,
     },
   ];
@@ -58,6 +60,7 @@ it('mapToDefaultFormikValues', () => {
       arch: 'stuffAndThings',
       versions: ['version1', 'etc'],
       gpgKey: 'stuffAndThings',
+      snapshot: false,
       gpgLoading: false,
       metadataVerification: false,
       expanded: true,

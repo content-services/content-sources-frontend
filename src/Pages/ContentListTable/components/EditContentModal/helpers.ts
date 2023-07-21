@@ -10,18 +10,22 @@ export interface FormikEditValues {
   gpgLoading: boolean;
   expanded: boolean;
   uuid: string;
+  snapshot: boolean;
 }
 
 export const mapFormikToEditAPIValues = (formikValues: FormikEditValues[]): EditContentRequest =>
-  formikValues.map(({ name, url, arch, versions, gpgKey, metadataVerification, uuid }) => ({
-    uuid,
-    name,
-    url,
-    distribution_arch: arch,
-    distribution_versions: versions,
-    gpg_key: gpgKey,
-    metadata_verification: metadataVerification,
-  }));
+  formikValues.map(
+    ({ name, url, arch, versions, gpgKey, metadataVerification, uuid, snapshot }) => ({
+      uuid,
+      name,
+      url,
+      distribution_arch: arch,
+      distribution_versions: versions,
+      gpg_key: gpgKey,
+      metadata_verification: metadataVerification,
+      snapshot,
+    }),
+  );
 
 export const mapToDefaultFormikValues = (values: ContentItem[]): FormikEditValues[] =>
   values.map(
@@ -34,6 +38,7 @@ export const mapToDefaultFormikValues = (values: ContentItem[]): FormikEditValue
         uuid,
         gpg_key: gpgKey,
         metadata_verification: metadataVerification,
+        snapshot,
       },
       index,
     ) => ({
@@ -46,6 +51,7 @@ export const mapToDefaultFormikValues = (values: ContentItem[]): FormikEditValue
       metadataVerification,
       expanded: index + 1 === values.length,
       uuid,
+      snapshot,
     }),
   );
 

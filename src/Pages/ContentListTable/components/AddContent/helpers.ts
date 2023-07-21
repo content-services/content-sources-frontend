@@ -15,9 +15,10 @@ export interface FormikValues {
   gpgLoading: boolean;
   metadataVerification: boolean;
   expanded: boolean;
+  snapshot: boolean;
 }
 
-export const defaultFormikValues: FormikValues = {
+export const getDefaultFormikValues = (overrides: Partial<FormikValues> = {}): FormikValues => ({
   name: '',
   url: '',
   gpgKey: '',
@@ -26,7 +27,9 @@ export const defaultFormikValues: FormikValues = {
   gpgLoading: false,
   expanded: true,
   metadataVerification: false,
-};
+  snapshot: false,
+  ...overrides,
+});
 
 export const REGEX_URL =
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
@@ -38,12 +41,13 @@ export const isValidURL = (val: string) => {
 };
 
 export const mapFormikToAPIValues = (formikValues: FormikValues[]) =>
-  formikValues.map(({ name, url, arch, versions, gpgKey, metadataVerification }) => ({
+  formikValues.map(({ name, url, arch, versions, gpgKey, metadataVerification, snapshot }) => ({
     name,
     url,
     distribution_arch: arch,
     distribution_versions: versions,
     gpg_key: gpgKey,
+    snapshot,
     metadata_verification: metadataVerification,
   }));
 
