@@ -1,6 +1,7 @@
 import { Dropdown, DropdownItem, KebabToggle } from '@patternfly/react-core';
 import { useState } from 'react';
-import { useAppContext } from '../../../middleware/AppContext';
+import { useAppContext } from '../../middleware/AppContext';
+import ConditionalTooltip from '../ConditionalTooltip/ConditionalTooltip';
 
 interface Props {
   atLeastOneRepoChecked: boolean;
@@ -8,7 +9,7 @@ interface Props {
   deleteCheckedRepos: () => void;
 }
 
-const ContentActions = ({
+const DeleteKebab = ({
   atLeastOneRepoChecked,
   numberOfReposChecked,
   deleteCheckedRepos,
@@ -21,7 +22,7 @@ const ContentActions = ({
   };
 
   const onFocus = () => {
-    const element = document.getElementById('actions-kebab') as HTMLElement;
+    const element = document.getElementById('delete-kebab') as HTMLElement;
     element.focus();
   };
 
@@ -31,15 +32,24 @@ const ContentActions = ({
   };
 
   const dropdownItems = [
-    <DropdownItem isDisabled={!atLeastOneRepoChecked} onClick={deleteCheckedRepos} key='delete'>
-      Remove {numberOfReposChecked} repositories
-    </DropdownItem>,
+    <ConditionalTooltip
+      key='delete'
+      content='Make a selection below to delete multiple repositories'
+      show={!atLeastOneRepoChecked}
+      setDisabled
+    >
+      <DropdownItem onClick={deleteCheckedRepos}>
+        {atLeastOneRepoChecked
+          ? `Remove ${numberOfReposChecked} repositories`
+          : 'Remove selected repositories'}
+      </DropdownItem>
+    </ConditionalTooltip>,
   ];
 
   return (
     <Dropdown
       onSelect={onSelect}
-      toggle={<KebabToggle id='actions-kebab' onToggle={onToggle} isDisabled={!rbac?.write} />}
+      toggle={<KebabToggle id='delete-kebab' onToggle={onToggle} isDisabled={!rbac?.write} />}
       isOpen={isOpen}
       isPlain
       dropdownItems={dropdownItems}
@@ -48,4 +58,4 @@ const ContentActions = ({
   );
 };
 
-export default ContentActions;
+export default DeleteKebab;

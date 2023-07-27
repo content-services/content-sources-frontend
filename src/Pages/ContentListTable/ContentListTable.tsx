@@ -223,7 +223,7 @@ const ContentListTable = () => {
         title: 'Delete',
         onClick: () =>
           deleteItem(rowData?.uuid).then(() => {
-            onSelectRepo(rowData.uuid, false); // Remove from checked repositories
+            clearCheckedRepositories();
             // If this is the last item on a page, go to previous page.
             if (page > 1 && count / perPage + 1 >= page && (count - 1) % perPage === 0) {
               setPage(page - 1);

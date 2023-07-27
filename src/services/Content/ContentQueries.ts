@@ -206,7 +206,7 @@ export const useAddPopularRepositoryQuery = (
         };
         queryClient.setQueryData(popularRepositoriesKeyArray, previousData);
       }
-      errorNotifier('Error deleting item from popularRepo', 'An error occurred', err);
+      errorNotifier('Error adding item from popularRepo', 'An error occurred', err);
     },
   });
 };

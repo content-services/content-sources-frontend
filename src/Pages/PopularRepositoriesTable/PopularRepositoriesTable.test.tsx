@@ -15,6 +15,7 @@ jest.mock('../../services/Content/ContentQueries', () => ({
   usePopularRepositoriesQuery: jest.fn(),
   useAddPopularRepositoryQuery: () => ({ isLoading: false }),
   useDeletePopularRepositoryMutate: () => ({ isLoading: false }),
+  useBulkDeleteContentItemMutate: () => ({ isLoading: false }),
   useFetchGpgKey: () => ({ fetchGpgKey: () => '' }),
 }));
 

@@ -22,6 +22,7 @@ import { isEmpty } from 'lodash';
 import { useAppContext } from '../../../middleware/AppContext';
 import ConditionalTooltip from '../../../components/ConditionalTooltip/ConditionalTooltip';
 import { useNavigate } from 'react-router-dom';
+import DeleteKebab from '../../../components/DeleteKebab/DeleteKebab';
 
 interface Props {
   isLoading?: boolean;
@@ -284,7 +285,7 @@ const ContentListFilters = ({
           show={!rbac?.write}
           setDisabled
         >
-          <ContentActions
+          <DeleteKebab
             atLeastOneRepoChecked={atLeastOneRepoChecked}
             numberOfReposChecked={numberOfReposChecked}
             deleteCheckedRepos={deleteCheckedRepos}
