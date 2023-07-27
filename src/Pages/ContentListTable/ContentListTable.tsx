@@ -49,7 +49,7 @@ import PackageCount from './components/PackageCount';
 import { useAppContext } from '../../middleware/AppContext';
 import ConditionalTooltip from '../../components/ConditionalTooltip/ConditionalTooltip';
 import dayjs from 'dayjs';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useOutletContext } from 'react-router-dom';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -240,7 +240,7 @@ const ContentListTable = () => {
       {
         isDisabled: actionTakingPlace || rowData?.status == 'Retrying',
         title: 'Introspect Now',
-        onClick: () => introspectRepoForUuid(rowData?.uuid),
+        onClick: () => introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
       },
     ],
     [actionTakingPlace, checkedRepositories],
@@ -311,7 +311,7 @@ const ContentListTable = () => {
   const showLoader = countIsZero && notFiltered && !isLoading;
   return (
     <>
-      <Outlet />
+      <Outlet context={clearCheckedRepositories} />
       {showLoader ? (
         <Bullseye data-ouia-safe={!actionTakingPlace} data-ouia-component-id='content_list_page'>
           <EmptyTableState
@@ -397,6 +397,7 @@ const ContentListTable = () => {
                         select={{
                           onSelect: selectAllRepos,
                           isSelected: areAllReposSelected,
+                          isHeaderSelectDisabled: areAllReposPending,
                         }}
                       />
                     </Hide>
@@ -513,5 +514,9 @@ const ContentListTable = () => {
     </>
   );
 };
+
+export function useClearCheckedRepositories() {
+  return useOutletContext<() => void>();
+}
 
 export default ContentListTable;

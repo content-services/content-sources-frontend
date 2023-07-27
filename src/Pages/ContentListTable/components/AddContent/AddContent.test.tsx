@@ -40,6 +40,7 @@ jest.mock('../../../../Hooks/useNotification', () => () => ({ notify: () => null
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
+  useOutletContext: () => () => null, // returns mock clearCheckedRepositories function
 }));
 
 const passingValidationMetaDataSigNotPresent = [

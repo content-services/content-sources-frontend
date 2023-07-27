@@ -240,7 +240,10 @@ const PopularRepositoriesTable = () => {
   useEffect(() => {
     if (selectedData.length != 0) {
       addContentQuery().then(
-        () => setSelectedData([]),
+        () => {
+          setSelectedData([]);
+          clearCheckedRepositories();
+        },
         () => setSelectedData([]),
       );
     }
@@ -248,7 +251,7 @@ const PopularRepositoriesTable = () => {
 
   useEffect(() => {
     if (selectedUUID) {
-      deleteItem(selectedUUID).then(undefined, () => setSelectedUUID(''));
+      deleteItem(selectedUUID).then(clearCheckedRepositories, () => setSelectedUUID(''));
     }
   }, [selectedUUID]);
 
@@ -300,12 +303,13 @@ const PopularRepositoriesTable = () => {
   };
 
   const deleteSelected = async () => {
-    await deleteItems(checkedRepositoriesToDelete);
-    const newMaxPage = Math.ceil((count - checkedRepositoriesToDelete.size) / perPage);
-    if (page > 1 && newMaxPage < page) {
-      setPage(newMaxPage);
-    }
-    clearCheckedRepositories();
+    deleteItems(checkedRepositoriesToDelete).then(() => {
+      const newMaxPage = Math.ceil((count - checkedRepositoriesToDelete.size) / perPage);
+      if (page > 1 && newMaxPage < page) {
+        setPage(newMaxPage);
+      }
+      clearCheckedRepositories();
+    })
   };
 
   const columnHeaders = ['Name', 'Architecture', 'Versions'];

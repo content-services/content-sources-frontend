@@ -51,6 +51,7 @@ import useDeepCompareEffect from '../../../../Hooks/useDeepCompareEffect';
 import useDebounce from '../../../../Hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
 import { BASE_ROUTE } from '../../../../Routes/useTabbedRoutes';
+import { useClearCheckedRepositories } from '../../ContentListTable';
 
 const useStyles = createUseStyles({
   description: {
@@ -128,6 +129,7 @@ const AddContent = () => {
     initialTouched: [defaultTouchedState],
     onSubmit: () => undefined,
   });
+  const clearCheckedRepositories = useClearCheckedRepositories();
 
   const updateGpgKey = (index: number, value: string) => {
     setChangeVerified(false);
@@ -197,6 +199,13 @@ const AddContent = () => {
     queryClient,
     mapFormikToAPIValues(formik.values),
   );
+
+  const onSave = () => {
+    addContent().then(() => {
+      onClose();
+      clearCheckedRepositories();
+    });
+  };
 
   const createDataLengthOf1 = formik.values.length === 1;
 
@@ -413,7 +422,7 @@ const AddContent = () => {
                 actionTakingPlace ||
                 formik.values?.length !== debouncedValues?.length
               }
-              onClick={() => addContent().then(onClose)}
+              onClick={onSave}
             >
               Save
             </Button>

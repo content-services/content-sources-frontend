@@ -27,6 +27,7 @@ import {
   fetchContentItem,
   deleteContentListItems,
   Meta,
+  ErrorResponse,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../AdminTasks/AdminTaskQueries';
 import useErrorNotification from '../../Hooks/useErrorNotification';
@@ -380,7 +381,7 @@ export const useBulkDeleteContentItemMutate = (
     sortString,
     ...Object.values(filterData || {}),
   ];
-  const { notify } = useNotification();
+  const errorNotifier = useErrorNotification();
   return useMutation(() => deleteContentListItems(uuids), {
     onMutate: async (checkedRepositories: Set<string>) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
@@ -423,45 +424,12 @@ export const useBulkDeleteContentItemMutate = (
     // If the mutation fails, use the context returned from onMutate to roll back
     onError: (err: { response?: { data: ErrorResponse } }, _newData, context) => {
       if (context) {
-        const error = err as Error; // Forced Type
-
-        // Not found repositories are unchecked
-        const newSelected = new Set<string>(selected);
-        err.response?.data.errors.forEach((error, index) => {
-          if (error.status === 404) {
-            newSelected.delete(uuids[index]);
-          }
-        });
-        setSelected(newSelected);
-
-        let description = error?.message;
-        switch (typeof err?.response?.data) {
-          case 'string':
-            description = err?.response?.data;
-            break;
-          case 'object':
-            // Only show the first error
-            err?.response?.data.errors?.find(({ detail }) => {
-              if (detail) {
-                description = detail;
-              }
-            })?.detail;
-            break;
-          default:
-            break;
-        }
-
         const { previousData } = context as {
           previousData: ContentListResponse;
         };
         queryClient.setQueryData(contentListKeyArray, previousData);
-
-        notify({
-          variant: AlertVariant.danger,
-          title: 'Error deleting items from content list',
-          description,
-        });
       }
+      errorNotifier('Error deleting items from content list', 'An error occurred', err);
     },
   });
 };

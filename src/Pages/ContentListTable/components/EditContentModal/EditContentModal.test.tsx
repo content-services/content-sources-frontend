@@ -41,6 +41,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: () => ({
     search: 'repoUUIDS=someLongUUID',
   }),
+  useOutletContext: () => () => null, // returns mock clearCheckedRepositories function
 }));
 
 it('Open, confirming values, edit an item, enabling Save button', async () => {

@@ -25,6 +25,7 @@ import { EditContentRequest } from '../../../../services/Content/ContentApi';
 import { isEqual } from 'lodash';
 import { mapToContentItemsToEditContentRequest } from './helpers';
 import { BASE_ROUTE } from '../../../../Routes/useTabbedRoutes';
+import { useClearCheckedRepositories } from '../../ContentListTable';
 
 const useStyles = createUseStyles({
   description: {
@@ -46,6 +47,7 @@ const EditContentModal = () => {
   const [updatedValues, setUpdatedValues] = useState<EditContentRequest>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
+  const clearCheckedRepositories = useClearCheckedRepositories();
 
   const uuids = new URLSearchParams(search).get('repoUUIDS')?.split(',') || [];
 
@@ -58,6 +60,7 @@ const EditContentModal = () => {
   const onSave = async () =>
     editContent().then(() => {
       onClose();
+      clearCheckedRepositories();
       queryClient.invalidateQueries(CONTENT_ITEM_KEY);
     });
 
