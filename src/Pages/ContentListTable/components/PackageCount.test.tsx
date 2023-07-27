@@ -2,6 +2,10 @@ import { render } from '@testing-library/react';
 import PackageCount from './PackageCount';
 import { defaultContentItem } from '../../../testingHelpers';
 
+jest.mock('react-router-dom', () => ({
+  useNavigate: jest.fn(),
+}));
+
 it('Render PackageCount for Invalid state', async () => {
   const { queryByText } = render(
     <PackageCount rowData={{ ...defaultContentItem, status: 'Invalid' }} />,

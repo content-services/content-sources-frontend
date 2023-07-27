@@ -2,7 +2,7 @@ import { isEmpty } from 'lodash';
 import * as Yup from 'yup';
 import { FormikErrors } from 'formik';
 import { ValidationResponse } from '../../../../services/Content/ContentApi';
-import { NotificationPayload } from '../../../../services/Notifications/Notifications';
+import { NotificationPayload } from '../../../../Hooks/useNotification';
 import ERROR_CODE from './httpErrorCodes.json';
 import { AlertVariant } from '@patternfly/react-core';
 
@@ -16,6 +16,17 @@ export interface FormikValues {
   metadataVerification: boolean;
   expanded: boolean;
 }
+
+export const defaultFormikValues: FormikValues = {
+  name: '',
+  url: '',
+  gpgKey: '',
+  arch: 'any',
+  versions: ['any'],
+  gpgLoading: false,
+  expanded: true,
+  metadataVerification: false,
+};
 
 export const REGEX_URL =
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;

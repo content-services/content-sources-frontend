@@ -8,9 +8,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { AdminTask } from '../../../../services/AdminTasks/AdminTaskApi';
 import { useFetchAdminTaskQuery } from '../../../../services/AdminTasks/AdminTaskQueries';
 
-jest.mock('../../../../services/Notifications/Notifications', () => ({
-  useNotification: () => ({ notify: () => null }),
-}));
+jest.mock('../../../../Hooks/useNotification', () => () => ({ notify: () => null }));
 
 jest.mock('../../../../services/AdminTasks/AdminTaskQueries', () => ({
   useFetchAdminTaskQuery: jest.fn(),
@@ -18,6 +16,11 @@ jest.mock('../../../../services/AdminTasks/AdminTaskQueries', () => ({
 
 jest.mock('../../../../Hooks/useDebounce', () => (value) => value);
 jest.mock('../../../../middleware/AppContext', () => ({ useAppContext: () => ({}) }));
+
+jest.mock('react-router-dom', () => ({
+  useNavigate: jest.fn(),
+  useParams: () => ({ taskUUID: 'something' }),
+}));
 
 it('Render loading spinner', async () => {
   (useFetchAdminTaskQuery as jest.Mock).mockImplementation(() => ({
@@ -27,12 +30,7 @@ it('Render loading spinner', async () => {
   }));
   render(
     <ReactQueryTestWrapper>
-      <ViewPayloadModal
-        open
-        uuid={defaultIntrospectTask.uuid}
-        status={defaultIntrospectTask.status}
-        setClosed={() => undefined}
-      />
+      <ViewPayloadModal />
     </ReactQueryTestWrapper>,
   );
 });
@@ -46,12 +44,7 @@ it('Open introspect task details and click tabs', async () => {
 
   const { queryByText } = render(
     <ReactQueryTestWrapper>
-      <ViewPayloadModal
-        open
-        uuid={defaultIntrospectTask.uuid}
-        status={defaultIntrospectTask.status}
-        setClosed={() => undefined}
-      />
+      <ViewPayloadModal />
     </ReactQueryTestWrapper>,
   );
 
@@ -83,12 +76,7 @@ it('Open snapshot details and click tabs', async () => {
 
   const { queryByText } = render(
     <ReactQueryTestWrapper>
-      <ViewPayloadModal
-        open
-        uuid={defaultSnapshotTask.uuid}
-        status={defaultSnapshotTask.status}
-        setClosed={() => undefined}
-      />
+      <ViewPayloadModal />
     </ReactQueryTestWrapper>,
   );
 
@@ -148,12 +136,7 @@ it('Open snapshot task without all pulp tasks', async () => {
 
   const { queryByText } = render(
     <ReactQueryTestWrapper>
-      <ViewPayloadModal
-        open
-        uuid={missingDistribution.uuid}
-        status={missingDistribution.status}
-        setClosed={() => undefined}
-      />
+      <ViewPayloadModal />
     </ReactQueryTestWrapper>,
   );
 

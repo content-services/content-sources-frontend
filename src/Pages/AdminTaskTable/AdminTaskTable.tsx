@@ -27,11 +27,11 @@ import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
 import Hide from '../../components/Hide/Hide';
 import EmptyTableState from '../../components/EmptyTableState/EmptyTableState';
 import AdminTaskFilters from './components/AdminTaskFilters';
-import ViewPayloadModal from './components/ViewPayloadModal/ViewPayloadModal';
 import dayjs from 'dayjs';
 import StatusIcon from './components/StatusIcon';
 import { useAdminTaskListQuery } from '../../services/AdminTasks/AdminTaskQueries';
 import { AdminTaskFilterData, AdminTask } from '../../services/AdminTasks/AdminTaskApi';
+import { Outlet, useNavigate } from 'react-router-dom';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -63,13 +63,12 @@ const perPageKey = 'adminTaskPerPage';
 
 const AdminTaskTable = () => {
   const classes = useStyles();
+  const navigate = useNavigate();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
   const [activeSortIndex, setActiveSortIndex] = useState<number>(3); // queued_at
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [payloadOpen, setPayloadOpen] = useState(false);
-  const [adminTask, setAdminTask] = useState<AdminTask | undefined>(undefined);
 
   const [filterData, setFilterData] = useState<AdminTaskFilterData>({
     accountId: '',
@@ -160,12 +159,7 @@ const AdminTaskTable = () => {
       data-ouia-component-id='admin_task_list_page'
       className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
     >
-      <ViewPayloadModal
-        setClosed={() => setPayloadOpen(false)}
-        open={payloadOpen}
-        uuid={adminTask?.uuid}
-        status={adminTask?.status}
-      />
+      <Outlet />
       <Flex className={classes.topContainer}>
         <AdminTaskFilters
           isLoading={isLoading}
@@ -232,10 +226,7 @@ const AdminTaskTable = () => {
                   </Td>
                   <Td width={10}>
                     <Button
-                      onClick={async () => {
-                        setPayloadOpen(true);
-                        setAdminTask(adminTask);
-                      }}
+                      onClick={() => navigate(adminTask.uuid)}
                       variant='secondary'
                       ouiaId='view_task_details'
                     >

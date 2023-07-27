@@ -99,7 +99,9 @@ const PopularRepositoriesTable = () => {
     isError,
     isFetching,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = usePopularRepositoriesQuery(page, perPage, { searchQuery: debouncedSearchValue });
+  } = usePopularRepositoriesQuery(page, perPage, {
+    searchQuery: !searchValue ? searchValue : debouncedSearchValue,
+  });
 
   const areAllReposAdded = useMemo(() => data.data.every(({ uuid }) => !!uuid), [data]);
 
@@ -234,6 +236,8 @@ const PopularRepositoriesTable = () => {
     meta: { count = 0 },
   } = data;
 
+  const countIsZero = !data?.data?.length;
+
   return (
     <Grid
       data-ouia-safe={!actionTakingPlace}
@@ -267,14 +271,14 @@ const PopularRepositoriesTable = () => {
                   isDisabled={!atLeastOneRepoChecked}
                   ouiaId='add_checked_repos'
                 >
-                  Add repositories
+                  Add selected repositories
                 </Button>
               </ConditionalTooltip>
             </FlexItem>
           </InputGroup>
         </FlexItem>
         <FlexItem>
-          <Hide hide={isLoading}>
+          <Hide hide={isLoading || countIsZero}>
             <Pagination
               id='top-pagination-id'
               widgetId='topPaginationWidgetId'
@@ -299,7 +303,7 @@ const PopularRepositoriesTable = () => {
           />
         </Grid>
       </Hide>
-      <Hide hide={isLoading}>
+      <Hide hide={isLoading || countIsZero}>
         <>
           <TableComposable
             aria-label='Popular repositories table'
@@ -410,28 +414,30 @@ const PopularRepositoriesTable = () => {
               )}
             </Tbody>
           </TableComposable>
-          <Flex className={classes.bottomContainer}>
-            <FlexItem />
-            <FlexItem>
-              <Pagination
-                id='bottom-pagination-id'
-                widgetId='bottomPaginationWidgetId'
-                perPageComponent='button'
-                itemCount={count}
-                perPage={perPage}
-                page={page}
-                onSetPage={onSetPage}
-                variant={PaginationVariant.bottom}
-                onPerPageSelect={onPerPageSelect}
-              />
-            </FlexItem>
-          </Flex>
+          <Hide hide={isLoading || countIsZero}>
+            <Flex className={classes.bottomContainer}>
+              <FlexItem />
+              <FlexItem>
+                <Pagination
+                  id='bottom-pagination-id'
+                  widgetId='bottomPaginationWidgetId'
+                  perPageComponent='button'
+                  itemCount={count}
+                  perPage={perPage}
+                  page={page}
+                  onSetPage={onSetPage}
+                  variant={PaginationVariant.bottom}
+                  onPerPageSelect={onPerPageSelect}
+                />
+              </FlexItem>
+            </Flex>
+          </Hide>
         </>
       </Hide>
-      <Hide hide={data.data.length !== 0 || isLoading}>
+      <Hide hide={!countIsZero}>
         <EmptyTableState
           clearFilters={() => setSearchValue('')}
-          notFiltered={true}
+          notFiltered={!debouncedSearchValue} // The second item prevents the clear button from being removed abruptly
           itemName='popular repositories'
         />
       </Hide>

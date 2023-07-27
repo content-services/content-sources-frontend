@@ -9,12 +9,14 @@ import {
   Tabs,
 } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
-import { createRef, useMemo, useState } from 'react';
+import { createRef, useEffect, useMemo, useState } from 'react';
 import { AdminTask } from '../../../../services/AdminTasks/AdminTaskApi';
 import AdminTaskInfo from './components/AdminTaskInfo';
 import ReactJson from 'react-json-view';
 import Hide from '../../../../components/Hide/Hide';
 import { useFetchAdminTaskQuery } from '../../../../services/AdminTasks/AdminTaskQueries';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ADMIN_TASKS_ROUTE, BASE_ROUTE } from '../../../../Routes/useTabbedRoutes';
 
 const useStyles = createUseStyles({
   jsonView: {
@@ -22,30 +24,33 @@ const useStyles = createUseStyles({
   },
 });
 
-export interface ViewPayloadProps {
-  setClosed: () => void;
-  open: boolean;
-  uuid?: string;
-  status?: AdminTask['status'];
-}
-
 export interface TabData {
   title: string;
   data: object;
   contentRef: React.RefObject<HTMLElement>;
 }
 
-const ViewPayloadModal = ({ uuid, status, open, setClosed }: ViewPayloadProps) => {
+const ViewPayloadModal = () => {
+  const { taskUUID: uuid } = useParams();
   const classes = useStyles();
+  const navigate = useNavigate();
+
+  const onClose = () => navigate(`${BASE_ROUTE}/${ADMIN_TASKS_ROUTE}`);
 
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
   const detailRef = createRef<HTMLElement>();
 
-  const { isLoading, isFetching, data: adminTask } = useFetchAdminTaskQuery(uuid, status);
+  const { isLoading, isFetching, data: adminTask, isError } = useFetchAdminTaskQuery(uuid);
 
   const handleTabClick = (_, tabIndex: string | number) => {
     setActiveTabKey(tabIndex);
   };
+
+  useEffect(() => {
+    if (isError) {
+      onClose();
+    }
+  }, [isError]);
 
   const tabs = useMemo(() => {
     const tabs: TabData[] = [];
@@ -94,10 +99,8 @@ const ViewPayloadModal = ({ uuid, status, open, setClosed }: ViewPayloadProps) =
     return tabs;
   }, [adminTask?.uuid, isFetching]);
 
-  const actionTakingPlace = isFetching;
-
-  if (!open) return <></>;
-
+  const actionTakingPlace = isFetching && !!adminTask;
+  const showLoading = isLoading || !adminTask;
   return (
     <Modal
       position='top'
@@ -105,11 +108,8 @@ const ViewPayloadModal = ({ uuid, status, open, setClosed }: ViewPayloadProps) =
       ouiaId='task_details'
       ouiaSafe={!actionTakingPlace}
       aria-label='Task details'
-      isOpen={open}
-      onClose={() => {
-        setActiveTabKey(0);
-        setClosed();
-      }}
+      isOpen
+      onClose={onClose}
       header={
         <Hide hide={isLoading}>
           <Tabs
@@ -139,12 +139,12 @@ const ViewPayloadModal = ({ uuid, status, open, setClosed }: ViewPayloadProps) =
         </Hide>
       }
     >
-      <Hide hide={!isLoading}>
+      <Hide hide={!showLoading}>
         <Bullseye>
           <Spinner />
         </Bullseye>
       </Hide>
-      <Hide hide={isLoading}>
+      <Hide hide={showLoading}>
         <TabContent aria-label='Task details' eventKey={0} id='task-details' ref={detailRef}>
           {/* Hide "isLoading" checks if adminTask is not null */}
           <AdminTaskInfo adminTask={adminTask as AdminTask} />

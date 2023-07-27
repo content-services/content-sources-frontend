@@ -1,5 +1,6 @@
 import {
   Bullseye,
+  Button,
   Flex,
   FlexItem,
   Grid,
@@ -41,14 +42,13 @@ import ContentListFilters from './components/ContentListFilters';
 import Hide from '../../components/Hide/Hide';
 import EmptyTableState from '../../components/EmptyTableState/EmptyTableState';
 import { useQueryClient } from 'react-query';
-import EditContentModal from './components/EditContentModal/EditContentModal';
 import StatusIcon from './components/StatusIcon';
 import UrlWithExternalIcon from '../../components/UrlWithLinkIcon/UrlWithLinkIcon';
 import PackageCount from './components/PackageCount';
 import { useAppContext } from '../../middleware/AppContext';
 import ConditionalTooltip from '../../components/ConditionalTooltip/ConditionalTooltip';
 import dayjs from 'dayjs';
-import AddContent from './components/AddContent/AddContent';
+import { Outlet, useNavigate } from 'react-router-dom';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -79,12 +79,11 @@ const perPageKey = 'contentListPerPage';
 const ContentListTable = () => {
   const classes = useStyles();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { rbac } = useAppContext();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editValues, setEditValues] = useState<ContentItem[]>([]);
   const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -218,8 +217,7 @@ const ContentListTable = () => {
         isDisabled: actionTakingPlace,
         title: 'Edit',
         onClick: () => {
-          setEditValues([rowData]);
-          setEditModalOpen(true);
+          navigate(`edit-repository?repoUUIDS=${rowData.uuid}`);
         },
       },
       {
@@ -235,160 +233,186 @@ const ContentListTable = () => {
   const notFilteredBody = 'To get started, create a custom repository';
 
   const countIsZero = count === 0;
-
-  if (countIsZero && notFiltered && !isLoading)
-    return (
-      <Bullseye data-ouia-safe={!actionTakingPlace} data-ouia-component-id='content_list_page'>
-        <EmptyTableState
-          notFiltered={notFiltered}
-          clearFilters={clearFilters}
-          itemName={itemName}
-          notFilteredBody={notFilteredBody}
-          notFilteredButton={<AddContent />}
-        />
-      </Bullseye>
-    );
-
+  const showLoader = countIsZero && notFiltered && !isLoading;
   return (
-    <Grid
-      data-ouia-safe={!actionTakingPlace}
-      data-ouia-component-id='content_list_page'
-      className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
-    >
-      <EditContentModal
-        values={editValues}
-        open={editModalOpen}
-        setClosed={() => {
-          setEditModalOpen(false);
-          setEditValues([]);
-        }}
-      />
-      <Flex className={classes.topContainer}>
-        <ContentListFilters
-          isLoading={isLoading}
-          setFilterData={(values) => {
-            setFilterData(values);
-            setPage(1);
-          }}
-          filterData={filterData}
-        />
-        <FlexItem>
-          <Hide hide={countIsZero}>
-            <Pagination
-              id='top-pagination-id'
-              widgetId='topPaginationWidgetId'
-              perPageComponent='button'
-              isDisabled={isLoading}
-              itemCount={count}
-              perPage={perPage}
-              page={page}
-              onSetPage={onSetPage}
-              isCompact
-              onPerPageSelect={onPerPageSelect}
-            />
-          </Hide>
-        </FlexItem>
-      </Flex>
-      <Hide hide={!isLoading}>
-        <Grid className={classes.mainContainer}>
-          <SkeletonTable
-            rowSize={perPage}
-            colSize={columnHeaders.length}
-            variant={TableVariant.compact}
+    <>
+      <Outlet />
+      {showLoader ? (
+        <Bullseye data-ouia-safe={!actionTakingPlace} data-ouia-component-id='content_list_page'>
+          <EmptyTableState
+            notFiltered={notFiltered}
+            clearFilters={clearFilters}
+            itemName={itemName}
+            notFilteredBody={notFilteredBody}
+            notFilteredButton={
+              <ConditionalTooltip
+                content='You do not have the required permissions to perform this action.'
+                show={!rbac?.write}
+                setDisabled
+              >
+                <Button
+                  id='createContentSourceButton'
+                  ouiaId='create_content_source'
+                  variant='primary'
+                  isDisabled={isLoading}
+                  onClick={() => navigate('add-repository')}
+                >
+                  Add repositories
+                </Button>
+              </ConditionalTooltip>
+            }
           />
-        </Grid>
-      </Hide>
-      <Hide hide={countIsZero || isLoading}>
-        <>
-          <TableComposable
-            aria-label='Custom repositories table'
-            ouiaId='custom_repositories_table'
-            variant='compact'
-          >
-            <Thead>
-              <Tr>
-                {columnHeaders.map((columnHeader, index) => (
-                  <Th key={columnHeader + 'column'} sort={sortParams(index)}>
-                    {columnHeader}
-                  </Th>
-                ))}
-                <Th>
-                  <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {contentList.map((rowData: ContentItem) => {
-                const {
-                  uuid,
-                  name,
-                  url,
-                  distribution_arch,
-                  distribution_versions,
-                  last_introspection_time,
-                } = rowData;
-                return (
-                  <Tr key={uuid}>
-                    <Td>
-                      {name}
-                      <br />
-                      <UrlWithExternalIcon href={url} />
-                    </Td>
-                    <Td>{archesDisplay(distribution_arch)}</Td>
-                    <Td>{versionDisplay(distribution_versions)}</Td>
-                    <Td>
-                      <PackageCount rowData={rowData} />
-                    </Td>
-                    <Td>{lastIntrospectionDisplay(last_introspection_time)}</Td>
-                    <Td>
-                      <StatusIcon rowData={rowData} retryHandler={introspectRepoForUuid} />
-                    </Td>
-                    <Td isActionCell>
-                      <ConditionalTooltip
-                        content={
-                          rowData?.status == 'Pending'
-                            ? 'Introspection is in progress'
-                            : 'You do not have the required permissions to perform this action.'
-                        }
-                        show={!rbac?.write || rowData?.status === 'Pending'}
-                        setDisabled
-                      >
-                        <ActionsColumn items={rowActions(rowData)} />
-                      </ConditionalTooltip>
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </TableComposable>
-          <Flex className={classes.bottomContainer}>
-            <FlexItem />
+        </Bullseye>
+      ) : (
+        <Grid
+          data-ouia-safe={!actionTakingPlace}
+          data-ouia-component-id='content_list_page'
+          className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
+        >
+          <Flex className={classes.topContainer}>
+            <ContentListFilters
+              isLoading={isLoading}
+              setFilterData={(values) => {
+                setFilterData(values);
+                setPage(1);
+              }}
+              filterData={filterData}
+            />
             <FlexItem>
-              <Pagination
-                id='bottom-pagination-id'
-                widgetId='bottomPaginationWidgetId'
-                perPageComponent='button'
-                itemCount={count}
-                perPage={perPage}
-                page={page}
-                onSetPage={onSetPage}
-                variant={PaginationVariant.bottom}
-                onPerPageSelect={onPerPageSelect}
-              />
+              <Hide hide={countIsZero}>
+                <Pagination
+                  id='top-pagination-id'
+                  widgetId='topPaginationWidgetId'
+                  perPageComponent='button'
+                  isDisabled={isLoading}
+                  itemCount={count}
+                  perPage={perPage}
+                  page={page}
+                  onSetPage={onSetPage}
+                  isCompact
+                  onPerPageSelect={onPerPageSelect}
+                />
+              </Hide>
             </FlexItem>
           </Flex>
-        </>
-      </Hide>
-      <Hide hide={!countIsZero || isLoading}>
-        <EmptyTableState
-          notFiltered={notFiltered}
-          clearFilters={clearFilters}
-          itemName={itemName}
-          notFilteredBody={notFilteredBody}
-          notFilteredButton={<AddContent />}
-        />
-      </Hide>
-    </Grid>
+          <Hide hide={!isLoading}>
+            <Grid className={classes.mainContainer}>
+              <SkeletonTable
+                rowSize={perPage}
+                colSize={columnHeaders.length}
+                variant={TableVariant.compact}
+              />
+            </Grid>
+          </Hide>
+          <Hide hide={countIsZero || isLoading}>
+            <>
+              <TableComposable
+                aria-label='Custom repositories table'
+                ouiaId='custom_repositories_table'
+                variant='compact'
+              >
+                <Thead>
+                  <Tr>
+                    {columnHeaders.map((columnHeader, index) => (
+                      <Th key={columnHeader + 'column'} sort={sortParams(index)}>
+                        {columnHeader}
+                      </Th>
+                    ))}
+                    <Th>
+                      <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
+                    </Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {contentList.map((rowData: ContentItem) => {
+                    const {
+                      uuid,
+                      name,
+                      url,
+                      distribution_arch,
+                      distribution_versions,
+                      last_introspection_time,
+                    } = rowData;
+                    return (
+                      <Tr key={uuid}>
+                        <Td>
+                          {name}
+                          <br />
+                          <UrlWithExternalIcon href={url} />
+                        </Td>
+                        <Td>{archesDisplay(distribution_arch)}</Td>
+                        <Td>{versionDisplay(distribution_versions)}</Td>
+                        <Td>
+                          <PackageCount rowData={rowData} />
+                        </Td>
+                        <Td>{lastIntrospectionDisplay(last_introspection_time)}</Td>
+                        <Td>
+                          <StatusIcon rowData={rowData} retryHandler={introspectRepoForUuid} />
+                        </Td>
+                        <Td isActionCell>
+                          <ConditionalTooltip
+                            content={
+                              rowData?.status == 'Pending'
+                                ? 'Introspection is in progress'
+                                : 'You do not have the required permissions to perform this action.'
+                            }
+                            show={!rbac?.write || rowData?.status === 'Pending'}
+                            setDisabled
+                          >
+                            <ActionsColumn items={rowActions(rowData)} />
+                          </ConditionalTooltip>
+                        </Td>
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </TableComposable>
+              <Flex className={classes.bottomContainer}>
+                <FlexItem />
+                <FlexItem>
+                  <Pagination
+                    id='bottom-pagination-id'
+                    widgetId='bottomPaginationWidgetId'
+                    perPageComponent='button'
+                    itemCount={count}
+                    perPage={perPage}
+                    page={page}
+                    onSetPage={onSetPage}
+                    variant={PaginationVariant.bottom}
+                    onPerPageSelect={onPerPageSelect}
+                  />
+                </FlexItem>
+              </Flex>
+            </>
+          </Hide>
+          <Hide hide={!countIsZero || isLoading}>
+            <EmptyTableState
+              notFiltered={notFiltered}
+              clearFilters={clearFilters}
+              itemName={itemName}
+              notFilteredBody={notFilteredBody}
+              notFilteredButton={
+                <ConditionalTooltip
+                  content='You do not have the required permissions to perform this action.'
+                  show={!rbac?.write}
+                  setDisabled
+                >
+                  <Button
+                    id='createContentSourceButton'
+                    ouiaId='create_content_source'
+                    variant='primary'
+                    isDisabled={isLoading}
+                    onClick={() => navigate('add-repository')}
+                  >
+                    Add repositories
+                  </Button>
+                </ConditionalTooltip>
+              }
+            />
+          </Hide>
+        </Grid>
+      )}
+    </>
   );
 };
 

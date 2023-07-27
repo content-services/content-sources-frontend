@@ -29,18 +29,30 @@ interface QuickStarts {
   activateQuickstart: (key: string) => Promise<void>;
 }
 
+const quickStartExpandedKey = 'QUICKSTART_EXPANDED';
+
 export default function QuickStart() {
   const { isBeta, quickStarts } = useChrome();
-  // This value only needs to be computed once
-  // So we wrap it in a useMemo and give it an empty dependency array to prevent it from being called on every render.
+  // These values only need to be computed once
+  // So we wrap them in useMemos and give them an empty dependency array to prevent them from being called on every render.
   const isPreview = useMemo(isBeta, []);
-  const [isExpanded, setIsExpanded] = useState(isPreview);
+  const quickStartExpanded = useMemo(
+    () => localStorage.getItem(quickStartExpandedKey) || 'true',
+    [],
+  );
+
+  const [isExpanded, setIsExpanded] = useState<boolean>(quickStartExpanded === 'true');
   const [quickStartLoading, setQuickStartLoading] = useState(false);
   const classes = useStyles();
 
   if (!isPreview) return <></>;
 
-  const onToggle = () => setIsExpanded((prev) => !prev);
+  const onToggle = () =>
+    setIsExpanded((prev) => {
+      localStorage.setItem(quickStartExpandedKey, `${!prev}`);
+      return !prev;
+    });
+
   const activateQuickStart = async () => {
     setQuickStartLoading(true);
     try {

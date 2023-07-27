@@ -1,7 +1,5 @@
-import { AlertVariant } from '@patternfly/react-core';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
-import { useNotification } from '../Notifications/Notifications';
 import {
   AdminTaskFilterData,
   AdminTaskListResponse,
@@ -9,6 +7,7 @@ import {
   AdminTask,
   getAdminTask,
 } from './AdminTaskApi';
+import useErrorNotification from '../../Hooks/useErrorNotification';
 
 export const ADMIN_TASK_LIST_KEY = 'ADMIN_TASK_LIST_KEY';
 export const ADMIN_TASK_KEY = 'ADMIN_TASK_KEY';
@@ -23,7 +22,7 @@ export const useAdminTaskListQuery = (
 ) => {
   const [polling, setPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
-
+  const errorNotifier = useErrorNotification();
   return useQuery<AdminTaskListResponse>(
     [ADMIN_TASK_LIST_KEY, page, limit, sortBy, ...Object.values(filterData)],
     () => getAdminTasks(page, limit, filterData, sortBy),
@@ -45,9 +44,11 @@ export const useAdminTaskListQuery = (
         // This sets the polling state based whether the data contains any "Running" status
         return setPolling(containsRunning);
       },
-      onError: () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError: (err: any) => {
         setPolling(false);
         setPollCount(0);
+        errorNotifier('Unable to get admin task list', 'An error occurred', err);
       },
       refetchInterval: polling ? ADMIN_TASK_LIST_POLLING_TIME : undefined,
       refetchIntervalInBackground: false, // This prevents endless polling when our app isn't the focus tab in a browser
@@ -58,23 +59,20 @@ export const useAdminTaskListQuery = (
   );
 };
 
-export const useFetchAdminTaskQuery = (uuid?: string, status?: AdminTask['status']) => {
-  const { notify } = useNotification();
-
+export const useFetchAdminTaskQuery = (uuid?: string) => {
+  const errorNotifier = useErrorNotification();
   return useQuery<AdminTask>(
-    [ADMIN_TASK_KEY, uuid, status],
+    [ADMIN_TASK_KEY, uuid],
     () => getAdminTask(uuid as string), // Will be disabled if undefined
     {
-      onError(err) {
-        const { data } = err as { data: { message: string | undefined } | string };
-        const description = typeof data === 'string' ? data : data?.message;
-        notify({
-          variant: AlertVariant.danger,
-          title: 'Error fetching admin task from UUID',
-          description,
-        });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError: (err: any) => {
+        errorNotifier(
+          'Unable to find an Admin task with the given UUID.',
+          'An error occurred',
+          err,
+        );
       },
-      enabled: !!uuid,
       keepPreviousData: true,
       staleTime: 20000,
     },

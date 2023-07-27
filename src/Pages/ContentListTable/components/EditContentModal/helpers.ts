@@ -1,9 +1,4 @@
 import { ContentItem, EditContentRequest } from '../../../../services/Content/ContentApi';
-export interface EditContentProps {
-  setClosed: () => void;
-  open: boolean;
-  values: ContentItem[];
-}
 
 export interface FormikEditValues {
   name: string;
@@ -28,7 +23,7 @@ export const mapFormikToEditAPIValues = (formikValues: FormikEditValues[]): Edit
     metadata_verification: metadataVerification,
   }));
 
-export const mapToDefaultFormikValues = (values: EditContentProps['values']): FormikEditValues[] =>
+export const mapToDefaultFormikValues = (values: ContentItem[]): FormikEditValues[] =>
   values.map(
     (
       {
@@ -53,3 +48,6 @@ export const mapToDefaultFormikValues = (values: EditContentProps['values']): Fo
       uuid,
     }),
   );
+
+export const mapToContentItemsToEditContentRequest = (values: ContentItem[]): EditContentRequest =>
+  mapFormikToEditAPIValues(mapToDefaultFormikValues(values));

@@ -1,5 +1,4 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { useFlag } from '@unleash/proxy-client-react';
 import { fetchRBAC, Rbac } from '@redhat-cloud-services/insights-common-typescript';
 import { Features } from '../services/Features/FeatureApi';
 import { notificationsReducer } from '@redhat-cloud-services/frontend-components-notifications/redux';
@@ -12,7 +11,6 @@ const getRegistry = _getRegistry as unknown as () => { register: ({ notification
 const { appname } = insights;
 
 export interface AppContextInterface {
-  hidePackageVerification: boolean;
   rbac?: { read: boolean; write: boolean };
   features: Features | null;
   isFetchingFeatures: boolean;
@@ -23,7 +21,6 @@ export const AppContext = createContext({} as AppContextInterface);
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [rbac, setRbac] = useState<Rbac | undefined>(undefined);
   const [features, setFeatures] = useState<Features | null>(null);
-  const hidePackageVerification = useFlag('content-sources.hide-package-verification') || false;
   const chrome = useChrome();
   const { fetchFeatures, isLoading: isFetchingFeatures } = useFetchFeaturesQuery();
 
@@ -46,7 +43,6 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AppContext.Provider
       value={{
-        hidePackageVerification,
         rbac: rbac
           ? {
               read: rbac?.hasPermission('content-sources', 'repositories', 'read'),

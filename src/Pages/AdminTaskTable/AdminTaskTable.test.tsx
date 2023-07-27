@@ -12,6 +12,11 @@ jest.mock('../../middleware/AppContext', () => ({
   useAppContext: () => ({}),
 }));
 
+jest.mock('react-router-dom', () => ({
+  useNavigate: jest.fn(),
+  Outlet: () => <></>,
+}));
+
 it('expect AdminTaskTable to render with a loading skeleton', () => {
   (useAdminTaskListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,

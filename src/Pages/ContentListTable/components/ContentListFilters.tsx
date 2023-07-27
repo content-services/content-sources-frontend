@@ -17,11 +17,11 @@ import { FilterData, RepositoryParamsResponse } from '../../../services/Content/
 import { useQueryClient } from 'react-query';
 import { REPOSITORY_PARAMS_KEY } from '../../../services/Content/ContentQueries';
 import useDebounce from '../../../Hooks/useDebounce';
-import AddContent from './AddContent/AddContent';
 import { createUseStyles } from 'react-jss';
 import { isEmpty } from 'lodash';
 import { useAppContext } from '../../../middleware/AppContext';
 import ConditionalTooltip from '../../../components/ConditionalTooltip/ConditionalTooltip';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   isLoading?: boolean;
@@ -57,6 +57,7 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
   const classes = useStyles();
   const { rbac } = useAppContext();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const filters = ['Name/URL', 'Version', 'Architecture', 'Status'];
   const [filterType, setFilterType] = useState<Filters>('Name/URL');
   const [versionNamesLabels, setVersionNamesLabels] = useState({});
@@ -253,7 +254,15 @@ const ContentListFilters = ({ isLoading, setFilterData, filterData }: Props) => 
           show={!rbac?.write}
           setDisabled
         >
-          <AddContent isDisabled={isLoading} />
+          <Button
+            id='createContentSourceButton'
+            ouiaId='create_content_source'
+            variant='primary'
+            isDisabled={isLoading}
+            onClick={() => navigate('add-repository')}
+          >
+            Add repositories
+          </Button>
         </ConditionalTooltip>
       </FlexItem>
       <Hide

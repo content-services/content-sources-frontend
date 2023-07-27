@@ -15,6 +15,7 @@ export interface ContentItem {
   failed_introspections_count: number;
   gpg_key: string;
   metadata_verification: boolean;
+  snapshot: boolean;
 }
 
 export interface PopularRepository {
@@ -186,6 +187,11 @@ export const getContentList: (
       (page - 1) * limit
     }&limit=${limit}&search=${searchQuery}&version=${versionParam}&status=${statusParam}&arch=${archParam}&sort_by=${sortBy}`,
   );
+  return data;
+};
+
+export const fetchContentItem: (uuid: string) => Promise<ContentItem> = async (uuid: string) => {
+  const { data } = await axios.get(`/api/content-sources/v1/repositories/${uuid}`);
   return data;
 };
 

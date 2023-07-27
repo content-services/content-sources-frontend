@@ -20,6 +20,11 @@ jest.mock('../../middleware/AppContext', () => ({
 
 jest.mock('./components/AddContent/AddContent');
 
+jest.mock('react-router-dom', () => ({
+  useNavigate: jest.fn(),
+  Outlet: () => <></>,
+}));
+
 (AddContent as jest.Mock).mockImplementation(() => 'Add Content');
 
 it('expect ContentListTable to render with a loading skeleton', () => {

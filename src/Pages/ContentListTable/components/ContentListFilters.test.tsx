@@ -12,6 +12,10 @@ jest.mock('../../../middleware/AppContext', () => ({
   useAppContext: () => ({}),
 }));
 
+jest.mock('react-router-dom', () => ({
+  useNavigate: jest.fn(),
+}));
+
 jest.mock('../../../Hooks/useDebounce', () => (value) => value);
 jest.mock('react-query');
 

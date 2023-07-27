@@ -48,6 +48,7 @@ it('mapToDefaultFormikValues', () => {
       org_id: 'stuffAndThings',
       gpg_key: 'stuffAndThings',
       metadata_verification: false,
+      snapshot: false,
     },
   ];
   const mapped = [

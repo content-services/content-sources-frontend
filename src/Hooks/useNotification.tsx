@@ -9,10 +9,10 @@ export interface NotificationPayload {
   dismissable?: boolean;
 }
 
-export const useNotification = () => {
+export default function useNotification() {
   const dispatch = useDispatch();
   const notify: (payload: NotificationPayload) => void = (payload: NotificationPayload) =>
     dispatch(addNotification(payload));
 
   return { notify };
-};
+}
