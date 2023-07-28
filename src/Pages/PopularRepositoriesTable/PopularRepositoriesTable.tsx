@@ -94,7 +94,7 @@ const PopularRepositoriesTable = () => {
   const classes = useStyles();
   const queryClient = useQueryClient();
   const { rbac } = useAppContext();
-  // Set of urls since uuids don't exist on unadded repositories
+  // Uses urls as map key because uuids don't exist on repositories that haven't been created
   const [checkedRepositoriesToAdd, setCheckedRepositoriesToAdd] = useState<
     Map<string, CreateContentRequestItem>
   >(new Map());
@@ -209,7 +209,6 @@ const PopularRepositoriesTable = () => {
     [data, checkedRepositoriesToAdd, checkedRepositoriesToDelete],
   );
 
-  // Can't use uuid because it could be empty for repositories that aren't added
   const onSelectRepo = (repo: PopularRepository, value: boolean) => {
     if (repo.uuid) {
       const newSet = new Set(checkedRepositoriesToDelete);

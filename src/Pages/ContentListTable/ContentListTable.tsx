@@ -247,6 +247,7 @@ const ContentListTable = () => {
 
   const clearCheckedRepositories = () => setCheckedRepositories(new Set<string>());
 
+  // Applied to all repos on current page
   const selectAllRepos = (_, checked: boolean) => {
     if (checked) {
       const newSet = new Set<string>(checkedRepositories);
@@ -269,7 +270,7 @@ const ContentListTable = () => {
 
   const areAllReposPending = useMemo(
     () => data.data.every((contentItem) => !repoCanBeChecked(contentItem)),
-    [data, checkedRepositories],
+    [data],
   );
 
   const areAllReposSelected = useMemo(() => {
@@ -294,14 +295,14 @@ const ContentListTable = () => {
     setCheckedRepositories(newSet);
   };
 
-  const deleteCheckedRepos = async () => {
-    await deleteItems(checkedRepositories);
-    const newMaxPage = Math.ceil((count - checkedRepositories.size) / perPage);
-    if (page > 1 && newMaxPage < page) {
-      setPage(newMaxPage);
-    }
-    clearCheckedRepositories();
-  };
+  const deleteCheckedRepos = () =>
+    deleteItems(checkedRepositories).then(() => {
+      const newMaxPage = Math.ceil((count - checkedRepositories.size) / perPage);
+      if (page > 1 && newMaxPage < page) {
+        setPage(newMaxPage);
+      }
+      clearCheckedRepositories();
+    });
 
   const itemName = 'custom repositories';
   const notFilteredBody = 'To get started, create a custom repository';
