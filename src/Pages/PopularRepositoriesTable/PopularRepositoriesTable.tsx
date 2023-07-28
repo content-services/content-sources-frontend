@@ -309,7 +309,7 @@ const PopularRepositoriesTable = () => {
         setPage(newMaxPage);
       }
       clearCheckedRepositories();
-    })
+    });
   };
 
   const columnHeaders = ['Name', 'Architecture', 'Versions'];
