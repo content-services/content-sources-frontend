@@ -297,7 +297,6 @@ const PopularRepositoriesTable = () => {
       request.push(repo);
     });
     setSelectedData(request);
-    clearCheckedRepositories();
   };
 
   const deleteSelected = async () => {
