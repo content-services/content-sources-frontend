@@ -155,7 +155,6 @@ const ContentListTable = () => {
   const { mutateAsync: deleteItems, isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
     queryClient,
     checkedRepositories,
-    setCheckedRepositories,
     page,
     perPage,
     filterData,

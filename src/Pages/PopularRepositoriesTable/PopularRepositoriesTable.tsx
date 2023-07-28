@@ -273,7 +273,6 @@ const PopularRepositoriesTable = () => {
   const { mutateAsync: deleteItems, isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
     queryClient,
     checkedRepositoriesToDelete,
-    setCheckedRepositoriesToDelete,
     page,
     perPage,
     { searchQuery: debouncedSearchValue } as FilterData,

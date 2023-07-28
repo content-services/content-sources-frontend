@@ -366,7 +366,6 @@ export const useDeleteContentItemMutate = (
 export const useBulkDeleteContentItemMutate = (
   queryClient: QueryClient,
   selected: Set<string>,
-  setSelected: (newSelected: Set<string>) => void,
   page: number,
   perPage: number,
   filterData?: FilterData,
