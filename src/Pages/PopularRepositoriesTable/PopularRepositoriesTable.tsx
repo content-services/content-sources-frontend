@@ -43,6 +43,7 @@ import { SearchIcon } from '@patternfly/react-icons';
 import useDebounce from '../../Hooks/useDebounce';
 import EmptyTableState from '../../components/EmptyTableState/EmptyTableState';
 import DeleteKebab from '../../components/DeleteKebab/DeleteKebab';
+import { repoToRequestItem } from './helper';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -138,26 +139,6 @@ const PopularRepositoriesTable = () => {
     perPage,
     { searchQuery: debouncedSearchValue } as FilterData,
   );
-
-  const repoToRequestItem = (repo: PopularRepository): CreateContentRequestItem => {
-    const {
-      suggested_name,
-      url,
-      distribution_versions,
-      distribution_arch,
-      gpg_key,
-      metadata_verification,
-    } = repo;
-
-    return {
-      name: suggested_name,
-      url,
-      distribution_versions,
-      distribution_arch,
-      gpg_key,
-      metadata_verification,
-    };
-  };
 
   const clearCheckedRepositories = () => {
     setCheckedRepositoriesToAdd(new Map());
