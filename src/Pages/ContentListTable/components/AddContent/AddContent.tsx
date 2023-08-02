@@ -236,7 +236,7 @@ const AddContent = () => {
     formik.setTouched([...formik.touched, defaultTouchedState]);
     formik.setValues([
       ...formik.values.map((vals) => ({ ...vals, expanded: false })),
-      getDefaultFormikValues(),
+      getDefaultFormikValues({ snapshot: snapshottingEnabled }),
     ]);
     setChangeVerified(false);
   };
@@ -518,7 +518,7 @@ const AddContent = () => {
                     <Hide hide={!snapshottingEnabled}>
                       <FormGroup fieldId='snapshot'>
                         <Switch
-                          id='snapshot-switch'
+                          id={'snapshot-switch-' + index}
                           hasCheckIcon
                           label='Snapshot creation enabled'
                           labelOff='Snapshot creation disabled'
