@@ -32,6 +32,7 @@ jest.mock('react-query', () => ({
   useQueryClient: jest.fn(),
 }));
 
+jest.mock('../../../../Hooks/useRootPath', () => () => 'someUrl');
 jest.mock('../../../../Hooks/useNotification', () => () => ({ notify: () => null }));
 jest.mock('../../../../Hooks/useDebounce', () => (value) => value);
 jest.mock('../../../../middleware/AppContext', () => ({ useAppContext: () => ({}) }));

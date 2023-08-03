@@ -17,6 +17,8 @@ const packageItem: PackageItem = {
   uuid: '',
 };
 
+jest.mock('../../../../Hooks/useRootPath', () => () => 'someUrl');
+
 jest.mock('../../../../services/Content/ContentQueries', () => ({
   useGetPackagesQuery: jest.fn(),
 }));
