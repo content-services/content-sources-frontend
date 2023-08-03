@@ -37,7 +37,7 @@ import { SearchIcon } from '@patternfly/react-icons';
 import useDebounce from '../../../../Hooks/useDebounce';
 import EmptyPackageState from './components/EmptyPackageState';
 import { useNavigate, useParams } from 'react-router-dom';
-import { BASE_ROUTE } from '../../../../Routes/useTabbedRoutes';
+import useRootPath from '../../../../Hooks/useRootPath';
 
 const useStyles = createUseStyles({
   description: {
@@ -78,7 +78,7 @@ const perPageKey = 'packagePerPage';
 export default function PackageModal() {
   const classes = useStyles();
   const { repoUUID: uuid } = useParams();
-
+  const rootPath = useRootPath();
   const navigate = useNavigate();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
@@ -141,7 +141,7 @@ export default function PackageModal() {
     };
   };
 
-  const onClose = () => navigate(BASE_ROUTE);
+  const onClose = () => navigate(rootPath);
 
   const {
     data: packageList = [],

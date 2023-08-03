@@ -7,9 +7,7 @@ import EditContentModal from '../Pages/ContentListTable/components/EditContentMo
 import PackageModal from '../Pages/ContentListTable/components/PackageModal/PackageModal';
 import PopularRepositoriesTable from '../Pages/PopularRepositoriesTable/PopularRepositoriesTable';
 import { useAppContext } from '../middleware/AppContext';
-import fecConfig from '../../fec.config';
 
-export const BASE_ROUTE = fecConfig.appUrl;
 export const DEFAULT_ROUTE = '';
 export const POPULAR_REPOSITORIES_ROUTE = 'popular-repositories';
 export const ADMIN_TASKS_ROUTE = 'admin-tasks';

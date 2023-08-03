@@ -50,8 +50,8 @@ import { isEmpty, isEqual } from 'lodash';
 import useDeepCompareEffect from '../../../../Hooks/useDeepCompareEffect';
 import useDebounce from '../../../../Hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
-import { BASE_ROUTE } from '../../../../Routes/useTabbedRoutes';
 import { useClearCheckedRepositories } from '../../ContentListTable';
+import useRootPath from '../../../../Hooks/useRootPath';
 
 const useStyles = createUseStyles({
   description: {
@@ -117,6 +117,7 @@ const defaultTouchedState = { name: false, url: false, gpgKey: false };
 
 const AddContent = () => {
   const navigate = useNavigate();
+  const rootPath = useRootPath();
   const [changeVerified, setChangeVerified] = useState(false);
   const [gpgKeyList, setGpgKeyList] = useState<Array<string>>(['']);
   const classes = useStyles();
@@ -193,7 +194,7 @@ const AddContent = () => {
     return { distributionArches, distributionVersions };
   }, [distArches, distVersions]);
 
-  const onClose = () => navigate(BASE_ROUTE);
+  const onClose = () => navigate(rootPath);
 
   const { mutateAsync: addContent, isLoading: isAdding } = useAddContentQuery(
     queryClient,

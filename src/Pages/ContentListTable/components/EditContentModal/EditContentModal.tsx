@@ -24,8 +24,8 @@ import EditContentForm from './EditContentForm';
 import { EditContentRequest } from '../../../../services/Content/ContentApi';
 import { isEqual } from 'lodash';
 import { mapToContentItemsToEditContentRequest } from './helpers';
-import { BASE_ROUTE } from '../../../../Routes/useTabbedRoutes';
 import { useClearCheckedRepositories } from '../../ContentListTable';
+import useRootPath from '../../../../Hooks/useRootPath';
 
 const useStyles = createUseStyles({
   description: {
@@ -41,6 +41,7 @@ const useStyles = createUseStyles({
 const EditContentModal = () => {
   const classes = useStyles();
   const navigate = useNavigate();
+  const rootPath = useRootPath();
   const queryClient = useQueryClient();
   const { search } = useLocation();
   const [initialLoad, setInitialLoad] = useState(true);
@@ -56,7 +57,7 @@ const EditContentModal = () => {
     updatedValues,
   );
 
-  const onClose = () => navigate(BASE_ROUTE);
+  const onClose = () => navigate(rootPath);
   const onSave = async () =>
     editContent().then(() => {
       onClose();
