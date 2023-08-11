@@ -33,7 +33,7 @@ it('Render enabled with snapshots enabled', async () => {
   expect(toggle).toBeInTheDocument();
   fireEvent.click(toggle);
 
-  const addWithoutSnapshot = queryByText('Add Without Snapshotting') as Element;
+  const addWithoutSnapshot = queryByText('Add without snapshotting') as Element;
   expect(addWithoutSnapshot).toBeInTheDocument();
   fireEvent.click(addWithoutSnapshot);
 
