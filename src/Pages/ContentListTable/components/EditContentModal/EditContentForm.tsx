@@ -553,8 +553,8 @@ const EditContentForm = ({
                     <FormGroup fieldId='metadataVerification' label='Use GPG key for' isInline>
                       <Radio
                         isDisabled={
-                          validationList?.[index]?.url?.metadata_signature_present === false ||
-                          !!formik?.errors?.[index]?.gpgKey
+                          validationList?.[index]?.url?.metadata_signature_present === false
+                          //    || !!formik?.errors?.[index]?.gpgKey
                         }
                         id='package verification only'
                         name='package-verification-only'
@@ -568,8 +568,8 @@ const EditContentForm = ({
                       >
                         <Radio
                           isDisabled={
-                            validationList?.[index]?.url?.metadata_signature_present === false ||
-                            !!formik?.errors?.[index]?.gpgKey
+                            validationList?.[index]?.url?.metadata_signature_present === false
+                            // || !!formik?.errors?.[index]?.gpgKey
                           }
                           id='Package and metadata verification'
                           name='package-and-repository-verification'

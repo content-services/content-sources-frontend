@@ -28,6 +28,8 @@ import {
   deleteContentListItems,
   Meta,
   ErrorResponse,
+  getSnapshotList,
+  SnapshotListResponse,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../AdminTasks/AdminTaskQueries';
 import useErrorNotification from '../../Hooks/useErrorNotification';
@@ -38,6 +40,7 @@ export const POPULAR_REPOSITORIES_LIST_KEY = 'POPULAR_REPOSITORIES_LIST_KEY';
 export const REPOSITORY_PARAMS_KEY = 'REPOSITORY_PARAMS_KEY';
 export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
 export const PACKAGES_KEY = 'PACKAGES_KEY';
+export const LIST_SNAPSHOTS_KEY = 'PACKAGES_KEY';
 export const CONTENT_ITEM_KEY = 'CONTENT_ITEM_KEY';
 
 const CONTENT_LIST_POLLING_TIME = 15000; // 15 seconds
@@ -458,6 +461,29 @@ export const useFetchGpgKey = () => {
   };
 
   return { fetchGpgKey, isLoading };
+};
+
+export const useGetSnapshotList = (
+  uuid: string,
+  page: number,
+  limit: number,
+  searchQuery: string,
+  sortBy: string,
+) => {
+  const errorNotifier = useErrorNotification();
+  return useQuery<SnapshotListResponse>(
+    [LIST_SNAPSHOTS_KEY, uuid, page, limit, searchQuery, sortBy],
+    () => getSnapshotList(uuid, page, limit, searchQuery, sortBy),
+    {
+      keepPreviousData: true,
+      optimisticResults: true,
+      staleTime: 60000,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError: (err: any) => {
+        errorNotifier('Unable to find snapshots with the given UUID.', 'An error occurred', err);
+      },
+    },
+  );
 };
 
 export const useGetPackagesQuery = (

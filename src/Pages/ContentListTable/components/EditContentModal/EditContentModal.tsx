@@ -24,7 +24,7 @@ import EditContentForm from './EditContentForm';
 import { EditContentRequest } from '../../../../services/Content/ContentApi';
 import { isEqual } from 'lodash';
 import { mapToContentItemsToEditContentRequest } from './helpers';
-import { useClearCheckedRepositories } from '../../ContentListTable';
+import { useContentListOutletContext } from '../../ContentListTable';
 import useRootPath from '../../../../Hooks/useRootPath';
 
 const useStyles = createUseStyles({
@@ -48,7 +48,7 @@ const EditContentModal = () => {
   const [updatedValues, setUpdatedValues] = useState<EditContentRequest>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
-  const clearCheckedRepositories = useClearCheckedRepositories();
+  const { clearCheckedRepositories } = useContentListOutletContext();
 
   const uuids = new URLSearchParams(search).get('repoUUIDS')?.split(',') || [];
 

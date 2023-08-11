@@ -9,7 +9,6 @@ import {
   OnSetPage,
   Pagination,
   PaginationVariant,
-  TextInput,
 } from '@patternfly/react-core';
 import {
   InnerScrollContainer,
@@ -31,13 +30,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
 import Hide from '../../../../components/Hide/Hide';
-import { PackageItem } from '../../../../services/Content/ContentApi';
-import { useGetPackagesQuery } from '../../../../services/Content/ContentQueries';
-import { SearchIcon } from '@patternfly/react-icons';
+import { SnapshotItem } from '../../../../services/Content/ContentApi';
+import { useFetchContent, useGetSnapshotList } from '../../../../services/Content/ContentQueries';
 import useDebounce from '../../../../Hooks/useDebounce';
-import EmptyPackageState from './components/EmptyPackageState';
 import { useNavigate, useParams } from 'react-router-dom';
 import useRootPath from '../../../../Hooks/useRootPath';
+import EmptyPackageState from '../PackageModal/components/EmptyPackageState';
+import ChangedArrows from './components/ChangedArrows';
 
 const useStyles = createUseStyles({
   description: {
@@ -73,12 +72,12 @@ const useStyles = createUseStyles({
   },
 });
 
-const perPageKey = 'packagePerPage';
+const perPageKey = 'snapshotPerPage';
 
-export default function PackageModal() {
+export default function SnapshotListModal() {
   const classes = useStyles();
-  const { repoUUID: uuid } = useParams();
   const rootPath = useRootPath();
+  const { repoUUID: uuid = '' } = useParams();
   const navigate = useNavigate();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
@@ -87,9 +86,9 @@ export default function PackageModal() {
   const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const columnHeaders = ['Name', 'Version', 'Release', 'Arch'];
+  const columnHeaders = ['Snapshots', 'Change', 'Packages', 'Errata'];
 
-  const columnSortAttributes = ['name', 'version', 'release', 'arch'];
+  const columnSortAttributes = ['created_at'];
 
   const sortString = useMemo(
     () => columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
@@ -107,7 +106,9 @@ export default function PackageModal() {
     isFetching,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetPackagesQuery(uuid as string, page, perPage, debouncedSearchQuery, sortString);
+  } = useGetSnapshotList(uuid as string, page, perPage, debouncedSearchQuery, sortString);
+
+  const { data: contentData } = useFetchContent([uuid]);
 
   useEffect(() => {
     if (isError) {
@@ -119,14 +120,13 @@ export default function PackageModal() {
 
   const onPerPageSelect: OnPerPageSelect = (_, newPerPage, newPage) => {
     // Save this value through page refresh for use on next reload
-
     setPerPage(newPerPage);
     setPage(newPage);
     localStorage.setItem(perPageKey, newPerPage.toString());
   };
 
   const sortParams = (columnIndex: number, isDisabled: boolean): ThProps['sort'] | undefined => {
-    if (isDisabled) return;
+    if (isDisabled || !columnSortAttributes[columnIndex]) return;
     return {
       sortBy: {
         index: activeSortIndex,
@@ -144,7 +144,7 @@ export default function PackageModal() {
   const onClose = () => navigate(rootPath);
 
   const {
-    data: packageList = [],
+    data: snapshotsList = [],
     meta: { count = 0 },
   } = data;
 
@@ -157,12 +157,20 @@ export default function PackageModal() {
       key={uuid}
       position='top'
       hasNoBodyWrapper
-      aria-label='RPM package modal'
-      ouiaId='rpm_package_modal'
+      aria-label='Snapshot list modal'
+      ouiaId='snapshot_list_modal'
       ouiaSafe={fetchingOrLoading}
       variant={ModalVariant.medium}
-      title='Packages'
-      description={<p className={classes.description}>View list of packages</p>}
+      title='Snapshots'
+      description={
+        <p className={classes.description}>
+          View list of snapshots for{' '}
+          {contentData?.name ? <b>{contentData?.name}</b> : 'a repository'}.
+          {/* You may select snapshots to delete them.
+          <br />
+          You may also view the snapshot comparisons <b>here</b>. */}
+        </p>
+      }
       isOpen
       onClose={onClose}
       footer={
@@ -174,17 +182,17 @@ export default function PackageModal() {
       <InnerScrollContainer>
         <Grid className={classes.mainContainer}>
           <Flex className={classes.topContainer}>
-            <Flex>
-              <TextInput
+            <FlexItem>
+              {/* <TextInput
                 id='search'
                 ouiaId='name_search'
-                placeholder='Filter by name'
+                placeholder='Search snapshot'
                 value={searchQuery}
                 onChange={(value) => setSearchQuery(value)}
                 className={classes.searchInput}
               />
-              <SearchIcon size='sm' className={classes.searchIcon} />
-            </Flex>
+              <SearchIcon size='sm' className={classes.searchIcon} /> */}
+            </FlexItem>
             <FlexItem>
               <Hide hide={loadingOrZeroCount}>
                 <Pagination
@@ -212,8 +220,8 @@ export default function PackageModal() {
           </Hide>
           <Hide hide={fetchingOrLoading}>
             <TableComposable
-              aria-label='Custom repositories table'
-              ouiaId='packages_table'
+              aria-label='snapshot list table'
+              ouiaId='snapshot_list_table'
               variant='compact'
             >
               <Hide hide={loadingOrZeroCount}>
@@ -231,14 +239,30 @@ export default function PackageModal() {
                 </Thead>
               </Hide>
               <Tbody>
-                {packageList.map(({ name, version, release, arch }: PackageItem, index: number) => (
-                  <Tr key={name + index}>
-                    <Td>{name}</Td>
-                    <Td>{version}</Td>
-                    <Td>{release}</Td>
-                    <Td>{arch}</Td>
-                  </Tr>
-                ))}
+                {snapshotsList.map(
+                  (
+                    { created_at, content_counts, added_counts, removed_counts }: SnapshotItem,
+                    index: number,
+                  ) => (
+                    <Tr key={created_at + index}>
+                      <Td>{new Date(created_at).toUTCString()}</Td>
+                      <Td>
+                        <ChangedArrows
+                          addedCount={
+                            (added_counts?.['rpm.advisory'] || 0) +
+                            (added_counts?.['rpm.package'] || 0)
+                          }
+                          removedCount={
+                            (removed_counts?.['rpm.advisory'] || 0) +
+                            (removed_counts?.['rpm.package'] || 0)
+                          }
+                        />
+                      </Td>
+                      <Td>{content_counts?.['rpm.package'] || 0}</Td>
+                      <Td>{content_counts?.['rpm.advisory'] || 0}</Td>
+                    </Tr>
+                  ),
+                )}
                 <Hide hide={!loadingOrZeroCount}>
                   <EmptyPackageState clearSearch={() => setSearchQuery('')} />
                 </Hide>

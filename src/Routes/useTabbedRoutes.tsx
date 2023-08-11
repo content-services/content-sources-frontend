@@ -7,6 +7,7 @@ import EditContentModal from '../Pages/ContentListTable/components/EditContentMo
 import PackageModal from '../Pages/ContentListTable/components/PackageModal/PackageModal';
 import PopularRepositoriesTable from '../Pages/PopularRepositoriesTable/PopularRepositoriesTable';
 import { useAppContext } from '../middleware/AppContext';
+import SnapshotListModal from '../Pages/ContentListTable/components/SnapshotListModal/SnapshotListModal';
 
 export const DEFAULT_ROUTE = '';
 export const POPULAR_REPOSITORIES_ROUTE = 'popular-repositories';
@@ -36,6 +37,9 @@ export default function useTabbedRoutes(): TabbedRoute[] {
                 { path: 'edit-repository', Element: EditContentModal },
                 { path: 'add-repository', Element: AddContent },
               ]
+            : []),
+          ...(features?.admintasks?.enabled && features.snapshots?.accessible
+            ? [{ path: ':repoUUID/snapshots', Element: SnapshotListModal }]
             : []),
           { path: ':repoUUID/packages', Element: PackageModal },
         ],

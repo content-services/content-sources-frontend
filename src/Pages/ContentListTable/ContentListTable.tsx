@@ -84,7 +84,7 @@ const ContentListTable = () => {
   const classes = useStyles();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { rbac } = useAppContext();
+  const { rbac, features } = useAppContext();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
@@ -219,6 +219,36 @@ const ContentListTable = () => {
   const rowActions = useCallback(
     (rowData: ContentItem): IAction[] => [
       {
+        isDisabled: actionTakingPlace,
+        title: 'Edit',
+        onClick: () => {
+          navigate(`edit-repository?repoUUIDS=${rowData.uuid}`);
+        },
+      },
+      ...(features?.snapshots?.accessible
+        ? [
+            {
+              isDisabled:
+                actionTakingPlace ||
+                !rowData.snapshot ||
+                !(rowData.snapshot && rowData.last_snapshot_uuid),
+              title:
+                rowData.snapshot && rowData.last_snapshot_uuid
+                  ? 'View all snapshots'
+                  : 'No snapshots yet',
+              onClick: () => {
+                navigate(`${rowData.uuid}/snapshots`);
+              },
+            },
+          ]
+        : []),
+      {
+        isDisabled: actionTakingPlace || rowData?.status == 'Retrying',
+        title: 'Introspect Now',
+        onClick: () => introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
+      },
+      { isSeparator: true },
+      {
         title: 'Delete',
         onClick: () =>
           deleteItem(rowData?.uuid).then(() => {
@@ -228,18 +258,6 @@ const ContentListTable = () => {
               setPage(page - 1);
             }
           }),
-      },
-      {
-        isDisabled: actionTakingPlace,
-        title: 'Edit',
-        onClick: () => {
-          navigate(`edit-repository?repoUUIDS=${rowData.uuid}`);
-        },
-      },
-      {
-        isDisabled: actionTakingPlace || rowData?.status == 'Retrying',
-        title: 'Introspect Now',
-        onClick: () => introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
       },
     ],
     [actionTakingPlace, checkedRepositories],
@@ -311,7 +329,7 @@ const ContentListTable = () => {
   const showLoader = countIsZero && notFiltered && !isLoading;
   return (
     <>
-      <Outlet context={clearCheckedRepositories} />
+      <Outlet context={{ clearCheckedRepositories }} />
       {showLoader ? (
         <Bullseye data-ouia-safe={!actionTakingPlace} data-ouia-component-id='content_list_page'>
           <EmptyTableState
@@ -515,8 +533,7 @@ const ContentListTable = () => {
   );
 };
 
-export function useClearCheckedRepositories() {
-  return useOutletContext<() => void>();
-}
+export const useContentListOutletContext = () =>
+  useOutletContext<{ clearCheckedRepositories: () => void }>();
 
 export default ContentListTable;

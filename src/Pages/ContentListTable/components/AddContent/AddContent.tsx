@@ -52,7 +52,7 @@ import { isEmpty, isEqual } from 'lodash';
 import useDeepCompareEffect from '../../../../Hooks/useDeepCompareEffect';
 import useDebounce from '../../../../Hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
-import { useClearCheckedRepositories } from '../../ContentListTable';
+import { useContentListOutletContext } from '../../ContentListTable';
 import useRootPath from '../../../../Hooks/useRootPath';
 import { useAppContext } from '../../../../middleware/AppContext';
 
@@ -138,7 +138,8 @@ const AddContent = () => {
     initialTouched: [defaultTouchedState],
     onSubmit: () => undefined,
   });
-  const clearCheckedRepositories = useClearCheckedRepositories();
+
+  const { clearCheckedRepositories } = useContentListOutletContext();
 
   const updateGpgKey = (index: number, value: string) => {
     setChangeVerified(false);

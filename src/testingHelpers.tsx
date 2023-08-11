@@ -1,8 +1,11 @@
 import { QueryClient, QueryClientProvider } from 'react-query';
 import {
   ContentItem,
+  Links,
+  Meta,
   PopularRepository,
   RepositoryParamsResponse,
+  SnapshotItem,
   ValidationResponse,
 } from './services/Content/ContentApi';
 import { AdminTask } from './services/AdminTasks/AdminTaskApi';
@@ -115,7 +118,7 @@ export const passingValidationErrorData: ValidationResponse = [
 
 export const defaultContentItem: ContentItem = {
   uuid: '',
-  name: '',
+  name: 'SteveTheRepo',
   package_count: 100,
   url: '',
   status: 'Pending',
@@ -172,4 +175,36 @@ export const defaultSnapshotTask: AdminTask = {
       distributionData: 'distributionValue',
     },
   },
+};
+
+export const defaultMetaItem: Meta = {
+  limit: 10,
+  offset: 0,
+  count: 1,
+};
+
+export const defaultLinkItem: Links = {
+  first:
+    '/api/content-sources/v1/repositories/?arch=&limit=20&offset=0&search=&sort_by=name:asc&status=&version=',
+  last: '/api/content-sources/v1/repositories/?arch=&limit=20&offset=0&search=&sort_by=name:asc&status=&version=',
+};
+
+export const defaultSnapshotItem: SnapshotItem = {
+  created_at: '2023-08-08T20:23:32.711372-06:00',
+  distribution_path: 'b68beca3-d081-4c9f-9d8f-9868107c30e2/ea837ff5-62ed-4507-876d-2c600f55df54',
+  content_counts: {
+    'rpm.advisory': 3864,
+    'rpm.package': 17208,
+    'rpm.packagecategory': 1,
+    'rpm.packageenvironment': 1,
+    'rpm.packagegroup': 20,
+  },
+  added_counts: {
+    'rpm.advisory': 3864,
+    'rpm.package': 17208,
+    'rpm.packagecategory': 1,
+    'rpm.packageenvironment': 1,
+    'rpm.packagegroup': 20,
+  },
+  removed_counts: {},
 };
