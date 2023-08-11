@@ -382,11 +382,12 @@ const PopularRepositoriesTable = () => {
                           className={classes.addRepositoriesButton}
                           toggle={() => (
                             <DropdownToggle
-                              id='toggle-add-selected'
+                              ouiaId='add-selected-toggle'
                               className={className}
                               splitButtonItems={[
                                 <DropdownToggleAction
                                   key='action'
+                                  data-ouia-component-id='add_checked_repos'
                                   onClick={() => addSelected(true)}
                                   className={className}
                                 >

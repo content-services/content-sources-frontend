@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Dropdown, DropdownItem, Button } from '@patternfly/react-core';
+
 import { useAppContext } from '../../../middleware/AppContext';
 import { global_disabled_color_100, global_disabled_color_200 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
@@ -37,8 +38,13 @@ export const AddRepo = ({ isDisabled, addRepo }: Props) => {
   };
 
   const dropdownItems = [
-    <DropdownItem key='action' component='button' onClick={() => addRepo(false)}>
-      Add Without Snapshotting
+    <DropdownItem
+      data-ouia-component-id='add-popular_repo_without-snapshotting'
+      key='action'
+      component='button'
+      onClick={() => addRepo(false)}
+    >
+      Add without snapshotting
     </DropdownItem>,
   ];
 
@@ -51,8 +57,10 @@ export const AddRepo = ({ isDisabled, addRepo }: Props) => {
           <DropdownToggle
             id='toggle-add'
             className={className}
+            ouiaId='add_popular_repo_toggle'
             splitButtonItems={[
               <DropdownToggleAction
+                data-ouia-component-id='add_popular_repo'
                 key='action'
                 onClick={() => addRepo(true)}
                 className={className}
@@ -64,7 +72,6 @@ export const AddRepo = ({ isDisabled, addRepo }: Props) => {
             splitButtonVariant='action'
             onToggle={onActionToggle}
             isDisabled={isDisabled}
-            ouiaId='add_popular_repo'
           />
         )}
         isOpen={isActionOpen}
