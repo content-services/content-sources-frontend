@@ -53,6 +53,7 @@ export const AddRepo = ({ isDisabled, addRepo }: Props) => {
     return (
       <Dropdown
         onSelect={onActionSelect}
+        ouiaId='add_popular_repo_toggle-dropdown'
         toggle={() => (
           <DropdownToggle
             id='toggle-add'

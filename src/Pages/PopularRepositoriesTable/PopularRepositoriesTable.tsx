@@ -380,6 +380,7 @@ const PopularRepositoriesTable = () => {
                         <Dropdown
                           onSelect={onDropdownSelect}
                           className={classes.addRepositoriesButton}
+                          ouiaId='add-selected-toggle-dropdown'
                           toggle={() => (
                             <DropdownToggle
                               ouiaId='add-selected-toggle'
