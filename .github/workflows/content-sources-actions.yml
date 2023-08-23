@@ -43,3 +43,7 @@ jobs:
         with:
           path: ${{ github.workspace }}/dist/*
           key: ${{ github.sha }}
+      - name: Set the sha
+        id: set_sha
+        run: |
+          echo "sha=${{ github.sha }}" >> "$GITHUB_ENV"

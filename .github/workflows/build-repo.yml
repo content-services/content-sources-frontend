@@ -24,7 +24,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/scripts/*
-          key: ${{ github.sha }}-scripts
+          key: ${{ env.sha }}-scripts
   pull-jenkins:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/.travis/58231b16fdee45a03a4ee3cf94a9f2c3
-          key: ${{ github.sha }}-travis
+          key: ${{ env.sha }}-travis
   set-ssh:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: /home/runner/.ssh/*
-          key: ${{ github.sha }}-ssh
+          key: ${{ env.sha }}-ssh
   Release-to-build:
     needs: [pull-scripts, pull-jenkins, set-ssh]
     runs-on: ubuntu-latest
@@ -75,20 +75,20 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: /home/runner/.ssh/*
-          key: ${{ github.sha }}-ssh
+          key: ${{ env.sha }}-ssh
       - uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/scripts/*
-          key: ${{ github.sha }}-scripts
+          key: ${{ env.sha }}-scripts
       - uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/.travis/58231b16fdee45a03a4ee3cf94a9f2c3
-          key: ${{ github.sha }}-travis
+          key: ${{ env.sha }}-travis
       - uses: actions/cache@v3
         id: restore-build
         with:
           path: ${{ github.workspace }}/dist/*
-          key: ${{ github.sha }}
+          key: ${{ env.sha }}
       - name: Check custom_release existence
         id: check_custom_release
         uses: andstor/file-existence-action@v1
@@ -116,5 +116,5 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/dist/*
-          key: ${{ github.sha }}-released
+          key: ${{ env.sha }}-released
 
