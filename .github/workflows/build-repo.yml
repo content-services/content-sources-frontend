@@ -12,6 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: mkdir ${{ github.workspace }}/scripts
+      - name: Set the sha
+        id: set_sha
+        run: |
+          echo "sha=$GITHUB_SHA" >> "$GITHUB_ENV"
       - name: Pull release file
         run: curl -sSL https://raw.githubusercontent.com/RedHatInsights/insights-frontend-builder-common/master/src/release.sh > ${{ github.workspace }}/scripts/release.sh
       - run: chmod +x "${{ github.workspace }}/scripts/release.sh"
