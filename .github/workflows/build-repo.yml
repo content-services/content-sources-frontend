@@ -33,8 +33,7 @@ jobs:
   
       - name: Build
         run: npm run build --if-present
-
-      - uses: actions/checkout@v3
+      
       - run: mkdir ${{ github.workspace }}/scripts
       - name: Pull release file
         run: curl -sSL https://raw.githubusercontent.com/RedHatInsights/insights-frontend-builder-common/master/src/release.sh > ${{ github.workspace }}/scripts/release.sh
@@ -45,8 +44,7 @@ jobs:
       - name: Pull quay push file
         run: curl -sSL https://raw.githubusercontent.com/RedHatInsights/insights-frontend-builder-common/master/src/quay_push.sh > ${{ github.workspace }}/scripts/quay_push.sh
       - run: chmod +x "${{ github.workspace }}/scripts/quay_push.sh"
-
-      - uses: actions/checkout@v3
+      
       - run: mkdir ${{ github.workspace }}/.travis
       - name: Pull the file
         run: curl -sSL https://raw.githubusercontent.com/RedHatInsights/insights-frontend-builder-common/master/src/Jenkinsfile > ${{ github.workspace }}/.travis/58231b16fdee45a03a4ee3cf94a9f2c3
@@ -61,13 +59,7 @@ jobs:
               HostName github.com
               User git
               AddKeysToAgent yes
-              IdentityFile /home/runner/.ssh/github_actions" >> /home/runner/.ssh/config
-      - uses: actions/cache@v3
-        with:
-          path: /home/runner/.ssh/*
-          key: ${{ github.sha }}-ssh
-
-      - uses: actions/checkout@v3
+              IdentityFile /home/runner/.ssh/github_actions" >> /home/runner/.ssh/config      
       - name: Set env variables
         run: |
           echo "TRAVIS_BRANCH=$GITHUB_REF_NAME" >> $GITHUB_ENV
@@ -75,24 +67,7 @@ jobs:
           echo "${{ github.event.head_commit.message }}"
           echo "TRAVIS_COMMIT_MESSAGE=`git log -1 --pretty=format:"%s"`" >> $GITHUB_ENV
           echo "REPO=`node -e 'console.log(require("${{ github.workspace }}/package.json").insights.buildrepo)'`" >> $GITHUB_ENV
-      - run: git config -l | grep 'http\..*\.extraheader' | cut -d= -f1 | xargs -L1 git config --unset-all
-      - uses: actions/cache@v3
-        with:
-          path: /home/runner/.ssh/*
-          key: ${{ github.sha }}-ssh
-      - uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/scripts/*
-          key: ${{ github.sha }}-scripts
-      - uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/.travis/58231b16fdee45a03a4ee3cf94a9f2c3
-          key: ${{ github.sha }}-travis
-      - uses: actions/cache@v3
-        id: restore-build
-        with:
-          path: ${{ github.workspace }}/dist/*
-          key: ${{ github.sha }}
+      - run: git config -l | grep 'http\..*\.extraheader' | cut -d= -f1 | xargs -L1 git config --unset-all   
       - name: Check custom_release existence
         id: check_custom_release
         uses: andstor/file-existence-action@v1
