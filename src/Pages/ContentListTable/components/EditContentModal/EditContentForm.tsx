@@ -552,10 +552,6 @@ const EditContentForm = ({
                   <Hide hide={!gpgKey}>
                     <FormGroup fieldId='metadataVerification' label='Use GPG key for' isInline>
                       <Radio
-                        isDisabled={
-                          validationList?.[index]?.url?.metadata_signature_present === false
-                          //    || !!formik?.errors?.[index]?.gpgKey
-                        }
                         id='package verification only'
                         name='package-verification-only'
                         label='Package verification only'
@@ -567,10 +563,6 @@ const EditContentForm = ({
                         content="This repository's metadata is not signed, metadata verification is not possible."
                       >
                         <Radio
-                          isDisabled={
-                            validationList?.[index]?.url?.metadata_signature_present === false
-                            // || !!formik?.errors?.[index]?.gpgKey
-                          }
                           id='Package and metadata verification'
                           name='package-and-repository-verification'
                           label='Package and metadata verification'
