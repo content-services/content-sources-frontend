@@ -21,7 +21,7 @@ import {
   Tr,
 } from '@patternfly/react-table';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
 import Hide from '../../components/Hide/Hide';
@@ -91,8 +91,10 @@ const AdminTaskTable = () => {
     'status',
   ];
 
-  const sortString = (): string =>
-    columnSortAttributes[activeSortIndex] + ':' + activeSortDirection;
+  const sortString = useMemo(
+    () => columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
+    [activeSortIndex, activeSortDirection],
+  );
 
   const {
     isLoading,
@@ -100,7 +102,7 @@ const AdminTaskTable = () => {
     isError,
     isFetching,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useAdminTaskListQuery(page, perPage, filterData, sortString());
+  } = useAdminTaskListQuery(page, perPage, filterData, sortString);
 
   const actionTakingPlace = isFetching;
 
@@ -215,8 +217,8 @@ const AdminTaskTable = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {adminTaskList.map((adminTask: AdminTask) => (
-                <Tr key={adminTask.uuid}>
+              {adminTaskList.map((adminTask: AdminTask, index) => (
+                <Tr key={adminTask.uuid + index + ''}>
                   <Td>{adminTask.org_id}</Td>
                   <Td>{adminTask.account_id ? adminTask.account_id : 'Unknown'}</Td>
                   <Td>{adminTask.typename}</Td>

@@ -23,8 +23,9 @@ export const useAdminTaskListQuery = (
   const [polling, setPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
   const errorNotifier = useErrorNotification();
+  const flattenedFilterData = Object.values(filterData).flat(1);
   return useQuery<AdminTaskListResponse>(
-    [ADMIN_TASK_LIST_KEY, page, limit, sortBy, ...Object.values(filterData)],
+    [ADMIN_TASK_LIST_KEY, page, limit, sortBy, ...flattenedFilterData],
     () => getAdminTasks(page, limit, filterData, sortBy),
     {
       onSuccess: (data) => {
