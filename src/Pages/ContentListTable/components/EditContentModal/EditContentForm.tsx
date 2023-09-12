@@ -218,12 +218,17 @@ const EditContentForm = ({
     index: number,
     field: keyof FormikEditValues,
   ): 'default' | 'success' | 'error' => {
-    const hasNotChanged = isEqual(initialValues[index]?.[field], formik.values[index]?.[field]);
+    let hasNotChanged = isEqual(initialValues[index]?.[field], formik.values[index]?.[field]);
+    if (field === 'metadataVerification') {
+      if (!initialValues[index].gpgKey) {
+        hasNotChanged = false;
+      }
+    }
     const errors = !!formik.errors[index]?.[field];
     switch (true) {
       case errors:
         return 'error';
-      case hasNotChanged:
+      case hasNotChanged || !isEmpty(formik.errors[index]) || !changeVerified:
         return 'default';
       case !hasNotChanged:
         return 'success';

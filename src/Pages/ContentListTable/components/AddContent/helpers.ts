@@ -70,14 +70,18 @@ export const mapValidationData = (
   formikErrors: FormikErrors<FormikValues | undefined>[],
 ) => {
   const updatedValidationData = mapNoMetaDataError(validationData);
-  const errors = updatedValidationData.map(({ name, url, gpg_key: gpgKey }, index: number) => ({
-    // First apply the errors found in the ValidationAPI
-    ...(name?.error ? { name: name?.error } : {}),
-    ...(url?.error ? { url: url?.error } : {}),
-    ...(gpgKey?.error ? { gpgKey: gpgKey?.error } : {}),
-    // Overwrite any errors with errors found within the UI itself
-    ...formikErrors[index],
-  }));
+
+  const errors = updatedValidationData.map(({ name, url, gpg_key: gpgKey }, index: number) => {
+    const hasUrlErrors = url?.error || formikErrors[index]?.url;
+    return {
+      // First apply the errors found in the ValidationAPI
+      ...(name?.error ? { name: name?.error } : {}),
+      ...(url?.error ? { url: url?.error } : {}),
+      ...(!hasUrlErrors && gpgKey?.error ? { gpgKey: gpgKey?.error } : {}),
+      // Overwrite any errors with errors found within the UI itself
+      ...formikErrors[index],
+    };
+  });
 
   if (errors.every((err) => isEmpty(err))) {
     return [];

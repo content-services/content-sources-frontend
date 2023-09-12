@@ -1,5 +1,7 @@
+import { FormikErrors } from 'formik';
 import { ValidationResponse } from '../../../../services/Content/ContentApi';
 import {
+  FormikValues,
   REGEX_URL,
   failedFileUpload,
   isValidURL,
@@ -77,6 +79,44 @@ it('mapValidationData', () => {
     },
   ];
   expect(mapValidationData([], [])).toEqual([]);
+  expect(mapValidationData(validationData, formikErrors)).toEqual(success);
+});
+
+it('mapValidationData, ensure url error heirarchy', () => {
+  const validationData: ValidationResponse = [
+    {
+      name: {
+        skipped: false,
+        valid: true,
+        error: '',
+      },
+      url: {
+        skipped: false,
+        valid: true,
+        error:
+          'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
+        http_code: 0,
+        metadata_present: false,
+        metadata_signature_present: false,
+      },
+      // We expect gpgKey errors not to be shown, as they are dependent on the url which has an error!
+      gpg_key: {
+        skipped: false,
+        valid: false,
+        error: 'Error loading GPG Key: unexpected EOF.  Is this a valid GPG Key?',
+      },
+    },
+  ];
+  const formikErrors: FormikErrors<FormikValues | undefined>[] = [
+    { name: 'name error booga booga!' },
+  ];
+  const success = [
+    {
+      name: 'name error booga booga!',
+      url: 'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
+    },
+  ];
+
   expect(mapValidationData(validationData, formikErrors)).toEqual(success);
 });
 
