@@ -24,7 +24,7 @@
     "@redhat-cloud-services/frontend-components": "^3.9.22",
     "@redhat-cloud-services/frontend-components-config": "^4.6.34",
     "@redhat-cloud-services/frontend-components-notifications": "^3.2.12",
-    "@redhat-cloud-services/frontend-components-utilities": "^3.3.5",
+    "@redhat-cloud-services/frontend-components-utilities": "^4.0.2",
     "@redhat-cloud-services/insights-common-typescript": "^4.12.3",
     "@testing-library/dom": "^8.13.0",
     "@types/jest": "^27.5.0",
