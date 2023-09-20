@@ -4,7 +4,7 @@
 # Export vars for helper scripts to use
 # --------------------------------------------
 export APP_NAME="content-sources"  # name of app-sre "application" folder this component lives in
-export COMPONENT_NAME="content-sources-frontend"  # name of resourceTemplate component for deploy
+export COMPONENT_NAME="content-sources-frontend --debug-pod"  # name of resourceTemplate component for deploy
 # IMAGE should match the quay repo set by app.yaml in app-interface
 export IMAGE="quay.io/cloudservices/content-sources-frontend"
 export WORKSPACE=${WORKSPACE:-$APP_ROOT} # if running in jenkins, use the build's workspace
@@ -24,7 +24,7 @@ COMMON_BUILDER=https://raw.githubusercontent.com/RedHatInsights/insights-fronten
 # --------------------------------------------
 export IQE_PLUGINS="content-sources"
 export IQE_MARKER_EXPRESSION="smoke and ui"
-export IQE_FILTER_EXPRESSION=""
+export IQE_FILTER_EXPRESSION="test_rbac_for_repos"
 export IQE_ENV="ephemeral"
 export IQE_SELENIUM="true"
 export IQE_CJI_TIMEOUT="30m"
