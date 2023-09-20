@@ -4,7 +4,7 @@
 # Export vars for helper scripts to use
 # --------------------------------------------
 export APP_NAME="content-sources"  # name of app-sre "application" folder this component lives in
-export COMPONENT_NAME="content-sources-frontend --debug-pod"  # name of resourceTemplate component for deploy
+export COMPONENT_NAME="content-sources-frontend"  # name of resourceTemplate component for deploy
 # IMAGE should match the quay repo set by app.yaml in app-interface
 export IMAGE="quay.io/cloudservices/content-sources-frontend"
 export WORKSPACE=${WORKSPACE:-$APP_ROOT} # if running in jenkins, use the build's workspace
@@ -48,7 +48,7 @@ source "${CICD_ROOT}/deploy_ephemeral_env.sh"
 # Run smoke tests using a ClowdJobInvocation (preferred)
 # The contents of this script can be found at:
 # https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd/cji_smoke_test.sh
-export COMPONENT_NAME="content-sources-backend"
+export COMPONENT_NAME="content-sources-backend --debug-pod"
 source "$CICD_ROOT/cji_smoke_test.sh"
 
 # Post a comment with test run IDs to the PR
