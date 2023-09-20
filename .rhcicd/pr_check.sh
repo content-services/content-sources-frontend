@@ -49,7 +49,7 @@ source "${CICD_ROOT}/deploy_ephemeral_env.sh"
 # The contents of this script can be found at:
 # https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd/cji_smoke_test.sh
 export COMPONENT_NAME="content-sources-backend"
-export CJI_NAME="$COMPONENT_NAME --debug-pod"
+export CJI_NAME="${COMPONENT_NAME} --debug-pod"
 source "$CICD_ROOT/cji_smoke_test.sh"
 
 # Post a comment with test run IDs to the PR
