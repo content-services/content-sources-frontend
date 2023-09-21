@@ -50,6 +50,7 @@ source "${CICD_ROOT}/deploy_ephemeral_env.sh"
 # https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd/cji_smoke_test.sh
 export COMPONENT_NAME="content-sources-backend"
 export CJI_NAME="$COMPONENT_NAME"
+export DYNACONF_MAIN__use_browser="chrome"
 source "$CICD_ROOT/cji_smoke_test.sh"
 
 # Post a comment with test run IDs to the PR
