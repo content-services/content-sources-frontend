@@ -24,7 +24,7 @@ COMMON_BUILDER=https://raw.githubusercontent.com/RedHatInsights/insights-fronten
 # --------------------------------------------
 export IQE_PLUGINS="content-sources"
 export IQE_MARKER_EXPRESSION="smoke and ui"
-export IQE_FILTER_EXPRESSION=""
+export IQE_FILTER_EXPRESSION="test_rbac_for_repos"
 export IQE_ENV="ephemeral"
 export IQE_SELENIUM="true"
 export IQE_CJI_TIMEOUT="30m"
@@ -50,7 +50,6 @@ source "${CICD_ROOT}/deploy_ephemeral_env.sh"
 # https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd/cji_smoke_test.sh
 export COMPONENT_NAME="content-sources-backend"
 export CJI_NAME="$COMPONENT_NAME"
-export DYNACONF_MAIN__use_browser="chrome"
 source "$CICD_ROOT/cji_smoke_test.sh"
 
 # Post a comment with test run IDs to the PR
