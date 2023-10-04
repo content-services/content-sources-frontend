@@ -59,7 +59,7 @@ const DeleteKebab = ({
       isOpen={isOpen}
       isPlain
       dropdownItems={dropdownItems}
-      direction='up'
+      direction='down'
     />
   );
 };
