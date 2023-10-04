@@ -23,6 +23,18 @@ const useStyles = createUseStyles({
     animationDuration: '6s !important',
     margin: '-3px 0',
   },
+  red: {
+    color: red,
+    fill: red,
+  },
+  green: {
+    color: green,
+    fill: green,
+  },
+  gold: {
+    color: gold,
+    fill: gold,
+  },
 });
 
 interface Props {
@@ -48,10 +60,10 @@ const StatusIcon = ({ status }: Props) => {
       return (
         <Flex alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
           <FlexItem spacer={{ default: 'spacerSm' }}>
-            <ExclamationCircleIcon color={red} />
+            <ExclamationCircleIcon className={classes.red} />
           </FlexItem>
           <FlexItem>
-            <StatusText color='green'>Failed</StatusText>
+            <StatusText color='red'>Failed</StatusText>
           </FlexItem>
         </Flex>
       );
@@ -59,7 +71,7 @@ const StatusIcon = ({ status }: Props) => {
       return (
         <Flex alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
           <FlexItem spacer={{ default: 'spacerSm' }}>
-            <CheckCircleIcon color={green} />
+            <CheckCircleIcon className={classes.green} />
           </FlexItem>
           <FlexItem>
             <StatusText color='green'>Completed</StatusText>
@@ -70,10 +82,10 @@ const StatusIcon = ({ status }: Props) => {
       return (
         <Flex alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
           <FlexItem spacer={{ default: 'spacerSm' }}>
-            <BanIcon color={red} />
+            <BanIcon className={classes.red} />
           </FlexItem>
           <FlexItem>
-            <StatusText color='green'>Canceled</StatusText>
+            <StatusText color='red'>Canceled</StatusText>
           </FlexItem>
         </Flex>
       );
@@ -81,10 +93,10 @@ const StatusIcon = ({ status }: Props) => {
       return (
         <Flex alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
           <FlexItem spacer={{ default: 'spacerSm' }}>
-            <ClockIcon color={gold} />
+            <ClockIcon className={classes.gold} />
           </FlexItem>
           <FlexItem>
-            <StatusText color='blue'>Pending</StatusText>
+            <StatusText color='gold'>Pending</StatusText>
           </FlexItem>
         </Flex>
       );

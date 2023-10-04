@@ -6,12 +6,14 @@ import {
   Flex,
   FlexItem,
   InputGroup,
-  SelectVariant,
   TextInput,
+  InputGroupItem,
+  InputGroupText,
 } from '@patternfly/react-core';
+import { SelectVariant } from '@patternfly/react-core/deprecated';
 import DropdownSelect from '../../../components/DropdownSelect/DropdownSelect';
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
-import { global_BackgroundColor_100, global_secondary_color_100 } from '@patternfly/react-tokens';
+import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import Hide from '../../../components/Hide/Hide';
 import { FilterData, RepositoryParamsResponse } from '../../../services/Content/ContentApi';
 import { useQueryClient } from 'react-query';
@@ -40,17 +42,6 @@ const useStyles = createUseStyles({
   },
   clearFilters: {
     marginLeft: '16px',
-  },
-  searchInput: {
-    paddingRight: '35px',
-    marginRight: '-23px',
-  },
-  searchIcon: {
-    color: global_secondary_color_100.value,
-    position: 'relative',
-    top: '3px',
-    left: '-5px',
-    pointerEvents: 'none',
   },
   // Needed to fix styling when "Add repositories" button is disabled
   repositoryActions: {
@@ -175,18 +166,19 @@ const ContentListFilters = ({
     switch (filterType) {
       case 'Name/URL':
         return (
-          <Flex>
+          <InputGroupItem isFill>
             <TextInput
               isDisabled={isLoading}
               id='search'
               ouiaId='filter_search'
               placeholder='Filter by name/url'
               value={searchQuery}
-              onChange={(value) => setSearchQuery(value)}
-              className={classes.searchInput}
+              onChange={(_event, value) => setSearchQuery(value)}
             />
-            <SearchIcon size='sm' className={classes.searchIcon} />
-          </Flex>
+            <InputGroupText isDisabled={isLoading} id='search-icon'>
+              <SearchIcon />
+            </InputGroupText>
+          </InputGroupItem>
         );
       case 'Version':
         return (
@@ -248,20 +240,24 @@ const ContentListFilters = ({
     <Flex>
       <FlexItem>
         <InputGroup>
-          <FlexItem>
-            <DropdownSelect
-              toggleId='filterSelectionDropdown'
-              ouiaId='filter_type'
-              isDisabled={isLoading}
-              options={filters}
-              variant={SelectVariant.single}
-              selectedProp={filterType}
-              setSelected={setFilterType}
-              placeholderText='filter'
-              toggleIcon={<FilterIcon />}
-            />
-          </FlexItem>
-          <FlexItem>{Filter}</FlexItem>
+          <InputGroupItem>
+            <FlexItem>
+              <DropdownSelect
+                toggleId='filterSelectionDropdown'
+                ouiaId='filter_type'
+                isDisabled={isLoading}
+                options={filters}
+                variant={SelectVariant.single}
+                selectedProp={filterType}
+                setSelected={setFilterType}
+                placeholderText='filter'
+                toggleIcon={<FilterIcon />}
+              />
+            </FlexItem>
+          </InputGroupItem>
+          <InputGroupItem>
+            <FlexItem>{Filter}</FlexItem>
+          </InputGroupItem>
         </InputGroup>
       </FlexItem>
       <FlexItem className={classes.repositoryActions}>

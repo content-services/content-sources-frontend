@@ -1,4 +1,4 @@
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import {
   defaultValidationErrorData,
   passingValidationErrorData,
@@ -67,7 +67,7 @@ it('expect "name" input to show a validation error', async () => {
   const nameInput = queryByPlaceholderText('Enter name');
   expect(nameInput).toBeInTheDocument();
   if (nameInput) {
-    await act(async () => {
+    await waitFor(() => {
       fireEvent.change(nameInput, { target: { value: 'b' } });
     });
   }
@@ -90,11 +90,13 @@ it('expect "url" input to show a validation error', async () => {
 
   const urlInput = queryByPlaceholderText('https://');
   expect(urlInput).toBeInTheDocument();
+
   if (urlInput) {
-    await act(async () => {
+    await waitFor(() => {
       fireEvent.change(urlInput, { target: { value: 'bobTheBuilder' } });
     });
   }
+
   waitFor(() => {
     expect(queryByText('Invalid URL')).toBeInTheDocument();
   });
@@ -115,7 +117,7 @@ it('expect "Package and metadata verification" to be pre-selected', async () => 
 
   const urlInput = queryByPlaceholderText('https://');
   expect(urlInput).toBeInTheDocument();
-  await act(async () => {
+  await waitFor(() => {
     fireEvent.change(urlInput as HTMLElement, { target: { value: 'https://bobTheBuilder.com' } });
   });
   waitFor(() => {
@@ -124,7 +126,7 @@ it('expect "Package and metadata verification" to be pre-selected', async () => 
 
   const gpgKeyInput = queryByPlaceholderText('Paste GPG key or URL here');
   expect(gpgKeyInput).toBeInTheDocument();
-  await act(async () => {
+  await waitFor(() => {
     fireEvent.change(gpgKeyInput as HTMLElement, { target: { value: 'aRealGPGKey' } });
   });
 
@@ -149,22 +151,24 @@ it('expect "Package verification only" to be pre-selected', async () => {
   const urlInput = queryByPlaceholderText('https://');
   expect(urlInput).toBeInTheDocument();
 
-  await act(async () => {
+  await waitFor(() => {
     fireEvent.change(urlInput as HTMLElement, { target: { value: 'https://bobTheBuilder.com' } });
   });
   expect(queryByText('Invalid URL')).not.toBeInTheDocument();
   const gpgKeyInput = queryByPlaceholderText('Paste GPG key or URL here');
   expect(gpgKeyInput).toBeInTheDocument();
-  await act(async () => {
+
+  await waitFor(() => {
     fireEvent.change(gpgKeyInput as HTMLElement, { target: { value: 'aRealGPGKey' } });
   });
+
   waitFor(() => {
     expect(queryByText('Package verification only')).toBeInTheDocument();
     expect(queryByLabelText('Package verification only')).toHaveAttribute('checked');
   });
 });
 
-it('Add content', async () => {
+it('Add content', () => {
   (useValidateContentList as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     mutateAsync: async () => passingValidationErrorData,
@@ -183,7 +187,7 @@ it('Add content', async () => {
   expect(urlInput).toBeInTheDocument();
   const gpgKeyInput = queryByPlaceholderText('Paste GPG key or URL here');
   if (urlInput && nameInput && gpgKeyInput) {
-    await act(async () => {
+    waitFor(() => {
       fireEvent.change(nameInput, { target: { value: 'superCoolName' } });
     });
 
@@ -191,7 +195,7 @@ it('Add content', async () => {
       expect(nameInput).toHaveAttribute('value', 'superCoolName');
     });
 
-    await act(async () => {
+    waitFor(() => {
       fireEvent.change(urlInput, { target: { value: 'https://google.com/' } });
     });
 
@@ -199,7 +203,7 @@ it('Add content', async () => {
       expect(urlInput?.getAttribute('value')).toBe('https://google.com/');
     });
 
-    await act(async () => {
+    waitFor(() => {
       fireEvent.change(gpgKeyInput, { target: { value: 'test GPG key' } });
     });
 
@@ -207,9 +211,10 @@ it('Add content', async () => {
       expect(gpgKeyInput?.getAttribute('value')).toBe('test GPG key');
     });
   }
-
-  expect(queryByText('Use GPG key for')).toBeInTheDocument();
-  expect(queryByText('test GPG key')).toBeInTheDocument();
+  waitFor(() => {
+    expect(queryByText('Use GPG key for')).toBeInTheDocument();
+    expect(queryByText('test GPG key')).toBeInTheDocument();
+  });
 
   expect(queryByText('Invalid URL')).not.toBeInTheDocument();
   const addAnotherButton = queryByText('Add another repository');
@@ -217,7 +222,7 @@ it('Add content', async () => {
     expect(addAnotherButton?.getAttribute('aria-disabled')).toBe('false');
   });
   if (addAnotherButton) {
-    await act(async () => {
+    waitFor(() => {
       fireEvent.click(addAnotherButton);
     });
   }
@@ -228,7 +233,7 @@ it('Add content', async () => {
   });
 
   if (secondRemoveButton) {
-    await act(async () => {
+    waitFor(() => {
       fireEvent.click(secondRemoveButton);
     });
   }
@@ -239,7 +244,7 @@ it('Add content', async () => {
   });
 
   if (saveButton) {
-    await act(async () => {
+    waitFor(() => {
       fireEvent.click(saveButton);
     });
   }

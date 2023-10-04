@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, KebabToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, KebabToggle } from '@patternfly/react-core/deprecated';
 import { useState } from 'react';
 import { useAppContext } from '../../middleware/AppContext';
 import ConditionalTooltip from '../ConditionalTooltip/ConditionalTooltip';
@@ -49,7 +49,13 @@ const DeleteKebab = ({
   return (
     <Dropdown
       onSelect={onSelect}
-      toggle={<KebabToggle id='delete-kebab' onToggle={onToggle} isDisabled={!rbac?.write} />}
+      toggle={
+        <KebabToggle
+          id='delete-kebab'
+          onToggle={(_event, isOpen: boolean) => onToggle(isOpen)}
+          isDisabled={!rbac?.write}
+        />
+      }
       isOpen={isOpen}
       isPlain
       dropdownItems={dropdownItems}

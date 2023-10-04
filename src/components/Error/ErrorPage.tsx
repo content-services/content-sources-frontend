@@ -13,7 +13,7 @@ interface Props {
 
 export const ErrorPage = ({ children }: Props) => (
   <ErrorBoundaryPage
-    headerTitle='Content Sources'
+    headerTitle=''
     errorTitle='Unhandled error'
     errorDescription='There was a problem trying to process your request'
   >

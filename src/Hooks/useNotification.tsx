@@ -11,8 +11,7 @@ export interface NotificationPayload {
 
 export default function useNotification() {
   const dispatch = useDispatch();
-  const notify: (payload: NotificationPayload) => void = (payload: NotificationPayload) =>
-    dispatch(addNotification(payload));
+  const notify = (payload: NotificationPayload) => dispatch(addNotification(payload));
 
   return { notify };
 }

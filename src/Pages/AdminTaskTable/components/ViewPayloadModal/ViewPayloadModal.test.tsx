@@ -141,9 +141,9 @@ it('Open snapshot task without all pulp tasks', async () => {
     </ReactQueryTestWrapper>,
   );
 
-  const modal = document.getElementsByClassName('pf-c-tab-content');
+  const modal = document.getElementById('task-details');
   // Details, payload, sync, publication
-  expect(modal).toHaveLength(4);
+  expect(modal).toBeInTheDocument();
   expect(queryByText('Task details')).toBeInTheDocument();
   expect(queryByText('Payload')).toBeInTheDocument();
   expect(queryByText('Sync')).toBeInTheDocument();

@@ -6,12 +6,14 @@ import {
   Flex,
   FlexItem,
   InputGroup,
-  SelectVariant,
   TextInput,
+  InputGroupItem,
+  InputGroupText,
 } from '@patternfly/react-core';
+import { SelectVariant } from '@patternfly/react-core/deprecated';
 import DropdownSelect from '../../../components/DropdownSelect/DropdownSelect';
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
-import { global_BackgroundColor_100, global_secondary_color_100 } from '@patternfly/react-tokens';
+import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import Hide from '../../../components/Hide/Hide';
 import useDebounce from '../../../Hooks/useDebounce';
 import { createUseStyles } from 'react-jss';
@@ -30,17 +32,6 @@ const useStyles = createUseStyles({
   },
   clearFilters: {
     marginLeft: '16px',
-  },
-  searchInput: {
-    paddingRight: '35px',
-    marginRight: '-23px',
-  },
-  searchIcon: {
-    color: global_secondary_color_100.value,
-    position: 'relative',
-    top: '3px',
-    left: '-5px',
-    pointerEvents: 'none',
   },
 });
 
@@ -102,33 +93,36 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
     switch (filterType) {
       case 'Account ID':
         return (
-          <Flex>
+          <InputGroupItem>
             <TextInput
+              type='text'
               isDisabled={isLoading}
               id='account-id'
               ouiaId='filter_account_id'
               placeholder='Filter by account ID'
               value={accountId}
-              onChange={(value) => setAccountId(value)}
-              className={classes.searchInput}
+              onChange={(_event, value) => setAccountId(value)}
             />
-            <SearchIcon size='sm' className={classes.searchIcon} />
-          </Flex>
+            <InputGroupText isDisabled={isLoading} id='search-icon'>
+              <SearchIcon />
+            </InputGroupText>
+          </InputGroupItem>
         );
       case 'Org ID':
         return (
-          <Flex>
+          <InputGroupItem>
             <TextInput
               isDisabled={isLoading}
               id='org-id'
               ouiaId='filter_org_id'
               placeholder='Filter by org ID'
               value={orgId}
-              onChange={(value) => setOrgId(value)}
-              className={classes.searchInput}
+              onChange={(_event, value) => setOrgId(value)}
             />
-            <SearchIcon size='sm' className={classes.searchIcon} />
-          </Flex>
+            <InputGroupText id='search-icon'>
+              <SearchIcon />
+            </InputGroupText>
+          </InputGroupItem>
         );
       case 'Status':
         return (
@@ -153,20 +147,24 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
     <Flex>
       <FlexItem>
         <InputGroup>
-          <FlexItem>
-            <DropdownSelect
-              toggleId='filterSelectionDropdown'
-              ouiaId='filter_type'
-              isDisabled={isLoading}
-              options={filters}
-              variant={SelectVariant.single}
-              selectedProp={filterType}
-              setSelected={setFilterType}
-              placeholderText='filter'
-              toggleIcon={<FilterIcon />}
-            />
-          </FlexItem>
-          <FlexItem>{Filter}</FlexItem>
+          <InputGroupItem>
+            <FlexItem>
+              <DropdownSelect
+                toggleId='filterSelectionDropdown'
+                ouiaId='filter_type'
+                isDisabled={isLoading}
+                options={filters}
+                variant={SelectVariant.single}
+                selectedProp={filterType}
+                setSelected={setFilterType}
+                placeholderText='filter'
+                toggleIcon={<FilterIcon />}
+              />
+            </FlexItem>
+          </InputGroupItem>
+          <InputGroupItem>
+            <FlexItem>{Filter}</FlexItem>
+          </InputGroupItem>
         </InputGroup>
       </FlexItem>
       <Hide hide={!(accountId !== '' || orgId !== '' || selectedStatuses.length)}>

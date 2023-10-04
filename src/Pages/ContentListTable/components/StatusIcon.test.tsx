@@ -1,4 +1,4 @@
-import { act, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import StatusIcon from './StatusIcon';
 import { defaultContentItem } from '../../../testingHelpers';
 
@@ -38,7 +38,7 @@ it('Render with Unavailable status', async () => {
   const SelectComponent = queryByText('Unavailable');
   expect(SelectComponent).toBeInTheDocument();
 
-  await act(async () => {
+  await waitFor(() => {
     SelectComponent?.click();
   });
 
@@ -54,7 +54,7 @@ it('Render with Invalid status', async () => {
   const SelectComponent = queryByText('Invalid');
   expect(SelectComponent).toBeInTheDocument();
 
-  await act(async () => {
+  await waitFor(() => {
     SelectComponent?.click();
   });
 

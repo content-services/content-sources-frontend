@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import {
   ReactQueryTestWrapper,
   defaultPopularRepository,
@@ -23,7 +23,7 @@ jest.mock('../../middleware/AppContext', () => ({
   useAppContext: () => ({}),
 }));
 
-it('expect PopularRepositoriesTable to render with one item', () => {
+it('expect PopularRepositoriesTable to render with add one item', () => {
   (useRepositoryParams as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (usePopularRepositoriesQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
@@ -41,7 +41,7 @@ it('expect PopularRepositoriesTable to render with one item', () => {
   expect(queryByText('Add')).toBeInTheDocument();
 });
 
-it('expect PopularRepositoriesTable to render with one item', () => {
+it('expect PopularRepositoriesTable to render with remove one item', () => {
   (useRepositoryParams as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (usePopularRepositoriesQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
@@ -57,9 +57,11 @@ it('expect PopularRepositoriesTable to render with one item', () => {
     </ReactQueryTestWrapper>,
   );
 
-  expect(queryByText(defaultPopularRepository.suggested_name)).toBeInTheDocument();
-  expect(queryByText(defaultPopularRepository.url)).toBeInTheDocument();
-  expect(queryByText('Remove')).toBeInTheDocument();
+  waitFor(() => {
+    expect(queryByText(defaultPopularRepository.suggested_name)).toBeInTheDocument();
+    expect(queryByText(defaultPopularRepository.url)).toBeInTheDocument();
+    expect(queryByText('Remove')).toBeInTheDocument();
+  });
 });
 
 it('Render a loading state checking search disabled', () => {

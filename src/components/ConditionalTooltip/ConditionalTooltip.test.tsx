@@ -5,7 +5,7 @@ import ConditionalTooltip from './ConditionalTooltip';
 const text = 'Hello';
 const content = <h1>{text}</h1>;
 
-it('Render content when show is true', async () => {
+it('Render content when show is true', () => {
   const { queryByText } = render(
     <div>
       <ConditionalTooltip content={content} show={true}>
@@ -18,15 +18,17 @@ it('Render content when show is true', async () => {
   expect(divElement).toBeInTheDocument();
 
   if (divElement) {
-    userEvent.hover(divElement);
+    waitFor(() => {
+      userEvent.hover(divElement);
+    });
   }
 
-  await waitFor(() => {
+  waitFor(() => {
     expect(queryByText(text)).toBeInTheDocument();
   });
 });
 
-it('Hide content when show is false', async () => {
+it('Hide content when show is false', () => {
   const { queryByText } = render(
     <div>
       <ConditionalTooltip content={content} show={false}>
@@ -39,10 +41,12 @@ it('Hide content when show is false', async () => {
   expect(divElement).toBeInTheDocument();
 
   if (divElement) {
-    userEvent.hover(divElement);
+    waitFor(() => {
+      userEvent.hover(divElement);
+    });
   }
 
-  await waitFor(() => {
+  waitFor(() => {
     expect(queryByText(text)).not.toBeInTheDocument();
   });
 });
