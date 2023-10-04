@@ -549,7 +549,6 @@ const AddContent = () => {
                               variant='warning'
                               title='Disabling snapshots might result in a higher risk of losing content or unintentionally modifying it irreversibly.'
                               isInline
-                              //   isPlain
                             />
                           </FormAlert>
                         </Hide>
