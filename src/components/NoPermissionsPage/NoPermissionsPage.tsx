@@ -25,7 +25,7 @@ export const NoPermissionsPage: React.FunctionComponent = () => (
     <Grid style={{ margin: '24px' }}>
       <EmptyState variant={EmptyStateVariant.full}>
         <EmptyStateHeader
-          titleText='You do not have access to Repositories'
+          titleText='You do not have access to repositories'
           icon={<EmptyStateIcon icon={LockIcon} />}
           headingLevel='h5'
         />
