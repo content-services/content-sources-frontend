@@ -547,7 +547,7 @@ const AddContent = () => {
                           <FormAlert style={{ paddingTop: '20px' }}>
                             <Alert
                               variant='warning'
-                              title='Disabling snapshots may result in a higher risk of losing content or unintentionally modifying it irreversibly.'
+                              title='Disabling snapshots might result in a higher risk of losing content or unintentionally modifying it irreversibly.'
                               isInline
                               //   isPlain
                             />
