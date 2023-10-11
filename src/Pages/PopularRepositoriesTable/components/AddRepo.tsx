@@ -1,10 +1,15 @@
-import { useState } from 'react';
-import { Dropdown, DropdownItem, Button } from '@patternfly/react-core';
+import React, { useState } from 'react';
+import { Button } from '@patternfly/react-core';
 
 import { useAppContext } from '../../../middleware/AppContext';
 import { global_disabled_color_100, global_disabled_color_200 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
-import { DropdownToggle, DropdownToggleAction } from '@patternfly/react-core/deprecated';
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownToggle,
+  DropdownToggleAction,
+} from '@patternfly/react-core/deprecated';
 
 const useStyles = createUseStyles({
   disabledButton: {
@@ -53,8 +58,7 @@ export const AddRepo = ({ isDisabled, addRepo }: Props) => {
     return (
       <Dropdown
         onSelect={onActionSelect}
-        ouiaId='add_popular_repo_toggle-dropdown'
-        toggle={() => (
+        toggle={
           <DropdownToggle
             id='toggle-add'
             className={className}
@@ -74,7 +78,7 @@ export const AddRepo = ({ isDisabled, addRepo }: Props) => {
             onToggle={onActionToggle}
             isDisabled={isDisabled}
           />
-        )}
+        }
         isOpen={isActionOpen}
       >
         {dropdownItems}

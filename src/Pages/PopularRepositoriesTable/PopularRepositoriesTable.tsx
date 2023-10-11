@@ -1,7 +1,5 @@
 import {
   Button,
-  Dropdown,
-  DropdownItem,
   Flex,
   FlexItem,
   Grid,
@@ -55,13 +53,24 @@ import EmptyTableState from '../../components/EmptyTableState/EmptyTableState';
 import DeleteKebab from '../../components/DeleteKebab/DeleteKebab';
 import { repoToRequestItem } from './helper';
 import { AddRepo } from './components/AddRepo';
-import { DropdownToggle, DropdownToggleAction } from '@patternfly/react-core/deprecated';
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownToggle,
+  DropdownToggleAction,
+} from '@patternfly/react-core/deprecated';
 
 const useStyles = createUseStyles({
   mainContainer: {
     backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
+    // Remove the below targeted when removing deprecated components
+    '& .pf-v5-c-dropdown__menu': {
+      '& li': {
+        listStyle: 'none',
+      },
+    },
   },
 
   topContainer: {
@@ -381,7 +390,7 @@ const PopularRepositoriesTable = () => {
                           onSelect={onDropdownSelect}
                           className={classes.addRepositoriesButton}
                           ouiaId='add-selected-toggle-dropdown'
-                          toggle={() => (
+                          toggle={
                             <DropdownToggle
                               ouiaId='add-selected-toggle'
                               className={className}
@@ -400,7 +409,7 @@ const PopularRepositoriesTable = () => {
                               onToggle={onDropdownToggle}
                               isDisabled={isDisabled}
                             />
-                          )}
+                          }
                           isOpen={isActionOpen}
                         >
                           <DropdownItem
