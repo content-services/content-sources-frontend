@@ -285,6 +285,7 @@ const ContentListFilters = ({
             atLeastOneRepoChecked={atLeastOneRepoChecked}
             numberOfReposChecked={numberOfReposChecked}
             deleteCheckedRepos={deleteCheckedRepos}
+            toggleOuiaId='custom_repositories_kebab_toggle'
           />
         </ConditionalTooltip>
       </FlexItem>

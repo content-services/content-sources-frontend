@@ -446,6 +446,7 @@ const PopularRepositoriesTable = () => {
                     atLeastOneRepoChecked={atLeastOneRepoToDeleteChecked}
                     numberOfReposChecked={checkedRepositoriesToDelete.size}
                     deleteCheckedRepos={deleteSelected}
+                    toggleOuiaId='popular_repositories_kebab_toggle'
                   />
                 </ConditionalTooltip>
               </FlexItem>
