@@ -390,15 +390,15 @@ const PopularRepositoriesTable = () => {
                         <Dropdown
                           onSelect={onDropdownSelect}
                           className={classes.addRepositoriesButton}
-                          ouiaId='add-selected-toggle-dropdown'
+                          ouiaId='add-selected-dropdown'
                           toggle={
                             <DropdownToggle
-                              ouiaId='add-selected-toggle'
+                              ouiaId='add-selected-dropdown-toggle-no-snap'
                               className={className}
                               splitButtonItems={[
                                 <DropdownToggleAction
                                   key='action'
-                                  data-ouia-component-id='add_checked_repos'
+                                  data-ouia-component-id='add_checked_repos-with-snap'
                                   onClick={() => addSelected(true)}
                                   className={className}
                                 >
@@ -417,7 +417,7 @@ const PopularRepositoriesTable = () => {
                             key='action'
                             component='button'
                             onClick={() => addSelected(false)}
-                            ouiaId='add_checked_repos'
+                            ouiaId='add-selected-repos-no-snap'
                           >
                             {withoutSnapshotText}
                           </DropdownItem>
