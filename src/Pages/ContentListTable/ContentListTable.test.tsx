@@ -1,5 +1,6 @@
-import { render } from '@testing-library/react';
-import { ReactQueryTestWrapper, testRepositoryParamsResponse } from '../../testingHelpers';
+import { render, waitFor } from '@testing-library/react';
+import dayjs from 'dayjs';
+import { ReactQueryTestWrapper, defaultContentItemWithSnapshot, defaultSnapshotItem, testRepositoryParamsResponse } from '../../testingHelpers';
 import ContentListTable from './ContentListTable';
 import { useContentListQuery, useRepositoryParams } from '../../services/Content/ContentQueries';
 import AddContent from './components/AddContent/AddContent';
@@ -62,6 +63,10 @@ it('Render a loading state', () => {
 });
 
 it('Render with a single row', () => {
+  jest.mock('../../middleware/AppContext', () => ({
+    useAppContext: (features) => ({  features: features.snapshot.accessible,}),
+  }));
+
   (useRepositoryParams as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     data: testRepositoryParamsResponse,
@@ -69,18 +74,7 @@ it('Render with a single row', () => {
   (useContentListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     data: {
-      data: [
-        {
-          account_id: 'undefined',
-          distribution_arch: 'x86_64',
-          distribution_versions: ['el7'],
-          name: 'AwesomeNamewwyylse12',
-          org_id: '13446804',
-          url: 'https://google.ca/wwyylse12/x86_64/el7',
-          uuid: '2375c35b-a67a-4ac2-a989-21139433c172',
-          package_count: 0,
-        },
-      ],
+      data: [defaultContentItemWithSnapshot],
       meta: { count: 1, limit: 20, offset: 0 },
     },
   }));
@@ -93,4 +87,9 @@ it('Render with a single row', () => {
 
   expect(queryByText('AwesomeNamewwyylse12')).toBeInTheDocument();
   expect(queryByText('https://google.ca/wwyylse12/x86_64/el7')).toBeInTheDocument();
+  waitFor(() => expect(queryByText(dayjs(defaultSnapshotItem.created_at).fromNow())).toBeInTheDocument());
+  waitFor(() => expect(queryByText(((defaultSnapshotItem.added_counts['rpm.package'] as number) 
+    + (defaultSnapshotItem.added_counts['rpm.advisory'] as number))?.toString())).toBeInTheDocument());
+  waitFor(() => expect(queryByText(((defaultSnapshotItem.removed_counts['rpm.package'] as number) 
+    + (defaultSnapshotItem.removed_counts['rpm.advisory'] as number))?.toString())).toBeInTheDocument());
 });

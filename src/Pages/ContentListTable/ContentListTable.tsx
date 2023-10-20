@@ -48,6 +48,7 @@ import { useAppContext } from '../../middleware/AppContext';
 import ConditionalTooltip from '../../components/ConditionalTooltip/ConditionalTooltip';
 import dayjs from 'dayjs';
 import { Outlet, useNavigate, useOutletContext } from 'react-router-dom';
+import ChangedArrows from './components/SnapshotListModal/components/ChangedArrows';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -74,6 +75,16 @@ const useStyles = createUseStyles({
   checkboxMinWidth: {
     minWidth: '45px!important',
   },
+  snapshotInfoText: {
+    color: 'grey',
+    paddingRight: '20px',
+  },
+  inline: {
+    display: 'flex'
+  },
+  snapshotInfoPadding: {
+    paddingTop: '10px'
+  }
 });
 
 const perPageKey = 'contentListPerPage';
@@ -432,6 +443,7 @@ const ContentListTable = () => {
                       uuid,
                       name,
                       url,
+                      last_snapshot,
                       distribution_arch,
                       distribution_versions,
                       last_introspection_time,
@@ -453,6 +465,27 @@ const ContentListTable = () => {
                           {name}
                           <br />
                           <UrlWithExternalIcon href={url} />
+                          {features?.snapshots?.accessible && 
+                            <Flex className={classes.snapshotInfoPadding}>
+                              <FlexItem className={classes.snapshotInfoText}>
+                                {last_snapshot ? 
+                                  `Last snapshot ${dayjs(last_snapshot?.created_at).fromNow()}` : 
+                                  'No snapshot yet'
+                                }
+                              </FlexItem>
+                              {last_snapshot &&
+                                <FlexItem className={classes.inline}>
+                                  <FlexItem className={classes.snapshotInfoText}>Changes:</FlexItem>
+                                  <ChangedArrows
+                                    addedCount={(last_snapshot?.added_counts?.['rpm.advisory'] || 0) + 
+                                                (last_snapshot?.added_counts?.['rpm.package'] || 0)}
+                                    removedCount={(last_snapshot?.removed_counts?.['rpm.advisory'] || 0) + 
+                                                  (last_snapshot?.removed_counts?.['rpm.package'] || 0)}
+                                  />
+                                </FlexItem>
+                              }
+                            </Flex>
+                          }
                         </Td>
                         <Td>{archesDisplay(distribution_arch)}</Td>
                         <Td>{versionDisplay(distribution_versions)}</Td>

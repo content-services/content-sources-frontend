@@ -208,3 +208,22 @@ export const defaultSnapshotItem: SnapshotItem = {
   },
   removed_counts: {},
 };
+
+export const defaultContentItemWithSnapshot: ContentItem = {
+  account_id: 'undefined',
+  distribution_arch: 'x86_64',
+  distribution_versions: ['el7'],
+  name: 'AwesomeNamewwyylse12',
+  org_id: '13446804',
+  url: 'https://google.ca/wwyylse12/x86_64/el7',
+  uuid: '2375c35b-a67a-4ac2-a989-21139433c172',
+  package_count: 0,
+  status: '',
+  last_introspection_error: '',
+  last_introspection_time: '',
+  failed_introspections_count: 0,
+  gpg_key: '',
+  metadata_verification: false,
+  snapshot: true,
+  last_snapshot: defaultSnapshotItem,
+}
