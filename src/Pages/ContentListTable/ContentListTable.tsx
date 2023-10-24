@@ -20,7 +20,7 @@ import {
   ThProps,
   Tr,
 } from '@patternfly/react-table';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
+import { global_BackgroundColor_100, global_Color_400 } from '@patternfly/react-tokens';
 import { useCallback, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import {
@@ -76,15 +76,13 @@ const useStyles = createUseStyles({
     minWidth: '45px!important',
   },
   snapshotInfoText: {
-    color: 'grey',
+    color: global_Color_400.value,
     paddingRight: '20px',
   },
   inline: {
-    display: 'flex'
+    display: 'flex',
+    gap: '10px',
   },
-  snapshotInfoPadding: {
-    paddingTop: '10px'
-  }
 });
 
 const perPageKey = 'contentListPerPage';
@@ -461,19 +459,18 @@ const ContentListTable = () => {
                             }}
                           />
                         </Hide>
-                        <Td>
+                        <Td className={classes.inline}>
                           {name}
-                          <br />
                           <UrlWithExternalIcon href={url} />
-                          {features?.snapshots?.accessible && 
-                            <Flex className={classes.snapshotInfoPadding}>
+                          <Hide hide={!features?.snapshots?.accessible}>
+                            <Flex>
                               <FlexItem className={classes.snapshotInfoText}>
                                 {last_snapshot ? 
                                   `Last snapshot ${dayjs(last_snapshot?.created_at).fromNow()}` : 
                                   'No snapshot yet'
                                 }
                               </FlexItem>
-                              {last_snapshot &&
+                              <Hide hide={!last_snapshot}>
                                 <FlexItem className={classes.inline}>
                                   <FlexItem className={classes.snapshotInfoText}>Changes:</FlexItem>
                                   <ChangedArrows
@@ -483,9 +480,9 @@ const ContentListTable = () => {
                                                   (last_snapshot?.removed_counts?.['rpm.package'] || 0)}
                                   />
                                 </FlexItem>
-                              }
+                              </Hide>
                             </Flex>
-                          }
+                          </Hide> 
                         </Td>
                         <Td>{archesDisplay(distribution_arch)}</Td>
                         <Td>{versionDisplay(distribution_versions)}</Td>
