@@ -28,13 +28,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
 import Hide from '../../../../components/Hide/Hide';
-import { PackageItem } from '../../../../services/Content/ContentApi';
+import { ContentOrigin, PackageItem } from '../../../../services/Content/ContentApi';
 import { useGetPackagesQuery } from '../../../../services/Content/ContentQueries';
 import { SearchIcon } from '@patternfly/react-icons';
 import useDebounce from '../../../../Hooks/useDebounce';
 import EmptyPackageState from './components/EmptyPackageState';
 import { useNavigate, useParams } from 'react-router-dom';
 import useRootPath from '../../../../Hooks/useRootPath';
+import { useAppContext } from '../../../../middleware/AppContext';
 
 const useStyles = createUseStyles({
   description: {
@@ -62,6 +63,7 @@ const useStyles = createUseStyles({
 const perPageKey = 'packagePerPage';
 
 export default function PackageModal() {
+  const { contentOrigin } = useAppContext();
   const classes = useStyles();
   const { repoUUID: uuid } = useParams();
   const rootPath = useRootPath();
@@ -126,7 +128,8 @@ export default function PackageModal() {
     };
   };
 
-  const onClose = () => navigate(rootPath);
+  const onClose = () =>
+    navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
 
   const {
     data: packageList = [],

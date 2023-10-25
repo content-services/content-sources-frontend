@@ -28,7 +28,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
 import Hide from '../../../../components/Hide/Hide';
-import { SnapshotItem } from '../../../../services/Content/ContentApi';
+import { ContentOrigin, SnapshotItem } from '../../../../services/Content/ContentApi';
 import { useFetchContent, useGetSnapshotList } from '../../../../services/Content/ContentQueries';
 import useDebounce from '../../../../Hooks/useDebounce';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -36,6 +36,7 @@ import useRootPath from '../../../../Hooks/useRootPath';
 import EmptyPackageState from '../PackageModal/components/EmptyPackageState';
 import ChangedArrows from './components/ChangedArrows';
 import { SearchIcon } from '@patternfly/react-icons';
+import { useAppContext } from '../../../../middleware/AppContext';
 
 const useStyles = createUseStyles({
   description: {
@@ -66,6 +67,7 @@ export default function SnapshotListModal() {
   const classes = useStyles();
   const rootPath = useRootPath();
   const { repoUUID: uuid = '' } = useParams();
+  const { contentOrigin } = useAppContext();
   const navigate = useNavigate();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
@@ -129,7 +131,8 @@ export default function SnapshotListModal() {
     };
   };
 
-  const onClose = () => navigate(rootPath);
+  const onClose = () =>
+    navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
 
   const {
     data: snapshotsList = [],

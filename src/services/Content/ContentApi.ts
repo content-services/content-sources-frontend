@@ -196,19 +196,24 @@ export const getPopularRepositories: (
   );
   return data;
 };
+export enum ContentOrigin {
+  'REDHAT' = 'red_hat',
+  'EXTERNAL' = 'external',
+}
 
 export const getContentList: (
   page: number,
   limit: number,
   filterData: FilterData,
   sortBy: string,
-) => Promise<ContentListResponse> = async (page, limit, filterData, sortBy) => {
+  contentOrigin: ContentOrigin,
+) => Promise<ContentListResponse> = async (page, limit, filterData, sortBy, contentOrigin) => {
   const searchQuery = filterData.searchQuery;
   const versionParam = filterData.versions.join(',');
   const archParam = filterData.arches.join(',');
   const statusParam = filterData?.statuses?.join(',');
   const { data } = await axios.get(
-    `/api/content-sources/v1/repositories/?offset=${
+    `/api/content-sources/v1/repositories/?origin=${contentOrigin}&offset=${
       (page - 1) * limit
     }&limit=${limit}&search=${searchQuery}&version=${versionParam}&status=${statusParam}&arch=${archParam}&sort_by=${sortBy}`,
   );

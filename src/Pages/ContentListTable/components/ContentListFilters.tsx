@@ -9,13 +9,19 @@ import {
   TextInput,
   InputGroupItem,
   InputGroupText,
+  ToggleGroup,
+  ToggleGroupItem,
 } from '@patternfly/react-core';
 import { SelectVariant } from '@patternfly/react-core/deprecated';
 import DropdownSelect from '../../../components/DropdownSelect/DropdownSelect';
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import Hide from '../../../components/Hide/Hide';
-import { FilterData, RepositoryParamsResponse } from '../../../services/Content/ContentApi';
+import {
+  FilterData,
+  ContentOrigin,
+  RepositoryParamsResponse,
+} from '../../../services/Content/ContentApi';
 import { useQueryClient } from 'react-query';
 import { REPOSITORY_PARAMS_KEY } from '../../../services/Content/ContentQueries';
 import useDebounce from '../../../Hooks/useDebounce';
@@ -33,6 +39,8 @@ interface Props {
   atLeastOneRepoChecked: boolean;
   numberOfReposChecked: number;
   deleteCheckedRepos: () => void;
+  setContentOrigin: (origin: ContentOrigin) => void;
+  contentOrigin: ContentOrigin;
 }
 
 const useStyles = createUseStyles({
@@ -60,6 +68,8 @@ const ContentListFilters = ({
   atLeastOneRepoChecked,
   numberOfReposChecked,
   deleteCheckedRepos,
+  setContentOrigin,
+  contentOrigin,
 }: Props) => {
   const classes = useStyles();
   const { rbac } = useAppContext();
@@ -73,11 +83,13 @@ const ContentListFilters = ({
   const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
   const [selectedArches, setSelectedArches] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const isRedHatRepository = contentOrigin === ContentOrigin.REDHAT;
 
   const { distribution_arches = [], distribution_versions = [] } =
     queryClient.getQueryData<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY) || {};
 
   const clearFilters = () => {
+    setFilterType('Name/URL');
     setSearchQuery('');
     setSelectedVersions([]);
     setSelectedArches([]);
@@ -260,17 +272,43 @@ const ContentListFilters = ({
           </InputGroupItem>
         </InputGroup>
       </FlexItem>
+      <FlexItem>
+        <ToggleGroup aria-label='Default with single selectable'>
+          <ToggleGroupItem
+            text='Custom'
+            buttonId='toggle-group-single-1'
+            isSelected={contentOrigin === ContentOrigin.EXTERNAL}
+            onChange={() => {
+              if (contentOrigin !== ContentOrigin.EXTERNAL) {
+                setContentOrigin(ContentOrigin.EXTERNAL);
+                // clearFilters(); //This resets the filters when changing Origins if desired.
+              }
+            }}
+          />
+          <ToggleGroupItem
+            text='Red Hat'
+            buttonId='toggle-group-single-2'
+            isSelected={contentOrigin === ContentOrigin.REDHAT}
+            onChange={() => {
+              if (contentOrigin !== ContentOrigin.REDHAT) {
+                setContentOrigin(ContentOrigin.REDHAT);
+                // clearFilters();//This resets the filters when changing Origins if desired.
+              }
+            }}
+          />
+        </ToggleGroup>
+      </FlexItem>
       <FlexItem className={classes.repositoryActions}>
         <ConditionalTooltip
           content='You do not have the required permissions to perform this action.'
-          show={!rbac?.write}
+          show={!rbac?.write && !isRedHatRepository}
           setDisabled
         >
           <Button
             id='createContentSourceButton'
             ouiaId='create_content_source'
             variant='primary'
-            isDisabled={isLoading}
+            isDisabled={isLoading || isRedHatRepository}
             onClick={() => navigate('add-repository')}
           >
             Add repositories
@@ -278,10 +316,11 @@ const ContentListFilters = ({
         </ConditionalTooltip>
         <ConditionalTooltip
           content='You do not have the required permissions to perform this action.'
-          show={!rbac?.write}
+          show={!rbac?.write && !isRedHatRepository}
           setDisabled
         >
           <DeleteKebab
+            isDisabled={isRedHatRepository}
             atLeastOneRepoChecked={atLeastOneRepoChecked}
             numberOfReposChecked={numberOfReposChecked}
             deleteCheckedRepos={deleteCheckedRepos}

@@ -3,6 +3,7 @@ import { testRepositoryParamsResponse } from '../../../testingHelpers';
 import AddContent from './AddContent/AddContent';
 import ContentListFilters from './ContentListFilters';
 import { useQueryClient } from 'react-query';
+import { ContentOrigin } from '../../../services/Content/ContentApi';
 
 jest.mock('./AddContent/AddContent');
 
@@ -28,6 +29,8 @@ beforeAll(() => {
 it('Render loading state (disabled)', async () => {
   const { getByRole } = render(
     <ContentListFilters
+      contentOrigin={ContentOrigin.EXTERNAL}
+      setContentOrigin={() => null}
       isLoading={true}
       setFilterData={() => null}
       filterData={{
@@ -49,6 +52,8 @@ it('Render loading state (disabled)', async () => {
 it('Select a filter of each type and ensure chips are present', async () => {
   const { queryByText, getByRole, getByLabelText } = render(
     <ContentListFilters
+      contentOrigin={ContentOrigin.EXTERNAL}
+      setContentOrigin={() => null}
       setFilterData={() => null}
       filterData={{
         searchQuery: '',

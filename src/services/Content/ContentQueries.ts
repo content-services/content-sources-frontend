@@ -30,6 +30,7 @@ import {
   ErrorResponse,
   getSnapshotList,
   SnapshotListResponse,
+  ContentOrigin,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../AdminTasks/AdminTaskQueries';
 import useErrorNotification from '../../Hooks/useErrorNotification';
@@ -81,14 +82,15 @@ export const useContentListQuery = (
   limit: number,
   filterData: FilterData,
   sortBy: string,
+  contentOrigin: ContentOrigin = ContentOrigin.EXTERNAL,
 ) => {
   const [polling, setPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
   const errorNotifier = useErrorNotification();
   return useQuery<ContentListResponse>(
     // Below MUST match the "contentListKeyArray" seen below in the useDeleteContent.
-    [CONTENT_LIST_KEY, page, limit, sortBy, ...Object.values(filterData)],
-    () => getContentList(page, limit, filterData, sortBy),
+    [CONTENT_LIST_KEY, page, limit, sortBy, contentOrigin, ...Object.values(filterData)],
+    () => getContentList(page, limit, filterData, sortBy, contentOrigin),
     {
       onSuccess: (data) => {
         const containsPending = data?.data?.some(

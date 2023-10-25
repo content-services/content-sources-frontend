@@ -21,12 +21,13 @@ import {
   Tr,
 } from '@patternfly/react-table';
 import { global_BackgroundColor_100, global_Color_400 } from '@patternfly/react-tokens';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import {
   ContentItem,
   FilterData,
   IntrospectRepositoryRequestItem,
+  ContentOrigin,
 } from '../../services/Content/ContentApi';
 import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
 
@@ -47,8 +48,8 @@ import PackageCount from './components/PackageCount';
 import { useAppContext } from '../../middleware/AppContext';
 import ConditionalTooltip from '../../components/ConditionalTooltip/ConditionalTooltip';
 import dayjs from 'dayjs';
-import { Outlet, useNavigate, useOutletContext } from 'react-router-dom';
 import ChangedArrows from './components/SnapshotListModal/components/ChangedArrows';
+import { Outlet, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -90,13 +91,15 @@ const ContentListTable = () => {
   const classes = useStyles();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { rbac, features } = useAppContext();
+  const { rbac, features, contentOrigin, setContentOrigin } = useAppContext();
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
   const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [checkedRepositories, setCheckedRepositories] = useState(new Set<string>());
+  const [checkedRepositories, setCheckedRepositories] = useState<Set<string>>(new Set<string>());
+  const isRedHatRepository = contentOrigin === ContentOrigin.REDHAT;
 
   const [filterData, setFilterData] = useState<FilterData>({
     searchQuery: '',
@@ -104,6 +107,20 @@ const ContentListTable = () => {
     arches: [],
     statuses: [],
   });
+
+  const setOriginAndSearchParams = (origin: ContentOrigin) => {
+    setContentOrigin(origin);
+    setUrlSearchParams(origin === ContentOrigin.EXTERNAL ? {} : { origin });
+  };
+
+  useEffect(() => {
+    if (
+      contentOrigin === ContentOrigin.REDHAT ||
+      urlSearchParams.get('origin') === ContentOrigin.REDHAT
+    ) {
+      setOriginAndSearchParams(ContentOrigin.REDHAT);
+    }
+  }, []);
 
   const clearFilters = () =>
     setFilterData({ searchQuery: '', versions: [], arches: [], statuses: [] });
@@ -142,7 +159,7 @@ const ContentListTable = () => {
     isError,
     isFetching,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useContentListQuery(page, perPage, filterData, sortString());
+  } = useContentListQuery(page, perPage, filterData, sortString(), contentOrigin);
 
   const { mutateAsync: deleteItem, isLoading: isDeleting } = useDeleteContentItemMutate(
     queryClient,
@@ -223,50 +240,69 @@ const ContentListTable = () => {
   } = data;
 
   const rowActions = useCallback(
-    (rowData: ContentItem): IAction[] => [
-      {
-        isDisabled: actionTakingPlace,
-        title: 'Edit',
-        onClick: () => {
-          navigate(`edit-repository?repoUUIDS=${rowData.uuid}`);
-        },
-      },
-      ...(features?.snapshots?.accessible
-        ? [
+    (rowData: ContentItem): IAction[] =>
+      isRedHatRepository
+        ? features?.snapshots?.accessible
+          ? [
+              {
+                isDisabled:
+                  actionTakingPlace ||
+                  !rowData.snapshot ||
+                  !(rowData.snapshot && rowData.last_snapshot_uuid),
+                title:
+                  rowData.snapshot && rowData.last_snapshot_uuid
+                    ? 'View all snapshots'
+                    : 'No snapshots yet',
+                onClick: () => {
+                  navigate(`${rowData.uuid}/snapshots`);
+                },
+              },
+            ]
+          : []
+        : [
             {
-              isDisabled:
-                actionTakingPlace ||
-                !rowData.snapshot ||
-                !(rowData.snapshot && rowData.last_snapshot_uuid),
-              title:
-                rowData.snapshot && rowData.last_snapshot_uuid
-                  ? 'View all snapshots'
-                  : 'No snapshots yet',
+              isDisabled: actionTakingPlace,
+              title: 'Edit',
               onClick: () => {
-                navigate(`${rowData.uuid}/snapshots`);
+                navigate(`edit-repository?repoUUIDS=${rowData.uuid}`);
               },
             },
-          ]
-        : []),
-      {
-        isDisabled: actionTakingPlace || rowData?.status == 'Retrying',
-        title: 'Introspect Now',
-        onClick: () => introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
-      },
-      { isSeparator: true },
-      {
-        title: 'Delete',
-        onClick: () =>
-          deleteItem(rowData?.uuid).then(() => {
-            clearCheckedRepositories();
-            // If this is the last item on a page, go to previous page.
-            if (page > 1 && count / perPage + 1 >= page && (count - 1) % perPage === 0) {
-              setPage(page - 1);
-            }
-          }),
-      },
-    ],
-    [actionTakingPlace, checkedRepositories],
+            ...(features?.snapshots?.accessible
+              ? [
+                  {
+                    isDisabled:
+                      actionTakingPlace ||
+                      !rowData.snapshot ||
+                      !(rowData.snapshot && rowData.last_snapshot_uuid),
+                    title:
+                      rowData.snapshot && rowData.last_snapshot_uuid
+                        ? 'View all snapshots'
+                        : 'No snapshots yet',
+                    onClick: () => {
+                      navigate(`${rowData.uuid}/snapshots`);
+                    },
+                  },
+                ]
+              : []),
+            {
+              isDisabled: actionTakingPlace || rowData?.status == 'Retrying',
+              title: 'Introspect Now',
+              onClick: () => introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
+            },
+            { isSeparator: true },
+            {
+              title: 'Delete',
+              onClick: () =>
+                deleteItem(rowData?.uuid).then(() => {
+                  clearCheckedRepositories();
+                  // If this is the last item on a page, go to previous page.
+                  if (page > 1 && count / perPage + 1 >= page && (count - 1) % perPage === 0) {
+                    setPage(page - 1);
+                  }
+                }),
+            },
+          ],
+    [actionTakingPlace, checkedRepositories, isRedHatRepository],
   );
 
   const clearCheckedRepositories = () => setCheckedRepositories(new Set<string>());
@@ -328,209 +364,56 @@ const ContentListTable = () => {
       clearCheckedRepositories();
     });
 
-  const itemName = 'custom repositories';
+  const itemName =
+    contentOrigin === ContentOrigin.EXTERNAL ? 'custom repositories' : 'red hat repositories';
   const notFilteredBody = 'To get started, create a custom repository';
 
   const countIsZero = count === 0;
   const showLoader = countIsZero && notFiltered && !isLoading;
+
+  // If Red Hat repositories returns a 0 count
+  if (notFiltered && countIsZero && !isFetching && contentOrigin === ContentOrigin.REDHAT) {
+    throw new Error('Unable to load Red Hat repositories');
+  }
+
   return (
     <>
       <Outlet context={{ clearCheckedRepositories }} />
-      {showLoader ? (
-        <Bullseye data-ouia-safe={!actionTakingPlace} data-ouia-component-id='content_list_page'>
-          <EmptyTableState
-            notFiltered={notFiltered}
-            clearFilters={clearFilters}
-            itemName={itemName}
-            notFilteredBody={notFilteredBody}
-            notFilteredButton={
-              <ConditionalTooltip
-                content='You do not have the required permissions to perform this action.'
-                show={!rbac?.write}
-                setDisabled
-              >
-                <Button
-                  id='createContentSourceButton'
-                  ouiaId='create_content_source'
-                  variant='primary'
-                  isDisabled={isLoading}
-                  onClick={() => navigate('add-repository')}
-                >
-                  Add repositories
-                </Button>
-              </ConditionalTooltip>
-            }
+      <Grid
+        data-ouia-safe={!actionTakingPlace}
+        data-ouia-component-id='content_list_page'
+        className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
+      >
+        <Flex className={classes.topContainer}>
+          <ContentListFilters
+            contentOrigin={contentOrigin}
+            setContentOrigin={setOriginAndSearchParams}
+            isLoading={isLoading}
+            setFilterData={(values) => {
+              setFilterData(values);
+              setPage(1);
+            }}
+            filterData={filterData}
+            atLeastOneRepoChecked={atLeastOneRepoChecked}
+            numberOfReposChecked={checkedRepositories.size}
+            deleteCheckedRepos={deleteCheckedRepos}
           />
-        </Bullseye>
-      ) : (
-        <Grid
-          data-ouia-safe={!actionTakingPlace}
-          data-ouia-component-id='content_list_page'
-          className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
-        >
-          <Flex className={classes.topContainer}>
-            <ContentListFilters
-              isLoading={isLoading}
-              setFilterData={(values) => {
-                setFilterData(values);
-                setPage(1);
-              }}
-              filterData={filterData}
-              atLeastOneRepoChecked={atLeastOneRepoChecked}
-              numberOfReposChecked={checkedRepositories.size}
-              deleteCheckedRepos={deleteCheckedRepos}
+          <FlexItem>
+            <Pagination
+              id='top-pagination-id'
+              widgetId='topPaginationWidgetId'
+              isDisabled={isLoading}
+              itemCount={count}
+              perPage={perPage}
+              page={page}
+              onSetPage={onSetPage}
+              isCompact
+              onPerPageSelect={onPerPageSelect}
             />
-            <FlexItem>
-              <Hide hide={countIsZero}>
-                <Pagination
-                  id='top-pagination-id'
-                  widgetId='topPaginationWidgetId'
-                  isDisabled={isLoading}
-                  itemCount={count}
-                  perPage={perPage}
-                  page={page}
-                  onSetPage={onSetPage}
-                  isCompact
-                  onPerPageSelect={onPerPageSelect}
-                />
-              </Hide>
-            </FlexItem>
-          </Flex>
-          <Hide hide={!isLoading}>
-            <Grid className={classes.mainContainer}>
-              <SkeletonTable
-                rows={perPage}
-                numberOfColumns={columnHeaders.length}
-                variant={TableVariant.compact}
-              />
-            </Grid>
-          </Hide>
-          <Hide hide={countIsZero || isLoading}>
-            <>
-              <Table
-                aria-label='Custom repositories table'
-                ouiaId='custom_repositories_table'
-                variant='compact'
-              >
-                <Thead>
-                  <Tr>
-                    <Hide hide={!rbac?.write}>
-                      <Th
-                        className={classes.checkboxMinWidth}
-                        select={{
-                          onSelect: selectAllRepos,
-                          isSelected: areAllReposSelected,
-                          isHeaderSelectDisabled: areAllReposPending,
-                        }}
-                      />
-                    </Hide>
-                    {columnHeaders.map((columnHeader, index) => (
-                      <Th key={columnHeader + 'column'} sort={sortParams(index)}>
-                        {columnHeader}
-                      </Th>
-                    ))}
-                    <Th>
-                      <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
-                    </Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {contentList.map((rowData: ContentItem, index) => {
-                    const {
-                      uuid,
-                      name,
-                      url,
-                      last_snapshot,
-                      distribution_arch,
-                      distribution_versions,
-                      last_introspection_time,
-                    } = rowData;
-                    return (
-                      <Tr key={uuid}>
-                        <Hide hide={!rbac?.write}>
-                          <Td
-                            select={{
-                              rowIndex: index,
-                              onSelect: (_event, isSelecting) =>
-                                onSelectRepo(rowData.uuid, isSelecting),
-                              isSelected: checkedRepositories.has(rowData.uuid),
-                              isDisabled: !repoCanBeChecked(rowData),
-                            }}
-                          />
-                        </Hide>
-                        <Td>
-                          {name}
-                          <UrlWithExternalIcon href={url} />
-                          <Hide hide={!features?.snapshots?.accessible}>
-                            <Flex>
-                              <FlexItem className={classes.snapshotInfoText}>
-                                {last_snapshot
-                                  ? `Last snapshot ${dayjs(last_snapshot?.created_at).fromNow()}`
-                                  : 'No snapshot yet'}
-                              </FlexItem>
-                              <Hide hide={!last_snapshot}>
-                                <FlexItem className={classes.inline}>
-                                  <FlexItem className={classes.snapshotInfoText}>Changes:</FlexItem>
-                                  <ChangedArrows
-                                    addedCount={
-                                      (last_snapshot?.added_counts?.['rpm.advisory'] || 0) +
-                                      (last_snapshot?.added_counts?.['rpm.package'] || 0)
-                                    }
-                                    removedCount={
-                                      (last_snapshot?.removed_counts?.['rpm.advisory'] || 0) +
-                                      (last_snapshot?.removed_counts?.['rpm.package'] || 0)
-                                    }
-                                  />
-                                </FlexItem>
-                              </Hide>
-                            </Flex>
-                          </Hide>
-                        </Td>
-                        <Td>{archesDisplay(distribution_arch)}</Td>
-                        <Td>{versionDisplay(distribution_versions)}</Td>
-                        <Td>
-                          <PackageCount rowData={rowData} />
-                        </Td>
-                        <Td>{lastIntrospectionDisplay(last_introspection_time)}</Td>
-                        <Td>
-                          <StatusIcon rowData={rowData} retryHandler={introspectRepoForUuid} />
-                        </Td>
-                        <Td isActionCell>
-                          <ConditionalTooltip
-                            content={
-                              rowData?.status == 'Pending'
-                                ? 'Introspection is in progress'
-                                : 'You do not have the required permissions to perform this action.'
-                            }
-                            show={!rbac?.write || rowData?.status === 'Pending'}
-                            setDisabled
-                          >
-                            <ActionsColumn items={rowActions(rowData)} />
-                          </ConditionalTooltip>
-                        </Td>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-              <Flex className={classes.bottomContainer}>
-                <FlexItem />
-                <FlexItem>
-                  <Pagination
-                    id='bottom-pagination-id'
-                    widgetId='bottomPaginationWidgetId'
-                    itemCount={count}
-                    perPage={perPage}
-                    page={page}
-                    onSetPage={onSetPage}
-                    variant={PaginationVariant.bottom}
-                    onPerPageSelect={onPerPageSelect}
-                  />
-                </FlexItem>
-              </Flex>
-            </>
-          </Hide>
-          <Hide hide={!countIsZero || isLoading}>
+          </FlexItem>
+        </Flex>
+        {showLoader ? (
+          <Bullseye data-ouia-safe={!actionTakingPlace} data-ouia-component-id='content_list_page'>
             <EmptyTableState
               notFiltered={notFiltered}
               clearFilters={clearFilters}
@@ -554,9 +437,176 @@ const ContentListTable = () => {
                 </ConditionalTooltip>
               }
             />
-          </Hide>
-        </Grid>
-      )}
+          </Bullseye>
+        ) : (
+          <>
+            <Hide hide={!isLoading}>
+              <Grid className={classes.mainContainer}>
+                <SkeletonTable
+                  rows={perPage}
+                  numberOfColumns={columnHeaders.length}
+                  variant={TableVariant.compact}
+                />
+              </Grid>
+            </Hide>
+            <Hide hide={countIsZero || isLoading}>
+              <>
+                <Table
+                  aria-label='Custom repositories table'
+                  ouiaId='custom_repositories_table'
+                  variant='compact'
+                >
+                  <Thead>
+                    <Tr>
+                      <Hide hide={!rbac?.write || isRedHatRepository}>
+                        <Th
+                          className={classes.checkboxMinWidth}
+                          select={{
+                            onSelect: selectAllRepos,
+                            isSelected: areAllReposSelected,
+                            isHeaderSelectDisabled: areAllReposPending,
+                          }}
+                        />
+                      </Hide>
+                      {columnHeaders.map((columnHeader, index) => (
+                        <Th key={columnHeader + 'column'} sort={sortParams(index)}>
+                          {columnHeader}
+                        </Th>
+                      ))}
+                      <Th>
+                        <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
+                      </Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {contentList.map((rowData: ContentItem, index) => {
+                      const {
+                        uuid,
+                        name,
+                        url,
+                        last_snapshot,
+                        distribution_arch,
+                        distribution_versions,
+                        last_introspection_time,
+                      } = rowData;
+                      return (
+                        <Tr key={uuid}>
+                          <Hide hide={!rbac?.write || isRedHatRepository}>
+                            <Td
+                              select={{
+                                rowIndex: index,
+                                onSelect: (_event, isSelecting) =>
+                                  onSelectRepo(rowData.uuid, isSelecting),
+                                isSelected: checkedRepositories.has(rowData.uuid),
+                                isDisabled: !repoCanBeChecked(rowData),
+                              }}
+                            />
+                          </Hide>
+                          <Td>
+                            {name}
+                            <UrlWithExternalIcon href={url} />
+                            <Hide hide={!features?.snapshots?.accessible}>
+                              <Flex>
+                                <FlexItem className={classes.snapshotInfoText}>
+                                  {last_snapshot
+                                    ? `Last snapshot ${dayjs(last_snapshot?.created_at).fromNow()}`
+                                    : 'No snapshot yet'}
+                                </FlexItem>
+                                <Hide hide={!last_snapshot}>
+                                  <FlexItem className={classes.inline}>
+                                    <FlexItem className={classes.snapshotInfoText}>
+                                      Changes:
+                                    </FlexItem>
+                                    <ChangedArrows
+                                      addedCount={
+                                        (last_snapshot?.added_counts?.['rpm.advisory'] || 0) +
+                                        (last_snapshot?.added_counts?.['rpm.package'] || 0)
+                                      }
+                                      removedCount={
+                                        (last_snapshot?.removed_counts?.['rpm.advisory'] || 0) +
+                                        (last_snapshot?.removed_counts?.['rpm.package'] || 0)
+                                      }
+                                    />
+                                  </FlexItem>
+                                </Hide>
+                              </Flex>
+                            </Hide>
+                          </Td>
+                          <Td>{archesDisplay(distribution_arch)}</Td>
+                          <Td>{versionDisplay(distribution_versions)}</Td>
+                          <Td>
+                            <PackageCount rowData={rowData} />
+                          </Td>
+                          <Td>{lastIntrospectionDisplay(last_introspection_time)}</Td>
+                          <Td>
+                            <StatusIcon rowData={rowData} retryHandler={introspectRepoForUuid} />
+                          </Td>
+                          <Td isActionCell>
+                            <ConditionalTooltip
+                              content={
+                                rowData?.status == 'Pending'
+                                  ? 'Introspection is in progress'
+                                  : 'You do not have the required permissions to perform this action.'
+                              }
+                              show={
+                                !isRedHatRepository &&
+                                (!rbac?.write || rowData?.status === 'Pending')
+                              }
+                              setDisabled
+                            >
+                              <ActionsColumn items={rowActions(rowData)} />
+                            </ConditionalTooltip>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+                <Flex className={classes.bottomContainer}>
+                  <FlexItem />
+                  <FlexItem>
+                    <Pagination
+                      id='bottom-pagination-id'
+                      widgetId='bottomPaginationWidgetId'
+                      itemCount={count}
+                      perPage={perPage}
+                      page={page}
+                      onSetPage={onSetPage}
+                      variant={PaginationVariant.bottom}
+                      onPerPageSelect={onPerPageSelect}
+                    />
+                  </FlexItem>
+                </Flex>
+              </>
+            </Hide>
+            <Hide hide={!countIsZero || isLoading}>
+              <EmptyTableState
+                notFiltered={notFiltered}
+                clearFilters={clearFilters}
+                itemName={itemName}
+                notFilteredBody={notFilteredBody}
+                notFilteredButton={
+                  <ConditionalTooltip
+                    content='You do not have the required permissions to perform this action.'
+                    show={!rbac?.write}
+                    setDisabled
+                  >
+                    <Button
+                      id='createContentSourceButton'
+                      ouiaId='create_content_source'
+                      variant='primary'
+                      isDisabled={isLoading}
+                      onClick={() => navigate('add-repository')}
+                    >
+                      Add repositories
+                    </Button>
+                  </ConditionalTooltip>
+                }
+              />
+            </Hide>
+          </>
+        )}
+      </Grid>
     </>
   );
 };

@@ -8,6 +8,7 @@ interface Props {
   numberOfReposChecked: number;
   deleteCheckedRepos: () => void;
   toggleOuiaId?: string;
+  isDisabled?: boolean;
 }
 
 const DeleteKebab = ({
@@ -15,6 +16,7 @@ const DeleteKebab = ({
   numberOfReposChecked,
   deleteCheckedRepos,
   toggleOuiaId,
+  isDisabled,
 }: Props) => {
   const { rbac } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
@@ -56,7 +58,7 @@ const DeleteKebab = ({
           id='delete-kebab'
           data-ouia-component-id={toggleOuiaId}
           onToggle={(_event, isOpen: boolean) => onToggle(isOpen)}
-          isDisabled={!rbac?.write}
+          isDisabled={!rbac?.write || isDisabled}
         />
       }
       isOpen={isOpen}
