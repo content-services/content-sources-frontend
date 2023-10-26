@@ -541,22 +541,24 @@ const ContentListTable = () => {
                           <Td>
                             <StatusIcon rowData={rowData} retryHandler={introspectRepoForUuid} />
                           </Td>
-                          <Td isActionCell>
-                            <ConditionalTooltip
-                              content={
-                                rowData?.status == 'Pending'
-                                  ? 'Introspection is in progress'
-                                  : 'You do not have the required permissions to perform this action.'
-                              }
-                              show={
-                                !isRedHatRepository &&
-                                (!rbac?.write || rowData?.status === 'Pending')
-                              }
-                              setDisabled
-                            >
-                              <ActionsColumn items={rowActions(rowData)} />
-                            </ConditionalTooltip>
-                          </Td>
+                          <Hide hide={!rowActions(rowData)?.length}>
+                            <Td isActionCell>
+                              <ConditionalTooltip
+                                content={
+                                  rowData?.status == 'Pending'
+                                    ? 'Introspection is in progress'
+                                    : 'You do not have the required permissions to perform this action.'
+                                }
+                                show={
+                                  !isRedHatRepository &&
+                                  (!rbac?.write || rowData?.status === 'Pending')
+                                }
+                                setDisabled
+                              >
+                                <ActionsColumn items={rowActions(rowData)} />
+                              </ConditionalTooltip>
+                            </Td>
+                          </Hide>
                         </Tr>
                       );
                     })}
