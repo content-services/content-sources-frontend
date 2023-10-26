@@ -9,6 +9,7 @@ import {
 import ContentListTable from './ContentListTable';
 import { useContentListQuery, useRepositoryParams } from '../../services/Content/ContentQueries';
 import AddContent from './components/AddContent/AddContent';
+import { ContentOrigin } from '../../services/Content/ContentApi';
 
 jest.mock('../../services/Content/ContentQueries', () => ({
   useRepositoryParams: jest.fn(),
@@ -22,7 +23,10 @@ jest.mock('../../services/Content/ContentQueries', () => ({
 }));
 
 jest.mock('../../middleware/AppContext', () => ({
-  useAppContext: () => ({}),
+  useAppContext: () => ({
+    contentOrigin: ContentOrigin.EXTERNAL,
+    setContentOrigin: () => {},
+  }),
 }));
 
 jest.mock('./components/AddContent/AddContent');
@@ -30,6 +34,7 @@ jest.mock('./components/AddContent/AddContent');
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
   Outlet: () => <></>,
+  useSearchParams: () => [{ get: () => 'external' }, () => {}],
 }));
 
 (AddContent as jest.Mock).mockImplementation(() => 'Add Content');
