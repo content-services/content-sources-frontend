@@ -77,11 +77,10 @@ const useStyles = createUseStyles({
   },
   snapshotInfoText: {
     color: global_Color_400.value,
-    paddingRight: '20px',
+    marginRight: '16px'
   },
   inline: {
     display: 'flex',
-    gap: '10px',
   },
 });
 
@@ -459,7 +458,7 @@ const ContentListTable = () => {
                             }}
                           />
                         </Hide>
-                        <Td className={classes.inline}>
+                        <Td>
                           {name}
                           <UrlWithExternalIcon href={url} />
                           <Hide hide={!features?.snapshots?.accessible}>
