@@ -1,4 +1,3 @@
-import { render, waitFor } from '@testing-library/react';
 import dayjs from 'dayjs';
 import {
   ReactQueryTestWrapper,
@@ -6,6 +5,7 @@ import {
   defaultSnapshotItem,
   testRepositoryParamsResponse,
 } from '../../testingHelpers';
+import { render, waitFor } from '@testing-library/react';
 import ContentListTable from './ContentListTable';
 import { useContentListQuery, useRepositoryParams } from '../../services/Content/ContentQueries';
 import AddContent from './components/AddContent/AddContent';
@@ -120,4 +120,53 @@ it('Render with a single row', () => {
       ),
     ).toBeInTheDocument(),
   );
+});
+
+it('Render with a single redhat repository', () => {
+  jest.mock('react-router-dom', () => ({
+    useNavigate: jest.fn(),
+    Outlet: () => <></>,
+    useSearchParams: () => [{ get: () => 'red_hat' }, () => {}],
+  }));
+  jest.mock('../../middleware/AppContext', () => ({
+    useAppContext: () => ({
+      contentOrigin: ContentOrigin.REDHAT,
+      setContentOrigin: () => {},
+    }),
+  }));
+  (useRepositoryParams as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: testRepositoryParamsResponse,
+  }));
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: {
+      data: [
+        {
+          account_id: 'undefined',
+          distribution_arch: 'x86_64',
+          distribution_versions: ['el7'],
+          name: 'AwesomeNamewwyylse12',
+          org_id: '-1',
+          url: 'https://google.ca/wwyylse12/x86_64/el7',
+          uuid: '2375c35b-a67a-4ac2-a989-21139433c172',
+          package_count: 0,
+        },
+      ],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+  }));
+
+  const { queryByText } = render(
+    <ReactQueryTestWrapper>
+      <ContentListTable />
+    </ReactQueryTestWrapper>,
+  );
+
+  waitFor(() => {
+    const value = document.getElementById('redhat-repositories-toggle-button');
+    expect(value?.getAttribute('aria-pressed')).toBe(true);
+  });
+  expect(queryByText('AwesomeNamewwyylse12')).toBeInTheDocument();
+  expect(queryByText('https://google.ca/wwyylse12/x86_64/el7')).toBeInTheDocument();
 });

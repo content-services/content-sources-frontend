@@ -276,7 +276,8 @@ const ContentListFilters = ({
         <ToggleGroup aria-label='Default with single selectable'>
           <ToggleGroupItem
             text='Custom'
-            buttonId='toggle-group-single-1'
+            buttonId='custom-repositories-toggle-button'
+            data-ouia-component-id='custom-repositories-toggle'
             isSelected={contentOrigin === ContentOrigin.EXTERNAL}
             onChange={() => {
               if (contentOrigin !== ContentOrigin.EXTERNAL) {
@@ -287,7 +288,8 @@ const ContentListFilters = ({
           />
           <ToggleGroupItem
             text='Red Hat'
-            buttonId='toggle-group-single-2'
+            buttonId='redhat-repositories-toggle-button'
+            data-ouia-component-id='redhat-repositories-toggle'
             isSelected={contentOrigin === ContentOrigin.REDHAT}
             onChange={() => {
               if (contentOrigin !== ContentOrigin.REDHAT) {
