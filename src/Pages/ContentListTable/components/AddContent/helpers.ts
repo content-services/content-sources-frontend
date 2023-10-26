@@ -135,6 +135,7 @@ export const makeValidationSchema = () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore-next-line
       .uniqueProperty('name', 'Names must be unique')
+      // eslint-disable-next-line quotes
       .uniqueProperty('url', "Url's must be unique"),
   );
 };
