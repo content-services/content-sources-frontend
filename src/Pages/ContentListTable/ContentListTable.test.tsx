@@ -1,6 +1,11 @@
 import { render, waitFor } from '@testing-library/react';
 import dayjs from 'dayjs';
-import { ReactQueryTestWrapper, defaultContentItemWithSnapshot, defaultSnapshotItem, testRepositoryParamsResponse } from '../../testingHelpers';
+import {
+  ReactQueryTestWrapper,
+  defaultContentItemWithSnapshot,
+  defaultSnapshotItem,
+  testRepositoryParamsResponse,
+} from '../../testingHelpers';
 import ContentListTable from './ContentListTable';
 import { useContentListQuery, useRepositoryParams } from '../../services/Content/ContentQueries';
 import AddContent from './components/AddContent/AddContent';
@@ -64,7 +69,7 @@ it('Render a loading state', () => {
 
 it('Render with a single row', () => {
   jest.mock('../../middleware/AppContext', () => ({
-    useAppContext: (features) => ({  features: features.snapshot.accessible,}),
+    useAppContext: (features) => ({ features: features.snapshot.accessible }),
   }));
 
   (useRepositoryParams as jest.Mock).mockImplementation(() => ({
@@ -87,9 +92,27 @@ it('Render with a single row', () => {
 
   expect(queryByText('AwesomeNamewwyylse12')).toBeInTheDocument();
   expect(queryByText('https://google.ca/wwyylse12/x86_64/el7')).toBeInTheDocument();
-  waitFor(() => expect(queryByText(dayjs(defaultSnapshotItem.created_at).fromNow())).toBeInTheDocument());
-  waitFor(() => expect(queryByText(((defaultSnapshotItem.added_counts['rpm.package'] as number) 
-    + (defaultSnapshotItem.added_counts['rpm.advisory'] as number))?.toString())).toBeInTheDocument());
-  waitFor(() => expect(queryByText(((defaultSnapshotItem.removed_counts['rpm.package'] as number) 
-    + (defaultSnapshotItem.removed_counts['rpm.advisory'] as number))?.toString())).toBeInTheDocument());
+  waitFor(() =>
+    expect(queryByText(dayjs(defaultSnapshotItem.created_at).fromNow())).toBeInTheDocument(),
+  );
+  waitFor(() =>
+    expect(
+      queryByText(
+        (
+          (defaultSnapshotItem.added_counts['rpm.package'] as number) +
+          (defaultSnapshotItem.added_counts['rpm.advisory'] as number)
+        )?.toString(),
+      ),
+    ).toBeInTheDocument(),
+  );
+  waitFor(() =>
+    expect(
+      queryByText(
+        (
+          (defaultSnapshotItem.removed_counts['rpm.package'] as number) +
+          (defaultSnapshotItem.removed_counts['rpm.advisory'] as number)
+        )?.toString(),
+      ),
+    ).toBeInTheDocument(),
+  );
 });

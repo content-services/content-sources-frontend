@@ -77,7 +77,7 @@ const useStyles = createUseStyles({
   },
   snapshotInfoText: {
     color: global_Color_400.value,
-    marginRight: '16px'
+    marginRight: '16px',
   },
   inline: {
     display: 'flex',
@@ -464,24 +464,27 @@ const ContentListTable = () => {
                           <Hide hide={!features?.snapshots?.accessible}>
                             <Flex>
                               <FlexItem className={classes.snapshotInfoText}>
-                                {last_snapshot ? 
-                                  `Last snapshot ${dayjs(last_snapshot?.created_at).fromNow()}` : 
-                                  'No snapshot yet'
-                                }
+                                {last_snapshot
+                                  ? `Last snapshot ${dayjs(last_snapshot?.created_at).fromNow()}`
+                                  : 'No snapshot yet'}
                               </FlexItem>
                               <Hide hide={!last_snapshot}>
                                 <FlexItem className={classes.inline}>
                                   <FlexItem className={classes.snapshotInfoText}>Changes:</FlexItem>
                                   <ChangedArrows
-                                    addedCount={(last_snapshot?.added_counts?.['rpm.advisory'] || 0) + 
-                                                (last_snapshot?.added_counts?.['rpm.package'] || 0)}
-                                    removedCount={(last_snapshot?.removed_counts?.['rpm.advisory'] || 0) + 
-                                                  (last_snapshot?.removed_counts?.['rpm.package'] || 0)}
+                                    addedCount={
+                                      (last_snapshot?.added_counts?.['rpm.advisory'] || 0) +
+                                      (last_snapshot?.added_counts?.['rpm.package'] || 0)
+                                    }
+                                    removedCount={
+                                      (last_snapshot?.removed_counts?.['rpm.advisory'] || 0) +
+                                      (last_snapshot?.removed_counts?.['rpm.package'] || 0)
+                                    }
                                   />
                                 </FlexItem>
                               </Hide>
                             </Flex>
-                          </Hide> 
+                          </Hide>
                         </Td>
                         <Td>{archesDisplay(distribution_arch)}</Td>
                         <Td>{versionDisplay(distribution_versions)}</Td>

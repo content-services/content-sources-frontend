@@ -226,4 +226,4 @@ export const defaultContentItemWithSnapshot: ContentItem = {
   metadata_verification: false,
   snapshot: true,
   last_snapshot: defaultSnapshotItem,
-}
+};
