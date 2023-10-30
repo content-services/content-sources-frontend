@@ -19,7 +19,7 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["react", "react-hooks", "@typescript-eslint", "prettier"],
+  "plugins": ["react", "react-hooks", "@typescript-eslint", "prettier","unused-imports"],
   "settings": {
     "import/resolver": {
       "typescript": {}
@@ -35,6 +35,10 @@
     "camelcase": "off",
     "spaced-comment": "error",
     "quotes": ["warn", "single"],
-    "no-duplicate-imports": "error"
+    "no-duplicate-imports": "error",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+        "warn"
+    ]
   }
 }

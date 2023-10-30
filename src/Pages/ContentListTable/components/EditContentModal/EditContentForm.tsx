@@ -4,13 +4,13 @@ import {
   Form,
   FormGroup,
   Radio,
-  SelectVariant,
   TextInput,
   Switch,
   Tooltip,
 } from '@patternfly/react-core';
+import { SelectVariant } from '@patternfly/react-core/deprecated';
 import { CheckCircleIcon, OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
-import { TableComposable, Tbody, Td, Tr } from '@patternfly/react-table';
+import { Table /* data-codemods */, Tbody, Td, Tr } from '@patternfly/react-table';
 import {
   global_Color_200,
   global_success_color_100,
@@ -47,6 +47,7 @@ import ConditionalTooltip from '../../../../components/ConditionalTooltip/Condit
 import useNotification from '../../../../Hooks/useNotification';
 import useDeepCompareEffect from '../../../../Hooks/useDeepCompareEffect';
 import { useAppContext } from '../../../../middleware/AppContext';
+import CustomHelperText from '../../../../components/CustomHelperText/CustomHelperText';
 
 const green = global_success_color_100.value;
 
@@ -97,8 +98,14 @@ const useStyles = createUseStyles({
     padding: '8px 0px 0px !important',
   },
   gpgKeyInput: {
-    '& .pf-c-form-control': {
-      backgroundPositionX: 'calc(100% - 1.3em)',
+    '& .pf-v5-svg': {
+      marginRight: '10px',
+    },
+  },
+  gpgKeyFormGroup: {
+    paddingBottom: '20px',
+    '& .pf-v5-c-radio': {
+      width: 'auto',
     },
   },
 });
@@ -218,12 +225,17 @@ const EditContentForm = ({
     index: number,
     field: keyof FormikEditValues,
   ): 'default' | 'success' | 'error' => {
-    const hasNotChanged = isEqual(initialValues[index]?.[field], formik.values[index]?.[field]);
+    let hasNotChanged = isEqual(initialValues[index]?.[field], formik.values[index]?.[field]);
+    if (field === 'metadataVerification') {
+      if (!initialValues[index].gpgKey) {
+        hasNotChanged = false;
+      }
+    }
     const errors = !!formik.errors[index]?.[field];
     switch (true) {
       case errors:
         return 'error';
-      case hasNotChanged:
+      case hasNotChanged || !isEmpty(formik.errors[index]) || !changeVerified:
         return 'default';
       case !hasNotChanged:
         return 'success';
@@ -325,7 +337,7 @@ const EditContentForm = ({
   }, [formik.values]);
 
   return (
-    <TableComposable aria-label='Table for edit modal' ouiaId='edit_modal_table'>
+    <Table aria-label='Table for edit modal' ouiaId='edit_modal_table'>
       <Hide hide={createDataLengthOf1}>
         <Tbody isExpanded={allExpanded}>
           <Tr onClick={expandAllToggle} className={classes.toggleAllRow}>
@@ -411,13 +423,7 @@ const EditContentForm = ({
                       </Hide>
                     </FormGroup>
                   </Hide>
-                  <FormGroup
-                    label='Name'
-                    isRequired
-                    fieldId='namegroup'
-                    validated={getFieldValidation(index, 'name')}
-                    helperTextInvalid={formik.errors[index]?.name}
-                  >
+                  <FormGroup label='Name' isRequired fieldId='namegroup'>
                     <TextInput
                       isRequired
                       id='name'
@@ -426,26 +432,24 @@ const EditContentForm = ({
                       ouiaId='input_name'
                       type='text'
                       validated={getFieldValidation(index, 'name')}
-                      onChange={(value) => {
+                      onChange={(_event, value) => {
                         updateVariable(index, { name: value });
                       }}
                       value={name || ''}
                       placeholder='Enter name'
                     />
+                    <CustomHelperText
+                      hide={getFieldValidation(index, 'name') === 'default'}
+                      textValue={formik.errors[index]?.name}
+                    />
                   </FormGroup>
-                  <FormGroup
-                    label='URL'
-                    isRequired
-                    fieldId='url'
-                    validated={getFieldValidation(index, 'url')}
-                    helperTextInvalid={formik.errors[index]?.url}
-                  >
+                  <FormGroup label='URL' isRequired fieldId='url'>
                     <TextInput
                       isRequired
                       type='url'
                       validated={getFieldValidation(index, 'url')}
                       onBlur={() => urlOnBlur(index)}
-                      onChange={(value) => {
+                      onChange={(_event, value) => {
                         if (url !== value) {
                           updateVariable(index, { url: value });
                         }
@@ -456,6 +460,10 @@ const EditContentForm = ({
                       name='url'
                       label='Url'
                       ouiaId='input_url'
+                    />
+                    <CustomHelperText
+                      hide={getFieldValidation(index, 'url') === 'default'}
+                      textValue={formik.errors[index]?.url}
                     />
                   </FormGroup>
                   <FormGroup
@@ -506,8 +514,8 @@ const EditContentForm = ({
                       toggleId={'versionSelection' + index}
                       options={Object.keys(distributionVersions)}
                       variant={SelectVariant.typeaheadMulti}
-                      selectedProp={Object.keys(distributionVersions).filter((key: string) =>
-                        versions?.includes(distributionVersions[key]),
+                      selectedProp={Object.keys(distributionVersions).filter(
+                        (key: string) => versions?.includes(distributionVersions[key]),
                       )}
                       placeholderText={versions?.length ? '' : 'Any version'}
                       setSelected={(value) => setVersionSelected(value, index)}
@@ -524,8 +532,6 @@ const EditContentForm = ({
                       </Tooltip>
                     }
                     fieldId='gpgKey'
-                    validated={getFieldValidation(index, 'gpgKey')}
-                    helperTextInvalid={formik.errors[index]?.gpgKey}
                   >
                     <FileUpload
                       className={classes.gpgKeyInput}
@@ -538,8 +544,8 @@ const EditContentForm = ({
                       value={gpgKeyList[index]}
                       isLoading={gpgLoading}
                       spellCheck={false}
-                      onDataChange={(value) => updateGpgKey(index, value)}
-                      onTextChange={(value) => updateGpgKey(index, value)}
+                      onDataChange={(_event, value) => updateGpgKey(index, value)}
+                      onTextChange={(_event, value) => updateGpgKey(index, value)}
                       onClearClick={() => updateGpgKey(index, '')}
                       dropzoneProps={{
                         maxSize: maxUploadSize,
@@ -548,9 +554,18 @@ const EditContentForm = ({
                       allowEditingUploadedText
                       browseButtonText='Upload'
                     />
+                    <CustomHelperText
+                      hide={getFieldValidation(index, 'gpgKey') === 'default'}
+                      textValue={formik.errors[index]?.gpgKey}
+                    />
                   </FormGroup>
                   <Hide hide={!gpgKey}>
-                    <FormGroup fieldId='metadataVerification' label='Use GPG key for' isInline>
+                    <FormGroup
+                      fieldId='metadataVerification'
+                      label='Use GPG key for'
+                      isInline
+                      className={classes.gpgKeyFormGroup}
+                    >
                       <Radio
                         id='package verification only'
                         name='package-verification-only'
@@ -562,17 +577,21 @@ const EditContentForm = ({
                         show={validationList?.[index]?.url?.metadata_signature_present === false}
                         content="This repository's metadata is not signed, metadata verification is not possible."
                       >
-                        <Radio
-                          id='Package and metadata verification'
-                          name='package-and-repository-verification'
-                          label='Package and metadata verification'
-                          isChecked={metadataVerification}
-                          onChange={() => updateVariable(index, { metadataVerification: true })}
-                        />
+                        <>
+                          <Radio
+                            id='Package and metadata verification'
+                            name='package-and-repository-verification'
+                            label='Package and metadata verification'
+                            isChecked={metadataVerification}
+                            onChange={() => updateVariable(index, { metadataVerification: true })}
+                          />
+                          <Hide
+                            hide={getFieldValidation(index, 'metadataVerification') !== 'success'}
+                          >
+                            <CheckCircleIcon style={{ marginLeft: '10px' }} color={green} />
+                          </Hide>
+                        </>
                       </ConditionalTooltip>
-                      <Hide hide={getFieldValidation(index, 'metadataVerification') !== 'success'}>
-                        <CheckCircleIcon noVerticalAlign color={green} />
-                      </Hide>
                     </FormGroup>
                   </Hide>
                 </Form>
@@ -581,7 +600,7 @@ const EditContentForm = ({
           </Tbody>
         ),
       )}
-    </TableComposable>
+    </Table>
   );
 };
 

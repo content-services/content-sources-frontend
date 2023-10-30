@@ -5,7 +5,7 @@ import {
   testRepositoryParamsResponse,
 } from '../../../../testingHelpers';
 import EditContentModal from './EditContentModal';
-import { act, fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useValidateContentList } from '../../../../services/Content/ContentQueries';
 import { useQueryClient } from 'react-query';
 import { ContentItem } from '../../../../services/Content/ContentApi';
@@ -72,14 +72,14 @@ it('Open, confirming values, edit an item, enabling Save button', async () => {
   const optionsMenuButton = queryAllByLabelText('Options menu')[1];
   expect(optionsMenuButton).toBeInTheDocument();
   if (optionsMenuButton) {
-    await act(async () => {
+    await waitFor(() => {
       fireEvent.click(optionsMenuButton);
     });
   }
   expect(optionsMenuButton).toHaveAttribute('aria-expanded', 'true');
   const el8MenuSelect = queryByText('el8');
   if (el8MenuSelect) {
-    await act(async () => {
+    await waitFor(() => {
       fireEvent.click(el8MenuSelect);
     });
   }

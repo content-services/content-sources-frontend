@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, KebabToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, KebabToggle } from '@patternfly/react-core/deprecated';
 import { useState } from 'react';
 import { useAppContext } from '../../middleware/AppContext';
 import ConditionalTooltip from '../ConditionalTooltip/ConditionalTooltip';
@@ -7,12 +7,14 @@ interface Props {
   atLeastOneRepoChecked: boolean;
   numberOfReposChecked: number;
   deleteCheckedRepos: () => void;
+  toggleOuiaId?: string;
 }
 
 const DeleteKebab = ({
   atLeastOneRepoChecked,
   numberOfReposChecked,
   deleteCheckedRepos,
+  toggleOuiaId,
 }: Props) => {
   const { rbac } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
@@ -49,11 +51,18 @@ const DeleteKebab = ({
   return (
     <Dropdown
       onSelect={onSelect}
-      toggle={<KebabToggle id='delete-kebab' onToggle={onToggle} isDisabled={!rbac?.write} />}
+      toggle={
+        <KebabToggle
+          id='delete-kebab'
+          data-ouia-component-id={toggleOuiaId}
+          onToggle={(_event, isOpen: boolean) => onToggle(isOpen)}
+          isDisabled={!rbac?.write}
+        />
+      }
       isOpen={isOpen}
       isPlain
       dropdownItems={dropdownItems}
-      direction='up'
+      direction='down'
     />
   );
 };

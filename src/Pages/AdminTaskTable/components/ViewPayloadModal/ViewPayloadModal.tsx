@@ -12,7 +12,7 @@ import { createUseStyles } from 'react-jss';
 import { createRef, useEffect, useMemo, useState } from 'react';
 import { AdminTask } from '../../../../services/AdminTasks/AdminTaskApi';
 import AdminTaskInfo from './components/AdminTaskInfo';
-import ReactJson from 'react-json-view';
+import ReactJson from 'react18-json-view';
 import Hide from '../../../../components/Hide/Hide';
 import { useFetchAdminTaskQuery } from '../../../../services/AdminTasks/AdminTaskQueries';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,7 +21,7 @@ import useRootPath from '../../../../Hooks/useRootPath';
 
 const useStyles = createUseStyles({
   jsonView: {
-    fontSize: '12px',
+    fontSize: '14px',
   },
 });
 
@@ -120,23 +120,26 @@ const ViewPayloadModal = () => {
             aria-label='Task tabs'
             ouiaId='task-tabs'
           >
-            <Tab
-              title={<TabTitleText>Task details</TabTitleText>}
-              aria-label='Task details'
-              ouiaId='task-details'
-              eventKey={0}
-              tabContentRef={detailRef}
-            />
-            {tabs.map(({ title, contentRef }) => (
+            {[
               <Tab
-                key={title}
-                eventKey={title}
-                aria-label={title}
-                ouiaId={title}
-                tabContentRef={contentRef}
-                title={<TabTitleText>{title}</TabTitleText>}
-              />
-            ))}
+                key='taskDetails'
+                title={<TabTitleText>Task details</TabTitleText>}
+                aria-label='Task details'
+                ouiaId='task-details'
+                eventKey={0}
+                tabContentRef={detailRef}
+              />,
+              ...tabs.map(({ title, contentRef }, key) => (
+                <Tab
+                  key={title + key}
+                  eventKey={title}
+                  aria-label={title}
+                  ouiaId={title}
+                  tabContentRef={contentRef}
+                  title={<TabTitleText>{title}</TabTitleText>}
+                />
+              )),
+            ]}
           </Tabs>
         </Hide>
       }
@@ -161,13 +164,7 @@ const ViewPayloadModal = () => {
             ref={contentRef}
             hidden
           >
-            <ReactJson
-              name={null}
-              src={data}
-              enableClipboard={(copy) => {
-                navigator.clipboard.writeText(JSON.stringify(copy.src, null, '\t'));
-              }}
-            />
+            <ReactJson src={data} enableClipboard theme='atom' />
           </TabContent>
         ))}
       </Hide>

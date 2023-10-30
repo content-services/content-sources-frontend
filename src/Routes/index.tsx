@@ -1,5 +1,5 @@
 import { Grid } from '@patternfly/react-core';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { createUseStyles } from 'react-jss';
 import { ErrorPage } from '../components/Error/ErrorPage';
@@ -15,13 +15,12 @@ const useStyles = createUseStyles({
 
 export default function MainRoutes() {
   const classes = useStyles();
-  const { pathname } = useLocation();
   const key = useMemo(() => Math.random(), []);
   const tabs = useTabbedRoutes();
 
   return (
     <Routes key={key}>
-      <Route element={<Layout pathname={pathname} tabs={tabs} />}>
+      <Route element={<Layout tabs={tabs} />}>
         {tabs.map(({ route, Element, ChildRoutes }, key) => (
           <Route
             key={key.toString()}

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 
 import { createUseStyles } from 'react-jss';
@@ -28,7 +28,8 @@ const useStyles = createUseStyles({
   },
 });
 
-export default function Layout({ pathname, tabs }: { pathname: string; tabs: TabbedRoute[] }) {
+export default function Layout({ tabs }: { tabs: TabbedRoute[] }) {
+  const { pathname } = useLocation();
   const classes = useStyles();
   const currentRoute = useMemo(() => last(pathname.split('/')), [pathname]);
 

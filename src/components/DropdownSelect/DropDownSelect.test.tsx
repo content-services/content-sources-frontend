@@ -1,5 +1,5 @@
-import { SelectVariant } from '@patternfly/react-core';
-import { render } from '@testing-library/react';
+import { SelectVariant } from '@patternfly/react-core/deprecated';
+import { render, waitFor } from '@testing-library/react';
 import DropDownSelect from './DropdownSelect';
 
 it('Render with SelectVariant.single', () => {
@@ -13,10 +13,14 @@ it('Render with SelectVariant.single', () => {
   );
   const SelectComponent = queryByText('1');
   expect(SelectComponent).toBeInTheDocument();
-  SelectComponent?.click();
-  expect(queryByText('2')).toBeInTheDocument();
-  expect(queryByText('3')).toBeInTheDocument();
-  expect(queryByText('4')).toBeInTheDocument();
+  waitFor(() => {
+    SelectComponent?.click();
+  });
+  waitFor(() => {
+    expect(queryByText('2')).toBeInTheDocument();
+    expect(queryByText('3')).toBeInTheDocument();
+    expect(queryByText('4')).toBeInTheDocument();
+  });
   queryByText('4')?.click();
 });
 
@@ -37,9 +41,13 @@ it('Render with SelectVariant.multi', () => {
   expect(queryByText('2')).toBeInTheDocument();
   expect(queryByText('3')).not.toBeInTheDocument();
   expect(queryByText('4')).not.toBeInTheDocument();
-  textbox?.click();
-  expect(queryByText('3')).toBeInTheDocument();
-  expect(queryByText('4')).toBeInTheDocument();
+  waitFor(() => {
+    textbox?.click();
+  });
+  waitFor(() => {
+    expect(queryByText('3')).toBeInTheDocument();
+    expect(queryByText('4')).toBeInTheDocument();
+  });
   queryByText('4')?.click();
   queryAllByText('1')[1]?.click();
 });

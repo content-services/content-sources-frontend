@@ -8,19 +8,20 @@ import {
   ModalVariant,
   Popover,
   Radio,
-  SelectVariant,
   Stack,
   StackItem,
   TextInput,
   Tooltip,
   Alert,
+  FormAlert,
 } from '@patternfly/react-core';
+import { SelectVariant } from '@patternfly/react-core/deprecated';
 import {
   OutlinedQuestionCircleIcon,
   PlusCircleIcon,
   MinusCircleIcon,
 } from '@patternfly/react-icons';
-import { TableComposable, Tbody, Td, Tr } from '@patternfly/react-table';
+import { Table /* data-codemods */, Tbody, Td, Tr } from '@patternfly/react-table';
 import { global_Color_200, global_link_Color } from '@patternfly/react-tokens';
 import { useFormik } from 'formik';
 import { useEffect, useMemo, useState } from 'react';
@@ -55,6 +56,7 @@ import { useNavigate } from 'react-router-dom';
 import { useContentListOutletContext } from '../../ContentListTable';
 import useRootPath from '../../../../Hooks/useRootPath';
 import { useAppContext } from '../../../../middleware/AppContext';
+import CustomHelperText from '../../../../components/CustomHelperText/CustomHelperText';
 
 const useStyles = createUseStyles({
   description: {
@@ -110,8 +112,14 @@ const useStyles = createUseStyles({
     padding: '8px 0px 0px !important',
   },
   gpgKeyInput: {
-    '& .pf-c-form-control': {
-      backgroundPositionX: 'calc(100% - 1.3em)',
+    '& .pf-v5-svg': {
+      marginRight: '10px',
+    },
+  },
+  gpgKeyFormGroup: {
+    paddingBottom: '20px',
+    '& .pf-v5-c-radio': {
+      width: 'auto',
     },
   },
 });
@@ -250,7 +258,8 @@ const AddContent = () => {
     newTouched.splice(index, 1);
 
     const newErrors = formik.errors;
-    newErrors.splice(index, 1);
+    // This check is because the newErrors may not be present for tests
+    if (newErrors.length) newErrors.splice(index, 1);
 
     formik.setTouched(newTouched);
     formik.setErrors(newErrors);
@@ -443,7 +452,7 @@ const AddContent = () => {
         </Stack>
       }
     >
-      <TableComposable aria-label='Table for repo add modal' ouiaId='add_modal_table'>
+      <Table aria-label='Table for repo add modal' ouiaId='add_modal_table'>
         <Hide hide={createDataLengthOf1}>
           <Tbody isExpanded={allExpanded}>
             <Tr onClick={expandAllToggle} className={classes.toggleAllRow}>
@@ -535,23 +544,18 @@ const AddContent = () => {
                           />
                         </Tooltip>
                         <Hide hide={snapshot}>
-                          <Alert
-                            variant='warning'
-                            style={{ paddingTop: '10px' }}
-                            title='Disabling snapshots may result in a higher risk of losing content or unintentionally modifying it irreversibly.'
-                            isInline
-                            isPlain
-                          />
+                          <FormAlert style={{ paddingTop: '20px' }}>
+                            <Alert
+                              variant='warning'
+                              title='Disabling snapshots might result in a higher risk of losing content or unintentionally modifying it irreversibly.'
+                              isInline
+                              //   isPlain
+                            />
+                          </FormAlert>
                         </Hide>
                       </FormGroup>
                     </Hide>
-                    <FormGroup
-                      label='Name'
-                      isRequired
-                      fieldId='namegroup'
-                      validated={getFieldValidation(index, 'name')}
-                      helperTextInvalid={formik.errors[index]?.name}
-                    >
+                    <FormGroup label='Name' isRequired fieldId='namegroup'>
                       <TextInput
                         isRequired
                         id='name'
@@ -560,26 +564,24 @@ const AddContent = () => {
                         ouiaId='input_name'
                         type='text'
                         validated={getFieldValidation(index, 'name')}
-                        onChange={(value) => {
+                        onChange={(_event, value) => {
                           updateVariable(index, { name: value });
                         }}
                         value={name || ''}
                         placeholder='Enter name'
                       />
+                      <CustomHelperText
+                        hide={getFieldValidation(index, 'name') === 'default'}
+                        textValue={formik.errors[index]?.name}
+                      />
                     </FormGroup>
-                    <FormGroup
-                      label='URL'
-                      isRequired
-                      fieldId='url'
-                      validated={getFieldValidation(index, 'url')}
-                      helperTextInvalid={formik.errors[index]?.url}
-                    >
+                    <FormGroup label='URL' isRequired fieldId='url'>
                       <TextInput
                         isRequired
                         type='url'
                         validated={getFieldValidation(index, 'url')}
                         onBlur={() => updateArchAndVersion(index)}
-                        onChange={(value) => {
+                        onChange={(_event, value) => {
                           if (url !== value) {
                             updateVariable(index, { url: value });
                           }
@@ -590,6 +592,10 @@ const AddContent = () => {
                         name='url'
                         label='Url'
                         ouiaId='input_url'
+                      />
+                      <CustomHelperText
+                        hide={getFieldValidation(index, 'url') === 'default'}
+                        textValue={formik.errors[index]?.url}
                       />
                     </FormGroup>
                     <FormGroup
@@ -638,8 +644,8 @@ const AddContent = () => {
                         toggleId={'versionSelection' + index}
                         options={Object.keys(distributionVersions)}
                         variant={SelectVariant.typeaheadMulti}
-                        selectedProp={Object.keys(distributionVersions).filter((key: string) =>
-                          versions?.includes(distributionVersions[key]),
+                        selectedProp={Object.keys(distributionVersions).filter(
+                          (key: string) => versions?.includes(distributionVersions[key]),
                         )}
                         placeholderText={versions?.length ? '' : 'Any version'}
                         setSelected={(value) => setVersionSelected(value, index)}
@@ -656,8 +662,6 @@ const AddContent = () => {
                         </Tooltip>
                       }
                       fieldId='gpgKey'
-                      validated={getFieldValidation(index, 'gpgKey')}
-                      helperTextInvalid={formik.errors[index]?.gpgKey}
                     >
                       <FileUpload
                         className={classes.gpgKeyInput}
@@ -670,8 +674,8 @@ const AddContent = () => {
                         value={gpgKeyList[index]}
                         isLoading={gpgLoading}
                         spellCheck={false}
-                        onDataChange={(value) => updateGpgKey(index, value)}
-                        onTextChange={(value) => updateGpgKey(index, value)}
+                        onDataChange={(_event, value) => updateGpgKey(index, value)}
+                        onTextChange={(_event, value) => updateGpgKey(index, value)}
                         onClearClick={() => updateGpgKey(index, '')}
                         dropzoneProps={{
                           maxSize: maxUploadSize,
@@ -680,9 +684,18 @@ const AddContent = () => {
                         allowEditingUploadedText
                         browseButtonText='Upload'
                       />
+                      <CustomHelperText
+                        hide={getFieldValidation(index, 'gpgKey') === 'default'}
+                        textValue={formik.errors[index]?.gpgKey}
+                      />
                     </FormGroup>
                     <Hide hide={!gpgKey}>
-                      <FormGroup fieldId='metadataVerification' label='Use GPG key for' isInline>
+                      <FormGroup
+                        fieldId='metadataVerification'
+                        label='Use GPG key for'
+                        isInline
+                        className={classes.gpgKeyFormGroup}
+                      >
                         <Radio
                           id='package-verification-only'
                           name='package-verification-only'
@@ -710,7 +723,7 @@ const AddContent = () => {
             </Tbody>
           ),
         )}
-      </TableComposable>
+      </Table>
     </Modal>
   );
 };
