@@ -461,7 +461,7 @@ const ContentListTable = () => {
                         <Td>
                           {name}
                           <UrlWithExternalIcon href={url} />
-                          <Hide hide={!features?.snapshots?.enabled}>
+                          <Hide hide={!features?.snapshots?.accessible}>
                             <Flex>
                               <FlexItem className={classes.snapshotInfoText}>
                                 {last_snapshot
