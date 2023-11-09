@@ -190,6 +190,7 @@ export const defaultLinkItem: Links = {
 };
 
 export const defaultSnapshotItem: SnapshotItem = {
+  uuid: '2375c35b-a67a-4ac2-a989-21139433c172',
   created_at: '2023-08-08T20:23:32.711372-06:00',
   distribution_path: 'b68beca3-d081-4c9f-9d8f-9868107c30e2/ea837ff5-62ed-4507-876d-2c600f55df54',
   content_counts: {

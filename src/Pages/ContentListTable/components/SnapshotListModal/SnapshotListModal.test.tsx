@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import {render, waitFor} from '@testing-library/react';
 import SnapshotListModal from './SnapshotListModal';
 import {
   ReactQueryTestWrapper,
@@ -13,6 +13,7 @@ jest.mock('../../../../Hooks/useRootPath', () => () => 'someUrl');
 jest.mock('../../../../services/Content/ContentQueries', () => ({
   useFetchContent: jest.fn(),
   useGetSnapshotList: jest.fn(),
+  useGetRepoConfigFileQuery: () => ({ mutateAsync: jest.fn() })
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -79,4 +80,5 @@ it('Render 20 items', async () => {
   expect(
     queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
   ).toBeInTheDocument();
+
 });

@@ -37,6 +37,7 @@ import EmptyPackageState from '../PackageModal/components/EmptyPackageState';
 import ChangedArrows from './components/ChangedArrows';
 import { SearchIcon } from '@patternfly/react-icons';
 import { useAppContext } from '../../../../middleware/AppContext';
+import RepoConfig from './components/RepoConfig';
 
 const useStyles = createUseStyles({
   description: {
@@ -76,7 +77,7 @@ export default function SnapshotListModal() {
   const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const columnHeaders = ['Snapshots', 'Change', 'Packages', 'Errata'];
+  const columnHeaders = ['Snapshots', 'Change', 'Packages', 'Errata', 'Config'];
 
   const columnSortAttributes = ['created_at'];
 
@@ -227,7 +228,7 @@ export default function SnapshotListModal() {
               <Tbody>
                 {snapshotsList.map(
                   (
-                    { created_at, content_counts, added_counts, removed_counts }: SnapshotItem,
+                    { uuid: snap_uuid, created_at, content_counts, added_counts, removed_counts }: SnapshotItem,
                     index: number,
                   ) => (
                     <Tr key={created_at + index}>
@@ -246,6 +247,9 @@ export default function SnapshotListModal() {
                       </Td>
                       <Td>{content_counts?.['rpm.package'] || 0}</Td>
                       <Td>{content_counts?.['rpm.advisory'] || 0}</Td>
+                      <Td>
+                        <RepoConfig repoUUID={uuid} snapUUID={snap_uuid}/>
+                        </Td>
                     </Tr>
                   ),
                 )}
