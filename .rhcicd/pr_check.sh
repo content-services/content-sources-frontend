@@ -25,7 +25,6 @@ COMMON_BUILDER=https://raw.githubusercontent.com/RedHatInsights/insights-fronten
 export IQE_PLUGINS="content-sources"
 export IQE_MARKER_EXPRESSION="smoke and ui"
 export IQE_FILTER_EXPRESSION=""
-export IQE_ENV="ephemeral"
 export IQE_SELENIUM="true"
 export IQE_CJI_TIMEOUT="30m"
 export DEPLOY_TIMEOUT="900"  # 15min
