@@ -3,10 +3,10 @@ import { Features } from '../services/Features/FeatureApi';
 import { notificationsReducer } from '@redhat-cloud-services/frontend-components-notifications/redux';
 import { getRegistry as _getRegistry } from '@redhat-cloud-services/frontend-components-utilities/Registry';
 import PackageJson from '../../package.json';
-import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import { useFetchFeaturesQuery } from '../services/Features/FeatureQueries';
 import { fetchRBAC, Rbac } from './RbacUtils';
 import { ContentOrigin } from '../services/Content/ContentApi';
+import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 
 const getRegistry = _getRegistry as unknown as () => { register: ({ notifications }) => void };
 const { appname } = PackageJson.insights;

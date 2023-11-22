@@ -21,7 +21,7 @@ import {
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import { useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
+import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from '../../components/Hide/Hide';
 import EmptyTableState from '../../components/EmptyTableState/EmptyTableState';
 import AdminTaskFilters from './components/AdminTaskFilters';

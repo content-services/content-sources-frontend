@@ -34,6 +34,10 @@ jest.mock('../../../../services/Content/ContentQueries', () => ({
   mutateAsync: async () => null,
 }));
 
+jest.mock('../../../../middleware/AppContext', () => ({
+  useAppContext: () => ({ rbac: { read: true, write: true } }),
+}));
+
 jest.mock('../../../../Hooks/useDebounce', () => (value) => value);
 
 jest.mock('../../../../Hooks/useRootPath', () => () => 'someUrl');

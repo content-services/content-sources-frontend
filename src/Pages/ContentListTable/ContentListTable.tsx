@@ -29,7 +29,7 @@ import {
   IntrospectRepositoryRequestItem,
   ContentOrigin,
 } from '../../services/Content/ContentApi';
-import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
+import { SkeletonTable } from '@patternfly/react-component-groups';
 
 import {
   useBulkDeleteContentItemMutate,

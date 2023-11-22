@@ -26,7 +26,7 @@ import {
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
+import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from '../../../../components/Hide/Hide';
 import { ContentOrigin, PackageItem } from '../../../../services/Content/ContentApi';
 import { useGetPackagesQuery } from '../../../../services/Content/ContentQueries';

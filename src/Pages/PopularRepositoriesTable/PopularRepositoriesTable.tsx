@@ -27,7 +27,7 @@ import {
 } from '@patternfly/react-tokens';
 import { useEffect, useState, useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
-import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
+import { SkeletonTable } from '@patternfly/react-component-groups';
 
 import {
   usePopularRepositoriesQuery,

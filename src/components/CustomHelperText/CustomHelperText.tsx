@@ -1,5 +1,5 @@
 import { HelperText, HelperTextItem, FormHelperText } from '@patternfly/react-core';
-import ExclamationCircleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-circle-icon';
+import { ExclamationCircleIcon } from '@patternfly/react-icons';
 export type HelperTextVariant = 'default' | 'indeterminate' | 'warning' | 'success' | 'error';
 
 interface Props {
