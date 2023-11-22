@@ -30,6 +30,10 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+jest.mock('../../../../middleware/AppContext', () => ({
+  useAppContext: () => ({ rbac: { read: true, write: true } }),
+}));
+
 it('Render 1 item', () => {
   (useGetPackagesQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
