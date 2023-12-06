@@ -161,14 +161,6 @@ const ContentListTable = () => {
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
   } = useContentListQuery(page, perPage, filterData, sortString(), contentOrigin);
 
-  const { mutateAsync: deleteItem, isLoading: isDeleting } = useDeleteContentItemMutate(
-    queryClient,
-    page,
-    perPage,
-    filterData,
-    sortString(),
-  );
-
   const { mutateAsync: introspectRepository, isLoading: isIntrospecting } =
     useIntrospectRepositoryMutate(queryClient, page, perPage, filterData, sortString());
 
@@ -186,7 +178,7 @@ const ContentListTable = () => {
 
   // Other update actions will be added to this later.
   const actionTakingPlace =
-    isDeleting || isFetching || repositoryParamsLoading || isIntrospecting || isDeletingItems;
+      isFetching || repositoryParamsLoading || isIntrospecting || isDeletingItems;
 
   const onSetPage = (_, newPage) => setPage(newPage);
 
@@ -292,14 +284,7 @@ const ContentListTable = () => {
             { isSeparator: true },
             {
               title: 'Delete',
-              onClick: () =>
-                deleteItem(rowData?.uuid).then(() => {
-                  clearCheckedRepositories();
-                  // If this is the last item on a page, go to previous page.
-                  if (page > 1 && count / perPage + 1 >= page && (count - 1) % perPage === 0) {
-                    setPage(page - 1);
-                  }
-                }),
+              onClick: () => navigate(`delete-repository?repoUUIDS=${rowData.uuid}?page=${page}?perPage=${perPage}?filterData=${filterData}`),
             },
           ],
     [actionTakingPlace, checkedRepositories, isRedHatRepository],
