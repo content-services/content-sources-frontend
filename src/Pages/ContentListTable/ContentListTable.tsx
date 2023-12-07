@@ -34,7 +34,6 @@ import { SkeletonTable } from '@patternfly/react-component-groups';
 import {
   useBulkDeleteContentItemMutate,
   useContentListQuery,
-  useDeleteContentItemMutate,
   useIntrospectRepositoryMutate,
   useRepositoryParams,
 } from '../../services/Content/ContentQueries';

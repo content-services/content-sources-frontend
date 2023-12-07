@@ -61,12 +61,12 @@ const DeleteContent = () => {
     const uuids = new URLSearchParams(search).get('repoUUIDS')?.split(',') || [];
     const page = Number(new URLSearchParams(search).get('page')) || 1;
     const perPage = Number(new URLSearchParams(search).get('perPage')) || 20;
-    const [filterData, setFilterData] = useState<FilterData>({
+    const filterData:FilterData = {
         searchQuery: '',
         versions: [],
         arches: [],
         statuses: [],
-      });
+    };
     const { mutateAsync: deleteItem, isLoading: isDeleting } = useDeleteContentItemMutate(
         queryClient,
         page,
@@ -91,6 +91,7 @@ const DeleteContent = () => {
     useEffect(() => {
       if (values.length) {
         setInitialLoad(false);
+        setIsLoading(false);
       }
     }, [values]);
   
