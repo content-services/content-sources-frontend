@@ -177,7 +177,7 @@ const ContentListTable = () => {
 
   // Other update actions will be added to this later.
   const actionTakingPlace =
-      isFetching || repositoryParamsLoading || isIntrospecting || isDeletingItems;
+    isFetching || repositoryParamsLoading || isIntrospecting || isDeletingItems;
 
   const onSetPage = (_, newPage) => setPage(newPage);
 
@@ -283,7 +283,7 @@ const ContentListTable = () => {
             { isSeparator: true },
             {
               title: 'Delete',
-              onClick: () => navigate(`delete-repository?repoUUIDS=${rowData.uuid}?page=${page}?perPage=${perPage}?filterData=${filterData}`),
+              onClick: () => navigate(`delete-repository?repoUUIDS=${rowData.uuid}`),
             },
           ],
     [actionTakingPlace, checkedRepositories, isRedHatRepository],
@@ -362,7 +362,12 @@ const ContentListTable = () => {
 
   return (
     <>
-      <Outlet context={{ clearCheckedRepositories }} />
+      <Outlet
+        context={{
+          clearCheckedRepositories,
+          deletionContext: { page, perPage, filterData, contentOrigin, sortString: sortString() },
+        }}
+      />
       <Grid
         data-ouia-safe={!actionTakingPlace}
         data-ouia-component-id='content_list_page'
@@ -598,6 +603,15 @@ const ContentListTable = () => {
 };
 
 export const useContentListOutletContext = () =>
-  useOutletContext<{ clearCheckedRepositories: () => void }>();
+  useOutletContext<{
+    clearCheckedRepositories: () => void;
+    deletionContext: {
+      page: number;
+      perPage: number;
+      filterData: FilterData;
+      contentOrigin: ContentOrigin;
+      sortString: string;
+    };
+  }>();
 
 export default ContentListTable;
