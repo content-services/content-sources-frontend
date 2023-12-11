@@ -109,6 +109,7 @@ const ContentListTable = () => {
   });
 
   const setOriginAndSearchParams = (origin: ContentOrigin) => {
+    if (!features?.snapshots?.accessible) return;
     setContentOrigin(origin);
     setUrlSearchParams(origin === ContentOrigin.EXTERNAL ? {} : { origin });
   };
