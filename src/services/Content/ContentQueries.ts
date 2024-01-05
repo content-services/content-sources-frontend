@@ -110,7 +110,7 @@ export const useContentListQuery = (
   filterData: FilterData,
   sortBy: string,
   contentOrigin: ContentOrigin = ContentOrigin.EXTERNAL,
-  enabled?: boolean,
+  enabled: boolean = true,
 ) => {
   const [polling, setPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);

@@ -19,11 +19,14 @@ export interface AppContextInterface {
   contentOrigin: ContentOrigin;
   setContentOrigin: (contentOrigin: ContentOrigin) => void;
   chrome?: ChromeAPI;
+  zeroState: boolean;
+  setZeroState: (zeroState: boolean) => void;
 }
 export const AppContext = createContext({} as AppContextInterface);
 
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [rbac, setRbac] = useState<Rbac | undefined>(undefined);
+  const [zeroState, setZeroState] = useState(true);
   const [features, setFeatures] = useState<Features | null>(null);
   const chrome = useChrome();
   const [contentOrigin, setContentOrigin] = useState<ContentOrigin>(ContentOrigin.EXTERNAL);
@@ -65,6 +68,8 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
         contentOrigin,
         setContentOrigin,
         chrome: chrome as ChromeAPI,
+        zeroState,
+        setZeroState,
       }}
     >
       {children}
