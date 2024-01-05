@@ -18,6 +18,7 @@ export interface ContentItem {
   snapshot: boolean;
   last_snapshot_uuid?: string;
   last_snapshot?: SnapshotItem;
+  module_hotfixes: boolean;
 }
 
 export interface PopularRepository {
@@ -39,6 +40,7 @@ export interface CreateContentRequestItem {
   gpg_key?: string;
   metadata_verification?: boolean;
   snapshot?: boolean;
+  module_hotfixes?: boolean;
 }
 
 export interface ErrorItem {
@@ -64,6 +66,7 @@ export interface EditContentRequestItem {
   gpg_key: string;
   metadata_verification: boolean;
   snapshot: boolean;
+  module_hotfixes: boolean;
 }
 
 export type EditContentRequest = Array<EditContentRequestItem>;

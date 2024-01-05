@@ -33,6 +33,7 @@ export interface FormikValues {
   metadataVerification: boolean;
   expanded: boolean;
   snapshot: boolean;
+  moduleHotfixesEnabled: boolean;
 }
 
 export const getDefaultFormikValues = (overrides: Partial<FormikValues> = {}): FormikValues => ({
@@ -45,6 +46,7 @@ export const getDefaultFormikValues = (overrides: Partial<FormikValues> = {}): F
   expanded: true,
   metadataVerification: false,
   snapshot: false,
+  moduleHotfixesEnabled: false,
   ...overrides,
 });
 
@@ -58,7 +60,7 @@ export const isValidURL = (val: string) => {
 };
 
 export const mapFormikToAPIValues = (formikValues: FormikValues[]) =>
-  formikValues.map(({ name, url, arch, versions, gpgKey, metadataVerification, snapshot }) => ({
+  formikValues.map(({ name, url, arch, versions, gpgKey, metadataVerification, snapshot, moduleHotfixesEnabled }) => ({
     name,
     url,
     distribution_arch: arch,
@@ -66,6 +68,7 @@ export const mapFormikToAPIValues = (formikValues: FormikValues[]) =>
     gpg_key: gpgKey,
     snapshot,
     metadata_verification: metadataVerification,
+    module_hotfixes: moduleHotfixesEnabled,
   }));
 
 const mapNoMetaDataError = (validationData: ValidationResponse) =>

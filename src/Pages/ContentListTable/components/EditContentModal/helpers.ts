@@ -11,11 +11,12 @@ export interface FormikEditValues {
   expanded: boolean;
   uuid: string;
   snapshot: boolean;
+  moduleHotfixesEnabled: boolean;
 }
 
 export const mapFormikToEditAPIValues = (formikValues: FormikEditValues[]): EditContentRequest =>
   formikValues.map(
-    ({ name, url, arch, versions, gpgKey, metadataVerification, uuid, snapshot }) => ({
+    ({ name, url, arch, versions, gpgKey, metadataVerification, uuid, snapshot, moduleHotfixesEnabled }) => ({
       uuid,
       name,
       url,
@@ -24,6 +25,7 @@ export const mapFormikToEditAPIValues = (formikValues: FormikEditValues[]): Edit
       gpg_key: gpgKey,
       metadata_verification: metadataVerification,
       snapshot,
+      module_hotfixes: moduleHotfixesEnabled,
     }),
   );
 
@@ -39,6 +41,7 @@ export const mapToDefaultFormikValues = (values: ContentItem[]): FormikEditValue
         gpg_key: gpgKey,
         metadata_verification: metadataVerification,
         snapshot,
+        module_hotfixes: moduleHotfixesEnabled,
       },
       index,
     ) => ({
@@ -52,6 +55,7 @@ export const mapToDefaultFormikValues = (values: ContentItem[]): FormikEditValue
       expanded: index + 1 === values.length,
       uuid,
       snapshot,
+      moduleHotfixesEnabled,
     }),
   );
 

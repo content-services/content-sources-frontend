@@ -35,6 +35,7 @@ it('mapFormikToAPIValues', () => {
       expanded: false,
       metadataVerification: false,
       snapshot: true,
+      moduleHotfixesEnabled: false
     },
   ];
 
@@ -47,6 +48,7 @@ it('mapFormikToAPIValues', () => {
       gpg_key: '',
       metadata_verification: false,
       snapshot: true,
+      module_hotfixes: false
     },
   ];
 

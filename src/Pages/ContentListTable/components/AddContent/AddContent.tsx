@@ -480,6 +480,7 @@ const AddContent = () => {
               gpgLoading,
               metadataVerification,
               snapshot,
+              moduleHotfixesEnabled
             },
             index,
           ) => (
@@ -650,6 +651,26 @@ const AddContent = () => {
                         placeholderText={versions?.length ? '' : 'Any version'}
                         setSelected={(value) => setVersionSelected(value, index)}
                       />
+                    </FormGroup>
+                    <FormGroup fieldId='enable_module_hotfixes'>
+                      <Switch
+                        label='Modularity filtering disabled'
+                        labelOff='Modularity filtering enabled'
+                        aria-label='enable_module_hotfixes'
+                        hasCheckIcon
+                        id={'module-hotfixes-switch' + index}
+                        name='module-hotfixes-switch'
+                        isChecked={moduleHotfixesEnabled}
+                        onChange={() => {
+                          updateVariable(index, { moduleHotfixesEnabled: !moduleHotfixesEnabled });
+                        }}
+                      />
+                      <Tooltip content='Optional: Checking this will set the module_hotfixes flag, allowing the repository to not be filtered by modularity'>
+                          <OutlinedQuestionCircleIcon
+                            className='pf-u-ml-xs'
+                            color={global_Color_200.value}
+                          />
+                      </Tooltip>
                     </FormGroup>
                     <FormGroup
                       label='GPG key'

@@ -14,6 +14,7 @@ it('mapFormikToEditAPIValues', () => {
       uuid: 'stuff',
       metadataVerification: false,
       snapshot: false,
+      moduleHotfixesEnabled: false,
     },
   ];
 
@@ -27,6 +28,7 @@ it('mapFormikToEditAPIValues', () => {
       uuid: 'stuff',
       snapshot: false,
       metadata_verification: false,
+      module_hotfixes: false,
     },
   ];
 
@@ -51,6 +53,7 @@ it('mapToDefaultFormikValues', () => {
       gpg_key: 'stuffAndThings',
       metadata_verification: false,
       snapshot: false,
+      module_hotfixes: false,
     },
   ];
   const mapped = [
@@ -65,6 +68,7 @@ it('mapToDefaultFormikValues', () => {
       metadataVerification: false,
       expanded: true,
       uuid: 'stuffAndThings',
+      moduleHotfixesEnabled: false,
     },
   ];
 

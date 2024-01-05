@@ -144,6 +144,7 @@ export const defaultContentItem: ContentItem = {
   failed_introspections_count: 0,
   metadata_verification: false,
   snapshot: false,
+  module_hotfixes: false,
 };
 
 export const defaultIntrospectTask: AdminTask = {
@@ -227,4 +228,5 @@ export const defaultContentItemWithSnapshot: ContentItem = {
   metadata_verification: false,
   snapshot: true,
   last_snapshot: defaultSnapshotItem,
+  module_hotfixes: false,
 };
