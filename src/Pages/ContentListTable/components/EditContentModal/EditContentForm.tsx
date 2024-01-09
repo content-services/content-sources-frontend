@@ -401,7 +401,7 @@ const EditContentForm = ({
                         hasCheckIcon
                         label='Snapshot creation enabled'
                         labelOff='Snapshot creation disabled'
-                        ouiaId='snapshot_creation_toggle'
+                        ouiaId={`snapshot_creation_toggle_${snapshot ? 'on' : 'off'}`}
                         isChecked={snapshot}
                         onChange={() => {
                           updateVariable(index, { snapshot: !snapshot });
