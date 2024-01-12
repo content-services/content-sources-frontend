@@ -656,6 +656,7 @@ const AddContent = () => {
                       <Switch
                         label='Modularity filtering disabled'
                         labelOff='Modularity filtering enabled'
+                        ouiaId={`module_hotfixes_switch_${moduleHotfixesEnabled ? 'on' : 'off'}`}
                         aria-label='enable_module_hotfixes'
                         hasCheckIcon
                         id={'module-hotfixes-switch' + index}
