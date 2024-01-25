@@ -24,13 +24,13 @@ it('Render with Failed status', () => {
   expect(SelectComponent).toBeInTheDocument();
 });
 
-it('Render with Canceled status', async () => {
+it('Render with Canceled status', () => {
   const { queryByText } = render(<StatusIcon status='canceled' />);
   const SelectComponent = queryByText('Canceled');
   expect(SelectComponent).toBeInTheDocument();
 });
 
-it('Render with Completed status', async () => {
+it('Render with Completed status', () => {
   const { queryByText } = render(<StatusIcon status='completed' />);
   const SelectComponent = queryByText('Completed');
   expect(SelectComponent).toBeInTheDocument();

@@ -1,7 +1,6 @@
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import QuickStart from './QuickStart';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
   useChrome: jest.fn(),
@@ -42,18 +41,17 @@ it('Confirm that QuickStart is shown, can be clicked, and then collapses', async
 
   // Confirm that the linkButton exists and click it
   expect(linkButton).toBeInTheDocument();
-  act(() => {
-    linkButton?.click();
-  });
+  fireEvent.click(linkButton as Element);
 
-  // After clicking the linkButton, we expect it to become disabled
   expect(linkButton).toHaveAttribute('aria-disabled', 'true');
 
   // As this is the loading state, the expansion panel will remain open
   expect(expansionToggle).toHaveAttribute('aria-expanded', 'true');
 
   // After the promise call completes, confirm that the expansion panel is closed.
-  await waitFor(() => expect(expansionToggle).toHaveAttribute('aria-expanded', 'false'));
+  await waitFor(() => {
+    expect(expansionToggle).toHaveAttribute('aria-expanded', 'false');
+  });
 
   // Although the expansion panel is closed, the linkButton is still "on the dom" and hidden
   // Confirm that the link is not disabled for future interaction

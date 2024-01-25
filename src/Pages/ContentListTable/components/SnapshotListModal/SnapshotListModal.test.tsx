@@ -1,8 +1,8 @@
-import { render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import SnapshotListModal from './SnapshotListModal';
 import {
   ReactQueryTestWrapper,
-  defaultContentItem,
+  defaultContentItemWithSnapshot,
   defaultMetaItem,
   defaultSnapshotItem,
 } from '../../../../testingHelpers';
@@ -27,9 +27,9 @@ jest.mock('../../../../middleware/AppContext', () => ({
   useAppContext: () => ({ rbac: { read: true, write: true } }),
 }));
 
-it('Render 1 item', async () => {
+it('Render 1 item', () => {
   (useFetchContent as jest.Mock).mockImplementation(() => ({
-    data: [defaultContentItem],
+    data: defaultContentItemWithSnapshot,
   }));
   (useGetSnapshotList as jest.Mock).mockImplementation(() => ({
     data: {
@@ -45,16 +45,16 @@ it('Render 1 item', async () => {
     </ReactQueryTestWrapper>,
   );
 
-  waitFor(() => expect(queryByText(defaultContentItem.name)).toBeInTheDocument());
+  expect(queryByText(defaultContentItemWithSnapshot.name)).toBeInTheDocument();
 
   expect(
     queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
   ).toBeInTheDocument();
 });
 
-it('Render 20 items', async () => {
+it('Render 20 items', () => {
   (useFetchContent as jest.Mock).mockImplementation(() => ({
-    data: [defaultContentItem],
+    data: defaultContentItemWithSnapshot,
   }));
   (useGetSnapshotList as jest.Mock).mockImplementation(() => ({
     data: {
@@ -79,7 +79,7 @@ it('Render 20 items', async () => {
     </ReactQueryTestWrapper>,
   );
 
-  waitFor(() => expect(queryByText(0 + defaultContentItem.name)).toBeInTheDocument());
+  expect(queryByText(defaultContentItemWithSnapshot.name)).toBeInTheDocument();
 
   expect(
     queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),

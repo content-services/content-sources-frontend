@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import {
   ReactQueryTestWrapper,
   defaultPopularRepository,
@@ -57,11 +57,9 @@ it('expect PopularRepositoriesTable to render with remove one item', () => {
     </ReactQueryTestWrapper>,
   );
 
-  waitFor(() => {
-    expect(queryByText(defaultPopularRepository.suggested_name)).toBeInTheDocument();
-    expect(queryByText(defaultPopularRepository.url)).toBeInTheDocument();
-    expect(queryByText('Remove')).toBeInTheDocument();
-  });
+  expect(queryByText(defaultPopularRepository.suggested_name)).toBeInTheDocument();
+  expect(queryByText(defaultPopularRepository.url)).toBeInTheDocument();
+  expect(queryByText('Remove')).toBeInTheDocument();
 });
 
 it('Render a loading state checking search disabled', () => {

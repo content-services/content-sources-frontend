@@ -45,8 +45,14 @@ jest.mock('../../../../Hooks/useRootPath', () => () => 'someUrl');
 jest.mock('../../../../Hooks/useNotification', () => () => ({ notify: () => null }));
 
 jest.mock('react-router-dom', () => ({
-  useNavigate: jest.fn(),
+  useNavigate: () => jest.fn(),
   useOutletContext: () => () => null, // returns mock clearCheckedRepositories function
+}));
+
+jest.mock('../../ContentListTable', () => ({
+  useContentListOutletContext: () => ({
+    clearCheckedRepositories: () => undefined,
+  }),
 }));
 
 const passingValidationMetaDataSigNotPresent = [
@@ -75,7 +81,7 @@ it('expect "name" input to show a validation error', async () => {
       fireEvent.change(nameInput, { target: { value: 'b' } });
     });
   }
-  waitFor(() => {
+  await waitFor(() => {
     expect(queryByText('Too Short!')).toBeInTheDocument();
   });
 });
@@ -101,7 +107,7 @@ it('expect "url" input to show a validation error', async () => {
     });
   }
 
-  waitFor(() => {
+  await waitFor(() => {
     expect(queryByText('Invalid URL')).toBeInTheDocument();
   });
 });
@@ -124,7 +130,7 @@ it('expect "Package and metadata verification" to be pre-selected', async () => 
   await waitFor(() => {
     fireEvent.change(urlInput as HTMLElement, { target: { value: 'https://bobTheBuilder.com' } });
   });
-  waitFor(() => {
+  await waitFor(() => {
     expect(queryByText('Invalid URL')).not.toBeInTheDocument();
   });
 
@@ -134,7 +140,7 @@ it('expect "Package and metadata verification" to be pre-selected', async () => 
     fireEvent.change(gpgKeyInput as HTMLElement, { target: { value: 'aRealGPGKey' } });
   });
 
-  waitFor(() => {
+  await waitFor(() => {
     expect(queryByLabelText('Package and metadata verification')).toHaveAttribute('checked');
   });
 });
@@ -166,13 +172,13 @@ it('expect "Package verification only" to be pre-selected', async () => {
     fireEvent.change(gpgKeyInput as HTMLElement, { target: { value: 'aRealGPGKey' } });
   });
 
-  waitFor(() => {
+  await waitFor(() => {
     expect(queryByText('Package verification only')).toBeInTheDocument();
     expect(queryByLabelText('Package verification only')).toHaveAttribute('checked');
   });
 });
 
-it('Add content', () => {
+it('Add content', async () => {
   (useValidateContentList as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     mutateAsync: async () => passingValidationErrorData,
@@ -191,68 +197,54 @@ it('Add content', () => {
   expect(urlInput).toBeInTheDocument();
   const gpgKeyInput = queryByPlaceholderText('Paste GPG key or URL here');
   if (urlInput && nameInput && gpgKeyInput) {
-    waitFor(() => {
-      fireEvent.change(nameInput, { target: { value: 'superCoolName' } });
-    });
+    fireEvent.change(nameInput, { target: { value: 'superCoolName' } });
+    fireEvent.change(urlInput, { target: { value: 'https://google.com/' } });
+    fireEvent.change(gpgKeyInput, { target: { value: 'test GPG key' } });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(nameInput).toHaveAttribute('value', 'superCoolName');
     });
 
-    waitFor(() => {
-      fireEvent.change(urlInput, { target: { value: 'https://google.com/' } });
-    });
-
-    waitFor(() => {
+    await waitFor(() => {
       expect(urlInput?.getAttribute('value')).toBe('https://google.com/');
     });
 
-    waitFor(() => {
-      fireEvent.change(gpgKeyInput, { target: { value: 'test GPG key' } });
-    });
-
-    waitFor(() => {
-      expect(gpgKeyInput?.getAttribute('value')).toBe('test GPG key');
+    await waitFor(() => {
+      expect(gpgKeyInput).toHaveValue('test GPG key');
     });
   }
-  waitFor(() => {
+
+  await waitFor(() => {
     expect(queryByText('Use GPG key for')).toBeInTheDocument();
     expect(queryByText('test GPG key')).toBeInTheDocument();
   });
 
   expect(queryByText('Invalid URL')).not.toBeInTheDocument();
   const addAnotherButton = queryByText('Add another repository');
-  waitFor(() => {
+  await waitFor(() => {
     expect(addAnotherButton?.getAttribute('aria-disabled')).toBe('false');
   });
   if (addAnotherButton) {
-    waitFor(() => {
-      fireEvent.click(addAnotherButton);
-    });
+    fireEvent.click(addAnotherButton);
   }
-  const secondRemoveButton = queryAllByText('Remove')[1];
 
-  waitFor(() => {
+  const secondRemoveButton = queryAllByText('Remove')[1];
+  await waitFor(() => {
     expect(secondRemoveButton).toBeInTheDocument();
   });
-
   if (secondRemoveButton) {
-    waitFor(() => {
-      fireEvent.click(secondRemoveButton);
-    });
+    fireEvent.click(secondRemoveButton);
   }
 
   const saveButton = queryByText('Save');
-  waitFor(() => {
+  await waitFor(() => {
     expect(saveButton?.getAttribute('disabled')).toBeNull();
   });
 
   if (saveButton) {
-    waitFor(() => {
-      fireEvent.click(saveButton);
-    });
+    fireEvent.click(saveButton);
   }
-  waitFor(() => {
+  await waitFor(() => {
     expect(queryByText('Add custom repository')).not.toBeInTheDocument();
   });
 });

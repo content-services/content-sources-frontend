@@ -5,7 +5,7 @@ jest.mock('../../middleware/AppContext', () => ({
   useAppContext: () => ({ rbac: { read: true, write: true } }),
 }));
 
-it('Render no checked repos', async () => {
+it('Render no checked repos', () => {
   const { queryByText } = render(
     <DeleteKebab
       atLeastOneRepoChecked={false}
@@ -21,7 +21,7 @@ it('Render no checked repos', async () => {
   expect(deleteButton).toHaveAttribute('aria-disabled', 'true');
 });
 
-it('Render with checked repos', async () => {
+it('Render with checked repos', () => {
   const repos = 100;
   const { queryByText } = render(
     <DeleteKebab

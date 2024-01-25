@@ -26,7 +26,7 @@ beforeAll(() => {
   }));
 });
 
-it('Render loading state (disabled)', async () => {
+it('Render loading state (disabled)', () => {
   const { getByRole } = render(
     <ContentListFilters
       contentOrigin={ContentOrigin.EXTERNAL}
@@ -49,7 +49,7 @@ it('Render loading state (disabled)', async () => {
   expect(filterInput).toHaveAttribute('disabled');
 });
 
-it('Select a filter of each type and ensure chips are present', async () => {
+it('Select a filter of each type and ensure chips are present', () => {
   const { queryByText, getByRole, getByLabelText } = render(
     <ContentListFilters
       contentOrigin={ContentOrigin.EXTERNAL}

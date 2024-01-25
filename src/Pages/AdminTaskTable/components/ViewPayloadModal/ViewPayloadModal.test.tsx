@@ -23,7 +23,7 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({ taskUUID: 'something' }),
 }));
 
-it('Render loading spinner', async () => {
+it('Render loading spinner', () => {
   (useFetchAdminTaskQuery as jest.Mock).mockImplementation(() => ({
     isFetching: true,
     isLoading: true,
@@ -36,7 +36,7 @@ it('Render loading spinner', async () => {
   );
 });
 
-it('Open introspect task details and click tabs', async () => {
+it('Open introspect task details and click tabs', () => {
   (useFetchAdminTaskQuery as jest.Mock).mockImplementation(() => ({
     isFetching: false,
     isLoading: false,
@@ -68,7 +68,7 @@ it('Open introspect task details and click tabs', async () => {
   expect(payloadContent).not.toHaveAttribute('hidden');
 });
 
-it('Open snapshot details and click tabs', async () => {
+it('Open snapshot details and click tabs', () => {
   (useFetchAdminTaskQuery as jest.Mock).mockImplementation(() => ({
     isFetching: false,
     isLoading: false,
@@ -121,7 +121,7 @@ it('Open snapshot details and click tabs', async () => {
   expect(publicationContent).toHaveAttribute('hidden');
 });
 
-it('Open snapshot task without all pulp tasks', async () => {
+it('Open snapshot task without all pulp tasks', () => {
   const missingDistribution: AdminTask = {
     ...defaultSnapshotTask,
     pulp: {

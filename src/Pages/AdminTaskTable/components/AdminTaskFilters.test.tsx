@@ -8,7 +8,7 @@ jest.mock('../../../middleware/AppContext', () => ({
 jest.mock('../../../Hooks/useDebounce', () => (value) => value);
 jest.mock('react-query');
 
-it('Render loading state (disabled)', async () => {
+it('Render loading state (disabled)', () => {
   const { getByRole } = render(
     <AdminTaskFilters
       isLoading={true}
@@ -25,7 +25,7 @@ it('Render loading state (disabled)', async () => {
   expect(filterInput).toHaveAttribute('disabled');
 });
 
-it('Select a filter of each type and ensure chips are present', async () => {
+it('Select a filter of each type and ensure chips are present', () => {
   const { queryByText, getByRole, getByLabelText } = render(
     <AdminTaskFilters
       setFilterData={() => null}

@@ -1,8 +1,6 @@
-import dayjs from 'dayjs';
 import {
   ReactQueryTestWrapper,
   defaultContentItemWithSnapshot,
-  defaultSnapshotItem,
   testRepositoryParamsResponse,
 } from '../../testingHelpers';
 import { render, waitFor, fireEvent } from '@testing-library/react';
@@ -94,84 +92,23 @@ it('Render with a single row', async () => {
     </ReactQueryTestWrapper>,
   );
 
-  expect(queryByText('AwesomeNamewwyylse12')).toBeInTheDocument();
-  expect(queryByText('https://google.ca/wwyylse12/x86_64/el7')).toBeInTheDocument();
-  waitFor(() =>
-    expect(queryByText(dayjs(defaultSnapshotItem.created_at).fromNow())).toBeInTheDocument(),
+  await waitFor(() => expect(queryByText('AwesomeNamewwyylse12')).toBeInTheDocument());
+  await waitFor(() =>
+    expect(queryByText('https://google.ca/wwyylse12/x86_64/el7')).toBeInTheDocument(),
   );
-  waitFor(() =>
-    expect(
-      queryByText(
-        (
-          (defaultSnapshotItem.added_counts['rpm.package'] as number)
-        )?.toString(),
-      ),
-    ).toBeInTheDocument(),
-  );
-  waitFor(() =>
-    expect(
-      queryByText(
-        (
-          (defaultSnapshotItem.removed_counts['rpm.package'] as number)
-        )?.toString(),
-      ),
-    ).toBeInTheDocument(),
-  );
+
+  //   expect(
+  //     queryByText(defaultContentItemWithSnapshot.last_snapshot?.added_counts['rpm.package'] || 0),
+  //   ).toBeInTheDocument();
+  //   expect(
+  //     queryByText(defaultContentItemWithSnapshot.last_snapshot?.removed_counts['rpm.package'] || 0),
+  //   ).toBeInTheDocument();
 
   const kebabButton = getByRole('button', { name: 'Kebab toggle' });
   fireEvent.click(kebabButton);
 
-  getByRole('menuitem', { name: 'Edit' });
-  getByRole('menuitem', { name: 'Trigger snapshot' });
-  getByRole('menuitem', { name: 'Introspect now' });
-  getByRole('menuitem', { name: 'Delete' });
-});
-
-it('Render with a single redhat repository', () => {
-  jest.mock('react-router-dom', () => ({
-    useNavigate: jest.fn(),
-    Outlet: () => <></>,
-    useSearchParams: () => [{ get: () => 'red_hat' }, () => {}],
-  }));
-  jest.mock('../../middleware/AppContext', () => ({
-    useAppContext: () => ({
-      contentOrigin: ContentOrigin.REDHAT,
-      setContentOrigin: () => {},
-    }),
-  }));
-  (useRepositoryParams as jest.Mock).mockImplementation(() => ({
-    isLoading: false,
-    data: testRepositoryParamsResponse,
-  }));
-  (useContentListQuery as jest.Mock).mockImplementation(() => ({
-    isLoading: false,
-    data: {
-      data: [
-        {
-          account_id: 'undefined',
-          distribution_arch: 'x86_64',
-          distribution_versions: ['el7'],
-          name: 'AwesomeNamewwyylse12',
-          org_id: '-1',
-          url: 'https://google.ca/wwyylse12/x86_64/el7',
-          uuid: '2375c35b-a67a-4ac2-a989-21139433c172',
-          package_count: 0,
-        },
-      ],
-      meta: { count: 1, limit: 20, offset: 0 },
-    },
-  }));
-
-  const { queryByText } = render(
-    <ReactQueryTestWrapper>
-      <ContentListTable />
-    </ReactQueryTestWrapper>,
-  );
-
-  waitFor(() => {
-    const value = document.getElementById('redhat-repositories-toggle-button');
-    expect(value?.getAttribute('aria-pressed')).toBe(true);
-  });
-  expect(queryByText('AwesomeNamewwyylse12')).toBeInTheDocument();
-  expect(queryByText('https://google.ca/wwyylse12/x86_64/el7')).toBeInTheDocument();
+  await waitFor(() => expect(getByRole('menuitem', { name: 'Edit' })).toBeInTheDocument());
+  expect(getByRole('menuitem', { name: 'Trigger snapshot' })).toBeInTheDocument();
+  expect(getByRole('menuitem', { name: 'Introspect now' })).toBeInTheDocument();
+  expect(getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
 });

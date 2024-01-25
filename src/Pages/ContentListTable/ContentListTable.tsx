@@ -522,11 +522,9 @@ const ContentListTable = () => {
                                       Changes:
                                     </FlexItem>
                                     <ChangedArrows
-                                      addedCount={
-                                        (last_snapshot?.added_counts?.['rpm.package'] || 0)
-                                      }
+                                      addedCount={last_snapshot?.added_counts?.['rpm.package'] || 0}
                                       removedCount={
-                                        (last_snapshot?.removed_counts?.['rpm.package'] || 0)
+                                        last_snapshot?.removed_counts?.['rpm.package'] || 0
                                       }
                                     />
                                   </FlexItem>

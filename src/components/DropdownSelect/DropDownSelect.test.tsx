@@ -1,8 +1,8 @@
 import { SelectVariant } from '@patternfly/react-core/deprecated';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import DropDownSelect from './DropdownSelect';
 
-it('Render with SelectVariant.single', () => {
+it('Render with SelectVariant.single', async () => {
   const { queryByText } = render(
     <DropDownSelect
       selectedProp='1'
@@ -13,18 +13,16 @@ it('Render with SelectVariant.single', () => {
   );
   const SelectComponent = queryByText('1');
   expect(SelectComponent).toBeInTheDocument();
-  waitFor(() => {
-    SelectComponent?.click();
-  });
-  waitFor(() => {
+  fireEvent.click(SelectComponent as Element);
+  await waitFor(() => {
     expect(queryByText('2')).toBeInTheDocument();
     expect(queryByText('3')).toBeInTheDocument();
     expect(queryByText('4')).toBeInTheDocument();
   });
-  queryByText('4')?.click();
+  fireEvent.click(queryByText('4') as Element);
 });
 
-it('Render with SelectVariant.multi', () => {
+it('Render with SelectVariant.multi', async () => {
   const { queryAllByText, queryByText, queryByRole } = render(
     <DropDownSelect
       aria-label='dropdown'
@@ -41,13 +39,11 @@ it('Render with SelectVariant.multi', () => {
   expect(queryByText('2')).toBeInTheDocument();
   expect(queryByText('3')).not.toBeInTheDocument();
   expect(queryByText('4')).not.toBeInTheDocument();
-  waitFor(() => {
-    textbox?.click();
-  });
-  waitFor(() => {
+  fireEvent.click(textbox as Element);
+  await waitFor(() => {
     expect(queryByText('3')).toBeInTheDocument();
     expect(queryByText('4')).toBeInTheDocument();
   });
-  queryByText('4')?.click();
-  queryAllByText('1')[1]?.click();
+  fireEvent.click(queryByText('4') as Element);
+  fireEvent.click(queryAllByText('1')[1] as Element);
 });

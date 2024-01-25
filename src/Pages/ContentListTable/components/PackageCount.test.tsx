@@ -6,7 +6,7 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }));
 
-it('Render PackageCount for Invalid state', async () => {
+it('Render PackageCount for Invalid state', () => {
   const { queryByText } = render(
     <PackageCount rowData={{ ...defaultContentItem, status: 'Invalid' }} />,
   );
