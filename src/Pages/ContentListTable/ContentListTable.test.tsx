@@ -40,7 +40,7 @@ jest.mock('react-router-dom', () => ({
   useSearchParams: () => [{ get: () => 'external' }, () => {}],
 }));
 
-(AddContent as jest.Mock).mockImplementation(() => 'Add Content');
+(AddContent as jest.Mock).mockImplementation(() => 'Add content');
 
 it('expect ContentListTable to render with a loading skeleton', () => {
   (useRepositoryParams as jest.Mock).mockImplementation(() => ({ isLoading: false }));
@@ -124,8 +124,8 @@ it('Render with a single row', async () => {
   fireEvent.click(kebabButton);
 
   getByRole('menuitem', { name: 'Edit' });
-  getByRole('menuitem', { name: 'Trigger Snapshot' });
-  getByRole('menuitem', { name: 'Introspect Now' });
+  getByRole('menuitem', { name: 'Trigger snapshot' });
+  getByRole('menuitem', { name: 'Introspect now' });
   getByRole('menuitem', { name: 'Delete' });
 });
 

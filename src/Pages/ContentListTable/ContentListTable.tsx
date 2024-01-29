@@ -283,7 +283,7 @@ const ContentListTable = () => {
                   },
                   {
                     isDisabled: actionTakingPlace || rowData?.status === 'Retrying',
-                    title: 'Trigger Snapshot',
+                    title: 'Trigger snapshot',
                     onClick: () => {
                       triggerSnapshot(rowData.uuid);
                     },
@@ -292,7 +292,7 @@ const ContentListTable = () => {
               : []),
             {
               isDisabled: actionTakingPlace || rowData?.status == 'Retrying',
-              title: 'Introspect Now',
+              title: 'Introspect now',
               onClick: () => introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
             },
             { isSeparator: true },
