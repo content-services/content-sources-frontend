@@ -40,7 +40,7 @@ export default function useTabbedRoutes(): TabbedRoute[] {
                 { path: 'delete-repository', Element: DeleteContentModal },
               ]
             : []),
-          ...(features?.admintasks?.enabled && features.snapshots?.accessible
+          ...(features?.snapshots?.enabled && features.snapshots?.accessible
             ? [{ path: ':repoUUID/snapshots', Element: SnapshotListModal }]
             : []),
           { path: ':repoUUID/packages', Element: PackageModal },
