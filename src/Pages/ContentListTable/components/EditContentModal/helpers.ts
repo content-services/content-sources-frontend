@@ -16,7 +16,17 @@ export interface FormikEditValues {
 
 export const mapFormikToEditAPIValues = (formikValues: FormikEditValues[]): EditContentRequest =>
   formikValues.map(
-    ({ name, url, arch, versions, gpgKey, metadataVerification, uuid, snapshot, moduleHotfixesEnabled }) => ({
+    ({
+      name,
+      url,
+      arch,
+      versions,
+      gpgKey,
+      metadataVerification,
+      uuid,
+      snapshot,
+      moduleHotfixesEnabled,
+    }) => ({
       uuid,
       name,
       url,

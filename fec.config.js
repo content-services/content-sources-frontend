@@ -13,11 +13,7 @@ module.exports = {
    */
   plugins: [],
   moduleFederation: {
-    exclude: [
-        'react-router-dom'
-    ],
-    shared: [
-        { 'react-router-dom': { singleton: true, version:'5.3.3' } }
-    ],
+    exclude: ['react-router-dom'],
+    shared: [{ 'react-router-dom': { singleton: true, import: false, version: '^6.3.0' } }],
   },
 };
