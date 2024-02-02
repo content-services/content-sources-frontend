@@ -480,7 +480,7 @@ const AddContent = () => {
               gpgLoading,
               metadataVerification,
               snapshot,
-              moduleHotfixesEnabled
+              moduleHotfixesEnabled,
             },
             index,
           ) => (
@@ -645,8 +645,8 @@ const AddContent = () => {
                         toggleId={'versionSelection' + index}
                         options={Object.keys(distributionVersions)}
                         variant={SelectVariant.typeaheadMulti}
-                        selectedProp={Object.keys(distributionVersions).filter(
-                          (key: string) => versions?.includes(distributionVersions[key]),
+                        selectedProp={Object.keys(distributionVersions).filter((key: string) =>
+                          versions?.includes(distributionVersions[key]),
                         )}
                         placeholderText={versions?.length ? '' : 'Any version'}
                         setSelected={(value) => setVersionSelected(value, index)}
@@ -667,10 +667,10 @@ const AddContent = () => {
                         }}
                       />
                       <Tooltip content='Optional: Selecting this will set the module_hotfixes flag on the clients, allowing the repository to not be filtered by modularity'>
-                          <OutlinedQuestionCircleIcon
-                            className='pf-u-ml-xs'
-                            color={global_Color_200.value}
-                          />
+                        <OutlinedQuestionCircleIcon
+                          className='pf-u-ml-xs'
+                          color={global_Color_200.value}
+                        />
                       </Tooltip>
                     </FormGroup>
                     <FormGroup

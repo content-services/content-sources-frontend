@@ -16,12 +16,12 @@
       "noImplicitAny": false,
       "resolveJsonModule": true,
       "sourceMap": true,
-      "types": ["node", "jest", "@testing-library/jest-dom"],
+      "types": ["node", "jest"],
       "typeRoots": [
-      "node_modules/@types"
+      "./node_modules/@types",
       ]
     },
-    "include": ["src/**/*.ts", "**/*.tsx"],
+    "include": ["src/**/*.ts", "**/*.tsx", "**/*"],
     "exclude": ["./node_modules/*", "**/*.js"]
   }
   

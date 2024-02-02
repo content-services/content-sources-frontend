@@ -60,16 +60,27 @@ export const isValidURL = (val: string) => {
 };
 
 export const mapFormikToAPIValues = (formikValues: FormikValues[]) =>
-  formikValues.map(({ name, url, arch, versions, gpgKey, metadataVerification, snapshot, moduleHotfixesEnabled }) => ({
-    name,
-    url,
-    distribution_arch: arch,
-    distribution_versions: versions,
-    gpg_key: gpgKey,
-    snapshot,
-    metadata_verification: metadataVerification,
-    module_hotfixes: moduleHotfixesEnabled,
-  }));
+  formikValues.map(
+    ({
+      name,
+      url,
+      arch,
+      versions,
+      gpgKey,
+      metadataVerification,
+      snapshot,
+      moduleHotfixesEnabled,
+    }) => ({
+      name,
+      url,
+      distribution_arch: arch,
+      distribution_versions: versions,
+      gpg_key: gpgKey,
+      snapshot,
+      metadata_verification: metadataVerification,
+      module_hotfixes: moduleHotfixesEnabled,
+    }),
+  );
 
 const mapNoMetaDataError = (validationData: ValidationResponse) =>
   validationData.map(({ url, ...rest }) => ({
