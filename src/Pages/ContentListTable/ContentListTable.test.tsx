@@ -97,12 +97,12 @@ it('Render with a single row', async () => {
     expect(queryByText('https://google.ca/wwyylse12/x86_64/el7')).toBeInTheDocument(),
   );
 
-  //   expect(
-  //     queryByText(defaultContentItemWithSnapshot.last_snapshot?.added_counts['rpm.package'] || 0),
-  //   ).toBeInTheDocument();
-  //   expect(
-  //     queryByText(defaultContentItemWithSnapshot.last_snapshot?.removed_counts['rpm.package'] || 0),
-  //   ).toBeInTheDocument();
+  expect(
+    queryByText(defaultContentItemWithSnapshot.last_snapshot?.added_counts['rpm.package'] || 0),
+  ).toBeInTheDocument();
+  expect(
+    queryByText(defaultContentItemWithSnapshot.last_snapshot?.removed_counts['rpm.package'] || 0),
+  ).toBeInTheDocument();
 
   const kebabButton = getByRole('button', { name: 'Kebab toggle' });
   fireEvent.click(kebabButton);

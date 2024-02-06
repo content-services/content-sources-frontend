@@ -208,7 +208,13 @@ export const defaultSnapshotItem: SnapshotItem = {
     'rpm.packageenvironment': 1,
     'rpm.packagegroup': 20,
   },
-  removed_counts: {},
+  removed_counts: {
+    'rpm.advisory': 50,
+    'rpm.package': 50,
+    'rpm.packagecategory': 1,
+    'rpm.packageenvironment': 1,
+    'rpm.packagegroup': 1,
+  },
 };
 
 export const defaultContentItemWithSnapshot: ContentItem = {
