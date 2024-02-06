@@ -33,12 +33,12 @@ export DEPLOY_FRONTENDS="true"
 
 set -exv
 
+# source is preferred to | bash -s in this case to avoid a subshell
+source <(curl -sSL $COMMON_BUILDER/src/frontend-build.sh)
+
 # bootstrap bonfire and it's config
 CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd
 curl -s "$CICD_URL/bootstrap.sh" > .cicd_bootstrap.sh && source .cicd_bootstrap.sh
-
-# source is preferred to | bash -s in this case to avoid a subshell
-source <(curl -sSL $COMMON_BUILDER/src/frontend-build.sh)
 
 # reserve ephemeral namespace
 source "${CICD_ROOT}/deploy_ephemeral_env.sh"
