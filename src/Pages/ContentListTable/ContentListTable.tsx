@@ -148,7 +148,6 @@ const ContentListTable = () => {
     'distribution_versions',
     'package_count',
     'last_introspection_time',
-    'status',
   ];
 
   const sortString = (): string =>
@@ -472,11 +471,15 @@ const ContentListTable = () => {
                           }}
                         />
                       </Hide>
-                      {columnHeaders.map((columnHeader, index) => (
-                        <Th key={columnHeader + 'column'} sort={sortParams(index)}>
-                          {columnHeader}
-                        </Th>
-                      ))}
+                      {columnHeaders.map((columnHeader, index) =>
+                        columnHeader === 'Status' ? (
+                          <Th key={columnHeader + 'column'}>{columnHeader}</Th>
+                        ) : (
+                          <Th key={columnHeader + 'column'} sort={sortParams(index)}>
+                            {columnHeader}
+                          </Th>
+                        ),
+                      )}
                       <Th>
                         <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
                       </Th>
