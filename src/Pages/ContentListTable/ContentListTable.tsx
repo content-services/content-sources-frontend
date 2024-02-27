@@ -282,10 +282,16 @@ const ContentListTable = () => {
                     },
                   },
                   {
-                    isDisabled: actionTakingPlace || rowData?.status === 'Retrying',
+                    isDisabled:
+                      actionTakingPlace || rowData?.status === 'Retrying' || !rowData.snapshot,
                     title: 'Trigger snapshot',
                     onClick: () => {
                       triggerSnapshot(rowData.uuid);
+                    },
+                    tooltipProps: {
+                      content: 'Snapshots disabled for this repository.',
+                      isVisible: !rowData.snapshot,
+                      trigger: 'manual',
                     },
                   },
                 ]

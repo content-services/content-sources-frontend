@@ -516,8 +516,8 @@ const EditContentForm = ({
                       toggleId={'versionSelection' + index}
                       options={Object.keys(distributionVersions)}
                       variant={SelectVariant.typeaheadMulti}
-                      selectedProp={Object.keys(distributionVersions).filter((key: string) =>
-                        versions?.includes(distributionVersions[key]),
+                      selectedProp={Object.keys(distributionVersions).filter(
+                        (key: string) => versions?.includes(distributionVersions[key]),
                       )}
                       placeholderText={versions?.length ? '' : 'Any version'}
                       setSelected={(value) => setVersionSelected(value, index)}
