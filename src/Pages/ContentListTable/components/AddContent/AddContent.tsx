@@ -235,7 +235,10 @@ const AddContent = () => {
   };
 
   const updateVariable = (index: number, newValue, callback?: () => void) => {
-    setChangeVerified(false);
+    // ensures no unnecessary validation occurs 
+    if (newValue['name'] || newValue['url'] || newValue['gpgKey'] || newValue['metadataVerification']) {
+      setChangeVerified(false);
+    }
     const updatedData = [...formik.values];
     updatedData[index] = { ...updatedData[index], ...newValue };
     formik.setValues(updatedData).then(callback);

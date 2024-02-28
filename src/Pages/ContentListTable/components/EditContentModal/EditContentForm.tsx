@@ -215,7 +215,10 @@ const EditContentForm = ({
   };
 
   const updateVariable = (index: number, newValue) => {
-    setChangeVerified(false);
+    // ensures no unnecessary validation occurs
+    if (newValue['name'] || newValue['url'] || newValue['gpgKey'] || newValue['metadataVerification']) {
+      setChangeVerified(false);
+    }
     const updatedData = [...formik.values];
     updatedData[index] = { ...updatedData[index], ...newValue };
     formik.setValues(updatedData);
