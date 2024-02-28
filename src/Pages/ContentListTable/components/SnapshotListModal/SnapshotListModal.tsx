@@ -151,7 +151,7 @@ export default function SnapshotListModal() {
       hasNoBodyWrapper
       aria-label='Snapshot list modal'
       ouiaId='snapshot_list_modal'
-      ouiaSafe={fetchingOrLoading}
+      ouiaSafe={!fetchingOrLoading}
       variant={ModalVariant.medium}
       title='Snapshots'
       description={
@@ -241,12 +241,8 @@ export default function SnapshotListModal() {
                       <Td>{new Date(created_at).toUTCString()}</Td>
                       <Td>
                         <ChangedArrows
-                          addedCount={
-                            (added_counts?.['rpm.package'] || 0)
-                          }
-                          removedCount={
-                            (removed_counts?.['rpm.package'] || 0)
-                          }
+                          addedCount={added_counts?.['rpm.package'] || 0}
+                          removedCount={removed_counts?.['rpm.package'] || 0}
                         />
                       </Td>
                       <Td>{content_counts?.['rpm.package'] || 0}</Td>
