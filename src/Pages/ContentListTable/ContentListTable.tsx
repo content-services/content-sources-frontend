@@ -288,11 +288,13 @@ const ContentListTable = () => {
                     onClick: () => {
                       triggerSnapshot(rowData.uuid);
                     },
-                    tooltipProps: {
+                    tooltipProps: !rowData.snapshot 
+                    ? {
                       content: 'Snapshots disabled for this repository.',
-                      isVisible: !rowData.snapshot,
-                      trigger: 'manual',
-                    },
+                      triggerRef: () => 
+                        document.getElementById('actions-column') || document.body,
+                    }
+                    : undefined,   
                   },
                 ]
               : []),
@@ -561,7 +563,7 @@ const ContentListTable = () => {
                                 }
                                 setDisabled
                               >
-                                <ActionsColumn items={rowActions(rowData)} />
+                                <ActionsColumn id='actions-column' items={rowActions(rowData)} />
                               </ConditionalTooltip>
                             </Td>
                           </Hide>
