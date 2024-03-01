@@ -240,7 +240,7 @@ export default function SnapshotListModal() {
                     <Tr
                       key={created_at + index}
                       ouiaId={'snapshot_row_' + index}
-                      aria-label={snap_uuid}
+                      data-uuid={snap_uuid}
                     >
                       <Td>{new Date(created_at).toUTCString()}</Td>
                       <Td>
