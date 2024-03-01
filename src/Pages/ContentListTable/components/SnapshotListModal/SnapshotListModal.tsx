@@ -237,7 +237,11 @@ export default function SnapshotListModal() {
                     }: SnapshotItem,
                     index: number,
                   ) => (
-                    <Tr key={created_at + index}>
+                    <Tr
+                      key={created_at + index}
+                      ouiaId={'snapshot_row_' + index}
+                      aria-label={snap_uuid}
+                    >
                       <Td>{new Date(created_at).toUTCString()}</Td>
                       <Td>
                         <ChangedArrows
