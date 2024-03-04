@@ -22,7 +22,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import useDebounce from '../../../../../Hooks/useDebounce';
 import useRootPath from '../../../../../Hooks/useRootPath';
 import { useAppContext } from '../../../../../middleware/AppContext';
-import { useGetPackagesQuery } from '../../../../../services/Content/ContentQueries';
+import { useGetSnapshotPackagesQuery } from '../../../../../services/Content/ContentQueries';
 
 const useStyles = createUseStyles({
   description: {
@@ -53,7 +53,7 @@ export function SnapshotPackagesTab() {
   const classes = useStyles();
   const { contentOrigin } = useAppContext();
 
-  const { repoUUID: uuid } = useParams();
+  const { snapshotUUID = '' } = useParams();
   const rootPath = useRootPath();
   const navigate = useNavigate();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
@@ -83,7 +83,7 @@ export function SnapshotPackagesTab() {
     isFetching,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetPackagesQuery(uuid as string, page, perPage, debouncedSearchQuery, sortString);
+  } = useGetSnapshotPackagesQuery(snapshotUUID, page, perPage, debouncedSearchQuery, sortString);
 
   useEffect(() => {
     if (isError) {
@@ -141,7 +141,7 @@ export function SnapshotPackagesTab() {
             <SearchIcon />
           </InputGroupText>
         </InputGroupItem>
-        <Hide hide={loadingOrZeroCount}>
+        <Hide hide={isLoading}>
           <Pagination
             id='top-pagination-id'
             widgetId='topPaginationWidgetId'
@@ -197,7 +197,7 @@ export function SnapshotPackagesTab() {
       <Flex className={classes.bottomContainer}>
         <FlexItem />
         <FlexItem>
-          <Hide hide={loadingOrZeroCount}>
+          <Hide hide={isLoading}>
             <Pagination
               id='bottom-pagination-id'
               widgetId='bottomPaginationWidgetId'

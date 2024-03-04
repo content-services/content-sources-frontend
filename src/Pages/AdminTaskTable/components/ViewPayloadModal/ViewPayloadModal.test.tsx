@@ -9,6 +9,9 @@ import { AdminTask } from '../../../../services/AdminTasks/AdminTaskApi';
 import { useFetchAdminTaskQuery } from '../../../../services/AdminTasks/AdminTaskQueries';
 
 jest.mock('../../../../Hooks/useNotification', () => () => ({ notify: () => null }));
+jest.mock('../../../../Routes/useTabbedRoutes', () => () => ({
+  ADMIN_TASKS_ROUTE: 'ADMIN_TASKS_ROUTE',
+}));
 
 jest.mock('../../../../services/AdminTasks/AdminTaskQueries', () => ({
   useFetchAdminTaskQuery: jest.fn(),
