@@ -83,6 +83,10 @@ const useStyles = createUseStyles({
   inline: {
     display: 'flex',
   },
+  disabledButton: {
+    pointerEvents: 'auto',
+    cursor: 'default',
+  },
 });
 
 const perPageKey = 'contentListPerPage';
@@ -282,19 +286,21 @@ const ContentListTable = () => {
                     },
                   },
                   {
+                    id: 'actions-column-snapshot',
+                    className: classes.disabledButton,
                     isDisabled:
                       actionTakingPlace || rowData?.status === 'Retrying' || !rowData.snapshot,
                     title: 'Trigger snapshot',
                     onClick: () => {
                       triggerSnapshot(rowData.uuid);
                     },
-                    tooltipProps: !rowData.snapshot 
-                    ? {
-                      content: 'Snapshots disabled for this repository.',
-                      triggerRef: () => 
-                        document.getElementById('actions-column') || document.body,
-                    }
-                    : undefined,   
+                    tooltipProps: !rowData.snapshot
+                      ? {
+                          content: 'Snapshots disabled for this repository.',
+                          triggerRef: () =>
+                            document.getElementById('actions-column-snapshot') || document.body,
+                        }
+                      : undefined,
                   },
                 ]
               : []),
@@ -563,7 +569,7 @@ const ContentListTable = () => {
                                 }
                                 setDisabled
                               >
-                                <ActionsColumn id='actions-column' items={rowActions(rowData)} />
+                                <ActionsColumn items={rowActions(rowData)} />
                               </ConditionalTooltip>
                             </Td>
                           </Hide>
