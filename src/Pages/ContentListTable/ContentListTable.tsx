@@ -7,6 +7,7 @@ import {
   Pagination,
   PaginationVariant,
   Spinner,
+  TooltipPosition,
 } from '@patternfly/react-core';
 import {
   ActionsColumn,
@@ -297,6 +298,7 @@ const ContentListTable = () => {
                     tooltipProps: !rowData.snapshot
                       ? {
                           content: 'Snapshots disabled for this repository.',
+                          position: TooltipPosition.left,
                           triggerRef: () =>
                             document.getElementById('actions-column-snapshot') || document.body,
                         }
