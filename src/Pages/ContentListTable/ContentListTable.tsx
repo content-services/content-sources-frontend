@@ -50,6 +50,7 @@ import ConditionalTooltip from '../../components/ConditionalTooltip/ConditionalT
 import dayjs from 'dayjs';
 import ChangedArrows from './components/SnapshotListModal/components/ChangedArrows';
 import { Outlet, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
+import { ADD_ROUTE, DELETE_ROUTE, EDIT_ROUTE } from '../../Routes/constants';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -85,7 +86,7 @@ const useStyles = createUseStyles({
   },
 });
 
-const perPageKey = 'contentListPerPage';
+export const perPageKey = 'contentListPerPage';
 
 const ContentListTable = () => {
   const classes = useStyles();
@@ -96,7 +97,7 @@ const ContentListTable = () => {
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
+  const [activeSortIndex, setActiveSortIndex] = useState<number>(-1);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
   const [checkedRepositories, setCheckedRepositories] = useState<Set<string>>(new Set<string>());
   const isRedHatRepository = contentOrigin === ContentOrigin.REDHAT;
@@ -151,8 +152,13 @@ const ContentListTable = () => {
     'status',
   ];
 
-  const sortString = (): string =>
-    columnSortAttributes[activeSortIndex] + ':' + activeSortDirection;
+  const sortString = useMemo(
+    () =>
+      activeSortIndex === -1
+        ? ''
+        : columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
+    [],
+  );
 
   const {
     isLoading,
@@ -160,10 +166,17 @@ const ContentListTable = () => {
     isError,
     isFetching,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useContentListQuery(page, perPage, filterData, sortString(), contentOrigin);
+  } = useContentListQuery(page, perPage, filterData, sortString, contentOrigin);
 
   const { mutateAsync: introspectRepository, isLoading: isIntrospecting } =
-    useIntrospectRepositoryMutate(queryClient, page, perPage, filterData, sortString());
+    useIntrospectRepositoryMutate(
+      queryClient,
+      page,
+      perPage,
+      contentOrigin,
+      filterData,
+      sortString,
+    );
 
   const introspectRepoForUuid = (uuid: string): Promise<void> =>
     introspectRepository({ uuid: uuid, reset_count: true } as IntrospectRepositoryRequestItem);
@@ -179,8 +192,9 @@ const ContentListTable = () => {
     checkedRepositories,
     page,
     perPage,
+    contentOrigin,
     filterData,
-    sortString(),
+    sortString,
   );
 
   // Other update actions will be added to this later.
@@ -263,7 +277,7 @@ const ContentListTable = () => {
               isDisabled: actionTakingPlace,
               title: 'Edit',
               onClick: () => {
-                navigate(`edit-repository?repoUUIDS=${rowData.uuid}`);
+                navigate(`${EDIT_ROUTE}?repoUUIDS=${rowData.uuid}`);
               },
             },
             ...(features?.snapshots?.accessible
@@ -298,7 +312,7 @@ const ContentListTable = () => {
             { isSeparator: true },
             {
               title: 'Delete',
-              onClick: () => navigate(`delete-repository?repoUUIDS=${rowData.uuid}`),
+              onClick: () => navigate(`${DELETE_ROUTE}?repoUUIDS=${rowData.uuid}`),
             },
           ],
     [actionTakingPlace, checkedRepositories, isRedHatRepository],
@@ -364,7 +378,7 @@ const ContentListTable = () => {
     });
 
   const itemName =
-    contentOrigin === ContentOrigin.EXTERNAL ? 'custom repositories' : 'red hat repositories';
+    contentOrigin === ContentOrigin.EXTERNAL ? 'custom repositories' : 'Red Hat repositories';
   const notFilteredBody = 'To get started, create a custom repository';
 
   const countIsZero = count === 0;
@@ -380,7 +394,7 @@ const ContentListTable = () => {
       <Outlet
         context={{
           clearCheckedRepositories,
-          deletionContext: { page, perPage, filterData, contentOrigin, sortString: sortString() },
+          deletionContext: { page, perPage, filterData, contentOrigin, sortString: sortString },
         }}
       />
       <Grid
@@ -434,7 +448,7 @@ const ContentListTable = () => {
                     ouiaId='create_content_source'
                     variant='primary'
                     isDisabled={isLoading}
-                    onClick={() => navigate('add-repository')}
+                    onClick={() => navigate(ADD_ROUTE)}
                   >
                     Add repositories
                   </Button>
@@ -598,7 +612,7 @@ const ContentListTable = () => {
                       ouiaId='create_content_source'
                       variant='primary'
                       isDisabled={isLoading}
-                      onClick={() => navigate('add-repository')}
+                      onClick={() => navigate(ADD_ROUTE)}
                     >
                       Add repositories
                     </Button>

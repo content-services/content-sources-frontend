@@ -5,7 +5,7 @@ import {
   DescriptionListTerm,
 } from '@patternfly/react-core';
 import { AdminTask } from '../../../../../services/AdminTasks/AdminTaskApi';
-import { formatDate } from '../../../AdminTaskTable';
+import { formatDateToHumanReadable } from '../../../../../helpers';
 
 export interface AdminTaskInfoProps {
   adminTask: AdminTask;
@@ -36,18 +36,20 @@ const AdminTaskInfo = ({ adminTask }: AdminTaskInfoProps) => (
     </DescriptionListGroup>
     <DescriptionListGroup>
       <DescriptionListTerm>Queued At</DescriptionListTerm>
-      <DescriptionListDescription>{formatDate(adminTask.queued_at)}</DescriptionListDescription>
+      <DescriptionListDescription>
+        {formatDateToHumanReadable(adminTask.queued_at)}
+      </DescriptionListDescription>
     </DescriptionListGroup>
     <DescriptionListGroup>
       <DescriptionListTerm>Started At</DescriptionListTerm>
       <DescriptionListDescription>
-        {adminTask.started_at ? formatDate(adminTask.started_at) : 'Not started'}
+        {adminTask.started_at ? formatDateToHumanReadable(adminTask.started_at) : 'Not started'}
       </DescriptionListDescription>
     </DescriptionListGroup>
     <DescriptionListGroup>
       <DescriptionListTerm>Finished At</DescriptionListTerm>
       <DescriptionListDescription>
-        {adminTask.finished_at ? formatDate(adminTask.finished_at) : 'Not finished'}
+        {adminTask.finished_at ? formatDateToHumanReadable(adminTask.finished_at) : 'Not finished'}
       </DescriptionListDescription>
     </DescriptionListGroup>
     <DescriptionListGroup>

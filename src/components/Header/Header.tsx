@@ -23,14 +23,20 @@ const useStyles = createUseStyles({
   },
 });
 
-export default function Header() {
+interface Props {
+  title: string;
+  ouiaId: string;
+  paragraph: string;
+}
+
+export default function Header({ title, ouiaId, paragraph }: Props) {
   const classes = useStyles();
 
   return (
     <PageHeader>
-      <PageHeaderTitle title='Repositories' />
-      <Text className={classes.subtext} ouiaId='custom_repositories_description'>
-        View all repositories within your organization.
+      <PageHeaderTitle title={title} />
+      <Text className={classes.subtext} ouiaId={ouiaId}>
+        {paragraph}
       </Text>
     </PageHeader>
   );

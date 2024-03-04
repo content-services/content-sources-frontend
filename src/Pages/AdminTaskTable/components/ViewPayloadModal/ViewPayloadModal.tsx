@@ -16,8 +16,8 @@ import ReactJson from 'react18-json-view';
 import Hide from '../../../../components/Hide/Hide';
 import { useFetchAdminTaskQuery } from '../../../../services/AdminTasks/AdminTaskQueries';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ADMIN_TASKS_ROUTE } from '../../../../Routes/useTabbedRoutes';
 import useRootPath from '../../../../Hooks/useRootPath';
+import { ADMIN_TASKS_ROUTE } from '../../../../Routes/constants';
 
 const useStyles = createUseStyles({
   jsonView: {

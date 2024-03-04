@@ -1,19 +1,19 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import QuickStart from './QuickStart';
+import RepositoryQuickStart from './RepositoryQuickStart';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 
 jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
   useChrome: jest.fn(),
 }));
 
-it('Confirm that QuickStart is hidden if not inBeta', () => {
+it('Confirm that RepositoryQuickStart is hidden if not inBeta', () => {
   (useChrome as jest.Mock).mockImplementation(() => ({
     isBeta: () => false,
     quickStarts: { activateQuickstart: () => new Promise((resolve) => resolve(undefined)) },
   }));
   const { queryByText } = render(
     <div>
-      <QuickStart />
+      <RepositoryQuickStart />
     </div>,
   );
 
@@ -28,7 +28,7 @@ it('Confirm that QuickStart is shown, can be clicked, and then collapses', async
   }));
   const { queryByText, getByLabelText } = render(
     <div>
-      <QuickStart />
+      <RepositoryQuickStart />
     </div>,
   );
 

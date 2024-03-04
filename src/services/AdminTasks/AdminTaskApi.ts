@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Links, Meta } from '../Content/ContentApi';
+import { objectToUrlParams } from '../../helpers';
 
 export interface AdminTaskFilterData {
   statuses: string[];
@@ -45,9 +46,14 @@ export const getAdminTasks: (
   const orgIdParam = filterData.orgId;
   const statusParam = filterData?.statuses?.join(',').toLowerCase();
   const { data } = await axios.get(
-    `/api/content-sources/v1/admin/tasks/?offset=${
-      (page - 1) * limit
-    }&limit=${limit}&account_id=${accountIdParam}&org_id=${orgIdParam}&status=${statusParam}&sort_by=${sortBy}`,
+    `/api/content-sources/v1/admin/tasks/?${objectToUrlParams({
+      offset: ((page - 1) * limit).toString(),
+      limit: limit?.toString(),
+      account_id: accountIdParam,
+      org_id: orgIdParam,
+      status: statusParam,
+      sort_by: sortBy,
+    })}`,
   );
   return data;
 };

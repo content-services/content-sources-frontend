@@ -31,6 +31,7 @@ import { useAppContext } from '../../../middleware/AppContext';
 import ConditionalTooltip from '../../../components/ConditionalTooltip/ConditionalTooltip';
 import { useNavigate } from 'react-router-dom';
 import DeleteKebab from '../../../components/DeleteKebab/DeleteKebab';
+import { ADD_ROUTE } from '../../../Routes/constants';
 
 interface Props {
   isLoading?: boolean;
@@ -100,9 +101,9 @@ const ContentListFilters = ({
   useEffect(() => {
     // If the filters get cleared at the top level, sense that and clear them here.
     if (
-      filterData.arches.length === 0 &&
-      filterData.versions.length === 0 &&
-      filterData.statuses.length === 0 &&
+      filterData.arches?.length === 0 &&
+      filterData.versions?.length === 0 &&
+      filterData.statuses?.length === 0 &&
       filterData.searchQuery === '' &&
       (searchQuery !== '' ||
         selectedArches.length !== 0 ||
@@ -249,89 +250,91 @@ const ContentListFilters = ({
   ]);
 
   return (
-    <Flex>
-      <FlexItem>
-        <InputGroup>
-          <InputGroupItem>
-            <FlexItem>
-              <DropdownSelect
-                toggleId='filterSelectionDropdown'
-                ouiaId='filter_type'
-                isDisabled={isLoading}
-                options={filters}
-                variant={SelectVariant.single}
-                selectedProp={filterType}
-                setSelected={setFilterType}
-                placeholderText='filter'
-                toggleIcon={<FilterIcon />}
-              />
-            </FlexItem>
-          </InputGroupItem>
-          <InputGroupItem>
-            <FlexItem>{Filter}</FlexItem>
-          </InputGroupItem>
-        </InputGroup>
-      </FlexItem>
-      <Hide hide={!features?.snapshots?.accessible}>
+    <Flex direction={{ default: 'column' }}>
+      <Flex>
         <FlexItem>
-          <ToggleGroup aria-label='Default with single selectable'>
-            <ToggleGroupItem
-              text='Custom'
-              buttonId='custom-repositories-toggle-button'
-              data-ouia-component-id='custom-repositories-toggle'
-              isSelected={contentOrigin === ContentOrigin.EXTERNAL}
-              onChange={() => {
-                if (contentOrigin !== ContentOrigin.EXTERNAL) {
-                  setContentOrigin(ContentOrigin.EXTERNAL);
-                  // clearFilters(); //This resets the filters when changing Origins if desired.
-                }
-              }}
-            />
-            <ToggleGroupItem
-              text='Red Hat'
-              buttonId='redhat-repositories-toggle-button'
-              data-ouia-component-id='redhat-repositories-toggle'
-              isSelected={contentOrigin === ContentOrigin.REDHAT}
-              onChange={() => {
-                if (contentOrigin !== ContentOrigin.REDHAT) {
-                  setContentOrigin(ContentOrigin.REDHAT);
-                  // clearFilters();//This resets the filters when changing Origins if desired.
-                }
-              }}
-            />
-          </ToggleGroup>
+          <InputGroup>
+            <InputGroupItem>
+              <FlexItem>
+                <DropdownSelect
+                  toggleId='filterSelectionDropdown'
+                  ouiaId='filter_type'
+                  isDisabled={isLoading}
+                  options={filters}
+                  variant={SelectVariant.single}
+                  selectedProp={filterType}
+                  setSelected={setFilterType}
+                  placeholderText='filter'
+                  toggleIcon={<FilterIcon />}
+                />
+              </FlexItem>
+            </InputGroupItem>
+            <InputGroupItem>
+              <FlexItem>{Filter}</FlexItem>
+            </InputGroupItem>
+          </InputGroup>
         </FlexItem>
-      </Hide>
-      <FlexItem className={classes.repositoryActions}>
-        <ConditionalTooltip
-          content='You do not have the required permissions to perform this action.'
-          show={!rbac?.write && !isRedHatRepository}
-          setDisabled
-        >
-          <Button
-            id='createContentSourceButton'
-            ouiaId='create_content_source'
-            variant='primary'
-            isDisabled={isLoading || isRedHatRepository}
-            onClick={() => navigate('add-repository')}
+        <Hide hide={!features?.snapshots?.accessible}>
+          <FlexItem>
+            <ToggleGroup aria-label='Default with single selectable'>
+              <ToggleGroupItem
+                text='Custom'
+                buttonId='custom-repositories-toggle-button'
+                data-ouia-component-id='custom-repositories-toggle'
+                isSelected={contentOrigin === ContentOrigin.EXTERNAL}
+                onChange={() => {
+                  if (contentOrigin !== ContentOrigin.EXTERNAL) {
+                    setContentOrigin(ContentOrigin.EXTERNAL);
+                    // clearFilters(); //This resets the filters when changing Origins if desired.
+                  }
+                }}
+              />
+              <ToggleGroupItem
+                text='Red Hat'
+                buttonId='redhat-repositories-toggle-button'
+                data-ouia-component-id='redhat-repositories-toggle'
+                isSelected={contentOrigin === ContentOrigin.REDHAT}
+                onChange={() => {
+                  if (contentOrigin !== ContentOrigin.REDHAT) {
+                    setContentOrigin(ContentOrigin.REDHAT);
+                    // clearFilters();//This resets the filters when changing Origins if desired.
+                  }
+                }}
+              />
+            </ToggleGroup>
+          </FlexItem>
+        </Hide>
+        <FlexItem className={classes.repositoryActions}>
+          <ConditionalTooltip
+            content='You do not have the required permissions to perform this action.'
+            show={!rbac?.write && !isRedHatRepository}
+            setDisabled
           >
-            Add repositories
-          </Button>
-        </ConditionalTooltip>
-        <ConditionalTooltip
-          content='You do not have the required permissions to perform this action.'
-          show={!rbac?.write && !isRedHatRepository}
-          setDisabled
-        >
-          <DeleteKebab
-            isDisabled={isRedHatRepository}
-            atLeastOneRepoChecked={atLeastOneRepoChecked}
-            numberOfReposChecked={numberOfReposChecked}
-            deleteCheckedRepos={deleteCheckedRepos}
-            toggleOuiaId='custom_repositories_kebab_toggle'
-          />
-        </ConditionalTooltip>
-      </FlexItem>
+            <Button
+              id='createContentSourceButton'
+              ouiaId='create_content_source'
+              variant='primary'
+              isDisabled={isLoading || isRedHatRepository}
+              onClick={() => navigate(ADD_ROUTE)}
+            >
+              Add repositories
+            </Button>
+          </ConditionalTooltip>
+          <ConditionalTooltip
+            content='You do not have the required permissions to perform this action.'
+            show={!rbac?.write && !isRedHatRepository}
+            setDisabled
+          >
+            <DeleteKebab
+              isDisabled={isRedHatRepository}
+              atLeastOneRepoChecked={atLeastOneRepoChecked}
+              numberOfReposChecked={numberOfReposChecked}
+              deleteCheckedRepos={deleteCheckedRepos}
+              toggleOuiaId='custom_repositories_kebab_toggle'
+            />
+          </ConditionalTooltip>
+        </FlexItem>
+      </Flex>
       <Hide
         hide={
           !(
@@ -342,7 +345,7 @@ const ContentListFilters = ({
           )
         }
       >
-        <FlexItem fullWidth={{ default: 'fullWidth' }} className={classes.chipsContainer}>
+        <FlexItem className={classes.chipsContainer}>
           <ChipGroup categoryName='Version'>
             {selectedVersions.map((version) => (
               <Chip

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { objectToUrlParams } from '../../helpers';
 
 export interface ContentItem {
   uuid: string;
@@ -16,9 +17,10 @@ export interface ContentItem {
   gpg_key: string;
   metadata_verification: boolean;
   snapshot: boolean;
+  module_hotfixes: boolean;
   last_snapshot_uuid?: string;
   last_snapshot?: SnapshotItem;
-  module_hotfixes: boolean;
+  label?: string;
 }
 
 export interface PopularRepository {
@@ -112,12 +114,16 @@ export type NameLabel = {
   label: string;
 };
 
-export type FilterData = {
+export type FilterData = Partial<{
   searchQuery: string;
   versions: Array<string>;
   arches: Array<string>;
   statuses: Array<string>;
-};
+  uuids: Array<string>;
+  urls: Array<string>;
+  availableForArch: string;
+  availableForVersion: string;
+}>;
 
 export type ValidateItem = {
   skipped: boolean;
@@ -162,6 +168,9 @@ export type ContentCounts = {
   'rpm.packagecategory'?: number;
   'rpm.packageenvironment'?: number;
   'rpm.packagegroup'?: number;
+  'rpm.modulemd'?: number;
+  'rpm.modulemd_defaults'?: number;
+  'rpm.repo_metadata_file'?: number;
 };
 
 export interface SnapshotItem {
@@ -172,6 +181,20 @@ export interface SnapshotItem {
   added_counts: ContentCounts;
   removed_counts: ContentCounts;
 }
+
+export type SnapshotByDateResponse = {
+  repository_uuid: string;
+  is_after: boolean;
+  match?: {
+    uuid: string;
+    created_at: string;
+    repository_path: string;
+    content_counts: ContentCounts;
+    added_counts: ContentCounts;
+    removed_counts: ContentCounts;
+    url: string;
+  };
+};
 
 export type SnapshotListResponse = {
   data: SnapshotItem[];
@@ -190,19 +213,25 @@ export const getPopularRepositories: (
   filterData?: Partial<FilterData>,
   sortBy?: string,
 ) => Promise<PopularRepositoriesResponse> = async (page, limit, filterData, sortBy) => {
-  const searchQuery = filterData?.searchQuery;
+  const search = filterData?.searchQuery;
   const versionParam = filterData?.versions?.join(',');
   const archParam = filterData?.arches?.join(',');
   const { data } = await axios.get(
-    `/api/content-sources/v1/popular_repositories/?offset=${
-      (page - 1) * limit
-    }&limit=${limit}&search=${searchQuery}&version=${versionParam}&arch=${archParam}&sort_by=${sortBy}`,
+    `/api/content-sources/v1/popular_repositories/?${objectToUrlParams({
+      offset: ((page - 1) * limit).toString(),
+      limit: limit?.toString(),
+      search,
+      version: versionParam,
+      arch: archParam,
+      sort_by: sortBy,
+    })}`,
   );
   return data;
 };
 export enum ContentOrigin {
   'REDHAT' = 'red_hat',
   'EXTERNAL' = 'external',
+  'ALL' = 'red_hat,external',
 }
 
 export const getContentList: (
@@ -212,14 +241,27 @@ export const getContentList: (
   sortBy: string,
   contentOrigin: ContentOrigin,
 ) => Promise<ContentListResponse> = async (page, limit, filterData, sortBy, contentOrigin) => {
-  const searchQuery = filterData.searchQuery;
-  const versionParam = filterData.versions.join(',');
-  const archParam = filterData.arches.join(',');
-  const statusParam = filterData?.statuses?.join(',');
+  const search = filterData.searchQuery;
+  const versionParam = filterData.versions?.join(',');
+  const archParam = filterData.arches?.join(',');
+  const statusParam = filterData.statuses?.join(',');
+  const urlParam = filterData.urls?.join(',');
+  const uuidsParam = filterData.uuids?.join(',');
   const { data } = await axios.get(
-    `/api/content-sources/v1/repositories/?origin=${contentOrigin}&offset=${
-      (page - 1) * limit
-    }&limit=${limit}&search=${searchQuery}&version=${versionParam}&status=${statusParam}&arch=${archParam}&sort_by=${sortBy}`,
+    `/api/content-sources/v1/repositories/?${objectToUrlParams({
+      origin: contentOrigin,
+      offset: ((page - 1) * limit).toString(),
+      limit: limit?.toString(),
+      search,
+      version: versionParam,
+      status: statusParam,
+      arch: archParam,
+      sort_by: sortBy,
+      uuid: uuidsParam,
+      url: urlParam,
+      available_for_arch: filterData.availableForArch,
+      available_for_version: filterData.availableForVersion,
+    })}`,
   );
   return data;
 };
@@ -238,6 +280,17 @@ export const deleteContentListItems: (uuids: string[]) => Promise<void> = async 
   uuids: string[],
 ) => {
   const { data } = await axios.post('/api/content-sources/v1/repositories/bulk_delete/', { uuids });
+  return data;
+};
+
+export const getSnapshotsByDate = async (
+  uuids: string[],
+  date: string,
+): Promise<SnapshotByDateResponse[]> => {
+  const { data } = await axios.post('/api/content-sources/v1/repositories/snapshots/for_date/', {
+    repository_uuids: uuids,
+    date,
+  });
   return data;
 };
 
@@ -285,19 +338,22 @@ export const getPackages: (
   uuid: string,
   page: number,
   limit: number,
-  searchQuery: string,
+  search: string,
   sortBy: string,
 ) => Promise<PackagesResponse> = async (
   uuid: string,
   page: number,
   limit: number,
-  searchQuery: string,
+  search: string,
   sortBy: string,
 ) => {
   const { data } = await axios.get(
-    `/api/content-sources/v1.0/repositories/${uuid}/rpms?offset=${
-      (page - 1) * limit
-    }&limit=${limit}&search=${searchQuery}&sort_by=${sortBy}`,
+    `/api/content-sources/v1.0/repositories/${uuid}/rpms?${objectToUrlParams({
+      offset: ((page - 1) * limit).toString(),
+      limit: limit?.toString(),
+      search,
+      sort_by: sortBy,
+    })}`,
   );
   return data;
 };
@@ -306,19 +362,22 @@ export const getSnapshotList: (
   uuid: string,
   page: number,
   limit: number,
-  searchQuery: string,
+  search: string,
   sortBy: string,
 ) => Promise<SnapshotListResponse> = async (
   uuid: string,
   page: number,
   limit: number,
-  searchQuery: string,
+  search: string,
   sortBy: string,
 ) => {
   const { data } = await axios.get(
-    `/api/content-sources/v1.0/repositories/${uuid}/snapshots/?offset=${
-      (page - 1) * limit
-    }&limit=${limit}&search=${searchQuery}&sort_by=${sortBy}`,
+    `/api/content-sources/v1.0/repositories/${uuid}/snapshots/?${objectToUrlParams({
+      offset: ((page - 1) * limit).toString(),
+      limit: limit?.toString(),
+      search,
+      sortBy,
+    })}`,
   );
   return data;
 };

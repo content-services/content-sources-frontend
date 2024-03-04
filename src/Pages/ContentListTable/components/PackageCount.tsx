@@ -17,9 +17,11 @@ const useStyles = createUseStyles({
 
 interface Props {
   rowData: ContentItem;
+  href?: string;
+  opensNewTab?: boolean;
 }
 
-const PackageCount = ({ rowData }: Props) => {
+const PackageCount = ({ rowData, href, opensNewTab }: Props) => {
   const classes = useStyles();
   const navigate = useNavigate();
 
@@ -43,8 +45,11 @@ const PackageCount = ({ rowData }: Props) => {
     <Button
       ouiaId='package_count_button'
       variant='link'
+      component='a'
+      href={href}
       className={classes.link}
-      onClick={() => navigate(`${rowData.uuid}/packages`)}
+      target={opensNewTab ? '_blank' : ''}
+      onClick={href ? undefined : () => navigate(`${rowData.uuid}/packages`)}
     >
       {rowData.package_count}
     </Button>

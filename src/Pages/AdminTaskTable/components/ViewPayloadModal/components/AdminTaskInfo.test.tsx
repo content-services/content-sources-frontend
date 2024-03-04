@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import AdminTaskInfo from './AdminTaskInfo';
 import { AdminTask } from '../../../../../services/AdminTasks/AdminTaskApi';
 import { defaultIntrospectTask } from '../../../../../testingHelpers';
-import { formatDate } from '../../../AdminTaskTable';
+import { formatDateToHumanReadable } from '../../../../../helpers';
 
 jest.mock('../../../../../middleware/AppContext', () => ({
   useAppContext: () => ({ rbac: { read: true, write: true } }),
@@ -16,9 +16,15 @@ it('Render with all fields', () => {
   expect(queryByText(defaultIntrospectTask.org_id)).toBeInTheDocument();
   expect(queryByText(defaultIntrospectTask.typename)).toBeInTheDocument();
   expect(queryByText(defaultIntrospectTask.status)).toBeInTheDocument();
-  expect(queryByText(formatDate(defaultIntrospectTask.queued_at))).toBeInTheDocument();
-  expect(queryByText(formatDate(defaultIntrospectTask.started_at))).toBeInTheDocument();
-  expect(queryByText(formatDate(defaultIntrospectTask.finished_at))).toBeInTheDocument();
+  expect(
+    queryByText(formatDateToHumanReadable(defaultIntrospectTask.queued_at)),
+  ).toBeInTheDocument();
+  expect(
+    queryByText(formatDateToHumanReadable(defaultIntrospectTask.started_at)),
+  ).toBeInTheDocument();
+  expect(
+    queryByText(formatDateToHumanReadable(defaultIntrospectTask.finished_at)),
+  ).toBeInTheDocument();
   expect(queryByText(defaultIntrospectTask.error)).toBeInTheDocument();
 });
 
@@ -38,7 +44,7 @@ it('Render without optional fields', () => {
   expect(queryByText(missingOptional.org_id)).toBeInTheDocument();
   expect(queryByText(missingOptional.typename)).toBeInTheDocument();
   expect(queryByText(missingOptional.status)).toBeInTheDocument();
-  expect(queryByText(formatDate(missingOptional.queued_at))).toBeInTheDocument();
+  expect(queryByText(formatDateToHumanReadable(missingOptional.queued_at))).toBeInTheDocument();
   expect(queryByText('Not started')).toBeInTheDocument();
   expect(queryByText('Not finished')).toBeInTheDocument();
   expect(queryByText('None')).toBeInTheDocument();

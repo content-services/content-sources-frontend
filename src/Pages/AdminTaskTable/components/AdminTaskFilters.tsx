@@ -144,31 +144,33 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
   }, [filterType, isLoading, accountId, orgId, selectedStatuses]);
 
   return (
-    <Flex>
-      <FlexItem>
-        <InputGroup>
-          <InputGroupItem>
-            <FlexItem>
-              <DropdownSelect
-                toggleId='filterSelectionDropdown'
-                ouiaId='filter_type'
-                isDisabled={isLoading}
-                options={filters}
-                variant={SelectVariant.single}
-                selectedProp={filterType}
-                setSelected={setFilterType}
-                placeholderText='filter'
-                toggleIcon={<FilterIcon />}
-              />
-            </FlexItem>
-          </InputGroupItem>
-          <InputGroupItem>
-            <FlexItem>{Filter}</FlexItem>
-          </InputGroupItem>
-        </InputGroup>
-      </FlexItem>
+    <Flex direction={{ default: 'column' }}>
+      <Flex>
+        <FlexItem>
+          <InputGroup>
+            <InputGroupItem>
+              <FlexItem>
+                <DropdownSelect
+                  toggleId='filterSelectionDropdown'
+                  ouiaId='filter_type'
+                  isDisabled={isLoading}
+                  options={filters}
+                  variant={SelectVariant.single}
+                  selectedProp={filterType}
+                  setSelected={setFilterType}
+                  placeholderText='filter'
+                  toggleIcon={<FilterIcon />}
+                />
+              </FlexItem>
+            </InputGroupItem>
+            <InputGroupItem>
+              <FlexItem>{Filter}</FlexItem>
+            </InputGroupItem>
+          </InputGroup>
+        </FlexItem>
+      </Flex>
       <Hide hide={!(accountId !== '' || orgId !== '' || selectedStatuses.length)}>
-        <FlexItem fullWidth={{ default: 'fullWidth' }} className={classes.chipsContainer}>
+        <FlexItem className={classes.chipsContainer}>
           <ChipGroup categoryName='Status'>
             {selectedStatuses.map((status) => (
               <Chip

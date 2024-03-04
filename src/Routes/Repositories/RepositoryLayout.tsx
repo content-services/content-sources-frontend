@@ -5,9 +5,9 @@ import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 
 import { createUseStyles } from 'react-jss';
 import { last } from 'lodash';
-import Header from '../components/Header/Header';
-import QuickStart from '../components/QuickStart/QuickStart';
-import { TabbedRoute } from './useTabbedRoutes';
+import Header from '../../components/Header/Header';
+import RepositoryQuickStart from '../../components/QuickStart/RepositoryQuickStart';
+import { TabbedRouteItem } from '../constants';
 
 const useStyles = createUseStyles({
   tabs: {
@@ -28,14 +28,18 @@ const useStyles = createUseStyles({
   },
 });
 
-export default function Layout({ tabs }: { tabs: TabbedRoute[] }) {
+export default function RepositoryLayout({ tabs }: { tabs: TabbedRouteItem[] }) {
   const { pathname } = useLocation();
   const classes = useStyles();
   const currentRoute = useMemo(() => last(pathname.split('/')), [pathname]);
 
   return (
     <>
-      <Header />
+      <Header
+        title='Repositories'
+        ouiaId='custom_repositories_description'
+        paragraph='View all repositories within your organization.'
+      />
       <Tabs className={classes.tabs} ouiaId='routed-tabs' activeKey={currentRoute}>
         {tabs.map(({ title, route }) => (
           <Tab
@@ -43,7 +47,7 @@ export default function Layout({ tabs }: { tabs: TabbedRoute[] }) {
             keyParams={route}
             key={route}
             tabIndex={-1} // This prevents the tab from being targetable by accessibility features.
-            eventKey={route || 'content'} // the current route will be "content" when there is no route specified (root)
+            eventKey={route}
             aria-label={title}
             ouiaId={title}
             title={
@@ -54,7 +58,7 @@ export default function Layout({ tabs }: { tabs: TabbedRoute[] }) {
           />
         ))}
       </Tabs>
-      <QuickStart />
+      <RepositoryQuickStart />
       {/* Render the app routes via the Layout Outlet */}
       <Outlet />
     </>

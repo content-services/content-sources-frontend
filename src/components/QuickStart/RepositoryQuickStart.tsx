@@ -23,7 +23,7 @@ const useStyles = createUseStyles({
 
 const quickStartExpandedKey = 'QUICKSTART_EXPANDED';
 
-export default function QuickStart() {
+export default function RepositoryQuickStart() {
   const { isBeta, quickStarts } = useChrome();
   // These values only need to be computed once
   // So we wrap them in useMemos and give them an empty dependency array to prevent them from being called on every render.

@@ -3,6 +3,7 @@ import { ReactQueryTestWrapper, defaultContentItem } from '../../../../testingHe
 import { useFetchContent } from '../../../../services/Content/ContentQueries';
 import DeleteContentModal from './DeleteContentModal';
 import { ContentOrigin } from '../../../../services/Content/ContentApi';
+import { DELETE_ROUTE } from '../../../../Routes/constants';
 
 jest.mock('react-query', () => ({
   ...jest.requireActual('react-query'),
@@ -12,7 +13,7 @@ jest.mock('react-query', () => ({
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
   useLocation: () => ({
-    search: `delete-repository?${defaultContentItem.uuid}`,
+    search: `${DELETE_ROUTE}?${defaultContentItem.uuid}`,
   }),
 }));
 

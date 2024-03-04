@@ -107,7 +107,6 @@ export default function DeleteContentModal() {
         <Stack>
           <StackItem>
             <Button
-              //   className={classes.removeButton}
               key='confirm'
               ouiaId='delete_modal_confirm'
               variant='danger'
@@ -117,7 +116,7 @@ export default function DeleteContentModal() {
             >
               Remove
             </Button>
-            <Button key='cancel' variant='link' onClick={onClose} ouiaId='edit_modal_cancel'>
+            <Button key='cancel' variant='link' onClick={onClose} ouiaId='delete_modal_cancel'>
               Cancel
             </Button>
           </StackItem>

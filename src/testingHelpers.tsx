@@ -5,10 +5,12 @@ import {
   Meta,
   PopularRepository,
   RepositoryParamsResponse,
+  SnapshotByDateResponse,
   SnapshotItem,
   ValidationResponse,
 } from './services/Content/ContentApi';
 import { AdminTask } from './services/AdminTasks/AdminTaskApi';
+import { TemplateItem } from './services/Templates/TemplateApi';
 
 const queryClient = new QueryClient({
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -235,4 +237,52 @@ export const defaultContentItemWithSnapshot: ContentItem = {
   snapshot: true,
   last_snapshot: defaultSnapshotItem,
   module_hotfixes: false,
+};
+
+export const defaultTemplateItem: TemplateItem = {
+  uuid: '50412eda-7df5-4fac-8556-278f45e2ef9b',
+  name: 'Billybob!',
+  org_id: '16758779',
+  description: 'Tatata bala tu!',
+  arch: 'aarch64',
+  version: '9',
+  date: '2024-01-22T00:00:00-07:00',
+  repository_uuids: [
+    '31c06bb4-ef1b-42f5-8c91-0ff67e7d8a1b',
+    '28b8d2b1-e4d6-4d8a-be12-1104601fb96e',
+    '053603c7-6ef0-4abe-8542-feacb8f7d575',
+  ],
+};
+
+export const defaultSnapshotsByDateResponse: SnapshotByDateResponse = {
+  repository_uuid: defaultContentItem.uuid,
+  is_after: true,
+  match: {
+    uuid: '5fbe7478-50f9-4dc3-b5f2-eb9827bb2752',
+    created_at: '2024-01-23T14:43:49.380795-07:00',
+    repository_path:
+      '096184ac/2b2aad70-d47f-4e15-bcc2-32cb5dc9ea54/bfa35d57-1224-4699-a36e-29ab3b1390f2',
+    content_counts: {
+      'rpm.advisory': 3233,
+      'rpm.modulemd': 754,
+      'rpm.modulemd_defaults': 48,
+      'rpm.package': 27792,
+      'rpm.packagecategory': 5,
+      'rpm.packageenvironment': 2,
+      'rpm.packagegroup': 51,
+      'rpm.repo_metadata_file': 1,
+    },
+    added_counts: {
+      'rpm.advisory': 3233,
+      'rpm.modulemd': 754,
+      'rpm.modulemd_defaults': 48,
+      'rpm.package': 27792,
+      'rpm.packagecategory': 5,
+      'rpm.packageenvironment': 2,
+      'rpm.packagegroup': 51,
+      'rpm.repo_metadata_file': 1,
+    },
+    removed_counts: {},
+    url: '',
+  },
 };

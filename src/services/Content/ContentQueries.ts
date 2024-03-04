@@ -33,6 +33,7 @@ import {
   ContentOrigin,
   getRepoConfigFile,
   triggerSnapshot,
+  getSnapshotsByDate,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../AdminTasks/AdminTaskQueries';
 import useErrorNotification from '../../Hooks/useErrorNotification';
@@ -48,6 +49,19 @@ export const CONTENT_ITEM_KEY = 'CONTENT_ITEM_KEY';
 export const REPO_CONFIG_FILE_KEY = 'REPO_CONFIG_FILE_KEY';
 
 const CONTENT_LIST_POLLING_TIME = 15000; // 15 seconds
+
+const buildContentListKey = (
+  page: number,
+  limit: number,
+  sortBy?: string,
+  contentOrigin?: ContentOrigin,
+  filterData?: Partial<FilterData>,
+) =>
+  `${page}${limit}${sortBy}${contentOrigin}${filterData?.arches?.join(
+    '',
+  )}${filterData?.versions?.join('')}${filterData?.urls?.join('')}${filterData?.uuids?.join(
+    '',
+  )}${filterData?.statuses?.join('')}${filterData?.availableForArch}${filterData?.availableForVersion}${filterData?.searchQuery}`;
 
 export const useFetchContent = (uuids: string[]) => {
   const errorNotifier = useErrorNotification();
@@ -86,13 +100,14 @@ export const useContentListQuery = (
   filterData: FilterData,
   sortBy: string,
   contentOrigin: ContentOrigin = ContentOrigin.EXTERNAL,
+  enabled?: boolean,
 ) => {
   const [polling, setPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
   const errorNotifier = useErrorNotification();
   return useQuery<ContentListResponse>(
     // Below MUST match the "contentListKeyArray" seen below in the useDeleteContent.
-    [CONTENT_LIST_KEY, page, limit, sortBy, contentOrigin, ...Object.values(filterData)],
+    [CONTENT_LIST_KEY, buildContentListKey(page, limit, sortBy, contentOrigin, filterData)],
     () => getContentList(page, limit, filterData, sortBy, contentOrigin),
     {
       onSuccess: (data) => {
@@ -124,6 +139,7 @@ export const useContentListQuery = (
       refetchOnWindowFocus: polling, // If polling and navigate to another tab, on refocus, we want to poll once more. (This is based off of the stalestime below)
       keepPreviousData: true,
       staleTime: 20000,
+      enabled,
     },
   );
 };
@@ -314,11 +330,7 @@ export const useDeleteContentItemMutate = (
   // Below MUST match the "useContentList" key found above or updates will fail.
   const contentListKeyArray = [
     CONTENT_LIST_KEY,
-    page,
-    perPage,
-    sortString,
-    contentOrigin,
-    ...Object.values(filterData || {}),
+    buildContentListKey(page, perPage, sortString, contentOrigin, filterData),
   ];
   const errorNotifier = useErrorNotification();
   return useMutation(deleteContentListItem, {
@@ -378,6 +390,7 @@ export const useBulkDeleteContentItemMutate = (
   selected: Set<string>,
   page: number,
   perPage: number,
+  contentOrigin: ContentOrigin,
   filterData?: FilterData,
   sortString?: string,
 ) => {
@@ -385,10 +398,7 @@ export const useBulkDeleteContentItemMutate = (
   // Below MUST match the "useContentList" key found above or updates will fail.
   const contentListKeyArray = [
     CONTENT_LIST_KEY,
-    page,
-    perPage,
-    sortString,
-    ...Object.values(filterData || {}),
+    buildContentListKey(page, perPage, sortString, contentOrigin, filterData),
   ];
   const errorNotifier = useErrorNotification();
   return useMutation(() => deleteContentListItems(uuids), {
@@ -438,6 +448,15 @@ export const useBulkDeleteContentItemMutate = (
         };
         queryClient.setQueryData(contentListKeyArray, previousData);
       }
+      errorNotifier('Error deleting items from content list', 'An error occurred', err);
+    },
+  });
+};
+
+export const useGetSnapshotsByDates = (uuids: string[], date: string) => {
+  const errorNotifier = useErrorNotification();
+  return useMutation(() => getSnapshotsByDate(uuids, date), {
+    onError: (err) => {
       errorNotifier('Error deleting items from content list', 'An error occurred', err);
     },
   });
@@ -537,16 +556,14 @@ export const useIntrospectRepositoryMutate = (
   queryClient: QueryClient,
   page: number,
   perPage: number,
+  contentOrigin: ContentOrigin,
   filterData?: FilterData,
   sortString?: string,
 ) => {
   // Below MUST match the "useContentList" key found above or updates will fail.
   const contentListKeyArray = [
     CONTENT_LIST_KEY,
-    page,
-    perPage,
-    sortString,
-    ...Object.values(filterData || {}),
+    buildContentListKey(page, perPage, sortString, contentOrigin, filterData),
   ];
   const errorNotifier = useErrorNotification();
   const { notify } = useNotification();

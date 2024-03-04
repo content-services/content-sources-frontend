@@ -39,6 +39,7 @@ import {
   useBulkDeleteContentItemMutate,
 } from '../../services/Content/ContentQueries';
 import {
+  ContentOrigin,
   CreateContentRequest,
   CreateContentRequestItem,
   FilterData,
@@ -297,6 +298,7 @@ const PopularRepositoriesTable = () => {
     checkedRepositoriesToDelete,
     page,
     perPage,
+    ContentOrigin.EXTERNAL,
     { searchQuery: debouncedSearchValue } as FilterData,
     undefined, // sort string
   );

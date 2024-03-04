@@ -7,6 +7,7 @@ import { useFetchFeaturesQuery } from '../services/Features/FeatureQueries';
 import { fetchRBAC, Rbac } from './RbacUtils';
 import { ContentOrigin } from '../services/Content/ContentApi';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
+import { ChromeAPI } from '@redhat-cloud-services/types';
 
 const getRegistry = _getRegistry as unknown as () => { register: ({ notifications }) => void };
 const { appname } = PackageJson.insights;
@@ -17,6 +18,7 @@ export interface AppContextInterface {
   isFetchingFeatures: boolean;
   contentOrigin: ContentOrigin;
   setContentOrigin: (contentOrigin: ContentOrigin) => void;
+  chrome?: ChromeAPI;
 }
 export const AppContext = createContext({} as AppContextInterface);
 
@@ -40,9 +42,9 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     (async () => {
       const fetchedFeatures = await fetchFeatures();
       // Disable snapshotting in prod stable
-      if (chrome.isProd() && !chrome.isBeta() && fetchedFeatures?. snapshots?.accessible) {
+      if (chrome.isProd() && !chrome.isBeta() && fetchedFeatures?.snapshots?.accessible) {
         if (fetchedFeatures !== null && fetchedFeatures.snapshots !== undefined) {
-          fetchedFeatures.snapshots.accessible = false
+          fetchedFeatures.snapshots.accessible = false;
         }
       }
       setFeatures(fetchedFeatures);
@@ -62,6 +64,7 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
         isFetchingFeatures: isFetchingFeatures,
         contentOrigin,
         setContentOrigin,
+        chrome: chrome as ChromeAPI,
       }}
     >
       {children}

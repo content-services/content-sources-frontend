@@ -3,9 +3,13 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { createUseStyles } from 'react-jss';
 import { ErrorPage } from '../components/Error/ErrorPage';
-import Layout from './Layout';
+import RepositoryLayout from './Repositories/RepositoryLayout';
 import { useMemo } from 'react';
-import useTabbedRoutes, { DEFAULT_ROUTE } from './useTabbedRoutes';
+import useRepositoryRoutes from './Repositories/useRepositoryRoutes';
+import { REPOSITORIES_ROUTE } from './constants';
+import useTemplateRoutes from './Templates/useTemplateRoutes';
+import TemplateLayout from './Templates/TemplateLayout';
+import { useAppContext } from '../middleware/AppContext';
 
 const useStyles = createUseStyles({
   containerMargin: {
@@ -13,15 +17,17 @@ const useStyles = createUseStyles({
   },
 });
 
-export default function MainRoutes() {
+export default function RepositoriesRoutes() {
   const classes = useStyles();
   const key = useMemo(() => Math.random(), []);
-  const tabs = useTabbedRoutes();
+  const repositoryRoutes = useRepositoryRoutes();
+  const templateRoutes = useTemplateRoutes();
+  const { features } = useAppContext();
 
   return (
     <Routes key={key}>
-      <Route element={<Layout tabs={tabs} />}>
-        {tabs.map(({ route, Element, ChildRoutes }, key) => (
+      <Route element={<RepositoryLayout tabs={repositoryRoutes} />}>
+        {repositoryRoutes.map(({ route, Element, ChildRoutes }, key) => (
           <Route
             key={key.toString()}
             path={route}
@@ -38,8 +44,31 @@ export default function MainRoutes() {
             ))}
           </Route>
         ))}
-        <Route path='*' element={<Navigate to={DEFAULT_ROUTE} replace />} />
       </Route>
+      {features?.snapshots?.accessible ? (
+        <Route element={<TemplateLayout />}>
+          {templateRoutes.map(({ route, Element, ChildRoutes }, key) => (
+            <Route
+              key={key.toString()}
+              path={route}
+              element={
+                <ErrorPage>
+                  <Grid className={classes.containerMargin}>
+                    <Element />
+                  </Grid>
+                </ErrorPage>
+              }
+            >
+              {ChildRoutes?.map(({ path, Element: ChildRouteElement }, childRouteKey) => (
+                <Route key={childRouteKey} path={path} element={<ChildRouteElement />} />
+              ))}
+            </Route>
+          ))}
+        </Route>
+      ) : (
+        <></>
+      )}
+      <Route path='*' element={<Navigate to={REPOSITORIES_ROUTE} replace />} />
     </Routes>
   );
 }

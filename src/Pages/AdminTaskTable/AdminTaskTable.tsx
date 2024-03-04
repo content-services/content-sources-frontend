@@ -25,11 +25,11 @@ import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from '../../components/Hide/Hide';
 import EmptyTableState from '../../components/EmptyTableState/EmptyTableState';
 import AdminTaskFilters from './components/AdminTaskFilters';
-import dayjs from 'dayjs';
 import StatusIcon from './components/StatusIcon';
 import { useAdminTaskListQuery } from '../../services/AdminTasks/AdminTaskQueries';
 import { AdminTaskFilterData, AdminTask } from '../../services/AdminTasks/AdminTaskApi';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { formatDateToHumanReadable } from '../../helpers';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -55,8 +55,6 @@ const useStyles = createUseStyles({
   },
 });
 
-export const formatDate = (date: string): string => dayjs(date).format('DD MMM YYYY HH:mm UTCZ');
-
 const perPageKey = 'adminTaskPerPage';
 
 const AdminTaskTable = () => {
@@ -77,7 +75,7 @@ const AdminTaskTable = () => {
   const clearFilters = () => setFilterData({ statuses: [], accountId: '', orgId: '' });
 
   const notFiltered =
-    filterData.statuses.length === 0 && filterData.accountId === '' && filterData.orgId === '';
+    filterData.statuses?.length === 0 && filterData.accountId === '' && filterData.orgId === '';
 
   const columnSortAttributes = [
     'org_id',
@@ -215,7 +213,7 @@ const AdminTaskTable = () => {
                   <Td>{adminTask.org_id}</Td>
                   <Td>{adminTask.account_id ? adminTask.account_id : 'Unknown'}</Td>
                   <Td>{adminTask.typename}</Td>
-                  <Td>{formatDate(adminTask.queued_at)}</Td>
+                  <Td>{formatDateToHumanReadable(adminTask.queued_at)}</Td>
                   <Td>
                     <StatusIcon status={adminTask.status} />
                   </Td>
