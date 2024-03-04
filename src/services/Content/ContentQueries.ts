@@ -34,6 +34,7 @@ import {
   getRepoConfigFile,
   triggerSnapshot,
   getSnapshotsByDate,
+  getSnapshotPackages,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../AdminTasks/AdminTaskQueries';
 import useErrorNotification from '../../Hooks/useErrorNotification';
@@ -603,6 +604,29 @@ export const useGetPackagesQuery = (
           err,
           'packages-list-error',
         );
+      },
+    },
+  );
+};
+
+export const useGetSnapshotPackagesQuery = (
+  snap_uuid: string,
+  page: number,
+  limit: number,
+  searchQuery: string,
+  sortBy: string,
+) => {
+  const errorNotifier = useErrorNotification();
+  return useQuery<PackagesResponse>(
+    [PACKAGES_KEY, snap_uuid, page, limit, searchQuery, sortBy],
+    () => getSnapshotPackages(snap_uuid, page, limit, searchQuery, sortBy),
+    {
+      keepPreviousData: true,
+      optimisticResults: true,
+      staleTime: 60000,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError: (err: any) => {
+        errorNotifier('Unable to find packages with the given UUID.', 'An error occurred', err);
       },
     },
   );

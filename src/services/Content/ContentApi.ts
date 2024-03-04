@@ -410,3 +410,24 @@ export const getRepoConfigFile: (
   );
   return data;
 };
+
+export const getSnapshotPackages: (
+  snap_uuid: string,
+  page: number,
+  limit: number,
+  searchQuery: string,
+  sortBy: string,
+) => Promise<PackagesResponse> = async (
+  snap_uuid: string,
+  page: number,
+  limit: number,
+  searchQuery: string,
+  sortBy: string,
+) => {
+  const { data } = await axios.get(
+    `/api/content-sources/v1/snapshots/${snap_uuid}/rpms?offset=${
+      (page - 1) * limit
+    }&limit=${limit}&search=${searchQuery}&sort_by=${sortBy}`,
+  );
+  return data;
+};
