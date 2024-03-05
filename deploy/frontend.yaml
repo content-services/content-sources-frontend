@@ -16,35 +16,24 @@ objects:
           - v1
       frontend:
         paths:
-          - /apps/content-sources # TODO ensure this matches routes?
+          - /apps/content-sources
       image: ${IMAGE}:${IMAGE_TAG}
       navItems:
-        - appId: 'content-sources'
-          title: 'Repositories'
-          href: '/settings/content/repositories'
-          product: 'Content'
-        - appId: 'content-sources'
-          title: 'Templates'
-          href: '/settings/content/templates'
-          product: 'Content'
+        - appId: "content-sources"
+          title: "Repositories"
+          href: "/insights/content/repositories"
+          product: "Content"
+        - appId: "content-sources"
+          title: "Templates"
+          href: "/insights/content/templates"
+          product: "Content"
       module:
-        manifestLocation: '/apps/content-sources/fed-mods.json'
+        manifestLocation: "/apps/content-sources/fed-mods.json"
         modules:
-          - id: 'insights-content-sources' # This should likely match: https://github.com/RedHatInsights/cloud-services-config/blob/ci-beta/chrome/fed-modules.json#L776
-            module: './RootApp'
+          - id: "insights-content-sources"
+            module: "./RootApp"
             routes:
-              - appId: 'content'
-                title: 'Repositories'
-                href: '/settings/content/repositories'
-              - appId: 'content'
-                title: 'Repositories'
-                href: '/insights/content/repositories'
-              - appId: 'content'
-                title: 'Templates'
-                href: '/settings/content/templates'
-              - appId: 'content'
-                title: 'Templates'
-                href: '/insights/content/templates'
+              - pathname: /insights/content
 
 parameters:
   - name: ENV_NAME
