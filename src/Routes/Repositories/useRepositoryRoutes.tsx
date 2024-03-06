@@ -18,6 +18,7 @@ import {
   REPOSITORIES_ROUTE,
   TabbedRouteItem,
 } from '../constants';
+import SnapshotDetailsModal from '../../Pages/ContentListTable/components/SnapshotDetailsModal/SnapshotDetailsModal';
 
 export default function useRepositoryRoutes(): TabbedRouteItem[] {
   const { features, rbac } = useAppContext();
@@ -39,7 +40,10 @@ export default function useRepositoryRoutes(): TabbedRouteItem[] {
               ]
             : []),
           ...(features?.snapshots?.enabled && features.snapshots?.accessible
-            ? [{ path: ':repoUUID/snapshots', Element: SnapshotListModal }]
+            ? [
+                { path: ':repoUUID/snapshots', Element: SnapshotListModal },
+                { path: ':repoUUID/snapshots/:snapshotUUID', Element: SnapshotDetailsModal },
+              ]
             : []),
           { path: ':repoUUID/packages', Element: PackageModal },
         ],
