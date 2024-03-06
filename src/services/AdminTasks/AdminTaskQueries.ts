@@ -49,7 +49,12 @@ export const useAdminTaskListQuery = (
       onError: (err: any) => {
         setPolling(false);
         setPollCount(0);
-        errorNotifier('Unable to get admin task list', 'An error occurred', err);
+        errorNotifier(
+          'Unable to get admin task list',
+          'An error occurred',
+          err,
+          'admin-task-list-error',
+        );
       },
       refetchInterval: polling ? ADMIN_TASK_LIST_POLLING_TIME : undefined,
       refetchIntervalInBackground: false, // This prevents endless polling when our app isn't the focus tab in a browser
@@ -72,6 +77,7 @@ export const useFetchAdminTaskQuery = (uuid?: string) => {
           'Unable to find an Admin task with the given UUID.',
           'An error occurred',
           err,
+          'fetch-admin-task-error',
         );
       },
       keepPreviousData: true,
