@@ -52,8 +52,8 @@ export default function DefineContentStep() {
     <Grid hasGutter>
       <Title headingLevel='h1'>Define template content</Title>
       <Text component={TextVariants.h6}>
-        Templates provide consistent content across environments and time by enabling you
-        to control the scope of package and advisory updates to be installed on selected systems.
+        Templates provide consistent content across environments and time by enabling you to control
+        the scope of package and advisory updates to be installed on selected systems.
       </Text>
       <GridItem>
         <Text component={TextVariants.h6}>

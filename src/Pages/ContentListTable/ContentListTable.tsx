@@ -301,7 +301,10 @@ const ContentListTable = () => {
                   },
                   {
                     id: 'actions-column-snapshot',
-                    className: (actionTakingPlace || rowData?.status === 'Retrying' || !rowData.snapshot) ? classes.disabledButton : '',
+                    className:
+                      actionTakingPlace || rowData?.status === 'Retrying' || !rowData.snapshot
+                        ? classes.disabledButton
+                        : '',
                     isDisabled:
                       actionTakingPlace || rowData?.status === 'Retrying' || !rowData.snapshot,
                     title: 'Trigger snapshot',

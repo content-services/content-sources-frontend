@@ -235,8 +235,13 @@ const AddContent = () => {
   };
 
   const updateVariable = (index: number, newValue, callback?: () => void) => {
-    // ensures no unnecessary validation occurs 
-    if (newValue['name'] || newValue['url'] || newValue['gpgKey'] || newValue['metadataVerification']) {
+    // ensures no unnecessary validation occurs
+    if (
+      newValue['name'] ||
+      newValue['url'] ||
+      newValue['gpgKey'] ||
+      newValue['metadataVerification']
+    ) {
       setChangeVerified(false);
     }
     const updatedData = [...formik.values];
@@ -648,8 +653,8 @@ const AddContent = () => {
                         toggleId={'versionSelection' + index}
                         options={Object.keys(distributionVersions)}
                         variant={SelectVariant.typeaheadMulti}
-                        selectedProp={Object.keys(distributionVersions).filter(
-                          (key: string) => versions?.includes(distributionVersions[key]),
+                        selectedProp={Object.keys(distributionVersions).filter((key: string) =>
+                          versions?.includes(distributionVersions[key]),
                         )}
                         placeholderText={versions?.length ? '' : 'Any version'}
                         setSelected={(value) => setVersionSelected(value, index)}
