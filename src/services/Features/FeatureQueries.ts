@@ -13,7 +13,7 @@ export const useFetchFeaturesQuery = () => {
       features = await getFeatures();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      errorNotifier('Error fetching features', 'An error occurred', err);
+      errorNotifier('Error fetching features', 'An error occurred', err, 'fetch-features-error');
     }
     setIsLoading(false);
     return features;

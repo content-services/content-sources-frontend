@@ -27,13 +27,19 @@ export const useEditTemplateQuery = (queryClient: QueryClient, request: EditTemp
       notify({
         variant: AlertVariant.success,
         title: `Successfully edited template '${request.name}'`,
+        id: 'edit-template-success',
       });
 
       queryClient.invalidateQueries(GET_TEMPLATES_KEY);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
-      errorNotifier(`Error editing template '${request.name}'`, 'An error occurred', err);
+      errorNotifier(
+        `Error editing template '${request.name}'`,
+        'An error occurred',
+        err,
+        'edit-template-error',
+      );
     },
   });
 };
@@ -43,7 +49,12 @@ export const useFetchTemplate = (uuid: string, enabled: boolean = true) => {
   return useQuery<TemplateItem>([FETCH_TEMPLATE_KEY, uuid], () => fetchTemplate(uuid), {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) =>
-      errorNotifier('Unable to find associated content template.', 'An error occurred', err),
+      errorNotifier(
+        'Unable to find associated content template.',
+        'An error occurred',
+        err,
+        'fetch-template-error',
+      ),
     keepPreviousData: true,
     staleTime: 20000,
     enabled,
@@ -63,7 +74,12 @@ export const useTemplateList = (
     () => getTemplates(page, limit, sortBy, filterData),
     {
       onError: (err) => {
-        errorNotifier('Unable to get content template list', 'An error occurred', err);
+        errorNotifier(
+          'Unable to get content template list',
+          'An error occurred',
+          err,
+          'template-list-error',
+        );
       },
       keepPreviousData: true,
       staleTime: 20000,
@@ -79,6 +95,7 @@ export const useCreateTemplateQuery = (queryClient: QueryClient, request: Templa
       notify({
         variant: AlertVariant.success,
         title: `Content Template "${request?.name}" created`,
+        id: 'create-template-success',
       });
 
       queryClient.invalidateQueries(GET_TEMPLATES_KEY);
@@ -86,7 +103,12 @@ export const useCreateTemplateQuery = (queryClient: QueryClient, request: Templa
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
-      errorNotifier('Error creating content template', 'An error occurred', err);
+      errorNotifier(
+        'Error creating content template',
+        'An error occurred',
+        err,
+        'create-template-error',
+      );
     },
   });
 };
@@ -155,7 +177,12 @@ export const useDeleteTemplateItemMutate = (
         };
         queryClient.setQueryData(contentListKeyArray, previousData);
       }
-      errorNotifier('Unable to delete the given template.', 'An error occurred', err);
+      errorNotifier(
+        'Unable to delete the given template.',
+        'An error occurred',
+        err,
+        'delete-template-error',
+      );
     },
   });
 };

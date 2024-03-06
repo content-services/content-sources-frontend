@@ -68,7 +68,12 @@ export const useFetchContent = (uuids: string[]) => {
   return useQuery<ContentItem>([CONTENT_ITEM_KEY, ...uuids], () => fetchContentItem(uuids[0]), {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) =>
-      errorNotifier('Unable to find associated repository.', 'An error occurred', err),
+      errorNotifier(
+        'Unable to find associated repository.',
+        'An error occurred',
+        err,
+        'fetch-content-error',
+      ),
     keepPreviousData: true,
     staleTime: 20000,
   });
@@ -89,7 +94,12 @@ export const usePopularRepositoriesQuery = (
       staleTime: 20000,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) =>
-        errorNotifier('Unable to get popular repositories list', 'An error occurred', err),
+        errorNotifier(
+          'Unable to get popular repositories list',
+          'An error occurred',
+          err,
+          'popular-repository-error',
+        ),
     },
   );
 };
@@ -132,7 +142,12 @@ export const useContentListQuery = (
       onError: (err) => {
         setPolling(false);
         setPollCount(0);
-        errorNotifier('Unable to get repositories list', 'An error occurred', err);
+        errorNotifier(
+          'Unable to get repositories list',
+          'An error occurred',
+          err,
+          'content-list-error',
+        );
       },
       refetchInterval: polling ? CONTENT_LIST_POLLING_TIME : undefined,
       refetchIntervalInBackground: false, // This prevents endless polling when our app isn't the focus tab in a browser
@@ -160,6 +175,7 @@ export const useAddContentQuery = (queryClient: QueryClient, request: CreateCont
         description: hasPending
           ? 'Repository introspection in progress'
           : 'Repository introspection data already available',
+        id: 'add-content-success',
       });
 
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
@@ -168,7 +184,12 @@ export const useAddContentQuery = (queryClient: QueryClient, request: CreateCont
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
-      errorNotifier('Error adding items to content list', 'An error occurred', err);
+      errorNotifier(
+        'Error adding items to content list',
+        'An error occurred',
+        err,
+        'add-content-error',
+      );
     },
   });
 };
@@ -218,6 +239,7 @@ export const useAddPopularRepositoryQuery = (
         description: hasPending
           ? 'Repository introspection in progress'
           : 'Repository introspection data already available',
+        id: 'add-popular-repo-success',
       });
 
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
@@ -231,7 +253,12 @@ export const useAddPopularRepositoryQuery = (
         };
         queryClient.setQueryData(popularRepositoriesKeyArray, previousData);
       }
-      errorNotifier('Error adding item from popularRepo', 'An error occurred', err);
+      errorNotifier(
+        'Error adding item from popularRepo',
+        'An error occurred',
+        err,
+        'add-popular-repo-error',
+      );
     },
   });
 };
@@ -244,6 +271,7 @@ export const useEditContentQuery = (queryClient: QueryClient, request: EditConte
       notify({
         variant: AlertVariant.success,
         title: `Successfully edited ${request.length} ${request.length > 1 ? 'items' : 'item'}`,
+        id: 'edit-content-success',
       });
 
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
@@ -252,7 +280,12 @@ export const useEditContentQuery = (queryClient: QueryClient, request: EditConte
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
-      errorNotifier('Error editing items on content list', 'An error occurred', err);
+      errorNotifier(
+        'Error editing items on content list',
+        'An error occurred',
+        err,
+        'edit-content-error',
+      );
     },
   });
 };
@@ -261,7 +294,12 @@ export const useValidateContentList = () => {
   const errorNotifier = useErrorNotification();
   return useMutation((request: CreateContentRequest) => validateContentListItems(request), {
     onError: (err) => {
-      errorNotifier('Error validating form fields', 'An error occurred', err);
+      errorNotifier(
+        'Error validating form fields',
+        'An error occurred',
+        err,
+        'validate-content-error',
+      );
     },
   });
 };
@@ -314,7 +352,12 @@ export const useDeletePopularRepositoryMutate = (
         };
         queryClient.setQueryData(popularRepositoriesKeyArray, previousData);
       }
-      errorNotifier('Unable to delete the given repository.', 'An error occurred', err);
+      errorNotifier(
+        'Unable to delete the given repository.',
+        'An error occurred',
+        err,
+        'delete-popular-repository-error',
+      );
     },
   });
 };
@@ -380,7 +423,12 @@ export const useDeleteContentItemMutate = (
         };
         queryClient.setQueryData(contentListKeyArray, previousData);
       }
-      errorNotifier('Unable to delete the given repository.', 'An error occurred', err);
+      errorNotifier(
+        'Unable to delete the given repository.',
+        'An error occurred',
+        err,
+        'delete-content-item-error',
+      );
     },
   });
 };
@@ -448,7 +496,12 @@ export const useBulkDeleteContentItemMutate = (
         };
         queryClient.setQueryData(contentListKeyArray, previousData);
       }
-      errorNotifier('Error deleting items from content list', 'An error occurred', err);
+      errorNotifier(
+        'Error deleting items from content list',
+        'An error occurred',
+        err,
+        'bulk-delete-error',
+      );
     },
   });
 };
@@ -457,7 +510,12 @@ export const useGetSnapshotsByDates = (uuids: string[], date: string) => {
   const errorNotifier = useErrorNotification();
   return useMutation(() => getSnapshotsByDate(uuids, date), {
     onError: (err) => {
-      errorNotifier('Error deleting items from content list', 'An error occurred', err);
+      errorNotifier(
+        'Error deleting items from content list',
+        'An error occurred',
+        err,
+        'snapshot-by-date-error',
+      );
     },
   });
 };
@@ -480,7 +538,12 @@ export const useFetchGpgKey = () => {
       gpg_key = data.gpg_key;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      errorNotifier('Error fetching GPG key from provided URL', 'An error occurred', err);
+      errorNotifier(
+        'Error fetching GPG key from provided URL',
+        'An error occurred',
+        err,
+        'fetch-gpgkey-error',
+      );
     }
     setIsLoading(false);
     return gpg_key;
@@ -506,7 +569,12 @@ export const useGetSnapshotList = (
       staleTime: 60000,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
-        errorNotifier('Unable to find snapshots with the given UUID.', 'An error occurred', err);
+        errorNotifier(
+          'Unable to find snapshots with the given UUID.',
+          'An error occurred',
+          err,
+          'snapshot-list-error',
+        );
       },
     },
   );
@@ -529,7 +597,12 @@ export const useGetPackagesQuery = (
       staleTime: 60000,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
-        errorNotifier('Unable to find packages with the given UUID.', 'An error occurred', err);
+        errorNotifier(
+          'Unable to find packages with the given UUID.',
+          'An error occurred',
+          err,
+          'packages-list-error',
+        );
       },
     },
   );
@@ -543,11 +616,17 @@ export const useTriggerSnapshot = (queryClient: QueryClient) => {
       notify({
         variant: AlertVariant.success,
         title: 'Snapshot triggered successfully',
+        id: 'trigger-snapshot-success',
       });
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
     },
     onError: (err) => {
-      errorNotifier('Error triggering snapshot', 'An error occurred', err);
+      errorNotifier(
+        'Error triggering snapshot',
+        'An error occurred',
+        err,
+        'trigger-snapshot-error',
+      );
     },
   });
 };
@@ -594,6 +673,7 @@ export const useIntrospectRepositoryMutate = (
       notify({
         variant: AlertVariant.success,
         title: 'Repository introspection in progress',
+        id: 'introspect-repository-success',
       });
       queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
     },
@@ -606,7 +686,12 @@ export const useIntrospectRepositoryMutate = (
         };
         queryClient.setQueryData(contentListKeyArray, previousData);
       }
-      errorNotifier('Error introspecting repository', 'An error occurred', err);
+      errorNotifier(
+        'Error introspecting repository',
+        'An error occurred',
+        err,
+        'introspect-repository-error',
+      );
     },
   });
 };
@@ -619,7 +704,12 @@ export const useGetRepoConfigFileQuery = (repo_uuid: string, snapshot_uuid: stri
     {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
-        errorNotifier('Unable to find config.repo with the given UUID.', 'An error occurred', err);
+        errorNotifier(
+          'Unable to find config.repo with the given UUID.',
+          'An error occurred',
+          err,
+          'repo-config-error',
+        );
       },
     },
   );
