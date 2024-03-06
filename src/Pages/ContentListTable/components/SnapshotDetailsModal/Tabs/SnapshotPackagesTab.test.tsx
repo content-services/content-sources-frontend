@@ -1,7 +1,6 @@
 import { render } from '@testing-library/react';
 import { ContentOrigin, PackageItem } from '../../../../../services/Content/ContentApi';
 import { useGetSnapshotPackagesQuery } from '../../../../../services/Content/ContentQueries';
-import { ReactQueryTestWrapper } from '../../../../../testingHelpers';
 import { SnapshotPackagesTab } from './SnapshotPackagesTab';
 
 const packageItem: PackageItem = {
