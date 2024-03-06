@@ -16,7 +16,7 @@ import { useAppContext } from '../../../../middleware/AppContext';
 import { useState } from 'react';
 import { SnapshotPackagesTab } from './Tabs/SnapshotPackagesTab';
 import { createUseStyles } from 'react-jss';
-import { SnapshotSelector } from './SnapshotsSelector';
+import { SnapshotSelector } from './SnapshotSelector';
 
 const useStyles = createUseStyles({
   modalBody: {

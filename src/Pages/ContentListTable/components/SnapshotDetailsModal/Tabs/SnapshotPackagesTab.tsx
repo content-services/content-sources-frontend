@@ -11,7 +11,7 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 import { TableVariant, Table, Thead, Tr, Th, Tbody, Td, ThProps } from '@patternfly/react-table';
-import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
+import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from '../../../../../components/Hide/Hide';
 import { ContentOrigin, PackageItem } from '../../../../../services/Content/ContentApi';
 import EmptyPackageState from '../../PackageModal/components/EmptyPackageState';
