@@ -402,9 +402,9 @@ export const triggerSnapshot: (repositoryUUID: string) => Promise<void> = async 
   return data;
 };
 
-export const getRepoConfigFile: (
-  snapshot_uuid: string,
-) => Promise<string> = async (snapshot_uuid) => {
+export const getRepoConfigFile: (snapshot_uuid: string) => Promise<string> = async (
+  snapshot_uuid,
+) => {
   const { data } = await axios.get(
     `/api/content-sources/v1/snapshots/${snapshot_uuid}/config.repo`,
   );
