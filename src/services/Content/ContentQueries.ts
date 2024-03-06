@@ -626,7 +626,12 @@ export const useGetSnapshotPackagesQuery = (
       staleTime: 60000,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
-        errorNotifier('Unable to find packages with the given UUID.', 'An error occurred', err);
+        errorNotifier(
+          'Unable to find packages with the given UUID.',
+          'An error occurred',
+          err,
+          'snapshot-package-list-error',
+        );
       },
     },
   );
