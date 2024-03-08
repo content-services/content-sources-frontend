@@ -161,7 +161,7 @@ const ContentListTable = () => {
       activeSortIndex === -1
         ? ''
         : columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
-    [],
+    [activeSortIndex, activeSortDirection],
   );
 
   const {
