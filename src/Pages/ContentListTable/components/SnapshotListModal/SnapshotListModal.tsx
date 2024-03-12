@@ -38,6 +38,7 @@ import ChangedArrows from './components/ChangedArrows';
 import { SearchIcon } from '@patternfly/react-icons';
 import { useAppContext } from '../../../../middleware/AppContext';
 import RepoConfig from './components/RepoConfig';
+import { REPOSITORIES_ROUTE } from '../../../../Routes/constants';
 
 const useStyles = createUseStyles({
   description: {
@@ -249,7 +250,11 @@ export default function SnapshotListModal() {
                         <Button
                           variant='link'
                           isInline
-                          onClick={() => navigate(`${rootPath}/${uuid}/snapshots/${snap_uuid}`)}
+                          onClick={() =>
+                            navigate(
+                              `${rootPath}/${REPOSITORIES_ROUTE}/${uuid}/snapshots/${snap_uuid}`,
+                            )
+                          }
                         >
                           {content_counts?.['rpm.package'] || 0}
                         </Button>

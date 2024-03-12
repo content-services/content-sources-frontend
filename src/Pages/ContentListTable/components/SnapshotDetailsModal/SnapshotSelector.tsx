@@ -6,6 +6,7 @@ import DropdownSelect from '../../../../components/DropdownSelect/DropdownSelect
 import { useGetSnapshotList } from '../../../../services/Content/ContentQueries';
 import { useMemo } from 'react';
 import useRootPath from '../../../../Hooks/useRootPath';
+import { REPOSITORIES_ROUTE } from '../../../../Routes/constants';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -37,7 +38,7 @@ export function SnapshotSelector() {
   }, [data?.data]);
 
   const setSelected = (selectedDate: string) => {
-    navigate(`${rootPath}/${uuid}/snapshots/${dateMapper[selectedDate]}`);
+    navigate(`${rootPath}/${REPOSITORIES_ROUTE}/${uuid}/snapshots/${dateMapper[selectedDate]}`);
   };
 
   return (
