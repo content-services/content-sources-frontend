@@ -614,12 +614,11 @@ export const useGetSnapshotPackagesQuery = (
   page: number,
   limit: number,
   searchQuery: string,
-  sortBy: string,
 ) => {
   const errorNotifier = useErrorNotification();
   return useQuery<PackagesResponse>(
-    [PACKAGES_KEY, snap_uuid, page, limit, searchQuery, sortBy],
-    () => getSnapshotPackages(snap_uuid, page, limit, searchQuery, sortBy),
+    [PACKAGES_KEY, snap_uuid, page, limit, searchQuery],
+    () => getSnapshotPackages(snap_uuid, page, limit, searchQuery),
     {
       keepPreviousData: true,
       optimisticResults: true,

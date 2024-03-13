@@ -10,14 +10,14 @@ import {
   PaginationVariant,
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
-import { TableVariant, Table, Thead, Tr, Th, Tbody, Td, ThProps } from '@patternfly/react-table';
+import { TableVariant, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from '../../../../../components/Hide/Hide';
 import { ContentOrigin, PackageItem } from '../../../../../services/Content/ContentApi';
 import EmptyPackageState from '../../PackageModal/components/EmptyPackageState';
 import { createUseStyles } from 'react-jss';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useDebounce from '../../../../../Hooks/useDebounce';
 import useRootPath from '../../../../../Hooks/useRootPath';
@@ -60,30 +60,21 @@ export function SnapshotPackagesTab() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
-  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const columnHeaders = ['Name', 'Version', 'Release', 'Arch'];
-
-  const columnSortAttributes = ['name', 'version', 'release', 'arch'];
-
-  const sortString = useMemo(
-    () => columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
-    [activeSortIndex, activeSortDirection],
-  );
 
   const debouncedSearchQuery = useDebounce(searchQuery);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearchQuery, sortString]);
+  }, [debouncedSearchQuery]);
 
   const {
     isLoading,
     isFetching,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetSnapshotPackagesQuery(snapshotUUID, page, perPage, debouncedSearchQuery, sortString);
+  } = useGetSnapshotPackagesQuery(snapshotUUID, page, perPage, debouncedSearchQuery);
 
   useEffect(() => {
     if (isError) {
@@ -97,22 +88,6 @@ export function SnapshotPackagesTab() {
     setPerPage(newPerPage);
     setPage(newPage);
     localStorage.setItem(perPageKey, newPerPage.toString());
-  };
-
-  const sortParams = (columnIndex: number, isDisabled: boolean): ThProps['sort'] | undefined => {
-    if (isDisabled) return;
-    return {
-      sortBy: {
-        index: activeSortIndex,
-        direction: activeSortDirection,
-        defaultDirection: 'asc',
-      },
-      onSort: (_event, index, direction) => {
-        setActiveSortIndex(index);
-        setActiveSortDirection(direction);
-      },
-      columnIndex,
-    };
   };
 
   const onClose = () =>
@@ -172,10 +147,8 @@ export function SnapshotPackagesTab() {
           <Hide hide={loadingOrZeroCount}>
             <Thead>
               <Tr>
-                {columnHeaders.map((columnHeader, index) => (
-                  <Th key={columnHeader + '_column'} sort={sortParams(index, loadingOrZeroCount)}>
-                    {columnHeader}
-                  </Th>
+                {columnHeaders.map((columnHeader) => (
+                  <Th key={columnHeader + '_column'}>{columnHeader}</Th>
                 ))}
               </Tr>
             </Thead>
