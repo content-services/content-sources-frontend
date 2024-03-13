@@ -17,6 +17,7 @@ import { useState } from 'react';
 import { SnapshotPackagesTab } from './Tabs/SnapshotPackagesTab';
 import { createUseStyles } from 'react-jss';
 import { SnapshotSelector } from './SnapshotSelector';
+import { REPOSITORIES_ROUTE } from '../../../../Routes/constants';
 
 const useStyles = createUseStyles({
   modalBody: {
@@ -47,7 +48,7 @@ export default function SnapshotDetailsModal() {
   const onClose = () =>
     navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
 
-  const onBackClick = () => navigate(rootPath + `/${repoUUID}/snapshots`);
+  const onBackClick = () => navigate(rootPath + `/${REPOSITORIES_ROUTE}/${repoUUID}/snapshots`);
 
   return (
     <Modal

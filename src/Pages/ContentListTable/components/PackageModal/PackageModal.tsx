@@ -197,7 +197,7 @@ export default function PackageModal() {
             </Grid>
           </Hide>
           <Hide hide={fetchingOrLoading}>
-            <Table aria-label='Custom repositories table' ouiaId='packages_table' variant='compact'>
+            <Table aria-label='Packages table' ouiaId='packages_table' variant='compact'>
               <Hide hide={loadingOrZeroCount}>
                 <Thead>
                   <Tr>

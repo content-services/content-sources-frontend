@@ -164,7 +164,11 @@ export function SnapshotPackagesTab() {
         </Grid>
       </Hide>
       <Hide hide={fetchingOrLoading}>
-        <Table aria-label='Custom repositories table' ouiaId='packages_table' variant='compact'>
+        <Table
+          aria-label='snapshot packages table'
+          ouiaId='snapshot_packages_table'
+          variant='compact'
+        >
           <Hide hide={loadingOrZeroCount}>
             <Thead>
               <Tr>
