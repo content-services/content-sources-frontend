@@ -23,14 +23,6 @@ it('Render with Valid status', () => {
   expect(SelectComponent).toBeInTheDocument();
 });
 
-it('Render with Invalid status', () => {
-  const { queryByText } = render(
-    <StatusIcon rowData={{ ...defaultContentItem, status: 'Invalid' }} />,
-  );
-  const SelectComponent = queryByText('Invalid');
-  expect(SelectComponent).toBeInTheDocument();
-});
-
 it('Render with Unavailable status', async () => {
   const { queryByText } = render(
     <StatusIcon rowData={{ ...defaultContentItem, status: 'Unavailable' }} />,
@@ -44,6 +36,7 @@ it('Render with Unavailable status', async () => {
 
   await waitFor(() => {
     expect(queryByText('Retry')).toBeInTheDocument();
+    expect(queryByText('snapshot failed')).toBeInTheDocument();
   });
 });
 
@@ -60,5 +53,6 @@ it('Render with Invalid status', async () => {
 
   await waitFor(() => {
     expect(queryByText('Retry')).toBeInTheDocument();
+    expect(queryByText('snapshot failed')).toBeInTheDocument();
   });
 });

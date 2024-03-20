@@ -130,6 +130,38 @@ export const defaultPopularRepository: PopularRepository = {
   metadata_verification: false,
 };
 
+export const defaultIntrospectTask: AdminTask = {
+    uuid: '2375c35b-a67a-4ac2-a989-21139433c172',
+    account_id: '11593016',
+    org_id: '13446804',
+    typename: 'introspect',
+    status: 'completed',
+    queued_at: '2023-06-15T10:41:02-04:00',
+    started_at: '2023-06-15T10:42:02-04:00',
+    finished_at: '2023-06-15T10:43:02-04:00',
+    error: 'something went wrong',
+    payload: {
+      URL: 'https://example.com',
+    },
+  };
+  
+  export const defaultSnapshotTask: AdminTask = {
+    ...defaultIntrospectTask,
+    typename: 'snapshot',
+    error: 'snapshot failed',
+    pulp: {
+      sync: {
+        syncData: 'syncValue',
+      },
+      publication: {
+        publicationData: 'publicationValue',
+      },
+      distribution: {
+        distributionData: 'distributionValue',
+      },
+    },
+  };
+
 export const defaultContentItem: ContentItem = {
   uuid: '053603c7-6ef0-4abe-8542-feacb8f7d575',
   name: 'SteveTheRepo',
@@ -147,37 +179,7 @@ export const defaultContentItem: ContentItem = {
   metadata_verification: false,
   snapshot: false,
   module_hotfixes: false,
-};
-
-export const defaultIntrospectTask: AdminTask = {
-  uuid: '2375c35b-a67a-4ac2-a989-21139433c172',
-  account_id: '11593016',
-  org_id: '13446804',
-  typename: 'introspect',
-  status: 'completed',
-  queued_at: '2023-06-15T10:41:02-04:00',
-  started_at: '2023-06-15T10:42:02-04:00',
-  finished_at: '2023-06-15T10:43:02-04:00',
-  error: 'something went wrong',
-  payload: {
-    URL: 'https://example.com',
-  },
-};
-
-export const defaultSnapshotTask: AdminTask = {
-  ...defaultIntrospectTask,
-  typename: 'snapshot',
-  pulp: {
-    sync: {
-      syncData: 'syncValue',
-    },
-    publication: {
-      publicationData: 'publicationValue',
-    },
-    distribution: {
-      distributionData: 'distributionValue',
-    },
-  },
+  last_snapshot_task: defaultSnapshotTask,
 };
 
 export const defaultMetaItem: Meta = {
