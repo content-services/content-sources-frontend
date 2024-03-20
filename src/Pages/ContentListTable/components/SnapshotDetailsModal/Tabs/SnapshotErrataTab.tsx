@@ -2,25 +2,25 @@ import {
   Grid,
   InputGroup,
   InputGroupItem,
-  TextInput,
   InputGroupText,
   Pagination,
   Flex,
   FlexItem,
   PaginationVariant,
+  TextInput,
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 import Hide from '../../../../../components/Hide/Hide';
 import { ContentOrigin } from '../../../../../services/Content/ContentApi';
 import { createUseStyles } from 'react-jss';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useDebounce from '../../../../../Hooks/useDebounce';
 import useRootPath from '../../../../../Hooks/useRootPath';
 import { useAppContext } from '../../../../../middleware/AppContext';
-import { useGetSnapshotPackagesQuery } from '../../../../../services/Content/ContentQueries';
-import PackagesTable from '../../../../../components/SharedTables/PackagesTable';
+import { useGetSnapshotErrataQuery } from '../../../../../services/Content/ContentQueries';
+import ErrataTable from '../../../../../components/SharedTables/ErrataTable';
 
 const useStyles = createUseStyles({
   description: {
@@ -45,9 +45,9 @@ const useStyles = createUseStyles({
   },
 });
 
-const perPageKey = 'snapshotPackagePerPage';
+const perPageKey = 'snapshotErrataPerPage';
 
-export function SnapshotPackagesTab() {
+export function SnapshotErrataTab() {
   const classes = useStyles();
   const { contentOrigin } = useAppContext();
 
@@ -57,20 +57,34 @@ export function SnapshotPackagesTab() {
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [errataId, setErrataId] = useState('');
+  const [type, setType] = useState('');
+  const [severity, setSeverity] = useState('');
 
-  const debouncedSearchQuery = useDebounce(searchQuery, !searchQuery ? 0 : 500);
+  const filterValues = useMemo(() => [errataId, type, severity], [errataId, type, severity]);
+
+  const [debouncedErrataId, debouncedType, debouncedSeverity] = useDebounce(
+    filterValues,
+    !errataId && !type && !severity ? 0 : 500,
+  );
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearchQuery]);
+  }, [debouncedErrataId, debouncedType, debouncedSeverity]);
 
   const {
     isLoading,
     isFetching,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetSnapshotPackagesQuery(snapshotUUID, page, perPage, debouncedSearchQuery);
+  } = useGetSnapshotErrataQuery(
+    snapshotUUID,
+    page,
+    perPage,
+    debouncedErrataId,
+    debouncedType,
+    debouncedSeverity,
+  );
 
   useEffect(() => {
     if (isError) {
@@ -90,7 +104,7 @@ export function SnapshotPackagesTab() {
     navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
 
   const {
-    data: packagesList = [],
+    data: errataList = [],
     meta: { count = 0 },
   } = data;
 
@@ -104,9 +118,9 @@ export function SnapshotPackagesTab() {
           <TextInput
             id='search'
             ouiaId='name_search'
-            placeholder='Filter by name'
-            value={searchQuery}
-            onChange={(_event, value) => setSearchQuery(value)}
+            placeholder='Filter by errata id'
+            value={errataId}
+            onChange={(_event, value) => setErrataId(value)}
           />
           <InputGroupText id='search-icon'>
             <SearchIcon />
@@ -125,11 +139,11 @@ export function SnapshotPackagesTab() {
           />
         </Hide>
       </InputGroup>
-      <PackagesTable
-        packagesList={packagesList}
+      <ErrataTable
+        errataList={errataList}
         isFetchingOrLoading={fetchingOrLoading}
         isLoadingOrZeroCount={loadingOrZeroCount}
-        clearSearch={() => setSearchQuery('')}
+        clearSearch={() => setErrataId('')}
         perPage={perPage}
       />
       <Flex className={classes.bottomContainer}>

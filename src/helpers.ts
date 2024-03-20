@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 // Removes null values and builds url params from a given object.
 export const objectToUrlParams = (obj: { [key: string]: string | undefined }): string => {
   const keyList = Object.keys(obj).filter((key) => !!obj[key]);
-  // Check each item for falsey value and
+  // Check each item for falsey value and filter
 
   if (!keyList.length) return '';
 

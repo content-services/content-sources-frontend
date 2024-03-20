@@ -39,6 +39,7 @@ import { SearchIcon } from '@patternfly/react-icons';
 import { useAppContext } from '../../../../middleware/AppContext';
 import RepoConfig from './components/RepoConfig';
 import { REPOSITORIES_ROUTE } from '../../../../Routes/constants';
+import { SnapshotDetailTab } from '../SnapshotDetailsModal/SnapshotDetailsModal';
 
 const useStyles = createUseStyles({
   description: {
@@ -250,6 +251,7 @@ export default function SnapshotListModal() {
                         <Button
                           variant='link'
                           isInline
+                          isDisabled={!content_counts?.['rpm.package']}
                           onClick={() =>
                             navigate(
                               `${rootPath}/${REPOSITORIES_ROUTE}/${uuid}/snapshots/${snap_uuid}`,
@@ -259,7 +261,20 @@ export default function SnapshotListModal() {
                           {content_counts?.['rpm.package'] || 0}
                         </Button>
                       </Td>
-                      <Td>{content_counts?.['rpm.advisory'] || 0}</Td>
+                      <Td>
+                        <Button
+                          variant='link'
+                          isInline
+                          isDisabled={!content_counts?.['rpm.advisory']}
+                          onClick={() =>
+                            navigate(
+                              `${rootPath}/${REPOSITORIES_ROUTE}/${uuid}/snapshots/${snap_uuid}?tab=${SnapshotDetailTab.ERRATA}`,
+                            )
+                          }
+                        >
+                          {content_counts?.['rpm.advisory'] || 0}
+                        </Button>
+                      </Td>
                       <Td>
                         <RepoConfig repoUUID={uuid} snapUUID={snap_uuid} />
                       </Td>

@@ -12,30 +12,19 @@ import {
   PaginationVariant,
   TextInput,
 } from '@patternfly/react-core';
-import {
-  InnerScrollContainer,
-  Table /* data-codemods */,
-  TableVariant,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  ThProps,
-  Tr,
-} from '@patternfly/react-table';
+import { InnerScrollContainer } from '@patternfly/react-table';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from '../../../../components/Hide/Hide';
-import { ContentOrigin, PackageItem } from '../../../../services/Content/ContentApi';
+import { ContentOrigin } from '../../../../services/Content/ContentApi';
 import { useGetPackagesQuery } from '../../../../services/Content/ContentQueries';
 import { SearchIcon } from '@patternfly/react-icons';
 import useDebounce from '../../../../Hooks/useDebounce';
-import EmptyPackageState from './components/EmptyPackageState';
 import { useNavigate, useParams } from 'react-router-dom';
 import useRootPath from '../../../../Hooks/useRootPath';
 import { useAppContext } from '../../../../middleware/AppContext';
+import PackagesTable from '../../../../components/SharedTables/PackagesTable';
 
 const useStyles = createUseStyles({
   description: {
@@ -72,30 +61,19 @@ export default function PackageModal() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
-  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const columnHeaders = ['Name', 'Version', 'Release', 'Arch'];
-
-  const columnSortAttributes = ['name', 'version', 'release', 'arch'];
-
-  const sortString = useMemo(
-    () => columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
-    [activeSortIndex, activeSortDirection],
-  );
-
-  const debouncedSearchQuery = useDebounce(searchQuery);
+  const debouncedSearchQuery = useDebounce(searchQuery, !searchQuery ? 0 : 500);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearchQuery, sortString]);
+  }, [debouncedSearchQuery]);
 
   const {
     isLoading,
     isFetching,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetPackagesQuery(uuid as string, page, perPage, debouncedSearchQuery, sortString);
+  } = useGetPackagesQuery(uuid as string, page, perPage, debouncedSearchQuery);
 
   useEffect(() => {
     if (isError) {
@@ -112,27 +90,11 @@ export default function PackageModal() {
     localStorage.setItem(perPageKey, newPerPage.toString());
   };
 
-  const sortParams = (columnIndex: number, isDisabled: boolean): ThProps['sort'] | undefined => {
-    if (isDisabled) return;
-    return {
-      sortBy: {
-        index: activeSortIndex,
-        direction: activeSortDirection,
-        defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
-      },
-      onSort: (_event, index, direction) => {
-        setActiveSortIndex(index);
-        setActiveSortDirection(direction);
-      },
-      columnIndex,
-    };
-  };
-
   const onClose = () =>
     navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
 
   const {
-    data: packageList = [],
+    data: packagesList = [],
     meta: { count = 0 },
   } = data;
 
@@ -187,46 +149,13 @@ export default function PackageModal() {
               />
             </Hide>
           </InputGroup>
-          <Hide hide={!fetchingOrLoading}>
-            <Grid className={classes.mainContainer}>
-              <SkeletonTable
-                rows={perPage}
-                numberOfColumns={columnHeaders.length}
-                variant={TableVariant.compact}
-              />
-            </Grid>
-          </Hide>
-          <Hide hide={fetchingOrLoading}>
-            <Table aria-label='Packages table' ouiaId='packages_table' variant='compact'>
-              <Hide hide={loadingOrZeroCount}>
-                <Thead>
-                  <Tr>
-                    {columnHeaders.map((columnHeader, index) => (
-                      <Th
-                        key={columnHeader + '_column'}
-                        sort={sortParams(index, loadingOrZeroCount)}
-                      >
-                        {columnHeader}
-                      </Th>
-                    ))}
-                  </Tr>
-                </Thead>
-              </Hide>
-              <Tbody>
-                {packageList.map(({ name, version, release, arch }: PackageItem, index: number) => (
-                  <Tr key={name + index}>
-                    <Td>{name}</Td>
-                    <Td>{version}</Td>
-                    <Td>{release}</Td>
-                    <Td>{arch}</Td>
-                  </Tr>
-                ))}
-                <Hide hide={!loadingOrZeroCount}>
-                  <EmptyPackageState clearSearch={() => setSearchQuery('')} />
-                </Hide>
-              </Tbody>
-            </Table>
-          </Hide>
+          <PackagesTable
+            packagesList={packagesList}
+            isFetchingOrLoading={fetchingOrLoading}
+            isLoadingOrZeroCount={loadingOrZeroCount}
+            clearSearch={() => setSearchQuery('')}
+            perPage={perPage}
+          />
           <Flex className={classes.bottomContainer}>
             <FlexItem />
             <FlexItem>
