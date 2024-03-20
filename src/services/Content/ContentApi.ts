@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { objectToUrlParams } from '../../helpers';
+import { AdminTask } from '../AdminTasks/AdminTaskApi';
 
 export interface ContentItem {
   uuid: string;
@@ -21,6 +22,8 @@ export interface ContentItem {
   last_snapshot_uuid?: string;
   last_snapshot?: SnapshotItem;
   label?: string;
+  last_snapshot_task?: AdminTask;
+  last_introspection_status: string;
 }
 
 export interface PopularRepository {

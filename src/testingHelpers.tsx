@@ -130,25 +130,6 @@ export const defaultPopularRepository: PopularRepository = {
   metadata_verification: false,
 };
 
-export const defaultContentItem: ContentItem = {
-  uuid: '053603c7-6ef0-4abe-8542-feacb8f7d575',
-  name: 'SteveTheRepo',
-  package_count: 100,
-  url: 'https://stevetheRepo.org/epel/9',
-  status: 'Pending',
-  account_id: '',
-  org_id: 'acme',
-  distribution_arch: 'x86_64',
-  gpg_key: defaultPopularRepository.gpg_key,
-  distribution_versions: ['9'],
-  last_introspection_error: '',
-  last_introspection_time: '2023-03-07 17:13:48.619192 -0500 EST',
-  failed_introspections_count: 0,
-  metadata_verification: false,
-  snapshot: false,
-  module_hotfixes: false,
-};
-
 export const defaultIntrospectTask: AdminTask = {
   uuid: '2375c35b-a67a-4ac2-a989-21139433c172',
   account_id: '11593016',
@@ -167,6 +148,7 @@ export const defaultIntrospectTask: AdminTask = {
 export const defaultSnapshotTask: AdminTask = {
   ...defaultIntrospectTask,
   typename: 'snapshot',
+  error: 'snapshot failed',
   pulp: {
     sync: {
       syncData: 'syncValue',
@@ -178,6 +160,27 @@ export const defaultSnapshotTask: AdminTask = {
       distributionData: 'distributionValue',
     },
   },
+};
+
+export const defaultContentItem: ContentItem = {
+  uuid: '053603c7-6ef0-4abe-8542-feacb8f7d575',
+  name: 'SteveTheRepo',
+  package_count: 100,
+  url: 'https://stevetheRepo.org/epel/9',
+  status: 'Pending',
+  account_id: '',
+  org_id: 'acme',
+  distribution_arch: 'x86_64',
+  gpg_key: defaultPopularRepository.gpg_key,
+  distribution_versions: ['9'],
+  last_introspection_error: '',
+  last_introspection_time: '2023-03-07 17:13:48.619192 -0500 EST',
+  failed_introspections_count: 0,
+  metadata_verification: false,
+  snapshot: false,
+  module_hotfixes: false,
+  last_snapshot_task: defaultSnapshotTask,
+  last_introspection_status: 'Pending',
 };
 
 export const defaultMetaItem: Meta = {
@@ -237,6 +240,7 @@ export const defaultContentItemWithSnapshot: ContentItem = {
   snapshot: true,
   last_snapshot: defaultSnapshotItem,
   module_hotfixes: false,
+  last_introspection_status: '',
 };
 
 export const defaultTemplateItem: TemplateItem = {

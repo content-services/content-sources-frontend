@@ -407,6 +407,19 @@ const ContentListTable = () => {
     throw new Error('Unable to load Red Hat repositories');
   }
 
+  const showPendingTooltip = (
+    snapshotStatus: string | undefined,
+    introspectStatus: string | undefined,
+  ) => {
+    if (!snapshotStatus && !introspectStatus) {
+      return 'Introspection or snapshotting is in progress';
+    } else if (snapshotStatus === 'running' || snapshotStatus === 'pending') {
+      return 'Snapshotting is in progress';
+    } else if (introspectStatus === 'Pending') {
+      return 'Introspection is in progress';
+    }
+  };
+
   return (
     <>
       <Outlet
@@ -528,9 +541,10 @@ const ContentListTable = () => {
                         distribution_arch,
                         distribution_versions,
                         last_introspection_time,
+                        status
                       } = rowData;
                       return (
-                        <Tr key={uuid}>
+                        <Tr key={uuid+status}>
                           <Hide hide={!rbac?.write || isRedHatRepository}>
                             <Td
                               select={{
@@ -582,7 +596,10 @@ const ContentListTable = () => {
                               <ConditionalTooltip
                                 content={
                                   rowData?.status == 'Pending'
-                                    ? 'Introspection is in progress'
+                                    ? showPendingTooltip(
+                                        rowData?.last_snapshot_task?.status,
+                                        rowData.status,
+                                      )
                                     : 'You do not have the required permissions to perform this action.'
                                 }
                                 show={

@@ -54,6 +54,7 @@ it('mapToDefaultFormikValues', () => {
       metadata_verification: false,
       snapshot: false,
       module_hotfixes: false,
+      last_introspection_status: 'stuffAndThings',
     },
   ];
   const mapped = [
