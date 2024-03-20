@@ -98,10 +98,23 @@ const StatusIcon = ({
     failed_introspections_count: failedIntrospectionsCount,
     last_introspection_time: lastIntrospectionTime,
     last_introspection_error: error,
+    last_snapshot_task,
   },
   retryHandler,
 }: Props) => {
   const classes = useStyles();
+
+  const showError = (snapshotError: string | undefined, introspectError: string | undefined) => {
+    if (!snapshotError && !introspectError) {
+        return 'An unknown error occurred';
+    }
+    else if (snapshotError) {
+        return snapshotError;
+    }
+    else if (introspectError) {
+        return introspectError;
+    }
+  }
 
   switch (status) {
     case 'Valid':
@@ -129,7 +142,7 @@ const StatusIcon = ({
               headerIcon={<ExclamationCircleIcon />}
               bodyContent={
                 <PopoverDescription
-                  error={error}
+                  error={showError(last_snapshot_task?.error, error)}
                   count={failedIntrospectionsCount}
                   time={lastIntrospectionTime}
                 />
@@ -160,7 +173,7 @@ const StatusIcon = ({
               headerIcon={<ExclamationTriangleIcon />}
               bodyContent={
                 <PopoverDescription
-                  error={error}
+                  error={showError(last_snapshot_task?.error, error)}
                   count={failedIntrospectionsCount}
                   time={lastIntrospectionTime}
                 />
@@ -177,7 +190,7 @@ const StatusIcon = ({
       );
     case 'Pending':
       return (
-        <Tooltip position='top-start' content='Repository is being introspected'>
+        <Tooltip position='top-start' content={last_snapshot_task?.status === 'running' ? 'Repository snapshot in progress' : 'Repository is being introspected'}>
           <Flex alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
             <FlexItem spacer={{ default: 'spacerSm' }}>
               <Spinner size='md' className={classes.spinner} />
