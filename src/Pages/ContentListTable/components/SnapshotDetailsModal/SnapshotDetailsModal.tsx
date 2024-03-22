@@ -108,7 +108,7 @@ export default function SnapshotDetailsModal() {
               </Tab>
               <Tab
                 eventKey={1}
-                title={<TabTitleText>Errata</TabTitleText>}
+                title={<TabTitleText>Advisories</TabTitleText>}
                 aria-label='Snapshot errata detail tab'
               >
                 <SnapshotErrataTab />

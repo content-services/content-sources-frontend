@@ -53,7 +53,7 @@ interface Props {
   perPage: number;
 }
 
-export default function ErrataTable({
+export default function AdvisoriesTable({
   isFetchingOrLoading,
   isLoadingOrZeroCount,
   errataList,

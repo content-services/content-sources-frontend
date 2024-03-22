@@ -1,26 +1,22 @@
 import {
   Grid,
   InputGroup,
-  InputGroupItem,
-  InputGroupText,
   Pagination,
   Flex,
   FlexItem,
   PaginationVariant,
-  TextInput,
 } from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
 import Hide from '../../../../../components/Hide/Hide';
 import { ContentOrigin } from '../../../../../services/Content/ContentApi';
 import { createUseStyles } from 'react-jss';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import useDebounce from '../../../../../Hooks/useDebounce';
 import useRootPath from '../../../../../Hooks/useRootPath';
 import { useAppContext } from '../../../../../middleware/AppContext';
 import { useGetSnapshotErrataQuery } from '../../../../../services/Content/ContentQueries';
-import ErrataTable from '../../../../../components/SharedTables/ErrataTable';
+import AdvisoriesTable from '../../../../../components/SharedTables/AdvisoriesTable';
+import SnapshotErrataFilters from './SnapshotErrataFilters';
 
 const useStyles = createUseStyles({
   description: {
@@ -43,9 +39,13 @@ const useStyles = createUseStyles({
     justifyContent: 'space-between',
     height: 'fit-content',
   },
+  alignTop: {
+    alignItems: 'baseline',
+  },
 });
 
 const perPageKey = 'snapshotErrataPerPage';
+const defaultFilterState = { search: '', type: '', severity: '' };
 
 export function SnapshotErrataTab() {
   const classes = useStyles();
@@ -57,20 +57,11 @@ export function SnapshotErrataTab() {
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [search, setSearch] = useState('');
-  const [type, setType] = useState('');
-  const [severity, setSeverity] = useState('');
-
-  const filterValues = useMemo(() => [search, type, severity], [search, type, severity]);
-
-  const [debouncedSearch, debouncedType, debouncedSeverity] = useDebounce(
-    filterValues,
-    !search && !type && !severity ? 0 : 500,
-  );
+  const [filterData, setFilterData] = useState(defaultFilterState);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, debouncedType, debouncedSeverity]);
+  }, [filterData]);
 
   const {
     isLoading,
@@ -81,9 +72,9 @@ export function SnapshotErrataTab() {
     snapshotUUID,
     page,
     perPage,
-    debouncedSearch,
-    debouncedType,
-    debouncedSeverity,
+    filterData.search,
+    filterData.type,
+    filterData.severity,
   );
 
   useEffect(() => {
@@ -114,20 +105,14 @@ export function SnapshotErrataTab() {
   return (
     <Grid className={classes.mainContainer}>
       <InputGroup className={classes.topContainer}>
-        <InputGroupItem>
-          <TextInput
-            id='search'
-            ouiaId='name_search'
-            placeholder='Filter by name/synopsis'
-            value={search}
-            onChange={(_event, value) => setSearch(value)}
-          />
-          <InputGroupText id='search-icon'>
-            <SearchIcon />
-          </InputGroupText>
-        </InputGroupItem>
+        <SnapshotErrataFilters
+          isLoading={isLoading}
+          filterData={filterData}
+          setFilterData={setFilterData}
+        />
         <Hide hide={isLoading}>
           <Pagination
+            className={classes.alignTop}
             id='top-pagination-id'
             widgetId='topPaginationWidgetId'
             itemCount={count}
@@ -139,11 +124,11 @@ export function SnapshotErrataTab() {
           />
         </Hide>
       </InputGroup>
-      <ErrataTable
+      <AdvisoriesTable
         errataList={errataList}
         isFetchingOrLoading={fetchingOrLoading}
         isLoadingOrZeroCount={loadingOrZeroCount}
-        clearSearch={() => setSearch('')}
+        clearSearch={() => setFilterData(defaultFilterState)}
         perPage={perPage}
       />
       <Flex className={classes.bottomContainer}>
