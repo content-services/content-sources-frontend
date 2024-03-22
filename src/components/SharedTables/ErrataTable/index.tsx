@@ -1,14 +1,34 @@
-import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import {
+  BaseCellProps,
+  ExpandableRowContent,
+  Table,
+  TableVariant,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@patternfly/react-table';
 import EmptyPackageState from '../../../Pages/ContentListTable/components/PackageModal/components/EmptyPackageState';
 import { ErrataItem } from '../../../services/Content/ContentApi';
 import Hide from '../../Hide/Hide';
-import { Grid } from '@patternfly/react-core';
+import { Flex, FlexItem, Grid, Stack, Text } from '@patternfly/react-core';
 import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
+import {
+  global_BackgroundColor_100,
+  global_danger_color_200,
+  global_success_color_200,
+} from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import useDeepCompareEffect from '../../../Hooks/useDeepCompareEffect';
 import { useState } from 'react';
-import { isEmpty } from 'lodash';
+import { capitalize, isEmpty } from 'lodash';
+import { OffIcon, OnIcon } from '@patternfly/react-icons';
+import { formatDateDDMMMYYYY, reduceStringToCharsWithEllipsis } from '../../../helpers';
+import ErrataType from '../../ErrataType/ErrataType';
+
+const red = global_danger_color_200.value;
+const green = global_success_color_200.value;
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -17,6 +37,12 @@ const useStyles = createUseStyles({
     flexDirection: 'column',
     height: '100%',
   },
+  expansionBox: {
+    padding: '16px 0',
+  },
+  rightMargin: { marginRight: '8px' },
+  red: { extend: 'rightMargin', color: red },
+  green: { extend: 'rightMargin', color: green },
 });
 
 interface Props {
@@ -35,7 +61,12 @@ export default function ErrataTable({
   perPage,
 }: Props) {
   const classes = useStyles();
-  const columnHeaders = ['Name', 'Synopsis', 'Type', 'Severity'];
+  const columnHeaders = [
+    { name: 'Name' },
+    { name: 'Synopsis' },
+    { name: 'Type', width: 15 },
+    { name: 'Severity', width: 10 },
+  ];
   const [expandState, setExpandState] = useState({});
 
   useDeepCompareEffect(() => {
@@ -59,8 +90,10 @@ export default function ErrataTable({
             <Thead>
               <Tr>
                 <Th />
-                {columnHeaders.map((columnHeader) => (
-                  <Th key={columnHeader + '_column'}>{columnHeader}</Th>
+                {columnHeaders.map(({ name, width }) => (
+                  <Th width={width as BaseCellProps['width']} key={name + '_column'}>
+                    {name}
+                  </Th>
                 ))}
               </Tr>
             </Thead>
@@ -71,10 +104,11 @@ export default function ErrataTable({
                 {
                   id,
                   errata_id,
-                  title,
+                  //   title,
                   summary,
                   description,
                   issued_date,
+                  updated_date,
                   type,
                   severity,
                   reboot_suggested,
@@ -93,15 +127,48 @@ export default function ErrataTable({
                       }}
                     />
                     <Td>{errata_id}</Td>
-                    <Td>{summary}</Td>
-                    <Td>{type}</Td>
+                    <Td>{reduceStringToCharsWithEllipsis(summary, 70)}</Td>
+                    <Td>
+                      <div>
+                        <ErrataType type={type} iconProps={{ className: classes.rightMargin }} />
+                        {capitalize(type)}
+                      </div>
+                    </Td>
                     <Td>{severity}</Td>
                   </Tr>
                   <Hide hide={!expandState[rowIndex]}>
-                    {title}
-                    {issued_date}
-                    {description}
-                    {reboot_suggested}
+                    <Td />
+                    <Td key={id + '-content'} dataLabel={id + '-content-label'} colSpan={3}>
+                      <ExpandableRowContent>
+                        <Stack hasGutter className={classes.expansionBox}>
+                          <Flex direction={{ default: 'row' }}>
+                            <FlexItem>
+                              <strong>Issued date</strong>
+                              <Text>{formatDateDDMMMYYYY(issued_date)}</Text>
+                            </FlexItem>
+                            <FlexItem>
+                              <strong>Updated date</strong>
+                              <Text>{formatDateDDMMMYYYY(updated_date)}</Text>
+                            </FlexItem>
+                          </Flex>
+                          <Grid>
+                            <strong>Description</strong>
+                            <Text>{description}</Text>
+                          </Grid>
+                          <Grid>
+                            <strong>Reboot</strong>
+                            <div>
+                              {reboot_suggested ? (
+                                <OffIcon className={classes.red} />
+                              ) : (
+                                <OnIcon className={classes.green} />
+                              )}
+                              {`Reboot is ${reboot_suggested ? '' : 'not '}required`}
+                            </div>
+                          </Grid>
+                        </Stack>
+                      </ExpandableRowContent>
+                    </Td>
                   </Hide>
                 </>
               ),

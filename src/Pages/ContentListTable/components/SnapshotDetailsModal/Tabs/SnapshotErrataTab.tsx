@@ -118,7 +118,7 @@ export function SnapshotErrataTab() {
           <TextInput
             id='search'
             ouiaId='name_search'
-            placeholder='Filter by errata id'
+            placeholder='Filter by name/synopsis'
             value={errataId}
             onChange={(_event, value) => setErrataId(value)}
           />
