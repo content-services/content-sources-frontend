@@ -57,20 +57,20 @@ export function SnapshotErrataTab() {
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [errataId, setErrataId] = useState('');
+  const [search, setSearch] = useState('');
   const [type, setType] = useState('');
   const [severity, setSeverity] = useState('');
 
-  const filterValues = useMemo(() => [errataId, type, severity], [errataId, type, severity]);
+  const filterValues = useMemo(() => [search, type, severity], [search, type, severity]);
 
-  const [debouncedErrataId, debouncedType, debouncedSeverity] = useDebounce(
+  const [debouncedSearch, debouncedType, debouncedSeverity] = useDebounce(
     filterValues,
-    !errataId && !type && !severity ? 0 : 500,
+    !search && !type && !severity ? 0 : 500,
   );
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedErrataId, debouncedType, debouncedSeverity]);
+  }, [debouncedSearch, debouncedType, debouncedSeverity]);
 
   const {
     isLoading,
@@ -81,7 +81,7 @@ export function SnapshotErrataTab() {
     snapshotUUID,
     page,
     perPage,
-    debouncedErrataId,
+    debouncedSearch,
     debouncedType,
     debouncedSeverity,
   );
@@ -119,8 +119,8 @@ export function SnapshotErrataTab() {
             id='search'
             ouiaId='name_search'
             placeholder='Filter by name/synopsis'
-            value={errataId}
-            onChange={(_event, value) => setErrataId(value)}
+            value={search}
+            onChange={(_event, value) => setSearch(value)}
           />
           <InputGroupText id='search-icon'>
             <SearchIcon />
@@ -143,7 +143,7 @@ export function SnapshotErrataTab() {
         errataList={errataList}
         isFetchingOrLoading={fetchingOrLoading}
         isLoadingOrZeroCount={loadingOrZeroCount}
-        clearSearch={() => setErrataId('')}
+        clearSearch={() => setSearch('')}
         perPage={perPage}
       />
       <Flex className={classes.bottomContainer}>

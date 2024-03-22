@@ -644,14 +644,14 @@ export const useGetSnapshotErrataQuery = (
   snap_uuid: string,
   page: number,
   limit: number,
-  errata_id: string,
+  search: string,
   type: string,
   severity: string,
 ) => {
   const errorNotifier = useErrorNotification();
   return useQuery<ErrataResponse>(
-    [SNAPSHOT_ERRATA_KEY, snap_uuid, page, limit, errata_id, type, severity],
-    () => getSnapshotErrata(snap_uuid, page, limit, errata_id, type, severity),
+    [SNAPSHOT_ERRATA_KEY, snap_uuid, page, limit, search, type, severity],
+    () => getSnapshotErrata(snap_uuid, page, limit, search, type, severity),
     {
       keepPreviousData: true,
       optimisticResults: true,

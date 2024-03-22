@@ -455,14 +455,14 @@ export const getSnapshotErrata: (
   snap_uuid: string,
   page: number,
   limit: number,
-  errata_id: string,
+  search: string,
   type: string,
   severity: string,
 ) => Promise<ErrataResponse> = async (
   snap_uuid: string,
   page: number,
   limit: number,
-  errata_id: string,
+  search: string,
   type: string,
   severity: string,
 ) => {
@@ -470,7 +470,7 @@ export const getSnapshotErrata: (
     `/api/content-sources/v1/snapshots/${snap_uuid}/errata?${objectToUrlParams({
       offset: ((page - 1) * limit).toString(),
       limit: limit?.toString(),
-      errata_id,
+      search,
       type,
       severity,
     })}`,
