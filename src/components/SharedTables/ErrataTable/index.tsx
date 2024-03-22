@@ -13,7 +13,7 @@ import EmptyPackageState from '../../../Pages/ContentListTable/components/Packag
 import { ErrataItem } from '../../../services/Content/ContentApi';
 import Hide from '../../Hide/Hide';
 import { Flex, FlexItem, Grid, Stack, Text } from '@patternfly/react-core';
-import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
+import { SkeletonTable } from '@patternfly/react-component-groups';
 import {
   global_BackgroundColor_100,
   global_danger_color_200,

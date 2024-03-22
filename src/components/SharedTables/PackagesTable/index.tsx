@@ -3,7 +3,7 @@ import EmptyPackageState from '../../../Pages/ContentListTable/components/Packag
 import { PackageItem } from '../../../services/Content/ContentApi';
 import Hide from '../../Hide/Hide';
 import { Grid } from '@patternfly/react-core';
-import { SkeletonTable } from '@redhat-cloud-services/frontend-components';
+import { SkeletonTable } from '@patternfly/react-component-groups';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 
