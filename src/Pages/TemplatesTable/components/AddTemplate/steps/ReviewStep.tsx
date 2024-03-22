@@ -1,6 +1,7 @@
 import { ExpandableSection, Flex, Grid, Text, TextVariants, Title } from '@patternfly/react-core';
 import { useAddTemplateContext } from '../AddTemplateContext';
 import { useMemo, useState } from 'react';
+import { formatDateDDMMMYYYY } from '../../../../../helpers';
 
 export default function ReviewStep() {
   const [expanded, setExpanded] = useState(new Set([0]));
@@ -34,7 +35,7 @@ export default function ReviewStep() {
         'Custom Repositories': selectedCustomRepos.size,
       },
       Date: {
-        Date: date,
+        Date: formatDateDDMMMYYYY(date || ''),
       },
       Details: {
         Name: name,

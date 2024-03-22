@@ -14,11 +14,8 @@ export const objectToUrlParams = (obj: { [key: string]: string | undefined }): s
   return items;
 };
 
-export const formatDateToHumanReadable = (date: string): string =>
-  dayjs(date).format('DD MMM YYYY HH:mm UTCZ');
-
-export const formatTemplateDate = (date: string): string =>
-  dayjs(date).format('YYYY-MM-DDTHH:mm:ssZ');
+export const formatDateDDMMMYYYY = (date: string, withTime?: boolean): string =>
+  dayjs(date).format(`DD MMM YYYY${withTime ? ' - HH:mm:ss' : ''}`);
 
 export const reduceStringToCharsWithEllipsis = (str: string, maxLength: number = 50) =>
   str.length > maxLength ? str.split('').slice(0, maxLength).join('') + '...' : str;

@@ -40,6 +40,7 @@ import { useAppContext } from '../../../../middleware/AppContext';
 import RepoConfig from './components/RepoConfig';
 import { REPOSITORIES_ROUTE } from '../../../../Routes/constants';
 import { SnapshotDetailTab } from '../SnapshotDetailsModal/SnapshotDetailsModal';
+import { formatDateDDMMMYYYY } from '../../../../helpers';
 
 const useStyles = createUseStyles({
   description: {
@@ -240,7 +241,7 @@ export default function SnapshotListModal() {
                     index: number,
                   ) => (
                     <Tr key={created_at + index} data-uuid={snap_uuid}>
-                      <Td>{new Date(created_at).toUTCString()}</Td>
+                      <Td>{formatDateDDMMMYYYY(created_at, true)}</Td>
                       <Td>
                         <ChangedArrows
                           addedCount={added_counts?.['rpm.package'] || 0}

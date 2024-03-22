@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import { ReactQueryTestWrapper, defaultIntrospectTask } from '../../testingHelpers';
 import AdminTaskTable from './AdminTaskTable';
 import { useAdminTaskListQuery } from '../../services/AdminTasks/AdminTaskQueries';
-import { formatDateToHumanReadable } from '../../helpers';
+import { formatDateDDMMMYYYY } from '../../helpers';
 
 jest.mock('../../services/AdminTasks/AdminTaskQueries', () => ({
   useAdminTaskListQuery: jest.fn(),
@@ -73,7 +73,5 @@ it('Render with a single row', () => {
       defaultIntrospectTask.status.at(0)?.toUpperCase() + defaultIntrospectTask.status.slice(1),
     ),
   ).toBeInTheDocument();
-  expect(
-    queryByText(formatDateToHumanReadable(defaultIntrospectTask.queued_at)),
-  ).toBeInTheDocument();
+  expect(queryByText(formatDateDDMMMYYYY(defaultIntrospectTask.queued_at))).toBeInTheDocument();
 });
