@@ -163,6 +163,7 @@ export interface ErrataItem {
   summary: string;
   description: string;
   issued_date: string;
+  updated_date: string;
   type: string;
   severity: string;
   reboot_suggested: string;
@@ -394,7 +395,7 @@ export const getSnapshotList: (
       offset: ((page - 1) * limit).toString(),
       limit: limit?.toString(),
       search,
-      sortBy,
+      sort_by: sortBy,
     })}`,
   );
   return data;
