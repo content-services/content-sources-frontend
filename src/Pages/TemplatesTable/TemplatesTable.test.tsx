@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import TemplatesTable from './TemplatesTable';
 import { useTemplateList } from '../../services/Templates/TemplateQueries';
 import { ReactQueryTestWrapper, defaultTemplateItem } from '../../testingHelpers';
-import { formatDateToHumanReadable } from '../../helpers';
+import { formatDateDDMMMYYYY } from '../../helpers';
 
 jest.mock('../../services/Templates/TemplateQueries', () => ({
   useTemplateList: jest.fn(),
@@ -49,5 +49,5 @@ it('expect TemplatesTable to render a single row', () => {
   );
 
   expect(queryByText(defaultTemplateItem.name)).toBeInTheDocument();
-  expect(queryByText(formatDateToHumanReadable(defaultTemplateItem.date))).toBeInTheDocument();
+  expect(queryByText(formatDateDDMMMYYYY(defaultTemplateItem.date))).toBeInTheDocument();
 });

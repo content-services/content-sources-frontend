@@ -46,7 +46,7 @@ import {
   useValidateContentList,
 } from '../../../../services/Content/ContentQueries';
 import { RepositoryParamsResponse } from '../../../../services/Content/ContentApi';
-import DropdownSelect from '../../../../components/DropdownSelect/DropdownSelect';
+import DropdownSelect from '../../../../components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
 import { useQueryClient } from 'react-query';
 import ConditionalTooltip from '../../../../components/ConditionalTooltip/ConditionalTooltip';
 import { isEmpty, isEqual } from 'lodash';

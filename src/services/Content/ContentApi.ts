@@ -156,8 +156,27 @@ export interface PackageItem {
   version: string;
 }
 
+export interface ErrataItem {
+  id: string;
+  errata_id: string;
+  title: string;
+  summary: string;
+  description: string;
+  issued_date: string;
+  updated_date: string;
+  type: string;
+  severity: string;
+  reboot_suggested: string;
+}
+
 export type PackagesResponse = {
   data: PackageItem[];
+  links: Links;
+  meta: Meta;
+};
+
+export type ErrataResponse = {
+  data: ErrataItem[];
   links: Links;
   meta: Meta;
 };
@@ -339,13 +358,13 @@ export const getPackages: (
   page: number,
   limit: number,
   search: string,
-  sortBy: string,
+  sortBy?: string,
 ) => Promise<PackagesResponse> = async (
   uuid: string,
   page: number,
   limit: number,
   search: string,
-  sortBy: string,
+  sortBy?: string,
 ) => {
   const { data } = await axios.get(
     `/api/content-sources/v1.0/repositories/${uuid}/rpms?${objectToUrlParams({
@@ -376,7 +395,7 @@ export const getSnapshotList: (
       offset: ((page - 1) * limit).toString(),
       limit: limit?.toString(),
       search,
-      sortBy,
+      sort_by: sortBy,
     })}`,
   );
   return data;
@@ -423,9 +442,38 @@ export const getSnapshotPackages: (
   searchQuery: string,
 ) => {
   const { data } = await axios.get(
-    `/api/content-sources/v1/snapshots/${snap_uuid}/rpms?offset=${
-      (page - 1) * limit
-    }&limit=${limit}&search=${searchQuery}`,
+    `/api/content-sources/v1/snapshots/${snap_uuid}/rpms?${objectToUrlParams({
+      offset: ((page - 1) * limit).toString(),
+      limit: limit?.toString(),
+      search: searchQuery,
+    })}`,
+  );
+  return data;
+};
+
+export const getSnapshotErrata: (
+  snap_uuid: string,
+  page: number,
+  limit: number,
+  search: string,
+  type: string[],
+  severity: string[],
+) => Promise<ErrataResponse> = async (
+  snap_uuid: string,
+  page: number,
+  limit: number,
+  search: string,
+  type: string[],
+  severity: string[],
+) => {
+  const { data } = await axios.get(
+    `/api/content-sources/v1/snapshots/${snap_uuid}/errata?${objectToUrlParams({
+      offset: ((page - 1) * limit).toString(),
+      limit: limit?.toString(),
+      search,
+      type: type.join(',').toLowerCase(),
+      severity: severity.join(','),
+    })}`,
   );
   return data;
 };

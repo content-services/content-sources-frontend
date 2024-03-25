@@ -1,26 +1,22 @@
 import {
   Grid,
   InputGroup,
-  InputGroupItem,
-  TextInput,
-  InputGroupText,
   Pagination,
   Flex,
   FlexItem,
   PaginationVariant,
 } from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
 import Hide from '../../../../../components/Hide/Hide';
 import { ContentOrigin } from '../../../../../services/Content/ContentApi';
 import { createUseStyles } from 'react-jss';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import useDebounce from '../../../../../Hooks/useDebounce';
 import useRootPath from '../../../../../Hooks/useRootPath';
 import { useAppContext } from '../../../../../middleware/AppContext';
-import { useGetSnapshotPackagesQuery } from '../../../../../services/Content/ContentQueries';
-import PackagesTable from '../../../../../components/SharedTables/PackagesTable';
+import { useGetSnapshotErrataQuery } from '../../../../../services/Content/ContentQueries';
+import AdvisoriesTable from '../../../../../components/SharedTables/AdvisoriesTable';
+import SnapshotErrataFilters from './SnapshotErrataFilters';
 
 const useStyles = createUseStyles({
   description: {
@@ -43,11 +39,15 @@ const useStyles = createUseStyles({
     justifyContent: 'space-between',
     height: 'fit-content',
   },
+  alignTop: {
+    alignItems: 'baseline',
+  },
 });
 
-const perPageKey = 'snapshotPackagePerPage';
+const perPageKey = 'snapshotErrataPerPage';
+const defaultFilterState = { search: '', type: [] as string[], severity: [] as string[] };
 
-export function SnapshotPackagesTab() {
+export function SnapshotErrataTab() {
   const classes = useStyles();
   const { contentOrigin } = useAppContext();
 
@@ -57,20 +57,25 @@ export function SnapshotPackagesTab() {
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const debouncedSearchQuery = useDebounce(searchQuery, !searchQuery ? 0 : 500);
+  const [filterData, setFilterData] = useState(defaultFilterState);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearchQuery]);
+  }, [filterData]);
 
   const {
     isLoading,
     isFetching,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetSnapshotPackagesQuery(snapshotUUID, page, perPage, debouncedSearchQuery);
+  } = useGetSnapshotErrataQuery(
+    snapshotUUID,
+    page,
+    perPage,
+    filterData.search,
+    filterData.type,
+    filterData.severity,
+  );
 
   useEffect(() => {
     if (isError) {
@@ -90,7 +95,7 @@ export function SnapshotPackagesTab() {
     navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
 
   const {
-    data: packagesList = [],
+    data: errataList = [],
     meta: { count = 0 },
   } = data;
 
@@ -100,20 +105,14 @@ export function SnapshotPackagesTab() {
   return (
     <Grid className={classes.mainContainer}>
       <InputGroup className={classes.topContainer}>
-        <InputGroupItem>
-          <TextInput
-            id='search'
-            ouiaId='name_search'
-            placeholder='Filter by name'
-            value={searchQuery}
-            onChange={(_event, value) => setSearchQuery(value)}
-          />
-          <InputGroupText id='search-icon'>
-            <SearchIcon />
-          </InputGroupText>
-        </InputGroupItem>
+        <SnapshotErrataFilters
+          isLoading={isLoading}
+          filterData={filterData}
+          setFilterData={setFilterData}
+        />
         <Hide hide={isLoading}>
           <Pagination
+            className={classes.alignTop}
             id='top-pagination-id'
             widgetId='topPaginationWidgetId'
             itemCount={count}
@@ -125,11 +124,11 @@ export function SnapshotPackagesTab() {
           />
         </Hide>
       </InputGroup>
-      <PackagesTable
-        packagesList={packagesList}
+      <AdvisoriesTable
+        errataList={errataList}
         isFetchingOrLoading={fetchingOrLoading}
         isLoadingOrZeroCount={loadingOrZeroCount}
-        clearSearch={() => setSearchQuery('')}
+        clearSearch={() => setFilterData(defaultFilterState)}
         perPage={perPage}
       />
       <Flex className={classes.bottomContainer}>

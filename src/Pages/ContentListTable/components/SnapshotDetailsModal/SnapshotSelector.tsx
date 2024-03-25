@@ -2,11 +2,12 @@ import { Form, FormGroup } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SelectVariant } from '@patternfly/react-core/deprecated';
-import DropdownSelect from '../../../../components/DropdownSelect/DropdownSelect';
+import DropdownSelect from '../../../../components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
 import { useGetSnapshotList } from '../../../../services/Content/ContentQueries';
 import { useMemo } from 'react';
 import useRootPath from '../../../../Hooks/useRootPath';
 import { REPOSITORIES_ROUTE } from '../../../../Routes/constants';
+import { formatDateDDMMMYYYY } from '../../../../helpers';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -30,7 +31,7 @@ export function SnapshotSelector() {
     const dateMap = {};
     const uuidMap = {};
     data?.data.forEach(({ uuid, created_at }) => {
-      const date = new Date(created_at).toUTCString();
+      const date = formatDateDDMMMYYYY(created_at, true);
       uuidMap[uuid] = date;
       dateMap[date] = uuid;
     });

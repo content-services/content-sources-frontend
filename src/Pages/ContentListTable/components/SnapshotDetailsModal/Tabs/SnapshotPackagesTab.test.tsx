@@ -16,6 +16,8 @@ const packageItem: PackageItem = {
   uuid: '',
 };
 
+jest.mock('../../../../../Hooks/useDebounce', () => (value) => value);
+
 jest.mock('../../../../../Hooks/useRootPath', () => () => 'someUrl');
 
 jest.mock('../../../../../services/Content/ContentQueries', () => ({
