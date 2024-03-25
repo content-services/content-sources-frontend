@@ -1,6 +1,6 @@
 import { SelectVariant } from '@patternfly/react-core/deprecated';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import DropDownSelect from './DropdownSelect';
+import DropDownSelect from './DropdownSelect_Deprecated';
 
 it('Render with SelectVariant.single', async () => {
   const { queryByText } = render(

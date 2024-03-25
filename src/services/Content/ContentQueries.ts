@@ -645,8 +645,8 @@ export const useGetSnapshotErrataQuery = (
   page: number,
   limit: number,
   search: string,
-  type: string,
-  severity: string,
+  type: string[],
+  severity: string[],
 ) => {
   const errorNotifier = useErrorNotification();
   return useQuery<ErrataResponse>(

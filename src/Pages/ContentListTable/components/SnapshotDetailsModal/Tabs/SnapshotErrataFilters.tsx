@@ -9,16 +9,18 @@ import {
   TextInput,
   InputGroupItem,
   InputGroupText,
+  SelectOptionProps,
 } from '@patternfly/react-core';
-import { SelectVariant } from '@patternfly/react-core/deprecated';
 
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 
 import { createUseStyles } from 'react-jss';
 import useDebounce from '../../../../../Hooks/useDebounce';
-import DropdownSelect from '../../../../../components/DropdownSelect/DropdownSelect';
 import Hide from '../../../../../components/Hide/Hide';
+import SeverityWithIcon from '../../../../../components/SeverityWithIcon/SeverityWithIcon';
+import DropdownSelect from '../../../../../components/DropdownSelect/DropdownSelect';
+import { isEmpty } from 'lodash';
 
 const useStyles = createUseStyles({
   chipsContainer: {
@@ -32,8 +34,8 @@ const useStyles = createUseStyles({
 
 interface Props {
   isLoading?: boolean;
-  setFilterData: (filterData: { search: string; type: string; severity: string }) => void;
-  filterData: { search: string; type: string; severity: string };
+  setFilterData: (filterData: { search: string; type: string[]; severity: string[] }) => void;
+  filterData: { search: string; type: string[]; severity: string[] };
 }
 
 export type Filters = 'Name/Synopsis' | 'Type' | 'Severity';
@@ -43,13 +45,13 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
   const filters = ['Name/Synopsis', 'Type', 'Severity'];
   const [filterType, setFilterType] = useState<Filters>('Name/Synopsis');
   const [search, setSearch] = useState('');
-  const [type, setType] = useState('');
-  const [severity, setSeverity] = useState('');
+  const [types, setTypes] = useState<string[]>([]);
+  const [severities, setSeverities] = useState<string[]>([]);
 
   const clearFilters = () => {
     setSearch('');
-    setType('');
-    setSeverity('');
+    setTypes([]);
+    setSeverities([]);
   };
 
   useEffect(() => {
@@ -61,24 +63,34 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
 
   const {
     search: debouncedSearch,
-    type: debouncedType,
-    severity: debouncedSeverity,
+    types: debouncedTypes,
+    severities: debouncedSeverities,
   } = useDebounce(
     {
       search,
-      type,
-      severity,
+      types,
+      severities,
     },
-    !search && !type && !severity ? 0 : 500,
+    !search && isEmpty(types) && isEmpty(severities) ? 0 : 500,
   );
+
+  const addOrRemoveSeverity = (sev: string) =>
+    setSeverities((prev) =>
+      prev.includes(sev) ? prev.filter((item) => item !== sev) : [...prev, sev],
+    );
+
+  const addOrRemoveTypes = (type: string) =>
+    setTypes((prev) =>
+      prev.includes(type) ? prev.filter((item) => item !== type) : [...prev, type],
+    );
 
   useEffect(() => {
     setFilterData({
       search: debouncedSearch,
-      type: debouncedType,
-      severity: debouncedSeverity,
+      type: debouncedTypes,
+      severity: debouncedSeverities,
     });
-  }, [debouncedSearch, debouncedType, debouncedSeverity]);
+  }, [debouncedSearch, debouncedTypes, debouncedSeverities]);
 
   const Filter = useMemo(() => {
     switch (filterType) {
@@ -101,36 +113,40 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
       case 'Type':
         return (
           <DropdownSelect
-            toggleAriaLabel='filter by type'
-            toggleId='typeSelect'
-            ouiaId='filter_by_type'
-            isDisabled={isLoading}
-            options={['All', 'bugfix']}
-            variant={SelectVariant.single}
-            selectedProp={type}
-            setSelected={setType}
-            placeholderText='Filter by type'
+            onSelect={(_, val) => addOrRemoveTypes(val as string)}
+            options={
+              ['Security', 'Bugfix', 'Enhancement', 'Other'].map((type) => ({
+                key: type,
+                value: type,
+                hasCheckbox: true,
+                isSelected: types.includes(type),
+                children: type,
+              })) as SelectOptionProps[]
+            }
+            toggleValue='Filter by type'
           />
         );
       case 'Severity':
         return (
           <DropdownSelect
-            toggleAriaLabel='filter by severity'
-            toggleId='severitySelect'
-            ouiaId='filter_by_severity'
-            isDisabled={isLoading}
-            options={['All', 'bugfix']}
-            variant={SelectVariant.single}
-            selectedProp={severity}
-            setSelected={setSeverity}
-            placeholderText='Filter by severity'
+            onSelect={(_, val) => addOrRemoveSeverity(val as string)}
+            options={
+              ['Critical', 'Important', 'Moderate', 'Low', 'Unknown'].map((sev) => ({
+                key: sev,
+                value: sev,
+                hasCheckbox: true,
+                isSelected: severities.includes(sev),
+                children: <SeverityWithIcon severity={sev} />,
+              })) as SelectOptionProps[]
+            }
+            toggleValue='Filter by severity'
           />
         );
 
       default:
         return <></>;
     }
-  }, [filterType, isLoading, search, type, severity]);
+  }, [filterType, isLoading, search, types, severities]);
 
   return (
     <Flex direction={{ default: 'column' }}>
@@ -139,15 +155,19 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
           <InputGroupItem>
             <FlexItem>
               <DropdownSelect
-                toggleId='filterSelectionDropdown'
+                key='filtertype'
+                toggleProps={{ isDisabled: isLoading, icon: <FilterIcon /> }}
                 ouiaId='filter_type'
-                isDisabled={isLoading}
-                options={filters}
-                variant={SelectVariant.single}
-                selectedProp={filterType}
-                setSelected={setFilterType}
-                placeholderText='filter'
-                toggleIcon={<FilterIcon />}
+                options={filters.map((optionName) => ({
+                  key: optionName,
+                  value: optionName,
+                  children: optionName,
+                }))}
+                selected={filterType}
+                onSelect={(_, val) => {
+                  setFilterType(val as Filters);
+                }}
+                toggleValue={filterType}
               />
             </FlexItem>
           </InputGroupItem>
@@ -156,7 +176,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
           </InputGroupItem>
         </InputGroup>
       </FlexItem>
-      <Hide hide={!(search !== '' || type !== '' || severity !== '')}>
+      <Hide hide={!(search !== '' || !isEmpty(types) || !isEmpty(severities))}>
         <FlexItem className={classes.chipsContainer}>
           {search !== '' && (
             <ChipGroup categoryName='Name/Synopsis'>
@@ -165,21 +185,25 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
               </Chip>
             </ChipGroup>
           )}
-          {type !== '' && (
+          {!isEmpty(types) && (
             <ChipGroup categoryName='Type'>
-              <Chip key='type_chip' onClick={() => setType('')}>
-                {type}
-              </Chip>
+              {severities.map((type) => (
+                <Chip key='type_chip' onClick={() => addOrRemoveTypes(type)}>
+                  {type}
+                </Chip>
+              ))}
             </ChipGroup>
           )}
-          {severity !== '' && (
+          {!isEmpty(severities) && (
             <ChipGroup categoryName='Severity'>
-              <Chip key='severity_chip' onClick={() => setSeverity('')}>
-                {severity}
-              </Chip>
+              {severities.map((severity) => (
+                <Chip key='severity_chip' onClick={() => addOrRemoveSeverity(severity)}>
+                  {severity}
+                </Chip>
+              ))}
             </ChipGroup>
           )}
-          {(debouncedSearch !== '' && search !== '') || type !== '' || severity !== '' ? (
+          {(debouncedSearch !== '' && search !== '') || !isEmpty(types) || !isEmpty(severities) ? (
             <Button className={classes.clearFilters} onClick={clearFilters} variant='link' isInline>
               Clear filters
             </Button>

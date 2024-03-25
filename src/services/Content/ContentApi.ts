@@ -456,23 +456,23 @@ export const getSnapshotErrata: (
   page: number,
   limit: number,
   search: string,
-  type: string,
-  severity: string,
+  type: string[],
+  severity: string[],
 ) => Promise<ErrataResponse> = async (
   snap_uuid: string,
   page: number,
   limit: number,
   search: string,
-  type: string,
-  severity: string,
+  type: string[],
+  severity: string[],
 ) => {
   const { data } = await axios.get(
     `/api/content-sources/v1/snapshots/${snap_uuid}/errata?${objectToUrlParams({
       offset: ((page - 1) * limit).toString(),
       limit: limit?.toString(),
       search,
-      type,
-      severity,
+      type: type.join(',').toLowerCase(),
+      severity: severity.join(','),
     })}`,
   );
   return data;

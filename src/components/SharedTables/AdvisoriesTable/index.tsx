@@ -21,11 +21,12 @@ import {
 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import useDeepCompareEffect from '../../../Hooks/useDeepCompareEffect';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { capitalize, isEmpty } from 'lodash';
 import { OffIcon, OnIcon } from '@patternfly/react-icons';
 import { formatDateDDMMMYYYY, reduceStringToCharsWithEllipsis } from '../../../helpers';
-import ErrataType from '../../ErrataType/ErrataType';
+import ErrataTypeIcon from '../../ErrataTypeIcon/ErrataTypeIcon';
+import SeverityWithIcon from '../../SeverityWithIcon/SeverityWithIcon';
 
 const red = global_danger_color_200.value;
 const green = global_success_color_200.value;
@@ -40,7 +41,7 @@ const useStyles = createUseStyles({
   expansionBox: {
     padding: '16px 0',
   },
-  rightMargin: { marginRight: '8px' },
+  rightMargin: { marginRight: '6px' },
   red: { extend: 'rightMargin', color: red },
   green: { extend: 'rightMargin', color: green },
 });
@@ -90,8 +91,8 @@ export default function AdvisoriesTable({
             <Thead>
               <Tr>
                 <Th />
-                {columnHeaders.map(({ name, width }) => (
-                  <Th width={width as BaseCellProps['width']} key={name + '_column'}>
+                {columnHeaders.map(({ name, width }, index) => (
+                  <Th width={width as BaseCellProps['width']} key={index + name + '_header'}>
                     {name}
                   </Th>
                 ))}
@@ -102,7 +103,7 @@ export default function AdvisoriesTable({
             {errataList.map(
               (
                 {
-                  id,
+                  //   id,
                   errata_id,
                   //   title,
                   summary,
@@ -115,8 +116,8 @@ export default function AdvisoriesTable({
                 }: ErrataItem,
                 rowIndex,
               ) => (
-                <>
-                  <Tr key={id + '-column'}>
+                <React.Fragment key={errata_id + rowIndex + '-column'}>
+                  <Tr>
                     <Td
                       expand={{
                         rowIndex,
@@ -130,47 +131,54 @@ export default function AdvisoriesTable({
                     <Td>{reduceStringToCharsWithEllipsis(summary, 70)}</Td>
                     <Td>
                       <div>
-                        <ErrataType type={type} iconProps={{ className: classes.rightMargin }} />
+                        <ErrataTypeIcon
+                          type={type}
+                          iconProps={{ className: classes.rightMargin }}
+                        />
                         {capitalize(type)}
                       </div>
                     </Td>
-                    <Td>{severity}</Td>
+                    <Td>
+                      <SeverityWithIcon severity={severity} />
+                    </Td>
                   </Tr>
                   <Hide hide={!expandState[rowIndex]}>
-                    <Td />
-                    <Td key={id + '-content'} dataLabel={id + '-content-label'} colSpan={3}>
-                      <ExpandableRowContent>
-                        <Stack hasGutter className={classes.expansionBox}>
-                          <Flex direction={{ default: 'row' }}>
-                            <FlexItem>
-                              <strong>Issued date</strong>
-                              <Text>{formatDateDDMMMYYYY(issued_date)}</Text>
-                            </FlexItem>
-                            <FlexItem>
-                              <strong>Updated date</strong>
-                              <Text>{formatDateDDMMMYYYY(updated_date)}</Text>
-                            </FlexItem>
-                          </Flex>
-                          <Grid>
-                            <strong>Description</strong>
-                            <Text>{description}</Text>
-                          </Grid>
-                          <Grid>
-                            <strong>Reboot</strong>
-                            <div>
-                              {reboot_suggested ? (
-                                <OffIcon className={classes.red} />
-                              ) : (
-                                <OnIcon className={classes.green} />
-                              )}
-                              {`Reboot is ${reboot_suggested ? '' : 'not '}required`}
-                            </div>
-                          </Grid>
-                        </Stack>
-                      </ExpandableRowContent>
-                    </Td>
+                    <Tr>
+                      <Td />
+                      <Td dataLabel={rowIndex + '-content-label'} colSpan={3}>
+                        <ExpandableRowContent key={rowIndex + '-expandablecontent'}>
+                          <Stack hasGutter className={classes.expansionBox}>
+                            <Flex direction={{ default: 'row' }}>
+                              <FlexItem>
+                                <strong>Issued date</strong>
+                                <Text>{formatDateDDMMMYYYY(issued_date)}</Text>
+                              </FlexItem>
+                              <FlexItem>
+                                <strong>Updated date</strong>
+                                <Text>{formatDateDDMMMYYYY(updated_date)}</Text>
+                              </FlexItem>
+                            </Flex>
+                            <Grid>
+                              <strong>Description</strong>
+                              <Text>{description}</Text>
+                            </Grid>
+                            <Grid>
+                              <strong>Reboot</strong>
+                              <div>
+                                {reboot_suggested ? (
+                                  <OffIcon className={classes.red} />
+                                ) : (
+                                  <OnIcon className={classes.green} />
+                                )}
+                                {`Reboot is ${reboot_suggested ? '' : 'not '}required`}
+                              </div>
+                            </Grid>
+                          </Stack>
+                        </ExpandableRowContent>
+                      </Td>
+                    </Tr>
                   </Hide>
-                </>
+                </React.Fragment>
               ),
             )}
             <Hide hide={!isLoadingOrZeroCount}>

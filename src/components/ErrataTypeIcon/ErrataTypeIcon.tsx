@@ -13,7 +13,7 @@ interface Props {
   iconProps?: SVGIconProps;
 }
 
-export default function ErrataType({ type, iconProps }: Props) {
+export default function ErrataTypeIcon({ type, iconProps }: Props) {
   const Icon = useMemo(() => {
     switch (type?.toLowerCase()) {
       case 'bugfix':

@@ -45,7 +45,7 @@ const useStyles = createUseStyles({
 });
 
 const perPageKey = 'snapshotErrataPerPage';
-const defaultFilterState = { search: '', type: '', severity: '' };
+const defaultFilterState = { search: '', type: [] as string[], severity: [] as string[] };
 
 export function SnapshotErrataTab() {
   const classes = useStyles();
