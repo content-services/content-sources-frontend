@@ -35,6 +35,8 @@ import {
   triggerSnapshot,
   getSnapshotsByDate,
   getSnapshotPackages,
+  getSnapshotErrata,
+  ErrataResponse,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../AdminTasks/AdminTaskQueries';
 import useErrorNotification from '../../Hooks/useErrorNotification';
@@ -45,7 +47,9 @@ export const POPULAR_REPOSITORIES_LIST_KEY = 'POPULAR_REPOSITORIES_LIST_KEY';
 export const REPOSITORY_PARAMS_KEY = 'REPOSITORY_PARAMS_KEY';
 export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
 export const PACKAGES_KEY = 'PACKAGES_KEY';
-export const LIST_SNAPSHOTS_KEY = 'PACKAGES_KEY';
+export const SNAPSHOT_PACKAGES_KEY = 'SNAPSHOT_PACKAGES_KEY';
+export const SNAPSHOT_ERRATA_KEY = 'SNAPSHOT_ERRATA_KEY';
+export const LIST_SNAPSHOTS_KEY = 'LIST_SNAPSHOTS_KEY';
 export const CONTENT_ITEM_KEY = 'CONTENT_ITEM_KEY';
 export const REPO_CONFIG_FILE_KEY = 'REPO_CONFIG_FILE_KEY';
 
@@ -586,7 +590,7 @@ export const useGetPackagesQuery = (
   page: number,
   limit: number,
   searchQuery: string,
-  sortBy: string,
+  sortBy?: string,
 ) => {
   const errorNotifier = useErrorNotification();
   return useQuery<PackagesResponse>(
@@ -617,7 +621,7 @@ export const useGetSnapshotPackagesQuery = (
 ) => {
   const errorNotifier = useErrorNotification();
   return useQuery<PackagesResponse>(
-    [PACKAGES_KEY, snap_uuid, page, limit, searchQuery],
+    [SNAPSHOT_PACKAGES_KEY, snap_uuid, page, limit, searchQuery],
     () => getSnapshotPackages(snap_uuid, page, limit, searchQuery),
     {
       keepPreviousData: true,
@@ -630,6 +634,35 @@ export const useGetSnapshotPackagesQuery = (
           'An error occurred',
           err,
           'snapshot-package-list-error',
+        );
+      },
+    },
+  );
+};
+
+export const useGetSnapshotErrataQuery = (
+  snap_uuid: string,
+  page: number,
+  limit: number,
+  search: string,
+  type: string[],
+  severity: string[],
+) => {
+  const errorNotifier = useErrorNotification();
+  return useQuery<ErrataResponse>(
+    [SNAPSHOT_ERRATA_KEY, snap_uuid, page, limit, search, type, severity],
+    () => getSnapshotErrata(snap_uuid, page, limit, search, type, severity),
+    {
+      keepPreviousData: true,
+      optimisticResults: true,
+      staleTime: 60000,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError: (err: any) => {
+        errorNotifier(
+          'Unable to find errata with the given UUID.',
+          'An error occurred',
+          err,
+          'snapshot-errata-list-error',
         );
       },
     },

@@ -35,7 +35,7 @@ import ConditionalTooltip from '../../components/ConditionalTooltip/ConditionalT
 import { useAppContext } from '../../middleware/AppContext';
 import { useRepositoryParams } from '../../services/Content/ContentQueries';
 import TemplateFilters from './components/TemplateFilters';
-import { formatDateToHumanReadable } from '../../helpers';
+import { formatDateDDMMMYYYY } from '../../helpers';
 import { useQueryClient } from 'react-query';
 
 const useStyles = createUseStyles({
@@ -270,7 +270,7 @@ const TemplatesTable = () => {
                     <Td>{description}</Td>
                     <Td>{archesDisplay(arch)}</Td>
                     <Td>{versionDisplay(version)}</Td>
-                    <Td>{formatDateToHumanReadable(date)}</Td>
+                    <Td>{formatDateDDMMMYYYY(date)}</Td>
                     <Td>
                       <ActionsColumn
                         items={[

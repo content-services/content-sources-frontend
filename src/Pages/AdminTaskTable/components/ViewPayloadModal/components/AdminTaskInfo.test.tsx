@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import AdminTaskInfo from './AdminTaskInfo';
 import { AdminTask } from '../../../../../services/AdminTasks/AdminTaskApi';
 import { defaultIntrospectTask } from '../../../../../testingHelpers';
-import { formatDateToHumanReadable } from '../../../../../helpers';
+import { formatDateDDMMMYYYY } from '../../../../../helpers';
 
 jest.mock('../../../../../middleware/AppContext', () => ({
   useAppContext: () => ({ rbac: { read: true, write: true } }),
@@ -17,13 +17,13 @@ it('Render with all fields', () => {
   expect(queryByText(defaultIntrospectTask.typename)).toBeInTheDocument();
   expect(queryByText(defaultIntrospectTask.status)).toBeInTheDocument();
   expect(
-    queryByText(formatDateToHumanReadable(defaultIntrospectTask.queued_at)),
+    queryByText(formatDateDDMMMYYYY(defaultIntrospectTask.queued_at, true)),
   ).toBeInTheDocument();
   expect(
-    queryByText(formatDateToHumanReadable(defaultIntrospectTask.started_at)),
+    queryByText(formatDateDDMMMYYYY(defaultIntrospectTask.started_at, true)),
   ).toBeInTheDocument();
   expect(
-    queryByText(formatDateToHumanReadable(defaultIntrospectTask.finished_at)),
+    queryByText(formatDateDDMMMYYYY(defaultIntrospectTask.finished_at, true)),
   ).toBeInTheDocument();
   expect(queryByText(defaultIntrospectTask.error)).toBeInTheDocument();
 });
@@ -44,7 +44,7 @@ it('Render without optional fields', () => {
   expect(queryByText(missingOptional.org_id)).toBeInTheDocument();
   expect(queryByText(missingOptional.typename)).toBeInTheDocument();
   expect(queryByText(missingOptional.status)).toBeInTheDocument();
-  expect(queryByText(formatDateToHumanReadable(missingOptional.queued_at))).toBeInTheDocument();
+  expect(queryByText(formatDateDDMMMYYYY(missingOptional.queued_at, true))).toBeInTheDocument();
   expect(queryByText('Not started')).toBeInTheDocument();
   expect(queryByText('Not finished')).toBeInTheDocument();
   expect(queryByText('None')).toBeInTheDocument();

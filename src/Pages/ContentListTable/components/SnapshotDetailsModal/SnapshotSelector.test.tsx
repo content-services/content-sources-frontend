@@ -2,6 +2,7 @@ import { render } from '@testing-library/react';
 import { SnapshotSelector } from './SnapshotSelector';
 import { useGetSnapshotList } from '../../../../services/Content/ContentQueries';
 import { defaultMetaItem, defaultSnapshotItem } from '../../../../testingHelpers';
+import { formatDateDDMMMYYYY } from '../../../../helpers';
 
 jest.mock('../../../../Hooks/useRootPath', () => () => 'someUrl');
 
@@ -30,6 +31,6 @@ it('Render SnapshotSelector', () => {
 
   // This is testing the date format specifically.
   // if we update the date format, this test needs updating as well.
-  const selectorElement = getByText(new Date(defaultSnapshotItem.created_at).toUTCString());
+  const selectorElement = getByText(formatDateDDMMMYYYY(defaultSnapshotItem.created_at, true));
   expect(selectorElement).toBeInTheDocument();
 });

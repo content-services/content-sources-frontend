@@ -10,14 +10,15 @@ import {
 } from '@patternfly/react-core';
 import { InnerScrollContainer } from '@patternfly/react-table';
 import { ContentOrigin } from '../../../../services/Content/ContentApi';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import useRootPath from '../../../../Hooks/useRootPath';
 import { useAppContext } from '../../../../middleware/AppContext';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SnapshotPackagesTab } from './Tabs/SnapshotPackagesTab';
 import { createUseStyles } from 'react-jss';
 import { SnapshotSelector } from './SnapshotSelector';
 import { REPOSITORIES_ROUTE } from '../../../../Routes/constants';
+import { SnapshotErrataTab } from './Tabs/SnapshotErrataTab';
 
 const useStyles = createUseStyles({
   modalBody: {
@@ -30,18 +31,34 @@ const useStyles = createUseStyles({
   },
 });
 
+export enum SnapshotDetailTab {
+  PACKAGES = 'packages',
+  ERRATA = 'errata',
+}
+
 export default function SnapshotDetailsModal() {
   const { contentOrigin } = useAppContext();
   const classes = useStyles();
   const { repoUUID, snapshotUUID } = useParams();
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const rootPath = useRootPath();
   const navigate = useNavigate();
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
+
+  useEffect(() => {
+    if (
+      contentOrigin === ContentOrigin.REDHAT ||
+      urlSearchParams.get('tab') === SnapshotDetailTab.ERRATA
+    ) {
+      setActiveTabKey(1);
+    }
+  }, []);
 
   const handleTabClick = (
     _: React.MouseEvent<HTMLElement, MouseEvent>,
     tabIndex: string | number,
   ) => {
+    setUrlSearchParams(tabIndex ? { tab: SnapshotDetailTab.ERRATA } : {});
     setActiveTabKey(tabIndex);
   };
 
@@ -88,6 +105,13 @@ export default function SnapshotDetailsModal() {
                 aria-label='Snapshot package detail tab'
               >
                 <SnapshotPackagesTab />
+              </Tab>
+              <Tab
+                eventKey={1}
+                title={<TabTitleText>Advisories</TabTitleText>}
+                aria-label='Snapshot errata detail tab'
+              >
+                <SnapshotErrataTab />
               </Tab>
             </Tabs>
           </StackItem>

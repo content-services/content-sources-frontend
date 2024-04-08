@@ -2,6 +2,7 @@ import { render } from '@testing-library/react';
 import { useAddTemplateContext } from '../AddTemplateContext';
 import { defaultTemplateItem, testRepositoryParamsResponse } from '../../../../../testingHelpers';
 import ReviewStep from './ReviewStep';
+import { formatDateDDMMMYYYY } from '../../../../../helpers';
 
 jest.mock('../AddTemplateContext', () => ({
   useAddTemplateContext: jest.fn(),
@@ -23,6 +24,6 @@ it('expect Review step to render correctly', () => {
   expect(getByText('Create')).toBeInTheDocument();
   expect(getByText(defaultTemplateItem.arch)).toBeInTheDocument();
   expect(getByText('el' + defaultTemplateItem.version)).toBeInTheDocument();
-  expect(getByText(defaultTemplateItem.date)).toBeInTheDocument();
+  expect(getByText(formatDateDDMMMYYYY(defaultTemplateItem.date))).toBeInTheDocument();
   expect(getByText(defaultTemplateItem.name)).toBeInTheDocument();
 });

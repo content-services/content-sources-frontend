@@ -29,7 +29,7 @@ import StatusIcon from './components/StatusIcon';
 import { useAdminTaskListQuery } from '../../services/AdminTasks/AdminTaskQueries';
 import { AdminTaskFilterData, AdminTask } from '../../services/AdminTasks/AdminTaskApi';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { formatDateToHumanReadable } from '../../helpers';
+import { formatDateDDMMMYYYY } from '../../helpers';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -213,7 +213,7 @@ const AdminTaskTable = () => {
                   <Td>{adminTask.org_id}</Td>
                   <Td>{adminTask.account_id ? adminTask.account_id : 'Unknown'}</Td>
                   <Td>{adminTask.typename}</Td>
-                  <Td>{formatDateToHumanReadable(adminTask.queued_at)}</Td>
+                  <Td>{formatDateDDMMMYYYY(adminTask.queued_at, true)}</Td>
                   <Td>
                     <StatusIcon status={adminTask.status} />
                   </Td>
