@@ -541,10 +541,10 @@ const ContentListTable = () => {
                         distribution_arch,
                         distribution_versions,
                         last_introspection_time,
-                        status
+                        status,
                       } = rowData;
                       return (
-                        <Tr key={uuid+status}>
+                        <Tr key={uuid + status}>
                           <Hide hide={!rbac?.write || isRedHatRepository}>
                             <Td
                               select={{

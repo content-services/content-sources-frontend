@@ -117,7 +117,11 @@ const StatusIcon = ({
   switch (status) {
     case 'Valid':
       return (
-        <Flex key={`${status}_${uuid}`} alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
+        <Flex
+          key={`${status}_${uuid}`}
+          alignContent={{ default: 'alignContentCenter' }}
+          direction={{ default: 'row' }}
+        >
           <FlexItem spacer={{ default: 'spacerSm' }}>
             <CheckCircleIcon color={green} />
           </FlexItem>
@@ -128,7 +132,11 @@ const StatusIcon = ({
       );
     case 'Invalid':
       return (
-        <Flex key={`${status}_${uuid}`} alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
+        <Flex
+          key={`${status}_${uuid}`}
+          alignContent={{ default: 'alignContentCenter' }}
+          direction={{ default: 'row' }}
+        >
           <FlexItem spacer={{ default: 'spacerSm' }}>
             <ExclamationCircleIcon color={red} />
           </FlexItem>
@@ -159,7 +167,11 @@ const StatusIcon = ({
       );
     case 'Unavailable':
       return (
-        <Flex key={`${status}_${uuid}`} alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
+        <Flex
+          key={`${status}_${uuid}`}
+          alignContent={{ default: 'alignContentCenter' }}
+          direction={{ default: 'row' }}
+        >
           <FlexItem spacer={{ default: 'spacerSm' }}>
             <ExclamationTriangleIcon color={gold} />
           </FlexItem>
@@ -196,7 +208,11 @@ const StatusIcon = ({
               : 'Repository introspection in progress'
           }
         >
-          <Flex key={`${status}_${uuid}`} alignContent={{ default: 'alignContentCenter' }} direction={{ default: 'row' }}>
+          <Flex
+            key={`${status}_${uuid}`}
+            alignContent={{ default: 'alignContentCenter' }}
+            direction={{ default: 'row' }}
+          >
             <FlexItem spacer={{ default: 'spacerSm' }}>
               <Spinner size='md' className={classes.spinner} />
             </FlexItem>
@@ -206,8 +222,8 @@ const StatusIcon = ({
           </Flex>
         </Tooltip>
       );
-    default: 
-      return <></>;  
+    default:
+      return <></>;
   }
 };
 

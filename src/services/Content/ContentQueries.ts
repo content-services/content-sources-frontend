@@ -165,7 +165,7 @@ export const useAddContentQuery = (queryClient: QueryClient, request: CreateCont
   const { notify } = useNotification();
   return useMutation(() => AddContentListItems(request.filter((item) => !!item)), {
     onSuccess: (data: CreateContentRequestResponse) => {
-      const hasPending = (data as ContentItem[]).some(({ status }) =>  status === 'Pending');
+      const hasPending = (data as ContentItem[]).some(({ status }) => status === 'Pending');
 
       notify({
         variant: AlertVariant.success,
