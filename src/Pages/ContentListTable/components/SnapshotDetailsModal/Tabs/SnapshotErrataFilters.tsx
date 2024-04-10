@@ -123,7 +123,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                 children: type,
               })) as SelectOptionProps[]
             }
-            toggleValue='Filter by type'
+            toggleValue='Filter by Type'
           />
         );
       case 'Severity':
@@ -139,7 +139,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                 children: <SeverityWithIcon severity={sev} />,
               })) as SelectOptionProps[]
             }
-            toggleValue='Filter by severity'
+            toggleValue='Filter by Severity'
           />
         );
 
@@ -187,7 +187,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
           )}
           {!isEmpty(types) && (
             <ChipGroup categoryName='Type'>
-              {severities.map((type) => (
+              {types.map((type) => (
                 <Chip key='type_chip' onClick={() => addOrRemoveTypes(type)}>
                   {type}
                 </Chip>
