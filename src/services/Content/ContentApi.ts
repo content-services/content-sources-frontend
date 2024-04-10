@@ -166,7 +166,7 @@ export interface ErrataItem {
   updated_date: string;
   type: string;
   severity: string;
-  reboot_suggested: string;
+  reboot_suggested: boolean;
 }
 
 export type PackagesResponse = {
