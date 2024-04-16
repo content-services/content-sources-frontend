@@ -101,7 +101,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
               isDisabled={isLoading}
               id='search'
               ouiaId='filter_search'
-              placeholder='Filter by Name/Synopsis'
+              placeholder='Filter by name/synopsis'
               value={search}
               onChange={(_event, value) => setSearch(value)}
             />
@@ -123,7 +123,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                 children: type,
               })) as SelectOptionProps[]
             }
-            toggleValue='Filter by Type'
+            toggleValue='Filter by type'
           />
         );
       case 'Severity':
@@ -139,7 +139,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                 children: <SeverityWithIcon severity={sev} />,
               })) as SelectOptionProps[]
             }
-            toggleValue='Filter by Severity'
+            toggleValue='Filter by severity'
           />
         );
 

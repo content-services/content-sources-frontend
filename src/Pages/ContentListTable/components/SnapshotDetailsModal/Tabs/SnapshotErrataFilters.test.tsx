@@ -57,7 +57,7 @@ it('Select a filter of each type and ensure chips are present', () => {
   expect(typeOption).toBeInTheDocument();
   fireEvent.click(typeOption);
 
-  expect(queryByText('Filter by Type')).toBeInTheDocument();
+  expect(queryByText('Filter by type')).toBeInTheDocument();
   const typeSelector = document.getElementsByClassName('pf-v5-c-menu-toggle')[1];
   fireEvent.click(typeSelector);
   const typeItem = queryByText('Security') as Element;
@@ -70,7 +70,7 @@ it('Select a filter of each type and ensure chips are present', () => {
   expect(severityOption).toBeInTheDocument();
   fireEvent.click(severityOption);
 
-  expect(queryByText('Filter by Severity')).toBeInTheDocument();
+  expect(queryByText('Filter by severity')).toBeInTheDocument();
   const severitySelector = document.getElementsByClassName('pf-v5-c-menu-toggle')[1];
   fireEvent.click(severitySelector);
   const severityItem = queryByText('Critical') as Element;
