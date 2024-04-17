@@ -14,7 +14,7 @@ it('mapFormikToEditAPIValues', () => {
       uuid: 'stuff',
       metadataVerification: false,
       snapshot: false,
-      moduleHotfixesEnabled: false,
+      modularityFilteringEnabled: true,
     },
   ];
 
@@ -69,7 +69,7 @@ it('mapToDefaultFormikValues', () => {
       metadataVerification: false,
       expanded: true,
       uuid: 'stuffAndThings',
-      moduleHotfixesEnabled: false,
+      modularityFilteringEnabled: true,
     },
   ];
 

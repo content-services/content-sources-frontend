@@ -373,7 +373,7 @@ const EditContentForm = ({
             gpgLoading,
             metadataVerification,
             snapshot,
-            moduleHotfixesEnabled,
+            modularityFilteringEnabled,
           },
           index,
         ) => (
@@ -535,14 +535,14 @@ const EditContentForm = ({
                     <Switch
                       label='Modularity filtering enabled'
                       labelOff='Modularity filtering disabled'
-                      ouiaId={`module_hotfixes_switch_${!moduleHotfixesEnabled ? 'on' : 'off'}`}
+                      ouiaId={`module_hotfixes_switch_${modularityFilteringEnabled ? 'on' : 'off'}`}
                       aria-label='enable_module_hotfixes'
                       hasCheckIcon
                       id={'module-hotfixes-switch' + index}
                       name='module-hotfixes-switch'
-                      isChecked={!moduleHotfixesEnabled}
+                      isChecked={modularityFilteringEnabled}
                       onChange={() => {
-                        updateVariable(index, { moduleHotfixesEnabled: !moduleHotfixesEnabled });
+                        updateVariable(index, { modularityFilteringEnabled: !modularityFilteringEnabled });
                       }}
                     />
                     <Tooltip content='Optional: Selecting this will set the module_hotfixes flag on the clients, allowing the repository to not be filtered by modularity'>

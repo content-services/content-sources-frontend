@@ -35,7 +35,7 @@ it('mapFormikToAPIValues', () => {
       expanded: false,
       metadataVerification: false,
       snapshot: true,
-      moduleHotfixesEnabled: false,
+      modularityFilteringEnabled: true,
     },
   ];
 

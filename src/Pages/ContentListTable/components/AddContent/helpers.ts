@@ -33,7 +33,7 @@ export interface FormikValues {
   metadataVerification: boolean;
   expanded: boolean;
   snapshot: boolean;
-  moduleHotfixesEnabled: boolean;
+  modularityFilteringEnabled: boolean;
 }
 
 export const getDefaultFormikValues = (overrides: Partial<FormikValues> = {}): FormikValues => ({
@@ -46,7 +46,7 @@ export const getDefaultFormikValues = (overrides: Partial<FormikValues> = {}): F
   expanded: true,
   metadataVerification: false,
   snapshot: false,
-  moduleHotfixesEnabled: false,
+  modularityFilteringEnabled: true,
   ...overrides,
 });
 
@@ -69,7 +69,7 @@ export const mapFormikToAPIValues = (formikValues: FormikValues[]) =>
       gpgKey,
       metadataVerification,
       snapshot,
-      moduleHotfixesEnabled,
+      modularityFilteringEnabled,
     }) => ({
       name,
       url,
@@ -78,7 +78,7 @@ export const mapFormikToAPIValues = (formikValues: FormikValues[]) =>
       gpg_key: gpgKey,
       snapshot,
       metadata_verification: metadataVerification,
-      module_hotfixes: moduleHotfixesEnabled,
+      module_hotfixes: !modularityFilteringEnabled,
     }),
   );
 
