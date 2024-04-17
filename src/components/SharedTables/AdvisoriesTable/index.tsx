@@ -155,7 +155,7 @@ export default function AdvisoriesTable({
                               </FlexItem>
                               <FlexItem>
                                 <strong>Updated date</strong>
-                                <Text>{formatDateDDMMMYYYY(updated_date)}</Text>
+                                <Text>{updated_date ? formatDateDDMMMYYYY(updated_date) : 'N/A'}</Text>
                               </FlexItem>
                             </Flex>
                             <Grid>
