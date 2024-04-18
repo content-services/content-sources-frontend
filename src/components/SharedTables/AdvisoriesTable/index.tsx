@@ -45,6 +45,7 @@ const useStyles = createUseStyles({
   rightMargin: { marginRight: '6px' },
   red: { extend: 'rightMargin', color: red },
   green: { extend: 'rightMargin', color: green },
+  retainSpaces: { whiteSpace: 'pre-line' },
 });
 
 interface Props {
@@ -104,9 +105,7 @@ export default function AdvisoriesTable({
             {errataList.map(
               (
                 {
-                  //   id,
                   errata_id,
-                  //   title,
                   summary,
                   description,
                   issued_date,
@@ -163,7 +162,7 @@ export default function AdvisoriesTable({
                             </Flex>
                             <Grid>
                               <strong>Description</strong>
-                              <Text>{description}</Text>
+                              <Text className={classes.retainSpaces}>{description}</Text>
                             </Grid>
                             <Grid>
                               <strong>Reboot</strong>
@@ -181,7 +180,7 @@ export default function AdvisoriesTable({
                                 {errata_id.startsWith('RH') ? (
                                   <UrlWithExternalIcon
                                     href={`https://access.redhat.com/errata/${errata_id}`}
-                                    customText={'View packages and errata at access.redhat.com'}
+                                    customText='View packages and errata at access.redhat.com'
                                   />
                                 ) : (
                                   ''
