@@ -41,6 +41,7 @@ export const ZeroState = () => {
             scope='dashboard'
             ErrorComponent={<ErrorState />}
             app='Content_management'
+            ouiaId='get_started_from_zerostate_description'
             customText='Get started with Insights by adding custom repositories'
             customButton={
               <Button
