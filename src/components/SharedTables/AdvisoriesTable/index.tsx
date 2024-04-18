@@ -27,6 +27,7 @@ import { OffIcon, OnIcon } from '@patternfly/react-icons';
 import { formatDateDDMMMYYYY, reduceStringToCharsWithEllipsis } from '../../../helpers';
 import ErrataTypeIcon from '../../ErrataTypeIcon/ErrataTypeIcon';
 import SeverityWithIcon from '../../SeverityWithIcon/SeverityWithIcon';
+import UrlWithExternalIcon from '../../UrlWithLinkIcon/UrlWithLinkIcon';
 
 const red = global_danger_color_200.value;
 const green = global_success_color_200.value;
@@ -155,7 +156,9 @@ export default function AdvisoriesTable({
                               </FlexItem>
                               <FlexItem>
                                 <strong>Updated date</strong>
-                                <Text>{updated_date ? formatDateDDMMMYYYY(updated_date) : 'N/A'}</Text>
+                                <Text>
+                                  {updated_date ? formatDateDDMMMYYYY(updated_date) : 'N/A'}
+                                </Text>
                               </FlexItem>
                             </Flex>
                             <Grid>
@@ -171,6 +174,18 @@ export default function AdvisoriesTable({
                                   <OnIcon className={classes.green} />
                                 )}
                                 {`Reboot is ${reboot_suggested ? '' : 'not '}required`}
+                              </div>
+                            </Grid>
+                            <Grid>
+                              <div>
+                                {errata_id.startsWith('RH') ? (
+                                  <UrlWithExternalIcon
+                                    href={`https://access.redhat.com/errata/${errata_id}`}
+                                    customText={'View packages and errata at access.redhat.com'}
+                                  />
+                                ) : (
+                                  ''
+                                )}
                               </div>
                             </Grid>
                           </Stack>

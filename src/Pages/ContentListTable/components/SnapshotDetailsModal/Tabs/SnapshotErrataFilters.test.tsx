@@ -3,11 +3,10 @@ import SnapshotErrataFilters from './SnapshotErrataFilters';
 import { ContentOrigin } from '../../../../../services/Content/ContentApi';
 
 jest.mock('../../../../../middleware/AppContext', () => ({
-    useAppContext: () => ({
-      contentOrigin: ContentOrigin.EXTERNAL,
-    }),
-  }));
-  
+  useAppContext: () => ({
+    contentOrigin: ContentOrigin.EXTERNAL,
+  }),
+}));
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
@@ -45,7 +44,7 @@ it('Select a filter of each type and ensure chips are present', () => {
     />,
   );
 
-  // Filter on Name / Synopsis 
+  // Filter on Name / Synopsis
   const nameOrSynopsisFilter = getByRole('textbox');
   expect(nameOrSynopsisFilter).not.toHaveAttribute('disabled');
   fireEvent.change(nameOrSynopsisFilter, { target: { value: 'EPEL' } });
