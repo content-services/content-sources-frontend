@@ -545,7 +545,7 @@ const EditContentForm = ({
                         updateVariable(index, { modularityFilteringEnabled: !modularityFilteringEnabled });
                       }}
                     />
-                    <Tooltip content='Optional: Selecting this will set the module_hotfixes flag on the clients, allowing the repository to not be filtered by modularity'>
+                    <Tooltip content='When enabled, modularity filtering prevents updates for packages contained within a module in this repository'>
                       <OutlinedQuestionCircleIcon
                         className='pf-u-ml-xs'
                         color={global_Color_200.value}
