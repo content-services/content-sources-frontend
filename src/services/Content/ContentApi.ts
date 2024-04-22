@@ -384,7 +384,7 @@ export const getSnapshotList: (
       offset: ((page - 1) * limit).toString(),
       limit: limit?.toString(),
       search,
-      sortBy,
+      sort_by: sortBy,
     })}`,
   );
   return data;
