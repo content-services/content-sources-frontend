@@ -64,10 +64,11 @@ export default function AdvisoriesTable({
 }: Props) {
   const classes = useStyles();
   const columnHeaders = [
-    { name: 'Name' },
+    { name: 'Name', width: 15 },
     { name: 'Synopsis' },
     { name: 'Type', width: 15 },
     { name: 'Severity', width: 10 },
+    { name: 'Publish date', width: 15},
   ];
   const [expandState, setExpandState] = useState({});
 
@@ -140,6 +141,7 @@ export default function AdvisoriesTable({
                     <Td>
                       <SeverityWithIcon severity={severity} />
                     </Td>
+                    <Td>{formatDateDDMMMYYYY(issued_date)}</Td>
                   </Tr>
                   <Hide hide={!expandState[rowIndex]}>
                     <Tr>
@@ -148,10 +150,6 @@ export default function AdvisoriesTable({
                         <ExpandableRowContent key={rowIndex + '-expandablecontent'}>
                           <Stack hasGutter className={classes.expansionBox}>
                             <Flex direction={{ default: 'row' }}>
-                              <FlexItem>
-                                <strong>Issued date</strong>
-                                <Text>{formatDateDDMMMYYYY(issued_date)}</Text>
-                              </FlexItem>
                               <FlexItem>
                                 <strong>Updated date</strong>
                                 <Text>
