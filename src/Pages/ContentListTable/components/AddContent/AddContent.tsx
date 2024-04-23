@@ -674,7 +674,7 @@ const AddContent = () => {
                           updateVariable(index, { modularityFilteringEnabled: !modularityFilteringEnabled });
                         }}
                       />
-                      <Tooltip content='When enabled, modularity filtering prevents updates for packages contained within a module in this repository'>
+                      <Tooltip content='When enabled, modularity filtering prevents updates to packages contained within an enabled module'>
                         <OutlinedQuestionCircleIcon
                           className='pf-u-ml-xs'
                           color={global_Color_200.value}
