@@ -45,6 +45,7 @@ const useStyles = createUseStyles({
   rightMargin: { marginRight: '6px' },
   red: { extend: 'rightMargin', color: red },
   green: { extend: 'rightMargin', color: green },
+  retainSpaces: { whiteSpace: 'pre-line' },
 });
 
 interface Props {
@@ -159,7 +160,7 @@ export default function AdvisoriesTable({
                             </Flex>
                             <Grid>
                               <strong>Description</strong>
-                              <Text>{description}</Text>
+                              <Text className={classes.retainSpaces}>{description}</Text>
                             </Grid>
                             <Grid>
                               <strong>Reboot</strong>
