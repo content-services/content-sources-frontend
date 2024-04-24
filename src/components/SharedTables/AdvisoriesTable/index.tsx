@@ -24,7 +24,7 @@ import useDeepCompareEffect from '../../../Hooks/useDeepCompareEffect';
 import React, { useState } from 'react';
 import { capitalize, isEmpty } from 'lodash';
 import { OffIcon, OnIcon } from '@patternfly/react-icons';
-import { formatDateDDMMMYYYY, reduceStringToCharsWithEllipsis } from '../../../helpers';
+import { formatDateDDMMMYYYY, formatDescription, reduceStringToCharsWithEllipsis } from '../../../helpers';
 import ErrataTypeIcon from '../../ErrataTypeIcon/ErrataTypeIcon';
 import SeverityWithIcon from '../../SeverityWithIcon/SeverityWithIcon';
 import UrlWithExternalIcon from '../../UrlWithLinkIcon/UrlWithLinkIcon';
@@ -160,7 +160,7 @@ export default function AdvisoriesTable({
                             </Flex>
                             <Grid>
                               <strong>Description</strong>
-                              <Text className={classes.retainSpaces}>{description}</Text>
+                              <Text className={classes.retainSpaces}>{formatDescription(description)}</Text>
                             </Grid>
                             <Grid>
                               <strong>Reboot</strong>
