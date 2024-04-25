@@ -20,7 +20,6 @@ export const formatDateDDMMMYYYY = (date: string, withTime?: boolean): string =>
 export const reduceStringToCharsWithEllipsis = (str: string, maxLength: number = 50) =>
   str.length > maxLength ? str.split('').slice(0, maxLength).join('') + '...' : str;
 
-// Removes unnecessary newlines before or after spaces
+// Removes any cases of 3+ line breaks and replaces them with 2 
 export const formatDescription = (description: string): string => 
-  description.replace(/(?<! )\n\s*\n(?![ ])/g, '\n');
-
+  description.replace(/\n{3,}/g, '\n\n');
