@@ -24,7 +24,7 @@ import DefineContentStep from './steps/DefineContentStep';
 import SetUpDateStep from './steps/SetUpDateStep';
 import DetailStep from './steps/DetailStep';
 import ReviewStep from './steps/ReviewStep';
-import { formatDateDDMMMYYYY } from '../../../../helpers';
+import { formatTemplateDate } from '../../../../helpers';
 import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
 
@@ -50,13 +50,13 @@ const AddTemplateBase = () => {
 
   const { mutateAsync: addTemplate, isLoading: isAdding } = useCreateTemplateQuery(queryClient, {
     ...(templateRequest as TemplateRequest),
-    date: formatDateDDMMMYYYY(templateRequest.date || ''),
+    date: formatTemplateDate(templateRequest.date || ''),
   });
 
   const { mutateAsync: editTemplate, isLoading: isEditing } = useEditTemplateQuery(queryClient, {
     uuid: editUUID as string,
     ...(templateRequest as TemplateRequest),
-    date: formatDateDDMMMYYYY(templateRequest.date || ''),
+    date: formatTemplateDate(templateRequest.date || ''),
   });
 
   const addEditAction = isEdit ? editTemplate : addTemplate;

@@ -17,6 +17,9 @@ export const objectToUrlParams = (obj: { [key: string]: string | undefined }): s
 export const formatDateDDMMMYYYY = (date: string, withTime?: boolean): string =>
   dayjs(date).format(`DD MMM YYYY${withTime ? ' - HH:mm:ss' : ''}`);
 
+export const formatTemplateDate = (date: string): string =>
+    dayjs(date).format('YYYY-MM-DDTHH:mm:ssZ');
+
 export const reduceStringToCharsWithEllipsis = (str: string, maxLength: number = 50) =>
   str.length > maxLength ? str.split('').slice(0, maxLength).join('') + '...' : str;
 
