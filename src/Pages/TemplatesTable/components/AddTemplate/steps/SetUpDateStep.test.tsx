@@ -6,6 +6,7 @@ import {
 import SetUpDateStep from './SetUpDateStep';
 import { useAddTemplateContext } from '../AddTemplateContext';
 import { defaultContentItem, defaultSnapshotsByDateResponse } from '../../../../../testingHelpers';
+import { formatTemplateDate } from '../../../../../helpers';
 
 jest.mock('../../../../../services/Content/ContentQueries', () => ({
   useGetSnapshotsByDates: jest.fn(),
@@ -26,6 +27,7 @@ jest.mock('react-router-dom', () => ({
 jest.mock('dayjs', () =>
   jest.fn(() => ({
     fromNow: () => '2024-01-22',
+    format: () => '2024-04-28T00:00:00-04:00'
   })),
 );
 
