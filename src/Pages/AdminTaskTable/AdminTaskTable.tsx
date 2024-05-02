@@ -82,8 +82,6 @@ const AdminTaskTable = () => {
     'account_id',
     'typename',
     'queued_at',
-    'started_at',
-    'finished_at',
     'status',
   ];
 
