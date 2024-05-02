@@ -6,7 +6,6 @@ import {
 import SetUpDateStep from './SetUpDateStep';
 import { useAddTemplateContext } from '../AddTemplateContext';
 import { defaultContentItem, defaultSnapshotsByDateResponse } from '../../../../../testingHelpers';
-import { formatTemplateDate } from '../../../../../helpers';
 
 jest.mock('../../../../../services/Content/ContentQueries', () => ({
   useGetSnapshotsByDates: jest.fn(),
