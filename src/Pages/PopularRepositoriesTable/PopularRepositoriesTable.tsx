@@ -384,11 +384,11 @@ const PopularRepositoriesTable = () => {
                 {/* RBAC popover takes precedence */}
                 <ConditionalTooltip
                   content={
-                    !rbac?.write
+                    !rbac?.repoWrite
                       ? 'You do not have the required permissions to perform this action.'
                       : 'Make a selection below to add multiple repositories'
                   }
-                  show={!rbac?.write || !atLeastOneRepoToAddChecked}
+                  show={!rbac?.repoWrite || !atLeastOneRepoToAddChecked}
                   setDisabled
                 >
                   {(() => {
@@ -396,7 +396,7 @@ const PopularRepositoriesTable = () => {
                       ? `Add ${checkedRepositoriesToAdd.size} repositories`
                       : 'Add selected repositories';
                     const withoutSnapshotText = defaultText + ' without snapshotting';
-                    const isDisabled = !rbac?.write || !atLeastOneRepoToAddChecked;
+                    const isDisabled = !rbac?.repoWrite || !atLeastOneRepoToAddChecked;
                     if (features?.snapshots?.enabled && features.snapshots.accessible) {
                       const className = isDisabled ? classes.disabledDropdownButton : undefined;
                       return (
@@ -452,7 +452,7 @@ const PopularRepositoriesTable = () => {
                 </ConditionalTooltip>
                 <ConditionalTooltip
                   content='You do not have the required permissions to perform this action.'
-                  show={!rbac?.write}
+                  show={!rbac?.repoWrite}
                   setDisabled
                 >
                   <DeleteKebab
@@ -460,6 +460,7 @@ const PopularRepositoriesTable = () => {
                     numberOfReposChecked={checkedRepositoriesToDelete.size}
                     deleteCheckedRepos={deleteSelected}
                     toggleOuiaId='popular_repositories_kebab_toggle'
+                    isDisabled={!rbac?.repoWrite}
                   />
                 </ConditionalTooltip>
               </FlexItem>
@@ -520,7 +521,7 @@ const PopularRepositoriesTable = () => {
           >
             <Thead>
               <Tr>
-                <Hide hide={!rbac?.write}>
+                <Hide hide={!rbac?.repoWrite}>
                   <Th
                     className={classes.checkboxMinWidth}
                     select={{
@@ -549,7 +550,7 @@ const PopularRepositoriesTable = () => {
                 } = repo;
                 return (
                   <Tr key={suggested_name + uuid}>
-                    <Hide hide={!rbac?.write}>
+                    <Hide hide={!rbac?.repoWrite}>
                       {/* Never disabled because popular repositories can be both added and deleted */}
                       <Td
                         select={{
@@ -579,7 +580,7 @@ const PopularRepositoriesTable = () => {
                     <Td width={10}>
                       <ConditionalTooltip
                         content='You do not have the required permissions to perform this action.'
-                        show={!rbac?.write}
+                        show={!rbac?.repoWrite}
                         setDisabled
                       >
                         {uuid ? (

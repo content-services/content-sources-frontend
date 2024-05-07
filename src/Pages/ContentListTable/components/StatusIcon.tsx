@@ -80,7 +80,7 @@ const PopoverFooter = ({ retryHandler, uuid }: FooterProps) => {
     <Flex>
       <ConditionalTooltip
         content='You do not have the required permissions to perform this action.'
-        show={!rbac?.write}
+        show={!rbac?.repoWrite}
         setDisabled
       >
         <Button variant='link' isInline onClick={() => (retryHandler ? retryHandler(uuid) : null)}>

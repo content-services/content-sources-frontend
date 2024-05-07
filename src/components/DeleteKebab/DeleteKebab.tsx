@@ -1,6 +1,5 @@
 import { Dropdown, DropdownItem, KebabToggle } from '@patternfly/react-core/deprecated';
 import { useState } from 'react';
-import { useAppContext } from '../../middleware/AppContext';
 import ConditionalTooltip from '../ConditionalTooltip/ConditionalTooltip';
 
 interface Props {
@@ -18,7 +17,6 @@ const DeleteKebab = ({
   toggleOuiaId,
   isDisabled,
 }: Props) => {
-  const { rbac } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
 
   const onToggle = (isOpen: boolean) => {
@@ -58,7 +56,7 @@ const DeleteKebab = ({
           id='delete-kebab'
           data-ouia-component-id={toggleOuiaId}
           onToggle={(_event, isOpen: boolean) => onToggle(isOpen)}
-          isDisabled={!rbac?.write || isDisabled}
+          isDisabled={isDisabled}
         />
       }
       isOpen={isOpen}

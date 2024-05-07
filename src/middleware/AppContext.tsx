@@ -13,7 +13,7 @@ const getRegistry = _getRegistry as unknown as () => { register: ({ notification
 const { appname } = PackageJson.insights;
 
 export interface AppContextInterface {
-  rbac?: { read: boolean; write: boolean };
+  rbac?: { repoRead: boolean; repoWrite: boolean, templateRead: boolean, templateWrite: boolean};
   features: Features | null;
   isFetchingFeatures: boolean;
   contentOrigin: ContentOrigin;
@@ -59,8 +59,10 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
       value={{
         rbac: rbac
           ? {
-              read: rbac?.hasPermission('content-sources', 'repositories', 'read'),
-              write: rbac?.hasPermission('content-sources', 'repositories', 'write'),
+              repoRead: rbac?.hasPermission('content-sources', 'repositories', 'read'),
+              repoWrite: rbac?.hasPermission('content-sources', 'repositories', 'write'),
+              templateRead: rbac?.hasPermission('content-sources', 'templates', 'read'),
+              templateWrite: rbac?.hasPermission('content-sources', 'templates', 'write'),
             }
           : undefined,
         features: features,

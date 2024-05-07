@@ -210,7 +210,7 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
         <FlexItem className={classes.repositoryActions}>
           <ConditionalTooltip
             content='You do not have the required permissions to perform this action.'
-            show={!rbac?.write}
+            show={!rbac?.templateWrite}
             setDisabled
           >
             <Button
@@ -231,7 +231,7 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
           setDisabled
         >
           <DeleteKebab
-            isDisabled={isRedHatRepository}
+            isDisabled={!rbac.templateWrite && isRedHatRepository}
             atLeastOneRepoChecked={atLeastOneRepoChecked}
             numberOfReposChecked={numberOfReposChecked}
             deleteCheckedRepos={deleteCheckedRepos}

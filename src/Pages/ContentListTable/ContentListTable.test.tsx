@@ -24,7 +24,7 @@ jest.mock('../../services/Content/ContentQueries', () => ({
 jest.mock('../../middleware/AppContext', () => ({
   useAppContext: () => ({
     features: { snapshots: { accessible: true } },
-    rbac: { write: true, read: true },
+    rbac: { repoWrite: true, repoRead: true },
     contentOrigin: ContentOrigin.EXTERNAL,
     setContentOrigin: () => {},
   }),

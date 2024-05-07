@@ -22,7 +22,7 @@ import SnapshotDetailsModal from '../../Pages/ContentListTable/components/Snapsh
 
 export default function useRepositoryRoutes(): TabbedRouteItem[] {
   const { features, rbac } = useAppContext();
-  const hasWrite = rbac?.write;
+  const hasWrite = rbac?.repoWrite;
 
   // Wrap in a memo to prevent recalculation if values haven't changed.
   const tabs = useMemo(

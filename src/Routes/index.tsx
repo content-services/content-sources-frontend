@@ -23,7 +23,7 @@ export default function RepositoriesRoutes() {
   const key = useMemo(() => Math.random(), []);
   const repositoryRoutes = useRepositoryRoutes();
   const templateRoutes = useTemplateRoutes();
-  const { features, zeroState } = useAppContext();
+  const { rbac, features, zeroState } = useAppContext();
 
   return (
     <Routes key={key}>
@@ -48,7 +48,7 @@ export default function RepositoriesRoutes() {
           </Route>
         ))}
       </Route>
-      {features?.snapshots?.accessible ? (
+      {features?.snapshots?.accessible && rbac?.templateRead ? (
         <Route element={<TemplateLayout />}>
           {templateRoutes.map(({ route, Element, ChildRoutes }, key) => (
             <Route

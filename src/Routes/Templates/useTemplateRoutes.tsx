@@ -6,7 +6,7 @@ import { AddTemplate } from '../../Pages/TemplatesTable/components/AddTemplate/A
 
 export default function useTemplateRoutes(): TabbedRouteItem[] {
   const { features, rbac, chrome } = useAppContext();
-  const hasWrite = rbac?.write;
+  const hasWrite = rbac?.templateWrite;
 
   // Wrap in a memo to prevent recalculation if values haven't changed.
   const tabs = useMemo(

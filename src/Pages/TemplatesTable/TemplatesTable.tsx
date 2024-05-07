@@ -183,7 +183,7 @@ const TemplatesTable = () => {
           notFilteredButton={
             <ConditionalTooltip
               content='You do not have the required permissions to perform this action.'
-              show={!rbac?.write}
+              show={!rbac?.templateWrite}
               setDisabled
             >
               <Button
@@ -272,29 +272,35 @@ const TemplatesTable = () => {
                     <Td>{versionDisplay(version)}</Td>
                     <Td>{formatDateDDMMMYYYY(date)}</Td>
                     <Td>
-                      <ActionsColumn
-                        items={[
-                          {
-                            title: 'Edit',
-                            onClick: () => navigate(`${uuid}/edit`),
-                          },
-                          { isSeparator: true },
-                          {
-                            title: 'Delete',
-                            onClick: () =>
-                              deleteItem(uuid).then(() => {
-                                // If last item being deleted on a page, go back one page.
-                                if (
-                                  page > 1 &&
-                                  count / perPage + 1 >= page &&
-                                  (count - 1) % perPage === 0
-                                ) {
-                                  setPage(page - 1);
-                                }
-                              }),
-                          },
-                        ]}
-                      />
+                      <ConditionalTooltip
+                        content='You do not have the required permissions to perform this action.'
+                        show={!rbac?.templateWrite}
+                        setDisabled
+                      >
+                        <ActionsColumn                        
+                          items={[
+                            {
+                              title: 'Edit',
+                              onClick: () => navigate(`${uuid}/edit`),
+                            },
+                            { isSeparator: true },
+                            {
+                              title: 'Delete',
+                              onClick: () =>
+                                deleteItem(uuid).then(() => {
+                                  // If last item being deleted on a page, go back one page.
+                                  if (
+                                    page > 1 &&
+                                    count / perPage + 1 >= page &&
+                                    (count - 1) % perPage === 0
+                                  ) {
+                                    setPage(page - 1);
+                                  }
+                                }),
+                            },
+                          ]}
+                        />
+                      </ConditionalTooltip>
                     </Td>
                   </Tr>
                 ),
@@ -327,7 +333,7 @@ const TemplatesTable = () => {
           notFilteredButton={
             <ConditionalTooltip
               content='You do not have the required permissions to perform this action.'
-              show={!rbac?.write}
+              show={!rbac?.templateWrite}
               setDisabled
             >
               <Button

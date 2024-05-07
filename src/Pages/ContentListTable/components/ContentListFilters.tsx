@@ -307,7 +307,7 @@ const ContentListFilters = ({
         <FlexItem className={classes.repositoryActions}>
           <ConditionalTooltip
             content='You do not have the required permissions to perform this action.'
-            show={!rbac?.write && !isRedHatRepository}
+            show={!rbac?.repoWrite && !isRedHatRepository}
             setDisabled
           >
             <Button
@@ -322,11 +322,11 @@ const ContentListFilters = ({
           </ConditionalTooltip>
           <ConditionalTooltip
             content='You do not have the required permissions to perform this action.'
-            show={!rbac?.write && !isRedHatRepository}
+            show={!rbac?.repoWrite && !isRedHatRepository}
             setDisabled
           >
             <DeleteKebab
-              isDisabled={isRedHatRepository}
+              isDisabled={!rbac?.repoWrite ||isRedHatRepository}
               atLeastOneRepoChecked={atLeastOneRepoChecked}
               numberOfReposChecked={numberOfReposChecked}
               deleteCheckedRepos={deleteCheckedRepos}

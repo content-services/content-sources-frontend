@@ -55,7 +55,7 @@ export default function App() {
           <Spinner size='xl' />
         </Bullseye>
       );
-    case rbac?.read:
+    case rbac?.repoRead || rbac?.templateRead:
       return (
         <>
           <NotificationsPortal />
