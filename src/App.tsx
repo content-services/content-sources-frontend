@@ -47,19 +47,18 @@ export default function App() {
     }
   }, [data.data.length]);
 
-  switch (true) {
-    case !rbac || isFetchingFeatures || isLoading:
-      return (
-        <Bullseye>
-          <Spinner size='xl' />
-        </Bullseye>
-      );
-      default:
-        return (
-          <>
-            <NotificationsPortal />
-            <Routes />
-          </>
-        );
+  if (!rbac || isFetchingFeatures || isLoading) {
+    return (
+      <Bullseye>
+        <Spinner size='xl' />
+      </Bullseye>
+    );
   }
+
+  return (
+    <>
+      <NotificationsPortal />
+      <Routes />
+    </>
+  );
 }
