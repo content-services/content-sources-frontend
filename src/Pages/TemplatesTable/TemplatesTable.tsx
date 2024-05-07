@@ -37,7 +37,6 @@ import { useRepositoryParams } from '../../services/Content/ContentQueries';
 import TemplateFilters from './components/TemplateFilters';
 import { formatDateDDMMMYYYY } from '../../helpers';
 import { useQueryClient } from 'react-query';
-import { NoPermissionsPage } from '../../components/NoPermissionsPage/NoPermissionsPage';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -203,10 +202,6 @@ const TemplatesTable = () => {
       </Bullseye>
     );
 
-  if (!rbac?.templateRead) {
-    return <NoPermissionsPage/>
-  }
-
   return (
     <Grid
       data-ouia-safe={!actionTakingPlace}
@@ -282,7 +277,7 @@ const TemplatesTable = () => {
                         show={!rbac?.templateWrite}
                         setDisabled
                       >
-                        <ActionsColumn                        
+                        <ActionsColumn
                           items={[
                             {
                               title: 'Edit',

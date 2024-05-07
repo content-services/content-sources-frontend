@@ -52,7 +52,6 @@ import dayjs from 'dayjs';
 import ChangedArrows from './components/SnapshotListModal/components/ChangedArrows';
 import { Outlet, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import { ADD_ROUTE, DELETE_ROUTE, EDIT_ROUTE } from '../../Routes/constants';
-import { NoPermissionsPage } from '../../components/NoPermissionsPage/NoPermissionsPage';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -420,10 +419,6 @@ const ContentListTable = () => {
       return 'Introspection is in progress';
     }
   };
-
-  if (!rbac?.repoRead) {
-    return <NoPermissionsPage />
-  }
 
   return (
     <>

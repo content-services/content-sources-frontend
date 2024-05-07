@@ -19,6 +19,7 @@ import {
   TabbedRouteItem,
 } from '../constants';
 import SnapshotDetailsModal from '../../Pages/ContentListTable/components/SnapshotDetailsModal/SnapshotDetailsModal';
+import { NoPermissionsPage } from '../../components/NoPermissionsPage/NoPermissionsPage';
 
 export default function useRepositoryRoutes(): TabbedRouteItem[] {
   const { features, rbac } = useAppContext();
@@ -66,6 +67,17 @@ export default function useRepositoryRoutes(): TabbedRouteItem[] {
     ],
     [hasWrite, features],
   );
+
+  if (!rbac?.repoRead) {
+    return [
+      {
+        title: 'Your repositories',
+        route: REPOSITORIES_ROUTE,
+        Element: () => <NoPermissionsPage />,
+        ChildRoutes: [],
+      },
+    ];
+  }
 
   return tabs;
 }
