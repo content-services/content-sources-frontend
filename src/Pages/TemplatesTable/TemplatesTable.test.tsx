@@ -18,6 +18,14 @@ jest.mock('react-router-dom', () => ({
   Outlet: () => <></>,
 }));
 
+jest.mock('../../middleware/AppContext', () => ({
+  useAppContext: () => ({
+    rbac: { repoWrite: true, templateRead: true },
+    setContentOrigin: () => {},
+  }),
+}));
+
+
 it('expect TemplatesTable to render empty state', () => {
   (useTemplateList as jest.Mock).mockImplementation(() => ({
     isLoading: false,

@@ -23,7 +23,7 @@ export default function RepositoriesRoutes() {
   const key = useMemo(() => Math.random(), []);
   const repositoryRoutes = useRepositoryRoutes();
   const templateRoutes = useTemplateRoutes();
-  const { rbac, features, zeroState } = useAppContext();
+  const { zeroState } = useAppContext();
 
   return (
     <Routes key={key}>
@@ -48,29 +48,25 @@ export default function RepositoriesRoutes() {
           </Route>
         ))}
       </Route>
-      {features?.snapshots?.accessible && rbac?.templateRead ? (
-        <Route element={<TemplateLayout />}>
-          {templateRoutes.map(({ route, Element, ChildRoutes }, key) => (
-            <Route
-              key={key.toString()}
-              path={route}
-              element={
-                <ErrorPage>
-                  <Grid className={classes.containerMargin}>
-                    <Element />
-                  </Grid>
-                </ErrorPage>
-              }
-            >
-              {ChildRoutes?.map(({ path, Element: ChildRouteElement }, childRouteKey) => (
-                <Route key={childRouteKey} path={path} element={<ChildRouteElement />} />
-              ))}
-            </Route>
-          ))}
-        </Route>
-      ) : (
-        <></>
-      )}
+      <Route element={<TemplateLayout />}>
+      {templateRoutes.map(({ route, Element, ChildRoutes }, key) => (
+          <Route
+            key={key.toString()}
+            path={route}
+            element={
+              <ErrorPage>
+                <Grid className={classes.containerMargin}>
+                  <Element />
+                </Grid>
+              </ErrorPage>
+            }
+          >
+            {ChildRoutes?.map(({ path, Element: ChildRouteElement }, childRouteKey) => (
+              <Route key={childRouteKey} path={path} element={<ChildRouteElement />} />
+            ))}
+          </Route>
+        ))}
+      </Route>
       <Route path='*' element={<Navigate to={REPOSITORIES_ROUTE} replace />} />
     </Routes>
   );

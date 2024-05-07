@@ -8,7 +8,6 @@ import { last } from 'lodash';
 
 import Routes from './Routes';
 import { useAppContext } from './middleware/AppContext';
-import { NoPermissionsPage } from './components/NoPermissionsPage/NoPermissionsPage';
 import { ContentOrigin, FilterData } from './services/Content/ContentApi';
 import { useContentListQuery } from './services/Content/ContentQueries';
 import { perPageKey } from './Pages/ContentListTable/ContentListTable';
@@ -55,15 +54,12 @@ export default function App() {
           <Spinner size='xl' />
         </Bullseye>
       );
-    case rbac?.repoRead || rbac?.templateRead:
-      return (
-        <>
-          <NotificationsPortal />
-          <Routes />
-        </>
-      );
-
-    default:
-      return <NoPermissionsPage />;
+      default:
+        return (
+          <>
+            <NotificationsPortal />
+            <Routes />
+          </>
+        );
   }
 }

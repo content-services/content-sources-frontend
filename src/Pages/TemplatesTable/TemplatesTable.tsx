@@ -37,6 +37,7 @@ import { useRepositoryParams } from '../../services/Content/ContentQueries';
 import TemplateFilters from './components/TemplateFilters';
 import { formatDateDDMMMYYYY } from '../../helpers';
 import { useQueryClient } from 'react-query';
+import { NoPermissionsPage } from '../../components/NoPermissionsPage/NoPermissionsPage';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -201,6 +202,10 @@ const TemplatesTable = () => {
         <Outlet />
       </Bullseye>
     );
+
+  if (!rbac?.templateRead) {
+    return <NoPermissionsPage/>
+  }
 
   return (
     <Grid
