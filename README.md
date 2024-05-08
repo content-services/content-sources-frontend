@@ -18,13 +18,18 @@ sudo npm run patch:hosts
 
 1. Make sure [nvm](https://github.com/nvm-sh/nvm) is installed
 
-2. `npm install`
+2. First time running the app do: `nvm use` to ensure you have the correct node version installed. If you do not, follow the instructions nvm gives you to install the appropriate version.
 
-3. `PROXY=true npm run start`
+3. `npm install`
 
-4.  With a browser, open URL listed in the terminal output
+4. `npm run start` to run against stage or prod environments. <br/>
+    OR <br/>
+  `npm run local` to run against a local backend running on port 8000.
+
+5.  With a browser, open URL listed in the terminal output
 
  
+
 
 Update `config/dev.webpack.config.js` according to your application URL. [Read more](https://github.com/RedHatInsights/frontend-components/tree/master/packages/config#useproxy).
 

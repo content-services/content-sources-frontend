@@ -14,6 +14,8 @@
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc",
     "patch:hosts": "fec patch-etc-hosts",
     "start": "fec dev",
+    "start:verbose": "VERBOSE=true fec dev",
+    "local": "BACKEND_PORT=8000 npm start",
     "test": "TZ=UTC jest --verbose --no-cache",
     "verify": "npm-run-all build lint test",
     "postinstall": "ts-patch install"
@@ -51,6 +53,7 @@
     "@testing-library/react": "^14.2.1",
     "@testing-library/user-event": "^14.5.2",
     "@types/jest": "^29.5.12",
+    "htmlparser2": "^9.1.0",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.24",
     "@types/react": "^18.2.61",
