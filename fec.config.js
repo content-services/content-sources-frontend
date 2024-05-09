@@ -43,7 +43,7 @@ module.exports = {
       './RootApp': path.resolve(__dirname, './src/AppEntry.tsx'),
     },
     shared: [
-      { 'react-redux': { version: dependencies['react-redux'] } },
+    //   { 'react-redux': { version: dependencies['react-redux'] } },
       {
         'react-router-dom': {
           version: dependencies['react-router-dom'],
