@@ -251,6 +251,7 @@ export default function SnapshotListModal() {
                       <Td>
                         <Button
                           variant='link'
+                          ouiaId='snapshot_package_count_button'
                           isInline
                           isDisabled={!content_counts?.['rpm.package']}
                           onClick={() =>
@@ -265,6 +266,7 @@ export default function SnapshotListModal() {
                       <Td>
                         <Button
                           variant='link'
+                          ouiaId='snapshot_advistory_count_button'
                           isInline
                           isDisabled={!content_counts?.['rpm.advisory']}
                           onClick={() =>
