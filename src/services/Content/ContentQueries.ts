@@ -116,37 +116,15 @@ export const useContentListQuery = (
   sortBy: string,
   contentOrigin: ContentOrigin = ContentOrigin.EXTERNAL,
   enabled: boolean = true,
+  polling: boolean = false,
 ) => {
-  const [polling, setPolling] = useState(false);
-  const [pollCount, setPollCount] = useState(0);
   const errorNotifier = useErrorNotification();
   return useQuery<ContentListResponse>(
     // Below MUST match the "contentListKeyArray" seen below in the useDeleteContent.
     [CONTENT_LIST_KEY, buildContentListKey(page, limit, sortBy, contentOrigin, filterData)],
     () => getContentList(page, limit, filterData, sortBy, contentOrigin),
     {
-      onSuccess: (data) => {
-        const containsPending = data?.data?.some(
-          ({ status }) => status === 'Pending' || status === '',
-        );
-        if (polling && containsPending) {
-          // Count each consecutive time polling occurs
-          setPollCount(pollCount + 1);
-        }
-        if (polling && !containsPending) {
-          // We were polling, but now the data is valid, we stop the count.
-          setPollCount(0);
-        }
-        if (pollCount > 40) {
-          // If polling occurs 40 times in a row, we stop it. Likely a data/kafka issue has occurred with the API.
-          return setPolling(false);
-        }
-        // This sets the polling state based whether the data contains any "Pending" status
-        return setPolling(containsPending);
-      },
       onError: (err) => {
-        setPolling(false);
-        setPollCount(0);
         errorNotifier(
           'Unable to get repositories list',
           'An error occurred',

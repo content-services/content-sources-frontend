@@ -105,6 +105,9 @@ const ContentListTable = () => {
   const [activeSortIndex, setActiveSortIndex] = useState<number>(-1);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
   const [checkedRepositories, setCheckedRepositories] = useState<Set<string>>(new Set<string>());
+  const [polling, setPolling] = useState(false);
+  const [pollCount, setPollCount] = useState(0);
+
   const isRedHatRepository = contentOrigin === ContentOrigin.REDHAT;
 
   const [filterData, setFilterData] = useState<FilterData>({
@@ -170,7 +173,30 @@ const ContentListTable = () => {
     isError,
     isFetching,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useContentListQuery(page, perPage, filterData, sortString, contentOrigin);
+  } = useContentListQuery(page, perPage, filterData, sortString, contentOrigin, true, polling);
+
+  useEffect(() => {
+    if (isError) {
+      setPolling(false);
+      setPollCount(0);
+      return;
+    }
+    const containsPending = data?.data?.some(({ status }) => status === 'Pending' || status === '');
+    if (polling && containsPending) {
+      // Count each consecutive time polling occurs
+      setPollCount(pollCount + 1);
+    }
+    if (polling && !containsPending) {
+      // We were polling, but now the data is valid, we stop the count.
+      setPollCount(0);
+    }
+    if (pollCount > 40) {
+      // If polling occurs 40 times in a row, we stop it. Likely a data/kafka issue has occurred with the API.
+      return setPolling(false);
+    }
+    // This sets the polling state based whether the data contains any "Pending" status
+    return setPolling(containsPending);
+  }, [data?.data]);
 
   const { mutateAsync: introspectRepository, isLoading: isIntrospecting } =
     useIntrospectRepositoryMutate(
@@ -509,6 +535,7 @@ const ContentListTable = () => {
                     <Tr>
                       <Hide hide={!rbac?.write || isRedHatRepository}>
                         <Th
+                          aria-label='select-repo-checkbox'
                           className={classes.checkboxMinWidth}
                           select={{
                             onSelect: selectAllRepos,
@@ -526,7 +553,7 @@ const ContentListTable = () => {
                           </Th>
                         ),
                       )}
-                      <Th>
+                      <Th aria-label='loading-spinner'>
                         <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
                       </Th>
                     </Tr>
