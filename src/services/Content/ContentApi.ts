@@ -466,6 +466,7 @@ export const getSnapshotErrata: (
   search: string,
   type: string[],
   severity: string[],
+  sortBy: string,
 ) => Promise<ErrataResponse> = async (
   snap_uuid: string,
   page: number,
@@ -473,6 +474,7 @@ export const getSnapshotErrata: (
   search: string,
   type: string[],
   severity: string[],
+  sortBy: string,
 ) => {
   const { data } = await axios.get(
     `/api/content-sources/v1/snapshots/${snap_uuid}/errata?${objectToUrlParams({
@@ -481,6 +483,7 @@ export const getSnapshotErrata: (
       search,
       type: type.join(',').toLowerCase(),
       severity: severity.join(','),
+      sort_by: sortBy,
     })}`,
   );
   return data;

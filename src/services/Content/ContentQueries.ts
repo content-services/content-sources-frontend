@@ -625,11 +625,12 @@ export const useGetSnapshotErrataQuery = (
   search: string,
   type: string[],
   severity: string[],
+  sortBy: string,
 ) => {
   const errorNotifier = useErrorNotification();
   return useQuery<ErrataResponse>(
-    [SNAPSHOT_ERRATA_KEY, snap_uuid, page, limit, search, type, severity],
-    () => getSnapshotErrata(snap_uuid, page, limit, search, type, severity),
+    [SNAPSHOT_ERRATA_KEY, snap_uuid, page, limit, search, type, severity, sortBy],
+    () => getSnapshotErrata(snap_uuid, page, limit, search, type, severity, sortBy),
     {
       keepPreviousData: true,
       optimisticResults: true,

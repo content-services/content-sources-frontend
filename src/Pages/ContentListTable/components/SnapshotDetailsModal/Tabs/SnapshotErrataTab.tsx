@@ -10,13 +10,14 @@ import Hide from '../../../../../components/Hide/Hide';
 import { ContentOrigin } from '../../../../../services/Content/ContentApi';
 import { createUseStyles } from 'react-jss';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useRootPath from '../../../../../Hooks/useRootPath';
 import { useAppContext } from '../../../../../middleware/AppContext';
 import { useGetSnapshotErrataQuery } from '../../../../../services/Content/ContentQueries';
 import AdvisoriesTable from '../../../../../components/SharedTables/AdvisoriesTable';
 import SnapshotErrataFilters from './SnapshotErrataFilters';
+import { ThProps } from '@patternfly/react-table';
 
 const useStyles = createUseStyles({
   description: {
@@ -58,10 +59,28 @@ export function SnapshotErrataTab() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
   const [filterData, setFilterData] = useState(defaultFilterState);
+  const [activeSortIndex, setActiveSortIndex] = useState<number>(-1);
+  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     setPage(1);
   }, [filterData]);
+
+  const columnSortAttributes = [
+    'name',
+    'synopsis',
+    'type',
+    'severity',
+    'issued_date'
+  ];
+
+  const sortString = useMemo(
+    () =>
+      activeSortIndex === -1
+        ? ''
+        : columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
+    [activeSortIndex, activeSortDirection],
+  );
 
   const {
     isLoading,
@@ -75,6 +94,7 @@ export function SnapshotErrataTab() {
     filterData.search,
     filterData.type,
     filterData.severity,
+    sortString
   );
 
   useEffect(() => {
@@ -102,6 +122,20 @@ export function SnapshotErrataTab() {
   const fetchingOrLoading = isFetching || isLoading;
 
   const loadingOrZeroCount = fetchingOrLoading || !count;
+
+  const sortParams = (columnIndex: number): ThProps['sort'] => ({
+    sortBy: {
+      index: activeSortIndex,
+      direction: activeSortDirection,
+      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
+    },
+    onSort: (_event, index, direction) => {
+      setActiveSortIndex(index);
+      setActiveSortDirection(direction);
+    },
+    columnIndex,
+  });
+  
   return (
     <Grid className={classes.mainContainer}>
       <InputGroup className={classes.topContainer}>
@@ -130,6 +164,7 @@ export function SnapshotErrataTab() {
         isLoadingOrZeroCount={loadingOrZeroCount}
         clearSearch={() => setFilterData(defaultFilterState)}
         perPage={perPage}
+        sortParams={sortParams}
       />
       <Flex className={classes.bottomContainer}>
         <FlexItem />

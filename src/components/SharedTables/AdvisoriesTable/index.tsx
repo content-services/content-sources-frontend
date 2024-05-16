@@ -6,6 +6,7 @@ import {
   Tbody,
   Td,
   Th,
+  ThProps,
   Thead,
   Tr,
 } from '@patternfly/react-table';
@@ -54,6 +55,7 @@ interface Props {
   errataList: ErrataItem[];
   clearSearch: () => void;
   perPage: number;
+  sortParams: (columnIndex: number) => ThProps['sort'];
 }
 
 export default function AdvisoriesTable({
@@ -62,6 +64,7 @@ export default function AdvisoriesTable({
   errataList,
   clearSearch,
   perPage,
+  sortParams
 }: Props) {
   const classes = useStyles();
   const columnHeaders = [
@@ -95,9 +98,13 @@ export default function AdvisoriesTable({
               <Tr>
                 <Th />
                 {columnHeaders.map(({ name, width }, index) => (
+                  name === 'Name' || name === 'Synopsis' ?  
                   <Th width={width as BaseCellProps['width']} key={index + name + '_header'}>
                     {name}
-                  </Th>
+                  </Th> :
+                  <Th width={width as BaseCellProps['width']} key={index + name + '_header'} sort={sortParams(index)}>
+                  {name}
+                </Th>
                 ))}
               </Tr>
             </Thead>
