@@ -304,7 +304,7 @@ const ContentListTable = () => {
           : []
         : [
             {
-              isDisabled: actionTakingPlace,
+              isDisabled: actionTakingPlace || rowData?.status === 'Pending',
               title: 'Edit',
               onClick: () => {
                 navigate(`${EDIT_ROUTE}?repoUUIDS=${rowData.uuid}`);
@@ -328,11 +328,11 @@ const ContentListTable = () => {
                   {
                     id: 'actions-column-snapshot',
                     className:
-                      actionTakingPlace || rowData?.status === 'Retrying' || !rowData.snapshot
+                      actionTakingPlace || rowData?.status === 'Pending' || !rowData.snapshot
                         ? classes.disabledButton
                         : '',
                     isDisabled:
-                      actionTakingPlace || rowData?.status === 'Retrying' || !rowData.snapshot,
+                      actionTakingPlace || rowData?.status === 'Pending' || !rowData.snapshot,
                     title: 'Trigger snapshot',
                     onClick: () => {
                       triggerSnapshot(rowData.uuid);
@@ -349,7 +349,7 @@ const ContentListTable = () => {
                 ]
               : []),
             {
-              isDisabled: actionTakingPlace || rowData?.status == 'Retrying',
+              isDisabled: actionTakingPlace || rowData?.status == 'Pending',
               title: 'Introspect now',
               onClick: () => introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
             },
@@ -369,7 +369,6 @@ const ContentListTable = () => {
     if (checked) {
       const newSet = new Set<string>(checkedRepositories);
       data.data
-        .filter((contentItem) => repoCanBeChecked(contentItem))
         .forEach((contentItem) => newSet.add(contentItem.uuid));
       setCheckedRepositories(newSet);
     } else {
@@ -381,14 +380,7 @@ const ContentListTable = () => {
     }
   };
 
-  const repoCanBeChecked = (contentItem: ContentItem) => contentItem.status !== 'Pending';
-
   const atLeastOneRepoChecked = useMemo(() => checkedRepositories.size >= 1, [checkedRepositories]);
-
-  const areAllReposPending = useMemo(
-    () => data.data.every((contentItem) => !repoCanBeChecked(contentItem)),
-    [data],
-  );
 
   const areAllReposSelected = useMemo(() => {
     let atLeastOneSelectedOnPage = false;
@@ -396,7 +388,7 @@ const ContentListTable = () => {
       if (checkedRepositories.has(contentItem.uuid)) {
         atLeastOneSelectedOnPage = true;
       }
-      return !repoCanBeChecked(contentItem) || checkedRepositories.has(contentItem.uuid);
+      return checkedRepositories.has(contentItem.uuid);
     });
     // Returns false if all repos on current page are pending (none selected)
     return allSelectedOrPending && atLeastOneSelectedOnPage;
@@ -540,7 +532,6 @@ const ContentListTable = () => {
                           select={{
                             onSelect: selectAllRepos,
                             isSelected: areAllReposSelected,
-                            isHeaderSelectDisabled: areAllReposPending,
                           }}
                         />
                       </Hide>
@@ -579,7 +570,6 @@ const ContentListTable = () => {
                                 onSelect: (_event, isSelecting) =>
                                   onSelectRepo(rowData.uuid, isSelecting),
                                 isSelected: checkedRepositories.has(rowData.uuid),
-                                isDisabled: !repoCanBeChecked(rowData),
                               }}
                             />
                           </Hide>
@@ -631,7 +621,7 @@ const ContentListTable = () => {
                                 }
                                 show={
                                   !isRedHatRepository &&
-                                  (!rbac?.repoWrite || rowData?.status === 'Pending')
+                                  (!rbac?.repoWrite)
                                 }
                                 setDisabled
                               >
