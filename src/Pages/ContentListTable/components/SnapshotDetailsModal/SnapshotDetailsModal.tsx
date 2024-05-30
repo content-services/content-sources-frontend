@@ -46,10 +46,7 @@ export default function SnapshotDetailsModal() {
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
 
   useEffect(() => {
-    if (
-      contentOrigin === ContentOrigin.REDHAT ||
-      urlSearchParams.get('tab') === SnapshotDetailTab.ERRATA
-    ) {
+    if (urlSearchParams.get('tab') === SnapshotDetailTab.ERRATA) {
       setActiveTabKey(1);
     }
   }, []);
@@ -101,6 +98,7 @@ export default function SnapshotDetailsModal() {
             >
               <Tab
                 eventKey={0}
+                ouiaId='packages_tab'
                 title={<TabTitleText>Packages</TabTitleText>}
                 aria-label='Snapshot package detail tab'
               >
@@ -108,6 +106,7 @@ export default function SnapshotDetailsModal() {
               </Tab>
               <Tab
                 eventKey={1}
+                ouiaId='advisories_tab'
                 title={<TabTitleText>Advisories</TabTitleText>}
                 aria-label='Snapshot errata detail tab'
               >
