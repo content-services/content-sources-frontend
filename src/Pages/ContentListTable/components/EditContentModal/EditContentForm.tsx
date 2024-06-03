@@ -122,14 +122,18 @@ const EditContentForm = ({
   setIsLoading,
   setUpdatedValues,
 }: EditContentProps) => {
-  const initialValues = mapToDefaultFormikValues(values);
+  const initialValues = useMemo(() => mapToDefaultFormikValues(values), [values]);
   const [changeVerified, setChangeVerified] = useState(false);
   const [gpgKeyList, setGpgKeyList] = useState<Array<string>>(
     initialValues.map(({ gpgKey }) => gpgKey),
   );
+
   const classes = useStyles();
+  const { notify } = useNotification();
   const queryClient = useQueryClient();
   const { features } = useAppContext();
+  const debouncedGpgKeyList = useDebounce(gpgKeyList, 300);
+
   const snapshottingEnabled = useMemo(
     () => !!features?.snapshots?.enabled && !!features?.snapshots?.accessible,
     [!!features?.snapshots?.enabled],
@@ -144,59 +148,10 @@ const EditContentForm = ({
     onSubmit: () => undefined,
   });
 
-  const updateGpgKey = (index: number, value: string) => {
-    setChangeVerified(false);
-    const updatedData: Array<string> = [...gpgKeyList];
-    updatedData[index] = value;
-    setGpgKeyList(updatedData);
-  };
   const { fetchGpgKey, isLoading: isFetchingGpgKey } = useFetchGpgKey();
-
-  const debouncedGpgKeyList = useDebounce(gpgKeyList, 300);
-
-  const updateGpgKeyList = async (list: Array<string>) => {
-    const updatedData = await Promise.all(
-      [...formik.values].map(async (values, index) => {
-        const updateValue = list[index];
-        if (isValidURL(updateValue)) {
-          const result = await fetchGpgKey(updateValue);
-          // If successful
-          if (result !== updateValue) {
-            updateGpgKey(index, result);
-            return {
-              ...values,
-              gpgKey: result,
-              ...(values.gpgKey === '' && !!updateValue
-                ? {
-                    metadataVerification:
-                      !!validationList?.[index]?.url?.metadata_signature_present,
-                  }
-                : {}),
-            };
-          }
-        }
-
-        return {
-          ...values,
-          gpgKey: updateValue,
-          ...(values.gpgKey === '' && !!updateValue
-            ? {
-                metadataVerification: !!validationList?.[index]?.url?.metadata_signature_present,
-              }
-            : {}),
-        };
-      }),
-    );
-
-    formik.setValues(updatedData);
-  };
 
   const { distribution_arches: distArches = [], distribution_versions: distVersions = [] } =
     queryClient.getQueryData<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY) || {};
-
-  useEffect(() => {
-    updateGpgKeyList(debouncedGpgKeyList);
-  }, [debouncedGpgKeyList]);
 
   const { distributionArches, distributionVersions } = useMemo(() => {
     const distributionArches = {};
@@ -206,13 +161,59 @@ const EditContentForm = ({
     return { distributionArches, distributionVersions };
   }, [distArches, distVersions]);
 
+  const updateGpgKey = (index: number, value: string) => {
+    setChangeVerified(false);
+    const updatedData: Array<string> = [...gpgKeyList];
+    updatedData[index] = value;
+    setGpgKeyList(updatedData);
+  };
+
+  useEffect(() => {
+    // Update Gpgkey List
+    (async () => {
+      const updatedData = await Promise.all(
+        [...formik.values].map(async (values, index) => {
+          const updateValue = debouncedGpgKeyList[index];
+          if (isValidURL(updateValue)) {
+            const result = await fetchGpgKey(updateValue);
+            // If successful
+            if (result !== updateValue) {
+              updateGpgKey(index, result);
+              return {
+                ...values,
+                gpgKey: result,
+                ...(values.gpgKey === '' && !!updateValue
+                  ? {
+                      metadataVerification:
+                        !!validationList?.[index]?.url?.metadata_signature_present,
+                    }
+                  : {}),
+              };
+            }
+          }
+
+          return {
+            ...values,
+            gpgKey: updateValue,
+            ...(values.gpgKey === '' && !!updateValue
+              ? {
+                  metadataVerification: !!validationList?.[index]?.url?.metadata_signature_present,
+                }
+              : {}),
+          };
+        }),
+      );
+
+      formik.setValues(updatedData);
+    })();
+  }, [debouncedGpgKeyList]);
+
   const createDataLengthOf1 = formik.values.length === 1;
 
   const allExpanded = !formik.values.some(({ expanded }) => !expanded);
 
-  const expandAllToggle = () => {
+  const expandAllToggle = () =>
     formik.setValues([...formik.values.map((vals) => ({ ...vals, expanded: !allExpanded }))]);
-  };
 
   const updateVariable = (index: number, newValue) => {
     // ensures no unnecessary validation occurs
@@ -312,10 +313,6 @@ const EditContentForm = ({
     }
   };
 
-  const urlOnBlur = (index: number) => {
-    updateArchAndVersion(index);
-  };
-
   const setVersionSelected = (value: string[], index: number) => {
     let valueToUpdate = value.map((val) => distributionVersions[val]);
     if (value.length === 0 || valueToUpdate[value.length - 1] === 'any') {
@@ -329,8 +326,6 @@ const EditContentForm = ({
       versions: valueToUpdate,
     });
   };
-
-  const { notify } = useNotification();
 
   // Tell the parent modal that things are happening
   const actionTakingPlace = isFetchingGpgKey || isValidating || !changeVerified;
@@ -458,7 +453,7 @@ const EditContentForm = ({
                       isRequired
                       type='url'
                       validated={getFieldValidation(index, 'url')}
-                      onBlur={() => urlOnBlur(index)}
+                      onBlur={() => updateArchAndVersion(index)}
                       onChange={(_event, value) => {
                         if (url !== value) {
                           updateVariable(index, { url: value });
@@ -542,7 +537,9 @@ const EditContentForm = ({
                       name='module-hotfixes-switch'
                       isChecked={modularityFilteringEnabled}
                       onChange={() => {
-                        updateVariable(index, { modularityFilteringEnabled: !modularityFilteringEnabled });
+                        updateVariable(index, {
+                          modularityFilteringEnabled: !modularityFilteringEnabled,
+                        });
                       }}
                     />
                     <Tooltip content='When enabled, modularity filtering prevents updates to packages contained within an enabled module'>

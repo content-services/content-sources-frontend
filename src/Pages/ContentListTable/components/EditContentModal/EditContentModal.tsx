@@ -65,7 +65,7 @@ const EditContentModal = () => {
       queryClient.invalidateQueries(CONTENT_ITEM_KEY);
     });
 
-  const { data, isError } = useFetchContent(uuids);
+  const { data, isError, isLoading: isLoadingInitialContent, isSuccess } = useFetchContent(uuids);
   const values = data ? [data] : [];
 
   useEffect(() => {
@@ -84,7 +84,8 @@ const EditContentModal = () => {
   }, [values]);
 
   const valuesHaveChanged = !isEqual(mapToContentItemsToEditContentRequest(values), updatedValues);
-  const actionTakingPlace = isEditing || isLoading || initialLoad;
+  const actionTakingPlace =
+    isEditing || isLoading || isLoadingInitialContent || initialLoad || !isSuccess;
 
   return (
     <Modal
