@@ -17,6 +17,12 @@ export default function useTemplateRoutes(): TabbedRouteItem[] {
         : [
             {
               title: 'Templates',
+              route: TEMPLATE_DETAILS_ROUTE,
+              Element: TemplateDetails,
+              ChildRoutes: [],
+            },
+            {
+              title: 'Templates',
               route: TEMPLATES_ROUTE,
               Element: TemplatesTable,
               ChildRoutes: [
