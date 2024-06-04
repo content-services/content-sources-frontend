@@ -2,26 +2,25 @@ import { Suspense } from 'react';
 import { Bullseye, Button, Grid, Spinner } from '@patternfly/react-core';
 import AsyncComponent from '@redhat-cloud-services/frontend-components/AsyncComponent';
 import ErrorState from '@redhat-cloud-services/frontend-components/ErrorState';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { createUseStyles } from 'react-jss';
 
 import { useAppContext } from '../../middleware/AppContext';
 
 const useStyles = createUseStyles({
-  minHeight: {
+  contentZerostate: {
     minHeight: '100%',
     '& .bannerBefore': { maxHeight: '320px!important' },
+    '& .bannerRight': { justifyContent: 'space-evenly!important' },
   },
 });
 
 export const ZeroState = () => {
   const classes = useStyles();
-  const navigate = useNavigate();
   const { setZeroState } = useAppContext();
 
   const handleClick = () => {
     setZeroState(false);
-    navigate('add');
   };
 
   return (
@@ -33,7 +32,7 @@ export const ZeroState = () => {
           </Bullseye>
         }
       >
-        <Grid className={classes.minHeight}>
+        <Grid className={classes.contentZerostate}>
           <AsyncComponent
             appId='content_zero_state'
             appName='dashboard'
@@ -42,15 +41,15 @@ export const ZeroState = () => {
             ErrorComponent={<ErrorState />}
             app='Content_management'
             ouiaId='get_started_from_zerostate_description'
-            customText='Get started with Insights by adding custom repositories'
+            customText='Get started with Insights by adding repositories'
             customButton={
               <Button
-                id='add-custom-repositories-button'
-                ouiaId='add_custom_repositories_button'
+                id='get-started-repositories-button'
+                ouiaId='get_started_repositories_button'
                 className='pf-c-button pf-m-primary pf-u-p-md pf-u-font-size-md'
                 onClick={() => handleClick()}
               >
-                Add custom repositories
+                Add repositories now
               </Button>
             }
           />
