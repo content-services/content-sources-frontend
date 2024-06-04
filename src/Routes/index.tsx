@@ -3,14 +3,13 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { createUseStyles } from 'react-jss';
 import { useMemo } from 'react';
 
-import { ErrorPage } from '../components/Error/ErrorPage';
+import { ErrorPage } from 'components/Error/ErrorPage';
 import RepositoryLayout from './Repositories/RepositoryLayout';
-import { ZeroState } from '../components/ZeroState/ZeroState';
+import { ZeroState } from 'components/ZeroState/ZeroState';
 import useRepositoryRoutes from './Repositories/useRepositoryRoutes';
 import { REPOSITORIES_ROUTE } from './constants';
 import useTemplateRoutes from './Templates/useTemplateRoutes';
-import TemplateLayout from './Templates/TemplateLayout';
-import { useAppContext } from '../middleware/AppContext';
+import { useAppContext } from 'middleware/AppContext';
 
 const useStyles = createUseStyles({
   containerMargin: {
@@ -48,25 +47,23 @@ export default function RepositoriesRoutes() {
           </Route>
         ))}
       </Route>
-      <Route element={<TemplateLayout />}>
       {templateRoutes.map(({ route, Element, ChildRoutes }, key) => (
-          <Route
-            key={key.toString()}
-            path={route}
-            element={
-              <ErrorPage>
-                <Grid className={classes.containerMargin}>
-                  <Element />
-                </Grid>
-              </ErrorPage>
-            }
-          >
-            {ChildRoutes?.map(({ path, Element: ChildRouteElement }, childRouteKey) => (
-              <Route key={childRouteKey} path={path} element={<ChildRouteElement />} />
-            ))}
-          </Route>
-        ))}
-      </Route>
+        <Route
+          key={key.toString()}
+          path={route}
+          element={
+            <ErrorPage>
+              <Grid className={classes.containerMargin}>
+                <Element />
+              </Grid>
+            </ErrorPage>
+          }
+        >
+          {ChildRoutes?.map(({ path, Element: ChildRouteElement }, childRouteKey) => (
+            <Route key={childRouteKey} path={path} element={<ChildRouteElement />} />
+          ))}
+        </Route>
+      ))}
       <Route path='*' element={<Navigate to={REPOSITORIES_ROUTE} replace />} />
     </Routes>
   );
