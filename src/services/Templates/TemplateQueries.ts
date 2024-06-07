@@ -31,6 +31,7 @@ export const useEditTemplateQuery = (queryClient: QueryClient, request: EditTemp
       });
 
       queryClient.invalidateQueries(GET_TEMPLATES_KEY);
+      queryClient.invalidateQueries(FETCH_TEMPLATE_KEY);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
