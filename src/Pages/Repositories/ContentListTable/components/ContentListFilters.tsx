@@ -35,7 +35,6 @@ interface Props {
   filterData: FilterData;
   atLeastOneRepoChecked: boolean;
   numberOfReposChecked: number;
-  deleteCheckedRepos: () => void;
   setContentOrigin: (origin: ContentOrigin) => void;
   contentOrigin: ContentOrigin;
 }
@@ -64,7 +63,6 @@ const ContentListFilters = ({
   filterData,
   atLeastOneRepoChecked,
   numberOfReposChecked,
-  deleteCheckedRepos,
   setContentOrigin,
   contentOrigin,
 }: Props) => {
@@ -325,7 +323,6 @@ const ContentListFilters = ({
               isDisabled={!rbac?.repoWrite || isRedHatRepository}
               atLeastOneRepoChecked={atLeastOneRepoChecked}
               numberOfReposChecked={numberOfReposChecked}
-              deleteCheckedRepos={deleteCheckedRepos}
               toggleOuiaId='custom_repositories_kebab_toggle'
             />
           </ConditionalTooltip>

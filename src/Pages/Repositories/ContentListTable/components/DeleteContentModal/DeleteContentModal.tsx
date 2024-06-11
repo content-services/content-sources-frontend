@@ -1,31 +1,36 @@
 import {
+  Alert,
   Bullseye,
   Button,
-  Grid,
-  GridItem,
+  ExpandableSection,
+  List,
+  ListItem,
   Modal,
   ModalVariant,
   Spinner,
   Stack,
   StackItem,
   Text,
-  TextArea,
-  Title,
 } from '@patternfly/react-core';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { global_Color_100 } from '@patternfly/react-tokens';
 import { useEffect, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import Hide from 'components/Hide/Hide';
 import {
-  CONTENT_ITEM_KEY,
-  useFetchContent,
-  useDeleteContentItemMutate,
+  CONTENT_LIST_KEY,
+  useBulkDeleteContentItemMutate,
+  useContentListQuery,
 } from 'services/Content/ContentQueries';
 import { useQueryClient } from 'react-query';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useHref, useLocation, useNavigate } from 'react-router-dom';
 import { useContentListOutletContext } from '../../ContentListTable';
 import useRootPath from 'Hooks/useRootPath';
+import { GET_TEMPLATES_KEY, useTemplateList } from 'services/Templates/TemplateQueries';
+import { TemplateFilterData, TemplateItem } from 'services/Templates/TemplateApi';
+import { TEMPLATES_ROUTE } from 'Routes/constants';
+import { ContentItem, FilterData } from 'services/Content/ContentApi';
 
 const useStyles = createUseStyles({
   description: {
@@ -41,65 +46,108 @@ const useStyles = createUseStyles({
     color: global_Color_100.value,
     height: '200px',
   },
+  link: {
+    padding: 0,
+  },
+  templateColumnMinWidth: {
+    minWidth: '200px!important',
+  },
 });
 
 export default function DeleteContentModal() {
   const classes = useStyles();
+  const path = useHref('content');
+  const pathname = path.split('content')[0] + 'content';
   const navigate = useNavigate();
   const rootPath = useRootPath();
   const queryClient = useQueryClient();
   const { search } = useLocation();
   const [isLoading, setIsLoading] = useState(true);
+  const maxTemplatesToShow = 3;
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const {
     clearCheckedRepositories,
-    deletionContext: { page, perPage, filterData, contentOrigin, sortString },
+    deletionContext: { page, perPage, filterData, contentOrigin, sortString, checkedRepositories },
   } = useContentListOutletContext();
 
-  const uuids = new URLSearchParams(search).get('repoUUIDS')?.split(',') || [];
+  const uuids =
+    new URLSearchParams(search).get('repoUUID')?.split(',') ||
+    Array.from(checkedRepositories) ||
+    [];
+  const reposToDelete = new Set(uuids);
 
-  const { mutate: deleteItem, isLoading: isDeleting } = useDeleteContentItemMutate(
+  const { mutateAsync: deleteItems, isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
     queryClient,
+    reposToDelete,
     page,
     perPage,
-    filterData,
     contentOrigin,
+    filterData,
     sortString,
   );
 
   const onClose = () => navigate(rootPath);
   const onSave = async () => {
-    deleteItem(data?.uuid || '');
-    onClose();
-    clearCheckedRepositories();
-    queryClient.invalidateQueries(CONTENT_ITEM_KEY);
+    deleteItems(reposToDelete).then(() => {
+      onClose();
+      clearCheckedRepositories();
+      queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(GET_TEMPLATES_KEY);
+    });
   };
 
-  const { data, isError } = useFetchContent(uuids);
-  const values = data ? [data] : [];
+  const repoFilterData: FilterData = { uuids: uuids };
+
+  const {
+    isError: isRepoError,
+    data: repos = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
+  } = useContentListQuery(page, perPage, repoFilterData, '');
+
+  const templateFilterData: TemplateFilterData = {
+    arch: '',
+    version: '',
+    search: '',
+    repository_uuids: uuids.join(','),
+  };
+
+  const {
+    isError: isTemplateError,
+    data: templates = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
+  } = useTemplateList(page, perPage, '', templateFilterData);
 
   useEffect(() => {
-    if (data) {
+    if (repos && templates) {
       setIsLoading(false);
     }
-    if (isError) {
+    if (isRepoError || isTemplateError) {
       onClose();
     }
-  }, [values, isError]);
+  }, [isRepoError, isTemplateError, repos.data, templates.data]);
 
-  const actionTakingPlace = isDeleting || isLoading;
+  const actionTakingPlace = isDeletingItems || isLoading;
+
+  const columnHeaders = ['Name', 'URL', 'Associated Templates'];
 
   return (
     <Modal
       titleIconVariant='warning'
       position='top'
-      variant={ModalVariant.small}
-      title='Remove repository?'
-      ouiaId='delete_custom_repository'
+      variant={ModalVariant.large}
+      title='Remove repositories?'
+      ouiaId='delete_custom_repositories'
       ouiaSafe={!actionTakingPlace}
       description={
-        <Text component='p' className={classes.description}>
-          Are you sure you want to remove this repository?
-        </Text>
+        <>
+          <Hide hide={templates.data.length <= 0}>
+            <Alert variant='warning' isInline title='Some repositories have associated templates.'>
+              Removing these repositories will remove that content from their associated templates.
+            </Alert>
+          </Hide>
+          <Text component='p' className={classes.description}>
+            Are you sure you want to remove these repositories?
+          </Text>
+        </>
       }
       isOpen
       onClose={onClose}
@@ -129,36 +177,83 @@ export default function DeleteContentModal() {
         </Bullseye>
       </Hide>
       <Hide hide={isLoading}>
-        <Grid hasGutter>
-          <GridItem>
-            <Title headingLevel='h6'>Name</Title>
-            <Text className='pf-v5-u-color-100'>{data?.name}</Text>
-          </GridItem>
-          <GridItem>
-            <Title headingLevel='h6'>URL</Title>
-            <Text className='pf-v5-u-color-100'>{data?.url}</Text>
-          </GridItem>
-          <GridItem>
-            <Title headingLevel='h6'>Archicture</Title>
-            <Text className='pf-v5-u-color-100'>{data?.distribution_arch ?? 'Any'}</Text>
-          </GridItem>
-          <GridItem>
-            <Title headingLevel='h6'>Versions</Title>
-            <Text className='pf-v5-u-color-100'>{data?.distribution_versions ?? 'Any'}</Text>
-          </GridItem>
-          <GridItem>
-            <Title headingLevel='h6'>GPG Key</Title>
-            {!data?.gpg_key ? (
-              <Text className='pf-v5-u-color-100'>None</Text>
-            ) : (
-              <TextArea
-                aria-label='GPG Key Text'
-                className={classes.textAreaContent}
-                value={data.gpg_key}
-              />
-            )}
-          </GridItem>
-        </Grid>
+        <Table variant='compact'>
+          <Thead>
+            <Tr>
+              {columnHeaders.map((columnHeader) => (
+                <Th key={columnHeader + 'column'}>{columnHeader}</Th>
+              ))}
+            </Tr>
+          </Thead>
+          <Tbody>
+            {repos.data?.map((repo: ContentItem, index) => {
+              const templatesWithRepos = templates.data.filter((template: TemplateItem) =>
+                template.repository_uuids.includes(repo.uuid),
+              );
+
+              return (
+                <Tr key={repo.uuid + index}>
+                  <Td>{repo.name}</Td>
+                  <Td>{repo.url}</Td>
+                  <Td className={classes.templateColumnMinWidth}>
+                    {templatesWithRepos.length > 0 ? (
+                      <List isPlain>
+                        {templatesWithRepos
+                          .slice(0, maxTemplatesToShow)
+                          .map((template: TemplateItem, index) => (
+                            <ListItem key={template.uuid + index}>
+                              <Button
+                                ouiaId='template_with_repo_button'
+                                className={classes.link}
+                                variant='link'
+                                component='a'
+                                href={pathname + '/' + TEMPLATES_ROUTE + `/${template.uuid}/edit`}
+                                target='_blank'
+                              >
+                                {template.name}
+                              </Button>
+                            </ListItem>
+                          ))}
+                        <Hide hide={templatesWithRepos.length <= maxTemplatesToShow}>
+                          <ExpandableSection
+                            toggleText={
+                              isExpanded
+                                ? 'Show less'
+                                : `and ${templatesWithRepos.length - maxTemplatesToShow} more`
+                            }
+                            onToggle={() => setIsExpanded(!isExpanded)}
+                            isExpanded={isExpanded}
+                          >
+                            {templatesWithRepos
+                              .slice(maxTemplatesToShow, templatesWithRepos.length)
+                              .map((template: TemplateItem, index) => (
+                                <ListItem key={template.uuid + index}>
+                                  <Button
+                                    ouiaId='template_with_repo_button'
+                                    className={classes.link}
+                                    variant='link'
+                                    component='a'
+                                    href={
+                                      pathname + '/' + TEMPLATES_ROUTE + `/${template.uuid}/edit`
+                                    }
+                                    target='_blank'
+                                  >
+                                    {template.name}
+                                  </Button>
+                                </ListItem>
+                              ))}
+                          </ExpandableSection>
+                        </Hide>
+                      </List>
+                    ) : (
+                      'None'
+                    )}
+                  </Td>
+                </Tr>
+              );
+            })}
+          </Tbody>
+        </Table>
       </Hide>
     </Modal>
   );

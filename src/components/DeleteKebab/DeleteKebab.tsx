@@ -1,11 +1,12 @@
 import { Dropdown, DropdownItem, KebabToggle } from '@patternfly/react-core/deprecated';
 import { useState } from 'react';
 import ConditionalTooltip from '../ConditionalTooltip/ConditionalTooltip';
+import { useNavigate } from 'react-router-dom';
+import { DELETE_ROUTE } from 'Routes/constants';
 
 interface Props {
   atLeastOneRepoChecked: boolean;
   numberOfReposChecked: number;
-  deleteCheckedRepos: () => void;
   toggleOuiaId?: string;
   isDisabled?: boolean;
 }
@@ -13,10 +14,10 @@ interface Props {
 const DeleteKebab = ({
   atLeastOneRepoChecked,
   numberOfReposChecked,
-  deleteCheckedRepos,
   toggleOuiaId,
   isDisabled,
 }: Props) => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   const onToggle = (isOpen: boolean) => {
@@ -40,7 +41,7 @@ const DeleteKebab = ({
       show={!atLeastOneRepoChecked}
       setDisabled
     >
-      <DropdownItem onClick={deleteCheckedRepos}>
+      <DropdownItem onClick={() => navigate(`${DELETE_ROUTE}`)}>
         {atLeastOneRepoChecked
           ? `Remove ${numberOfReposChecked} repositories`
           : 'Remove selected repositories'}

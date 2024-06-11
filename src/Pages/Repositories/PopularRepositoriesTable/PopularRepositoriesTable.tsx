@@ -62,6 +62,8 @@ import {
   DropdownToggle,
   DropdownToggleAction,
 } from '@patternfly/react-core/deprecated';
+import { DELETE_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
+import { useHref, useNavigate } from 'react-router-dom';
 
 const useStyles = createUseStyles({
   chipsContainer: {
@@ -123,6 +125,9 @@ const PopularRepositoriesTable = () => {
   const classes = useStyles();
   const queryClient = useQueryClient();
   const { rbac, features } = useAppContext();
+  const navigate = useNavigate();
+  const path = useHref('content');
+  const pathname = path.split('content')[0] + 'content';
   // Uses urls as map key because uuids don't exist on repositories that haven't been created
   const [checkedRepositoriesToAdd, setCheckedRepositoriesToAdd] = useState<
     Map<string, CreateContentRequestItem>
@@ -272,12 +277,6 @@ const PopularRepositoriesTable = () => {
     }
   }, [selectedData]);
 
-  useEffect(() => {
-    if (selectedUUID) {
-      deleteItem(selectedUUID).then(clearCheckedRepositories, () => setSelectedUUID(''));
-    }
-  }, [selectedUUID]);
-
   const archesDisplay = (arch: string) => distArches.find(({ label }) => arch === label)?.name;
 
   const versionDisplay = (versions: Array<string>): string =>
@@ -286,14 +285,11 @@ const PopularRepositoriesTable = () => {
       .map(({ name }) => name)
       .join(', ');
 
-  const { mutateAsync: deleteItem, isLoading: isDeleting } = useDeletePopularRepositoryMutate(
-    queryClient,
-    page,
-    perPage,
-    { searchQuery: debouncedSearchValue } as FilterData,
-  );
+  const { isLoading: isDeleting } = useDeletePopularRepositoryMutate(queryClient, page, perPage, {
+    searchQuery: debouncedSearchValue,
+  } as FilterData);
 
-  const { mutateAsync: deleteItems, isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
+  const { isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
     queryClient,
     checkedRepositoriesToDelete,
     page,
@@ -325,16 +321,6 @@ const PopularRepositoriesTable = () => {
       });
     });
     setSelectedData(request);
-  };
-
-  const deleteSelected = async () => {
-    deleteItems(checkedRepositoriesToDelete).then(() => {
-      const newMaxPage = Math.ceil((count - checkedRepositoriesToDelete.size) / perPage);
-      if (page > 1 && newMaxPage < page) {
-        setPage(newMaxPage);
-      }
-      clearCheckedRepositories();
-    });
   };
 
   const addRepo = (key: number, repo: PopularRepository, snapshot: boolean) => {
@@ -458,7 +444,6 @@ const PopularRepositoriesTable = () => {
                   <DeleteKebab
                     atLeastOneRepoChecked={atLeastOneRepoToDeleteChecked}
                     numberOfReposChecked={checkedRepositoriesToDelete.size}
-                    deleteCheckedRepos={deleteSelected}
                     toggleOuiaId='popular_repositories_kebab_toggle'
                     isDisabled={!rbac?.repoWrite}
                   />
@@ -586,7 +571,17 @@ const PopularRepositoriesTable = () => {
                         {uuid ? (
                           <Button
                             isDisabled={uuid === selectedUUID || isAdding}
-                            onClick={() => setSelectedUUID(uuid)}
+                            onClick={() =>
+                              navigate(
+                                pathname +
+                                  '/' +
+                                  REPOSITORIES_ROUTE +
+                                  '/' +
+                                  DELETE_ROUTE +
+                                  '?repoUUID=' +
+                                  uuid,
+                              )
+                            }
                             variant='danger'
                             ouiaId='remove_popular_repo'
                           >

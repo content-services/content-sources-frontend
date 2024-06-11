@@ -41,7 +41,6 @@ it('Render loading state (disabled)', () => {
       }}
       atLeastOneRepoChecked={false}
       numberOfReposChecked={0}
-      deleteCheckedRepos={() => null}
     />,
   );
 
@@ -63,7 +62,6 @@ it('Select a filter of each type and ensure chips are present', () => {
       }}
       atLeastOneRepoChecked={false}
       numberOfReposChecked={0}
-      deleteCheckedRepos={() => null}
     />,
   );
 

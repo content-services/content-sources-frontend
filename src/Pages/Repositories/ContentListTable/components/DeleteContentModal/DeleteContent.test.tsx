@@ -1,9 +1,15 @@
 import { render } from '@testing-library/react';
-import { ReactQueryTestWrapper, defaultContentItem } from 'testingHelpers';
-import { useFetchContent } from 'services/Content/ContentQueries';
+import {
+  ReactQueryTestWrapper,
+  defaultContentItem,
+  defaultTemplateItem,
+  defaultTemplateItem2,
+} from 'testingHelpers';
+import { useContentListQuery } from 'services/Content/ContentQueries';
 import DeleteContentModal from './DeleteContentModal';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import { DELETE_ROUTE } from 'Routes/constants';
+import { useTemplateList } from 'services/Templates/TemplateQueries';
 
 jest.mock('react-query', () => ({
   ...jest.requireActual('react-query'),
@@ -15,6 +21,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: () => ({
     search: `${DELETE_ROUTE}?${defaultContentItem.uuid}`,
   }),
+  useHref: () => 'insights/content/repositories',
 }));
 
 jest.mock('../../ContentListTable', () => ({
@@ -26,6 +33,7 @@ jest.mock('../../ContentListTable', () => ({
       filterData: undefined,
       contentOrigin: ContentOrigin.EXTERNAL,
       sortString: '',
+      checkedRepositories: new Set<string>('some-uuid'),
     },
   }),
 }));
@@ -33,17 +41,28 @@ jest.mock('../../ContentListTable', () => ({
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
 jest.mock('services/Content/ContentQueries', () => ({
-  useDeleteContentItemMutate: () => ({ mutate: () => undefined, isLoading: false }),
-  useFetchContent: jest.fn(),
+  useBulkDeleteContentItemMutate: () => ({ isLoading: false }),
+  useContentListQuery: jest.fn(),
+}));
+
+jest.mock('services/Templates/TemplateQueries', () => ({
+  useTemplateList: jest.fn(),
 }));
 
 jest.mock('middleware/AppContext', () => ({ useAppContext: () => ({}) }));
 
-it('Render Delete Modal', () => {
-  const data = defaultContentItem;
-  (useFetchContent as jest.Mock).mockImplementation(() => ({
-    isLoading: false,
-    data: data,
+it('Render delete modal where repo is not included in any templates', () => {
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    data: {
+      isLoading: false,
+      data: [defaultContentItem],
+    },
+  }));
+  (useTemplateList as jest.Mock).mockImplementation(() => ({
+    data: {
+      isLoading: false,
+      data: [defaultTemplateItem2],
+    },
   }));
 
   const { queryByText } = render(
@@ -54,17 +73,22 @@ it('Render Delete Modal', () => {
 
   expect(queryByText(defaultContentItem.name)).toBeInTheDocument();
   expect(queryByText(defaultContentItem.url)).toBeInTheDocument();
-  expect(queryByText(defaultContentItem.distribution_arch)).toBeInTheDocument();
-  expect(queryByText(defaultContentItem.distribution_versions[0])).toBeInTheDocument();
-  expect(queryByText('None')).not.toBeInTheDocument();
+  expect(queryByText(defaultTemplateItem2.name)).not.toBeInTheDocument();
+  expect(queryByText('None')).toBeInTheDocument();
 });
 
-it('Render Delete Modal with no gpg key', () => {
-  const data = defaultContentItem;
-  data.gpg_key = '';
-  (useFetchContent as jest.Mock).mockImplementation(() => ({
-    isLoading: false,
-    data: data,
+it('Render delete modal where repo is included in 1 template', () => {
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    data: {
+      isLoading: false,
+      data: [defaultContentItem],
+    },
+  }));
+  (useTemplateList as jest.Mock).mockImplementation(() => ({
+    data: {
+      isLoading: false,
+      data: [defaultTemplateItem],
+    },
   }));
 
   const { queryByText } = render(
@@ -75,7 +99,5 @@ it('Render Delete Modal with no gpg key', () => {
 
   expect(queryByText(defaultContentItem.name)).toBeInTheDocument();
   expect(queryByText(defaultContentItem.url)).toBeInTheDocument();
-  expect(queryByText(defaultContentItem.distribution_arch)).toBeInTheDocument();
-  expect(queryByText(defaultContentItem.distribution_versions[0])).toBeInTheDocument();
-  expect(queryByText('None')).toBeInTheDocument();
+  expect(queryByText(defaultTemplateItem.name)).toBeInTheDocument();
 });

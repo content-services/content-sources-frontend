@@ -5,13 +5,13 @@ jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({ rbac: { read: true, write: true } }),
 }));
 
+jest.mock('react-router-dom', () => ({
+  useNavigate: jest.fn(),
+}));
+
 it('Render no checked repos', () => {
   const { queryByText } = render(
-    <DeleteKebab
-      atLeastOneRepoChecked={false}
-      numberOfReposChecked={0}
-      deleteCheckedRepos={() => null}
-    />,
+    <DeleteKebab atLeastOneRepoChecked={false} numberOfReposChecked={0} />,
   );
 
   const kebab = document.getElementById('delete-kebab');
@@ -24,11 +24,7 @@ it('Render no checked repos', () => {
 it('Render with checked repos', () => {
   const repos = 100;
   const { queryByText } = render(
-    <DeleteKebab
-      atLeastOneRepoChecked={true}
-      numberOfReposChecked={repos}
-      deleteCheckedRepos={() => null}
-    />,
+    <DeleteKebab atLeastOneRepoChecked={true} numberOfReposChecked={repos} />,
   );
 
   const kebab = document.getElementById('delete-kebab');

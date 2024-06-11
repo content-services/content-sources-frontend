@@ -217,7 +217,7 @@ const ContentListTable = () => {
     triggerSnapshotMutation(uuid);
   };
 
-  const { mutateAsync: deleteItems, isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
+  const { isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
     queryClient,
     checkedRepositories,
     page,
@@ -356,7 +356,7 @@ const ContentListTable = () => {
             { isSeparator: true },
             {
               title: 'Delete',
-              onClick: () => navigate(`${DELETE_ROUTE}?repoUUIDS=${rowData.uuid}`),
+              onClick: () => navigate(`${DELETE_ROUTE}?repoUUID=${rowData.uuid}`),
             },
           ],
     [actionTakingPlace, checkedRepositories, isRedHatRepository],
@@ -403,15 +403,6 @@ const ContentListTable = () => {
     setCheckedRepositories(newSet);
   };
 
-  const deleteCheckedRepos = () =>
-    deleteItems(checkedRepositories).then(() => {
-      const newMaxPage = Math.ceil((count - checkedRepositories.size) / perPage);
-      if (page > 1 && newMaxPage < page) {
-        setPage(newMaxPage);
-      }
-      clearCheckedRepositories();
-    });
-
   const itemName =
     contentOrigin === ContentOrigin.EXTERNAL ? 'custom repositories' : 'Red Hat repositories';
   const notFilteredBody = 'To get started, create a custom repository';
@@ -442,7 +433,14 @@ const ContentListTable = () => {
       <Outlet
         context={{
           clearCheckedRepositories,
-          deletionContext: { page, perPage, filterData, contentOrigin, sortString: sortString },
+          deletionContext: {
+            page,
+            perPage,
+            filterData,
+            contentOrigin,
+            sortString: sortString,
+            checkedRepositories,
+          },
         }}
       />
       <Grid
@@ -462,7 +460,6 @@ const ContentListTable = () => {
             filterData={filterData}
             atLeastOneRepoChecked={atLeastOneRepoChecked}
             numberOfReposChecked={checkedRepositories.size}
-            deleteCheckedRepos={deleteCheckedRepos}
           />
           <FlexItem>
             <Pagination
@@ -688,6 +685,7 @@ export const useContentListOutletContext = () =>
       filterData: FilterData;
       contentOrigin: ContentOrigin;
       sortString: string;
+      checkedRepositories: Set<string>;
     };
   }>();
 

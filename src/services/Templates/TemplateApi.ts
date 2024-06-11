@@ -36,6 +36,7 @@ export type TemplateFilterData = {
   arch: string;
   version: string;
   search: string;
+  repository_uuids: string;
 };
 
 export const getTemplates: (
@@ -47,7 +48,7 @@ export const getTemplates: (
   page,
   limit,
   sortBy,
-  { search, arch, version },
+  { search, arch, version, repository_uuids },
 ) => {
   const { data } = await axios.get(
     `/api/content-sources/v1/templates/?${objectToUrlParams({
@@ -57,6 +58,7 @@ export const getTemplates: (
       arch,
       version,
       sort_by: sortBy,
+      repository_uuids: repository_uuids,
     })}`,
   );
   return data;

@@ -259,6 +259,21 @@ export const defaultTemplateItem: TemplateItem = {
   ],
 };
 
+// Template used for testing delete modal where repo is not in any templates
+export const defaultTemplateItem2: TemplateItem = {
+  uuid: '60412eda-7df5-4fac-8556-278f45e2ef9a',
+  name: 'Bettyboop!',
+  org_id: '16758779',
+  description: 'I am not associated with the default repo!',
+  arch: 'aarch64',
+  version: '9',
+  date: '2024-01-22T00:00:00-07:00',
+  repository_uuids: [
+    '31c06bb4-ef1b-42f5-8c91-0ff67e7d8a1b',
+    '28b8d2b1-e4d6-4d8a-be12-1104601fb96e',
+  ],
+};
+
 export const defaultSnapshotForDateItem: SnapshotForDate = {
   repository_uuid: defaultContentItem.uuid,
   is_after: true,

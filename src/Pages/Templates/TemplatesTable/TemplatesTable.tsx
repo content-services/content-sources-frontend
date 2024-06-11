@@ -80,6 +80,7 @@ const TemplatesTable = () => {
     arch: '',
     version: '',
     search: '',
+    repository_uuids: '',
   };
 
   const [filterData, setFilterData] = useState<TemplateFilterData>(defaultValues);

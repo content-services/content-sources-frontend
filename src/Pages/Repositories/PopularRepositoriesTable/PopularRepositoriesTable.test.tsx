@@ -20,6 +20,11 @@ jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({}),
 }));
 
+jest.mock('react-router-dom', () => ({
+  useNavigate: jest.fn(),
+  useHref: () => 'insights/content/repositories',
+}));
+
 it('expect PopularRepositoriesTable to render with add one item', () => {
   (useRepositoryParams as jest.Mock).mockImplementation(() => ({ isLoading: false }));
   (usePopularRepositoriesQuery as jest.Mock).mockImplementation(() => ({
