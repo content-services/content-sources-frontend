@@ -6,6 +6,7 @@ import {
 } from 'testingHelpers';
 import PopularRepositoriesTable from './PopularRepositoriesTable';
 import { usePopularRepositoriesQuery, useRepositoryParams } from 'services/Content/ContentQueries';
+import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 
 jest.mock('services/Content/ContentQueries', () => ({
   useRepositoryParams: jest.fn(),
@@ -18,6 +19,14 @@ jest.mock('services/Content/ContentQueries', () => ({
 
 jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({}),
+}));
+
+jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
+  useChrome: jest.fn(),
+}));
+
+(useChrome as jest.Mock).mockImplementation(() => ({
+  isProd: () => false,
 }));
 
 jest.mock('react-router-dom', () => ({

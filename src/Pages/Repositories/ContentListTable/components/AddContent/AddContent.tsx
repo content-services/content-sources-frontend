@@ -57,6 +57,7 @@ import { useContentListOutletContext } from '../../ContentListTable';
 import useRootPath from 'Hooks/useRootPath';
 import { useAppContext } from 'middleware/AppContext';
 import CustomHelperText from 'components/CustomHelperText/CustomHelperText';
+import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 
 const useStyles = createUseStyles({
   description: {
@@ -138,8 +139,15 @@ const AddContent = () => {
   );
   const classes = useStyles();
   const queryClient = useQueryClient();
+  const { isProd } = useChrome();
+  // temporarily disable snapshotting by default for custom repos
+  const handleDefaultSnapshotting = () => {
+    if (isProd()) {
+      return [getDefaultFormikValues({ snapshot: false })];
+    } else return [getDefaultFormikValues({ snapshot: snapshottingEnabled })];
+  };
   const formik = useFormik({
-    initialValues: [getDefaultFormikValues({ snapshot: snapshottingEnabled })],
+    initialValues: handleDefaultSnapshotting(),
     validateOnBlur: false,
     validateOnChange: false,
     validationSchema: makeValidationSchema(),
@@ -557,7 +565,7 @@ const AddContent = () => {
                           <FormAlert style={{ paddingTop: '20px' }}>
                             <Alert
                               variant='warning'
-                              title='Disabling snapshots might result in a higher risk of losing content or unintentionally modifying it irreversibly.'
+                              title='Enable snapshotting for this repository if you want to build images with historical snapshots.'
                               isInline
                             />
                           </FormAlert>

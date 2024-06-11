@@ -11,6 +11,7 @@ import {
   useFetchGpgKey,
   useValidateContentList,
 } from 'services/Content/ContentQueries';
+import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 
 jest.mock('services/Content/ContentQueries', () => ({
   useAddContentQuery: jest.fn(),
@@ -53,6 +54,14 @@ jest.mock('../../ContentListTable', () => ({
   useContentListOutletContext: () => ({
     clearCheckedRepositories: () => undefined,
   }),
+}));
+
+jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
+  useChrome: jest.fn(),
+}));
+
+(useChrome as jest.Mock).mockImplementation(() => ({
+  isProd: () => false,
 }));
 
 const passingValidationMetaDataSigNotPresent = [

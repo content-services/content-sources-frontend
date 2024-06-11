@@ -1,9 +1,18 @@
 import { fireEvent, render } from '@testing-library/react';
 import { AddRepo } from './AddRepo';
 import { useAppContext } from 'middleware/AppContext';
+import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 
 jest.mock('middleware/AppContext', () => ({
   useAppContext: jest.fn(),
+}));
+
+jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
+  useChrome: jest.fn(),
+}));
+
+(useChrome as jest.Mock).mockImplementation(() => ({
+  isProd: () => false,
 }));
 
 it('Render enabled with snapshots enabled', () => {
