@@ -6,6 +6,7 @@ import { Grid } from '@patternfly/react-core';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
+import { useEffect, useState } from 'react';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -32,6 +33,12 @@ export default function PackagesTable({
   perPage,
 }: Props) {
   const classes = useStyles();
+  const [prevLength, setPrev] = useState(perPage || 10);
+
+  useEffect(() => {
+    setPrev(packagesList.length || 10);
+  }, [packagesList.length]);
+
   const columnHeaders = ['Name', 'Version', 'Release', 'Arch'];
 
   return (
@@ -39,7 +46,7 @@ export default function PackagesTable({
       <Hide hide={!isFetchingOrLoading}>
         <Grid className={classes.mainContainer}>
           <SkeletonTable
-            rows={perPage}
+            rows={prevLength}
             numberOfColumns={columnHeaders.length}
             variant={TableVariant.compact}
           />

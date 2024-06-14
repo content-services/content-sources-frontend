@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
+import { Grid, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 
@@ -7,7 +7,7 @@ import { createUseStyles } from 'react-jss';
 import { last } from 'lodash';
 import Header from 'components/Header/Header';
 import RepositoryQuickStart from 'components/QuickStart/RepositoryQuickStart';
-import { TabbedRouteItem } from '../constants';
+import { TabbedRouteItem } from '../../Routes/constants';
 
 const useStyles = createUseStyles({
   tabs: {
@@ -25,6 +25,9 @@ const useStyles = createUseStyles({
     '&:focus-visible': {
       outlineOffset: '-6px',
     },
+  },
+  containerMargin: {
+    margin: '24px',
   },
 });
 
@@ -60,7 +63,9 @@ export default function RepositoryLayout({ tabs }: { tabs: TabbedRouteItem[] }) 
       </Tabs>
       <RepositoryQuickStart />
       {/* Render the app routes via the Layout Outlet */}
-      <Outlet />
+      <Grid className={classes.containerMargin}>
+        <Outlet />
+      </Grid>
     </>
   );
 }

@@ -12,12 +12,18 @@ import {
   deleteTemplateItem,
   EditTemplateRequest,
   EditTemplate,
+  type SnapshotRpmCollectionResponse,
+  getTemplatePackages,
+  getTemplateErrata,
 } from './TemplateApi';
 import useNotification from 'Hooks/useNotification';
 import { AlertVariant } from '@patternfly/react-core';
+import type { ErrataResponse } from 'services/Content/ContentApi';
 
 export const FETCH_TEMPLATE_KEY = 'FETCH_TEMPLATE_KEY';
 export const GET_TEMPLATES_KEY = 'GET_TEMPLATES_KEY';
+export const GET_TEMPLATE_PACKAGES_KEY = 'GET_TEMPLATE_PACKAGES_KEY';
+export const TEMPLATE_ERRATA_KEY = 'TEMPLATE_ERRATA_KEY';
 
 export const useEditTemplateQuery = (queryClient: QueryClient, request: EditTemplateRequest) => {
   const errorNotifier = useErrorNotification();
@@ -32,6 +38,8 @@ export const useEditTemplateQuery = (queryClient: QueryClient, request: EditTemp
 
       queryClient.invalidateQueries(GET_TEMPLATES_KEY);
       queryClient.invalidateQueries(FETCH_TEMPLATE_KEY);
+      queryClient.invalidateQueries(GET_TEMPLATE_PACKAGES_KEY);
+      queryClient.invalidateQueries(TEMPLATE_ERRATA_KEY);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
@@ -60,6 +68,60 @@ export const useFetchTemplate = (uuid: string, enabled: boolean = true) => {
     staleTime: 20000,
     enabled,
   });
+};
+
+export const useFetchTemplatePackages = (
+  page: number,
+  limit: number,
+  search: string,
+  uuid: string,
+) => {
+  const errorNotifier = useErrorNotification();
+  return useQuery<SnapshotRpmCollectionResponse>(
+    [GET_TEMPLATE_PACKAGES_KEY, page, limit, search, uuid],
+    () => getTemplatePackages(page, limit, search, uuid),
+    {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError: (err: any) =>
+        errorNotifier(
+          'Unable to find associated packages for content template.',
+          'An error occurred',
+          err,
+          'fetch-packages-template-error',
+        ),
+      keepPreviousData: true,
+      staleTime: 60000,
+    },
+  );
+};
+
+export const useFetchTemplateErrataQuery = (
+  uuid: string,
+  page: number,
+  limit: number,
+  search: string,
+  type: string[],
+  severity: string[],
+  sortBy: string,
+) => {
+  const errorNotifier = useErrorNotification();
+  return useQuery<ErrataResponse>(
+    [TEMPLATE_ERRATA_KEY, uuid, page, limit, search, type, severity, sortBy],
+    () => getTemplateErrata(uuid, page, limit, search, type, severity, sortBy),
+    {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError: (err: any) => {
+        errorNotifier(
+          'Unable to find errata with the given UUID.',
+          'An error occurred',
+          err,
+          'Template-errata-list-error',
+        );
+      },
+      keepPreviousData: true,
+      staleTime: 60000,
+    },
+  );
 };
 
 export const useTemplateList = (
@@ -114,21 +176,9 @@ export const useCreateTemplateQuery = (queryClient: QueryClient, request: Templa
   });
 };
 
-export const useDeleteTemplateItemMutate = (
-  queryClient: QueryClient,
-  page: number,
-  limit: number,
-  sortBy: string,
-  filterData: TemplateFilterData,
-) => {
+export const useDeleteTemplateItemMutate = (queryClient: QueryClient) => {
   // Below MUST match the "useTemplateList" key found above or updates will fail.
-  const contentListKeyArray = [
-    GET_TEMPLATES_KEY,
-    page,
-    limit,
-    sortBy,
-    ...Object.values(filterData),
-  ];
+  const contentListKeyArray = [GET_TEMPLATES_KEY];
   const errorNotifier = useErrorNotification();
   return useMutation(deleteTemplateItem, {
     onMutate: async (uuid: string) => {

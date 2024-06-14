@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Links, Meta } from '../Content/ContentApi';
+import { Links, Meta, type ErrataResponse, type PackageItem } from '../Content/ContentApi';
 import { objectToUrlParams } from 'helpers';
 
 export interface TemplateRequest {
@@ -24,10 +24,20 @@ export interface TemplateItem {
   arch: string;
   version: string;
   date: string;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+  last_updated_by?: string;
 }
 
 export interface TemplateCollectionResponse {
   data: Array<TemplateItem>;
+  links: Links;
+  meta: Meta;
+}
+
+export interface SnapshotRpmCollectionResponse {
+  data: Array<PackageItem>;
   links: Links;
   meta: Meta;
 }
@@ -56,6 +66,53 @@ export const getTemplates: (
       search,
       arch,
       version,
+      sort_by: sortBy,
+    })}`,
+  );
+  return data;
+};
+
+export const getTemplatePackages: (
+  page: number,
+  limit: number,
+  search: string,
+  uuid: string,
+) => Promise<SnapshotRpmCollectionResponse> = async (page, limit, search, uuid) => {
+  const { data } = await axios.get(
+    `/api/content-sources/v1/templates/${uuid}/rpms?${objectToUrlParams({
+      offset: ((page - 1) * limit).toString(),
+      limit: limit?.toString(),
+      uuid,
+      search,
+    })}`,
+  );
+  return data;
+};
+
+export const getTemplateErrata: (
+  uuid: string,
+  page: number,
+  limit: number,
+  search: string,
+  type: string[],
+  severity: string[],
+  sortBy: string,
+) => Promise<ErrataResponse> = async (
+  uuid: string,
+  page: number,
+  limit: number,
+  search: string,
+  type: string[],
+  severity: string[],
+  sortBy: string,
+) => {
+  const { data } = await axios.get(
+    `/api/content-sources/v1/templates/${uuid}/errata?${objectToUrlParams({
+      offset: ((page - 1) * limit).toString(),
+      limit: limit?.toString(),
+      search,
+      type: type.join(',').toLowerCase(),
+      severity: severity.join(','),
       sort_by: sortBy,
     })}`,
   );

@@ -1,27 +1,29 @@
 import {
+  Flex,
+  FlexItem,
   Grid,
   InputGroup,
   Pagination,
-  Flex,
-  FlexItem,
   PaginationVariant,
 } from '@patternfly/react-core';
-import Hide from 'components/Hide/Hide';
-import { ContentOrigin } from 'services/Content/ContentApi';
-import { createUseStyles } from 'react-jss';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import useRootPath from 'Hooks/useRootPath';
-import { useAppContext } from 'middleware/AppContext';
-import { useGetSnapshotErrataQuery } from 'services/Content/ContentQueries';
+import { createUseStyles } from 'react-jss';
+import { useParams } from 'react-router-dom';
 import AdvisoriesTable from 'components/SharedTables/AdvisoriesTable';
-import SnapshotErrataFilters from './SnapshotErrataFilters';
-import { ThProps } from '@patternfly/react-table';
+import { useQueryClient } from 'react-query';
+import {
+  FETCH_TEMPLATE_KEY,
+  useFetchTemplateErrataQuery,
+} from 'services/Templates/TemplateQueries';
+import type { TemplateItem } from 'services/Templates/TemplateApi';
+import type { ThProps } from '@patternfly/react-table';
+import SnapshotErrataFilters from 'Pages/Repositories/ContentListTable/components/SnapshotDetailsModal/Tabs/SnapshotErrataFilters';
+import Loader from 'components/Loader';
 
 const useStyles = createUseStyles({
   description: {
-    paddingTop: '12px',
+    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
     paddingBottom: '8px',
     color: global_Color_200.value,
   },
@@ -29,40 +31,43 @@ const useStyles = createUseStyles({
     backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
-    height: '100%',
   },
   topContainer: {
     justifyContent: 'space-between',
-    padding: '16px 24px 16px 0',
+    padding: '16px 24px',
     height: 'fit-content',
-    display: 'flex',
-    flexDirection: 'row',
+    flexDirection: 'row!important',
+    minHeight: '68px', // Prevents compacting of the search box (patternfly bug?)
   },
+  topContainerWithFilterHeight: { extend: 'topContainer', minHeight: '128px' },
   bottomContainer: {
     justifyContent: 'space-between',
     height: 'fit-content',
   },
-  alignTop: {
-    alignItems: 'baseline',
-  },
 });
 
-const perPageKey = 'snapshotErrataPerPage';
+const perPageKey = 'TemplateAdvisoriesPerPage';
 const defaultFilterState = { search: '', type: [] as string[], severity: [] as string[] };
 
-export function SnapshotErrataTab() {
+export default function TemplateErrataTab() {
   const classes = useStyles();
-  const { contentOrigin } = useAppContext();
-
-  const { snapshotUUID = '' } = useParams();
-  const rootPath = useRootPath();
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { templateUUID: uuid } = useParams();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
   const [filterData, setFilterData] = useState(defaultFilterState);
   const [activeSortIndex, setActiveSortIndex] = useState<number>(-1);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const templatesData = queryClient.getQueryData<TemplateItem>([FETCH_TEMPLATE_KEY, uuid]);
+
+  const hasTemplatesData = !!templatesData;
+
+  const hasFilters = useMemo(
+    () => filterData.search || filterData.severity.length || filterData.type.length,
+    [filterData],
+  );
 
   useEffect(() => {
     setPage(1);
@@ -81,10 +86,11 @@ export function SnapshotErrataTab() {
   const {
     isLoading,
     isFetching,
+    error,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetSnapshotErrataQuery(
-    snapshotUUID,
+  } = useFetchTemplateErrataQuery(
+    uuid as string,
     page,
     perPage,
     filterData.search,
@@ -93,12 +99,6 @@ export function SnapshotErrataTab() {
     sortString,
   );
 
-  useEffect(() => {
-    if (isError) {
-      onClose();
-    }
-  }, [isError]);
-
   const onSetPage = (_, newPage) => setPage(newPage);
 
   const onPerPageSelect = (_, newPerPage, newPage) => {
@@ -106,9 +106,6 @@ export function SnapshotErrataTab() {
     setPage(newPage);
     localStorage.setItem(perPageKey, newPerPage.toString());
   };
-
-  const onClose = () =>
-    navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
 
   const {
     data: errataList = [],
@@ -132,16 +129,25 @@ export function SnapshotErrataTab() {
     columnIndex,
   });
 
+  if (!hasTemplatesData || isLoading) {
+    return <Loader />;
+  }
+
+  if (isError) {
+    throw error;
+  }
+
   return (
     <Grid className={classes.mainContainer}>
-      <InputGroup className={classes.topContainer}>
+      <InputGroup
+        className={hasFilters ? classes.topContainerWithFilterHeight : classes.topContainer}
+      >
         <SnapshotErrataFilters
           isLoading={isLoading}
           filterData={filterData}
           setFilterData={setFilterData}
         />
         <Pagination
-          className={classes.alignTop}
           id='top-pagination-id'
           widgetId='topPaginationWidgetId'
           itemCount={count}
@@ -163,18 +169,16 @@ export function SnapshotErrataTab() {
       <Flex className={classes.bottomContainer}>
         <FlexItem />
         <FlexItem>
-          <Hide hide={isLoading}>
-            <Pagination
-              id='bottom-pagination-id'
-              widgetId='bottomPaginationWidgetId'
-              itemCount={count}
-              perPage={perPage}
-              page={page}
-              onSetPage={onSetPage}
-              variant={PaginationVariant.bottom}
-              onPerPageSelect={onPerPageSelect}
-            />
-          </Hide>
+          <Pagination
+            id='bottom-pagination-id'
+            widgetId='bottomPaginationWidgetId'
+            itemCount={count}
+            perPage={perPage}
+            page={page}
+            onSetPage={onSetPage}
+            variant={PaginationVariant.bottom}
+            onPerPageSelect={onPerPageSelect}
+          />
         </FlexItem>
       </Flex>
     </Grid>

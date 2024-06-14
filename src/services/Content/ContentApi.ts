@@ -150,10 +150,10 @@ export type ValidationResponse = {
 
 export interface PackageItem {
   arch: string;
-  checksum: string;
   epoch: number;
   name: string;
   release: string;
+  checksum: string;
   summary: string;
   uuid: string;
   version: string;

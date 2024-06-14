@@ -22,7 +22,7 @@ import {
 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { capitalize, isEmpty } from 'lodash';
 import { OffIcon, OnIcon } from '@patternfly/react-icons';
 import { formatDateDDMMMYYYY, formatDescription, reduceStringToCharsWithEllipsis } from 'helpers';
@@ -67,6 +67,18 @@ export default function AdvisoriesTable({
   sortParams,
 }: Props) {
   const classes = useStyles();
+  const [prevLength, setPrev] = useState(perPage || 10);
+
+  const [expandState, setExpandState] = useState({});
+
+  useDeepCompareEffect(() => {
+    if (!isEmpty(expandState)) setExpandState({});
+  }, [errataList]);
+
+  useEffect(() => {
+    setPrev(errataList.length || 10);
+  }, [errataList.length]);
+
   const columnHeaders = [
     { name: 'Name', width: 15 },
     { name: 'Synopsis' },
@@ -74,18 +86,13 @@ export default function AdvisoriesTable({
     { name: 'Severity', width: 10 },
     { name: 'Publish date', width: 15 },
   ];
-  const [expandState, setExpandState] = useState({});
-
-  useDeepCompareEffect(() => {
-    if (!isEmpty(expandState)) setExpandState({});
-  }, [errataList]);
 
   return (
     <>
       <Hide hide={!isFetchingOrLoading}>
         <Grid className={classes.mainContainer}>
           <SkeletonTable
-            rows={perPage}
+            rows={prevLength}
             numberOfColumns={columnHeaders.length}
             variant={TableVariant.compact}
           />

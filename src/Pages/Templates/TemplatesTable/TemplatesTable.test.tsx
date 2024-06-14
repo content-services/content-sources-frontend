@@ -18,6 +18,8 @@ jest.mock('react-router-dom', () => ({
   Outlet: () => <></>,
 }));
 
+jest.mock('Hooks/useRootPath', () => () => 'someUrl');
+
 jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({
     rbac: { repoWrite: true, templateRead: true },

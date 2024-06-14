@@ -30,6 +30,9 @@ const useStyles = createUseStyles({
   clearFilters: {
     marginLeft: '16px',
   },
+  ensureMinHeight: {
+    minHeight: '126px',
+  },
 });
 
 interface Props {
@@ -148,6 +151,8 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
     }
   }, [filterType, isLoading, search, types, severities]);
 
+  const hasFilters = search !== '' || !isEmpty(types) || !isEmpty(severities);
+
   return (
     <Flex direction={{ default: 'column' }}>
       <FlexItem>
@@ -176,7 +181,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
           </InputGroupItem>
         </InputGroup>
       </FlexItem>
-      <Hide hide={!(search !== '' || !isEmpty(types) || !isEmpty(severities))}>
+      <Hide hide={!hasFilters}>
         <FlexItem className={classes.chipsContainer}>
           {search !== '' && (
             <ChipGroup categoryName='Name/Synopsis'>
