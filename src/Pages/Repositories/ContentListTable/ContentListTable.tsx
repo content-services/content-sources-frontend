@@ -70,7 +70,7 @@ const useStyles = createUseStyles({
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    height: 'fit-content',
+    minHeight: '68px',
   },
   invisible: {
     opacity: 0,

@@ -42,7 +42,7 @@ const useStyles = createUseStyles({
   topContainerWithFilterHeight: { extend: 'topContainer', minHeight: '128px' },
   bottomContainer: {
     justifyContent: 'space-between',
-    height: 'fit-content',
+    minHeight: '68px',
   },
 });
 
