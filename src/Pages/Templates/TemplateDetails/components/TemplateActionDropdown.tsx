@@ -10,6 +10,8 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from 'react-query';
 import { useDeleteTemplateItemMutate } from 'services/Templates/TemplateQueries';
 import { TEMPLATES_ROUTE } from 'Routes/constants';
+import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
+import { useAppContext } from 'middleware/AppContext';
 
 export default function TemplateActionDropdown() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -19,6 +21,7 @@ export default function TemplateActionDropdown() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { templateUUID: uuid } = useParams();
+  const { rbac } = useAppContext();
 
   const { mutateAsync: deleteItem, isLoading: isDeleting } =
     useDeleteTemplateItemMutate(queryClient);
@@ -52,14 +55,20 @@ export default function TemplateActionDropdown() {
       onSelect={onSelect}
       onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-        <MenuToggle
-          isDisabled={isDeleting}
-          ref={toggleRef}
-          onClick={onToggleClick}
-          isExpanded={isOpen}
+        <ConditionalTooltip
+          content='You do not have the required permissions to perform this action.'
+          show={!rbac?.templateWrite}
+          setDisabled
         >
-          Actions
-        </MenuToggle>
+          <MenuToggle
+            isDisabled={isDeleting}
+            ref={toggleRef}
+            onClick={onToggleClick}
+            isExpanded={isOpen}
+          >
+            Actions
+          </MenuToggle>
+        </ConditionalTooltip>
       )}
       ouiaId='template_actions'
     >

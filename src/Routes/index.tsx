@@ -72,8 +72,12 @@ export default function RepositoriesRoutes() {
           <Route path='*' element={<Navigate to='content' replace />} />
         </Route>
         <Route path={TEMPLATES_ROUTE} element={<TemplatesTable />}>
-          <Route path={ADD_ROUTE} element={<AddTemplate />} />
-          <Route path={`:templateUUID/${EDIT_ROUTE}`} element={<AddTemplate />} />
+          {...rbac?.templateWrite
+            ? [
+                <Route key='1' path={ADD_ROUTE} element={<AddTemplate />} />,
+                <Route key='2' path={`:templateUUID/${EDIT_ROUTE}`} element={<AddTemplate />} />,
+              ]
+            : []}
         </Route>
         <Route path='*' element={<Navigate to={REPOSITORIES_ROUTE} replace />} />
       </Routes>
