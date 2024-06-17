@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable unused-imports/no-unused-vars */
 import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -37,7 +39,6 @@ export default function TemplateDetailsTabs() {
   }, [subpath]);
 
   // TODO: Uncomment this for SYSTEMS support
-  // eslint-disable-next-line unused-imports/no-unused-vars
   const navigateContentTab = (eventKey: string) => {
     if (eventKey === CONTENT_ROUTE) {
       navigate(`${baseRoute}/${eventKey}/${contentTabKey}`);

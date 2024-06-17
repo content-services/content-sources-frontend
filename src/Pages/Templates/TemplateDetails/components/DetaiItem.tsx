@@ -1,4 +1,4 @@
-import { Flex, Text, Title } from '@patternfly/react-core';
+import { Flex, Text } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 
 const useStyles = createUseStyles({
