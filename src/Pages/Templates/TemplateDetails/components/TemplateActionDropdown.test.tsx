@@ -13,6 +13,10 @@ jest.mock('services/Templates/TemplateQueries', () => ({
   useDeleteTemplateItemMutate: () => ({ mutate: () => undefined, isLoading: false }),
 }));
 
+jest.mock('middleware/AppContext', () => ({
+  useAppContext: () => ({ rbac: { templateWrite: true } }),
+}));
+
 it('expect TemplateActionDropdown to render all buttons', async () => {
   const { queryByText } = render(
     <ReactQueryTestWrapper>
