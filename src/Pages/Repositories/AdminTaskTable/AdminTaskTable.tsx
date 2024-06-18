@@ -70,12 +70,13 @@ const AdminTaskTable = () => {
     accountId: '',
     orgId: '',
     statuses: [],
+    typenames: [],
   });
 
-  const clearFilters = () => setFilterData({ statuses: [], accountId: '', orgId: '' });
+  const clearFilters = () => setFilterData({ statuses: [], accountId: '', orgId: '' , typenames: []});
 
   const notFiltered =
-    filterData.statuses?.length === 0 && filterData.accountId === '' && filterData.orgId === '';
+      filterData.typenames?.length === 0 && filterData.statuses?.length === 0 && filterData.accountId === '' && filterData.orgId === '';
 
   const columnSortAttributes = ['org_id', 'account_id', 'typename', 'queued_at', 'status'];
 

@@ -17,6 +17,7 @@ it('Render loading state (disabled)', () => {
         statuses: [],
         accountId: '',
         orgId: '',
+        typenames: [],
       }}
     />,
   );
@@ -33,6 +34,7 @@ it('Select a filter of each type and ensure chips are present', () => {
         statuses: [],
         accountId: '',
         orgId: '',
+        typenames: [],
       }}
     />,
   );
@@ -72,8 +74,25 @@ it('Select a filter of each type and ensure chips are present', () => {
   // Click the optionsButton to make the statusMenu disappear
   fireEvent.click(optionMenu);
 
+    // Select a Type item
+    const typeOption = queryByText('Type') as Element;
+    expect(typeOption).toBeInTheDocument();
+    fireEvent.click(typeOption);
+
+    const typeSelector = getByLabelText('filter type') as Element;
+    expect(typeSelector).toBeInTheDocument();
+    fireEvent.click(typeSelector);
+
+    const typeItem = queryByText('introspect') as Element;
+    expect(typeItem).toBeInTheDocument();
+    fireEvent.click(typeItem);
+
+    // Click the optionsButton to make the typeMenu disappear
+    fireEvent.click(optionMenu);
+
   // Check all the chips are there
   expect(queryByText('11593016')).toBeInTheDocument();
   expect(queryByText('13446804')).toBeInTheDocument();
   expect(queryByText('Running')).toBeInTheDocument();
+  expect(queryByText('introspect')).toBeInTheDocument();
 });

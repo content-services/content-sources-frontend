@@ -6,6 +6,7 @@ export interface AdminTaskFilterData {
   statuses: string[];
   accountId: string;
   orgId: string;
+  typenames: string[];
 }
 
 export interface PulpData {
@@ -45,6 +46,7 @@ export const getAdminTasks: (
   const accountIdParam = filterData.accountId;
   const orgIdParam = filterData.orgId;
   const statusParam = filterData?.statuses?.join(',').toLowerCase();
+  const typeParam = filterData?.typenames?.join(',').toLowerCase()
   const { data } = await axios.get(
     `/api/content-sources/v1/admin/tasks/?${objectToUrlParams({
       offset: ((page - 1) * limit).toString(),
@@ -52,6 +54,7 @@ export const getAdminTasks: (
       account_id: accountIdParam,
       org_id: orgIdParam,
       status: statusParam,
+      type: typeParam,
       sort_by: sortBy,
     })}`,
   );
