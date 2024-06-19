@@ -20,7 +20,7 @@ export interface DropDownMenuProps {
   dropDownItems?: { value: string; label: string | ReactElement }[];
   onSelect?: (value?: string | number | undefined) => void;
   isDisabled?: boolean;
-  menuToggleProps?: Partial<MenuToggleProps>;
+  menuToggleProps?: Partial<MenuToggleProps | unknown>;
   dropDownProps?: Partial<DropdownProps>;
 }
 

@@ -63,7 +63,7 @@ export default function DefineContentStep() {
           Based on your filters, the base repositories will be added to this template.
         </Text>
       </GridItem>
-      <FormGroup data-ouia-component-id='restrict_to_architecture' label='Architecture' isRequired>
+      <FormGroup label='Architecture' isRequired>
         <ConditionalTooltip
           position='top-start'
           content='Architecture cannot be changed after creation'
@@ -74,10 +74,11 @@ export default function DefineContentStep() {
             onSelect={(value) => setTemplateRequest((prev) => ({ ...prev, arch: value as string }))}
             dropDownItems={allowedDistributionarches}
             menuValue={archesDisplay(templateRequest?.arch)}
+            menuToggleProps={{ 'data-ouia-component-id': 'restrict_to_architecture' }}
           />
         </ConditionalTooltip>
       </FormGroup>
-      <FormGroup data-ouia-component-id='restrict_to_os_version' label='OS Version' isRequired>
+      <FormGroup label='OS Version' isRequired>
         <ConditionalTooltip
           position='top-start'
           content='OS Version cannot be changed after creation'
@@ -90,6 +91,7 @@ export default function DefineContentStep() {
             }
             dropDownItems={allowedDistributionVersions}
             menuValue={versionDisplay(templateRequest?.version)}
+            menuToggleProps={{ 'data-ouia-component-id': 'restrict_to_os_version' }}
           />
         </ConditionalTooltip>
       </FormGroup>
