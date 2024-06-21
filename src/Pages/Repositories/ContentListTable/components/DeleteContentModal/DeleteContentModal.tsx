@@ -31,6 +31,8 @@ import { GET_TEMPLATES_KEY, useTemplateList } from 'services/Templates/TemplateQ
 import { TemplateFilterData, TemplateItem } from 'services/Templates/TemplateApi';
 import { TEMPLATES_ROUTE } from 'Routes/constants';
 import { ContentItem, FilterData } from 'services/Content/ContentApi';
+import { isEmpty } from 'lodash';
+import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
 
 const useStyles = createUseStyles({
   description: {
@@ -64,7 +66,7 @@ export default function DeleteContentModal() {
   const { search } = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const maxTemplatesToShow = 3;
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [expandState, setExpandState] = useState({});
 
   const {
     clearCheckedRepositories,
@@ -128,6 +130,10 @@ export default function DeleteContentModal() {
   const actionTakingPlace = isDeletingItems || isLoading;
 
   const columnHeaders = ['Name', 'URL', 'Associated Templates'];
+
+  useDeepCompareEffect(() => {
+    if (!isEmpty(expandState)) setExpandState({});
+  }, [templates]);
 
   return (
     <Modal
@@ -217,12 +223,12 @@ export default function DeleteContentModal() {
                         <Hide hide={templatesWithRepos.length <= maxTemplatesToShow}>
                           <ExpandableSection
                             toggleText={
-                              isExpanded
+                              expandState[index]
                                 ? 'Show less'
                                 : `and ${templatesWithRepos.length - maxTemplatesToShow} more`
                             }
-                            onToggle={() => setIsExpanded(!isExpanded)}
-                            isExpanded={isExpanded}
+                            onToggle={() => setExpandState((prev) => ({ ...prev, [index]: !prev[index] }))}
+                            isExpanded={!!expandState[index]}
                           >
                             {templatesWithRepos
                               .slice(maxTemplatesToShow, templatesWithRepos.length)
