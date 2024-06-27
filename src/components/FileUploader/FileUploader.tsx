@@ -192,14 +192,12 @@ export default function FileUploader() {
         return {
           titleIcon: <StatusIcon status='running' removeText />,
           titleText: 'Calculating hash for each file',
-          infoText: 'This should be quick',
           isUploadButtonHidden: true,
         };
       case completedCount + failedCount < fileCount:
         return {
           titleIcon: <StatusIcon status='running' removeText />,
           titleText: 'Uploading files',
-          infoText: 'This may take some time',
           isUploadButtonHidden: true,
         };
       case fileCountGreaterThanZero && fileCount === completedCount:
