@@ -19,7 +19,13 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["react", "react-hooks", "@typescript-eslint", "prettier","unused-imports"],
+  "plugins": [
+    "react",
+    "react-hooks",
+    "@typescript-eslint",
+    "prettier",
+    "unused-imports"
+  ],
   "settings": {
     "import/resolver": {
       "typescript": {}
@@ -29,16 +35,28 @@
     }
   },
   "rules": {
-    "react/jsx-curly-brace-presence": ["error", { "props": "never", "children": "never" }],
-    "arrow-body-style": ["error", "as-needed"],
+    "react/jsx-curly-brace-presence": [
+      "error",
+      {
+        "props": "never",
+        "children": "never"
+      }
+    ],
+    "arrow-body-style": [
+      "error",
+      "as-needed"
+    ],
     "react/react-in-jsx-scope": "off",
     "camelcase": "off",
     "spaced-comment": "error",
-    "quotes": ["warn", "single"],
+    "quotes": [
+      "warn",
+      "single"
+    ],
     "no-duplicate-imports": "error",
     "unused-imports/no-unused-imports": "error",
     "unused-imports/no-unused-vars": [
-        "warn"
+      "warn"
     ]
   }
 }
