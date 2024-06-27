@@ -9,7 +9,7 @@ import {
 } from '@patternfly/react-core';
 
 import useRootPath from 'Hooks/useRootPath';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { TEMPLATES_ROUTE } from 'Routes/constants';
 import { useCreateTemplateQuery, useEditTemplateQuery } from 'services/Templates/TemplateQueries';
 import { AddTemplateContextProvider, useAddTemplateContext } from './AddTemplateContext';
@@ -24,6 +24,7 @@ import ReviewStep from './steps/ReviewStep';
 import { formatTemplateDate } from 'helpers';
 import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
+import { useMemo } from 'react';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -36,11 +37,28 @@ export interface Props {
   addRepo: (snapshot: boolean) => void;
 }
 
+const indexMapper = {
+  define_content: 2,
+  redhat_repositories: 3,
+  custom_repositories: 4,
+  set_up_date_step: 5,
+  detail_step: 6,
+  review_step: 7,
+};
+
 const AddTemplateBase = () => {
   const rootPath = useRootPath();
   const classes = useStyles();
   const navigate = useNavigate();
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams();
+
   const { isEdit, templateRequest, checkIfCurrentStepValid, editUUID } = useAddTemplateContext();
+
+  const initialIndex = useMemo(() => {
+    const tabValue = urlSearchParams.get('tab');
+    if (isEdit && tabValue && indexMapper[tabValue]) return indexMapper[tabValue];
+    return 2;
+  }, []);
 
   const { queryClient } = useAddTemplateContext();
   const onClose = () => navigate(rootPath + '/' + TEMPLATES_ROUTE);
@@ -84,6 +102,14 @@ const AddTemplateBase = () => {
             />
           }
           onClose={onClose}
+          startIndex={initialIndex}
+          onStepChange={
+            isEdit
+              ? (_, currentStep) => {
+                  setUrlSearchParams((prev) => ({ ...prev, tab: currentStep.id }));
+                }
+              : undefined
+          }
         >
           <WizardStep
             name='Content'
