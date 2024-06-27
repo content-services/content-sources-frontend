@@ -65,6 +65,9 @@ const useStyles = createUseStyles({
   spinnerMinWidth: {
     width: '50px!important',
   },
+  leftPaddingZero: {
+    paddingLeft: 0,
+  },
 });
 
 const perPageKey = 'templatesPerPage';
@@ -271,6 +274,7 @@ const TemplatesTable = () => {
                     <Tr key={uuid + index}>
                       <Td>
                         <Button
+                          className={classes.leftPaddingZero}
                           variant='link'
                           onClick={() =>
                             navigate(`${rootPath}/${TEMPLATES_ROUTE}/${uuid}/${DETAILS_ROUTE}`)
