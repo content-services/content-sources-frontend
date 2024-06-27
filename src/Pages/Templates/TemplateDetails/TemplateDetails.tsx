@@ -46,6 +46,11 @@ const useStyles = createUseStyles({
     margin: '24px',
     background: global_BackgroundColor_light_100.value,
   },
+  detailItems: {
+    '@media (min-width: 1400px)': {
+      maxHeight: '165px',
+    },
+  },
 });
 
 export default function TemplateDetails() {
@@ -106,25 +111,25 @@ export default function TemplateDetails() {
           </StackItem>
           <StackItem className={classes.descriptionMaxWidth}>
             <Flex
-              direction={{ default: 'row' }}
-              justifyContent={{ default: 'justifyContentSpaceBetween' }}
+              direction={{ default: 'column' }}
+              flexWrap={{ default: 'wrap' }}
+              className={classes.detailItems}
             >
-              <Flex direction={{ default: 'column' }}>
-                <DetailItem title='Description:' value={data?.description} />
-                <DetailItem
-                  title='Includes content up to:'
-                  value={data?.date ? formatDateDDMMMYYYY(data.date) : ''}
-                />
-              </Flex>
-              <Flex direction={{ default: 'column' }}>
-                <DetailItem title='Created by:' value={data?.created_by} />
-                <DetailItem title='Created:' value={data?.created_at} />
-                <DetailItem title='Last edited by:' value={data?.last_updated_by} />
-                <DetailItem
-                  title='Last edited:'
-                  value={data?.updated_at ? formatDateDDMMMYYYY(data.date) : ''}
-                />
-              </Flex>
+              <DetailItem title='Description:' value={data?.description} />
+              <DetailItem
+                title='Includes content up to:'
+                value={data?.date ? formatDateDDMMMYYYY(data.date) : ''}
+              />
+              <DetailItem title='Created by:' value={data?.created_by} />
+              <DetailItem
+                title='Created:'
+                value={data?.created_at ? formatDateDDMMMYYYY(data.created_at) : ''}
+              />
+              <DetailItem title='Last edited by:' value={data?.last_updated_by} />
+              <DetailItem
+                title='Last edited:'
+                value={data?.updated_at ? formatDateDDMMMYYYY(data.updated_at) : ''}
+              />
             </Flex>
           </StackItem>
         </Stack>

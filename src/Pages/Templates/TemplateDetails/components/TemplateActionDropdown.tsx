@@ -17,7 +17,7 @@ export default function TemplateActionDropdown() {
   const [isOpen, setIsOpen] = React.useState(false);
   const { pathname } = useLocation();
   const [mainRoute] = pathname?.split(`${TEMPLATES_ROUTE}/`) || [];
-  const baseRoute = mainRoute + `${TEMPLATES_ROUTE}/`;
+  const baseRoute = mainRoute + `${TEMPLATES_ROUTE}`;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { templateUUID: uuid } = useParams();

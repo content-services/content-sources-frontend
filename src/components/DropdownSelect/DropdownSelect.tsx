@@ -32,6 +32,7 @@ export default function DropdownSelect({ toggleValue, options, toggleProps = {},
           {toggleValue}
         </MenuToggle>
       )}
+      popperProps={{ appendTo: document.body }}
       {...rest}
     >
       <SelectList>

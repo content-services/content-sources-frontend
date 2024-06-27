@@ -17,7 +17,7 @@ type ContentSubTabType = typeof PACKAGES_ROUTE | typeof ADVISORIES_ROUTE;
 export default function TemplateDetailsTabs() {
   const { pathname } = useLocation();
   const [mainRoute, subpath] = pathname?.split(`${DETAILS_ROUTE}/`) || [];
-  const baseRoute = mainRoute + `${DETAILS_ROUTE}/`;
+  const baseRoute = mainRoute + `${DETAILS_ROUTE}`;
   const navigate = useNavigate();
 
   const [topTabKey, setTopTabKey] = useState<ContentTabType>(CONTENT_ROUTE);
