@@ -39,6 +39,9 @@ set -exv
 # source is preferred to | bash -s in this case to avoid a subshell
 source <(curl -sSL $COMMON_BUILDER/src/frontend-build.sh)
 
+# workaround frontend-build.sh setting IMAGE_BUILD, but then bootstrap appending pr-# to it again
+unset IMAGE_TAG
+
 # bootstrap bonfire and it's config
 CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd
 curl -s "$CICD_URL/bootstrap.sh" >.cicd_bootstrap.sh && source .cicd_bootstrap.sh
