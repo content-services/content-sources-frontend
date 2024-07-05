@@ -28,7 +28,7 @@ export IQE_FILTER_EXPRESSION=""
 export IQE_ENV="ephemeral"
 export IQE_SELENIUM="true"
 export IQE_CJI_TIMEOUT="30m"
-export DEPLOY_TIMEOUT="1400"
+export DEPLOY_TIMEOUT="35m"
 export DEPLOY_FRONTENDS="true"
 export REF_ENV="insights-stage"
 
