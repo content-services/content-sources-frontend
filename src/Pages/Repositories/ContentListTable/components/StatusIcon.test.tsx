@@ -36,7 +36,7 @@ it('Render with Unavailable status', async () => {
 
   await waitFor(() => {
     expect(queryByText('Retry')).toBeInTheDocument();
-    expect(queryByText('snapshot failed')).toBeInTheDocument();
+    expect(queryByText('A snapshot error occurred: snapshot failed')).toBeInTheDocument();
   });
 });
 
@@ -53,6 +53,6 @@ it('Render with Invalid status', async () => {
 
   await waitFor(() => {
     expect(queryByText('Retry')).toBeInTheDocument();
-    expect(queryByText('snapshot failed')).toBeInTheDocument();
+    expect(queryByText('A snapshot error occurred: snapshot failed')).toBeInTheDocument();
   });
 });

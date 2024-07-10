@@ -86,7 +86,7 @@ it('Render with a single row', async () => {
     },
   }));
 
-  const { queryByText, getByRole } = render(
+  const { queryByText, getByRole, queryByRole } = render(
     <ReactQueryTestWrapper>
       <ContentListTable />
     </ReactQueryTestWrapper>,
@@ -109,6 +109,6 @@ it('Render with a single row', async () => {
 
   await waitFor(() => expect(getByRole('menuitem', { name: 'Edit' })).toBeInTheDocument());
   expect(getByRole('menuitem', { name: 'Trigger snapshot' })).toBeInTheDocument();
-  expect(getByRole('menuitem', { name: 'Introspect now' })).toBeInTheDocument();
+  expect(queryByRole('menuitem', { name: 'Introspect now' })).not.toBeInTheDocument();
   expect(getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
 });

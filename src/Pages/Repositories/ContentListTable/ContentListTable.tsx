@@ -227,6 +227,11 @@ const ContentListTable = () => {
     sortString,
   );
 
+  const triggerIntrospectionAndSnapshot = (repoUuid) => {
+    introspectRepoForUuid(repoUuid).then(clearCheckedRepositories);
+    triggerSnapshot(repoUuid);
+  }
+
   // Other update actions will be added to this later.
   const actionTakingPlace =
     isFetching || repositoryParamsLoading || isIntrospecting || isDeletingItems;
@@ -335,7 +340,7 @@ const ContentListTable = () => {
                       actionTakingPlace || rowData?.status === 'Pending' || !rowData.snapshot,
                     title: 'Trigger snapshot',
                     onClick: () => {
-                      triggerSnapshot(rowData.uuid);
+                        triggerIntrospectionAndSnapshot(rowData?.uuid);
                     },
                     tooltipProps: !rowData.snapshot
                       ? {
@@ -348,11 +353,16 @@ const ContentListTable = () => {
                   },
                 ]
               : []),
-            {
-              isDisabled: actionTakingPlace || rowData?.status == 'Pending',
-              title: 'Introspect now',
-              onClick: () => introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
-            },
+            ...(!rowData?.snapshot
+              ? [
+                  {
+                    isDisabled: actionTakingPlace || rowData?.status == 'Pending',
+                    title: 'Introspect now',
+                    onClick: () =>
+                      introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
+                  },
+                ]
+              : []),
             { isSeparator: true },
             {
               title: 'Delete',

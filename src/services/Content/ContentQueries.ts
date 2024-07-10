@@ -686,6 +686,7 @@ export const useIntrospectRepositoryMutate = (
   ];
   const errorNotifier = useErrorNotification();
   const { notify } = useNotification();
+  let hasSnapshottingEnabled: boolean | undefined = false;
   return useMutation(introspectRepository, {
     onMutate: async (item: IntrospectRepositoryRequestItem) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
@@ -706,15 +707,19 @@ export const useIntrospectRepositoryMutate = (
       queryClient.setQueryData(contentListKeyArray, () => ({
         ...newData,
       }));
+
+      hasSnapshottingEnabled = newData.data?.at(0)?.snapshot;
       // Return a context object with the snapshotted value
       return { previousData, queryClient };
     },
     onSuccess: () => {
-      notify({
-        variant: AlertVariant.success,
-        title: 'Repository introspection in progress',
-        id: 'introspect-repository-success',
-      });
+      if (!hasSnapshottingEnabled) {
+        notify({
+          variant: AlertVariant.success,
+          title: 'Repository introspection in progress',
+          id: 'introspect-repository-success',
+        });
+      }
       queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
     },
     // If the mutation fails, use the context returned from onMutate to roll back

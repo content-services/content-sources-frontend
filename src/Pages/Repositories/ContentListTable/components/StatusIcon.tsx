@@ -108,9 +108,9 @@ const StatusIcon = ({
     if (!snapshotError && !introspectError) {
       return 'An unknown error occurred';
     } else if (snapshotError) {
-      return snapshotError;
+      return `A snapshot error occurred: ${snapshotError}`;
     } else if (introspectError) {
-      return introspectError;
+      return `An introspection error occurred: ${introspectError}`;
     }
   };
 
