@@ -61,7 +61,7 @@ export default function App() {
 
   return (
     <>
-      <div data-ouia-app-safe={pageSafe} />
+      <div data-ouia-safe={pageSafe} />
       <NotificationsPortal />
       <Routes />
     </>
