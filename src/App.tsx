@@ -12,11 +12,14 @@ import { ContentOrigin, FilterData } from './services/Content/ContentApi';
 import { useContentListQuery } from './services/Content/ContentQueries';
 import { perPageKey } from './Pages/Repositories/ContentListTable/ContentListTable';
 import { REPOSITORIES_ROUTE } from './Routes/constants';
+import usePageSafe from 'Hooks/usePageSafe';
 
 export default function App() {
   const { rbac, isFetchingFeatures, zeroState, setZeroState } = useAppContext();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const { pathname } = useLocation();
+  const pageSafe = usePageSafe();
+
   const isDefaultRoute = useMemo(
     () => last(pathname.split('/')) === REPOSITORIES_ROUTE,
     [pathname],
@@ -50,6 +53,7 @@ export default function App() {
   if (!rbac || isFetchingFeatures || isLoading) {
     return (
       <Bullseye>
+        <div data-ouia-safe={false} />
         <Spinner size='xl' />
       </Bullseye>
     );
@@ -57,6 +61,7 @@ export default function App() {
 
   return (
     <>
+      <div data-ouia-app-safe={pageSafe} />
       <NotificationsPortal />
       <Routes />
     </>

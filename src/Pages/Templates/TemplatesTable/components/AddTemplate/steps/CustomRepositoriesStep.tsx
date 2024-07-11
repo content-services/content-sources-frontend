@@ -135,7 +135,7 @@ export default function CustomRepositoriesStep() {
   const countIsZero = count === 0;
   const showLoader = countIsZero && !isLoading;
   return (
-    <Grid hasGutter>
+    <Grid data-ouia-component-id='custom_repositories_step' hasGutter>
       <Flex
         direction={{ default: 'row' }}
         justifyContent={{ default: 'justifyContentSpaceBetween' }}
@@ -222,7 +222,7 @@ export default function CustomRepositoriesStep() {
         </Flex>
       </Hide>
       {showLoader ? (
-        <Bullseye data-ouia-safe={!isFetching} data-ouia-component-id='custom_repositories_table'>
+        <Bullseye data-ouia-component-id='custom_repositories_table'>
           <EmptyTableState
             notFiltered={searchQuery === ''}
             clearFilters={() => setSearchQuery('')}

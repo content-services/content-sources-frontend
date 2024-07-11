@@ -154,7 +154,6 @@ export default function SnapshotListModal() {
       hasNoBodyWrapper
       aria-label='Snapshot list modal'
       ouiaId='snapshot_list_modal'
-      ouiaSafe={!fetchingOrLoading}
       variant={ModalVariant.medium}
       title='Snapshots'
       description={

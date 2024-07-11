@@ -444,7 +444,6 @@ const ContentListTable = () => {
         }}
       />
       <Grid
-        data-ouia-safe={!actionTakingPlace}
         data-ouia-component-id='content_list_page'
         className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
       >
@@ -476,7 +475,7 @@ const ContentListTable = () => {
           </FlexItem>
         </Flex>
         {showLoader ? (
-          <Bullseye data-ouia-safe={!actionTakingPlace} data-ouia-component-id='content_list_page'>
+          <Bullseye data-ouia-component-id='content_list_page'>
             <EmptyTableState
               notFiltered={notFiltered}
               clearFilters={clearFilters}

@@ -412,7 +412,6 @@ const AddContent = () => {
       variant={ModalVariant.medium}
       title='Add custom repositories'
       ouiaId='add_custom_repository'
-      ouiaSafe={!actionTakingPlace}
       help={
         <Popover
           headerContent={<div>Add a custom repository</div>}

@@ -101,14 +101,12 @@ const ViewPayloadModal = () => {
     return tabs;
   }, [adminTask?.uuid, isFetching]);
 
-  const actionTakingPlace = isFetching && !!adminTask;
   const showLoading = isLoading || !adminTask;
   return (
     <Modal
       position='top'
       variant={ModalVariant.medium}
       ouiaId='task_details'
-      ouiaSafe={!actionTakingPlace}
       aria-label='Task details'
       isOpen
       onClose={onClose}

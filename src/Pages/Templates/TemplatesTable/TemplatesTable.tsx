@@ -172,10 +172,7 @@ const TemplatesTable = () => {
 
   if (countIsZero && notFiltered && !isLoading)
     return (
-      <Bullseye
-        data-ouia-safe={!actionTakingPlace}
-        data-ouia-component-id='content_template_list_page'
-      >
+      <Bullseye data-ouia-component-id='content_template_list_page'>
         <EmptyTableState
           notFiltered={notFiltered}
           clearFilters={clearFilters}
@@ -211,7 +208,6 @@ const TemplatesTable = () => {
         paragraph='View all content templates within your organization.'
       />
       <Grid
-        data-ouia-safe={!actionTakingPlace}
         data-ouia-component-id='content_template_list_page'
         className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
       >

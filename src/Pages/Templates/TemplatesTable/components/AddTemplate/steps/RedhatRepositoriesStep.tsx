@@ -113,22 +113,19 @@ export default function RedhatRepositoriesStep() {
         }
       : undefined;
 
-  const {
-    isLoading,
-    isFetching,
-    data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useContentListQuery(
-    page,
-    perPage,
-    {
-      searchQuery: searchQuery === '' ? searchQuery : debouncedSearch,
-      availableForArch: templateRequest.arch as string,
-      availableForVersion: templateRequest.version as string,
-      uuids: toggled ? [...selectedRedhatRepos] : undefined,
-    },
-    sortString(),
-    ContentOrigin.REDHAT,
-  );
+  const { isLoading, data = { data: [], meta: { count: 0, limit: 20, offset: 0 } } } =
+    useContentListQuery(
+      page,
+      perPage,
+      {
+        searchQuery: searchQuery === '' ? searchQuery : debouncedSearch,
+        availableForArch: templateRequest.arch as string,
+        availableForVersion: templateRequest.version as string,
+        uuids: toggled ? [...selectedRedhatRepos] : undefined,
+      },
+      sortString(),
+      ContentOrigin.REDHAT,
+    );
 
   const {
     data: contentList = [],
@@ -216,7 +213,7 @@ export default function RedhatRepositoriesStep() {
         </Flex>
       </Hide>
       {showLoader ? (
-        <Bullseye data-ouia-safe={!isFetching} data-ouia-component-id='redhat_repositories_table'>
+        <Bullseye data-ouia-component-id='redhat_repositories_table'>
           <EmptyTableState
             notFiltered={searchQuery === ''}
             clearFilters={() => setSearchQuery('')}

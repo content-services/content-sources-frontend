@@ -93,7 +93,6 @@ const EditContentModal = () => {
       variant={ModalVariant.medium}
       title='Edit custom repository'
       ouiaId='edit_custom_repository'
-      ouiaSafe={!actionTakingPlace}
       help={
         <Popover
           headerContent={<div>Edit custom repository</div>}

@@ -73,10 +73,14 @@ const AdminTaskTable = () => {
     typenames: [],
   });
 
-  const clearFilters = () => setFilterData({ statuses: [], accountId: '', orgId: '' , typenames: []});
+  const clearFilters = () =>
+    setFilterData({ statuses: [], accountId: '', orgId: '', typenames: [] });
 
   const notFiltered =
-      filterData.typenames?.length === 0 && filterData.statuses?.length === 0 && filterData.accountId === '' && filterData.orgId === '';
+    filterData.typenames?.length === 0 &&
+    filterData.statuses?.length === 0 &&
+    filterData.accountId === '' &&
+    filterData.orgId === '';
 
   const columnSortAttributes = ['org_id', 'account_id', 'typename', 'queued_at', 'status'];
 
@@ -134,7 +138,7 @@ const AdminTaskTable = () => {
 
   if (countIsZero && notFiltered && !isLoading)
     return (
-      <Bullseye data-ouia-safe={!actionTakingPlace} data-ouia-component-id='admin_task_list_page'>
+      <Bullseye data-ouia-component-id='admin_task_list_page'>
         <EmptyTableState
           notFiltered={notFiltered}
           clearFilters={clearFilters}
@@ -146,7 +150,6 @@ const AdminTaskTable = () => {
 
   return (
     <Grid
-      data-ouia-safe={!actionTakingPlace}
       data-ouia-component-id='admin_task_list_page'
       className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
     >

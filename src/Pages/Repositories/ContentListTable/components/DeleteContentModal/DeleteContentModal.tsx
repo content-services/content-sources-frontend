@@ -142,7 +142,6 @@ export default function DeleteContentModal() {
       variant={ModalVariant.large}
       title='Remove repositories?'
       ouiaId='delete_custom_repositories'
-      ouiaSafe={!actionTakingPlace}
       description={
         <>
           <Hide hide={templates.data.length <= 0}>
@@ -227,7 +226,9 @@ export default function DeleteContentModal() {
                                 ? 'Show less'
                                 : `and ${templatesWithRepos.length - maxTemplatesToShow} more`
                             }
-                            onToggle={() => setExpandState((prev) => ({ ...prev, [index]: !prev[index] }))}
+                            onToggle={() =>
+                              setExpandState((prev) => ({ ...prev, [index]: !prev[index] }))
+                            }
                             isExpanded={!!expandState[index]}
                           >
                             {templatesWithRepos

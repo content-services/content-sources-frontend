@@ -71,7 +71,6 @@ export default function SnapshotDetailsModal() {
       hasNoBodyWrapper
       aria-label='snapshot details modal'
       ouiaId='snapshot_details_modal'
-      //   ouiaSafe={fetchingOrLoading}
       variant={ModalVariant.large}
       title='Snapshot detail'
       isOpen
