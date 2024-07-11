@@ -36,7 +36,14 @@ const useStyles = createUseStyles({
 });
 
 const statusValues = ['Running', 'Failed', 'Completed', 'Canceled', 'Pending'];
-const typeValues = ['snapshot', 'delete-repository-snapshots', 'introspect', 'delete-templates', 'update-template-content', 'update-repository' ]
+const typeValues = [
+  'snapshot',
+  'delete-repository-snapshots',
+  'introspect',
+  'delete-templates',
+  'update-template-content',
+  'update-repository',
+];
 const filters = ['Account ID', 'Org ID', 'Status', 'Type'];
 export type AdminTaskFilters = 'Account ID' | 'Org ID' | 'Status' | 'Type';
 
@@ -78,7 +85,7 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
     accountId: debouncedAccountId,
     orgId: debouncedOrgId,
     selectedStatuses: debouncedSelectedStatuses,
-    selectedTypenames: debouncedSelectedTypenames
+    selectedTypenames: debouncedSelectedTypenames,
   } = useDebounce({
     accountId,
     orgId,
@@ -146,17 +153,17 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
         );
       case 'Type':
         return (
-            <DropdownSelect
-                toggleAriaLabel='filter type'
-                toggleId='typeSelect'
-                ouiaId='filter_type'
-                isDisabled={isLoading}
-                options={typeValues}
-                variant={SelectVariant.checkbox}
-                selectedProp={selectedTypenames}
-                setSelected={setSelectedTypenames}
-                placeholderText='Filter by type'
-            />
+          <DropdownSelect
+            toggleAriaLabel='filter type'
+            toggleId='typeSelect'
+            ouiaId='filter_type'
+            isDisabled={isLoading}
+            options={typeValues}
+            variant={SelectVariant.checkbox}
+            selectedProp={selectedTypenames}
+            setSelected={setSelectedTypenames}
+            placeholderText='Filter by type'
+          />
         );
       default:
         return <></>;
@@ -189,16 +196,20 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
           </InputGroup>
         </FlexItem>
       </Flex>
-      <Hide hide={!(accountId !== '' || orgId !== '' || selectedStatuses.length || selectedTypenames.length)}>
+      <Hide
+        hide={
+          !(accountId !== '' || orgId !== '' || selectedStatuses.length || selectedTypenames.length)
+        }
+      >
         <FlexItem className={classes.chipsContainer}>
           <ChipGroup categoryName='Type'>
             {selectedTypenames.map((type) => (
-                <Chip
-                    key={type}
-                    onClick={() => deleteItem(type, selectedTypenames, setSelectedTypenames)}
-                >
-                  {type}
-                </Chip>
+              <Chip
+                key={type}
+                onClick={() => deleteItem(type, selectedTypenames, setSelectedTypenames)}
+              >
+                {type}
+              </Chip>
             ))}
           </ChipGroup>
           <ChipGroup categoryName='Status'>
@@ -227,7 +238,7 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
           )}
           {((debouncedAccountId !== '' && accountId !== '') ||
             (debouncedOrgId !== '' && orgId !== '') ||
-            (!!selectedTypenames?.length) ||
+            !!selectedTypenames?.length ||
             !!selectedStatuses?.length) && (
             <Button className={classes.clearFilters} onClick={clearFilters} variant='link' isInline>
               Clear filters
