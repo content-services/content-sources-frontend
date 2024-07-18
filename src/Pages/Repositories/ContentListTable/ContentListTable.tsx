@@ -227,9 +227,10 @@ const ContentListTable = () => {
     sortString,
   );
 
-  const triggerIntrospectionAndSnapshot = (repoUuid) => {
-    introspectRepoForUuid(repoUuid).then(clearCheckedRepositories);
-    triggerSnapshot(repoUuid);
+  const triggerIntrospectionAndSnapshot = async (repoUuid: string): Promise<void> => {
+    clearCheckedRepositories();
+    await introspectRepoForUuid(repoUuid)
+    await triggerSnapshot(repoUuid);
   }
 
   // Other update actions will be added to this later.
@@ -320,10 +321,9 @@ const ContentListTable = () => {
                   {
                     isDisabled:
                       actionTakingPlace ||
-                      !rowData.snapshot ||
-                      !(rowData.snapshot && rowData.last_snapshot_uuid),
+                      !rowData.last_snapshot_uuid,
                     title:
-                      rowData.snapshot && rowData.last_snapshot_uuid
+                      rowData.last_snapshot_uuid
                         ? 'View all snapshots'
                         : 'No snapshots yet',
                     onClick: () => {
