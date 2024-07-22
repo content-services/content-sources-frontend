@@ -5,9 +5,10 @@ import {
   DropdownProps,
   MenuToggle,
   MenuToggleProps,
+  type DropdownItemProps,
 } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
-import { ReactElement, useState } from 'react';
+import { useState } from 'react';
 
 const useStyles = createUseStyles({
   menuToggle: {
@@ -17,7 +18,7 @@ const useStyles = createUseStyles({
 
 export interface DropDownMenuProps {
   menuValue: string;
-  dropDownItems?: { value: string; label: string | ReactElement }[];
+  dropDownItems?: DropdownItemProps[];
   onSelect?: (value?: string | number | undefined) => void;
   isDisabled?: boolean;
   menuToggleProps?: Partial<MenuToggleProps | unknown>;
@@ -63,8 +64,8 @@ export default function DropdownMenu({
       {...dropDownProps}
     >
       <DropdownList>
-        {dropDownItems.map(({ value, label }, index) => (
-          <DropdownItem key={value + index} value={value}>
+        {dropDownItems.map(({ label, ...props }, index) => (
+          <DropdownItem key={label || '' + index} {...props}>
             {label}
           </DropdownItem>
         ))}
