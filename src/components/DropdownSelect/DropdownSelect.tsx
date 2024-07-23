@@ -12,8 +12,8 @@ import {
 
 interface Props extends Omit<SelectProps, 'toggle'> {
   toggleValue: string;
-  toggleProps?: Partial<MenuToggleProps>;
-  options: Partial<SelectOptionProps>[];
+  toggleProps?: Partial<MenuToggleProps | unknown>;
+  options: Partial<SelectOptionProps | unknown>[];
 }
 
 export default function DropdownSelect({ toggleValue, options, toggleProps = {}, ...rest }: Props) {
@@ -28,7 +28,7 @@ export default function DropdownSelect({ toggleValue, options, toggleProps = {},
       isOpen={isOpen}
       onOpenChange={(nextOpen: boolean) => setIsOpen(nextOpen)}
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-        <MenuToggle ref={toggleRef} onClick={onToggleClick} isExpanded={isOpen} {...toggleProps}>
+        <MenuToggle ref={toggleRef} onClick={onToggleClick} isExpanded={isOpen} {...toggleProps} data-ouia-component-type="PF5/Button">
           {toggleValue}
         </MenuToggle>
       )}

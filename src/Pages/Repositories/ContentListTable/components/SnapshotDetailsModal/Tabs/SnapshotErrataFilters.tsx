@@ -124,9 +124,11 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                 hasCheckbox: true,
                 isSelected: types.includes(type),
                 children: type,
+                'data-ouia-component-id': `filter_${type}`
               })) as SelectOptionProps[]
             }
             toggleValue='Filter by type'
+            toggleProps={{ 'data-ouia-component-id': 'filter_type' }}
           />
         );
       case 'Severity':
@@ -140,9 +142,11 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                 hasCheckbox: true,
                 isSelected: severities.includes(sev),
                 children: <SeverityWithIcon severity={sev} />,
+                'data-ouia-component-id': `filter_${sev}`
               })) as SelectOptionProps[]
             }
             toggleValue='Filter by severity'
+            toggleProps={{ 'data-ouia-component-id': 'filter_severity' }}
           />
         );
 
@@ -161,12 +165,16 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
             <FlexItem>
               <DropdownSelect
                 key='filtertype'
-                toggleProps={{ isDisabled: isLoading, icon: <FilterIcon /> }}
-                ouiaId='filter_type'
+                toggleProps={{ 
+                  isDisabled: isLoading, 
+                  icon: <FilterIcon />, 
+                  'data-ouia-component-id': 'filter_errata',
+                }}
                 options={filters.map((optionName) => ({
                   //   key: optionName,
                   value: optionName,
                   children: optionName,
+                  'data-ouia-component-id': `filter_${optionName}`
                 }))}
                 selected={filterType}
                 onSelect={(_, val) => {
