@@ -41,7 +41,7 @@ const DeleteKebab = ({
       show={!atLeastOneRepoChecked}
       setDisabled
     >
-      <DropdownItem onClick={() => navigate(`${DELETE_ROUTE}`)}>
+      <DropdownItem onClick={() => navigate(DELETE_ROUTE)}>
         {atLeastOneRepoChecked
           ? `Remove ${numberOfReposChecked} repositories`
           : 'Remove selected repositories'}

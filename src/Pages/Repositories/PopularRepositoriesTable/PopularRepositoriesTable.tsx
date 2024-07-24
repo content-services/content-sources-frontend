@@ -63,8 +63,8 @@ import {
   DropdownToggleAction,
 } from '@patternfly/react-core/deprecated';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
-import { DELETE_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
-import { useHref, useNavigate } from 'react-router-dom';
+import { DELETE_ROUTE } from 'Routes/constants';
+import { Outlet, useNavigate, useOutletContext } from 'react-router-dom';
 
 const useStyles = createUseStyles({
   chipsContainer: {
@@ -127,8 +127,6 @@ const PopularRepositoriesTable = () => {
   const queryClient = useQueryClient();
   const { rbac, features } = useAppContext();
   const navigate = useNavigate();
-  const path = useHref('content');
-  const pathname = path.split('content')[0] + 'content';
   // Uses urls as map key because uuids don't exist on repositories that haven't been created
   const [checkedRepositoriesToAdd, setCheckedRepositoriesToAdd] = useState<
     Map<string, CreateContentRequestItem>
@@ -371,6 +369,14 @@ const PopularRepositoriesTable = () => {
   }, [isInProd, checkedRepositoriesToAdd.size]);
 
   return (
+    <>
+    <Outlet
+        context={{
+          deletionContext: {
+            checkedRepositoriesToDelete,
+          },
+        }}
+      />
     <Grid data-ouia-component-id='popular_repositories_page' className={classes.mainContainer}>
       <Flex className={classes.topContainer}>
         <FlexItem>
@@ -556,7 +562,7 @@ const PopularRepositoriesTable = () => {
             <Thead>
               <Tr>
                 <Hide hide={!rbac?.repoWrite}>
-                  <Th
+                  <Th screenReaderText='empty'
                     className={classes.checkboxMinWidth}
                     select={{
                       onSelect: selectAllRepos,
@@ -621,15 +627,7 @@ const PopularRepositoriesTable = () => {
                           <Button
                             isDisabled={uuid === selectedUUID || isAdding}
                             onClick={() =>
-                              navigate(
-                                pathname +
-                                  '/' +
-                                  REPOSITORIES_ROUTE +
-                                  '/' +
-                                  DELETE_ROUTE +
-                                  '?repoUUID=' +
-                                  uuid,
-                              )
+                              navigate(DELETE_ROUTE + '?repoUUID=' + uuid)
                             }
                             variant='danger'
                             ouiaId='remove_popular_repo'
@@ -681,7 +679,15 @@ const PopularRepositoriesTable = () => {
         />
       </Hide>
     </Grid>
+    </>
   );
 };
+
+export const usePopularListOutletContext = () =>
+    useOutletContext<{
+      deletionContext: {
+        checkedRepositoriesToDelete: Set<string>;
+      };
+    }>();
 
 export default PopularRepositoriesTable;

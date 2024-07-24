@@ -32,6 +32,7 @@ jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
   useHref: () => 'insights/content/repositories',
+  Outlet: () => <></>,
 }));
 
 it('expect PopularRepositoriesTable to render with add one item', () => {
