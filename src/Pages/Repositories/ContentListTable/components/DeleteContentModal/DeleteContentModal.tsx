@@ -3,6 +3,7 @@ import {
   Bullseye,
   Button,
   ExpandableSection,
+  ExpandableSectionToggle,
   List,
   ListItem,
   Modal,
@@ -55,6 +56,9 @@ const useStyles = createUseStyles({
   templateColumnMinWidth: {
     minWidth: '200px!important',
   },
+  expandableSectionMargin: {
+    marginTop: '8px'
+  }
 });
 
 export default function DeleteContentModal() {
@@ -230,15 +234,11 @@ export default function DeleteContentModal() {
                           ))}
                         <Hide hide={templatesWithRepos.length <= maxTemplatesToShow}>
                           <ExpandableSection
-                            toggleText={
-                              expandState[index]
-                                ? 'Show less'
-                                : `and ${templatesWithRepos.length - maxTemplatesToShow} more`
-                            }
-                            onToggle={() =>
-                              setExpandState((prev) => ({ ...prev, [index]: !prev[index] }))
-                            }
-                            isExpanded={!!expandState[index]}
+                            isExpanded={expandState[index]}
+                            isDetached
+                            toggleId='detached-expandable-section-toggle'
+                            contentId='detached-expandable-section-content'
+                            className={classes.expandableSectionMargin}
                           >
                             {templatesWithRepos
                               .slice(maxTemplatesToShow, templatesWithRepos.length)
@@ -259,6 +259,20 @@ export default function DeleteContentModal() {
                                 </ListItem>
                               ))}
                           </ExpandableSection>
+                          <ExpandableSectionToggle
+                            isExpanded={expandState[index]}
+                            onToggle={() =>
+                                setExpandState((prev) => ({ ...prev, [index]: !prev[index] }))
+                                }
+                            toggleId='detached-expandable-section-toggle'
+                            contentId='detached-expandable-section-content'
+                            direction='up'
+                          >
+                            {expandState[index]
+                                ? 'Show less'
+                                : `and ${templatesWithRepos.length - maxTemplatesToShow} more`
+                            }
+                          </ExpandableSectionToggle>
                         </Hide>
                       </List>
                     ) : (
