@@ -13,6 +13,7 @@ jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
 
 (useChrome as jest.Mock).mockImplementation(() => ({
   isProd: () => false,
+  isBeta: () => false,
 }));
 
 it('Render enabled with snapshots enabled', () => {

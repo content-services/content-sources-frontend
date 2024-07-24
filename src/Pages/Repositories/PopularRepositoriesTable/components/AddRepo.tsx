@@ -28,8 +28,10 @@ export const AddRepo = ({ isDisabled, addRepo }: Props) => {
   const { features } = useAppContext();
   const classes = useStyles();
   const [isActionOpen, setIsActionOpen] = useState(false);
-  const { isProd } = useChrome();
+  const { isProd, isBeta } = useChrome();
   const isInProd = useMemo(() => isProd() === true, []);
+  const isInBeta = useMemo(() => isBeta() === true, []);
+
 
   const onActionToggle = (_, isActionOpen: boolean) => {
     setIsActionOpen(isActionOpen);
@@ -46,7 +48,7 @@ export const AddRepo = ({ isDisabled, addRepo }: Props) => {
   };
 
   const dropdownItems = useMemo(() => {
-    if (isInProd) {
+    if (isInProd && !isInBeta) {
       return [
         <DropdownItem
           data-ouia-component-id='add-popular_repo_with-snapshotting'
@@ -73,7 +75,7 @@ export const AddRepo = ({ isDisabled, addRepo }: Props) => {
   if (features?.snapshots?.enabled && features.snapshots.accessible) {
     const className = isDisabled ? classes.disabledButton : undefined;
     // temporarily disable snapshotting by default for popular repos
-    if (isInProd) {
+    if (isInProd && !isInBeta) {
       return (
         <Dropdown
           onSelect={onActionSelect}

@@ -27,6 +27,7 @@ jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
 
 (useChrome as jest.Mock).mockImplementation(() => ({
   isProd: () => false,
+  isBeta: () => false,
 }));
 
 jest.mock('react-router-dom', () => ({

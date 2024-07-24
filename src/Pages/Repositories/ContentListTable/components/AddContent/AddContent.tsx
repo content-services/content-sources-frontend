@@ -139,10 +139,10 @@ const AddContent = () => {
   );
   const classes = useStyles();
   const queryClient = useQueryClient();
-  const { isProd } = useChrome();
+  const { isProd, isBeta } = useChrome();
   // temporarily disable snapshotting by default for custom repos
   const handleDefaultSnapshotting = () => {
-    if (isProd()) {
+    if (isProd() && !isBeta()) {
       return [getDefaultFormikValues({ snapshot: false })];
     } else return [getDefaultFormikValues({ snapshot: snapshottingEnabled })];
   };
