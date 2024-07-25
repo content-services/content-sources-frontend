@@ -225,7 +225,7 @@ export default function DeleteContentModal() {
                                 className={classes.link}
                                 variant='link'
                                 component='a'
-                                href={pathname + '/' + TEMPLATES_ROUTE + `/${template.uuid}/edit`}
+                                href={pathname + '/' + TEMPLATES_ROUTE + `/${template.uuid}/edit?tab=custom_repositories`}
                                 target='_blank'
                               >
                                 {template.name}
@@ -250,7 +250,7 @@ export default function DeleteContentModal() {
                                     variant='link'
                                     component='a'
                                     href={
-                                      pathname + '/' + TEMPLATES_ROUTE + `/${template.uuid}/edit`
+                                      pathname + '/' + TEMPLATES_ROUTE + `/${template.uuid}/edit?tab=custom_repositories`
                                     }
                                     target='_blank'
                                   >
