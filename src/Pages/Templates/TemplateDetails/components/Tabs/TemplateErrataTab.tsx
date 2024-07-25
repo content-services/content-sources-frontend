@@ -3,22 +3,22 @@ import {
   FlexItem,
   Grid,
   InputGroup,
-  InputGroupItem,
-  InputGroupText,
   Pagination,
   PaginationVariant,
-  TextInput,
 } from '@patternfly/react-core';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { SearchIcon } from '@patternfly/react-icons';
-import useDebounce from 'Hooks/useDebounce';
 import { useParams } from 'react-router-dom';
-import PackagesTable from 'components/SharedTables/PackagesTable';
+import AdvisoriesTable from 'components/SharedTables/AdvisoriesTable';
 import { useQueryClient } from 'react-query';
-import { FETCH_TEMPLATE_KEY, useFetchTemplatePackages } from 'services/Templates/TemplateQueries';
+import {
+  FETCH_TEMPLATE_KEY,
+  useFetchTemplateErrataQuery,
+} from 'services/Templates/TemplateQueries';
 import type { TemplateItem } from 'services/Templates/TemplateApi';
+import type { ThProps } from '@patternfly/react-table';
+import SnapshotErrataFilters from 'Pages/Repositories/ContentListTable/components/SnapshotDetailsModal/Tabs/SnapshotErrataFilters';
 import Loader from 'components/Loader';
 
 const useStyles = createUseStyles({
@@ -31,58 +31,84 @@ const useStyles = createUseStyles({
     backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
-    height: '100%',
   },
   topContainer: {
     justifyContent: 'space-between',
     padding: '16px 24px',
     height: 'fit-content',
+    flexDirection: 'row!important',
     minHeight: '68px', // Prevents compacting of the search box (patternfly bug?)
   },
+  topContainerWithFilterHeight: { extend: 'topContainer', minHeight: '128px' },
   bottomContainer: {
     justifyContent: 'space-between',
     minHeight: '68px',
   },
 });
 
-const perPageKey = 'TemplatePackagePerPage';
+const perPageKey = 'TemplateAdvisoriesPerPage';
+const defaultFilterState = { search: '', type: [] as string[], severity: [] as string[] };
 
-export default function TemplatePackageTab() {
+export default function TemplateErrataTab() {
   const classes = useStyles();
-  const { templateUUID: uuid } = useParams();
   const queryClient = useQueryClient();
+  const { templateUUID: uuid } = useParams();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const debouncedSearchQuery = useDebounce(searchQuery, !searchQuery ? 0 : 500);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearchQuery]);
+  const [filterData, setFilterData] = useState(defaultFilterState);
+  const [activeSortIndex, setActiveSortIndex] = useState<number>(-1);
+  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const templatesData = queryClient.getQueryData<TemplateItem>([FETCH_TEMPLATE_KEY, uuid]);
 
   const hasTemplatesData = !!templatesData;
 
+  const hasFilters = useMemo(
+    () => !!(filterData.search || filterData.severity.length || filterData.type.length),
+    [filterData],
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [filterData]);
+
+  const columnSortAttributes = ['name', 'synopsis', 'type', 'severity', 'issued_date'];
+
+  const sortString = useMemo(
+    () =>
+      activeSortIndex === -1
+        ? ''
+        : columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
+    [activeSortIndex, activeSortDirection],
+  );
+
   const {
     isLoading,
     isFetching,
+    error,
+    isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useFetchTemplatePackages(page, perPage, debouncedSearchQuery, uuid as string);
+  } = useFetchTemplateErrataQuery(
+    uuid as string,
+    page,
+    perPage,
+    filterData.search,
+    filterData.type,
+    filterData.severity,
+    sortString,
+  );
 
   const onSetPage = (_, newPage) => setPage(newPage);
 
   const onPerPageSelect = (_, newPerPage, newPage) => {
-    // Save this value through page refresh for use on next reload
     setPerPage(newPerPage);
     setPage(newPage);
     localStorage.setItem(perPageKey, newPerPage.toString());
   };
 
   const {
-    data: packagesList = [],
+    data: errataList = [],
     meta: { count = 0 },
   } = data;
 
@@ -90,25 +116,37 @@ export default function TemplatePackageTab() {
 
   const loadingOrZeroCount = fetchingOrLoading || !count;
 
+  const sortParams = (columnIndex: number): ThProps['sort'] => ({
+    sortBy: {
+      index: activeSortIndex,
+      direction: activeSortDirection,
+      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
+    },
+    onSort: (_event, index, direction) => {
+      setActiveSortIndex(index);
+      setActiveSortDirection(direction);
+    },
+    columnIndex,
+  });
+
   if (!hasTemplatesData || isLoading) {
     return <Loader />;
   }
 
+  if (isError) {
+    throw error;
+  }
+
   return (
     <Grid className={classes.mainContainer}>
-      <InputGroup className={classes.topContainer}>
-        <InputGroupItem>
-          <TextInput
-            id='search'
-            ouiaId='name_search'
-            placeholder='Filter by name'
-            value={searchQuery}
-            onChange={(_event, value) => setSearchQuery(value)}
-          />
-          <InputGroupText id='search-icon'>
-            <SearchIcon />
-          </InputGroupText>
-        </InputGroupItem>
+      <InputGroup
+        className={hasFilters ? classes.topContainerWithFilterHeight : classes.topContainer}
+      >
+        <SnapshotErrataFilters
+          isLoading={isLoading}
+          filterData={filterData}
+          setFilterData={setFilterData}
+        />
         <Pagination
           id='top-pagination-id'
           widgetId='topPaginationWidgetId'
@@ -120,12 +158,13 @@ export default function TemplatePackageTab() {
           onPerPageSelect={onPerPageSelect}
         />
       </InputGroup>
-      <PackagesTable
-        packagesList={packagesList}
+      <AdvisoriesTable
+        errataList={errataList}
         isFetchingOrLoading={fetchingOrLoading}
         isLoadingOrZeroCount={loadingOrZeroCount}
-        clearSearch={() => setSearchQuery('')}
+        clearSearch={() => setFilterData(defaultFilterState)}
         perPage={perPage}
+        sortParams={sortParams}
       />
       <Flex className={classes.bottomContainer}>
         <FlexItem />

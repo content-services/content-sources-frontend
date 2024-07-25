@@ -1,30 +1,27 @@
 import {
+  Flex,
+  FlexItem,
   Grid,
   InputGroup,
   InputGroupItem,
-  TextInput,
   InputGroupText,
   Pagination,
-  Flex,
-  FlexItem,
   PaginationVariant,
+  TextInput,
 } from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
-import Hide from 'components/Hide/Hide';
-import { ContentOrigin } from 'services/Content/ContentApi';
-import { createUseStyles } from 'react-jss';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { createUseStyles } from 'react-jss';
+import { SearchIcon } from '@patternfly/react-icons';
 import useDebounce from 'Hooks/useDebounce';
-import useRootPath from 'Hooks/useRootPath';
-import { useAppContext } from 'middleware/AppContext';
-import { useGetSnapshotPackagesQuery } from 'services/Content/ContentQueries';
+import { useParams } from 'react-router-dom';
 import PackagesTable from 'components/SharedTables/PackagesTable';
+import { useFetchTemplatePackages } from 'services/Templates/TemplateQueries';
+import Loader from 'components/Loader';
 
 const useStyles = createUseStyles({
   description: {
-    paddingTop: '12px',
+    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
     paddingBottom: '8px',
     color: global_Color_200.value,
   },
@@ -36,8 +33,9 @@ const useStyles = createUseStyles({
   },
   topContainer: {
     justifyContent: 'space-between',
-    padding: '16px 24px 16px 0',
+    padding: '16px 24px',
     height: 'fit-content',
+    minHeight: '68px', // Prevents compacting of the search box (patternfly bug?)
   },
   bottomContainer: {
     justifyContent: 'space-between',
@@ -45,15 +43,11 @@ const useStyles = createUseStyles({
   },
 });
 
-const perPageKey = 'snapshotPackagePerPage';
+const perPageKey = 'TemplatePackagePerPage';
 
-export function SnapshotPackagesTab() {
+export default function TemplatePackageTab() {
   const classes = useStyles();
-  const { contentOrigin } = useAppContext();
-
-  const { snapshotUUID = '' } = useParams();
-  const rootPath = useRootPath();
-  const navigate = useNavigate();
+  const { templateUUID: uuid } = useParams();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
@@ -68,26 +62,17 @@ export function SnapshotPackagesTab() {
   const {
     isLoading,
     isFetching,
-    isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetSnapshotPackagesQuery(snapshotUUID, page, perPage, debouncedSearchQuery);
-
-  useEffect(() => {
-    if (isError) {
-      onClose();
-    }
-  }, [isError]);
+  } = useFetchTemplatePackages(page, perPage, debouncedSearchQuery, uuid as string);
 
   const onSetPage = (_, newPage) => setPage(newPage);
 
   const onPerPageSelect = (_, newPerPage, newPage) => {
+    // Save this value through page refresh for use on next reload
     setPerPage(newPerPage);
     setPage(newPage);
     localStorage.setItem(perPageKey, newPerPage.toString());
   };
-
-  const onClose = () =>
-    navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
 
   const {
     data: packagesList = [],
@@ -97,6 +82,11 @@ export function SnapshotPackagesTab() {
   const fetchingOrLoading = isFetching || isLoading;
 
   const loadingOrZeroCount = fetchingOrLoading || !count;
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
   return (
     <Grid className={classes.mainContainer}>
       <InputGroup className={classes.topContainer}>
@@ -112,18 +102,16 @@ export function SnapshotPackagesTab() {
             <SearchIcon />
           </InputGroupText>
         </InputGroupItem>
-        <Hide hide={isLoading}>
-          <Pagination
-            id='top-pagination-id'
-            widgetId='topPaginationWidgetId'
-            itemCount={count}
-            perPage={perPage}
-            page={page}
-            onSetPage={onSetPage}
-            isCompact
-            onPerPageSelect={onPerPageSelect}
-          />
-        </Hide>
+        <Pagination
+          id='top-pagination-id'
+          widgetId='topPaginationWidgetId'
+          itemCount={count}
+          perPage={perPage}
+          page={page}
+          onSetPage={onSetPage}
+          isCompact
+          onPerPageSelect={onPerPageSelect}
+        />
       </InputGroup>
       <PackagesTable
         packagesList={packagesList}
@@ -136,18 +124,16 @@ export function SnapshotPackagesTab() {
       <Flex className={classes.bottomContainer}>
         <FlexItem />
         <FlexItem>
-          <Hide hide={isLoading}>
-            <Pagination
-              id='bottom-pagination-id'
-              widgetId='bottomPaginationWidgetId'
-              itemCount={count}
-              perPage={perPage}
-              page={page}
-              onSetPage={onSetPage}
-              variant={PaginationVariant.bottom}
-              onPerPageSelect={onPerPageSelect}
-            />
-          </Hide>
+          <Pagination
+            id='bottom-pagination-id'
+            widgetId='bottomPaginationWidgetId'
+            itemCount={count}
+            perPage={perPage}
+            page={page}
+            onSetPage={onSetPage}
+            variant={PaginationVariant.bottom}
+            onPerPageSelect={onPerPageSelect}
+          />
         </FlexItem>
       </Flex>
     </Grid>

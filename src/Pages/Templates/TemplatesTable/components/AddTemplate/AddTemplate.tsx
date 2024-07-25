@@ -25,6 +25,7 @@ import { formatTemplateDate } from 'helpers';
 import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
 import { useMemo } from 'react';
+import { AddNavigateButton } from './AddNavigateButton';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -73,8 +74,6 @@ const AddTemplateBase = () => {
     ...(templateRequest as TemplateRequest),
     date: formatTemplateDate(templateRequest.date || ''),
   });
-
-  const addEditAction = isEdit ? editTemplate : addTemplate;
 
   return (
     <Modal
@@ -165,11 +164,17 @@ const AddTemplateBase = () => {
             isDisabled={checkIfCurrentStepValid(5)}
             name='Review'
             id='review_step'
-            footer={{
-              nextButtonText: isEdit ? 'Confirm changes' : 'Create',
-              onNext: () => addEditAction().then(onClose),
-              isNextDisabled: isAdding || isEditing,
-            }}
+            footer={
+              isEdit ? (
+                {
+                  nextButtonText: 'Confirm changes',
+                  onNext: () => editTemplate().then(() => onClose()),
+                  isNextDisabled: isEditing,
+                }
+              ) : (
+                <AddNavigateButton isAdding={isAdding} onClose={onClose} add={addTemplate} />
+              )
+            }
           >
             <ReviewStep />
           </WizardStep>

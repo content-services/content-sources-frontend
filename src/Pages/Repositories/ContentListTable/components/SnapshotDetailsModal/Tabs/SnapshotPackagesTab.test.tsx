@@ -1,30 +1,14 @@
 import { render } from '@testing-library/react';
-import { ContentOrigin, PackageItem } from 'services/Content/ContentApi';
+import { ContentOrigin } from 'services/Content/ContentApi';
 import { useGetSnapshotPackagesQuery } from 'services/Content/ContentQueries';
 import { SnapshotPackagesTab } from './SnapshotPackagesTab';
-
-const packageItem: PackageItem = {
-  // Used variables
-  name: 'billy-the-bob',
-  version: '2.2.2',
-  release: '1.2.el9',
-  arch: 'x86_64',
-  // Placeholders for TS
-  checksum: '',
-  epoch: 0,
-  summary: '',
-  uuid: '',
-};
-
-jest.mock('Hooks/useDebounce', () => (value) => value);
+import { defaultPackageItem } from 'testingHelpers';
 
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
 jest.mock('services/Content/ContentQueries', () => ({
   useGetSnapshotPackagesQuery: jest.fn(),
 }));
-
-jest.mock('Hooks/useDebounce', () => (value) => value);
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
@@ -43,15 +27,15 @@ it('Render 1 item in package list', () => {
   (useGetSnapshotPackagesQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     data: {
-      data: [packageItem],
+      data: [defaultPackageItem],
       meta: { count: 1, limit: 20, offset: 0 },
     },
   }));
 
   const { queryByText } = render(<SnapshotPackagesTab />);
 
-  expect(queryByText(packageItem.name)).toBeInTheDocument();
-  expect(queryByText(packageItem.version)).toBeInTheDocument();
-  expect(queryByText(packageItem.release)).toBeInTheDocument();
-  expect(queryByText(packageItem.arch)).toBeInTheDocument();
+  expect(queryByText(defaultPackageItem.name)).toBeInTheDocument();
+  expect(queryByText(defaultPackageItem.version)).toBeInTheDocument();
+  expect(queryByText(defaultPackageItem.release)).toBeInTheDocument();
+  expect(queryByText(defaultPackageItem.arch)).toBeInTheDocument();
 });

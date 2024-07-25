@@ -30,5 +30,3 @@ it('expect TemplateActionDropdown to render all buttons', async () => {
   expect(queryByText('Edit')).toBeInTheDocument();
   expect(queryByText('Delete')).toBeInTheDocument();
 });
-
-// TODO: Test permissions

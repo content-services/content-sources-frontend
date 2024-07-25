@@ -14,8 +14,6 @@ jest.mock('../AddTemplateContext', () => ({
   useAddTemplateContext: jest.fn(),
 }));
 
-jest.mock('Hooks/useDebounce', () => (value) => value);
-
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
   Outlet: () => <></>,

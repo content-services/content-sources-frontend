@@ -1,21 +1,7 @@
 import { render } from '@testing-library/react';
 import PackageModal from './PackageModal';
-import { PackageItem } from 'services/Content/ContentApi';
-import { ReactQueryTestWrapper } from 'testingHelpers';
+import { defaultPackageItem, ReactQueryTestWrapper } from 'testingHelpers';
 import { useGetPackagesQuery } from 'services/Content/ContentQueries';
-
-const packageItem: PackageItem = {
-  // Used variables
-  name: 'billy-the-bob',
-  version: '2.2.2',
-  release: '1.2.el9',
-  arch: 'x86_64',
-  // Placeholders for TS
-  checksum: '',
-  epoch: 0,
-  summary: '',
-  uuid: '',
-};
 
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
@@ -38,7 +24,7 @@ it('Render 1 item', () => {
   (useGetPackagesQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     data: {
-      data: [packageItem],
+      data: [defaultPackageItem],
       meta: { count: 1, limit: 20, offset: 0 },
     },
   }));
@@ -50,10 +36,10 @@ it('Render 1 item', () => {
   );
 
   expect(queryByText('Packages')).toBeInTheDocument();
-  expect(queryByText(packageItem.name)).toBeInTheDocument();
-  expect(queryByText(packageItem.version)).toBeInTheDocument();
-  expect(queryByText(packageItem.release)).toBeInTheDocument();
-  expect(queryByText(packageItem.arch)).toBeInTheDocument();
+  expect(queryByText(defaultPackageItem.name)).toBeInTheDocument();
+  expect(queryByText(defaultPackageItem.version)).toBeInTheDocument();
+  expect(queryByText(defaultPackageItem.release)).toBeInTheDocument();
+  expect(queryByText(defaultPackageItem.arch)).toBeInTheDocument();
   expect(queryByText('Clear search')).not.toBeInTheDocument();
 });
 
@@ -73,6 +59,7 @@ it('Render with no packages (after an unsuccessful search)', () => {
   );
 
   expect(queryByText('Packages')).toBeInTheDocument();
-  expect(queryByText('No packages match the search criteria')).toBeInTheDocument();
-  expect(queryByText('Clear search')).toBeInTheDocument();
+  expect(
+    queryByText('You may need to add repositories that contain packages.'),
+  ).toBeInTheDocument();
 });

@@ -16,9 +16,13 @@
     "start": "fec dev",
     "start:verbose": "VERBOSE=true fec dev",
     "local": "BACKEND_PORT=8000 npm start",
-    "test": "TZ=UTC jest --verbose --no-cache",
-    "verify": "npm-run-all build lint test",
-    "postinstall": "ts-patch install"
+    "verify": "npm-run-all build lint test-ci",
+    "postinstall": "ts-patch install",
+    "test": "TZ=UTC jest --config jest.config.js --verbose",
+    "test-ci": "TZ=UTC jest --config jest.ci.config.js --verbose --no-cache",
+    "testAllPreviewFailures": "npm-run-all -p test jestPreview",
+    "jestPreview": "jest-preview",
+    "jestClear": "jest --clearCache"
   },
   "dependencies": {
     "@patternfly/react-core": "^5.3.3",
@@ -45,6 +49,7 @@
     "yup": "^1.4.0"
   },
   "devDependencies": {
+    "jest-preview": "^0.3.1",
     "@redhat-cloud-services/eslint-config-redhat-cloud-services": "^2.0.4",
     "@redhat-cloud-services/frontend-components-config": "^6.0.13",
     "@redhat-cloud-services/tsc-transform-imports": "^1.0.7",

@@ -12,8 +12,6 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }));
 
-jest.mock('Hooks/useDebounce', () => (value) => value);
-
 it('Render loading state (disabled)', () => {
   const { getByRole } = render(
     <SnapshotErrataFilters

@@ -11,7 +11,7 @@ import {
 } from '@patternfly/react-core';
 
 interface Props extends Omit<SelectProps, 'toggle'> {
-  toggleValue: string;
+  toggleValue?: string;
   toggleProps?: Partial<MenuToggleProps>;
   options: Partial<SelectOptionProps>[];
 }
@@ -37,7 +37,7 @@ export default function DropdownSelect({ toggleValue, options, toggleProps = {},
     >
       <SelectList>
         {options.map((option, index) => (
-          <SelectOption key={index} {...option} />
+          <SelectOption key={index + option?.value} {...option} />
         ))}
       </SelectList>
     </Select>

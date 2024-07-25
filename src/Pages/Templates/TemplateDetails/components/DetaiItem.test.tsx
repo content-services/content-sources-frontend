@@ -7,7 +7,7 @@ it('expect DetailtItem to render empty state', () => {
   expect(queryByText('Something')).not.toBeInTheDocument();
 });
 
-it('expect DetailtItem to render empty state', () => {
+it('expect DetailtItem to render with a value', () => {
   const { queryByText } = render(<DetailtItem title='Something' value='with a value' />);
 
   expect(queryByText('Something')).toBeInTheDocument();

@@ -39,8 +39,6 @@ jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({ rbac: { read: true, write: true } }),
 }));
 
-jest.mock('Hooks/useDebounce', () => (value) => value);
-
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
 jest.mock('Hooks/useNotification', () => () => ({ notify: () => null }));

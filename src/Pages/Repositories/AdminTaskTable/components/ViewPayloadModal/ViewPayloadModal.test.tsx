@@ -11,7 +11,7 @@ jest.mock('services/AdminTasks/AdminTaskQueries', () => ({
 }));
 
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
-jest.mock('Hooks/useDebounce', () => (value) => value);
+
 jest.mock('middleware/AppContext', () => ({ useAppContext: () => ({}) }));
 
 jest.mock('react-router-dom', () => ({

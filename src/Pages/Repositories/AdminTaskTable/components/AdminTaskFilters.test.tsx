@@ -5,7 +5,6 @@ jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({}),
 }));
 
-jest.mock('Hooks/useDebounce', () => (value) => value);
 jest.mock('react-query');
 
 it('Render loading state (disabled)', () => {

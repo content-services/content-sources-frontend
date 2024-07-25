@@ -10,6 +10,10 @@ export const ADVISORIES_ROUTE = 'advisories';
 export const EDIT_ROUTE = 'edit';
 export const ADD_ROUTE = 'add';
 export const DELETE_ROUTE = 'delete';
+// PATCH
+
+export const PATCH_SYSTEMS_ROUTE = 'patch/systems/';
+export const INVENTORY_WORKSPACES_ROUTE = 'inventory/workspaces';
 
 export type TabbedRouteItem = {
   title: string;

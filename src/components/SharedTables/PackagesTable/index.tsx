@@ -1,5 +1,4 @@
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import EmptyPackageState from '../../../Pages/Repositories/ContentListTable/components/PackageModal/components/EmptyPackageState';
 import { PackageItem } from 'services/Content/ContentApi';
 import Hide from '../../Hide/Hide';
 import { Grid } from '@patternfly/react-core';
@@ -7,6 +6,7 @@ import { SkeletonTable } from '@patternfly/react-component-groups';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import { useEffect, useState } from 'react';
+import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -23,6 +23,7 @@ interface Props {
   packagesList: PackageItem[];
   clearSearch: () => void;
   perPage: number;
+  search: string;
 }
 
 export default function PackagesTable({
@@ -31,6 +32,7 @@ export default function PackagesTable({
   packagesList,
   clearSearch,
   perPage,
+  search,
 }: Props) {
   const classes = useStyles();
   const [prevLength, setPrev] = useState(perPage || 10);
@@ -73,7 +75,12 @@ export default function PackagesTable({
               </Tr>
             ))}
             <Hide hide={!isLoadingOrZeroCount}>
-              <EmptyPackageState clearSearch={clearSearch} />
+              <EmptyTableState
+                notFiltered={!search?.length}
+                clearFilters={clearSearch}
+                itemName='packages'
+                notFilteredBody='You may need to add repositories that contain packages.'
+              />
             </Hide>
           </Tbody>
         </Table>

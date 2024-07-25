@@ -11,7 +11,7 @@ jest.mock('middleware/AppContext', () => ({
 
 it('Render with notFiltered is set to "true"', () => {
   const item = 'custom repositories';
-  const body = 'To get started, create a custom repository';
+  const body = 'To get started, create a custom repository.';
   const { queryByText } = render(
     <ReactQueryTestWrapper>
       <EmptyTableState

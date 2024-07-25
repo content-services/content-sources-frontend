@@ -155,7 +155,7 @@ export const makeValidationSchema = () => {
 };
 
 export const maxUploadSize = 32000;
-// TODO: check this is working
+
 export const failedFileUpload = (
   files: FileRejection[],
   notify: (arg: NotificationPayload) => void,

@@ -25,7 +25,7 @@ export function SnapshotSelector() {
     isLoading,
     isFetching,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetSnapshotList(uuid as string, 1, 100, '', ''); // TODO: What do we do when a user has n+ snapshots?
+  } = useGetSnapshotList(uuid as string, 1, 100, ''); // TODO: What do we do when a user has n+ snapshots?
 
   const [dateMapper, uuidMapper] = useMemo(() => {
     const dateMap = {};

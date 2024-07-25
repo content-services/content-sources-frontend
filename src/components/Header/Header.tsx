@@ -21,6 +21,9 @@ const useStyles = createUseStyles({
     color: global_Color_100.value,
     paddingTop: '8px',
   },
+  remove100percent: {
+    height: 'unset',
+  },
 });
 
 interface Props {
@@ -34,7 +37,7 @@ export default function Header({ title, ouiaId, paragraph }: Props) {
 
   return (
     <PageHeader>
-      <PageHeaderTitle title={title} />
+      <PageHeaderTitle title={title} className={classes.remove100percent} />
       <Text className={classes.subtext} ouiaId={ouiaId}>
         {paragraph}
       </Text>

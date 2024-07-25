@@ -9,9 +9,11 @@ import {
   SnapshotForDate,
   SnapshotItem,
   ValidationResponse,
+  type PackageItem,
 } from 'services/Content/ContentApi';
 import { AdminTask } from 'services/AdminTasks/AdminTaskApi';
 import { TemplateItem } from 'services/Templates/TemplateApi';
+import type { IDSystemItem, SystemItem } from 'services/Systems/SystemsApi';
 
 const queryClient = new QueryClient({
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -309,4 +311,75 @@ export const defaultSnapshotForDateItem: SnapshotForDate = {
 
 export const defaultSnapshotsByDateResponse: SnapshotByDateResponse = {
   data: [defaultSnapshotForDateItem],
+};
+
+export const defaultSystemsListItem: SystemItem = {
+  attributes: {
+    display_name: '14867.host.example.com',
+    os: 'RHEL 9.3',
+    rhsm: '',
+    tags: [],
+    last_evaluation: null,
+    rhsa_count: 0,
+    rhba_count: 0,
+    rhea_count: 0,
+    other_count: 0,
+    packages_installed: 0,
+    baseline_name: '',
+    last_upload: '2024-07-22T14:43:58.803303Z',
+    stale_timestamp: '2024-07-14T02:10:37.142532Z',
+    stale_warning_timestamp: '2024-07-21T02:10:37.142532Z',
+    culled_timestamp: '2024-07-28T02:10:37.142532Z',
+    created: '2024-07-12T21:10:37.142509Z',
+    stale: true,
+    satellite_managed: false,
+    built_pkgcache: false,
+    packages_installable: 0,
+    packages_applicable: 0,
+    installable_rhsa_count: 0,
+    installable_rhba_count: 0,
+    installable_rhea_count: 0,
+    installable_other_count: 0,
+    applicable_rhsa_count: 0,
+    applicable_rhba_count: 0,
+    applicable_rhea_count: 0,
+    applicable_other_count: 0,
+    baseline_id: 0,
+    template_name: 'asdf',
+    template_uuid: '2bab9c0c-8518-48f8-bbe3-eb195547f3b6',
+    groups: [],
+    arch: 'x86_64',
+  },
+  id: 'edf803e4-caf3-48f4-b04e-db0eabe495df',
+  type: 'system',
+};
+
+export const defaultTemplateSystemsListItem: IDSystemItem = {
+  attributes: {
+    display_name: 'rhel9.jsherril-lap.example.com',
+    os: 'RHEL 9.3',
+    rhsm: '',
+    installable_rhsa_count: 0,
+    installable_rhba_count: 0,
+    installable_rhea_count: 0,
+    installable_other_count: 0,
+    applicable_rhsa_count: 0,
+    applicable_rhba_count: 0,
+    applicable_rhea_count: 0,
+    applicable_other_count: 0,
+    tags: [],
+    groups: [],
+    last_upload: '2024-07-22T14:41:51.626621Z',
+  },
+  inventory_id: 'c05cb55e-acdd-44c8-b3e3-e21f00e714ff',
+  type: 'system',
+};
+
+export const defaultPackageItem: PackageItem = {
+  name: 'banana-base-libs',
+  arch: 'x86_64',
+  version: '1.2.3',
+  release: '6.el9_fruit',
+  epoch: '0',
+  summary: 'Core libraries for 389 Banana Server',
 };

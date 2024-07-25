@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable unused-imports/no-unused-vars */
 import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -22,72 +20,74 @@ export default function TemplateDetailsTabs() {
 
   const [topTabKey, setTopTabKey] = useState<ContentTabType>(CONTENT_ROUTE);
   const [contentTabKey, setContentTabKey] = useState<ContentSubTabType>(PACKAGES_ROUTE);
-  const [systemsTabKey, setSystemsTabKey] = useState<string>('other');
+
+  //   TODO: Uncomment to use systems tabs
+  //   const [systemsTabKey, setSystemsTabKey] = useState<string>('other');
 
   useEffect(() => {
     const [topTabRoute, bottomTabRoute] = subpath?.split('/') || [];
 
     // Update tabs on route change
-    if (!!topTabRoute && !!bottomTabRoute) {
+    if (topTabRoute) {
       setTopTabKey(topTabRoute as ContentTabType);
       if (topTabRoute === CONTENT_ROUTE) {
-        setContentTabKey(bottomTabRoute as ContentSubTabType);
+        setContentTabKey((bottomTabRoute as ContentSubTabType) || PACKAGES_ROUTE);
       } else {
-        setSystemsTabKey(bottomTabRoute as string);
+        //   TODO: Uncomment to use systems tabs
+        // setSystemsTabKey(bottomTabRoute as string);
       }
     }
   }, [subpath]);
 
-  // TODO: Uncomment this for SYSTEMS support
   const navigateContentTab = (eventKey: string) => {
     if (eventKey === CONTENT_ROUTE) {
       navigate(`${baseRoute}/${eventKey}/${contentTabKey}`);
     } else {
-      navigate(`${baseRoute}/${eventKey}/${systemsTabKey}`);
+      //   TODO: Uncomment to use systems tabs
+      navigate(`${baseRoute}/${eventKey}`); // /${systemsTabKey}
     }
   };
-  // TODO: Uncomment this for SYSTEMS support
-  // <Tabs
-  //   activeKey={topTabKey}
-  //   onSelect={(_, eventKey) => navigateContentTab(eventKey as string)}
-  //   aria-label='Snapshot detail tabs'
-  // >
-  //   <Tab
-  //     eventKey={CONTENT_ROUTE}
-  //     ouiaId='content_tab'
-  //     title={<TabTitleText>Content</TabTitleText>}
-  //     aria-label='Template package detail tab'
-  //   >
+
   return (
     <Tabs
-      activeKey={contentTabKey}
-      onSelect={(_, eventKey) => navigate(`${baseRoute}/${topTabKey}/${eventKey}`)}
-      aria-label='Template details tab'
+      activeKey={topTabKey}
+      onSelect={(_, eventKey) => navigateContentTab(eventKey as string)}
+      aria-label='Snapshot detail tabs'
     >
       <Tab
-        eventKey={PACKAGES_ROUTE}
-        ouiaId='packages_tab'
-        title={<TabTitleText>Packages</TabTitleText>}
+        eventKey={CONTENT_ROUTE}
+        ouiaId='content_tab'
+        title={<TabTitleText>Content</TabTitleText>}
         aria-label='Template package detail tab'
-      />
-      <Tab
-        eventKey={ADVISORIES_ROUTE}
-        ouiaId='advisories_tab'
-        title={<TabTitleText>Advisories</TabTitleText>}
-        aria-label='Template advisories detail tab'
-      />
-    </Tabs>
-  );
-  {
-    // TODO: Uncomment this for SYSTEMS support
-    /* </Tab>
+      >
+        <Tabs
+          activeKey={contentTabKey}
+          onSelect={(_, eventKey) => navigate(`${baseRoute}/${topTabKey}/${eventKey}`)}
+          aria-label='Template details tab'
+        >
+          <Tab
+            eventKey={PACKAGES_ROUTE}
+            ouiaId='packages_tab'
+            title={<TabTitleText>Packages</TabTitleText>}
+            aria-label='Template package detail tab'
+          />
+          <Tab
+            eventKey={ADVISORIES_ROUTE}
+            ouiaId='advisories_tab'
+            title={<TabTitleText>Advisories</TabTitleText>}
+            aria-label='Template advisories detail tab'
+          />
+        </Tabs>
+      </Tab>
       <Tab
         eventKey={SYSTEMS_ROUTE}
         ouiaId='systems_tab'
         title={<TabTitleText>Systems</TabTitleText>}
         aria-label='Template systems detail tab'
       >
-        <Tabs
+        {
+          //   TODO: Uncomment to use systems tabs
+          /* <Tabs
           activeKey={systemsTabKey}
           onSelect={(_, eventKey) => navigate(`${baseRoute}/${topTabKey}/${eventKey}`)}
           aria-label='Template details tab'
@@ -104,8 +104,9 @@ export default function TemplateDetailsTabs() {
             title={<TabTitleText>Thing</TabTitleText>}
             aria-label='Template thing detail tab'
           />
-        </Tabs>
+        </Tabs> */
+        }
       </Tab>
-    </Tabs> */
-  }
+    </Tabs>
+  );
 }

@@ -4,13 +4,10 @@ import {
   FlexItem,
   Grid,
   InputGroup,
-  InputGroupItem,
-  InputGroupText,
   Modal,
   ModalVariant,
   Pagination,
   PaginationVariant,
-  TextInput,
 } from '@patternfly/react-core';
 import {
   InnerScrollContainer,
@@ -30,12 +27,9 @@ import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from 'components/Hide/Hide';
 import { ContentOrigin, SnapshotItem } from 'services/Content/ContentApi';
 import { useFetchContent, useGetSnapshotList } from 'services/Content/ContentQueries';
-import useDebounce from 'Hooks/useDebounce';
 import { useNavigate, useParams } from 'react-router-dom';
 import useRootPath from 'Hooks/useRootPath';
-import EmptyPackageState from '../PackageModal/components/EmptyPackageState';
 import ChangedArrows from './components/ChangedArrows';
-import { SearchIcon } from '@patternfly/react-icons';
 import { useAppContext } from 'middleware/AppContext';
 import RepoConfig from './components/RepoConfig';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
@@ -76,7 +70,6 @@ export default function SnapshotListModal() {
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('desc');
 
@@ -89,18 +82,16 @@ export default function SnapshotListModal() {
     [activeSortIndex, activeSortDirection],
   );
 
-  const debouncedSearchQuery = useDebounce(searchQuery);
-
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearchQuery, sortString]);
+  }, [sortString]);
 
   const {
     isLoading,
     isFetching,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetSnapshotList(uuid as string, page, perPage, debouncedSearchQuery, sortString);
+  } = useGetSnapshotList(uuid as string, page, perPage, sortString);
 
   const { data: contentData } = useFetchContent([uuid]);
 
@@ -176,19 +167,7 @@ export default function SnapshotListModal() {
       <InnerScrollContainer>
         <Grid className={classes.mainContainer}>
           <InputGroup className={classes.topContainer}>
-            <InputGroupItem>
-              <TextInput
-                id='search'
-                type='text'
-                ouiaId='name_search'
-                placeholder='Search snapshot'
-                value={searchQuery}
-                onChange={(_, value) => setSearchQuery(value)}
-              />
-              <InputGroupText id='search-icon'>
-                <SearchIcon />
-              </InputGroupText>
-            </InputGroupItem>
+            <Grid />
             <Hide hide={loadingOrZeroCount}>
               <Pagination
                 id='top-pagination-id'
@@ -283,9 +262,6 @@ export default function SnapshotListModal() {
                     </Tr>
                   ),
                 )}
-                <Hide hide={!loadingOrZeroCount}>
-                  <EmptyPackageState clearSearch={() => setSearchQuery('')} />
-                </Hide>
               </Tbody>
             </Table>
           </Hide>

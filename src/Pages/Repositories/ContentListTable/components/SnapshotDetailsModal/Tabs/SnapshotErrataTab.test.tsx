@@ -16,15 +16,11 @@ const errataItem: ErrataItem = {
   reboot_suggested: false,
 };
 
-jest.mock('Hooks/useDebounce', () => (value) => value);
-
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
 jest.mock('services/Content/ContentQueries', () => ({
   useGetSnapshotErrataQuery: jest.fn(),
 }));
-
-jest.mock('Hooks/useDebounce', () => (value) => value);
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),

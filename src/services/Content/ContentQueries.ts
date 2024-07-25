@@ -535,17 +535,11 @@ export const useFetchGpgKey = () => {
   return { fetchGpgKey, isLoading };
 };
 
-export const useGetSnapshotList = (
-  uuid: string,
-  page: number,
-  limit: number,
-  searchQuery: string,
-  sortBy: string,
-) => {
+export const useGetSnapshotList = (uuid: string, page: number, limit: number, sortBy: string) => {
   const errorNotifier = useErrorNotification();
   return useQuery<SnapshotListResponse>(
-    [LIST_SNAPSHOTS_KEY, uuid, page, limit, searchQuery, sortBy],
-    () => getSnapshotList(uuid, page, limit, searchQuery, sortBy),
+    [LIST_SNAPSHOTS_KEY, uuid, page, limit, sortBy],
+    () => getSnapshotList(uuid, page, limit, sortBy),
     {
       keepPreviousData: true,
       optimisticResults: true,

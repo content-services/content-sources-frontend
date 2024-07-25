@@ -11,7 +11,7 @@ import { createStore, restoreStore } from './store';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false, // TODO: Have a conversation about this
+      refetchOnWindowFocus: false,
     },
   },
 });

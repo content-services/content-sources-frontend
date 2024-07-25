@@ -153,7 +153,7 @@ export const useTemplateList = (
 export const useCreateTemplateQuery = (queryClient: QueryClient, request: TemplateRequest) => {
   const errorNotifier = useErrorNotification();
   const { notify } = useNotification();
-  return useMutation(() => createTemplate(request), {
+  return useMutation<TemplateItem>(() => createTemplate(request), {
     onSuccess: () => {
       notify({
         variant: AlertVariant.success,

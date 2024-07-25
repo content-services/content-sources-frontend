@@ -16,5 +16,6 @@ it('expect TemplateDetailsTabs to render all tabs, and have Advisories selected'
   const { queryByText } = render(<TemplateDetailsTabs />);
   expect(queryByText('Packages')).toBeInTheDocument();
   expect(queryByText('Advisories')).toBeInTheDocument();
+  expect(queryByText('Systems')).toBeInTheDocument();
   expect(queryByText('Advisories')!.closest('button')).toHaveAttribute('aria-selected', 'true');
 });
