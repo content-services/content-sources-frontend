@@ -22,7 +22,7 @@ import useRootPath from 'Hooks/useRootPath';
 import { PATCH_SYSTEMS_ROUTE } from 'Routes/constants';
 import Hide from 'components/Hide/Hide';
 import dayjs from 'dayjs';
-import Groups from './Components/Groups';
+import Workspace from './Components/Workspace';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 
 const useStyles = createUseStyles({
@@ -87,7 +87,7 @@ export default function SystemsTable({
     { width: 25, title: 'Name' },
     { title: 'Tags' },
     { title: 'OS' },
-    { title: 'Groups' },
+    { title: 'Workspace' },
     { width: 15, title: 'Installable advisories' },
     { width: 15, title: 'Applicable advisories' },
     { title: 'Last seen' },
@@ -191,7 +191,7 @@ export default function SystemsTable({
                     </Td>
                     <Td>{os}</Td>
                     <Td className={groups.length ? '' : classes.forceDisabled}>
-                      <Groups groups={groups} />
+                      <Workspace workspace={groups} />
                     </Td>
                     <Td className={installable ? '' : classes.forceDisabled}>{installable}</Td>
                     <Td className={applicable ? '' : classes.forceDisabled}>{applicable}</Td>

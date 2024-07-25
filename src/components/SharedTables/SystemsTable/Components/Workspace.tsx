@@ -13,17 +13,17 @@ const useStyles = createUseStyles({
 });
 
 interface Props {
-  groups: SystemGroup[];
+  workspace: SystemGroup[];
 }
 
-export default function Groups({ groups }: Props) {
+export default function Workspace({ workspace }: Props) {
   // we use a .slice to remove the first item in the string a "/" in this case so that the base route is used
   const basePath = useRootPath().slice(1).replace('content', '');
 
   const classes = useStyles();
-  // Only show the first group if there is one for now
-  if (!groups.length) return <Text className={classes.forceDisabled}>No groups</Text>;
-  const { id, name } = groups[0];
+  // Only show the first workspace if there is one for now
+  if (!workspace.length) return <Text className={classes.forceDisabled}>No workspace</Text>;
+  const { id, name } = workspace[0];
   return (
     <Button
       isInline
