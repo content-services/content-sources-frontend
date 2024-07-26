@@ -11,12 +11,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { useParams } from 'react-router-dom';
 import AdvisoriesTable from 'components/SharedTables/AdvisoriesTable';
-import { useQueryClient } from 'react-query';
-import {
-  FETCH_TEMPLATE_KEY,
-  useFetchTemplateErrataQuery,
-} from 'services/Templates/TemplateQueries';
-import type { TemplateItem } from 'services/Templates/TemplateApi';
+import { useFetchTemplateErrataQuery } from 'services/Templates/TemplateQueries';
 import type { ThProps } from '@patternfly/react-table';
 import SnapshotErrataFilters from 'Pages/Repositories/ContentListTable/components/SnapshotDetailsModal/Tabs/SnapshotErrataFilters';
 import Loader from 'components/Loader';
@@ -51,7 +46,6 @@ const defaultFilterState = { search: '', type: [] as string[], severity: [] as s
 
 export default function TemplateErrataTab() {
   const classes = useStyles();
-  const queryClient = useQueryClient();
   const { templateUUID: uuid } = useParams();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
@@ -59,10 +53,6 @@ export default function TemplateErrataTab() {
   const [filterData, setFilterData] = useState(defaultFilterState);
   const [activeSortIndex, setActiveSortIndex] = useState<number>(-1);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
-
-  const templatesData = queryClient.getQueryData<TemplateItem>([FETCH_TEMPLATE_KEY, uuid]);
-
-  const hasTemplatesData = !!templatesData;
 
   const hasFilters = useMemo(
     () => !!(filterData.search || filterData.severity.length || filterData.type.length),
@@ -129,7 +119,7 @@ export default function TemplateErrataTab() {
     columnIndex,
   });
 
-  if (!hasTemplatesData || isLoading) {
+  if (isLoading) {
     return <Loader />;
   }
 
@@ -159,6 +149,7 @@ export default function TemplateErrataTab() {
         />
       </InputGroup>
       <AdvisoriesTable
+        hasFilters={hasFilters}
         errataList={errataList}
         isFetchingOrLoading={fetchingOrLoading}
         isLoadingOrZeroCount={loadingOrZeroCount}

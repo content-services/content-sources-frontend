@@ -9,6 +9,7 @@ import {
   SnapshotForDate,
   SnapshotItem,
   ValidationResponse,
+  type ErrataItem,
   type PackageItem,
 } from 'services/Content/ContentApi';
 import { AdminTask } from 'services/AdminTasks/AdminTaskApi';
@@ -382,4 +383,20 @@ export const defaultPackageItem: PackageItem = {
   release: '6.el9_fruit',
   epoch: '0',
   summary: 'Core libraries for 389 Banana Server',
+};
+
+export const defaultErrataItem: ErrataItem = {
+  id: '0190a44a-fcd3-7aa1-a280-033399516ead',
+  errata_id: 'RHSA-2024:4502',
+  title: 'Important: skopeo security update',
+  summary:
+    'An update for skopeo is now available for Red Hat Enterprise Linux 9.\n\nRed Hat Product Security has rated this update as having a security impact of Important. A Common Vulnerability Scoring System (CVSS) base score, which gives a detailed severity rating, is available for each vulnerability from the CVE link(s) in the References section.',
+  description:
+    'The skopeo command lets you inspect images from container image registries, get images and image layers, and use signatures to create and verify files. \n\nSecurity Fix(es):\n\n* golang-fips/openssl: Memory leaks in code encrypting and decrypting RSA payloads (CVE-2024-1394)\n\nFor more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.',
+  issued_date: '2024-07-11 11:34:56',
+  updated_date: '2024-07-11 11:34:56',
+  type: 'security',
+  severity: 'Important',
+  reboot_suggested: false,
+  cves: ['CVE-2024-1394'],
 };

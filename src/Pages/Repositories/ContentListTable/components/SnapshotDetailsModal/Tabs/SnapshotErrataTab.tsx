@@ -64,6 +64,11 @@ export function SnapshotErrataTab() {
   const [activeSortIndex, setActiveSortIndex] = useState<number>(-1);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
+  const hasFilters = useMemo(
+    () => !!(filterData.search || filterData.severity.length || filterData.type.length),
+    [filterData],
+  );
+
   useEffect(() => {
     setPage(1);
   }, [filterData]);
@@ -153,6 +158,7 @@ export function SnapshotErrataTab() {
         />
       </InputGroup>
       <AdvisoriesTable
+        hasFilters={hasFilters}
         errataList={errataList}
         isFetchingOrLoading={fetchingOrLoading}
         isLoadingOrZeroCount={loadingOrZeroCount}

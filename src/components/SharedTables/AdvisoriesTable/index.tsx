@@ -10,7 +10,6 @@ import {
   Thead,
   Tr,
 } from '@patternfly/react-table';
-import EmptyPackageState from '../../../Pages/Repositories/ContentListTable/components/PackageModal/components/EmptyPackageState';
 import { ErrataItem } from 'services/Content/ContentApi';
 import Hide from '../../Hide/Hide';
 import { Flex, FlexItem, Grid, Stack, Text } from '@patternfly/react-core';
@@ -29,6 +28,7 @@ import { formatDateDDMMMYYYY, formatDescription, reduceStringToCharsWithEllipsis
 import ErrataTypeIcon from '../../ErrataTypeIcon/ErrataTypeIcon';
 import SeverityWithIcon from '../../SeverityWithIcon/SeverityWithIcon';
 import UrlWithExternalIcon from '../../UrlWithLinkIcon/UrlWithLinkIcon';
+import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 
 const red = global_danger_color_200.value;
 const green = global_success_color_200.value;
@@ -56,6 +56,7 @@ interface Props {
   clearSearch: () => void;
   perPage: number;
   sortParams: (columnIndex: number) => ThProps['sort'];
+  hasFilters: boolean;
 }
 
 export default function AdvisoriesTable({
@@ -65,6 +66,7 @@ export default function AdvisoriesTable({
   clearSearch,
   perPage,
   sortParams,
+  hasFilters,
 }: Props) {
   const classes = useStyles();
   const [prevLength, setPrev] = useState(perPage || 10);
@@ -216,7 +218,12 @@ export default function AdvisoriesTable({
               ),
             )}
             <Hide hide={!isLoadingOrZeroCount}>
-              <EmptyPackageState clearSearch={clearSearch} />
+              <EmptyTableState
+                notFiltered={!hasFilters}
+                clearFilters={clearSearch}
+                itemName='advisories'
+                notFilteredBody='You may need to add repositories that contain advisories.'
+              />
             </Hide>
           </Tbody>
         </Table>

@@ -169,6 +169,7 @@ export interface ErrataItem {
   type: string;
   severity: string;
   reboot_suggested: boolean;
+  cves: string[];
 }
 
 export type PackagesResponse = {
