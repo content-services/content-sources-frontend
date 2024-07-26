@@ -2,12 +2,13 @@ import * as React from 'react';
 import styles from '@patternfly/react-styles/css/components/MultipleFileUpload/multiple-file-upload';
 import { css } from '@patternfly/react-styles';
 import FileIcon from '@patternfly/react-icons/dist/esm/icons/file-icon';
-import { Button, Progress } from '@patternfly/react-core';
+import { Button, Flex, Progress } from '@patternfly/react-core';
 import { reduceStringToCharsWithEllipsis } from 'helpers';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { createUseStyles } from 'react-jss';
 import { global_danger_color_100 } from '@patternfly/react-tokens';
 import { TimesIcon } from '@patternfly/react-icons';
+import Hide from 'components/Hide/Hide';
 
 const useStyles = createUseStyles({
   statusMinWidth: {
@@ -21,6 +22,9 @@ const useStyles = createUseStyles({
     '& .pf-v5-c-progress__helper-text': {
       color: global_danger_color_100.value,
     },
+  },
+  noPadding: {
+    padding: 0,
   },
 });
 
@@ -40,9 +44,11 @@ export interface MultipleFileUploadStatusItemProps extends React.HTMLProps<HTMLL
   progressAriaLiveMessage?: string | ((loadPercentage: number) => string);
   progressId?: string;
   progressHelperText?: React.ReactNode;
+  retry?: () => void;
 }
 
 export default function UploadStatusItem({
+  retry,
   className,
   fileIcon,
   onClearClick = () => {},
@@ -111,7 +117,7 @@ export default function UploadStatusItem({
         />
       </div>
 
-      <div className={styles.multipleFileUploadStatusItemClose}>
+      <Flex direction={{ default: 'column' }} className={styles.multipleFileUploadStatusItemClose}>
         <Button
           isDisabled={deleteButtonDisabled}
           variant='plain'
@@ -121,7 +127,12 @@ export default function UploadStatusItem({
         >
           <TimesIcon />
         </Button>
-      </div>
+        <Hide hide={!retry || progressVariant !== 'danger'}>
+          <Button className={classes.noPadding} variant='link' onClick={retry}>
+            Retry
+          </Button>
+        </Hide>
+      </Flex>
     </li>
   );
 }
