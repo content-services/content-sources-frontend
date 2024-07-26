@@ -26,12 +26,16 @@ const useStyles = createUseStyles({
     minHeight: '103px',
   },
   innerScrollerMaxHeight: {
-    maxHeight: 'calc(80vh - 185px);;',
+    maxHeight: 'calc(80vh - 232px);;',
+  },
+  containerPadding: {
+    padding: '16px',
   },
 });
 
 // TODO: Remove mock fail values
-const CHANCE_OF_FAILURE = 0.8;
+const CHANCE_OF_SUCCESS = 0.9;
+const CHANCE_OF_HASHING_SUCCESS = 0.95;
 
 export default function FileUploader() {
   const classes = useStyles();
@@ -47,6 +51,7 @@ export default function FileUploader() {
       Object.values(currentFiles).length,
       // completedCount
       Object.values(currentFiles).filter(({ completed }) => completed).length,
+      // failedCount
       Object.values(currentFiles).filter(({ failed }) => failed).length,
     ],
     [currentFiles],
@@ -64,6 +69,7 @@ export default function FileUploader() {
 
   const updateItem = async (name: string) => {
     setIsBatching(true);
+
     if (currentFiles[name]) {
       const targetIndexes = new Set(
         currentFiles[name].chunks
@@ -88,7 +94,7 @@ export default function FileUploader() {
                 currentFiles[name].completed = true;
               }
               setCurrentFiles((prev) => ({ ...prev, [name]: currentFiles[name] }));
-            }, CHANCE_OF_FAILURE).catch(() => {
+            }, CHANCE_OF_SUCCESS).catch(() => {
               currentFiles[name].chunks[targetIndex].retryCount += 1;
               if (currentFiles[name].chunks[targetIndex].retryCount > MAX_RETRY_COUNT) {
                 return `Failed to upload chunk: ${start} to ${end}`;
@@ -98,6 +104,7 @@ export default function FileUploader() {
             });
           }),
         );
+
         const failedMessage = result.find((val) => val);
         if (failedMessage) {
           currentFiles[name].error = failedMessage;
@@ -109,6 +116,19 @@ export default function FileUploader() {
       }
     }
     setIsBatching(false);
+  };
+
+  const retryItem = (name: string) => {
+    if (!currentFiles[name]) return;
+    currentFiles[name].error = '';
+    currentFiles[name].failed = false;
+    currentFiles[name].chunks = currentFiles[name].chunks.map((chunk) => ({
+      ...chunk,
+      retryCount: 0,
+      // If Chunk is not completed, we know that it failed, so we want to reset it to be requeued
+      queued: chunk.completed,
+    }));
+    setCurrentFiles((prev) => ({ ...prev, [name]: currentFiles[name] }));
   };
 
   useEffect(() => {
@@ -147,15 +167,15 @@ export default function FileUploader() {
     let error: string;
 
     try {
-      checksum = await getFileChecksumSHA256(file);
-      if (Math.random() > CHANCE_OF_FAILURE)
+      if (Math.random() > CHANCE_OF_HASHING_SUCCESS)
         throw Error(
           `Bro ipsum dolor sit amet gaper backside single track, manny Bike epic clipless. 
-          Schraeder drop gondy, rail fatty slash gear jammer steeps clipless rip bowl couloir bomb hole berm. 
-          Huck cruiser crank endo, sucker hole piste ripping ACL huck greasy flow face plant pinner. 
-          Japan air Skate park big ring trucks shuttle stoked rock-ectomy.
-          `,
+              Schraeder drop gondy, rail fatty slash gear jammer steeps clipless rip bowl couloir bomb hole berm. 
+              Huck cruiser crank endo, sucker hole piste ripping ACL huck greasy flow face plant pinner. 
+              Japan air Skate park big ring trucks shuttle stoked rock-ectomy.
+              `,
         );
+      checksum = await getFileChecksumSHA256(file);
     } catch (err) {
       error = 'Failed checksum validation: ' + (err as Error).message;
     }
@@ -210,7 +230,7 @@ export default function FileUploader() {
         return {
           titleIcon: <StatusIcon status='failed' removeText />,
           titleText: `${failedCount} of ${fileCount} files failed to uploaded`,
-          infoText: 'Review and remove all failed items before continuing.',
+          infoText: 'Retry, re-upload, or remove the failed items below before continuing.',
         };
       default:
         return {
@@ -224,55 +244,55 @@ export default function FileUploader() {
   const actionOngoing = uploadMainProps.isUploadButtonHidden;
 
   return (
-    <>
-      <MultipleFileUpload
-        onFileDrop={handleFileDrop}
-        dropzoneProps={{
-          disabled: actionOngoing,
-          maxSize: 16242783756,
-          accept: {
-            'application/x-rpm': ['.rpm'],
-          },
-        }}
-        isHorizontal
-      >
-        <MultipleFileUploadMain className={classes.mainDropzone} {...uploadMainProps} />
-        {fileCountGreaterThanZero && (
-          <MultipleFileUploadStatus
-            statusToggleText={`${completedCount} of ${fileCount} files will be uploaded${failedCount ? `, ${failedCount} failed` : ''}`}
-            statusToggleIcon={statusIcon}
-          >
-            <InnerScrollContainer className={classes.innerScrollerMaxHeight}>
-              {Object.values(currentFiles).map(({ chunks, error, file, failed }) => {
-                const completedChunks = chunks.filter(({ completed }) => completed).length;
-                const progressValue = Math.round((completedChunks / chunks.length) * 100);
+    <MultipleFileUpload
+      onFileDrop={handleFileDrop}
+      className={classes.containerPadding}
+      dropzoneProps={{
+        disabled: actionOngoing,
+        maxSize: 16242783756,
+        accept: {
+          'application/x-rpm': ['.rpm'],
+        },
+      }}
+      isHorizontal
+    >
+      <MultipleFileUploadMain className={classes.mainDropzone} {...uploadMainProps} />
+      {fileCountGreaterThanZero && (
+        <MultipleFileUploadStatus
+          statusToggleText={`${completedCount} of ${fileCount} files will be uploaded${failedCount ? `, ${failedCount} failed` : ''}`}
+          statusToggleIcon={statusIcon}
+        >
+          <InnerScrollContainer className={classes.innerScrollerMaxHeight}>
+            {Object.values(currentFiles).map(({ checksum, chunks, error, file, failed }) => {
+              const completedChunks = chunks.filter(({ completed }) => completed).length;
+              const progressValue = Math.round((completedChunks / chunks.length) * 100);
 
-                return (
-                  <UploadStatusItem
-                    fileSize={file.size}
-                    key={file.name}
-                    fileName={file.name}
-                    progressVariant={(() => {
-                      switch (true) {
-                        case failed:
-                          return 'danger';
-                        case progressValue >= 100:
-                          return 'success';
-                        default:
-                          break;
-                      }
-                    })()}
-                    progressHelperText={error}
-                    progressValue={progressValue}
-                    deleteButtonDisabled={!failed && progressValue < 100 && progressValue > 0}
-                    onClearClick={() => removeItem(file.name)}
-                  />
-                );
-              })}
-            </InnerScrollContainer>
-          </MultipleFileUploadStatus>
-        )}
-      </MultipleFileUpload>
-    </>
+              return (
+                <UploadStatusItem
+                  fileSize={file.size}
+                  key={file.name}
+                  fileName={file.name}
+                  progressVariant={(() => {
+                    switch (true) {
+                      case failed:
+                        return 'danger';
+                      case progressValue >= 100:
+                        return 'success';
+                      default:
+                        break;
+                    }
+                  })()}
+                  retry={checksum ? () => retryItem(file.name) : undefined}
+                  progressHelperText={error}
+                  progressValue={progressValue}
+                  deleteButtonDisabled={!failed && progressValue < 100 && progressValue > 0}
+                  onClearClick={() => removeItem(file.name)}
+                />
+              );
+            })}
+          </InnerScrollContainer>
+        </MultipleFileUploadStatus>
+      )}
+    </MultipleFileUpload>
   );
 }
