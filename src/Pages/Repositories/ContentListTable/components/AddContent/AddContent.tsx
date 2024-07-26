@@ -58,6 +58,7 @@ import useRootPath from 'Hooks/useRootPath';
 import { useAppContext } from 'middleware/AppContext';
 import CustomHelperText from 'components/CustomHelperText/CustomHelperText';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
+import { REPOSITORIES_ROUTE } from 'Routes/constants';
 
 const useStyles = createUseStyles({
   description: {
@@ -219,7 +220,7 @@ const AddContent = () => {
     return { distributionArches, distributionVersions };
   }, [distArches, distVersions]);
 
-  const onClose = () => navigate(rootPath);
+  const onClose = () => navigate(`${rootPath}/${REPOSITORIES_ROUTE}`);
 
   const { mutateAsync: addContent, isLoading: isAdding } = useAddContentQuery(
     queryClient,

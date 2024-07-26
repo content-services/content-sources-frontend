@@ -61,7 +61,7 @@ const AddTemplateBase = () => {
   }, []);
 
   const { queryClient } = useAddTemplateContext();
-  const onClose = () => navigate(rootPath + '/' + TEMPLATES_ROUTE);
+  const onClose = () => navigate(`${rootPath}/${TEMPLATES_ROUTE}`);
 
   const { mutateAsync: addTemplate, isLoading: isAdding } = useCreateTemplateQuery(queryClient, {
     ...(templateRequest as TemplateRequest),

@@ -25,6 +25,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import useRootPath from 'Hooks/useRootPath';
 import { useAppContext } from 'middleware/AppContext';
 import PackagesTable from 'components/SharedTables/PackagesTable';
+import { REPOSITORIES_ROUTE } from 'Routes/constants';
 
 const useStyles = createUseStyles({
   description: {
@@ -91,7 +92,10 @@ export default function PackageModal() {
   };
 
   const onClose = () =>
-    navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
+    navigate(
+      `${rootPath}/${REPOSITORIES_ROUTE}` +
+        (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''),
+    );
 
   const {
     data: packagesList = [],

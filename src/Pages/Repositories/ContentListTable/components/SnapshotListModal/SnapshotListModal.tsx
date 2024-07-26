@@ -136,7 +136,10 @@ export default function SnapshotListModal() {
   };
 
   const onClose = () =>
-    navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
+    navigate(
+      `${rootPath}/${REPOSITORIES_ROUTE}` +
+        (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''),
+    );
 
   const {
     data: snapshotsList = [],

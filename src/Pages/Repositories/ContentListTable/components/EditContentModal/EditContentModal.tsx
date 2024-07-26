@@ -26,6 +26,7 @@ import { isEqual } from 'lodash';
 import { mapToContentItemsToEditContentRequest } from './helpers';
 import { useContentListOutletContext } from '../../ContentListTable';
 import useRootPath from 'Hooks/useRootPath';
+import { REPOSITORIES_ROUTE } from 'Routes/constants';
 
 const useStyles = createUseStyles({
   description: {
@@ -57,7 +58,7 @@ const EditContentModal = () => {
     updatedValues,
   );
 
-  const onClose = () => navigate(rootPath);
+  const onClose = () => navigate(`${rootPath}/${REPOSITORIES_ROUTE}`);
   const onSave = async () =>
     editContent().then(() => {
       onClose();
