@@ -229,9 +229,9 @@ const ContentListTable = () => {
 
   const triggerIntrospectionAndSnapshot = async (repoUuid: string): Promise<void> => {
     clearCheckedRepositories();
-    await introspectRepoForUuid(repoUuid)
+    await introspectRepoForUuid(repoUuid);
     await triggerSnapshot(repoUuid);
-  }
+  };
 
   // Other update actions will be added to this later.
   const actionTakingPlace =
@@ -319,13 +319,8 @@ const ContentListTable = () => {
             ...(features?.snapshots?.accessible
               ? [
                   {
-                    isDisabled:
-                      actionTakingPlace ||
-                      !rowData.last_snapshot_uuid,
-                    title:
-                      rowData.last_snapshot_uuid
-                        ? 'View all snapshots'
-                        : 'No snapshots yet',
+                    isDisabled: actionTakingPlace || !rowData.last_snapshot_uuid,
+                    title: rowData.last_snapshot_uuid ? 'View all snapshots' : 'No snapshots yet',
                     onClick: () => {
                       navigate(`${rowData.uuid}/snapshots`);
                     },
@@ -340,7 +335,7 @@ const ContentListTable = () => {
                       actionTakingPlace || rowData?.status === 'Pending' || !rowData.snapshot,
                     title: 'Trigger snapshot',
                     onClick: () => {
-                        triggerIntrospectionAndSnapshot(rowData?.uuid);
+                      triggerIntrospectionAndSnapshot(rowData?.uuid);
                     },
                     tooltipProps: !rowData.snapshot
                       ? {
