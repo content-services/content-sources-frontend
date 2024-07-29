@@ -236,8 +236,8 @@ export default function DeleteContentModal() {
                           <ExpandableSection
                             isExpanded={expandState[index]}
                             isDetached
-                            toggleId='detached-expandable-section-toggle'
-                            contentId='detached-expandable-section-content'
+                            toggleId={expandState[index] ? 'detached-expandable-section-toggle-open' : 'detached-expandable-section-toggle'}
+                            contentId={expandState[index] ? 'detached-expandable-section-content-open' : 'detached-expandable-section-content'}
                             className={classes.expandableSectionMargin}
                           >
                             {templatesWithRepos
@@ -264,8 +264,8 @@ export default function DeleteContentModal() {
                             onToggle={() =>
                                 setExpandState((prev) => ({ ...prev, [index]: !prev[index] }))
                                 }
-                            toggleId='detached-expandable-section-toggle'
-                            contentId='detached-expandable-section-content'
+                            toggleId={expandState[index] ? 'detached-expandable-section-toggle-open' : 'detached-expandable-section-toggle'}
+                            contentId={expandState[index] ? 'detached-expandable-section-content-open' : 'detached-expandable-section-content'}
                             direction='up'
                           >
                             {expandState[index]

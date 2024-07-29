@@ -562,7 +562,8 @@ const PopularRepositoriesTable = () => {
             <Thead>
               <Tr>
                 <Hide hide={!rbac?.repoWrite}>
-                  <Th screenReaderText='empty'
+                  <Th
+                    aria-label='popular repositories selection column'
                     className={classes.checkboxMinWidth}
                     select={{
                       onSelect: selectAllRepos,
