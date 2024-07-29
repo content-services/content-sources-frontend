@@ -310,7 +310,7 @@ export default function AddSystemModal() {
                       navigate(`${rootPath.replace('content', '')}${PATCH_SYSTEMS_ROUTE}`)
                     }
                   >
-                    Register a Rhel {version} system
+                    Register a RHEL {version} system
                   </Button>
                 }
               />
