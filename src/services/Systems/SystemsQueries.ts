@@ -109,7 +109,7 @@ export const useDeleteTemplateFromSystems = (queryClient: QueryClient) => {
         'Unable to delete the given repository.',
         'An error occurred',
         err,
-        'delete-popular-repository-error',
+        'remove-template-from-system-error',
       );
     },
   });
