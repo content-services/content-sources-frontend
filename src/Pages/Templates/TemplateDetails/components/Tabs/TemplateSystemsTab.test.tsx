@@ -97,5 +97,5 @@ it('expect TemplateSystemsTab to render blank state', async () => {
   const { queryByText } = render(<TemplateSystemsTab />);
 
   expect(queryByText('No associated systems')).toBeInTheDocument();
-  expect(queryByText('To get started, add a system to this template.')).toBeInTheDocument();
+  expect(queryByText('To get started, add this template to a system.')).toBeInTheDocument();
 });

@@ -254,7 +254,7 @@ export default function TemplateSystemsTab() {
             notFiltered={!debouncedSearchQuery}
             clearFilters={() => setSearchQuery('')}
             itemName='associated systems'
-            notFilteredBody='To get started, add a system to this template.'
+            notFilteredBody='To get started, add this template to a system.'
             notFilteredButton={
               <ConditionalTooltip
                 content='You do not have the required permissions to perform this action.'

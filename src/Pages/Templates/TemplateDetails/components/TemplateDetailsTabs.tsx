@@ -21,9 +21,6 @@ export default function TemplateDetailsTabs() {
   const [topTabKey, setTopTabKey] = useState<ContentTabType>(CONTENT_ROUTE);
   const [contentTabKey, setContentTabKey] = useState<ContentSubTabType>(PACKAGES_ROUTE);
 
-  //   TODO: Uncomment to use systems tabs
-  //   const [systemsTabKey, setSystemsTabKey] = useState<string>('other');
-
   useEffect(() => {
     const [topTabRoute, bottomTabRoute] = subpath?.split('/') || [];
 
@@ -32,9 +29,6 @@ export default function TemplateDetailsTabs() {
       setTopTabKey(topTabRoute as ContentTabType);
       if (topTabRoute === CONTENT_ROUTE) {
         setContentTabKey((bottomTabRoute as ContentSubTabType) || PACKAGES_ROUTE);
-      } else {
-        //   TODO: Uncomment to use systems tabs
-        // setSystemsTabKey(bottomTabRoute as string);
       }
     }
   }, [subpath]);
@@ -43,8 +37,7 @@ export default function TemplateDetailsTabs() {
     if (eventKey === CONTENT_ROUTE) {
       navigate(`${baseRoute}/${eventKey}/${contentTabKey}`);
     } else {
-      //   TODO: Uncomment to use systems tabs
-      navigate(`${baseRoute}/${eventKey}`); // /${systemsTabKey}
+      navigate(`${baseRoute}/${eventKey}`);
     }
   };
 
@@ -84,29 +77,7 @@ export default function TemplateDetailsTabs() {
         ouiaId='systems_tab'
         title={<TabTitleText>Systems</TabTitleText>}
         aria-label='Template systems detail tab'
-      >
-        {
-          //   TODO: Uncomment to use systems tabs
-          /* <Tabs
-          activeKey={systemsTabKey}
-          onSelect={(_, eventKey) => navigate(`${baseRoute}/${topTabKey}/${eventKey}`)}
-          aria-label='Template details tab'
-        >
-          <Tab
-            eventKey='other'
-            ouiaId='other_tab'
-            title={<TabTitleText>Other</TabTitleText>}
-            aria-label='Template other detail tab'
-          />
-          <Tab
-            eventKey='thing'
-            ouiaId='thing_tab'
-            title={<TabTitleText>Thing</TabTitleText>}
-            aria-label='Template thing detail tab'
-          />
-        </Tabs> */
-        }
-      </Tab>
+      />
     </Tabs>
   );
 }
