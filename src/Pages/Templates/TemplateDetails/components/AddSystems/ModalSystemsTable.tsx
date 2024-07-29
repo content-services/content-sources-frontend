@@ -133,7 +133,6 @@ export default function ModalSystemsTable({
                       isInline
                       variant='link'
                       component='a'
-                      target='_blank'
                       href={`${basePath}${PATCH_SYSTEMS_ROUTE}${id}`}
                     >
                       {reduceStringToCharsWithEllipsis(display_name)}
