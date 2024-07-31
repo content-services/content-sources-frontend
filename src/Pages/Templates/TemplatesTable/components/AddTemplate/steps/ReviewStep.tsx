@@ -35,7 +35,9 @@ export default function ReviewStep() {
         'Custom Repositories': selectedCustomRepos.size,
       },
       Date: {
-        Date: formatDateDDMMMYYYY(date || ''),
+        ...(templateRequest.use_latest
+          ? { 'Snapshot date': 'Use latest content' }
+          : { Date: formatDateDDMMMYYYY(date || '') }),
       },
       Details: {
         Name: name,

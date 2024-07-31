@@ -66,7 +66,7 @@ const AddTemplateBase = () => {
 
   const { mutateAsync: addTemplate, isLoading: isAdding } = useCreateTemplateQuery(queryClient, {
     ...(templateRequest as TemplateRequest),
-    date: formatTemplateDate(templateRequest.date || ''),
+    date: templateRequest.use_latest ? null : formatTemplateDate(templateRequest.date || ''),
   });
 
   const { mutateAsync: editTemplate, isLoading: isEditing } = useEditTemplateQuery(queryClient, {
@@ -144,7 +144,7 @@ const AddTemplateBase = () => {
             ]}
           />
           <WizardStep
-            name='Set up date'
+            name='Set snapshot date'
             id='set_up_date_step'
             isDisabled={checkIfCurrentStepValid(3)}
             footer={{ isNextDisabled: checkIfCurrentStepValid(4) }}

@@ -260,6 +260,11 @@ export const defaultTemplateItem: TemplateItem = {
     '28b8d2b1-e4d6-4d8a-be12-1104601fb96e',
     '053603c7-6ef0-4abe-8542-feacb8f7d575',
   ],
+  use_latest: false,
+  created_at: '2024-01-22T00:00:00-07:00',
+  updated_at: '2024-01-22T00:00:00-07:00',
+  created_by: 'Dudeguy',
+  last_updated_by: 'Dudeguy',
 };
 
 // Template used for testing delete modal where repo is not in any templates
@@ -275,6 +280,11 @@ export const defaultTemplateItem2: TemplateItem = {
     '31c06bb4-ef1b-42f5-8c91-0ff67e7d8a1b',
     '28b8d2b1-e4d6-4d8a-be12-1104601fb96e',
   ],
+  use_latest: false,
+  created_at: '2024-01-22T00:00:00-07:00',
+  updated_at: '2024-01-22T00:00:00-07:00',
+  created_by: 'Dudeguy',
+  last_updated_by: 'Dudeguy',
 };
 
 export const defaultSnapshotForDateItem: SnapshotForDate = {

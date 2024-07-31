@@ -4,11 +4,12 @@ import { objectToUrlParams } from 'helpers';
 
 export interface TemplateRequest {
   arch: string;
-  date: string;
+  date: string | null;
   description: string;
   name: string;
   repository_uuids: string[];
   version: string;
+  use_latest: boolean;
 }
 
 export interface EditTemplateRequest extends TemplateRequest {
@@ -24,10 +25,11 @@ export interface TemplateItem {
   arch: string;
   version: string;
   date: string;
-  created_at?: string;
-  updated_at?: string;
-  created_by?: string;
-  last_updated_by?: string;
+  use_latest: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  last_updated_by: string;
 }
 
 export interface TemplateCollectionResponse {

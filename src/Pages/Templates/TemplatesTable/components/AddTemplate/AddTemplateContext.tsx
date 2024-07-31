@@ -52,14 +52,14 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
   );
 
   const stepsValidArray = useMemo(() => {
-    const { arch, date, name, version } = templateRequest;
+    const { arch, date, name, version, use_latest } = templateRequest;
 
     return [
       true,
       arch && version,
       !!selectedRedhatRepos.size,
       true,
-      !!date,
+      !!date || use_latest,
       !!name && name.length < 256,
     ] as boolean[];
   }, [templateRequest, selectedRedhatRepos.size]);
@@ -69,7 +69,7 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
       const stepsToCheck = stepsValidArray.slice(0, stepIndex + 1);
       return !stepsToCheck.every((step) => step);
     },
-    [templateRequest, selectedRedhatRepos.size],
+    [selectedRedhatRepos.size, stepsValidArray],
   );
 
   const queryClient = useQueryClient();
