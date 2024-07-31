@@ -136,127 +136,113 @@ export default function SetUpDateStep() {
           }}
         />
       </FormGroup>
-      {templateRequest.use_latest ? (
-        <>
-          <Title headingLevel='h1' size='xl'>
-            Use latest content
-          </Title>
-          <Grid>
-            <Text component={TextVariants.h6}>Always use latest content from the repository.</Text>
-          </Grid>
-        </>
-      ) : (
-        <>
-          <Title headingLevel='h1' size='xl'>
-            Use a snapshot
-          </Title>
+
+      <Hide hide={!!templateRequest.use_latest}>
+        <Title headingLevel='h1' size='xl'>
+          Use a snapshot
+        </Title>
+        <Text component={TextVariants.h6}>
+          This will include snapshots up to a specific date. Content of the snapshots created after
+          the selected date will be displayed as applicable, not installable.
+        </Text>
+        <GridItem>
           <Text component={TextVariants.h6}>
-            This will include snapshots up to a specific date. Content of the snapshots created
-            after the selected date will be displayed as applicable, not installable.
+            <b>Select date for snapshotted repositories</b>
           </Text>
-          <GridItem>
-            <Text component={TextVariants.h6}>
-              <b>Select date for snapshotted repositories</b>
-            </Text>
-          </GridItem>
-          <FormGroup label='Include repository changes up to this date' required>
-            <DatePicker
-              value={templateRequest.date || ''}
-              required
-              requiredDateOptions={{ isRequired: true }}
-              validators={dateValidators}
-              onChange={(_, val) => {
-                setTemplateRequest((prev) => ({ ...prev, date: val }));
-              }}
-            />
-            <Hide hide={!hasIsAfter || !dateIsValid}>
-              <FormAlert style={{ paddingTop: '20px' }}>
-                <Alert
-                  variant='warning'
-                  title='The items listed in the table below have snapshots after the selected date.'
-                  isInline
+        </GridItem>
+        <FormGroup label='Include repository changes up to this date' required>
+          <DatePicker
+            value={templateRequest.date || ''}
+            required
+            requiredDateOptions={{ isRequired: true }}
+            validators={dateValidators}
+            onChange={(_, val) => {
+              setTemplateRequest((prev) => ({ ...prev, date: val }));
+            }}
+          />
+          <Hide hide={!hasIsAfter || !dateIsValid}>
+            <FormAlert style={{ paddingTop: '20px' }}>
+              <Alert
+                variant='warning'
+                title='The items listed in the table below have snapshots after the selected date.'
+                isInline
+              />
+            </FormAlert>
+            <Hide hide={!isLoading}>
+              <Grid className=''>
+                <SkeletonTable
+                  rows={10}
+                  numberOfColumns={columnHeaders.length}
+                  variant={TableVariant.compact}
                 />
-              </FormAlert>
-              <Hide hide={!isLoading}>
-                <Grid className=''>
-                  <SkeletonTable
-                    rows={10}
-                    numberOfColumns={columnHeaders.length}
-                    variant={TableVariant.compact}
-                  />
-                </Grid>
-              </Hide>
-              <Hide hide={isLoading}>
-                <Table aria-label='Set up date table' ouiaId='setup_date_table' variant='compact'>
-                  <Thead>
-                    <Tr>
-                      {columnHeaders.map((columnHeader) => (
-                        <Th key={columnHeader + 'column'}>{columnHeader}</Th>
-                      ))}
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {contentData.data?.map((rowData: ContentItem) => {
-                      const { uuid, name, url } = rowData;
-                      return (
-                        <Tr key={uuid}>
-                          <Td>
-                            <ConditionalTooltip show={name.length > 60} content={name}>
-                              <>{reduceStringToCharsWithEllipsis(name, 60)}</>
-                            </ConditionalTooltip>
-                            <ConditionalTooltip show={url.length > 50} content={url}>
-                              <UrlWithExternalIcon
-                                href={url}
-                                customText={reduceStringToCharsWithEllipsis(url)}
-                              />
-                            </ConditionalTooltip>
-                            <Hide hide={!rowData?.last_snapshot?.created_at}>
-                              <FlexItem className={classes.snapshotInfoText}>
-                                Last snapshot {dayjs(rowData?.last_snapshot?.created_at).fromNow()}
-                              </FlexItem>
-                            </Hide>
-                          </Td>
-                          <Td>{rowData.last_snapshot?.content_counts?.['rpm.advisory'] || '-'}</Td>
-                          <Td>
-                            <PackageCount
-                              rowData={rowData}
-                              href={
-                                pathname + '/' + REPOSITORIES_ROUTE + `/${rowData.uuid}/packages`
-                              }
-                              opensNewTab
-                            />
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
-                <ExpandableSection
-                  toggleText='What does it mean?'
-                  aria-label='quickStart-expansion'
-                  data-ouia-component-id='quickstart_expand'
-                  className={classes.whatDoesItMean}
-                >
-                  <TextContent>
-                    <TextList>
-                      <TextListItem>
-                        No snapshots exist for these repositories on the specified date.
-                      </TextListItem>
-                      <TextListItem>
-                        The closest snapshots after that date will be used.
-                      </TextListItem>
-                      <TextListItem>
-                        Depending on the repository and time difference, this could cause a
-                        dependency issue.
-                      </TextListItem>
-                    </TextList>
-                  </TextContent>
-                </ExpandableSection>
-              </Hide>
+              </Grid>
             </Hide>
-          </FormGroup>
-        </>
-      )}
+            <Hide hide={isLoading}>
+              <Table aria-label='Set up date table' ouiaId='setup_date_table' variant='compact'>
+                <Thead>
+                  <Tr>
+                    {columnHeaders.map((columnHeader) => (
+                      <Th key={columnHeader + 'column'}>{columnHeader}</Th>
+                    ))}
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {contentData.data?.map((rowData: ContentItem) => {
+                    const { uuid, name, url } = rowData;
+                    return (
+                      <Tr key={uuid}>
+                        <Td>
+                          <ConditionalTooltip show={name.length > 60} content={name}>
+                            <>{reduceStringToCharsWithEllipsis(name, 60)}</>
+                          </ConditionalTooltip>
+                          <ConditionalTooltip show={url.length > 50} content={url}>
+                            <UrlWithExternalIcon
+                              href={url}
+                              customText={reduceStringToCharsWithEllipsis(url)}
+                            />
+                          </ConditionalTooltip>
+                          <Hide hide={!rowData?.last_snapshot?.created_at}>
+                            <FlexItem className={classes.snapshotInfoText}>
+                              Last snapshot {dayjs(rowData?.last_snapshot?.created_at).fromNow()}
+                            </FlexItem>
+                          </Hide>
+                        </Td>
+                        <Td>{rowData.last_snapshot?.content_counts?.['rpm.advisory'] || '-'}</Td>
+                        <Td>
+                          <PackageCount
+                            rowData={rowData}
+                            href={pathname + '/' + REPOSITORIES_ROUTE + `/${rowData.uuid}/packages`}
+                            opensNewTab
+                          />
+                        </Td>
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </Table>
+              <ExpandableSection
+                toggleText='What does it mean?'
+                aria-label='quickStart-expansion'
+                data-ouia-component-id='quickstart_expand'
+                className={classes.whatDoesItMean}
+              >
+                <TextContent>
+                  <TextList>
+                    <TextListItem>
+                      No snapshots exist for these repositories on the specified date.
+                    </TextListItem>
+                    <TextListItem>The closest snapshots after that date will be used.</TextListItem>
+                    <TextListItem>
+                      Depending on the repository and time difference, this could cause a dependency
+                      issue.
+                    </TextListItem>
+                  </TextList>
+                </TextContent>
+              </ExpandableSection>
+            </Hide>
+          </Hide>
+        </FormGroup>
+      </Hide>
     </Grid>
   );
 }
