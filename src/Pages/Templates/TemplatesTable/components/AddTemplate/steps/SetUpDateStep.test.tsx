@@ -49,7 +49,7 @@ it('expect Set up date step to render correctly', () => {
 
   const { queryByText, getByRole } = render(<SetUpDateStep />);
 
-  expect(queryByText('Include repositories up to this date')).toBeInTheDocument();
+  expect(queryByText('Include repository changes up to this date')).toBeInTheDocument();
 
   const dateInput = getByRole('textbox', { name: 'Date picker' });
 
