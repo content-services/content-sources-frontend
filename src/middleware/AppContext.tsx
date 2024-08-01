@@ -4,16 +4,16 @@ import { notificationsReducer } from '@redhat-cloud-services/frontend-components
 import { getRegistry as _getRegistry } from '@redhat-cloud-services/frontend-components-utilities/Registry';
 import PackageJson from '../../package.json';
 import { useFetchFeaturesQuery } from 'services/Features/FeatureQueries';
-import { fetchRBAC, Rbac } from './RbacUtils';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import { ChromeAPI } from '@redhat-cloud-services/types';
+import getRBAC from '@redhat-cloud-services/frontend-components-utilities/RBAC';
 
 const getRegistry = _getRegistry as unknown as () => { register: ({ notifications }) => void };
 const { appname } = PackageJson.insights;
 
 export interface AppContextInterface {
-  rbac?: { repoRead: boolean; repoWrite: boolean; templateRead: boolean; templateWrite: boolean };
+  rbac?: Record<string, boolean>;
   features: Features | null;
   isFetchingFeatures: boolean;
   contentOrigin: ContentOrigin;
@@ -22,10 +22,11 @@ export interface AppContextInterface {
   zeroState: boolean;
   setZeroState: (zeroState: boolean) => void;
 }
+
 export const AppContext = createContext({} as AppContextInterface);
 
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
-  const [rbac, setRbac] = useState<Rbac | undefined>(undefined);
+  const [rbac, setRbac] = useState<Record<string, boolean> | undefined>(undefined);
   const [zeroState, setZeroState] = useState(true);
   const [features, setFeatures] = useState<Features | null>(null);
   const chrome = useChrome();
@@ -39,7 +40,18 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
 
     if (chrome && !rbac) {
       // Get permissions and store them in context
-      chrome.auth.getUser().then(async () => fetchRBAC(appname).then(setRbac));
+      chrome.auth.getUser().then(async () =>
+        getRBAC(appname).then((res) => {
+          const rbacSet = new Set(res.permissions.map(({ permission }) => permission));
+
+          setRbac({
+            repoRead: rbacSet.has('content-sources:repositories:read'),
+            repoWrite: rbacSet.has('content-sources:repositories:write'),
+            templateRead: rbacSet.has('content-sources:templates:read'),
+            templateWrite: rbacSet.has('content-sources:templates:write'),
+          });
+        }),
+      );
     }
 
     (async () => {
@@ -51,14 +63,7 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AppContext.Provider
       value={{
-        rbac: rbac
-          ? {
-              repoRead: rbac?.hasPermission('content-sources', 'repositories', 'read'),
-              repoWrite: rbac?.hasPermission('content-sources', 'repositories', 'write'),
-              templateRead: rbac?.hasPermission('content-sources', 'templates', 'read'),
-              templateWrite: rbac?.hasPermission('content-sources', 'templates', 'write'),
-            }
-          : undefined,
+        rbac: rbac,
         features: features,
         isFetchingFeatures: isFetchingFeatures,
         contentOrigin,
