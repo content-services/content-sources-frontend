@@ -32,7 +32,6 @@ export const AddRepo = ({ isDisabled, addRepo }: Props) => {
   const isInProd = useMemo(() => isProd() === true, []);
   const isInBeta = useMemo(() => isBeta() === true, []);
 
-
   const onActionToggle = (_, isActionOpen: boolean) => {
     setIsActionOpen(isActionOpen);
   };

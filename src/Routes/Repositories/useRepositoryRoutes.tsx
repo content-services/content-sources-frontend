@@ -53,12 +53,7 @@ export default function useRepositoryRoutes(): TabbedRouteItem[] {
         title: 'Popular repositories',
         route: POPULAR_REPOSITORIES_ROUTE,
         Element: PopularRepositoriesTable,
-        ChildRoutes: 
-          hasWrite 
-            ? [
-              { path: DELETE_ROUTE, Element: DeleteContentModal },
-            ]
-            : [],
+        ChildRoutes: hasWrite ? [{ path: DELETE_ROUTE, Element: DeleteContentModal }] : [],
       },
       ...(features?.admintasks?.enabled && features.admintasks?.accessible
         ? [

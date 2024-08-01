@@ -57,8 +57,8 @@ const useStyles = createUseStyles({
     minWidth: '200px!important',
   },
   expandableSectionMargin: {
-    marginTop: '8px'
-  }
+    marginTop: '8px',
+  },
 });
 
 export default function DeleteContentModal() {
@@ -83,13 +83,17 @@ export default function DeleteContentModal() {
 
   const repoUUIDFromPath = new URLSearchParams(search).get('repoUUID')?.split(',');
   const checkedCustomRepos = checkedRepositories ? Array.from(checkedRepositories) : [];
-  const checkedPopularRepos =  checkedRepositoriesToDelete ? Array.from(checkedRepositoriesToDelete) : [];
+  const checkedPopularRepos = checkedRepositoriesToDelete
+    ? Array.from(checkedRepositoriesToDelete)
+    : [];
 
-  const uuids = 
-    repoUUIDFromPath?.length ? repoUUIDFromPath : 
-    checkedCustomRepos.length ? checkedCustomRepos :
-    checkedPopularRepos.length? checkedPopularRepos :
-    [];
+  const uuids = repoUUIDFromPath?.length
+    ? repoUUIDFromPath
+    : checkedCustomRepos.length
+      ? checkedCustomRepos
+      : checkedPopularRepos.length
+        ? checkedPopularRepos
+        : [];
   const reposToDelete = new Set(uuids);
 
   const { mutateAsync: deleteItems, isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
@@ -225,7 +229,12 @@ export default function DeleteContentModal() {
                                 className={classes.link}
                                 variant='link'
                                 component='a'
-                                href={pathname + '/' + TEMPLATES_ROUTE + `/${template.uuid}/edit?tab=custom_repositories`}
+                                href={
+                                  pathname +
+                                  '/' +
+                                  TEMPLATES_ROUTE +
+                                  `/${template.uuid}/edit?tab=custom_repositories`
+                                }
                                 target='_blank'
                               >
                                 {template.name}
@@ -236,8 +245,16 @@ export default function DeleteContentModal() {
                           <ExpandableSection
                             isExpanded={expandState[index]}
                             isDetached
-                            toggleId={expandState[index] ? 'detached-expandable-section-toggle-open' : 'detached-expandable-section-toggle'}
-                            contentId={expandState[index] ? 'detached-expandable-section-content-open' : 'detached-expandable-section-content'}
+                            toggleId={
+                              expandState[index]
+                                ? 'detached-expandable-section-toggle-open'
+                                : 'detached-expandable-section-toggle'
+                            }
+                            contentId={
+                              expandState[index]
+                                ? 'detached-expandable-section-content-open'
+                                : 'detached-expandable-section-content'
+                            }
                             className={classes.expandableSectionMargin}
                           >
                             {templatesWithRepos
@@ -250,7 +267,10 @@ export default function DeleteContentModal() {
                                     variant='link'
                                     component='a'
                                     href={
-                                      pathname + '/' + TEMPLATES_ROUTE + `/${template.uuid}/edit?tab=custom_repositories`
+                                      pathname +
+                                      '/' +
+                                      TEMPLATES_ROUTE +
+                                      `/${template.uuid}/edit?tab=custom_repositories`
                                     }
                                     target='_blank'
                                   >
@@ -262,16 +282,23 @@ export default function DeleteContentModal() {
                           <ExpandableSectionToggle
                             isExpanded={expandState[index]}
                             onToggle={() =>
-                                setExpandState((prev) => ({ ...prev, [index]: !prev[index] }))
-                                }
-                            toggleId={expandState[index] ? 'detached-expandable-section-toggle-open' : 'detached-expandable-section-toggle'}
-                            contentId={expandState[index] ? 'detached-expandable-section-content-open' : 'detached-expandable-section-content'}
+                              setExpandState((prev) => ({ ...prev, [index]: !prev[index] }))
+                            }
+                            toggleId={
+                              expandState[index]
+                                ? 'detached-expandable-section-toggle-open'
+                                : 'detached-expandable-section-toggle'
+                            }
+                            contentId={
+                              expandState[index]
+                                ? 'detached-expandable-section-content-open'
+                                : 'detached-expandable-section-content'
+                            }
                             direction='up'
                           >
                             {expandState[index]
-                                ? 'Show less'
-                                : `and ${templatesWithRepos.length - maxTemplatesToShow} more`
-                            }
+                              ? 'Show less'
+                              : `and ${templatesWithRepos.length - maxTemplatesToShow} more`}
                           </ExpandableSectionToggle>
                         </Hide>
                       </List>

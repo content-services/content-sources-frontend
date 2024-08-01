@@ -371,325 +371,323 @@ const PopularRepositoriesTable = () => {
 
   return (
     <>
-    <Outlet
+      <Outlet
         context={{
           deletionContext: {
             checkedRepositoriesToDelete,
           },
         }}
       />
-    <Grid data-ouia-component-id='popular_repositories_page' className={classes.mainContainer}>
-      <Flex className={classes.topContainer}>
-        <FlexItem>
-          <InputGroup>
-            <InputGroupItem isFill>
-              <TextInput
-                isDisabled={isLoading}
-                type='text'
-                id='search'
-                ouiaId='popular_filter_search'
-                placeholder='Filter by name/url'
-                value={searchValue}
-                onChange={(_event, val) => setSearchValue(val)}
-              />
-              <InputGroupText isDisabled={isLoading} id='search-icon'>
-                <SearchIcon />
-              </InputGroupText>
-            </InputGroupItem>
-            <InputGroupItem>
-              <FlexItem className={classes.repositoryActions}>
-                {/* RBAC popover takes precedence */}
-                <ConditionalTooltip
-                  content={
-                    !rbac?.repoWrite
-                      ? 'You do not have the required permissions to perform this action.'
-                      : 'Make a selection below to add multiple repositories'
-                  }
-                  show={!rbac?.repoWrite || !atLeastOneRepoToAddChecked}
-                  setDisabled
-                >
-                  {(() => {
-                    const defaultText = atLeastOneRepoToAddChecked
-                      ? `Add ${checkedRepositoriesToAdd.size} repositories`
-                      : 'Add selected repositories';
-                    const isDisabled = !rbac?.repoWrite || !atLeastOneRepoToAddChecked;
-                    if (features?.snapshots?.enabled && features.snapshots.accessible) {
-                      const className = isDisabled ? classes.disabledDropdownButton : undefined;
-                      // temporarily disable snapshotting by default for popular repos
-                      if (isInProd && !isInBeta) {
-                        return (
-                          <Dropdown
-                            onSelect={onDropdownSelect}
-                            className={classes.addRepositoriesButton}
-                            ouiaId='add-selected-toggle-dropdown'
-                            toggle={
-                              <DropdownToggle
-                                ouiaId='add-selected-dropdown-toggle-no-snap'
-                                className={className}
-                                splitButtonItems={[
-                                  <DropdownToggleAction
-                                    key='action'
-                                    data-ouia-component-id='add_checked_repos-without-snap'
-                                    onClick={() => addSelected(false)}
-                                    className={className}
-                                  >
-                                    {defaultText}
-                                  </DropdownToggleAction>,
-                                ]}
-                                toggleVariant='primary'
-                                splitButtonVariant='action'
-                                onToggle={onDropdownToggle}
-                                isDisabled={isDisabled}
-                              />
-                            }
-                            isOpen={isActionOpen}
-                          >
-                            {dropdownItems}
-                          </Dropdown>
-                        );
-                      } else
-                        return (
-                          <Dropdown
-                            onSelect={onDropdownSelect}
-                            className={classes.addRepositoriesButton}
-                            ouiaId='add-selected-toggle-dropdown'
-                            toggle={
-                              <DropdownToggle
-                                ouiaId='add-selected-dropdown-toggle-no-snap'
-                                className={className}
-                                splitButtonItems={[
-                                  <DropdownToggleAction
-                                    key='action'
-                                    data-ouia-component-id='add_checked_repos-with-snap'
-                                    onClick={() => addSelected(true)}
-                                    className={className}
-                                  >
-                                    {defaultText}
-                                  </DropdownToggleAction>,
-                                ]}
-                                toggleVariant='primary'
-                                splitButtonVariant='action'
-                                onToggle={onDropdownToggle}
-                                isDisabled={isDisabled}
-                              />
-                            }
-                            isOpen={isActionOpen}
-                          >
-                            {dropdownItems}
-                          </Dropdown>
-                        );
-                    } else {
-                      return (
-                        <Button
-                          onClick={() => addSelected(false)}
-                          className={classes.addRepositoriesButton}
-                          isDisabled={isDisabled}
-                          ouiaId='add_checked_repos'
-                        >
-                          {defaultText}
-                        </Button>
-                      );
-                    }
-                  })()}
-                </ConditionalTooltip>
-                <ConditionalTooltip
-                  content='You do not have the required permissions to perform this action.'
-                  show={!rbac?.repoWrite}
-                  setDisabled
-                >
-                  <DeleteKebab
-                    atLeastOneRepoChecked={atLeastOneRepoToDeleteChecked}
-                    numberOfReposChecked={checkedRepositoriesToDelete.size}
-                    toggleOuiaId='popular_repositories_kebab_toggle'
-                    isDisabled={!rbac?.repoWrite}
-                  />
-                </ConditionalTooltip>
-              </FlexItem>
-            </InputGroupItem>
-          </InputGroup>
-          {searchValue !== '' && (
-            <Flex>
-              <FlexItem fullWidth={{ default: 'fullWidth' }} className={classes.chipsContainer}>
-                <ChipGroup categoryName='Name/URL'>
-                  <Chip key='search_chip' onClick={() => setSearchValue('')}>
-                    {searchValue}
-                  </Chip>
-                </ChipGroup>
-                <Button
-                  className={classes.clearFilters}
-                  onClick={() => setSearchValue('')}
-                  variant='link'
-                  isInline
-                >
-                  Clear filters
-                </Button>
-              </FlexItem>
-            </Flex>
-          )}
-        </FlexItem>
-        <FlexItem>
-          <Hide hide={isLoading || countIsZero}>
-            <Pagination
-              id='top-pagination-id'
-              widgetId='topPaginationWidgetId'
-              isDisabled={isLoading}
-              itemCount={count}
-              perPage={perPage}
-              page={page}
-              onSetPage={onSetPage}
-              isCompact
-              onPerPageSelect={onPerPageSelect}
-            />
-            <Hide hide={!debouncedSearchValue}></Hide>
-          </Hide>
-        </FlexItem>
-      </Flex>
-      <Hide hide={!isLoading}>
-        <Grid className={classes.mainContainer}>
-          <SkeletonTable
-            rows={perPage}
-            numberOfColumns={columnHeaders.length}
-            variant={TableVariant.compact}
-          />
-        </Grid>
-      </Hide>
-      <Hide hide={isLoading || countIsZero}>
-        <>
-          <Table
-            aria-label='Popular repositories table'
-            ouiaId='popular_repos_table'
-            variant='compact'
-          >
-            <Thead>
-              <Tr>
-                <Hide hide={!rbac?.repoWrite}>
-                  <Th
-                    aria-label='popular repositories selection column'
-                    className={classes.checkboxMinWidth}
-                    select={{
-                      onSelect: selectAllRepos,
-                      isSelected: areAllReposSelected,
-                    }}
-                  />
-                </Hide>
-                {columnHeaders.map((columnHeader) => (
-                  <Th key={columnHeader + 'column'}>{columnHeader}</Th>
-                ))}
-                <Th>
-                  <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {popularData.map((repo, key) => {
-                const {
-                  uuid,
-                  existing_name,
-                  suggested_name,
-                  url,
-                  distribution_arch,
-                  distribution_versions,
-                } = repo;
-                return (
-                  <Tr key={suggested_name + uuid}>
-                    <Hide hide={!rbac?.repoWrite}>
-                      {/* Never disabled because popular repositories can be both added and deleted */}
-                      <Td
-                        select={{
-                          rowIndex: key,
-                          onSelect: (_event, isSelecting) => onSelectRepo(repo, isSelecting),
-                          isSelected: uuid
-                            ? checkedRepositoriesToDelete.has(uuid)
-                            : checkedRepositoriesToAdd.has(url),
-                        }}
-                      />
-                    </Hide>
-                    <Td>
-                      <>
-                        <Flex direction={{ default: 'row' }}>
-                          <FlexItem>{suggested_name}</FlexItem>
-                          {existing_name && suggested_name !== existing_name && (
-                            <FlexItem className={classes.disabled}>
-                              Current name: {existing_name}
-                            </FlexItem>
-                          )}
-                        </Flex>
-                        <UrlWithExternalIcon href={url} />
-                      </>
-                    </Td>
-                    <Td>{archesDisplay(distribution_arch)}</Td>
-                    <Td>{versionDisplay(distribution_versions)}</Td>
-                    <Td width={10}>
-                      <ConditionalTooltip
-                        content='You do not have the required permissions to perform this action.'
-                        show={!rbac?.repoWrite}
-                        setDisabled
-                      >
-                        {uuid ? (
-                          <Button
-                            isDisabled={uuid === selectedUUID || isAdding}
-                            onClick={() =>
-                              navigate(DELETE_ROUTE + '?repoUUID=' + uuid)
-                            }
-                            variant='danger'
-                            ouiaId='remove_popular_repo'
-                          >
-                            Remove
-                          </Button>
-                        ) : (
-                          <AddRepo
-                            isDisabled={
-                              selectedData[key]?.url === url ||
-                              isFetching ||
-                              isDeleting ||
-                              isDeletingItems
-                            }
-                            addRepo={(snapshot) => addRepo(key, repo, snapshot)}
-                          />
-                        )}
-                      </ConditionalTooltip>
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
-          <Hide hide={isLoading || countIsZero}>
-            <Flex className={classes.bottomContainer}>
-              <FlexItem />
-              <FlexItem>
-                <Pagination
-                  id='bottom-pagination-id'
-                  widgetId='bottomPaginationWidgetId'
-                  itemCount={count}
-                  perPage={perPage}
-                  page={page}
-                  onSetPage={onSetPage}
-                  variant={PaginationVariant.bottom}
-                  onPerPageSelect={onPerPageSelect}
+      <Grid data-ouia-component-id='popular_repositories_page' className={classes.mainContainer}>
+        <Flex className={classes.topContainer}>
+          <FlexItem>
+            <InputGroup>
+              <InputGroupItem isFill>
+                <TextInput
+                  isDisabled={isLoading}
+                  type='text'
+                  id='search'
+                  ouiaId='popular_filter_search'
+                  placeholder='Filter by name/url'
+                  value={searchValue}
+                  onChange={(_event, val) => setSearchValue(val)}
                 />
-              </FlexItem>
-            </Flex>
-          </Hide>
-        </>
-      </Hide>
-      <Hide hide={!countIsZero}>
-        <EmptyTableState
-          clearFilters={() => setSearchValue('')}
-          notFiltered={!debouncedSearchValue} // The second item prevents the clear button from being removed abruptly
-          itemName='popular repositories'
-        />
-      </Hide>
-    </Grid>
+                <InputGroupText isDisabled={isLoading} id='search-icon'>
+                  <SearchIcon />
+                </InputGroupText>
+              </InputGroupItem>
+              <InputGroupItem>
+                <FlexItem className={classes.repositoryActions}>
+                  {/* RBAC popover takes precedence */}
+                  <ConditionalTooltip
+                    content={
+                      !rbac?.repoWrite
+                        ? 'You do not have the required permissions to perform this action.'
+                        : 'Make a selection below to add multiple repositories'
+                    }
+                    show={!rbac?.repoWrite || !atLeastOneRepoToAddChecked}
+                    setDisabled
+                  >
+                    {(() => {
+                      const defaultText = atLeastOneRepoToAddChecked
+                        ? `Add ${checkedRepositoriesToAdd.size} repositories`
+                        : 'Add selected repositories';
+                      const isDisabled = !rbac?.repoWrite || !atLeastOneRepoToAddChecked;
+                      if (features?.snapshots?.enabled && features.snapshots.accessible) {
+                        const className = isDisabled ? classes.disabledDropdownButton : undefined;
+                        // temporarily disable snapshotting by default for popular repos
+                        if (isInProd && !isInBeta) {
+                          return (
+                            <Dropdown
+                              onSelect={onDropdownSelect}
+                              className={classes.addRepositoriesButton}
+                              ouiaId='add-selected-toggle-dropdown'
+                              toggle={
+                                <DropdownToggle
+                                  ouiaId='add-selected-dropdown-toggle-no-snap'
+                                  className={className}
+                                  splitButtonItems={[
+                                    <DropdownToggleAction
+                                      key='action'
+                                      data-ouia-component-id='add_checked_repos-without-snap'
+                                      onClick={() => addSelected(false)}
+                                      className={className}
+                                    >
+                                      {defaultText}
+                                    </DropdownToggleAction>,
+                                  ]}
+                                  toggleVariant='primary'
+                                  splitButtonVariant='action'
+                                  onToggle={onDropdownToggle}
+                                  isDisabled={isDisabled}
+                                />
+                              }
+                              isOpen={isActionOpen}
+                            >
+                              {dropdownItems}
+                            </Dropdown>
+                          );
+                        } else
+                          return (
+                            <Dropdown
+                              onSelect={onDropdownSelect}
+                              className={classes.addRepositoriesButton}
+                              ouiaId='add-selected-toggle-dropdown'
+                              toggle={
+                                <DropdownToggle
+                                  ouiaId='add-selected-dropdown-toggle-no-snap'
+                                  className={className}
+                                  splitButtonItems={[
+                                    <DropdownToggleAction
+                                      key='action'
+                                      data-ouia-component-id='add_checked_repos-with-snap'
+                                      onClick={() => addSelected(true)}
+                                      className={className}
+                                    >
+                                      {defaultText}
+                                    </DropdownToggleAction>,
+                                  ]}
+                                  toggleVariant='primary'
+                                  splitButtonVariant='action'
+                                  onToggle={onDropdownToggle}
+                                  isDisabled={isDisabled}
+                                />
+                              }
+                              isOpen={isActionOpen}
+                            >
+                              {dropdownItems}
+                            </Dropdown>
+                          );
+                      } else {
+                        return (
+                          <Button
+                            onClick={() => addSelected(false)}
+                            className={classes.addRepositoriesButton}
+                            isDisabled={isDisabled}
+                            ouiaId='add_checked_repos'
+                          >
+                            {defaultText}
+                          </Button>
+                        );
+                      }
+                    })()}
+                  </ConditionalTooltip>
+                  <ConditionalTooltip
+                    content='You do not have the required permissions to perform this action.'
+                    show={!rbac?.repoWrite}
+                    setDisabled
+                  >
+                    <DeleteKebab
+                      atLeastOneRepoChecked={atLeastOneRepoToDeleteChecked}
+                      numberOfReposChecked={checkedRepositoriesToDelete.size}
+                      toggleOuiaId='popular_repositories_kebab_toggle'
+                      isDisabled={!rbac?.repoWrite}
+                    />
+                  </ConditionalTooltip>
+                </FlexItem>
+              </InputGroupItem>
+            </InputGroup>
+            {searchValue !== '' && (
+              <Flex>
+                <FlexItem fullWidth={{ default: 'fullWidth' }} className={classes.chipsContainer}>
+                  <ChipGroup categoryName='Name/URL'>
+                    <Chip key='search_chip' onClick={() => setSearchValue('')}>
+                      {searchValue}
+                    </Chip>
+                  </ChipGroup>
+                  <Button
+                    className={classes.clearFilters}
+                    onClick={() => setSearchValue('')}
+                    variant='link'
+                    isInline
+                  >
+                    Clear filters
+                  </Button>
+                </FlexItem>
+              </Flex>
+            )}
+          </FlexItem>
+          <FlexItem>
+            <Hide hide={isLoading || countIsZero}>
+              <Pagination
+                id='top-pagination-id'
+                widgetId='topPaginationWidgetId'
+                isDisabled={isLoading}
+                itemCount={count}
+                perPage={perPage}
+                page={page}
+                onSetPage={onSetPage}
+                isCompact
+                onPerPageSelect={onPerPageSelect}
+              />
+              <Hide hide={!debouncedSearchValue}></Hide>
+            </Hide>
+          </FlexItem>
+        </Flex>
+        <Hide hide={!isLoading}>
+          <Grid className={classes.mainContainer}>
+            <SkeletonTable
+              rows={perPage}
+              numberOfColumns={columnHeaders.length}
+              variant={TableVariant.compact}
+            />
+          </Grid>
+        </Hide>
+        <Hide hide={isLoading || countIsZero}>
+          <>
+            <Table
+              aria-label='Popular repositories table'
+              ouiaId='popular_repos_table'
+              variant='compact'
+            >
+              <Thead>
+                <Tr>
+                  <Hide hide={!rbac?.repoWrite}>
+                    <Th
+                      aria-label='popular repositories selection column'
+                      className={classes.checkboxMinWidth}
+                      select={{
+                        onSelect: selectAllRepos,
+                        isSelected: areAllReposSelected,
+                      }}
+                    />
+                  </Hide>
+                  {columnHeaders.map((columnHeader) => (
+                    <Th key={columnHeader + 'column'}>{columnHeader}</Th>
+                  ))}
+                  <Th>
+                    <Spinner size='md' className={actionTakingPlace ? '' : classes.invisible} />
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {popularData.map((repo, key) => {
+                  const {
+                    uuid,
+                    existing_name,
+                    suggested_name,
+                    url,
+                    distribution_arch,
+                    distribution_versions,
+                  } = repo;
+                  return (
+                    <Tr key={suggested_name + uuid}>
+                      <Hide hide={!rbac?.repoWrite}>
+                        {/* Never disabled because popular repositories can be both added and deleted */}
+                        <Td
+                          select={{
+                            rowIndex: key,
+                            onSelect: (_event, isSelecting) => onSelectRepo(repo, isSelecting),
+                            isSelected: uuid
+                              ? checkedRepositoriesToDelete.has(uuid)
+                              : checkedRepositoriesToAdd.has(url),
+                          }}
+                        />
+                      </Hide>
+                      <Td>
+                        <>
+                          <Flex direction={{ default: 'row' }}>
+                            <FlexItem>{suggested_name}</FlexItem>
+                            {existing_name && suggested_name !== existing_name && (
+                              <FlexItem className={classes.disabled}>
+                                Current name: {existing_name}
+                              </FlexItem>
+                            )}
+                          </Flex>
+                          <UrlWithExternalIcon href={url} />
+                        </>
+                      </Td>
+                      <Td>{archesDisplay(distribution_arch)}</Td>
+                      <Td>{versionDisplay(distribution_versions)}</Td>
+                      <Td width={10}>
+                        <ConditionalTooltip
+                          content='You do not have the required permissions to perform this action.'
+                          show={!rbac?.repoWrite}
+                          setDisabled
+                        >
+                          {uuid ? (
+                            <Button
+                              isDisabled={uuid === selectedUUID || isAdding}
+                              onClick={() => navigate(DELETE_ROUTE + '?repoUUID=' + uuid)}
+                              variant='danger'
+                              ouiaId='remove_popular_repo'
+                            >
+                              Remove
+                            </Button>
+                          ) : (
+                            <AddRepo
+                              isDisabled={
+                                selectedData[key]?.url === url ||
+                                isFetching ||
+                                isDeleting ||
+                                isDeletingItems
+                              }
+                              addRepo={(snapshot) => addRepo(key, repo, snapshot)}
+                            />
+                          )}
+                        </ConditionalTooltip>
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+            <Hide hide={isLoading || countIsZero}>
+              <Flex className={classes.bottomContainer}>
+                <FlexItem />
+                <FlexItem>
+                  <Pagination
+                    id='bottom-pagination-id'
+                    widgetId='bottomPaginationWidgetId'
+                    itemCount={count}
+                    perPage={perPage}
+                    page={page}
+                    onSetPage={onSetPage}
+                    variant={PaginationVariant.bottom}
+                    onPerPageSelect={onPerPageSelect}
+                  />
+                </FlexItem>
+              </Flex>
+            </Hide>
+          </>
+        </Hide>
+        <Hide hide={!countIsZero}>
+          <EmptyTableState
+            clearFilters={() => setSearchValue('')}
+            notFiltered={!debouncedSearchValue} // The second item prevents the clear button from being removed abruptly
+            itemName='popular repositories'
+          />
+        </Hide>
+      </Grid>
     </>
   );
 };
 
 export const usePopularListOutletContext = () =>
-    useOutletContext<{
-      deletionContext: {
-        checkedRepositoriesToDelete: Set<string>;
-      };
-    }>();
+  useOutletContext<{
+    deletionContext: {
+      checkedRepositoriesToDelete: Set<string>;
+    };
+  }>();
 
 export default PopularRepositoriesTable;
