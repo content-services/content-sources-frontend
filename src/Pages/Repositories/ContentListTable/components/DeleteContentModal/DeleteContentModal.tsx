@@ -31,7 +31,7 @@ import { usePopularListOutletContext } from '../../../PopularRepositoriesTable/P
 import useRootPath from 'Hooks/useRootPath';
 import { GET_TEMPLATES_KEY, useTemplateList } from 'services/Templates/TemplateQueries';
 import { TemplateFilterData, TemplateItem } from 'services/Templates/TemplateApi';
-import { REPOSITORIES_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
+import { POPULAR_REPOSITORIES_ROUTE, REPOSITORIES_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
 import { ContentItem, FilterData } from 'services/Content/ContentApi';
 import { isEmpty } from 'lodash';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
@@ -106,7 +106,11 @@ export default function DeleteContentModal() {
     sortString,
   );
 
-  const onClose = () => navigate(`${rootPath}/${REPOSITORIES_ROUTE}`);
+  const onClose = () =>
+    navigate(
+      `${rootPath}/${REPOSITORIES_ROUTE}${checkedPopularRepos ? `/${POPULAR_REPOSITORIES_ROUTE}` : ''}`,
+    );
+
   const onSave = async () => {
     deleteItems(reposToDelete).then(() => {
       onClose();

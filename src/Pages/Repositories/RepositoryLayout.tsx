@@ -7,7 +7,12 @@ import { createUseStyles } from 'react-jss';
 import { last } from 'lodash';
 import Header from 'components/Header/Header';
 import RepositoryQuickStart from 'components/QuickStart/RepositoryQuickStart';
-import { TabbedRouteItem } from '../../Routes/constants';
+import {
+  ADMIN_TASKS_ROUTE,
+  POPULAR_REPOSITORIES_ROUTE,
+  REPOSITORIES_ROUTE,
+} from '../../Routes/constants';
+import { useAppContext } from 'middleware/AppContext';
 
 const useStyles = createUseStyles({
   tabs: {
@@ -31,10 +36,32 @@ const useStyles = createUseStyles({
   },
 });
 
-export default function RepositoryLayout({ tabs }: { tabs: TabbedRouteItem[] }) {
+export default function RepositoryLayout() {
   const { pathname } = useLocation();
+  const { features } = useAppContext();
   const classes = useStyles();
   const currentRoute = useMemo(() => last(pathname.split('/')), [pathname]);
+
+  const tabs = useMemo(
+    () => [
+      { title: 'Your repositories', route: '', key: REPOSITORIES_ROUTE },
+      {
+        title: 'Popular repositories',
+        route: POPULAR_REPOSITORIES_ROUTE,
+        key: POPULAR_REPOSITORIES_ROUTE,
+      },
+      ...(features?.admintasks?.enabled && features.admintasks?.accessible
+        ? [
+            {
+              title: 'Admin tasks',
+              route: ADMIN_TASKS_ROUTE,
+              key: ADMIN_TASKS_ROUTE,
+            },
+          ]
+        : []),
+    ],
+    [features],
+  );
 
   return (
     <>
@@ -44,17 +71,17 @@ export default function RepositoryLayout({ tabs }: { tabs: TabbedRouteItem[] }) 
         paragraph='View all repositories within your organization.'
       />
       <Tabs className={classes.tabs} ouiaId='routed-tabs' activeKey={currentRoute}>
-        {tabs.map(({ title, route }) => (
+        {tabs.map(({ title, route, key }) => (
           <Tab
             className={classes.tab}
             keyParams={route}
-            key={route}
+            key={key}
             tabIndex={-1} // This prevents the tab from being targetable by accessibility features.
-            eventKey={route}
+            eventKey={key}
             aria-label={title}
             ouiaId={title}
             title={
-              <Link className={classes.link} accessKey={route} key={route} to={route}>
+              <Link className={classes.link} accessKey={key} key={key} to={route}>
                 <TabTitleText>{title}</TabTitleText>
               </Link>
             }

@@ -4,15 +4,17 @@ import { useMemo } from 'react';
 import { ErrorPage } from 'components/Error/ErrorPage';
 import RepositoryLayout from '../Pages/Repositories/RepositoryLayout';
 import { ZeroState } from 'components/ZeroState/ZeroState';
-import useRepositoryRoutes from './Repositories/useRepositoryRoutes';
 import {
   ADD_ROUTE,
   ADVISORIES_ROUTE,
   CONTENT_ROUTE,
+  DELETE_ROUTE,
   DETAILS_ROUTE,
   EDIT_ROUTE,
   PACKAGES_ROUTE,
+  POPULAR_REPOSITORIES_ROUTE,
   REPOSITORIES_ROUTE,
+  SNAPSHOTS_ROUTE,
   SYSTEMS_ROUTE,
   TEMPLATES_ROUTE,
 } from './constants';
@@ -25,25 +27,62 @@ import AddSystemModal from 'Pages/Templates/TemplateDetails/components/AddSystem
 import TemplateErrataTab from 'Pages/Templates/TemplateDetails/components/Tabs/TemplateErrataTab';
 import TemplateSystemsTab from 'Pages/Templates/TemplateDetails/components/Tabs/TemplateSystemsTab';
 import TemplatePackageTab from 'Pages/Templates/TemplateDetails/components/Tabs/TemplatePackageTab';
+import ContentListTable from 'Pages/Repositories/ContentListTable/ContentListTable';
+import EditContentModal from 'Pages/Repositories/ContentListTable/components/EditContentModal/EditContentModal';
+import AddContent from 'Pages/Repositories/ContentListTable/components/AddContent/AddContent';
+import DeleteContentModal from 'Pages/Repositories/ContentListTable/components/DeleteContentModal/DeleteContentModal';
+import SnapshotListModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/SnapshotListModal';
+import SnapshotDetailsModal from 'Pages/Repositories/ContentListTable/components/SnapshotDetailsModal/SnapshotDetailsModal';
+import PackageModal from 'Pages/Repositories/ContentListTable/components/PackageModal/PackageModal';
+import PopularRepositoriesTable from 'Pages/Repositories/PopularRepositoriesTable/PopularRepositoriesTable';
 
 export default function RepositoriesRoutes() {
   const key = useMemo(() => Math.random(), []);
-  const repositoryRoutes = useRepositoryRoutes();
-  const { zeroState, rbac } = useAppContext();
-
+  const { zeroState, features, rbac } = useAppContext();
   return (
     <ErrorPage>
       <Routes key={key}>
         {zeroState ? <Route path={REPOSITORIES_ROUTE} element={<ZeroState />} /> : <></>}
-        <Route element={<RepositoryLayout tabs={repositoryRoutes} />}>
-          {repositoryRoutes.map(({ route, Element, ChildRoutes }, key) => (
-            <Route key={key.toString()} path={route} element={<Element />}>
-              {ChildRoutes?.map(({ path, Element: ChildRouteElement }, childRouteKey) => (
-                <Route key={childRouteKey} path={path} element={<ChildRouteElement />} />
-              ))}
-            </Route>
-          ))}
-          <Route path='*' element={<Navigate to={REPOSITORIES_ROUTE} replace />} />
+        <Route path={REPOSITORIES_ROUTE} element={<RepositoryLayout />}>
+          <Route path='' element={<ContentListTable />}>
+            {rbac?.repoWrite ? (
+              <>
+                <Route key={EDIT_ROUTE} path={EDIT_ROUTE} element={<EditContentModal />} />
+                <Route key={ADD_ROUTE} path={ADD_ROUTE} element={<AddContent />} />
+                <Route key={DELETE_ROUTE} path={DELETE_ROUTE} element={<DeleteContentModal />} />
+              </>
+            ) : (
+              ''
+            )}
+            {features?.snapshots?.enabled && features.snapshots?.accessible ? (
+              <>
+                <Route
+                  key={`:repoUUID/${SNAPSHOTS_ROUTE}`}
+                  path={`:repoUUID/${SNAPSHOTS_ROUTE}`}
+                  element={<SnapshotListModal />}
+                />
+                <Route
+                  key={`:repoUUID/${SNAPSHOTS_ROUTE}/:snapshotUUID`}
+                  path={`:repoUUID/${SNAPSHOTS_ROUTE}/:snapshotUUID`}
+                  element={<SnapshotDetailsModal />}
+                />
+              </>
+            ) : (
+              ''
+            )}
+            <Route
+              key={`:repoUUID/${PACKAGES_ROUTE}`}
+              path={`:repoUUID/${PACKAGES_ROUTE}`}
+              element={<PackageModal />}
+            />
+          </Route>
+          <Route path={POPULAR_REPOSITORIES_ROUTE} element={<PopularRepositoriesTable />}>
+            {rbac?.repoWrite ? (
+              <Route key={DELETE_ROUTE} path={DELETE_ROUTE} element={<DeleteContentModal />} />
+            ) : (
+              ''
+            )}
+          </Route>
         </Route>
         {!rbac?.templateRead ? (
           <Route path={TEMPLATES_ROUTE} element={<NoPermissionsPage />} />
@@ -67,14 +106,17 @@ export default function RepositoriesRoutes() {
           <Route path='*' element={<Navigate to={TEMPLATES_ROUTE} replace />} />
         </Route>
         <Route path={TEMPLATES_ROUTE} element={<TemplatesTable />}>
-          {...rbac?.templateWrite
-            ? [
-                <Route key='1' path={ADD_ROUTE} element={<AddTemplate />} />,
-                <Route key='2' path={`:templateUUID/${EDIT_ROUTE}`} element={<AddTemplate />} />,
-              ]
-            : []}
+          {rbac?.templateWrite ? (
+            <>
+              <Route key='1' path={ADD_ROUTE} element={<AddTemplate />} />
+              <Route key='2' path={`:templateUUID/${EDIT_ROUTE}`} element={<AddTemplate />} />
+            </>
+          ) : (
+            ''
+          )}
           <Route path='*' element={<Navigate to='' replace />} />
         </Route>
+        <Route path='*' element={<Navigate to={REPOSITORIES_ROUTE} replace />} />
       </Routes>
     </ErrorPage>
   );
