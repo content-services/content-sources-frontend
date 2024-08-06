@@ -108,7 +108,7 @@ export default function DeleteContentModal() {
 
   const onClose = () =>
     navigate(
-      `${rootPath}/${REPOSITORIES_ROUTE}${checkedPopularRepos ? `/${POPULAR_REPOSITORIES_ROUTE}` : ''}`,
+      `${rootPath}/${REPOSITORIES_ROUTE}${checkedPopularRepos.length ? `/${POPULAR_REPOSITORIES_ROUTE}` : ''}`,
     );
 
   const onSave = async () => {
