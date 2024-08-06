@@ -143,7 +143,7 @@ const TemplatesTable = () => {
     { title: 'Description' },
     { title: 'Architecture', width: 10 },
     { title: 'Version', width: 10 },
-    { title: 'Date', width: 10 },
+    { title: 'Snapshot date', width: 15 },
   ];
 
   const {
@@ -267,7 +267,10 @@ const TemplatesTable = () => {
               </Thead>
               <Tbody>
                 {templateList.map(
-                  ({ uuid, name, description, arch, version, date }: TemplateItem, index) => (
+                  (
+                    { uuid, name, description, arch, version, date, use_latest }: TemplateItem,
+                    index,
+                  ) => (
                     <Tr key={uuid + index}>
                       <Td>
                         <Button
@@ -283,7 +286,7 @@ const TemplatesTable = () => {
                       <Td>{description}</Td>
                       <Td>{archesDisplay(arch)}</Td>
                       <Td>{versionDisplay(version)}</Td>
-                      <Td>{formatDateDDMMMYYYY(date)}</Td>
+                      <Td>{use_latest ? 'Use latest' : formatDateDDMMMYYYY(date)}</Td>
                       <Td>
                         <ConditionalTooltip
                           content='You do not have the required permissions to perform this action.'

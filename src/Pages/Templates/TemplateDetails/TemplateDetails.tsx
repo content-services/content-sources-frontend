@@ -117,8 +117,14 @@ export default function TemplateDetails() {
             >
               <DetailItem title='Description:' value={data?.description} />
               <DetailItem
-                title='Includes content up to:'
-                value={data?.date ? formatDateDDMMMYYYY(data.date) : ''}
+                title='Snapshot date'
+                value={
+                  data?.use_latest
+                    ? 'Using latest content from repositories'
+                    : data?.date
+                      ? formatDateDDMMMYYYY(data.date)
+                      : ''
+                }
               />
               <DetailItem title='Created by:' value={data?.created_by} />
               <DetailItem
