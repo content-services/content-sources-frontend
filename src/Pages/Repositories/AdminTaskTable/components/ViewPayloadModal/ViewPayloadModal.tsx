@@ -17,7 +17,7 @@ import Hide from 'components/Hide/Hide';
 import { useFetchAdminTaskQuery } from 'services/AdminTasks/AdminTaskQueries';
 import { useNavigate, useParams } from 'react-router-dom';
 import useRootPath from 'Hooks/useRootPath';
-import { ADMIN_TASKS_ROUTE } from 'Routes/constants';
+import { ADMIN_TASKS_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
 
 const useStyles = createUseStyles({
   jsonView: {
@@ -37,7 +37,7 @@ const ViewPayloadModal = () => {
   const navigate = useNavigate();
   const rootPath = useRootPath();
 
-  const onClose = () => navigate(`${rootPath}/${ADMIN_TASKS_ROUTE}`);
+  const onClose = () => navigate(`${rootPath}/${REPOSITORIES_ROUTE}/${ADMIN_TASKS_ROUTE}`);
 
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
   const detailRef = createRef<HTMLElement>();

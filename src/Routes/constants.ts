@@ -1,8 +1,9 @@
 export const REPOSITORIES_ROUTE = 'repositories';
-export const POPULAR_REPOSITORIES_ROUTE = 'popular-repositories';
+export const POPULAR_REPOSITORIES_ROUTE = 'popular';
 export const ADMIN_TASKS_ROUTE = 'admin-tasks';
 export const TEMPLATES_ROUTE = 'templates';
 export const CONTENT_ROUTE = 'content';
+export const SNAPSHOTS_ROUTE = 'snapshots';
 export const SYSTEMS_ROUTE = 'systems';
 export const DETAILS_ROUTE = 'details';
 export const PACKAGES_ROUTE = 'packages';
