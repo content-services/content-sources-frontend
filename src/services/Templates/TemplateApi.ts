@@ -124,10 +124,7 @@ export const getTemplateErrata: (
 };
 
 export const EditTemplate: (request: EditTemplateRequest) => Promise<void> = async (request) => {
-  const { data } = await axios.patch(
-    `/api/content-sources/v1.0/templates/${request.uuid}`,
-    request,
-  );
+  const { data } = await axios.put(`/api/content-sources/v1.0/templates/${request.uuid}`, request);
   return data;
 };
 
