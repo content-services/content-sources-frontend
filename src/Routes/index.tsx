@@ -6,6 +6,7 @@ import RepositoryLayout from '../Pages/Repositories/RepositoryLayout';
 import { ZeroState } from 'components/ZeroState/ZeroState';
 import {
   ADD_ROUTE,
+  ADMIN_TASKS_ROUTE,
   ADVISORIES_ROUTE,
   CONTENT_ROUTE,
   DELETE_ROUTE,
@@ -35,6 +36,8 @@ import SnapshotListModal from 'Pages/Repositories/ContentListTable/components/Sn
 import SnapshotDetailsModal from 'Pages/Repositories/ContentListTable/components/SnapshotDetailsModal/SnapshotDetailsModal';
 import PackageModal from 'Pages/Repositories/ContentListTable/components/PackageModal/PackageModal';
 import PopularRepositoriesTable from 'Pages/Repositories/PopularRepositoriesTable/PopularRepositoriesTable';
+import AdminTaskTable from 'Pages/Repositories/AdminTaskTable/AdminTaskTable';
+import ViewPayloadModal from 'Pages/Repositories/AdminTaskTable/components/ViewPayloadModal/ViewPayloadModal';
 
 export default function RepositoriesRoutes() {
   const key = useMemo(() => Math.random(), []);
@@ -83,6 +86,13 @@ export default function RepositoriesRoutes() {
               ''
             )}
           </Route>
+          {features?.admintasks?.enabled && features.admintasks?.accessible ? (
+            <Route path={ADMIN_TASKS_ROUTE} element={<AdminTaskTable />}>
+              <Route key=':taskUUID' path=':taskUUID' element={<ViewPayloadModal />} />
+            </Route>
+          ) : (
+            ''
+          )}
         </Route>
         {!rbac?.templateRead ? (
           <Route path={TEMPLATES_ROUTE} element={<NoPermissionsPage />} />
