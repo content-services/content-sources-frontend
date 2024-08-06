@@ -72,7 +72,7 @@ const AddTemplateBase = () => {
   const { mutateAsync: editTemplate, isLoading: isEditing } = useEditTemplateQuery(queryClient, {
     uuid: editUUID as string,
     ...(templateRequest as TemplateRequest),
-    date: formatTemplateDate(templateRequest.date || ''),
+    date: templateRequest.use_latest ? null : formatTemplateDate(templateRequest.date || ''),
   });
 
   return (
