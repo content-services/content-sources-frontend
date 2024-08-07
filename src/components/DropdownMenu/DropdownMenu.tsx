@@ -2,10 +2,10 @@ import {
   Dropdown,
   DropdownItem,
   DropdownList,
-  DropdownProps,
   MenuToggle,
   MenuToggleProps,
   type DropdownItemProps,
+  type DropdownProps,
 } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { useState } from 'react';
@@ -16,13 +16,12 @@ const useStyles = createUseStyles({
   },
 });
 
-export interface DropDownMenuProps {
+export interface DropDownMenuProps extends Omit<DropdownProps, 'toggle'> {
   menuValue: string;
   dropDownItems?: DropdownItemProps[];
-  onSelect?: (value?: string | number | undefined) => void;
   isDisabled?: boolean;
+  multiSelect?: boolean; // Prevents close behaviour on select
   menuToggleProps?: Partial<MenuToggleProps | unknown>;
-  dropDownProps?: Partial<DropdownProps>;
 }
 
 export default function DropdownMenu({
@@ -30,8 +29,9 @@ export default function DropdownMenu({
   dropDownItems = [],
   menuValue,
   isDisabled,
+  multiSelect,
   menuToggleProps,
-  dropDownProps,
+  ...rest
 }: DropDownMenuProps) {
   const classes = useStyles();
   const [isOpen, setIsOpen] = useState(false);
@@ -48,6 +48,7 @@ export default function DropdownMenu({
         <MenuToggle
           ref={toggleRef}
           isFullWidth
+          isExpanded={isOpen}
           className={classes.menuToggle}
           onClick={onToggleClick}
           isDisabled={isDisabled}
@@ -57,17 +58,14 @@ export default function DropdownMenu({
         </MenuToggle>
       )}
       onSelect={(_, value) => {
-        onSelect(value);
-        setIsOpen(false);
+        onSelect(_, value);
+        !multiSelect && setIsOpen(false);
       }}
-      shouldFocusToggleOnSelect
-      {...dropDownProps}
+      {...rest}
     >
       <DropdownList>
         {dropDownItems.map(({ label, ...props }, index) => (
-          <DropdownItem key={label || '' + index} {...props}>
-            {label}
-          </DropdownItem>
+          <DropdownItem key={label || '' + index} {...props} />
         ))}
       </DropdownList>
     </Dropdown>

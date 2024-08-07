@@ -11,7 +11,7 @@ import {
   InputGroupText,
 } from '@patternfly/react-core';
 import { SelectVariant } from '@patternfly/react-core/deprecated';
-import DropdownSelect from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
+import DropdownSelect_Deprecated from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import Hide from 'components/Hide/Hide';
@@ -139,7 +139,7 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
         );
       case 'Status':
         return (
-          <DropdownSelect
+          <DropdownSelect_Deprecated
             toggleAriaLabel='filter status'
             toggleId='statusSelect'
             ouiaId='filter_status'
@@ -153,7 +153,7 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
         );
       case 'Type':
         return (
-          <DropdownSelect
+          <DropdownSelect_Deprecated
             toggleAriaLabel='filter type'
             toggleId='typeSelect'
             ouiaId='filter_type'
@@ -177,7 +177,7 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
           <InputGroup>
             <InputGroupItem>
               <FlexItem>
-                <DropdownSelect
+                <DropdownSelect_Deprecated
                   toggleId='filterSelectionDropdown'
                   ouiaId='filter_type'
                   isDisabled={isLoading}

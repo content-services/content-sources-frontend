@@ -1,10 +1,10 @@
 import { SelectVariant } from '@patternfly/react-core/deprecated';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import DropDownSelect from './DropdownSelect_Deprecated';
+import DropdownSelect_Deprecated from './DropdownSelect_Deprecated';
 
 it('Render with SelectVariant.single', async () => {
   const { queryByText } = render(
-    <DropDownSelect
+    <DropdownSelect_Deprecated
       selectedProp='1'
       options={['1', '2', '3', '4']}
       variant={SelectVariant.single}
@@ -24,7 +24,7 @@ it('Render with SelectVariant.single', async () => {
 
 it('Render with SelectVariant.multi', async () => {
   const { queryAllByText, queryByText, queryByRole } = render(
-    <DropDownSelect
+    <DropdownSelect_Deprecated
       aria-label='dropdown'
       selectedProp={['1', '2']}
       options={['1', '2', '3', '4']}

@@ -2,7 +2,7 @@ import { Form, FormGroup } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SelectVariant } from '@patternfly/react-core/deprecated';
-import DropdownSelect from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
+import DropdownSelect_Deprecated from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
 import { useGetSnapshotList } from 'services/Content/ContentQueries';
 import { useMemo } from 'react';
 import useRootPath from 'Hooks/useRootPath';
@@ -50,7 +50,7 @@ export function SnapshotSelector() {
         aria-label='snapshot-selector'
         fieldId='snapshot'
       >
-        <DropdownSelect
+        <DropdownSelect_Deprecated
           isDisabled={isLoading || isFetching}
           ouiaId='snapshot_selector'
           menuAppendTo={document.body}

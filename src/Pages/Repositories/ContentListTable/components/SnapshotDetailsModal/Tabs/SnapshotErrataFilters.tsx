@@ -19,7 +19,7 @@ import { createUseStyles } from 'react-jss';
 import useDebounce from 'Hooks/useDebounce';
 import Hide from 'components/Hide/Hide';
 import SeverityWithIcon from 'components/SeverityWithIcon/SeverityWithIcon';
-import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
+import DropdownMenu from 'components/DropdownMenu/DropdownMenu';
 import { isEmpty } from 'lodash';
 
 const useStyles = createUseStyles({
@@ -115,34 +115,41 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
         );
       case 'Type':
         return (
-          <DropdownSelect
+          <DropdownMenu
             onSelect={(_, val) => addOrRemoveTypes(val as string)}
-            options={
+            multiSelect
+            dropDownItems={
               ['Security', 'Bugfix', 'Enhancement', 'Other'].map((type) => ({
-                // key: type,
-                value: type,
+                role: 'menu',
                 hasCheckbox: true,
+                value: type,
                 isSelected: types.includes(type),
                 children: type,
+                ouiaId: `filter_${type}`,
               })) as SelectOptionProps[]
             }
-            toggleValue='Filter by type'
+            menuValue='Filter by type'
+            menuToggleProps={{ 'data-ouia-component-id': 'filter_by_type' }}
           />
         );
       case 'Severity':
         return (
-          <DropdownSelect
+          <DropdownMenu
             onSelect={(_, val) => addOrRemoveSeverity(val as string)}
-            options={
+            multiSelect
+            dropDownItems={
               ['Critical', 'Important', 'Moderate', 'Low', 'Unknown'].map((sev) => ({
                 // key: sev,
                 value: sev,
+                role: 'menu',
                 hasCheckbox: true,
                 isSelected: severities.includes(sev),
                 children: <SeverityWithIcon severity={sev} />,
+                ouiaId: `filter_${sev}`,
               })) as SelectOptionProps[]
             }
-            toggleValue='Filter by severity'
+            menuValue='Filter by severity'
+            menuToggleProps={{ 'data-ouia-component-id': 'filter_by_severity' }}
           />
         );
 
@@ -159,20 +166,24 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
         <InputGroup>
           <InputGroupItem>
             <FlexItem>
-              <DropdownSelect
+              <DropdownMenu
                 key='filtertype'
-                toggleProps={{ isDisabled: isLoading, icon: <FilterIcon /> }}
-                ouiaId='filter_type'
-                options={filters.map((optionName) => ({
+                menuToggleProps={{
+                  isDisabled: isLoading,
+                  icon: <FilterIcon />,
+                  'data-ouia-component-id': 'filter_errata',
+                }}
+                dropDownItems={filters.map((optionName) => ({
                   //   key: optionName,
                   value: optionName,
                   children: optionName,
+                  ouiaId: `filter_${optionName}`,
                 }))}
                 selected={filterType}
                 onSelect={(_, val) => {
                   setFilterType(val as Filters);
                 }}
-                toggleValue={filterType}
+                menuValue={filterType}
               />
             </FlexItem>
           </InputGroupItem>

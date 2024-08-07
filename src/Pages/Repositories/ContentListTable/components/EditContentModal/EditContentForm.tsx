@@ -31,7 +31,7 @@ import {
   EditContentRequest,
   RepositoryParamsResponse,
 } from 'services/Content/ContentApi';
-import DropdownSelect from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
+import DropdownSelect_Deprecated from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
 import { useQueryClient } from 'react-query';
 import {
   failedFileUpload,
@@ -484,7 +484,7 @@ const EditContentForm = ({
                     }
                     fieldId='arch'
                   >
-                    <DropdownSelect
+                    <DropdownSelect_Deprecated
                       ouiaId='restrict_to_architecture'
                       validated={getFieldValidation(index, 'arch')}
                       menuAppendTo={document.body}
@@ -512,7 +512,7 @@ const EditContentForm = ({
                     }
                     fieldId='version'
                   >
-                    <DropdownSelect
+                    <DropdownSelect_Deprecated
                       ouiaId='restrict_to_os_version'
                       validated={getFieldValidation(index, 'versions')}
                       menuAppendTo={document.body}
