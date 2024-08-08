@@ -120,7 +120,6 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
             multiSelect
             dropDownItems={
               ['Security', 'Bugfix', 'Enhancement', 'Other'].map((type) => ({
-                role: 'menu',
                 hasCheckbox: true,
                 value: type,
                 isSelected: types.includes(type),
@@ -139,9 +138,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
             multiSelect
             dropDownItems={
               ['Critical', 'Important', 'Moderate', 'Low', 'Unknown'].map((sev) => ({
-                // key: sev,
                 value: sev,
-                role: 'menu',
                 hasCheckbox: true,
                 isSelected: severities.includes(sev),
                 children: <SeverityWithIcon severity={sev} />,

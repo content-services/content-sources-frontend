@@ -44,6 +44,8 @@ export default function DropdownMenu({
     <Dropdown
       isOpen={isOpen}
       onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
+      role='menu'
+      isRootMenu
       toggle={(toggleRef) => (
         <MenuToggle
           ref={toggleRef}
@@ -65,7 +67,7 @@ export default function DropdownMenu({
     >
       <DropdownList>
         {dropDownItems.map(({ label, ...props }, index) => (
-          <DropdownItem key={label || '' + index} {...props} />
+          <DropdownItem role='menuitem' key={label || '' + index} {...props} />
         ))}
       </DropdownList>
     </Dropdown>
