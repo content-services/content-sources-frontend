@@ -13,7 +13,7 @@ import {
   ToggleGroupItem,
 } from '@patternfly/react-core';
 import { SelectVariant } from '@patternfly/react-core/deprecated';
-import DropdownSelect from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
+import DropdownSelect_Deprecated from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import Hide from 'components/Hide/Hide';
@@ -189,7 +189,7 @@ const ContentListFilters = ({
         );
       case 'Version':
         return (
-          <DropdownSelect
+          <DropdownSelect_Deprecated
             toggleAriaLabel='filter version'
             toggleId='versionSelect'
             ouiaId='filter_version'
@@ -203,7 +203,7 @@ const ContentListFilters = ({
         );
       case 'Architecture':
         return (
-          <DropdownSelect
+          <DropdownSelect_Deprecated
             toggleAriaLabel='filter architecture'
             toggleId='archSelect'
             ouiaId='filter_arch'
@@ -217,7 +217,7 @@ const ContentListFilters = ({
         );
       case 'Status':
         return (
-          <DropdownSelect
+          <DropdownSelect_Deprecated
             toggleAriaLabel='filter status'
             toggleId='statusSelect'
             ouiaId='filter_status'
@@ -250,7 +250,7 @@ const ContentListFilters = ({
           <InputGroup>
             <InputGroupItem>
               <FlexItem>
-                <DropdownSelect
+                <DropdownSelect_Deprecated
                   toggleId='filterSelectionDropdown'
                   ouiaId='filter_type'
                   isDisabled={isLoading}

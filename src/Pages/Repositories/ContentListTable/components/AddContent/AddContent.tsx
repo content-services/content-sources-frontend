@@ -46,7 +46,7 @@ import {
   useValidateContentList,
 } from 'services/Content/ContentQueries';
 import { RepositoryParamsResponse } from 'services/Content/ContentApi';
-import DropdownSelect from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
+import DropdownSelect_Deprecated from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
 import { useQueryClient } from 'react-query';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { isEmpty, isEqual } from 'lodash';
@@ -628,7 +628,7 @@ const AddContent = () => {
                       }
                       fieldId='arch'
                     >
-                      <DropdownSelect
+                      <DropdownSelect_Deprecated
                         ouiaId='restrict_to_architecture'
                         menuAppendTo={document.body}
                         toggleId={'archSelection' + index}
@@ -655,7 +655,7 @@ const AddContent = () => {
                       }
                       fieldId='version'
                     >
-                      <DropdownSelect
+                      <DropdownSelect_Deprecated
                         ouiaId='restrict_to_os_version'
                         menuAppendTo={document.body}
                         toggleId={'versionSelection' + index}

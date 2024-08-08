@@ -1,23 +1,41 @@
-import React from 'react';
 import {
   Select,
-  SelectOption,
-  SelectList,
   MenuToggle,
-  MenuToggleElement,
-  SelectOptionProps,
   MenuToggleProps,
-  SelectProps,
+  SelectList,
+  SelectOption,
+  type SelectOptionProps,
+  type SelectProps,
 } from '@patternfly/react-core';
+import { createUseStyles } from 'react-jss';
+import { useState } from 'react';
 
-interface Props extends Omit<SelectProps, 'toggle'> {
-  toggleValue?: string;
-  toggleProps?: Partial<MenuToggleProps>;
-  options: Partial<SelectOptionProps>[];
+const useStyles = createUseStyles({
+  menuToggle: {
+    maxWidth: 'unset!important', // Remove arbitrary button width
+  },
+});
+
+export interface DropDownSelectProps extends Omit<SelectProps, 'toggle'> {
+  menuValue: string;
+  dropDownItems?: SelectOptionProps[];
+  isDisabled?: boolean;
+  multiSelect?: boolean; // Prevents close behaviour on select
+  menuToggleProps?: Partial<MenuToggleProps | unknown>;
 }
 
-export default function DropdownSelect({ toggleValue, options, toggleProps = {}, ...rest }: Props) {
-  const [isOpen, setIsOpen] = React.useState(false);
+// Use with checkboxes
+export default function DropdownSelect({
+  onSelect = () => undefined,
+  dropDownItems = [],
+  menuValue,
+  isDisabled,
+  multiSelect,
+  menuToggleProps,
+  ...rest
+}: DropDownSelectProps) {
+  const classes = useStyles();
+  const [isOpen, setIsOpen] = useState(false);
 
   const onToggleClick = () => {
     setIsOpen(!isOpen);
@@ -26,18 +44,29 @@ export default function DropdownSelect({ toggleValue, options, toggleProps = {},
   return (
     <Select
       isOpen={isOpen}
-      onOpenChange={(nextOpen: boolean) => setIsOpen(nextOpen)}
-      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-        <MenuToggle ref={toggleRef} onClick={onToggleClick} isExpanded={isOpen} {...toggleProps}>
-          {toggleValue}
+      onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
+      toggle={(toggleRef) => (
+        <MenuToggle
+          ref={toggleRef}
+          isFullWidth
+          isExpanded={isOpen}
+          className={classes.menuToggle}
+          onClick={onToggleClick}
+          isDisabled={isDisabled}
+          {...menuToggleProps}
+        >
+          {menuValue}
         </MenuToggle>
       )}
-      popperProps={{ appendTo: document.body }}
+      onSelect={(_, value) => {
+        onSelect(_, value);
+        !multiSelect && setIsOpen(false);
+      }}
       {...rest}
     >
       <SelectList>
-        {options.map((option, index) => (
-          <SelectOption key={index + option?.value} {...option} />
+        {dropDownItems.map(({ label, ...props }, index) => (
+          <SelectOption key={label || '' + index} {...props} />
         ))}
       </SelectList>
     </Select>

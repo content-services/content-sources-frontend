@@ -42,11 +42,11 @@ export default function DefineContentStep() {
 
   const allowedDistributionarches = distribution_arches
     .filter(({ label }) => ['x86_64', 'aarch64'].includes(label))
-    .map(({ label, name }) => ({ value: label, label: name }));
+    .map(({ label, name }) => ({ value: label, children: name }));
 
   const allowedDistributionVersions = distribution_versions
     .filter(({ label }) => ['8', '9'].includes(label))
-    .map(({ label, name }) => ({ value: label, label: name }));
+    .map(({ label, name }) => ({ value: label, children: name }));
 
   return (
     <Grid hasGutter>
@@ -71,11 +71,15 @@ export default function DefineContentStep() {
           setDisabled
         >
           <DropdownMenu
-            onSelect={(value) => setTemplateRequest((prev) => ({ ...prev, arch: value as string }))}
+            onSelect={(_, value) =>
+              setTemplateRequest((prev) => ({ ...prev, arch: value as string }))
+            }
             dropDownItems={allowedDistributionarches}
             menuValue={archesDisplay(templateRequest?.arch)}
-            menuToggleProps={{ 'data-ouia-component-id': 'restrict_to_architecture' }}
-            dropDownProps={{ ouiaId: 'restrict_to_architecture_menu' }}
+            menuToggleProps={{
+              'data-ouia-component-id': 'restrict_to_architecture',
+            }}
+            ouiaId='restrict_to_architecture_menu'
           />
         </ConditionalTooltip>
       </FormGroup>
@@ -87,13 +91,13 @@ export default function DefineContentStep() {
           setDisabled
         >
           <DropdownMenu
-            onSelect={(value) =>
+            onSelect={(_, value) =>
               setTemplateRequest((prev) => ({ ...prev, version: value as string }))
             }
             dropDownItems={allowedDistributionVersions}
             menuValue={versionDisplay(templateRequest?.version)}
             menuToggleProps={{ 'data-ouia-component-id': 'restrict_to_os_version' }}
-            dropDownProps={{ ouiaId: 'restrict_to_os_version_menu' }}
+            ouiaId='restrict_to_os_version_menu'
           />
         </ConditionalTooltip>
       </FormGroup>
