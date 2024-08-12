@@ -6,7 +6,6 @@ import {
   SelectOption,
   type SelectOptionProps,
   type SelectProps,
-  type SelectPopperProps,
 } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { useState } from 'react';
