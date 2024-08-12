@@ -11,7 +11,7 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { useAddTemplateContext } from '../AddTemplateContext';
-import DropdownMenu from 'components/DropdownMenu/DropdownMenu';
+import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 import { global_Color_300 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
@@ -70,16 +70,13 @@ export default function DefineContentStep() {
           show={!!isEdit}
           setDisabled
         >
-          <DropdownMenu
+          <DropdownSelect
             onSelect={(_, value) =>
               setTemplateRequest((prev) => ({ ...prev, arch: value as string }))
             }
             dropDownItems={allowedDistributionarches}
             menuValue={archesDisplay(templateRequest?.arch)}
-            menuToggleProps={{
-              'data-ouia-component-id': 'restrict_to_architecture',
-            }}
-            ouiaId='restrict_to_architecture_menu'
+            ouiaId='restrict_to_architecture'
           />
         </ConditionalTooltip>
       </FormGroup>
@@ -90,14 +87,13 @@ export default function DefineContentStep() {
           show={!!isEdit}
           setDisabled
         >
-          <DropdownMenu
+          <DropdownSelect
             onSelect={(_, value) =>
               setTemplateRequest((prev) => ({ ...prev, version: value as string }))
             }
             dropDownItems={allowedDistributionVersions}
             menuValue={versionDisplay(templateRequest?.version)}
-            menuToggleProps={{ 'data-ouia-component-id': 'restrict_to_os_version' }}
-            ouiaId='restrict_to_os_version_menu'
+            ouiaId='restrict_to_os_version'
           />
         </ConditionalTooltip>
       </FormGroup>

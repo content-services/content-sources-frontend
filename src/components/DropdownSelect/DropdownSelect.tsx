@@ -6,6 +6,7 @@ import {
   SelectOption,
   type SelectOptionProps,
   type SelectProps,
+  type SelectPopperProps,
 } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { useState } from 'react';
@@ -32,6 +33,7 @@ export default function DropdownSelect({
   isDisabled,
   multiSelect,
   menuToggleProps,
+  ouiaId,
   ...rest
 }: DropDownSelectProps) {
   const classes = useStyles();
@@ -42,33 +44,40 @@ export default function DropdownSelect({
   };
 
   return (
-    <Select
-      isOpen={isOpen}
-      onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
-      toggle={(toggleRef) => (
-        <MenuToggle
-          ref={toggleRef}
-          isFullWidth
-          isExpanded={isOpen}
-          className={classes.menuToggle}
-          onClick={onToggleClick}
-          isDisabled={isDisabled}
-          {...menuToggleProps}
-        >
-          {menuValue}
-        </MenuToggle>
-      )}
-      onSelect={(_, value) => {
-        onSelect(_, value);
-        !multiSelect && setIsOpen(false);
-      }}
-      {...rest}
+    <div
+      className='pf-v5-c-select'
+      data-ouia-component-type='PF5/Select'
+      data-ouia-safe={true}
+      data-ouia-component-id={ouiaId}
     >
-      <SelectList>
-        {dropDownItems.map(({ label, ...props }, index) => (
-          <SelectOption key={label || '' + index} {...props} />
-        ))}
-      </SelectList>
-    </Select>
+      <Select
+        isOpen={isOpen}
+        onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
+        toggle={(toggleRef) => (
+          <MenuToggle
+            ref={toggleRef}
+            isFullWidth
+            isExpanded={isOpen}
+            className={classes.menuToggle}
+            onClick={onToggleClick}
+            isDisabled={isDisabled}
+            {...menuToggleProps}
+          >
+            {menuValue}
+          </MenuToggle>
+        )}
+        onSelect={(_, value) => {
+          onSelect(_, value);
+          !multiSelect && setIsOpen(false);
+        }}
+        {...rest}
+      >
+        <SelectList>
+          {dropDownItems.map(({ label, ...props }, index) => (
+            <SelectOption key={label || '' + index} {...props} />
+          ))}
+        </SelectList>
+      </Select>
+    </div>
   );
 }

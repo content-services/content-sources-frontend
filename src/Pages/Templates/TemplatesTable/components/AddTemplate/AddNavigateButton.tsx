@@ -1,5 +1,5 @@
 import { useWizardContext, Flex, Button, ButtonVariant } from '@patternfly/react-core';
-import DropdownMenu from 'components/DropdownMenu/DropdownMenu';
+import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 import useRootPath from 'Hooks/useRootPath';
 import { useNavigate } from 'react-router-dom';
 import { TEMPLATES_ROUTE, DETAILS_ROUTE, SYSTEMS_ROUTE, ADD_ROUTE } from 'Routes/constants';
@@ -21,9 +21,9 @@ export const AddNavigateButton = ({ isAdding, add, onClose }: Props) => {
       <Button variant={ButtonVariant.secondary} onClick={goToPrevStep}>
         Back
       </Button>
-
-      <DropdownMenu
+      <DropdownSelect
         dropDownItems={[{ isDisabled: isAdding, children: 'Create template only', type: 'submit' }]}
+        ouiaId='create_template'
         onSelect={() => add().then(() => onClose())}
         menuValue=''
         menuToggleProps={{

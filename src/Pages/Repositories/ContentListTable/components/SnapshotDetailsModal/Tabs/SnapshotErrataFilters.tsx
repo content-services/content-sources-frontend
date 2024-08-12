@@ -19,7 +19,7 @@ import { createUseStyles } from 'react-jss';
 import useDebounce from 'Hooks/useDebounce';
 import Hide from 'components/Hide/Hide';
 import SeverityWithIcon from 'components/SeverityWithIcon/SeverityWithIcon';
-import DropdownMenu from 'components/DropdownMenu/DropdownMenu';
+import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 import { isEmpty } from 'lodash';
 
 const useStyles = createUseStyles({
@@ -115,7 +115,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
         );
       case 'Type':
         return (
-          <DropdownMenu
+          <DropdownSelect
             onSelect={(_, val) => addOrRemoveTypes(val as string)}
             multiSelect
             dropDownItems={
@@ -128,12 +128,12 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
               })) as SelectOptionProps[]
             }
             menuValue='Filter by type'
-            menuToggleProps={{ 'data-ouia-component-id': 'filter_by_type' }}
+            ouiaId='filter_by_type'
           />
         );
       case 'Severity':
         return (
-          <DropdownMenu
+          <DropdownSelect
             onSelect={(_, val) => addOrRemoveSeverity(val as string)}
             multiSelect
             dropDownItems={
@@ -146,7 +146,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
               })) as SelectOptionProps[]
             }
             menuValue='Filter by severity'
-            menuToggleProps={{ 'data-ouia-component-id': 'filter_by_severity' }}
+            ouiaId='filter_by_severity'
           />
         );
 
@@ -163,12 +163,12 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
         <InputGroup>
           <InputGroupItem>
             <FlexItem>
-              <DropdownMenu
+              <DropdownSelect
                 key='filtertype'
+                ouiaId='filter_errata'
                 menuToggleProps={{
                   isDisabled: isLoading,
                   icon: <FilterIcon />,
-                  'data-ouia-component-id': 'filter_errata',
                 }}
                 dropDownItems={filters.map((optionName) => ({
                   //   key: optionName,
