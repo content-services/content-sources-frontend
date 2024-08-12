@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useQuery } from 'react-query';
 import {
   AdminTaskFilterData,
@@ -19,36 +18,16 @@ export const useAdminTaskListQuery = (
   limit: number,
   filterData: AdminTaskFilterData,
   sortBy: string,
+  polling: boolean,
 ) => {
-  const [polling, setPolling] = useState(false);
-  const [pollCount, setPollCount] = useState(0);
   const errorNotifier = useErrorNotification();
   const flattenedFilterData = Object.values(filterData).flat(1);
   return useQuery<AdminTaskListResponse>(
     [ADMIN_TASK_LIST_KEY, page, limit, sortBy, ...flattenedFilterData],
     () => getAdminTasks(page, limit, filterData, sortBy),
     {
-      onSuccess: (data) => {
-        const containsRunning = data?.data?.some(({ status }) => status === 'running');
-        if (polling && containsRunning) {
-          // Count each consecutive time polling occurs
-          setPollCount(pollCount + 1);
-        }
-        if (polling && !containsRunning) {
-          // We were polling, but now the data is valid, we stop the count.
-          setPollCount(0);
-        }
-        if (pollCount > 40) {
-          // If polling occurs 40 times in a row, we stop it. Likely a data/kafka issue has occurred with the API.
-          return setPolling(false);
-        }
-        // This sets the polling state based whether the data contains any "Running" status
-        return setPolling(containsRunning);
-      },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
-        setPolling(false);
-        setPollCount(0);
         errorNotifier(
           'Unable to get admin task list',
           'An error occurred',

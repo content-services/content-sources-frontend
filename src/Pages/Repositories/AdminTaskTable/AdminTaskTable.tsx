@@ -19,7 +19,7 @@ import {
   Tr,
 } from '@patternfly/react-table';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from 'components/Hide/Hide';
@@ -63,6 +63,8 @@ const AdminTaskTable = () => {
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
+  const [polling, setPolling] = useState(false);
+  const [pollCount, setPollCount] = useState(0);
   const [activeSortIndex, setActiveSortIndex] = useState<number>(3); // queued_at
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('desc');
 
@@ -95,7 +97,32 @@ const AdminTaskTable = () => {
     isError,
     isFetching,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useAdminTaskListQuery(page, perPage, filterData, sortString);
+  } = useAdminTaskListQuery(page, perPage, filterData, sortString, polling);
+
+  useEffect(() => {
+    if (isError) {
+      setPolling(false);
+      setPollCount(0);
+      return;
+    }
+    const containsPending = data?.data?.some(
+      ({ status }) => status === 'pending' || status === 'running',
+    );
+    if (polling && containsPending) {
+      // Count each consecutive time polling occurs
+      setPollCount(pollCount + 1);
+    }
+    if (polling && !containsPending) {
+      // We were polling, but now the data is valid, we stop the count.
+      setPollCount(0);
+    }
+    if (pollCount > 40) {
+      // If polling occurs 40 times in a row, we stop it. Likely a data/kafka issue has occurred with the API.
+      return setPolling(false);
+    }
+    // This sets the polling state based whether the data contains any "Pending" status
+    return setPolling(containsPending);
+  }, [data.data]);
 
   const actionTakingPlace = isFetching;
 
