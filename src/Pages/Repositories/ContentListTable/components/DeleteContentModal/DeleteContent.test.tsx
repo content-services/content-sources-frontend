@@ -31,7 +31,7 @@ jest.mock('../../ContentListTable', () => ({
       page: 1,
       perPage: 21,
       filterData: undefined,
-      contentOrigin: ContentOrigin.EXTERNAL,
+      contentOrigin: ContentOrigin.CUSTOM,
       sortString: '',
       checkedRepositories: new Set<string>('some-uuid'),
     },

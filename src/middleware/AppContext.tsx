@@ -30,7 +30,7 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [zeroState, setZeroState] = useState(true);
   const [features, setFeatures] = useState<Features | null>(null);
   const chrome = useChrome();
-  const [contentOrigin, setContentOrigin] = useState<ContentOrigin>(ContentOrigin.EXTERNAL);
+  const [contentOrigin, setContentOrigin] = useState<ContentOrigin>(ContentOrigin.CUSTOM);
   const { fetchFeatures, isLoading: isFetchingFeatures } = useFetchFeaturesQuery();
 
   useEffect(() => {

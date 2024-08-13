@@ -296,7 +296,7 @@ const PopularRepositoriesTable = () => {
     checkedRepositoriesToDelete,
     page,
     perPage,
-    ContentOrigin.EXTERNAL,
+    ContentOrigin.CUSTOM,
     { searchQuery: debouncedSearchValue } as FilterData,
     undefined, // sort string
   );

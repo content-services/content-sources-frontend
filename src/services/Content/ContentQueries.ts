@@ -114,7 +114,7 @@ export const useContentListQuery = (
   limit: number,
   filterData: FilterData,
   sortBy: string,
-  contentOrigin: ContentOrigin = ContentOrigin.EXTERNAL,
+  contentOrigin: ContentOrigin = ContentOrigin.CUSTOM,
   enabled: boolean = true,
   polling: boolean = false,
 ) => {

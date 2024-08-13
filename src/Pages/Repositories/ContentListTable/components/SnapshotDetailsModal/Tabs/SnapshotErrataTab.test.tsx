@@ -20,7 +20,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({
-    contentOrigin: ContentOrigin.EXTERNAL,
+    contentOrigin: ContentOrigin.CUSTOM,
   }),
 }));
 

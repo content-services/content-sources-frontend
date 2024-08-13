@@ -254,10 +254,13 @@ export const getPopularRepositories: (
   );
   return data;
 };
+
 export enum ContentOrigin {
   'REDHAT' = 'red_hat',
   'EXTERNAL' = 'external',
-  'ALL' = 'red_hat,external',
+  'UPLOAD' = 'upload',
+  'CUSTOM' = 'external,upload',
+  'ALL' = 'red_hat,external,upload',
 }
 
 export const getContentList: (

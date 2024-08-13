@@ -28,7 +28,7 @@ beforeAll(() => {
 it('Render loading state (disabled)', () => {
   const { getByRole } = render(
     <ContentListFilters
-      contentOrigin={ContentOrigin.EXTERNAL}
+      contentOrigin={ContentOrigin.CUSTOM}
       setContentOrigin={() => null}
       isLoading={true}
       setFilterData={() => null}
@@ -50,7 +50,7 @@ it('Render loading state (disabled)', () => {
 it('Select a filter of each type and ensure chips are present', () => {
   const { queryByText, getByRole, getByLabelText } = render(
     <ContentListFilters
-      contentOrigin={ContentOrigin.EXTERNAL}
+      contentOrigin={ContentOrigin.CUSTOM}
       setContentOrigin={() => null}
       setFilterData={() => null}
       filterData={{

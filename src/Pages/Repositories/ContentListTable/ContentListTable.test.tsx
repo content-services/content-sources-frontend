@@ -25,7 +25,7 @@ jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({
     features: { snapshots: { accessible: true } },
     rbac: { repoWrite: true, repoRead: true },
-    contentOrigin: ContentOrigin.EXTERNAL,
+    contentOrigin: ContentOrigin.CUSTOM,
     setContentOrigin: () => {},
   }),
 }));
@@ -35,7 +35,7 @@ jest.mock('./components/AddContent/AddContent');
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
   Outlet: () => <></>,
-  useSearchParams: () => [{ get: () => 'external' }, () => {}],
+  useSearchParams: () => [{ get: () => ContentOrigin.CUSTOM }, () => {}],
 }));
 
 (AddContent as jest.Mock).mockImplementation(() => 'Add content');

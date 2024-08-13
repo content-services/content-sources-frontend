@@ -275,10 +275,10 @@ const ContentListFilters = ({
                 text='Custom'
                 buttonId='custom-repositories-toggle-button'
                 data-ouia-component-id='custom-repositories-toggle'
-                isSelected={contentOrigin === ContentOrigin.EXTERNAL}
+                isSelected={contentOrigin === ContentOrigin.CUSTOM}
                 onChange={() => {
-                  if (contentOrigin !== ContentOrigin.EXTERNAL) {
-                    setContentOrigin(ContentOrigin.EXTERNAL);
+                  if (contentOrigin !== ContentOrigin.CUSTOM) {
+                    setContentOrigin(ContentOrigin.CUSTOM);
                     // clearFilters(); //This resets the filters when changing Origins if desired.
                   }
                 }}

@@ -120,7 +120,7 @@ const ContentListTable = () => {
   const setOriginAndSearchParams = (origin: ContentOrigin) => {
     if (!features?.snapshots?.accessible) return;
     setContentOrigin(origin);
-    setUrlSearchParams(origin === ContentOrigin.EXTERNAL ? {} : { origin });
+    setUrlSearchParams(origin === ContentOrigin.CUSTOM ? {} : { origin });
   };
 
   useEffect(() => {
@@ -409,7 +409,7 @@ const ContentListTable = () => {
   };
 
   const itemName =
-    contentOrigin === ContentOrigin.EXTERNAL ? 'custom repositories' : 'Red Hat repositories';
+    contentOrigin === ContentOrigin.CUSTOM ? 'custom repositories' : 'Red Hat repositories';
   const notFilteredBody = 'To get started, create a custom repository';
 
   const countIsZero = count === 0;

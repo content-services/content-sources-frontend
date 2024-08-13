@@ -4,7 +4,7 @@ import { ContentOrigin } from 'services/Content/ContentApi';
 
 jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({
-    contentOrigin: ContentOrigin.EXTERNAL,
+    contentOrigin: ContentOrigin.CUSTOM,
   }),
 }));
 
