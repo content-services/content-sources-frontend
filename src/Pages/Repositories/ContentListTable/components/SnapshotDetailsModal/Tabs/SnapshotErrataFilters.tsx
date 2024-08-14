@@ -59,10 +59,10 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
 
   useEffect(() => {
     // If the filters get cleared at the top level, sense that and clear them here.
-    if (!filterData.search && !filterData.type && !filterData.severity) {
+    if (!filterData.search && !filterData.type.length && !filterData.severity.length) {
       clearFilters();
     }
-  }, [filterData]);
+  }, [filterData.search, filterData.type.length, filterData.severity.length]);
 
   const {
     search: debouncedSearch,

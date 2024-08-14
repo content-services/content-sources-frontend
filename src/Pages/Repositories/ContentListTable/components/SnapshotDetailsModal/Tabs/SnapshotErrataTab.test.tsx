@@ -27,6 +27,8 @@ jest.mock('middleware/AppContext', () => ({
 it('Render 1 item in errata list', () => {
   (useGetSnapshotErrataQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
+    isFetching: false,
+    isError: false,
     data: {
       data: [defaultErrataItem],
       meta: { count: 1, limit: 20, offset: 0 },
@@ -34,7 +36,6 @@ it('Render 1 item in errata list', () => {
   }));
 
   const { queryByText } = render(<SnapshotErrataTab />);
-
   const expandableButton = document.getElementById('expandable-0');
   fireEvent.click(expandableButton as HTMLElement);
 
