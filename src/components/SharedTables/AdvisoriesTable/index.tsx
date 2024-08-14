@@ -124,108 +124,103 @@ export default function AdvisoriesTable({
               </Tr>
             </Thead>
           </Hide>
-          <Tbody>
-            {errataList.map(
-              (
-                {
-                  errata_id,
-                  summary,
-                  description,
-                  issued_date,
-                  updated_date,
-                  type,
-                  severity,
-                  reboot_suggested,
-                }: ErrataItem,
-                rowIndex,
-              ) => (
-                <React.Fragment key={errata_id + rowIndex + '-column'}>
+          {errataList.map(
+            (
+              {
+                errata_id,
+                summary,
+                description,
+                issued_date,
+                updated_date,
+                type,
+                severity,
+                reboot_suggested,
+              }: ErrataItem,
+              rowIndex,
+            ) => (
+              <Tbody key={errata_id + rowIndex + '-column'}>
+                <Tr>
+                  <Td
+                    expand={{
+                      rowIndex,
+                      isExpanded: !!expandState[rowIndex],
+                      onToggle: () =>
+                        setExpandState((prev) => ({ ...prev, [rowIndex]: !prev[rowIndex] })),
+                      expandId: 'expandable-',
+                    }}
+                  />
+                  <Td>{errata_id}</Td>
+                  <Td>{reduceStringToCharsWithEllipsis(summary, 70)}</Td>
+                  <Td>
+                    <div>
+                      <ErrataTypeIcon type={type} iconProps={{ className: classes.rightMargin }} />
+                      {capitalize(type)}
+                    </div>
+                  </Td>
+                  <Td>
+                    <SeverityWithIcon severity={severity} />
+                  </Td>
+                  <Td>{formatDateDDMMMYYYY(issued_date)}</Td>
+                </Tr>
+                <Hide hide={!expandState[rowIndex]}>
                   <Tr>
-                    <Td
-                      expand={{
-                        rowIndex,
-                        isExpanded: !!expandState[rowIndex],
-                        onToggle: () =>
-                          setExpandState((prev) => ({ ...prev, [rowIndex]: !prev[rowIndex] })),
-                        expandId: 'expandable-',
-                      }}
-                    />
-                    <Td>{errata_id}</Td>
-                    <Td>{reduceStringToCharsWithEllipsis(summary, 70)}</Td>
-                    <Td>
-                      <div>
-                        <ErrataTypeIcon
-                          type={type}
-                          iconProps={{ className: classes.rightMargin }}
-                        />
-                        {capitalize(type)}
-                      </div>
-                    </Td>
-                    <Td>
-                      <SeverityWithIcon severity={severity} />
-                    </Td>
-                    <Td>{formatDateDDMMMYYYY(issued_date)}</Td>
-                  </Tr>
-                  <Hide hide={!expandState[rowIndex]}>
-                    <Tr>
-                      <Td />
-                      <Td dataLabel={rowIndex + '-content-label'} colSpan={3}>
-                        <ExpandableRowContent key={rowIndex + '-expandablecontent'}>
-                          <Stack hasGutter className={classes.expansionBox}>
-                            <Flex direction={{ default: 'row' }}>
-                              <FlexItem>
-                                <strong>Updated date</strong>
-                                <Text>
-                                  {updated_date ? formatDateDDMMMYYYY(updated_date) : 'N/A'}
-                                </Text>
-                              </FlexItem>
-                            </Flex>
-                            <Grid>
-                              <strong>Description</strong>
-                              <Text className={classes.retainSpaces}>
-                                {formatDescription(description)}
+                    <Td />
+                    <Td dataLabel={rowIndex + '-content-label'} colSpan={3}>
+                      <ExpandableRowContent key={rowIndex + '-expandablecontent'}>
+                        <Stack hasGutter className={classes.expansionBox}>
+                          <Flex direction={{ default: 'row' }}>
+                            <FlexItem>
+                              <strong>Updated date</strong>
+                              <Text>
+                                {updated_date ? formatDateDDMMMYYYY(updated_date) : 'N/A'}
                               </Text>
-                            </Grid>
-                            <Grid>
-                              <strong>Reboot</strong>
-                              <div>
-                                {reboot_suggested ? (
-                                  <OffIcon className={classes.red} />
-                                ) : (
-                                  <OnIcon className={classes.green} />
-                                )}
-                                {`Reboot is ${reboot_suggested ? '' : 'not '}required`}
-                              </div>
-                            </Grid>
-                            <Grid>
-                              <div>
-                                {errata_id.startsWith('RH') ? (
-                                  <UrlWithExternalIcon
-                                    href={`https://access.redhat.com/errata/${errata_id}`}
-                                    customText='View packages and errata at access.redhat.com'
-                                  />
-                                ) : (
-                                  ''
-                                )}
-                              </div>
-                            </Grid>
-                          </Stack>
-                        </ExpandableRowContent>
-                      </Td>
-                    </Tr>
-                  </Hide>
-                </React.Fragment>
-              ),
-            )}
-            <Hide hide={!isLoadingOrZeroCount}>
-              <EmptyTableState
-                notFiltered={!hasFilters}
-                clearFilters={clearSearch}
-                itemName='advisories'
-                notFilteredBody='You may need to add repositories that contain advisories.'
-              />
-            </Hide>
-          </Tbody>
+                            </FlexItem>
+                          </Flex>
+                          <Grid>
+                            <strong>Description</strong>
+                            <Text className={classes.retainSpaces}>
+                              {formatDescription(description)}
+                            </Text>
+                          </Grid>
+                          <Grid>
+                            <strong>Reboot</strong>
+                            <div>
+                              {reboot_suggested ? (
+                                <OffIcon className={classes.red} />
+                              ) : (
+                                <OnIcon className={classes.green} />
+                              )}
+                              {`Reboot is ${reboot_suggested ? '' : 'not '}required`}
+                            </div>
+                          </Grid>
+                          <Grid>
+                            <div>
+                              {errata_id.startsWith('RH') ? (
+                                <UrlWithExternalIcon
+                                  href={`https://access.redhat.com/errata/${errata_id}`}
+                                  customText='View packages and errata at access.redhat.com'
+                                />
+                              ) : (
+                                ''
+                              )}
+                            </div>
+                          </Grid>
+                        </Stack>
+                      </ExpandableRowContent>
+                    </Td>
+                  </Tr>
+                </Hide>
+              </Tbody>
+            ),
+          )}
+          <Hide hide={!isLoadingOrZeroCount}>
+            <EmptyTableState
+              notFiltered={!hasFilters}
+              clearFilters={clearSearch}
+              itemName='advisories'
+              notFilteredBody='You may need to add repositories that contain advisories.'
+            />
+          </Hide>
         </Table>
       </Hide>
     </>
