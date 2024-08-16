@@ -61,7 +61,7 @@ export default function DropdownMenu({
       )}
       onSelect={(_, value) => {
         onSelect(_, value);
-        !multiSelect && setIsOpen(false);
+        if (!multiSelect) setIsOpen(false);
       }}
       {...rest}
     >

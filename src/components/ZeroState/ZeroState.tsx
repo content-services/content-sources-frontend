@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 import { Bullseye, Button, Grid, Spinner } from '@patternfly/react-core';
 import AsyncComponent from '@redhat-cloud-services/frontend-components/AsyncComponent';
 import ErrorState from '@redhat-cloud-services/frontend-components/ErrorState';
-import { Outlet } from 'react-router-dom';
 import { createUseStyles } from 'react-jss';
 
 import { useAppContext } from 'middleware/AppContext';
@@ -55,7 +54,6 @@ export const ZeroState = () => {
           />
         </Grid>
       </Suspense>
-      <Outlet />
     </>
   );
 };

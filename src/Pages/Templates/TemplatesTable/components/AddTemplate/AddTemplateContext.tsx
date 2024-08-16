@@ -139,9 +139,13 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
         }
       });
 
-      redHatReposToAdd.length &&
+      if (redHatReposToAdd.length) {
         setSelectedRedhatRepos(new Set([...selectedRedhatRepos, ...redHatReposToAdd]));
-      customReposToAdd.length && setSelectedCustomRepos(new Set(customReposToAdd));
+      }
+
+      if (customReposToAdd.length) {
+        setSelectedCustomRepos(new Set(customReposToAdd));
+      }
     }
   }, [editTemplateData, isLoading, existingRepositoryInformation]);
 
