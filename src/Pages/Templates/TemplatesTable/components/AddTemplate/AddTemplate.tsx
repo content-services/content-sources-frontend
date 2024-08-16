@@ -75,6 +75,12 @@ const AddTemplateBase = () => {
     date: templateRequest.use_latest ? null : formatTemplateDate(templateRequest.date || ''),
   });
 
+  const sharedFooterProps = {
+    nextButtonProps: { ouiaId: 'wizard-next-btn' },
+    backButtonProps: { ouiaId: 'wizard-back-btn' },
+    cancelButtonProps: { ouiaId: 'wizard-cancel-btn' },
+  };
+
   return (
     <Modal
       aria-label={`${isEdit ? 'edit' : 'add'} template modal`}
@@ -119,7 +125,7 @@ const AddTemplateBase = () => {
                 name='Define content'
                 id='define_content'
                 key='define_content_key'
-                footer={{ isNextDisabled: checkIfCurrentStepValid(1) }}
+                footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(1) }}
               >
                 <DefineContentStep />
               </WizardStep>,
@@ -128,7 +134,7 @@ const AddTemplateBase = () => {
                 name='Red Hat repositories'
                 id='redhat_repositories'
                 key='redhat_repositories_key'
-                footer={{ isNextDisabled: checkIfCurrentStepValid(2) }}
+                footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(2) }}
               >
                 <RedhatRepositoriesStep />
               </WizardStep>,
@@ -137,7 +143,7 @@ const AddTemplateBase = () => {
                 name='Custom Repositories'
                 id='custom_repositories'
                 key='custom_repositories_key'
-                footer={{ isNextDisabled: checkIfCurrentStepValid(3) }}
+                footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(3) }}
               >
                 <CustomRepositoriesStep />
               </WizardStep>,
@@ -147,14 +153,14 @@ const AddTemplateBase = () => {
             name='Set snapshot date'
             id='set_up_date_step'
             isDisabled={checkIfCurrentStepValid(3)}
-            footer={{ isNextDisabled: checkIfCurrentStepValid(4) }}
+            footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(4) }}
           >
             <SetUpDateStep />
           </WizardStep>
           {/* <WizardStep name='Systems (optional)' id='systems' /> */}
           <WizardStep
             isDisabled={checkIfCurrentStepValid(4)}
-            footer={{ isNextDisabled: checkIfCurrentStepValid(5) }}
+            footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(5) }}
             name='Detail'
             id='detail_step'
           >
@@ -167,6 +173,8 @@ const AddTemplateBase = () => {
             footer={
               isEdit ? (
                 {
+                  ...sharedFooterProps,
+                  nextButtonProps: { ouiaId: 'wizard-edit-btn' },
                   nextButtonText: 'Confirm changes',
                   onNext: () => editTemplate().then(() => onClose()),
                   isNextDisabled: isEditing,

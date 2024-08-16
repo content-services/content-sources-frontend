@@ -18,12 +18,12 @@ export const AddNavigateButton = ({ isAdding, add, onClose }: Props) => {
 
   return (
     <Flex gap={{ default: 'gapMd' }} style={{ padding: '24px' }} direction={{ default: 'row' }}>
-      <Button variant={ButtonVariant.secondary} onClick={goToPrevStep}>
+      <Button ouiaId='wizard-back-btn' variant={ButtonVariant.secondary} onClick={goToPrevStep}>
         Back
       </Button>
       <DropdownSelect
         dropDownItems={[{ isDisabled: isAdding, children: 'Create template only', type: 'submit' }]}
-        ouiaId='create_template'
+        ouiaId='wizard-create-btn'
         onSelect={() => add().then(() => onClose())}
         menuValue=''
         menuToggleProps={{
