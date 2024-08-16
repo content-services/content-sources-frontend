@@ -48,6 +48,8 @@ export default function DropdownSelect({
       data-ouia-component-type='PF5/Select'
       data-ouia-safe={true}
       data-ouia-component-id={ouiaId}
+      // This is necessary to have both the 'pf-v5-c-select' above for QE and no styles applied
+      style={{ all: 'unset' }}
     >
       <Select
         isOpen={isOpen}
