@@ -4,6 +4,7 @@ import { AdminTask } from '../AdminTasks/AdminTaskApi';
 
 export interface ContentItem {
   uuid: string;
+
   name: string;
   package_count: number;
   url: string;
@@ -22,6 +23,7 @@ export interface ContentItem {
   last_snapshot_uuid?: string;
   last_snapshot?: SnapshotItem;
   label?: string;
+  origin?: ContentOrigin;
   last_snapshot_task?: AdminTask;
   last_introspection_status: string;
 }
@@ -38,14 +40,19 @@ export interface PopularRepository {
 }
 
 export interface CreateContentRequestItem {
-  name: string;
-  url: string;
+  name?: string;
+  url?: string;
   distribution_versions?: Array<string>;
   distribution_arch?: string;
   gpg_key?: string;
   metadata_verification?: boolean;
   snapshot?: boolean;
   module_hotfixes?: boolean;
+  origin?: ContentOrigin;
+}
+
+export interface ValidateContentRequestItem extends CreateContentRequestItem {
+  uuid?: string;
 }
 
 export interface ErrorItem {
@@ -73,8 +80,6 @@ export interface EditContentRequestItem {
   snapshot: boolean;
   module_hotfixes: boolean;
 }
-
-export type EditContentRequest = Array<EditContentRequestItem>;
 
 export type ContentList = Array<ContentItem>;
 
@@ -146,7 +151,7 @@ export type ValidationResponse = {
   distribution_versions?: ValidateItem;
   distribution_arch?: ValidateItem;
   gpg_key?: ValidateItem;
-}[];
+};
 
 export interface PackageItem {
   arch: string;
@@ -346,13 +351,12 @@ export const getRepositoryParams: () => Promise<RepositoryParamsResponse> = asyn
 };
 
 export const validateContentListItems: (
-  request: CreateContentRequest,
+  request: ValidateContentRequestItem,
 ) => Promise<ValidationResponse> = async (request) => {
-  const { data } = await axios.post(
-    '/api/content-sources/v1.0/repository_parameters/validate/',
+  const { data } = await axios.post('/api/content-sources/v1.0/repository_parameters/validate/', [
     request,
-  );
-  return data;
+  ]);
+  return data[0];
 };
 
 export const getGpgKey: (url: string) => Promise<GpgKeyResponse> = async (url: string) => {

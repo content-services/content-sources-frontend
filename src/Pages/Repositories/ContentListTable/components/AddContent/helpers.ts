@@ -1,7 +1,12 @@
 import { isEmpty } from 'lodash';
 import * as Yup from 'yup';
 import { FormikErrors } from 'formik';
-import { ValidationResponse } from 'services/Content/ContentApi';
+import {
+  ContentOrigin,
+  ValidationResponse,
+  type ContentItem,
+  type EditContentRequestItem,
+} from 'services/Content/ContentApi';
 import { NotificationPayload } from 'Hooks/useNotification';
 import ERROR_CODE from './httpErrorCodes.json';
 import { AlertVariant } from '@patternfly/react-core';
@@ -24,6 +29,7 @@ export interface FileRejection {
 }
 
 export interface FormikValues {
+  uuid?: string;
   name: string;
   url: string;
   gpgKey: string;
@@ -31,23 +37,48 @@ export interface FormikValues {
   versions: string[];
   gpgLoading: boolean;
   metadataVerification: boolean;
-  expanded: boolean;
   snapshot: boolean;
   modularityFilteringEnabled: boolean;
+  origin?: ContentOrigin;
 }
 
-export const getDefaultFormikValues = (overrides: Partial<FormikValues> = {}): FormikValues => ({
+export const getDefaultValues = (overrides: Partial<FormikValues> = {}): FormikValues => ({
   name: '',
   url: '',
   gpgKey: '',
   arch: 'any',
   versions: ['any'],
   gpgLoading: false,
-  expanded: true,
   metadataVerification: false,
-  snapshot: false,
+  snapshot: true,
   modularityFilteringEnabled: true,
+  origin: ContentOrigin.EXTERNAL, // This needs to stay as EXTERNAL, will be updated if use clicks "upload"
   ...overrides,
+});
+
+export const mapContentItemToDefaultFormikValues = ({
+  uuid,
+  name,
+  url,
+  distribution_arch: arch,
+  distribution_versions: versions,
+  gpg_key: gpgKey,
+  metadata_verification: metadataVerification,
+  snapshot,
+  module_hotfixes,
+  ...rest
+}: ContentItem): FormikValues => ({
+  name,
+  url,
+  arch,
+  versions,
+  gpgKey,
+  gpgLoading: false,
+  metadataVerification,
+  uuid,
+  snapshot,
+  modularityFilteringEnabled: !module_hotfixes,
+  ...rest,
 });
 
 export const REGEX_URL =
@@ -59,100 +90,79 @@ export const isValidURL = (val: string) => {
   return val.match(regex);
 };
 
-export const mapFormikToAPIValues = (formikValues: FormikValues[]) =>
-  formikValues.map(
-    ({
-      name,
-      url,
-      arch,
-      versions,
-      gpgKey,
-      metadataVerification,
-      snapshot,
-      modularityFilteringEnabled,
-    }) => ({
-      name,
-      url,
-      distribution_arch: arch,
-      distribution_versions: versions,
-      gpg_key: gpgKey,
-      snapshot,
-      metadata_verification: metadataVerification,
-      module_hotfixes: !modularityFilteringEnabled,
-    }),
-  );
+export const mapFormikToAPIValues = ({
+  uuid,
+  name,
+  url,
+  arch,
+  versions,
+  gpgKey,
+  metadataVerification,
+  snapshot,
+  modularityFilteringEnabled,
+  origin,
+}: FormikValues): EditContentRequestItem =>
+  ({
+    uuid,
+    name,
+    url,
+    distribution_arch: arch,
+    distribution_versions: versions,
+    gpg_key: gpgKey,
+    snapshot,
+    metadata_verification: metadataVerification,
+    module_hotfixes: !modularityFilteringEnabled,
+    origin,
+  }) as EditContentRequestItem;
 
-const mapNoMetaDataError = (validationData: ValidationResponse) =>
-  validationData.map(({ url, ...rest }) => ({
+const mapNoMetaDataError = (response: ValidationResponse): Partial<ValidationResponse> => {
+  if (isEmpty(response)) return {};
+  const { url, ...rest } = response;
+  return {
     ...rest,
-    url: {
-      ...url,
-      error:
-        !url?.error && !url?.metadata_present
-          ? `Unable to retrieve YUM Metadata, Recieved HTTP ${url?.http_code}: ${
-              url ? ERROR_CODE[url.http_code] : ''
-            }`
-          : url?.error,
-    },
-  }));
+    ...(url
+      ? {
+          url: {
+            ...url,
+            error:
+              !url?.error && !url?.metadata_present
+                ? `Unable to retrieve YUM Metadata, Recieved HTTP ${url?.http_code}: ${
+                    url ? ERROR_CODE[url.http_code] : ''
+                  }`
+                : url?.error,
+          },
+        }
+      : {}),
+  };
+};
 
 export const mapValidationData = (
   validationData: ValidationResponse,
-  formikErrors: FormikErrors<FormikValues | undefined>[],
-) => {
-  const updatedValidationData = mapNoMetaDataError(validationData);
+  formikErrors: FormikErrors<FormikValues | undefined>,
+  removeUrl?: boolean,
+): Record<string, string> => {
+  const { name, url, gpg_key: gpgKey } = mapNoMetaDataError(validationData);
 
-  const errors = updatedValidationData.map(({ name, url, gpg_key: gpgKey }, index: number) => {
-    const hasUrlErrors = url?.error || formikErrors[index]?.url;
-    return {
-      // First apply the errors found in the ValidationAPI
-      ...(name?.error ? { name: name?.error } : {}),
-      ...(url?.error ? { url: url?.error } : {}),
-      ...(!hasUrlErrors && gpgKey?.error ? { gpgKey: gpgKey?.error } : {}),
-      // Overwrite any errors with errors found within the UI itself
-      ...formikErrors[index],
-    };
-  });
-
-  if (errors.every((err) => isEmpty(err))) {
-    return [];
-  }
-
-  return errors;
+  const hasUrlErrors = url?.error || formikErrors?.url;
+  const result = {
+    // First apply the errors found in the ValidationAPI
+    ...(name?.error ? { name: name?.error } : {}),
+    ...(url?.error ? { url: url?.error } : {}),
+    ...(!hasUrlErrors && gpgKey?.error ? { gpgKey: gpgKey?.error } : {}),
+    // Overwrite any errors with errors found within the UI itself
+    ...formikErrors,
+  } as Record<string, string>;
+  if (removeUrl) delete result?.url;
+  return result;
 };
 
-export const makeValidationSchema = () => {
-  // This adds the uniqueProperty function to the below schema validation
-  Yup.addMethod(Yup.object, 'uniqueProperty', function (propertyName, message) {
-    return this.test('unique', message, function (value) {
-      if (!value || !value[propertyName]) {
-        return true;
-      }
-      if (
-        this.parent.filter((v) => v !== value).some((v) => v[propertyName] === value[propertyName])
-      ) {
-        throw this.createError({
-          path: `${this.path}.${propertyName}`,
-        });
-      }
-
-      return true;
-    });
+export const validationSchema = (upload?: boolean) =>
+  Yup.object().shape({
+    name: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Required'),
+    ...(upload
+      ? {}
+      : { url: Yup.string().url('Invalid URL').required('Required').min(2, 'Too Short!') }),
   });
-
-  return Yup.array(
-    Yup.object()
-      .shape({
-        name: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Required'),
-        url: Yup.string().url('Invalid URL').required('Required'),
-      })
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line
-      .uniqueProperty('name', 'Names must be unique')
-      // eslint-disable-next-line quotes
-      .uniqueProperty('url', "Url's must be unique"),
-  );
-};
 
 export const maxUploadSize = 32000;
 

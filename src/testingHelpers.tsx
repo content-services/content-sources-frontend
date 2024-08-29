@@ -81,7 +81,7 @@ export const testRepositoryParamsResponse: RepositoryParamsResponse = {
   ],
 };
 
-export const defaultValidationErrorData: ValidationResponse = [
+export const defaultValidationErrorData: ValidationResponse[] = [
   {
     name: {
       skipped: false,
@@ -99,28 +99,26 @@ export const defaultValidationErrorData: ValidationResponse = [
   },
 ];
 
-export const passingValidationErrorData: ValidationResponse = [
-  {
-    name: {
-      skipped: false,
-      valid: true,
-      error: '',
-    },
-    gpg_key: {
-      skipped: false,
-      valid: true,
-      error: '',
-    },
-    url: {
-      skipped: false,
-      valid: true,
-      error: '',
-      http_code: 200,
-      metadata_present: true,
-      metadata_signature_present: true,
-    },
+export const passingValidationErrorData: ValidationResponse = {
+  name: {
+    skipped: false,
+    valid: true,
+    error: '',
   },
-];
+  gpg_key: {
+    skipped: false,
+    valid: true,
+    error: '',
+  },
+  url: {
+    skipped: false,
+    valid: true,
+    error: '',
+    http_code: 200,
+    metadata_present: true,
+    metadata_signature_present: true,
+  },
+};
 
 export const defaultPopularRepository: PopularRepository = {
   uuid: '',
