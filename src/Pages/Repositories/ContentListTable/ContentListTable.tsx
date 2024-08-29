@@ -52,6 +52,7 @@ import dayjs from 'dayjs';
 import ChangedArrows from './components/SnapshotListModal/components/ChangedArrows';
 import { Outlet, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import { ADD_ROUTE, DELETE_ROUTE, EDIT_ROUTE } from 'Routes/constants';
+import UploadRepositoryLabel from 'components/UploadRepositoryLabel/UploadRepositoryLabel';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -88,6 +89,9 @@ const useStyles = createUseStyles({
   disabledButton: {
     pointerEvents: 'auto',
     cursor: 'default',
+  },
+  uploadIcon: {
+    marginLeft: '8px',
   },
 });
 
@@ -565,6 +569,7 @@ const ContentListTable = () => {
                         distribution_versions,
                         last_introspection_time,
                         status,
+                        origin,
                       } = rowData;
                       return (
                         <Tr key={uuid + status}>
@@ -580,7 +585,12 @@ const ContentListTable = () => {
                           </Hide>
                           <Td>
                             {name}
-                            <UrlWithExternalIcon href={url} />
+                            <Hide hide={origin !== ContentOrigin.UPLOAD}>
+                              <UploadRepositoryLabel />
+                            </Hide>
+                            <Hide hide={origin === ContentOrigin.UPLOAD}>
+                              <UrlWithExternalIcon href={url} />
+                            </Hide>
                             <Hide hide={!features?.snapshots?.accessible}>
                               <Flex>
                                 <FlexItem className={classes.snapshotInfoText}>
