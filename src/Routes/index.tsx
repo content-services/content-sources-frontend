@@ -29,7 +29,6 @@ import TemplateErrataTab from 'Pages/Templates/TemplateDetails/components/Tabs/T
 import TemplateSystemsTab from 'Pages/Templates/TemplateDetails/components/Tabs/TemplateSystemsTab';
 import TemplatePackageTab from 'Pages/Templates/TemplateDetails/components/Tabs/TemplatePackageTab';
 import ContentListTable from 'Pages/Repositories/ContentListTable/ContentListTable';
-import EditContentModal from 'Pages/Repositories/ContentListTable/components/EditContentModal/EditContentModal';
 import AddContent from 'Pages/Repositories/ContentListTable/components/AddContent/AddContent';
 import DeleteContentModal from 'Pages/Repositories/ContentListTable/components/DeleteContentModal/DeleteContentModal';
 import SnapshotListModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/SnapshotListModal';
@@ -52,7 +51,7 @@ export default function RepositoriesRoutes() {
           <Route path='' element={<ContentListTable />}>
             {rbac?.repoWrite ? (
               <>
-                <Route key={EDIT_ROUTE} path={EDIT_ROUTE} element={<EditContentModal />} />
+                <Route key={EDIT_ROUTE} path={EDIT_ROUTE} element={<AddContent isEdit />} />
                 <Route key={ADD_ROUTE} path={ADD_ROUTE} element={<AddContent />} />
                 <Route key={DELETE_ROUTE} path={DELETE_ROUTE} element={<DeleteContentModal />} />
               </>

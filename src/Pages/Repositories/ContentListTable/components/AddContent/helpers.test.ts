@@ -24,100 +24,91 @@ it('isValidURL', () => {
 });
 
 it('mapFormikToAPIValues', () => {
-  const values = [
-    {
-      name: 'AwesomeNamewtmsgnum0',
-      url: 'https://google.ca/wtmsgnum0/x86_64/el7',
-      gpgKey: '',
-      arch: 'x86_64',
-      versions: ['el7'],
-      gpgLoading: false,
-      expanded: false,
-      metadataVerification: false,
-      snapshot: true,
-      modularityFilteringEnabled: true,
-    },
-  ];
+  const values = {
+    name: 'AwesomeNamewtmsgnum0',
+    url: 'https://google.ca/wtmsgnum0/x86_64/el7',
+    gpgKey: '',
+    arch: 'x86_64',
+    versions: ['el7'],
+    gpgLoading: false,
+    expanded: false,
+    metadataVerification: false,
+    snapshot: true,
+    modularityFilteringEnabled: true,
+  };
 
-  const mappedValues = [
-    {
-      name: 'AwesomeNamewtmsgnum0',
-      url: 'https://google.ca/wtmsgnum0/x86_64/el7',
-      distribution_arch: 'x86_64',
-      distribution_versions: ['el7'],
-      gpg_key: '',
-      metadata_verification: false,
-      snapshot: true,
-      module_hotfixes: false,
-    },
-  ];
+  const mappedValues = {
+    name: 'AwesomeNamewtmsgnum0',
+    url: 'https://google.ca/wtmsgnum0/x86_64/el7',
+    distribution_arch: 'x86_64',
+    distribution_versions: ['el7'],
+    gpg_key: '',
+    metadata_verification: false,
+    snapshot: true,
+    module_hotfixes: false,
+  };
 
   expect(mapFormikToAPIValues(values)).toEqual(mappedValues);
 });
 
-it('mapValidationData', () => {
-  const validationData: ValidationResponse = [
-    {
-      name: {
-        skipped: false,
-        valid: true,
-        error: '',
-      },
-      url: {
-        skipped: false,
-        valid: true,
-        error:
-          'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
-        http_code: 0,
-        metadata_present: false,
-        metadata_signature_present: false,
-      },
+it('mapValidationData, ensure url error shows', () => {
+  //   expect(mapValidationData({}, {})).toEqual({});
+  const validationData: ValidationResponse = {
+    name: {
+      skipped: false,
+      valid: true,
+      error: '',
     },
-  ];
-  const formikErrors = [];
-  const success = [
-    {
-      url: 'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
+    url: {
+      skipped: false,
+      valid: true,
+      error:
+        'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
+      http_code: 0,
+      metadata_present: false,
+      metadata_signature_present: false,
     },
-  ];
-  expect(mapValidationData([], [])).toEqual([]);
+  };
+  const formikErrors = {};
+  const success = {
+    url: 'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
+  };
+
   expect(mapValidationData(validationData, formikErrors)).toEqual(success);
 });
 
+it('mapValidationData,empty', () => {
+  expect(mapValidationData({}, {})).toEqual({});
+});
+
 it('mapValidationData, ensure url error heirarchy', () => {
-  const validationData: ValidationResponse = [
-    {
-      name: {
-        skipped: false,
-        valid: true,
-        error: '',
-      },
-      url: {
-        skipped: false,
-        valid: true,
-        error:
-          'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
-        http_code: 0,
-        metadata_present: false,
-        metadata_signature_present: false,
-      },
-      // We expect gpgKey errors not to be shown, as they are dependent on the url which has an error!
-      gpg_key: {
-        skipped: false,
-        valid: false,
-        error: 'Error loading GPG Key: unexpected EOF.  Is this a valid GPG Key?',
-      },
+  const validationData: ValidationResponse = {
+    name: {
+      skipped: false,
+      valid: true,
+      error: '',
     },
-  ];
-  const formikErrors: FormikErrors<FormikValues | undefined>[] = [
-    { name: 'name error booga booga!' },
-  ];
-  const success = [
-    {
-      name: 'name error booga booga!',
-      url: 'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
+    url: {
+      skipped: false,
+      valid: true,
+      error:
+        'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
+      http_code: 0,
+      metadata_present: false,
+      metadata_signature_present: false,
     },
-  ];
+    // We expect gpgKey errors not to be shown, as they are dependent on the url which has an error!
+    gpg_key: {
+      skipped: false,
+      valid: false,
+      error: 'Error loading GPG Key: unexpected EOF.  Is this a valid GPG Key?',
+    },
+  };
+  const formikErrors: FormikErrors<FormikValues | undefined> = { name: 'name error booga booga!' };
+  const success = {
+    name: 'name error booga booga!',
+    url: 'Error fetching YUM metadata: Head "https://bobjull.co": dial tcp: lookup bobjull.co: no such host',
+  };
 
   expect(mapValidationData(validationData, formikErrors)).toEqual(success);
 });

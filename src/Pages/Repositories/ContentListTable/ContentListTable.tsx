@@ -315,27 +315,32 @@ const ContentListTable = () => {
                       navigate(`${rowData.uuid}/snapshots`);
                     },
                   },
-                  {
-                    id: 'actions-column-snapshot',
-                    className:
-                      actionTakingPlace || rowData?.status === 'Pending' || !rowData.snapshot
-                        ? classes.disabledButton
-                        : '',
-                    isDisabled:
-                      actionTakingPlace || rowData?.status === 'Pending' || !rowData.snapshot,
-                    title: 'Trigger snapshot',
-                    onClick: () => {
-                      triggerIntrospectionAndSnapshot(rowData?.uuid);
-                    },
-                    tooltipProps: !rowData.snapshot
-                      ? {
-                          content: 'Snapshots disabled for this repository.',
-                          position: TooltipPosition.left,
-                          triggerRef: () =>
-                            document.getElementById('actions-column-snapshot') || document.body,
-                        }
-                      : undefined,
-                  },
+                  ...(rowData.origin !== ContentOrigin.UPLOAD
+                    ? [
+                        {
+                          id: 'actions-column-snapshot',
+                          className:
+                            actionTakingPlace || rowData?.status === 'Pending' || !rowData.snapshot
+                              ? classes.disabledButton
+                              : '',
+                          isDisabled:
+                            actionTakingPlace || rowData?.status === 'Pending' || !rowData.snapshot,
+                          title: 'Trigger snapshot',
+                          onClick: () => {
+                            triggerIntrospectionAndSnapshot(rowData?.uuid);
+                          },
+                          tooltipProps: !rowData.snapshot
+                            ? {
+                                content: 'Snapshots disabled for this repository.',
+                                position: TooltipPosition.left,
+                                triggerRef: () =>
+                                  document.getElementById('actions-column-snapshot') ||
+                                  document.body,
+                              }
+                            : undefined,
+                        },
+                      ]
+                    : []),
                 ]
               : []),
             ...(!rowData?.snapshot
