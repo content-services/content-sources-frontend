@@ -162,6 +162,17 @@ const AddContent = ({ isEdit = false }: Props) => {
     mapFormikToAPIValues(values),
   ]);
 
+  const onSave = async () => {
+    if (isEdit) {
+      await editContent();
+    } else {
+      await addContent();
+    }
+
+    onClose();
+    clearCheckedRepositories();
+  };
+
   const updateVariable = (newValue) => {
     // ensures no unnecessary validation occurs
     if (
@@ -423,6 +434,17 @@ const AddContent = ({ isEdit = false }: Props) => {
                 }}
               />
             )}
+            <Button
+              className={classes.saveButton}
+              key='confirm'
+              ouiaId='modal_save'
+              variant='primary'
+              isLoading={actionTakingPlace}
+              isDisabled={!changeVerified || actionTakingPlace || hasErrors || editHasNotChanged}
+              onClick={onSave}
+            >
+              {isEdit ? (editHasNotChanged ? 'No changes' : 'Save changes') : 'Save'}
+            </Button>
             <Button
               className={classes.cancelButton}
               key='cancel'
