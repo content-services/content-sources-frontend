@@ -36,6 +36,7 @@ import { ADD_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
 import TdWithTooltip from 'components/TdWithTooltip/TdWithTooltip';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { reduceStringToCharsWithEllipsis } from 'helpers';
+import UploadRepositoryLabel from 'components/UploadRepositoryLabel/UploadRepositoryLabel';
 
 const useStyles = createUseStyles({
   global_300: {
@@ -277,7 +278,7 @@ export default function CustomRepositoriesStep() {
               </Thead>
               <Tbody>
                 {contentList.map((rowData: ContentItem, rowIndex) => {
-                  const { uuid, name, url } = rowData;
+                  const { uuid, name, url, origin } = rowData;
                   return (
                     <Tr key={uuid}>
                       <TdWithTooltip
@@ -294,14 +295,21 @@ export default function CustomRepositoriesStep() {
                       />
                       <Td>
                         <ConditionalTooltip show={name.length > 60} content={name}>
-                          <>{reduceStringToCharsWithEllipsis(name, 60)}</>
+                          <>
+                            {reduceStringToCharsWithEllipsis(name, 60)}
+                            <Hide hide={origin !== ContentOrigin.UPLOAD}>
+                              <UploadRepositoryLabel />
+                            </Hide>
+                          </>
                         </ConditionalTooltip>
-                        <ConditionalTooltip show={url.length > 50} content={url}>
-                          <UrlWithExternalIcon
-                            href={url}
-                            customText={reduceStringToCharsWithEllipsis(url)}
-                          />
-                        </ConditionalTooltip>
+                        <Hide hide={origin === ContentOrigin.UPLOAD}>
+                          <ConditionalTooltip show={url.length > 50} content={url}>
+                            <UrlWithExternalIcon
+                              href={url}
+                              customText={reduceStringToCharsWithEllipsis(url)}
+                            />
+                          </ConditionalTooltip>
+                        </Hide>
                       </Td>
                       <Td>
                         <StatusIcon rowData={rowData} />
