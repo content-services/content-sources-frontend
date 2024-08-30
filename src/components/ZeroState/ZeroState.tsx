@@ -58,7 +58,7 @@ export const ZeroState = () => {
     },
     {
       title: 'Popular repositories',
-      description: 'Add popular custom repositories with a single click.',
+      description: 'Add popular repositories with a single click.',
       onClick: () => navigate(`${pathname}/${REPOSITORIES_ROUTE}/${POPULAR_REPOSITORIES_ROUTE}`),
     },
   ];
