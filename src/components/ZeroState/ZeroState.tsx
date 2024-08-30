@@ -1,10 +1,26 @@
 import { Suspense } from 'react';
-import { Bullseye, Button, Grid, Spinner } from '@patternfly/react-core';
+import {
+  Bullseye,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  Flex,
+  FlexItem,
+  Grid,
+  PageSection,
+  Spinner,
+  Text,
+  TextContent,
+  Title,
+} from '@patternfly/react-core';
 import AsyncComponent from '@redhat-cloud-services/frontend-components/AsyncComponent';
 import ErrorState from '@redhat-cloud-services/frontend-components/ErrorState';
 import { createUseStyles } from 'react-jss';
 
 import { useAppContext } from 'middleware/AppContext';
+import { useHref, useNavigate } from 'react-router-dom';
+import { POPULAR_REPOSITORIES_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
 
 const useStyles = createUseStyles({
   contentZerostate: {
@@ -12,15 +28,40 @@ const useStyles = createUseStyles({
     '& .bannerBefore': { maxHeight: '320px!important' },
     '& .bannerRight': { justifyContent: 'space-evenly!important' },
   },
+  textContent: {
+    minHeight: '40px',
+  },
+  removeBottomPadding: {
+    paddingBottom: '0',
+  },
 });
 
 export const ZeroState = () => {
   const classes = useStyles();
+  const navigate = useNavigate();
   const { setZeroState } = useAppContext();
+  const path = useHref('content');
+  const pathname = path.split('content')[0] + 'content';
 
-  const handleClick = () => {
+  const handleMainButtonClick = () => {
     setZeroState(false);
   };
+
+  const repoList = [
+    {
+      title: 'Red Hat repositories',
+      description: 'Browse available Red Hat Repositories to create RHEL images.',
+      onClick: () => {
+        setZeroState(false);
+        navigate(`${pathname}/${REPOSITORIES_ROUTE}?origin=red_hat`);
+      },
+    },
+    {
+      title: 'Popular repositories',
+      description: 'Add popular custom repositories with a single click.',
+      onClick: () => navigate(`${pathname}/${REPOSITORIES_ROUTE}/${POPULAR_REPOSITORIES_ROUTE}`),
+    },
+  ];
 
   return (
     <>
@@ -41,12 +82,35 @@ export const ZeroState = () => {
             app='Content_management'
             ouiaId='get_started_from_zerostate_description'
             customText='Get started with Insights by adding repositories'
+            customSection={
+              <PageSection className={classes.removeBottomPadding}>
+                <Flex direction={{ default: 'row' }} gap={{ default: 'gap' }}>
+                  {repoList.map(({ title, description, onClick }) => (
+                    <FlexItem flex={{ default: 'flex_1' }} key={title}>
+                      <Card>
+                        <CardTitle>
+                          <Title headingLevel='h3'>{title}</Title>
+                        </CardTitle>
+                        <CardBody>
+                          <TextContent className={classes.textContent}>
+                            <Text>{description}</Text>
+                          </TextContent>
+                          <Button onClick={onClick} variant='secondary' size='lg'>
+                            Browse {title}
+                          </Button>
+                        </CardBody>
+                      </Card>
+                    </FlexItem>
+                  ))}
+                </Flex>
+              </PageSection>
+            }
             customButton={
               <Button
                 id='get-started-repositories-button'
                 ouiaId='get_started_repositories_button'
                 className='pf-c-button pf-m-primary pf-u-p-md pf-u-font-size-md'
-                onClick={() => handleClick()}
+                onClick={() => handleMainButtonClick()}
               >
                 Add repositories now
               </Button>
