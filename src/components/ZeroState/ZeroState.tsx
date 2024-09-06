@@ -50,7 +50,7 @@ export const ZeroState = () => {
   const repoList = [
     {
       title: 'Red Hat repositories',
-      description: 'Browse available Red Hat Repositories to create RHEL images.',
+      description: 'Browse available Red Hat repositories to create RHEL images.',
       onClick: () => {
         setZeroState(false);
         navigate(`${pathname}/${REPOSITORIES_ROUTE}?origin=red_hat`);
@@ -58,7 +58,7 @@ export const ZeroState = () => {
     },
     {
       title: 'Popular repositories',
-      description: 'Add popular custom repositories with a single click.',
+      description: 'Add popular repositories with a single click.',
       onClick: () => {
         setZeroState(false);
         navigate(`${pathname}/${REPOSITORIES_ROUTE}/${POPULAR_REPOSITORIES_ROUTE}`);
