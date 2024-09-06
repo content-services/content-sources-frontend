@@ -397,16 +397,7 @@ const AddContent = ({ isEdit = false }: Props) => {
               textValue={errors?.name}
             />
           </FormGroup>
-          <FormGroup
-            label='Repository type'
-            fieldId='repositoryType'
-            hasNoPaddingTop
-            // labelIcon={
-            //   <Tooltip content='Put important explanation in here: Put important explanation in herePut important explanation in herePut important explanation in herePut important explanation in herePut important explanation in herePut important explanation in herePut important explanation in here'>
-            //     <OutlinedQuestionCircleIcon className='pf-u-ml-xs' color={global_Color_200.value} />
-            //   </Tooltip>
-            // }
-          >
+          <FormGroup label='Repository type' fieldId='repositoryType' hasNoPaddingTop>
             <Flex direction={{ default: 'column' }} gap={{ default: 'gap' }}>
               <Hide hide={isEdit && contentOrigin === ContentOrigin.UPLOAD}>
                 <Radio
@@ -415,7 +406,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                   label='Snapshotting'
                   description={
                     values.snapshot && values.origin === ContentOrigin.EXTERNAL
-                      ? 'Enable snapshotting for an external repository, allowing you to build images with historical snapshots.'
+                      ? 'Enable daily snapshotting for an external repository, allowing you to build images with historical snapshots and in content templates.'
                       : ''
                   }
                   name='snapshot-radio'
@@ -429,7 +420,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                   label='Introspect only'
                   description={
                     !values.snapshot && values.origin === ContentOrigin.EXTERNAL
-                      ? 'Enable only introspection for an external repository, snapshots will not be taken.'
+                      ? 'Enable only introspection for an external repository, for use in building images against an external repository.'
                       : ''
                   }
                   name='introspect-radio'
@@ -446,7 +437,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                   isDisabled={isEdit && contentOrigin === ContentOrigin.UPLOAD}
                   description={
                     isUploadRepo
-                      ? 'Create a repository to upload custom content to, snapshots will be taken after every new upload.'
+                      ? 'Create a repository to upload custom content to, snapshots will be taken after every new upload and can be used in content templates.'
                       : ''
                   }
                   name='upload-radio'
