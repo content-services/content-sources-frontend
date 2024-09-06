@@ -247,7 +247,7 @@ export default function SnapshotListModal() {
                       <Td>
                         <Button
                           variant='link'
-                          ouiaId='snapshot_advistory_count_button'
+                          ouiaId='snapshot_advisory_count_button'
                           isInline
                           isDisabled={!content_counts?.['rpm.advisory']}
                           onClick={() =>
