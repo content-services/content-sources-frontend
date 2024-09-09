@@ -15,6 +15,7 @@ import {
   Flex,
   FormAlert,
   Alert,
+  ButtonVariant,
 } from '@patternfly/react-core';
 import { SelectVariant } from '@patternfly/react-core/deprecated';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
@@ -48,14 +49,15 @@ import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip
 import { isEmpty, isEqual } from 'lodash';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
 import useDebounce from 'Hooks/useDebounce';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useContentListOutletContext } from '../../ContentListTable';
 import useRootPath from 'Hooks/useRootPath';
 import CustomHelperText from 'components/CustomHelperText/CustomHelperText';
-import { REPOSITORIES_ROUTE } from 'Routes/constants';
+import { ADD_ROUTE, REPOSITORIES_ROUTE, UPLOAD_ROUTE } from 'Routes/constants';
 import { useFormik, type FormikValues } from 'formik';
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import Loader from 'components/Loader';
+import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 
 const useStyles = createUseStyles({
   description: {
@@ -63,12 +65,15 @@ const useStyles = createUseStyles({
     color: global_Color_200.value,
   },
   saveButton: {
-    marginRight: '36px',
-    transition: 'unset!important',
+    minWidth: '80px',
   },
-  removeButton: {
-    display: 'flex!important',
-    justifyContent: 'flex-end',
+  saveShifted: {
+    // This fixes a css issue with the button loading icon
+    extend: 'saveButton',
+    paddingLeft: '40px!important',
+  },
+  cancelButton: {
+    marginLeft: '18px',
   },
   gpgKeyInput: {
     '& .pf-v5-svg': {
@@ -92,18 +97,14 @@ interface Props {
 const AddContent = ({ isEdit = false }: Props) => {
   const classes = useStyles();
   const queryClient = useQueryClient();
+  const { repoUUID: uuid } = useParams();
   const navigate = useNavigate();
   const rootPath = useRootPath();
-  const { search } = useLocation();
   const { isProd } = useChrome();
   const isInProd = useMemo(() => isProd(), []);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const uuids = useMemo(
-    () => new URLSearchParams(search).get('repoUUIDS')?.split(',') || [],
-    [search],
-  );
-  const { data, isLoading: isLoadingInitialContent, isSuccess } = useFetchContent(uuids, isEdit);
+  const { data, isLoading: isLoadingInitialContent, isSuccess } = useFetchContent(uuid!, isEdit);
 
   const [values, setValues] = useState(getDefaultValues(isInProd ? { snapshot: false } : {}));
   const [changeVerified, setChangeVerified] = useState(false);
@@ -160,17 +161,6 @@ const AddContent = ({ isEdit = false }: Props) => {
   const { mutateAsync: addContent, isLoading: isAdding } = useAddContentQuery([
     mapFormikToAPIValues(values),
   ]);
-
-  const onSave = async () => {
-    if (isEdit) {
-      await editContent();
-    } else {
-      await addContent();
-    }
-
-    onClose();
-    clearCheckedRepositories();
-  };
 
   const updateVariable = (newValue) => {
     // ensures no unnecessary validation occurs
@@ -324,6 +314,7 @@ const AddContent = ({ isEdit = false }: Props) => {
     gpgLoading,
     metadataVerification,
     modularityFilteringEnabled,
+    origin,
   } = values;
 
   return (
@@ -355,18 +346,83 @@ const AddContent = ({ isEdit = false }: Props) => {
       footer={
         <Stack>
           <StackItem>
+            {isEdit ? (
+              <Button
+                key='confirm'
+                ouiaId='modal_save'
+                className={classes.saveButton}
+                variant='primary'
+                isLoading={actionTakingPlace}
+                isDisabled={!changeVerified || actionTakingPlace || hasErrors || editHasNotChanged}
+                onClick={() => editContent().then(onClose)}
+              >
+                {editHasNotChanged ? 'No changes' : 'Save changes'}
+              </Button>
+            ) : (
+              <DropdownSelect
+                isDisabled={!changeVerified || actionTakingPlace || hasErrors || editHasNotChanged}
+                dropDownItems={[
+                  {
+                    isDisabled: isAdding,
+                    children:
+                      origin === ContentOrigin.UPLOAD ? 'Save and close' : 'Save and add another',
+                    type: 'submit',
+                  },
+                ]}
+                ouiaId='wizard-create-btn'
+                onSelect={() =>
+                  addContent().then(() => {
+                    clearCheckedRepositories();
+                    if (origin === ContentOrigin.UPLOAD) {
+                      return onClose();
+                    }
+                    setTimeout(() => navigate(`${rootPath}/${REPOSITORIES_ROUTE}/${ADD_ROUTE}`), 0);
+                    onClose();
+                  })
+                }
+                menuValue=''
+                menuToggleProps={{
+                  isFullWidth: false,
+                  variant: 'primary',
+                  splitButtonOptions: {
+                    variant: 'action',
+                    items: [
+                      <Button
+                        key='confirm'
+                        ouiaId='modal_save'
+                        className={actionTakingPlace ? classes.saveShifted : classes.saveButton}
+                        variant={ButtonVariant.primary}
+                        isLoading={actionTakingPlace}
+                        isDisabled={
+                          !changeVerified || actionTakingPlace || hasErrors || editHasNotChanged
+                        }
+                        onClick={() =>
+                          addContent().then((resp) => {
+                            clearCheckedRepositories();
+                            if (origin === ContentOrigin.UPLOAD) {
+                              navigate(
+                                `${rootPath}/${REPOSITORIES_ROUTE}/${resp[0]?.uuid}/${UPLOAD_ROUTE}`,
+                              );
+                            } else {
+                              navigate(`${rootPath}/${REPOSITORIES_ROUTE}`);
+                            }
+                          })
+                        }
+                      >
+                        {origin === ContentOrigin.UPLOAD ? 'Save and upload content' : 'Save'}
+                      </Button>,
+                    ],
+                  },
+                }}
+              />
+            )}
             <Button
-              className={classes.saveButton}
-              key='confirm'
-              ouiaId='modal_save'
-              variant='primary'
-              isLoading={actionTakingPlace}
-              isDisabled={!changeVerified || actionTakingPlace || hasErrors || editHasNotChanged}
-              onClick={onSave}
+              className={classes.cancelButton}
+              key='cancel'
+              variant='link'
+              onClick={onClose}
+              ouiaId='modal_cancel'
             >
-              {isEdit ? (editHasNotChanged ? 'No changes' : 'Save changes') : 'Save'}
-            </Button>
-            <Button key='cancel' variant='link' onClick={onClose} ouiaId='modal_cancel'>
               Cancel
             </Button>
           </StackItem>
@@ -397,16 +453,7 @@ const AddContent = ({ isEdit = false }: Props) => {
               textValue={errors?.name}
             />
           </FormGroup>
-          <FormGroup
-            label='Repository type'
-            fieldId='repositoryType'
-            hasNoPaddingTop
-            // labelIcon={
-            //   <Tooltip content='Put important explanation in here: Put important explanation in herePut important explanation in herePut important explanation in herePut important explanation in herePut important explanation in herePut important explanation in herePut important explanation in here'>
-            //     <OutlinedQuestionCircleIcon className='pf-u-ml-xs' color={global_Color_200.value} />
-            //   </Tooltip>
-            // }
-          >
+          <FormGroup label='Repository type' fieldId='repositoryType' hasNoPaddingTop>
             <Flex direction={{ default: 'column' }} gap={{ default: 'gap' }}>
               <Hide hide={isEdit && contentOrigin === ContentOrigin.UPLOAD}>
                 <Radio

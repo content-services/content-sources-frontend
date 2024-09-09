@@ -1,13 +1,12 @@
 import * as React from 'react';
 import styles from '@patternfly/react-styles/css/components/MultipleFileUpload/multiple-file-upload';
 import { css } from '@patternfly/react-styles';
-import FileIcon from '@patternfly/react-icons/dist/esm/icons/file-icon';
 import { Button, Flex, Progress } from '@patternfly/react-core';
 import { reduceStringToCharsWithEllipsis } from 'helpers';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { createUseStyles } from 'react-jss';
 import { global_danger_color_100 } from '@patternfly/react-tokens';
-import { TimesIcon } from '@patternfly/react-icons';
+import { FileIcon, TimesIcon } from '@patternfly/react-icons';
 import Hide from 'components/Hide/Hide';
 
 const useStyles = createUseStyles({
