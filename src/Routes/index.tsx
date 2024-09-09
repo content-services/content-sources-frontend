@@ -53,7 +53,6 @@ export default function RepositoriesRoutes() {
           <Route path='' element={<ContentListTable />}>
             {rbac?.repoWrite ? (
               <>
-                <Route key={EDIT_ROUTE} path={EDIT_ROUTE} element={<AddContent isEdit />} />
                 <Route key={ADD_ROUTE} path={ADD_ROUTE} element={<AddContent />} />
                 <Route
                   key={EDIT_ROUTE}
