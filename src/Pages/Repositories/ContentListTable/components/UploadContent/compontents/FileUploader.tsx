@@ -135,6 +135,19 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
     }
   };
 
+  const retryItem = (name: string) => {
+    if (!currentFiles[name]) return;
+    currentFiles[name].error = '';
+    currentFiles[name].failed = false;
+    currentFiles[name].chunks = currentFiles[name].chunks.map((chunk) => ({
+      ...chunk,
+      retryCount: 0,
+      // If Chunk is not completed, we know that it failed, so we want to reset it to be requeued
+      queued: chunk.completed,
+    }));
+    setCurrentFiles((prev) => ({ ...prev, [name]: currentFiles[name] }));
+  };
+
   useEffect(() => {
     if (!isBatching && !isDropping) {
       setIsBatching(true);
@@ -200,7 +213,7 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
         uuid = res.upload_uuid;
         created = res.created;
       } catch (err) {
-        error = 'Failed to create upload file: ' + (err as Error).message;
+        error = 'Failed checksum validation: ' + (err as Error).message;
       }
     }
 
@@ -308,7 +321,7 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
       />
       {fileCountGreaterThanZero && (
         <MultipleFileUploadStatus
-          statusToggleText={`${completedCount} of ${fileCount} files are ready to be added to the repository${failedCount ? `, ${failedCount} failed` : ''}`}
+          statusToggleText={`${completedCount} of ${fileCount} files are ready to be uploaded${failedCount ? `, ${failedCount} failed` : ''}`}
           statusToggleIcon={statusIcon}
         >
           {Object.values(currentFiles).map(({ checksum, chunks, error, file, failed }) => {
