@@ -73,6 +73,8 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
   }, [completedCount, fileCount, failedCount]);
 
   const updateItem = async (name: string) => {
+    setIsBatching(true);
+
     if (currentFiles[name]) {
       const targetIndexes = new Set(
         currentFiles[name].chunks
