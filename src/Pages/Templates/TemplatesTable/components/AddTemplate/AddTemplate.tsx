@@ -4,6 +4,7 @@ import {
   ModalVariant,
   Spinner,
   Wizard,
+  WizardFooterWrapper,
   WizardHeader,
   WizardStep,
 } from '@patternfly/react-core';
@@ -180,7 +181,9 @@ const AddTemplateBase = () => {
                   isNextDisabled: isEditing,
                 }
               ) : (
-                <AddNavigateButton isAdding={isAdding} onClose={onClose} add={addTemplate} />
+                <WizardFooterWrapper>
+                  <AddNavigateButton isAdding={isAdding} onClose={onClose} add={addTemplate} />
+                </WizardFooterWrapper>
               )
             }
           >

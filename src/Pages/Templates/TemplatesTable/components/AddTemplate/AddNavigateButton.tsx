@@ -17,7 +17,7 @@ export const AddNavigateButton = ({ isAdding, add, onClose }: Props) => {
   const { goToPrevStep } = useWizardContext();
 
   return (
-    <Flex gap={{ default: 'gapMd' }} style={{ padding: '24px' }} direction={{ default: 'row' }}>
+    <Flex gap={{ default: 'gapMd' }} direction={{ default: 'row' }}>
       <Button ouiaId='wizard-back-btn' variant={ButtonVariant.secondary} onClick={goToPrevStep}>
         Back
       </Button>
