@@ -41,40 +41,43 @@ const UploadContent = () => {
   });
 
   return (
-    <Modal
-      position='top'
-      className={classes.modalSize}
-      variant={ModalVariant.medium}
-      title='Upload content'
-      ouiaId='upload_content_modal'
-      description={
-        <p className={classes.description}>
-          Use the form below to upload content to your repository.
-        </p>
-      }
-      isOpen={!!uuid}
-      onClose={onCloseClick}
-      footer={
-        <Stack>
-          <StackItem>
-            <Button
-              className={classes.saveButton}
-              key='confirm'
-              ouiaId='modal_save'
-              variant='primary'
-              isLoading={isLoading}
-              isDisabled={!fileUUIDs.length}
-              onClick={() => uploadItems().then(onClose)}
-            >
-              {fileUUIDs.length ? 'Confirm changes' : 'No content uploaded'}
-            </Button>
-            <Button key='cancel' variant='link' onClick={onCloseClick} ouiaId='modal_cancel'>
-              Cancel
-            </Button>
-          </StackItem>
-        </Stack>
-      }
-    >
+    <>
+      <Modal
+        position='top'
+        className={classes.modalSize}
+        variant={ModalVariant.medium}
+        title='Upload content'
+        ouiaId='upload_content_modal'
+        description={
+          <p className={classes.description}>
+            Use the form below to upload content to your repository.
+          </p>
+        }
+        isOpen={!!uuid}
+        onClose={onCloseClick}
+        footer={
+          <Stack>
+            <StackItem>
+              <Button
+                className={classes.saveButton}
+                key='confirm'
+                ouiaId='modal_save'
+                variant='primary'
+                isLoading={isLoading}
+                isDisabled={!fileUUIDs.length}
+                onClick={() => uploadItems().then(onClose)}
+              >
+                {fileUUIDs.length ? 'Confirm changes' : 'No content uploaded'}
+              </Button>
+              <Button key='cancel' variant='link' onClick={onCloseClick} ouiaId='modal_cancel'>
+                Cancel
+              </Button>
+            </StackItem>
+          </Stack>
+        }
+      >
+        <FileUploader isLoading={isLoading} setFileUUIDs={setFileUUIDs} />
+      </Modal>
       <Modal
         isOpen={confirmModal}
         position='default'
@@ -105,8 +108,7 @@ const UploadContent = () => {
       >
         <></>
       </Modal>
-      <FileUploader isLoading={isLoading} setFileUUIDs={setFileUUIDs} />
-    </Modal>
+    </>
   );
 };
 
