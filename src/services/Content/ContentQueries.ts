@@ -160,9 +160,13 @@ export const useAddContentQuery = (request: CreateContentRequest) => {
           request?.length > 1
             ? `${request?.length} custom repositories added`
             : `Custom repository "${request?.[0]?.name}" added`,
-        description: hasPending
-          ? 'Repository introspection in progress'
-          : 'Repository introspection data already available',
+        ...(request[0]?.origin === ContentOrigin.UPLOAD
+          ? {}
+          : {
+              description: hasPending
+                ? 'Repository introspection in progress'
+                : 'Repository introspection data already available',
+            }),
         id: 'add-content-success',
       });
 
