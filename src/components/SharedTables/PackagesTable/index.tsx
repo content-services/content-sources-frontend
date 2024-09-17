@@ -65,24 +65,24 @@ export default function PackagesTable({
               </Tr>
             </Thead>
           </Hide>
-          <Tbody>
-            {packagesList.map(({ name, version, release, arch }: PackageItem, index: number) => (
-              <Tr key={name + index}>
+          {packagesList.map(({ name, version, release, arch }: PackageItem, index: number) => (
+            <Tbody key={name + index}>
+              <Tr>
                 <Td>{name}</Td>
                 <Td>{version}</Td>
                 <Td>{release}</Td>
                 <Td>{arch}</Td>
               </Tr>
-            ))}
-            <Hide hide={!isLoadingOrZeroCount}>
-              <EmptyTableState
-                notFiltered={!search?.length}
-                clearFilters={clearSearch}
-                itemName='packages'
-                notFilteredBody='You may need to add repositories that contain packages.'
-              />
-            </Hide>
-          </Tbody>
+            </Tbody>
+          ))}
+          <Hide hide={!isLoadingOrZeroCount}>
+            <EmptyTableState
+              notFiltered={!search?.length}
+              clearFilters={clearSearch}
+              itemName='packages'
+              notFilteredBody='You may need to add repositories that contain packages.'
+            />
+          </Hide>
         </Table>
       </Hide>
     </>

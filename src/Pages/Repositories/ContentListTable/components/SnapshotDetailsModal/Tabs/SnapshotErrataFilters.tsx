@@ -124,7 +124,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                 value: type,
                 isSelected: types.includes(type),
                 children: type,
-                ouiaId: `filter_${type}`,
+                'data-ouia-component-id': `filter_${type}`,
               })) as SelectOptionProps[]
             }
             menuValue='Filter by type'
@@ -142,7 +142,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                 hasCheckbox: true,
                 isSelected: severities.includes(sev),
                 children: <SeverityWithIcon severity={sev} />,
-                ouiaId: `filter_${sev}`,
+                'data-ouia-component-id': `filter_${sev}`,
               })) as SelectOptionProps[]
             }
             menuValue='Filter by severity'
@@ -174,7 +174,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                   //   key: optionName,
                   value: optionName,
                   children: optionName,
-                  ouiaId: `filter_${optionName}`,
+                  'data-ouia-component-id': `filter_${optionName}`,
                 }))}
                 selected={filterType}
                 onSelect={(_, val) => {
