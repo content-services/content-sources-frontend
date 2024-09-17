@@ -75,15 +75,15 @@ export default function PackagesTable({
               </Tr>
             </Tbody>
           ))}
-          <Hide hide={!isLoadingOrZeroCount}>
-            <EmptyTableState
-              notFiltered={!search?.length}
-              clearFilters={clearSearch}
-              itemName='packages'
-              notFilteredBody='You may need to add repositories that contain packages.'
-            />
-          </Hide>
         </Table>
+        <Hide hide={!isLoadingOrZeroCount}>
+          <EmptyTableState
+            notFiltered={!search?.length}
+            clearFilters={clearSearch}
+            itemName='packages'
+            notFilteredBody='You may need to add repositories that contain packages.'
+          />
+        </Hide>
       </Hide>
     </>
   );

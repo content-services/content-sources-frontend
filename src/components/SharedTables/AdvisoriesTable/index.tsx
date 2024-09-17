@@ -213,15 +213,15 @@ export default function AdvisoriesTable({
               </Tbody>
             ),
           )}
-          <Hide hide={!isLoadingOrZeroCount}>
-            <EmptyTableState
-              notFiltered={!hasFilters}
-              clearFilters={clearSearch}
-              itemName='advisories'
-              notFilteredBody='You may need to add repositories that contain advisories.'
-            />
-          </Hide>
         </Table>
+        <Hide hide={!isLoadingOrZeroCount}>
+          <EmptyTableState
+            notFiltered={!hasFilters}
+            clearFilters={clearSearch}
+            itemName='advisories'
+            notFilteredBody='You may need to add repositories that contain advisories.'
+          />
+        </Hide>
       </Hide>
     </>
   );
