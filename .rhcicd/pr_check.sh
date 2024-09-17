@@ -27,8 +27,8 @@ export IQE_MARKER_EXPRESSION="smoke and ui"
 export IQE_FILTER_EXPRESSION=""
 export IQE_ENV="ephemeral"
 export IQE_SELENIUM="true"
-export IQE_CJI_TIMEOUT="30m"
-export DEPLOY_TIMEOUT="900" # 15min
+export IQE_CJI_TIMEOUT="40m"
+export DEPLOY_TIMEOUT="1800"
 export DEPLOY_FRONTENDS="true"
 export REF_ENV="insights-stage"
 
