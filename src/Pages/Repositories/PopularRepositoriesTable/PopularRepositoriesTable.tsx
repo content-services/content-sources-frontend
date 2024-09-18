@@ -34,7 +34,6 @@ import { SkeletonTable } from '@patternfly/react-component-groups';
 import {
   usePopularRepositoriesQuery,
   useDeletePopularRepositoryMutate,
-  useRepositoryParams,
   useAddPopularRepositoryQuery,
   useBulkDeleteContentItemMutate,
 } from 'services/Content/ContentQueries';
@@ -65,6 +64,7 @@ import {
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import { DELETE_ROUTE } from 'Routes/constants';
 import { Outlet, useNavigate, useOutletContext } from 'react-router-dom';
+import useArchVersion from 'Hooks/useArchVersion';
 
 const useStyles = createUseStyles({
   chipsContainer: {
@@ -148,6 +148,14 @@ const PopularRepositoriesTable = () => {
   const isInProd = useMemo(() => isProd() === true, []);
   const isInBeta = useMemo(() => isBeta() === true, []);
 
+  const {
+    archesDisplay,
+    versionDisplay,
+    isLoading: repositoryParamsLoading,
+    isError: repositoryParamsIsError,
+    error: repositoryParamsError,
+  } = useArchVersion();
+
   const onDropdownToggle = (_, isActionOpen: boolean) => {
     setIsActionOpen(isActionOpen);
   };
@@ -171,16 +179,6 @@ const PopularRepositoriesTable = () => {
   } = usePopularRepositoriesQuery(page, perPage, {
     searchQuery: !searchValue ? searchValue : debouncedSearchValue,
   });
-
-  const {
-    isLoading: repositoryParamsLoading,
-    error: repositoryParamsError,
-    isError: repositoryParamsIsError,
-    data: { distribution_versions: distVersions, distribution_arches: distArches } = {
-      distribution_versions: [],
-      distribution_arches: [],
-    },
-  } = useRepositoryParams();
 
   const { mutateAsync: addContentQuery, isLoading: isAdding } = useAddPopularRepositoryQuery(
     queryClient,
@@ -278,14 +276,6 @@ const PopularRepositoriesTable = () => {
       );
     }
   }, [selectedData]);
-
-  const archesDisplay = (arch: string) => distArches.find(({ label }) => arch === label)?.name;
-
-  const versionDisplay = (versions: Array<string>): string =>
-    distVersions
-      .filter(({ label }) => versions?.includes(label))
-      .map(({ name }) => name)
-      .join(', ');
 
   const { isLoading: isDeleting } = useDeletePopularRepositoryMutate(queryClient, page, perPage, {
     searchQuery: debouncedSearchValue,

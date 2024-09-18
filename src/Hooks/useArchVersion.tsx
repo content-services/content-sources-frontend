@@ -20,13 +20,15 @@ export default function useArchVersion() {
     return result;
   };
 
-  const versionDisplay = (version?: string) => {
-    const result = distVersions.find(({ label }) => version === label)?.name;
+  const versionDisplay = (versions: string[]) => {
+    const result = versions.filter(
+      (version) => distVersions.find(({ label }) => version === label)?.name,
+    );
     if (!result) {
-      console.warn('Unknown version ', version);
-      return version;
+      console.warn('Unknown version ', versions);
+      return versions;
     }
-    return result;
+    return result.join(', ');
   };
 
   return { isLoading, error, isError, archesDisplay, versionDisplay };

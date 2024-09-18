@@ -36,7 +36,6 @@ import {
   useBulkDeleteContentItemMutate,
   useContentListQuery,
   useIntrospectRepositoryMutate,
-  useRepositoryParams,
   useTriggerSnapshot,
 } from 'services/Content/ContentQueries';
 import ContentListFilters from './components/ContentListFilters';
@@ -52,6 +51,7 @@ import dayjs from 'dayjs';
 import ChangedArrows from './components/SnapshotListModal/components/ChangedArrows';
 import { Outlet, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import { ADD_ROUTE, DELETE_ROUTE, EDIT_ROUTE } from 'Routes/constants';
+import useArchVersion from 'Hooks/useArchVersion';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -108,6 +108,14 @@ const ContentListTable = () => {
   const [polling, setPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
 
+  const {
+    archesDisplay,
+    versionDisplay,
+    isLoading: repositoryParamsLoading,
+    isError: repositoryParamsIsError,
+    error: repositoryParamsError,
+  } = useArchVersion();
+
   const isRedHatRepository = contentOrigin === ContentOrigin.REDHAT;
 
   const [filterData, setFilterData] = useState<FilterData>({
@@ -140,16 +148,6 @@ const ContentListTable = () => {
     filterData.searchQuery === '' &&
     !filterData.versions?.length &&
     !filterData.statuses?.length;
-
-  const {
-    isLoading: repositoryParamsLoading,
-    error: repositoryParamsError,
-    isError: repositoryParamsIsError,
-    data: { distribution_versions: distVersions, distribution_arches: distArches } = {
-      distribution_versions: [],
-      distribution_arches: [],
-    },
-  } = useRepositoryParams();
 
   const columnSortAttributes = [
     'name',
@@ -267,14 +265,6 @@ const ContentListTable = () => {
     'Last Introspection',
     'Status',
   ];
-
-  const archesDisplay = (arch: string) => distArches.find(({ label }) => arch === label)?.name;
-
-  const versionDisplay = (versions: Array<string>): string =>
-    distVersions
-      .filter(({ label }) => versions?.includes(label))
-      .map(({ name }) => name)
-      .join(', ');
 
   const lastIntrospectionDisplay = (time?: string): string =>
     time === '' || time === undefined ? 'Never' : dayjs(time).fromNow();

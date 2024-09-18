@@ -280,7 +280,7 @@ const TemplatesTable = () => {
                       </Td>
                       <Td>{description}</Td>
                       <Td>{archesDisplay(arch)}</Td>
-                      <Td>{versionDisplay(version)}</Td>
+                      <Td>{versionDisplay([version])}</Td>
                       <Td>
                         <ConditionalTooltip
                           show={!use_latest}

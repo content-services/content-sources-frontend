@@ -100,7 +100,7 @@ export default function TemplateDetails() {
               <Title headingLevel='h1'>{data?.name}</Title>
               <LabelGroup className={classes.labelGroup}>
                 <Label isCompact color='blue'>
-                  {versionDisplay(data?.version)}
+                  {data?.version ? versionDisplay([data?.version]) : ''}
                 </Label>
                 <Label isCompact color='blue'>
                   {archesDisplay(data?.arch)}
