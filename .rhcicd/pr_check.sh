@@ -34,6 +34,9 @@ export REF_ENV="insights-stage"
 
 export COMPONENTS_W_RESOURCES="pulp"
 
+# Only deploy one small red hat repo
+EXTRA_DEPLOY_ARGS="--set-parameter content-sources-backend/OPTIONS_REPOSITORY_IMPORT_FILTER=small --set-parameter content-sources-backend/SUSPEND_CRON_JOB=true"
+
 set -exv
 
 # source is preferred to | bash -s in this case to avoid a subshell
