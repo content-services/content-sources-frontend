@@ -187,6 +187,39 @@ export const defaultContentItem: ContentItem = {
   last_introspection_status: 'Pending',
 };
 
+export const defaultUpdateTemplateTaskCompleted: AdminTask = {
+  uuid: 'a44540de-b8ce-4843-94ae-53b1f630ca93',
+  status: 'completed',
+  error: '',
+  org_id: '17684632',
+  queued_at: '2024-09-18T20:24:57Z',
+  started_at: '2024-09-18T20:24:57Z',
+  finished_at: '2024-09-18T20:25:57Z',
+  typename: 'update-template-content',
+};
+
+export const defaultUpdateTemplateTaskRunning: AdminTask = {
+  uuid: 'b44540de-b8ce-4843-94ae-53b1f630ca94',
+  status: 'running',
+  error: '',
+  org_id: '17684632',
+  queued_at: '2024-09-18T20:24:57Z',
+  started_at: '2024-09-18T20:24:57Z',
+  finished_at: '',
+  typename: 'update-template-content',
+};
+
+export const defaultUpdateTemplateTaskFailed: AdminTask = {
+  uuid: 'x44540de-b8ce-4843-94ae-53b1f630ca99',
+  status: 'failed',
+  error: 'error',
+  org_id: '17684632',
+  queued_at: '2024-09-18T20:24:57Z',
+  started_at: '2024-09-18T20:24:57Z',
+  finished_at: '2024-09-18T20:25:57Z',
+  typename: 'update-template-content',
+};
+
 export const defaultMetaItem: Meta = {
   limit: 10,
   offset: 0,
@@ -265,6 +298,9 @@ export const defaultTemplateItem: TemplateItem = {
   updated_at: '2024-01-22T00:00:00-07:00',
   created_by: 'Dudeguy',
   last_updated_by: 'Dudeguy',
+  last_update_snapshot_error: '',
+  last_update_task_uuid: '60412eda-7df5-4fac-8556-278f45e2ef9c',
+  last_update_task: defaultUpdateTemplateTaskCompleted,
 };
 
 // Template used for testing delete modal where repo is not in any templates
@@ -285,6 +321,7 @@ export const defaultTemplateItem2: TemplateItem = {
   updated_at: '2024-01-22T00:00:00-07:00',
   created_by: 'Dudeguy',
   last_updated_by: 'Dudeguy',
+  last_update_snapshot_error: '',
 };
 
 export const defaultSnapshotForDateItem: SnapshotForDate = {
