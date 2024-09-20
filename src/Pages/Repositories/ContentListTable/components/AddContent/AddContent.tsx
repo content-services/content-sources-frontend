@@ -202,55 +202,62 @@ const AddContent = ({ isEdit = false }: Props) => {
     isLoading: isValidating,
   } = useValidateContentList();
 
+  useEffect(() => {
+    (async () => {
+      if (isValidURL(debouncedValues.gpgKey)) {
+        const result = await fetchGpgKey(debouncedValues.gpgKey);
+        // If successful
+        if (result !== debouncedValues.gpgKey) {
+          updateVariable({
+            gpgKey: result,
+            ...(values.gpgKey === '' && !!result
+              ? {
+                  metadataVerification: !!validationList?.url?.metadata_signature_present,
+                }
+              : {}),
+          });
+          return;
+        }
+      }
+    })();
+  }, [debouncedValues.gpgKey]);
+
   useDeepCompareEffect(() => {
-    if (isFetchingGpgKey || isLoadingInitialContent) return;
-    // We wait for the gpg_key to finish returning before validating
-    const { uuid, name, url, gpgKey, metadataVerification } = debouncedValues;
+    if (isFetchingGpgKey || isLoadingInitialContent || isEmpty(debouncedValues)) return;
+    (async () => {
+      // We wait for the gpg_key to finish returning before validating
+      const { uuid, name, url, gpgKey, metadataVerification } = debouncedValues;
 
-    formik.setValues(values);
+      formik.setValues(values);
 
-    let newTouchedValues = { ...formik.touched };
-    if (!newTouchedValues?.name && name) {
-      newTouchedValues = { ...newTouchedValues, name: true };
-    }
-    if (!newTouchedValues?.url && url) {
-      newTouchedValues = { ...newTouchedValues, url: true };
-    }
-    if (!newTouchedValues?.gpgKey && gpgKey) {
-      newTouchedValues = { ...newTouchedValues, gpgKey: true };
-    }
+      let newTouchedValues = { ...formik.touched };
+      if (!newTouchedValues?.name && name) {
+        newTouchedValues = { ...newTouchedValues, name: true };
+      }
+      if (!newTouchedValues?.url && url) {
+        newTouchedValues = { ...newTouchedValues, url: true };
+      }
+      if (!newTouchedValues?.gpgKey && gpgKey) {
+        newTouchedValues = { ...newTouchedValues, gpgKey: true };
+      }
 
-    validateContent({
-      uuid,
-      name: name || undefined,
-      url: url || undefined,
-      gpg_key: gpgKey || undefined,
-      metadata_verification: metadataVerification,
-    }).then(async (validationData) => {
+      const validationData = await validateContent({
+        uuid,
+        name: name || undefined,
+        url: url || undefined,
+        gpg_key: gpgKey || undefined,
+        metadata_verification: metadataVerification,
+      });
+
       const formikErrors = await formik.validateForm(debouncedValues);
       const mappedErrorData = mapValidationData(validationData, formikErrors, isUploadRepo);
       formik.setTouched(newTouchedValues);
       setErrors(mappedErrorData);
       setChangeVerified(true);
-    });
+    })();
   }, [debouncedValues]);
 
   const updateGpgKey = async (value: string) => {
-    if (isValidURL(value)) {
-      const result = await fetchGpgKey(value);
-      // If successful
-      if (result !== value) {
-        updateVariable({
-          gpgKey: result,
-          ...(values.gpgKey === '' && !!result
-            ? {
-                metadataVerification: !!validationList?.url?.metadata_signature_present,
-              }
-            : {}),
-        });
-        return;
-      }
-    }
     // It's not a valid url, so we allow the user to continue
     updateVariable({
       gpgKey: value,
