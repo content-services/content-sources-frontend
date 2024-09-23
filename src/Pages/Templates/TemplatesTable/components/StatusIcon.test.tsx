@@ -10,11 +10,9 @@ import {
 it('Render with Valid status', () => {
   const { queryByText } = render(
     <StatusIcon
-      rowData={{
-        ...defaultTemplateItem,
-        last_update_snapshot_error: '',
-        last_update_task: defaultUpdateTemplateTaskCompleted,
-      }}
+      uuid={defaultTemplateItem.uuid}
+      last_update_snapshot_error=''
+      last_update_task={defaultUpdateTemplateTaskCompleted}
     />,
   );
 
@@ -25,11 +23,9 @@ it('Render with Valid status', () => {
 it('Render with In progress status', () => {
   const { queryByText } = render(
     <StatusIcon
-      rowData={{
-        ...defaultTemplateItem,
-        last_update_snapshot_error: '',
-        last_update_task: defaultUpdateTemplateTaskRunning,
-      }}
+      uuid={defaultTemplateItem.uuid}
+      last_update_snapshot_error=''
+      last_update_task={defaultUpdateTemplateTaskRunning}
     />,
   );
 
@@ -40,11 +36,9 @@ it('Render with In progress status', () => {
 it('Render with Invalid status with an error from the update-latest-snapshot task', async () => {
   const { queryByText } = render(
     <StatusIcon
-      rowData={{
-        ...defaultTemplateItem,
-        last_update_snapshot_error: 'error',
-        last_update_task: defaultUpdateTemplateTaskFailed,
-      }}
+      uuid={defaultTemplateItem.uuid}
+      last_update_snapshot_error='error'
+      last_update_task={defaultUpdateTemplateTaskFailed}
     />,
   );
 
@@ -65,11 +59,9 @@ it('Render with Invalid status with an error from the update-latest-snapshot tas
 it('Render with Invalid status with an error from the update-template-content task', async () => {
   const { queryByText } = render(
     <StatusIcon
-      rowData={{
-        ...defaultTemplateItem,
-        last_update_snapshot_error: '',
-        last_update_task: defaultUpdateTemplateTaskFailed,
-      }}
+      uuid={defaultTemplateItem.uuid}
+      last_update_snapshot_error=''
+      last_update_task={defaultUpdateTemplateTaskFailed}
     />,
   );
 
