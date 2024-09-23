@@ -14,6 +14,8 @@
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc",
     "patch:hosts": "fec patch-etc-hosts",
     "start": "fec dev",
+    "start:stage": "fec dev --clouddotEnv=stage",
+    "start:prod": "fec dev --clouddotEnv=prod",
     "start:verbose": "VERBOSE=true fec dev",
     "local": "BACKEND_PORT=8000 npm start",
     "verify": "npm-run-all build lint test-ci",

@@ -36,7 +36,11 @@ Alternativly, simply add these lines to your /etc/hosts:
 
 4. `npm run build` (only required when setting up for the first time)
 
-5. `npm run start` to run against stage or prod environments. <br/>
+5. `npm run start` to choose whether to run against stage or prod environments. <br/>
+   OR <br/>
+   `npm run start:stage` to run against stage environment. <br/>
+   OR <br/>
+   `npm run start:prod` to run against prod environment. <br/>
    OR <br/>
    `npm run local` to run against a local backend running on port 8000. <br/>
    (keep in mind that you have to be connected to the VPN for this to work, even in the offices)
