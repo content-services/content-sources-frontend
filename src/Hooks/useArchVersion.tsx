@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from 'react';
 import { useRepositoryParams } from 'services/Content/ContentQueries';
 
 export default function useArchVersion() {
@@ -11,25 +12,26 @@ export default function useArchVersion() {
     },
   } = useRepositoryParams();
 
-  const archesDisplay = (arch?: string) => {
-    const result = distArches.find(({ label }) => arch === label)?.name;
-    if (!result) {
-      console.warn('Unknown arch ', arch);
-      return arch;
-    }
+  const labelToName: Record<string, string> = useMemo(() => {
+    const result = {};
+    distArches.forEach(({ name, label }) => {
+      result[label] = name;
+    });
+    distVersions.forEach(({ name, label }) => {
+      result[label] = name;
+    });
     return result;
-  };
+  }, [distVersions, distArches]);
 
-  const versionDisplay = (versions: string[]) => {
-    const result = versions.filter(
-      (version) => distVersions.find(({ label }) => version === label)?.name,
-    );
-    if (!result) {
-      console.warn('Unknown version ', versions);
-      return versions;
-    }
-    return result.join(', ');
-  };
+  const archesDisplay = useCallback(
+    (arch: string = '') => labelToName[arch] || arch,
+    [labelToName],
+  );
+
+  const versionDisplay = useCallback(
+    (versions: string[]) => versions.map((version) => labelToName[version]).join(', '),
+    [labelToName],
+  );
 
   return { isLoading, error, isError, archesDisplay, versionDisplay };
 }
