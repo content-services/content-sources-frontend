@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-core';
 import {
   ActionsColumn,
-  Table /* data-codemods */,
+  Table,
   TableVariant,
   Tbody,
   Td,
@@ -96,10 +96,13 @@ const TemplatesTable = () => {
   const notFiltered =
     filterData.arch === '' && filterData.version === '' && filterData.search === '';
 
-  const columnSortAttributes = ['name', 'arch', 'version'];
+  const columnSortAttributes = ['name', '', 'arch', 'version', ''];
 
   const sortString = useMemo(
-    () => columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
+    () =>
+      columnSortAttributes[activeSortIndex]
+        ? columnSortAttributes[activeSortIndex] + ':' + activeSortDirection
+        : '',
     [activeSortIndex, activeSortDirection],
   );
 
@@ -120,18 +123,21 @@ const TemplatesTable = () => {
     setPage(newPage);
   };
 
-  const sortParams = (columnIndex: number): ThProps['sort'] => ({
-    sortBy: {
-      index: activeSortIndex,
-      direction: activeSortDirection,
-      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
-    },
-    onSort: (_event, index, direction) => {
-      setActiveSortIndex(index);
-      setActiveSortDirection(direction);
-    },
-    columnIndex,
-  });
+  const sortParams = (columnIndex: number): ThProps['sort'] | undefined =>
+    columnSortAttributes[columnIndex]
+      ? {
+          sortBy: {
+            index: activeSortIndex,
+            direction: activeSortDirection,
+            defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
+          },
+          onSort: (_event, index, direction) => {
+            setActiveSortIndex(index);
+            setActiveSortDirection(direction);
+          },
+          columnIndex,
+        }
+      : undefined;
 
   const columnHeaders: { title: string; width?: BaseCellProps['width'] }[] = [
     { title: 'Name', width: 10 },
