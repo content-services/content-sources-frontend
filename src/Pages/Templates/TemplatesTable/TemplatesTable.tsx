@@ -297,9 +297,21 @@ const TemplatesTable = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {templateList.map((rowData: TemplateItem, index) => {
-                  const { uuid, name, description, arch, version, date, use_latest } = rowData;
-                  return (
+                {templateList.map(
+                  (
+                    {
+                      uuid,
+                      name,
+                      description,
+                      arch,
+                      version,
+                      date,
+                      use_latest,
+                      last_update_snapshot_error,
+                      last_update_task,
+                    }: TemplateItem,
+                    index,
+                  ) => (
                     <Tr key={uuid + index}>
                       <Td>
                         <Button
@@ -326,7 +338,11 @@ const TemplatesTable = () => {
                         </ConditionalTooltip>
                       </Td>
                       <Td>
-                        <StatusIcon rowData={rowData} />
+                        <StatusIcon
+                          uuid={uuid}
+                          last_update_snapshot_error={last_update_snapshot_error}
+                          last_update_task={last_update_task}
+                        />
                       </Td>
                       <Td>
                         <ConditionalTooltip
@@ -350,8 +366,8 @@ const TemplatesTable = () => {
                         </ConditionalTooltip>
                       </Td>
                     </Tr>
-                  );
-                })}
+                  ),
+                )}
               </Tbody>
             </Table>
             <Flex className={classes.bottomContainer}>

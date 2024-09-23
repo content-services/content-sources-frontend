@@ -2,8 +2,8 @@ import { CheckCircleIcon, ExclamationCircleIcon } from '@patternfly/react-icons'
 import { Button, Flex, FlexItem, Popover, Spinner, Tooltip } from '@patternfly/react-core';
 import StatusText from 'components/StatusText/StatusText';
 import { global_danger_color_100, global_success_color_100 } from '@patternfly/react-tokens';
-import { TemplateItem } from 'services/Templates/TemplateApi';
 import { createUseStyles } from 'react-jss';
+import { AdminTask } from 'services/AdminTasks/AdminTaskApi';
 
 const red = global_danger_color_100.value;
 const green = global_success_color_100.value;
@@ -16,16 +16,12 @@ const useStyles = createUseStyles({
 });
 
 interface Props {
-  rowData: TemplateItem;
+  uuid: string;
+  last_update_snapshot_error: string;
+  last_update_task: AdminTask | undefined;
 }
 
-interface DescriptionProps {
-  error?: string;
-}
-
-const PopoverDescription = ({ error }: DescriptionProps) => <div>{error}</div>;
-
-const StatusIcon = ({ rowData: { uuid, last_update_snapshot_error, last_update_task } }: Props) => {
+const StatusIcon = ({ uuid, last_update_snapshot_error, last_update_task }: Props) => {
   const classes = useStyles();
 
   const showError = (
@@ -93,11 +89,7 @@ const StatusIcon = ({ rowData: { uuid, last_update_snapshot_error, last_update_t
             alertSeverityVariant='danger'
             headerContent='Invalid'
             headerIcon={<ExclamationCircleIcon />}
-            bodyContent={
-              <PopoverDescription
-                error={showError(last_update_snapshot_error, last_update_task?.error)}
-              />
-            }
+            bodyContent={showError(last_update_snapshot_error, last_update_task?.error)}
             position='left'
           >
             <Button variant='link' isInline>
