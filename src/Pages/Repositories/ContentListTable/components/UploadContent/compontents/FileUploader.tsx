@@ -299,7 +299,11 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
       }}
       isHorizontal
     >
-      <MultipleFileUploadMain className={classes.mainDropzone} {...uploadMainProps} />
+      <MultipleFileUploadMain
+        className={classes.mainDropzone}
+        {...uploadMainProps}
+        data-ouia-component-id='upload-button'
+      />
       {fileCountGreaterThanZero && (
         <MultipleFileUploadStatus
           statusToggleText={`${completedCount} of ${fileCount} files are ready to be added to the repository${failedCount ? `, ${failedCount} failed` : ''}`}
