@@ -27,7 +27,6 @@ const StatusIcon = ({ uuid, last_update_snapshot_error, last_update_task }: Prop
   const classes = useStyles();
   const { getEnvironment } = useChrome();
   const isInEphemeral = useMemo(() => getEnvironment() === 'qa', []);
-  console.log(getEnvironment());
 
   const showError = (
     snapshotError: string | undefined,
