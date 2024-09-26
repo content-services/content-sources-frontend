@@ -6,6 +6,15 @@ import {
   defaultUpdateTemplateTaskFailed,
   defaultUpdateTemplateTaskRunning,
 } from 'testingHelpers';
+import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
+
+jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
+  useChrome: jest.fn(),
+}));
+
+(useChrome as jest.Mock).mockImplementation(() => ({
+  getEnvironment: () => 'stage',
+}));
 
 it('Render with Valid status', () => {
   const { queryByText } = render(

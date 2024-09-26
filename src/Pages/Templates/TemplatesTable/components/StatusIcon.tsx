@@ -4,6 +4,8 @@ import StatusText from 'components/StatusText/StatusText';
 import { global_danger_color_100, global_success_color_100 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import { AdminTask } from 'services/AdminTasks/AdminTaskApi';
+import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
+import { useMemo } from 'react';
 
 const red = global_danger_color_100.value;
 const green = global_success_color_100.value;
@@ -23,6 +25,9 @@ interface Props {
 
 const StatusIcon = ({ uuid, last_update_snapshot_error, last_update_task }: Props) => {
   const classes = useStyles();
+  const { getEnvironment } = useChrome();
+  const isInEphemeral = useMemo(() => getEnvironment() === 'qa', []);
+  console.log(getEnvironment());
 
   const showError = (
     snapshotError: string | undefined,
@@ -38,9 +43,10 @@ const StatusIcon = ({ uuid, last_update_snapshot_error, last_update_task }: Prop
   };
 
   if (
-    last_update_task?.status === 'completed' &&
-    last_update_task?.error === '' &&
-    last_update_snapshot_error === ''
+    (last_update_task?.status === 'completed' &&
+      last_update_task?.error === '' &&
+      last_update_snapshot_error === '') ||
+    (last_update_snapshot_error === '' && isInEphemeral)
   ) {
     return (
       <Flex
