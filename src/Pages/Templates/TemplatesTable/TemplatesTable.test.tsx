@@ -3,6 +3,7 @@ import TemplatesTable from './TemplatesTable';
 import { useTemplateList } from 'services/Templates/TemplateQueries';
 import { ReactQueryTestWrapper, defaultTemplateItem } from 'testingHelpers';
 import { formatDateDDMMMYYYY } from 'helpers';
+import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 
 jest.mock('services/Templates/TemplateQueries', () => ({
   useTemplateList: jest.fn(),
@@ -25,6 +26,14 @@ jest.mock('middleware/AppContext', () => ({
     rbac: { repoWrite: true, templateRead: true },
     setContentOrigin: () => {},
   }),
+}));
+
+jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
+  useChrome: jest.fn(),
+}));
+
+(useChrome as jest.Mock).mockImplementation(() => ({
+  getEnvironment: () => 'stage',
 }));
 
 it('expect TemplatesTable to render empty state', () => {
