@@ -24,7 +24,7 @@ import { ContentItem, ContentOrigin } from 'services/Content/ContentApi';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
-import { formatDateForPicker, reduceStringToCharsWithEllipsis } from 'helpers';
+import { formatDateForPicker, formatTemplateDate, reduceStringToCharsWithEllipsis } from 'helpers';
 import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
 import PackageCount from 'Pages/Repositories/ContentListTable/components/PackageCount';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
@@ -57,7 +57,7 @@ export default function SetUpDateStep() {
 
   const { data, mutateAsync } = useGetSnapshotsByDates(
     [...selectedRedhatRepos, ...selectedCustomRepos],
-    templateRequest?.date || '',
+    formatTemplateDate(templateRequest?.date || ''),
   );
 
   const dateValidators = [
