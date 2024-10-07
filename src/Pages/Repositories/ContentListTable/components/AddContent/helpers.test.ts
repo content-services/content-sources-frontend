@@ -52,7 +52,6 @@ it('mapFormikToAPIValues', () => {
 });
 
 it('mapValidationData, ensure url error shows', () => {
-  //   expect(mapValidationData({}, {})).toEqual({});
   const validationData: ValidationResponse = {
     name: {
       skipped: false,

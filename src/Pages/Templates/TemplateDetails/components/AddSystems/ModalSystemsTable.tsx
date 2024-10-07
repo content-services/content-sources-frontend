@@ -81,7 +81,7 @@ export default function ModalSystemsTable({
         <Grid className={classes.mainContainer}>
           <SkeletonTable
             rows={prevLength}
-            numberOfColumns={columnHeaders.length}
+            columnsCount={columnHeaders.length}
             variant={TableVariant.compact}
           />
         </Grid>

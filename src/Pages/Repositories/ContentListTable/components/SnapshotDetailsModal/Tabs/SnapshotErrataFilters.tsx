@@ -171,7 +171,6 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                   icon: <FilterIcon />,
                 }}
                 dropDownItems={filters.map((optionName) => ({
-                  //   key: optionName,
                   value: optionName,
                   children: optionName,
                   'data-ouia-component-id': `filter_${optionName}`,

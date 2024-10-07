@@ -299,6 +299,7 @@ export const useEditContentQuery = (request: EditContentRequestItem) => {
       });
 
       queryClient.invalidateQueries(CONTENT_LIST_KEY);
+      queryClient.invalidateQueries(CONTENT_ITEM_KEY);
       queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
       queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
     },

@@ -9,9 +9,9 @@ import {
   TextInput,
   InputGroupItem,
   InputGroupText,
+  type SelectOptionProps,
 } from '@patternfly/react-core';
-import { SelectVariant } from '@patternfly/react-core/deprecated';
-import DropdownSelect_Deprecated from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
+import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import Hide from 'components/Hide/Hide';
@@ -139,30 +139,60 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
         );
       case 'Status':
         return (
-          <DropdownSelect_Deprecated
-            toggleAriaLabel='filter status'
-            toggleId='statusSelect'
-            ouiaId='filter_status'
+          <DropdownSelect
+            onSelect={(_, val) =>
+              setSelectedStatuses((prev) =>
+                selectedStatuses.includes(val as string)
+                  ? prev.filter((item) => item !== (val as string))
+                  : [...prev, val as string],
+              )
+            }
+            menuToggleProps={{
+              'aria-label': 'filter status',
+              id: 'statusSelect',
+            }}
+            multiSelect
+            dropDownItems={
+              statusValues.map((status) => ({
+                hasCheckbox: true,
+                value: status,
+                isSelected: selectedStatuses.includes(status),
+                children: status,
+                'data-ouia-component-id': `filter_${status}`,
+              })) as SelectOptionProps[]
+            }
             isDisabled={isLoading}
-            options={statusValues}
-            variant={SelectVariant.checkbox}
-            selectedProp={selectedStatuses}
-            setSelected={setSelectedStatuses}
-            placeholderText='Filter by status'
+            menuValue='Filter by status'
+            ouiaId='filter_status'
           />
         );
       case 'Type':
         return (
-          <DropdownSelect_Deprecated
-            toggleAriaLabel='filter type'
-            toggleId='typeSelect'
-            ouiaId='filter_type'
+          <DropdownSelect
+            onSelect={(_, val) =>
+              setSelectedTypenames((prev) =>
+                selectedTypenames.includes(val as string)
+                  ? prev.filter((item) => item !== (val as string))
+                  : [...prev, val as string],
+              )
+            }
+            menuToggleProps={{
+              'aria-label': 'filter type',
+              id: 'typeSelect',
+            }}
+            multiSelect
+            dropDownItems={
+              typeValues.map((status) => ({
+                hasCheckbox: true,
+                value: status,
+                isSelected: selectedTypenames.includes(status),
+                children: status,
+                'data-ouia-component-id': `filter_${status}`,
+              })) as SelectOptionProps[]
+            }
             isDisabled={isLoading}
-            options={typeValues}
-            variant={SelectVariant.checkbox}
-            selectedProp={selectedTypenames}
-            setSelected={setSelectedTypenames}
-            placeholderText='Filter by type'
+            menuValue='Filter by type'
+            ouiaId='filter_type'
           />
         );
       default:
@@ -177,16 +207,24 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
           <InputGroup>
             <InputGroupItem>
               <FlexItem>
-                <DropdownSelect_Deprecated
-                  toggleId='filterSelectionDropdown'
-                  ouiaId='filter_type'
+                <DropdownSelect
+                  onSelect={(_, val) => setFilterType(val as AdminTaskFilters)}
+                  menuToggleProps={{
+                    'aria-label': 'filterSelectionDropdown',
+                    id: 'typeSelect',
+                    icon: <FilterIcon />,
+                  }}
+                  dropDownItems={
+                    filters.map((filter) => ({
+                      value: filter,
+                      isSelected: filterType === filter,
+                      children: filter,
+                      'data-ouia-component-id': `filter_${filter}`,
+                    })) as SelectOptionProps[]
+                  }
                   isDisabled={isLoading}
-                  options={filters}
-                  variant={SelectVariant.single}
-                  selectedProp={filterType}
-                  setSelected={setFilterType}
-                  placeholderText='filter'
-                  toggleIcon={<FilterIcon />}
+                  menuValue={filterType}
+                  ouiaId='filter_type'
                 />
               </FlexItem>
             </InputGroupItem>

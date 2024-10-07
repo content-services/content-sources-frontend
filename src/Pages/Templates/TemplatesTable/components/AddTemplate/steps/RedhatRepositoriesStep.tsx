@@ -227,7 +227,7 @@ export default function RedhatRepositoriesStep() {
             <Grid className=''>
               <SkeletonTable
                 rows={perPage}
-                numberOfColumns={columnHeaders.length}
+                columnsCount={columnHeaders.length}
                 variant={TableVariant.compact}
               />
             </Grid>

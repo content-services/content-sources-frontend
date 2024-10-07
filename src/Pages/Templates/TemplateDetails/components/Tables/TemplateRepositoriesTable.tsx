@@ -83,7 +83,7 @@ export default function TemplateRepositoriesTable({
         <Grid className={classes.mainContainer}>
           <SkeletonTable
             rows={prevLength}
-            numberOfColumns={columnHeaders.length}
+            columnsCount={columnHeaders.length}
             variant={TableVariant.compact}
           />
         </Grid>
@@ -181,15 +181,15 @@ export default function TemplateRepositoriesTable({
               </Tbody>
             ),
           )}
-          <Hide hide={!isLoadingOrZeroCount}>
-            <EmptyTableState
-              notFiltered={!hasSearch}
-              clearFilters={clearSearch}
-              itemName='repositories'
-              notFilteredBody='You may need to add repositories that have snapshots.'
-            />
-          </Hide>
         </Table>
+        <Hide hide={!isLoadingOrZeroCount}>
+          <EmptyTableState
+            notFiltered={!hasSearch}
+            clearFilters={clearSearch}
+            itemName='repositories'
+            notFilteredBody='You may need to add repositories that have snapshots.'
+          />
+        </Hide>
       </Hide>
     </>
   );

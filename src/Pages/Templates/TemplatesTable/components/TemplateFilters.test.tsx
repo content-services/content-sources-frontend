@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { testRepositoryParamsResponse } from 'testingHelpers';
 import TemplateFilters from './TemplateFilters';
 import { useQueryClient } from 'react-query';
@@ -54,8 +54,11 @@ it('Select a filter of each type and ensure chips are present', async () => {
   expect(filterInput).not.toHaveAttribute('disabled');
   fireEvent.change(filterInput, { target: { value: 'EPEL' } });
 
-  const optionMenu = getByLabelText('Options menu');
-  fireEvent.click(optionMenu);
+  const optionMenu = getByRole('button', { name: 'filterSelectionDropdown' });
+
+  waitFor(() => {
+    fireEvent.click(optionMenu);
+  });
 
   // Select a Version item
   const versionOption = queryByText('Version') as Element;

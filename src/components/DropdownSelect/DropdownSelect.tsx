@@ -8,7 +8,7 @@ import {
   type SelectProps,
 } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 const useStyles = createUseStyles({
   menuToggle: {
@@ -17,7 +17,7 @@ const useStyles = createUseStyles({
 });
 
 export interface DropDownSelectProps extends Omit<SelectProps, 'toggle'> {
-  menuValue: string;
+  menuValue?: string | ReactNode;
   dropDownItems?: SelectOptionProps[];
   isDisabled?: boolean;
   multiSelect?: boolean; // Prevents close behaviour on select

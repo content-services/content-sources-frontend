@@ -4,7 +4,7 @@ import { createUseStyles } from 'react-jss';
 import { useNavigate, useParams } from 'react-router-dom';
 import useRootPath from 'Hooks/useRootPath';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
-import FileUploader from './compontents/FileUploader';
+import FileUploader from './components/FileUploader';
 import { useState } from 'react';
 import { useAddUploadsQuery } from 'services/Content/ContentQueries';
 

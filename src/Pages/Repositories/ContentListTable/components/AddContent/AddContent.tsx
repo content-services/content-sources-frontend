@@ -16,8 +16,9 @@ import {
   FormAlert,
   Alert,
   ButtonVariant,
+  ChipGroup,
+  Chip,
 } from '@patternfly/react-core';
-import { SelectVariant } from '@patternfly/react-core/deprecated';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { global_Color_200 } from '@patternfly/react-tokens';
 import { useEffect, useMemo, useState } from 'react';
@@ -43,7 +44,6 @@ import {
   useValidateContentList,
 } from 'services/Content/ContentQueries';
 import { ContentOrigin, RepositoryParamsResponse } from 'services/Content/ContentApi';
-import DropdownSelect_Deprecated from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
 import { useQueryClient } from 'react-query';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { isEmpty, isEqual } from 'lodash';
@@ -294,7 +294,7 @@ const AddContent = ({ isEdit = false }: Props) => {
   };
 
   const setVersionSelected = (value: string[]) => {
-    let valueToUpdate = value.map((val) => distributionVersions[val]);
+    let valueToUpdate = value;
     if (value.length === 0 || valueToUpdate[value.length - 1] === 'any') {
       valueToUpdate = ['any'];
     }
@@ -562,16 +562,29 @@ const AddContent = ({ isEdit = false }: Props) => {
             }
             fieldId='arch'
           >
-            <DropdownSelect_Deprecated
+            <DropdownSelect
+              onSelect={(_, val) =>
+                updateVariable({
+                  arch: val,
+                })
+              }
+              selected={arch}
+              menuToggleProps={{
+                'aria-label': 'filter architecture',
+                id: 'archSelection',
+              }}
+              dropDownItems={Object.keys(distributionArches).map((option) => ({
+                value: distributionArches[option],
+                isSelected: arch === distributionArches[option],
+                children: option,
+                'data-ouia-component-id': `filter_${option}`,
+              }))}
+              menuValue={
+                Object.keys(distributionArches).find(
+                  (key: string) => arch === distributionArches[key],
+                )!
+              }
               ouiaId='restrict_to_architecture'
-              menuAppendTo={document.body}
-              toggleId='archSelection'
-              options={Object.keys(distributionArches)}
-              variant={SelectVariant.single}
-              selectedProp={Object.keys(distributionArches).find(
-                (key: string) => arch === distributionArches[key],
-              )}
-              setSelected={(value) => updateVariable({ arch: distributionArches[value] })}
             />
           </FormGroup>
           <FormGroup
@@ -584,17 +597,53 @@ const AddContent = ({ isEdit = false }: Props) => {
             }
             fieldId='version'
           >
-            <DropdownSelect_Deprecated
+            <DropdownSelect
+              onSelect={(_, val) => {
+                setVersionSelected(
+                  versions.includes(val as string)
+                    ? versions.filter((item) => item !== (val as string))
+                    : [...versions, val as string],
+                );
+              }}
+              selected={versions}
+              menuToggleProps={{
+                'aria-label': 'filter version',
+                id: 'versionSelection',
+              }}
+              multiSelect
+              dropDownItems={Object.keys(distributionVersions).map((option) => ({
+                hasCheckbox: true,
+                value: distributionVersions[option],
+                isSelected: versions.includes(distributionVersions[option]),
+                children: option,
+                'data-ouia-component-id': `filter_${option}`,
+              }))}
+              menuValue={
+                versions?.length ? (
+                  <ChipGroup aria-label='Current selections'>
+                    {(
+                      Object.keys(distributionVersions).filter((key) =>
+                        versions.includes(distributionVersions[key as string]),
+                      ) as string[]
+                    ).map((val) => (
+                      <Chip
+                        key={val}
+                        onClick={(ev) => {
+                          ev.preventDefault();
+                          setVersionSelected(
+                            versions.filter((item) => item !== distributionVersions[val]),
+                          );
+                        }}
+                      >
+                        {val}
+                      </Chip>
+                    ))}
+                  </ChipGroup>
+                ) : (
+                  'Any version'
+                )
+              }
               ouiaId='restrict_to_os_version'
-              menuAppendTo={document.body}
-              toggleId='versionSelection'
-              options={Object.keys(distributionVersions)}
-              variant={SelectVariant.typeaheadMulti}
-              selectedProp={Object.keys(distributionVersions).filter((key: string) =>
-                versions?.includes(distributionVersions[key]),
-              )}
-              placeholderText={versions?.length ? '' : 'Any version'}
-              setSelected={(value) => setVersionSelected(value)}
             />
           </FormGroup>
           <FormGroup fieldId='enable_module_hotfixes'>

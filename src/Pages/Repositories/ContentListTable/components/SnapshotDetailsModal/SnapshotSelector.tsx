@@ -1,8 +1,7 @@
 import { Form, FormGroup } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { useNavigate, useParams } from 'react-router-dom';
-import { SelectVariant } from '@patternfly/react-core/deprecated';
-import DropdownSelect_Deprecated from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
+import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 import { useGetSnapshotList } from 'services/Content/ContentQueries';
 import { useMemo } from 'react';
 import useRootPath from 'Hooks/useRootPath';
@@ -12,6 +11,9 @@ import { formatDateDDMMMYYYY } from 'helpers';
 const useStyles = createUseStyles({
   mainContainer: {
     display: 'flex!important',
+  },
+  minWidth: {
+    minWidth: '228px',
   },
 });
 
@@ -50,15 +52,23 @@ export function SnapshotSelector() {
         aria-label='snapshot-selector'
         fieldId='snapshot'
       >
-        <DropdownSelect_Deprecated
+        <DropdownSelect
+          onSelect={(_, val) => setSelected(val as string)}
+          selected={uuidMapper[snapshotUUID]}
+          menuToggleProps={{
+            className: classes.minWidth,
+            'aria-label': 'filter date',
+            id: 'snapshotSelector',
+          }}
+          dropDownItems={Object.keys(dateMapper).map((date) => ({
+            value: date,
+            isSelected: uuidMapper[snapshotUUID] === date,
+            children: date,
+            'data-ouia-component-id': `filter_${date}`,
+          }))}
           isDisabled={isLoading || isFetching}
+          menuValue={uuidMapper[snapshotUUID]}
           ouiaId='snapshot_selector'
-          menuAppendTo={document.body}
-          toggleId='snapshotSelector'
-          options={Object.keys(dateMapper)}
-          variant={SelectVariant.single}
-          selectedProp={uuidMapper[snapshotUUID]}
-          setSelected={setSelected}
         />
       </FormGroup>
     </Form>

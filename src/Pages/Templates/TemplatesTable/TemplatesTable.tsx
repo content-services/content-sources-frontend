@@ -282,7 +282,7 @@ const TemplatesTable = () => {
           <Grid className={classes.mainContainer}>
             <SkeletonTable
               rows={perPage}
-              numberOfColumns={columnHeaders.length}
+              columnsCount={columnHeaders.length}
               variant={TableVariant.compact}
             />
           </Grid>

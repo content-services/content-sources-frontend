@@ -2,8 +2,6 @@ import { render } from '@testing-library/react';
 import UploadContent from './UploadContent';
 import React from 'react';
 
-// import { createUpload, uploadChunk } from 'services/Content/ContentApi';
-
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
 jest.mock('services/Content/ContentQueries', () => ({

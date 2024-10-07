@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { testRepositoryParamsResponse } from 'testingHelpers';
 import AddContent from './AddContent/AddContent';
 import ContentListFilters from './ContentListFilters';
@@ -68,8 +68,11 @@ it('Select a filter of each type and ensure chips are present', () => {
   expect(filterInput).not.toHaveAttribute('disabled');
   fireEvent.change(filterInput, { target: { value: 'EPEL' } });
 
-  const optionMenu = getByLabelText('Options menu');
-  fireEvent.click(optionMenu);
+  const optionMenu = getByRole('button', { name: 'filterSelectionDropdown' });
+
+  waitFor(() => {
+    fireEvent.click(optionMenu);
+  });
 
   // Select a Version item
   const versionOption = queryByText('Version') as Element;

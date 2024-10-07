@@ -172,7 +172,7 @@ export default function SetUpDateStep() {
               <Grid className=''>
                 <SkeletonTable
                   rows={10}
-                  numberOfColumns={columnHeaders.length}
+                  columnsCount={columnHeaders.length}
                   variant={TableVariant.compact}
                 />
               </Grid>

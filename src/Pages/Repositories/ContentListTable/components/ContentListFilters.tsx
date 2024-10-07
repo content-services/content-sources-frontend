@@ -12,8 +12,6 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@patternfly/react-core';
-import { SelectVariant } from '@patternfly/react-core/deprecated';
-import DropdownSelect_Deprecated from 'components/DropdownSelect_Deprecated/DropdownSelect_Deprecated';
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import Hide from 'components/Hide/Hide';
@@ -28,6 +26,7 @@ import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip
 import { useNavigate } from 'react-router-dom';
 import DeleteKebab from 'components/DeleteKebab/DeleteKebab';
 import { ADD_ROUTE } from 'Routes/constants';
+import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 
 interface Props {
   isLoading?: boolean;
@@ -189,44 +188,83 @@ const ContentListFilters = ({
         );
       case 'Version':
         return (
-          <DropdownSelect_Deprecated
-            toggleAriaLabel='filter version'
-            toggleId='versionSelect'
-            ouiaId='filter_version'
+          <DropdownSelect
+            onSelect={(_, val) =>
+              setSelectedVersions((prev) =>
+                selectedVersions.includes(val as string)
+                  ? prev.filter((item) => item !== (val as string))
+                  : [...prev, val as string],
+              )
+            }
+            menuToggleProps={{
+              'aria-label': 'filter version',
+              id: 'versionSelect',
+            }}
+            multiSelect
+            dropDownItems={Object.keys(versionNamesLabels).map((version) => ({
+              hasCheckbox: true,
+              value: version,
+              isSelected: selectedVersions.includes(version),
+              children: version,
+              'data-ouia-component-id': `filter_${version}`,
+            }))}
             isDisabled={isLoading}
-            options={Object.keys(versionNamesLabels)}
-            variant={SelectVariant.checkbox}
-            selectedProp={selectedVersions}
-            setSelected={setSelectedVersions}
-            placeholderText='Filter by version'
+            menuValue='Filter by version'
+            ouiaId='filter_version'
           />
         );
       case 'Architecture':
         return (
-          <DropdownSelect_Deprecated
-            toggleAriaLabel='filter architecture'
-            toggleId='archSelect'
-            ouiaId='filter_arch'
+          <DropdownSelect
+            onSelect={(_, val) =>
+              setSelectedArches((prev) =>
+                selectedArches.includes(val as string)
+                  ? prev.filter((item) => item !== (val as string))
+                  : [...prev, val as string],
+              )
+            }
+            menuToggleProps={{
+              'aria-label': 'filter architecture',
+              id: 'archSelect',
+            }}
+            multiSelect
+            dropDownItems={Object.keys(archNamesLabels).map((arch) => ({
+              hasCheckbox: true,
+              value: arch,
+              isSelected: selectedArches.includes(arch),
+              children: arch,
+              'data-ouia-component-id': `filter_${arch}`,
+            }))}
             isDisabled={isLoading}
-            options={Object.keys(archNamesLabels)}
-            variant={SelectVariant.checkbox}
-            selectedProp={selectedArches}
-            setSelected={setSelectedArches}
-            placeholderText='Filter by architecture'
+            menuValue='Filter by architecture'
+            ouiaId='filter_arch'
           />
         );
       case 'Status':
         return (
-          <DropdownSelect_Deprecated
-            toggleAriaLabel='filter status'
-            toggleId='statusSelect'
-            ouiaId='filter_status'
+          <DropdownSelect
+            onSelect={(_, val) =>
+              setSelectedStatuses((prev) =>
+                selectedStatuses.includes(val as string)
+                  ? prev.filter((item) => item !== (val as string))
+                  : [...prev, val as string],
+              )
+            }
+            menuToggleProps={{
+              'aria-label': 'filter status',
+              id: 'statusSelect',
+            }}
+            multiSelect
+            dropDownItems={statusValues.map((status) => ({
+              hasCheckbox: true,
+              value: status,
+              isSelected: selectedStatuses.includes(status),
+              children: status,
+              'data-ouia-component-id': `filter_${status}`,
+            }))}
             isDisabled={isLoading}
-            options={statusValues}
-            variant={SelectVariant.checkbox}
-            selectedProp={selectedStatuses}
-            setSelected={setSelectedStatuses}
-            placeholderText='Filter by status'
+            menuValue='Filter by status'
+            ouiaId='filter_status'
           />
         );
       default:
@@ -250,16 +288,22 @@ const ContentListFilters = ({
           <InputGroup>
             <InputGroupItem>
               <FlexItem>
-                <DropdownSelect_Deprecated
-                  toggleId='filterSelectionDropdown'
-                  ouiaId='filter_type'
+                <DropdownSelect
+                  onSelect={(_, val) => setFilterType(val as Filters)}
+                  menuToggleProps={{
+                    'aria-label': 'filterSelectionDropdown',
+                    id: 'typeSelect',
+                    icon: <FilterIcon />,
+                  }}
+                  dropDownItems={filters.map((filter) => ({
+                    value: filter,
+                    isSelected: filterType === filter,
+                    children: filter,
+                    'data-ouia-component-id': `filter_${filter}`,
+                  }))}
                   isDisabled={isLoading}
-                  options={filters}
-                  variant={SelectVariant.single}
-                  selectedProp={filterType}
-                  setSelected={setFilterType}
-                  placeholderText='filter'
-                  toggleIcon={<FilterIcon />}
+                  menuValue={filterType}
+                  ouiaId='filter_type'
                 />
               </FlexItem>
             </InputGroupItem>

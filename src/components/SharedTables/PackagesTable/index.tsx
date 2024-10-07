@@ -49,7 +49,7 @@ export default function PackagesTable({
         <Grid className={classes.mainContainer}>
           <SkeletonTable
             rows={prevLength}
-            numberOfColumns={columnHeaders.length}
+            columnsCount={columnHeaders.length}
             variant={TableVariant.compact}
           />
         </Grid>

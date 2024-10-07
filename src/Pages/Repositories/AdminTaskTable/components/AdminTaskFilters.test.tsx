@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import AdminTaskFilters from './AdminTaskFilters';
 
 jest.mock('middleware/AppContext', () => ({
@@ -43,8 +43,11 @@ it('Select a filter of each type and ensure chips are present', () => {
   expect(accountIdInput).not.toHaveAttribute('disabled');
   fireEvent.change(accountIdInput, { target: { value: '11593016' } });
 
-  const optionMenu = getByLabelText('Options menu');
-  fireEvent.click(optionMenu);
+  const optionMenu = getByRole('button', { name: 'filterSelectionDropdown' });
+
+  waitFor(() => {
+    fireEvent.click(optionMenu);
+  });
 
   const orgIdOption = queryByText('Org ID') as Element;
   expect(orgIdOption).toBeInTheDocument();

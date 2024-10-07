@@ -53,7 +53,6 @@ import { Outlet, useNavigate, useOutletContext, useSearchParams } from 'react-ro
 import useArchVersion from 'Hooks/useArchVersion';
 import { ADD_ROUTE, DELETE_ROUTE, EDIT_ROUTE, UPLOAD_ROUTE } from 'Routes/constants';
 import UploadRepositoryLabel from 'components/UploadRepositoryLabel/UploadRepositoryLabel';
-import useArchVersion from 'Hooks/useArchVersion';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -525,7 +524,7 @@ const ContentListTable = () => {
               <Grid className={classes.mainContainer}>
                 <SkeletonTable
                   rows={perPage}
-                  numberOfColumns={columnHeaders.length}
+                  columnsCount={columnHeaders.length}
                   variant={TableVariant.compact}
                 />
               </Grid>

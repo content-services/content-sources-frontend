@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { initStore, restoreStore } from '@redhat-cloud-services/insights-common-typescript';
 import { Middleware } from 'redux';
 import { ReducerRegistry } from '@redhat-cloud-services/frontend-components-utilities/ReducerRegistry/index';
-// import promiseMiddleware from 'redux-promise-middleware';
 import { notifications } from '@redhat-cloud-services/frontend-components-notifications';
 
 let registry: any;

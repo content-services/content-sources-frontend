@@ -13,7 +13,7 @@ jest.mock('services/Content/ContentQueries', () => ({
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
   useParams: () => ({
-    repoUUID: 'some-uuid',
+    snapshotUUID: defaultSnapshotItem.uuid,
   }),
 }));
 
