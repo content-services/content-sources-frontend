@@ -196,8 +196,8 @@ export const useAddUploadsQuery = (request: AddUploadRequest) => {
         variant: AlertVariant.success,
         title:
           request.uploads.length > 1
-            ? `${request.uploads.length} rpms successfully uploaded to ${data.repository_name}`
-            : `One rpm successfully uploaded to ${data.repository_name}`,
+            ? `${request.uploads.length} rpms successfully uploaded to ${data.object_name}`
+            : `One rpm successfully uploaded to ${data.object_name}`,
         description: 'This repository will be snapshotted shortly',
         id: 'add-upload-success',
       });

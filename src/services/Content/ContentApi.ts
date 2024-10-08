@@ -269,10 +269,9 @@ export interface AddUploadResponse {
   error: string;
   org_id: string;
   type: string;
-  repository_name: string;
-  repository_uuid: string;
-  dependencies: string[];
-  dependents: string[];
+  object_type: string;
+  object_name: string;
+  object_uuid: string;
 }
 
 export const getPopularRepositories: (
