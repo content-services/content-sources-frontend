@@ -102,7 +102,7 @@ const AddTemplateBase = () => {
           header={
             <WizardHeader
               title={`${isEdit ? 'Edit' : 'Create'} content template`}
-              titleId={`${isEdit ? 'edit' : 'create'}_content_template`}
+              titleId={`${isEdit ? 'edit' : 'create'}_content_template` ouiaId={'create_content-template'}}
               description='Prepare for your next patching cycle with a content template.'
               onClose={onClose}
               closeButtonAriaLabel={`close_${isEdit ? 'edit' : 'create'}_content_template`}

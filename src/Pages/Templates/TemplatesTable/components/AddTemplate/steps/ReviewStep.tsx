@@ -59,7 +59,7 @@ export default function ReviewStep() {
 
   return (
     <Grid hasGutter>
-      <Title headingLevel='h1'>Review</Title>
+      <Title ouiaId='review' headingLevel='h1'>Review</Title>
       <Text component={TextVariants.h6}>
         Review the information and then click <b>{isEdit ? 'Confirm changes' : 'Create'}</b>.
       </Text>

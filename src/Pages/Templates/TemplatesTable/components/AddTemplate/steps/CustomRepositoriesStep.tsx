@@ -141,7 +141,7 @@ export default function CustomRepositoriesStep() {
         direction={{ default: 'row' }}
         justifyContent={{ default: 'justifyContentSpaceBetween' }}
       >
-        <Title headingLevel='h1'>Custom repositories</Title>
+        <Title ouiaId='custom_repositories' headingLevel='h1'>Custom repositories</Title>
         <Button
           id='refreshContentList'
           ouiaId='refresh_content_list'

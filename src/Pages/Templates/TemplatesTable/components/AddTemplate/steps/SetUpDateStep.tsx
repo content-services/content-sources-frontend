@@ -107,7 +107,7 @@ export default function SetUpDateStep() {
 
   return (
     <Grid hasGutter>
-      <Title headingLevel='h1'>Set up snapshot date</Title>
+      <Title ouiaId='set_up_snapshot_date' headingLevel='h1'>Set up snapshot date</Title>
       <FormGroup className={classes.radioGroup}>
         <Radio
           id='use latest snapshot radio'

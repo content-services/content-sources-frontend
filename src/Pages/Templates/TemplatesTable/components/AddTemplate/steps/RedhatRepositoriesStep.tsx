@@ -143,7 +143,7 @@ export default function RedhatRepositoriesStep() {
         direction={{ default: 'row' }}
         justifyContent={{ default: 'justifyContentSpaceBetween' }}
       >
-        <Title headingLevel='h1'>Additional Red Hat repositories</Title>
+        <Title ouiaId='additional_red_hat_repositories' headingLevel='h1'>Additional Red Hat repositories</Title>
       </Flex>
       <Flex direction={{ default: 'row' }}>
         <Text component={TextVariants.h6}>
