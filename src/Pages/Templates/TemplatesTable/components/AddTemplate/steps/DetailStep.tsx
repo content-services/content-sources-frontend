@@ -29,7 +29,9 @@ export default function DetailStep() {
 
   return (
     <Grid hasGutter>
-      <Title headingLevel='h1'>Enter template details</Title>
+      <Title ouiaId='enter_template_details' headingLevel='h1'>
+        Enter template details
+      </Title>
       <Text component={TextVariants.h6}>Enter a name and description for your template.</Text>
 
       <FormGroup label='Name' isRequired>
