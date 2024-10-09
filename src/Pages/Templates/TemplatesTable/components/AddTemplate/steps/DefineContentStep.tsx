@@ -50,6 +50,7 @@ export default function DefineContentStep() {
 
   return (
     <Grid hasGutter>
+      ouiaId='define_template_content'
       <Title headingLevel='h1'>Define template content</Title>
       <Text component={TextVariants.h6}>
         Templates provide consistent content across environments and time by enabling you to control
