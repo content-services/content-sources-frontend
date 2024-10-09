@@ -50,8 +50,7 @@ export default function DefineContentStep() {
 
   return (
     <Grid hasGutter>
-      ouiaId='define_template_content'
-      <Title headingLevel='h1'>Define template content</Title>
+      <Title ouiaId='define_template_content' headingLevel='h1'>Define template content</Title>
       <Text component={TextVariants.h6}>
         Templates provide consistent content across environments and time by enabling you to control
         the scope of package and advisory updates to be installed on selected systems.
