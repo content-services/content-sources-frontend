@@ -1,5 +1,6 @@
 import {
-  Bullseye,
+  Alert,
+  AlertActionCloseButton,
   Button,
   Flex,
   FlexItem,
@@ -35,7 +36,12 @@ import TemplateFilters from './components/TemplateFilters';
 import { formatDateDDMMMYYYY, formatDateUTC } from 'helpers';
 import Header from 'components/Header/Header';
 import useRootPath from 'Hooks/useRootPath';
-import { DELETE_ROUTE, DETAILS_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
+import {
+  DELETE_ROUTE,
+  DETAILS_ROUTE,
+  PATCH_SYSTEMS_ROUTE,
+  TEMPLATES_ROUTE,
+} from 'Routes/constants';
 import useArchVersion from 'Hooks/useArchVersion';
 import { useTemplateList } from 'services/Templates/TemplateQueries';
 import StatusIcon from './components/StatusIcon';
@@ -46,10 +52,7 @@ const useStyles = createUseStyles({
     display: 'flex',
     flexDirection: 'column',
     margin: '24px',
-  },
-  mainContainer100Height: {
-    composes: ['$mainContainer'], // This extends another class within this stylesheet
-    minHeight: '100%',
+    minHeight: '50%',
   },
   topContainer: {
     justifyContent: 'space-between',
@@ -73,6 +76,9 @@ const useStyles = createUseStyles({
     pointerEvents: 'auto',
     cursor: 'default',
   },
+  bannerContainer: {
+    padding: '24px 24px 0px',
+  },
 });
 
 const perPageKey = 'templatesPerPage';
@@ -89,6 +95,15 @@ const TemplatesTable = () => {
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('desc');
   const [polling, setPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
+
+  const basePath = rootPath.slice(1).replace('content', '');
+  const storedBannerDismissal = !!sessionStorage.getItem('bannerDismissal');
+  const [dismissed, setDismissed] = useState(storedBannerDismissal);
+
+  const onDismissBanner = () => {
+    sessionStorage.setItem('bannerDismissal', 'true');
+    setDismissed(true);
+  };
 
   const defaultValues: TemplateFilterData = {
     arch: '',
@@ -211,36 +226,6 @@ const TemplatesTable = () => {
   const missingRequirements =
     rbac?.templateWrite && !hasRHELSubscription ? 'subscription (RHEL)' : 'permission';
 
-  if (countIsZero && notFiltered && !isLoading)
-    return (
-      <Bullseye data-ouia-component-id='content_template_list_page'>
-        <EmptyTableState
-          notFiltered={notFiltered}
-          clearFilters={clearFilters}
-          itemName={itemName}
-          notFilteredBody={notFilteredBody}
-          notFilteredButton={
-            <ConditionalTooltip
-              content={`You do not have the required ${missingRequirements} to perform this action.`}
-              show={isMissingRequirements}
-              setDisabled
-            >
-              <Button
-                id='createContentTemplateButton'
-                ouiaId='create_content_template'
-                variant='primary'
-                isDisabled={isLoading}
-                onClick={() => navigate('add')}
-              >
-                Add template
-              </Button>
-            </ConditionalTooltip>
-          }
-        />
-        <Outlet />
-      </Bullseye>
-    );
-
   return (
     <>
       <Header
@@ -248,10 +233,30 @@ const TemplatesTable = () => {
         ouiaId='templates_description'
         paragraph='View all content templates within your organization.'
       />
-      <Grid
-        data-ouia-component-id='content_template_list_page'
-        className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
-      >
+      <Hide hide={dismissed}>
+        <Grid className={classes.bannerContainer}>
+          <Alert
+            variant='info'
+            title='Content templates is currently in preview'
+            actionClose={<AlertActionCloseButton onClose={onDismissBanner} />}
+          >
+            <p>
+              <b>Note:</b>{' '}
+              <Button
+                isInline
+                variant='link'
+                component='a'
+                href={`${basePath}${PATCH_SYSTEMS_ROUTE}`}
+              >
+                Systems within Patch
+              </Button>{' '}
+              might not properly indicate which template is assigned to a system or which updates
+              are installable.
+            </p>
+          </Alert>
+        </Grid>
+      </Hide>
+      <Grid data-ouia-component-id='content_template_list_page' className={classes.mainContainer}>
         <Outlet />
         <Flex className={classes.topContainer}>
           <TemplateFilters
