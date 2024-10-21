@@ -40,6 +40,7 @@ export interface TemplateItem {
   last_update_task_uuid?: string;
   last_update_task?: AdminTask;
   last_update_snapshot_error: string;
+  rhsm_environment_created: boolean;
 }
 
 export interface TemplateCollectionResponse {

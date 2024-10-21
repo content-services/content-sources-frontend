@@ -28,6 +28,7 @@ export const TEMPLATE_ERRATA_KEY = 'TEMPLATE_ERRATA_KEY';
 export const TEMPLATE_SNAPSHOTS_KEY = 'TEMPLATE_SNAPSHOTS_KEY';
 
 const TEMPLATE_LIST_POLLING_TIME = 15000; // 15 seconds
+const TEMPLATE_FETCH_POLLING_TIME = 5000; // 5 seconds
 
 export const useEditTemplateQuery = (queryClient: QueryClient, request: EditTemplateRequest) => {
   const errorNotifier = useErrorNotification();
@@ -57,7 +58,11 @@ export const useEditTemplateQuery = (queryClient: QueryClient, request: EditTemp
   });
 };
 
-export const useFetchTemplate = (uuid: string, enabled: boolean = true) => {
+export const useFetchTemplate = (
+  uuid: string,
+  enabled: boolean = true,
+  polling: boolean = false,
+) => {
   const errorNotifier = useErrorNotification();
   return useQuery<TemplateItem>([FETCH_TEMPLATE_KEY, uuid], () => fetchTemplate(uuid), {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,6 +73,7 @@ export const useFetchTemplate = (uuid: string, enabled: boolean = true) => {
         err,
         'fetch-template-error',
       ),
+    refetchInterval: polling ? TEMPLATE_FETCH_POLLING_TIME : undefined,
     keepPreviousData: true,
     staleTime: 20000,
     enabled,

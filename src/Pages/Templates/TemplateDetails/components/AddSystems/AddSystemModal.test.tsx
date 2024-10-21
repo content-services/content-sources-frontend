@@ -2,7 +2,11 @@ import { render, waitFor } from '@testing-library/react';
 import AddSystemModal from './AddSystemModal';
 import { useQueryClient } from 'react-query';
 import { useSystemsListQuery } from 'services/Systems/SystemsQueries';
-import { defaultSystemsListItem } from 'testingHelpers';
+import {
+  defaultSystemsListItem,
+  defaultTemplateItem,
+  defaultUpdateTemplateTaskCompleted,
+} from 'testingHelpers';
 import type { SystemItem } from 'services/Systems/SystemsApi';
 
 const bananaUUID = 'banana-uuid';
@@ -18,7 +22,12 @@ jest.mock('react-query');
 
 beforeAll(() => {
   (useQueryClient as jest.Mock).mockImplementation(() => ({
-    getQueryData: () => ({ version: 1, name: 'Steve the template', arch: 'x86_64' }),
+    getQueryData: () => ({
+      version: 1,
+      name: 'Steve the template',
+      arch: 'x86_64',
+      last_update_task: defaultUpdateTemplateTaskCompleted,
+    }),
   }));
 });
 
@@ -36,6 +45,12 @@ jest.mock('middleware/AppContext', () => ({
   isFetching: false,
   isError: false,
   data: undefined,
+}));
+
+jest.mock('Hooks/useNotification', () => () => ({ notify: () => null }));
+
+jest.mock('services/Templates/TemplateQueries', () => ({
+  useFetchTemplate: () => ({ data: defaultTemplateItem }),
 }));
 
 it('expect AddSystemModal to render blank state', async () => {

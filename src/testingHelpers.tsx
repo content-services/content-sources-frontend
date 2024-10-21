@@ -301,6 +301,7 @@ export const defaultTemplateItem: TemplateItem = {
   last_update_snapshot_error: '',
   last_update_task_uuid: '60412eda-7df5-4fac-8556-278f45e2ef9c',
   last_update_task: defaultUpdateTemplateTaskCompleted,
+  rhsm_environment_created: true,
 };
 
 // Template used for testing delete modal where repo is not in any templates
@@ -322,6 +323,7 @@ export const defaultTemplateItem2: TemplateItem = {
   created_by: 'Dudeguy',
   last_updated_by: 'Dudeguy',
   last_update_snapshot_error: '',
+  rhsm_environment_created: true,
 };
 
 export const defaultSnapshotForDateItem: SnapshotForDate = {
