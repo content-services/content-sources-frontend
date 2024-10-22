@@ -27,9 +27,9 @@
     "jestClear": "jest --clearCache"
   },
   "dependencies": {
-    "@patternfly/react-core": "^5.4.1",
+    "@patternfly/react-core": "^5.4.7",
     "@patternfly/react-icons": "^5.2.1",
-    "@patternfly/react-table": "^5.4.1",
+    "@patternfly/react-table": "^5.4.7",
     "@redhat-cloud-services/frontend-components": "^4.2.16",
     "@redhat-cloud-services/frontend-components-config": "^6.3.1",
     "@redhat-cloud-services/frontend-components-notifications": "^4.1.0",
