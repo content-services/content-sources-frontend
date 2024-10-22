@@ -500,7 +500,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                   isDisabled={isEdit && contentOrigin === ContentOrigin.UPLOAD}
                   description={
                     isUploadRepo
-                      ? 'Create a repository to upload custom content to, snapshots will be taken after every new upload.'
+                      ? 'Create a repository to upload custom content to. Snapshots will be taken after every new upload, allowing you to build images with uploaded content.'
                       : ''
                   }
                   name='upload-radio'
