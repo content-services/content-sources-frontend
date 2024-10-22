@@ -39,7 +39,7 @@ import {
   type EditContentRequestItem,
   type ValidateContentRequestItem,
   addUploads,
-  type AddUploadRequest,
+  type AddUploadRequest, getLatestRepoConfigFile,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../AdminTasks/AdminTaskQueries';
 import useErrorNotification from 'Hooks/useErrorNotification';
@@ -55,6 +55,7 @@ export const SNAPSHOT_ERRATA_KEY = 'SNAPSHOT_ERRATA_KEY';
 export const LIST_SNAPSHOTS_KEY = 'LIST_SNAPSHOTS_KEY';
 export const CONTENT_ITEM_KEY = 'CONTENT_ITEM_KEY';
 export const REPO_CONFIG_FILE_KEY = 'REPO_CONFIG_FILE_KEY';
+export const LATEST_REPO_CONFIG_FILE_KEY = 'LATEST_REPO_CONFIG_FILE_KEY';
 
 const CONTENT_LIST_POLLING_TIME = 15000; // 15 seconds
 
@@ -793,5 +794,24 @@ export const useGetRepoConfigFileQuery = (repo_uuid: string, snapshot_uuid: stri
         );
       },
     },
+  );
+};
+
+export const useGetLatestRepoConfigFileQuery = (repo_uuid: string) => {
+  const errorNotifier = useErrorNotification();
+  return useMutation<string>(
+      [LATEST_REPO_CONFIG_FILE_KEY, repo_uuid],
+      async () => await getLatestRepoConfigFile(repo_uuid),
+      {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onError: (err: any) => {
+          errorNotifier(
+              'Unable to find config.repo with the given UUID.',
+              'An error occurred',
+              err,
+              'repo-config-error',
+          );
+        },
+      },
   );
 };

@@ -14,6 +14,7 @@ jest.mock('services/Content/ContentQueries', () => ({
   useFetchContent: jest.fn(),
   useGetSnapshotList: jest.fn(),
   useGetRepoConfigFileQuery: () => ({ mutateAsync: jest.fn() }),
+  useGetLatestRepoConfigFileQuery: () => ({ mutateAsync: jest.fn() })
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -39,17 +40,18 @@ it('Render 1 item', () => {
     isLoading: false,
     isFetching: false,
   }));
-  const { queryByText } = render(
+  const { queryByText, queryAllByText } = render(
     <ReactQueryTestWrapper>
       <SnapshotListModal />
     </ReactQueryTestWrapper>,
   );
 
   expect(queryByText(defaultContentItemWithSnapshot.name)).toBeInTheDocument();
+  expect(queryByText('Latest')).toBeInTheDocument();
 
   expect(
-    queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
-  ).toBeInTheDocument();
+    queryAllByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
+  ).toHaveLength(2);
 });
 
 it('Render 20 items', () => {
@@ -73,15 +75,16 @@ it('Render 20 items', () => {
     isLoading: false,
     isFetching: false,
   }));
-  const { queryByText } = render(
+  const { queryByText, queryAllByText } = render(
     <ReactQueryTestWrapper>
       <SnapshotListModal />
     </ReactQueryTestWrapper>,
   );
 
   expect(queryByText(defaultContentItemWithSnapshot.name)).toBeInTheDocument();
+  expect(queryByText('Latest')).toBeInTheDocument();
 
   expect(
-    queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
-  ).toBeInTheDocument();
+    queryAllByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
+  ).toHaveLength(2);
 });

@@ -21,7 +21,7 @@ import {
   Tr,
 } from '@patternfly/react-table';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from 'components/Hide/Hide';
@@ -35,6 +35,7 @@ import RepoConfig from './components/RepoConfig';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
 import { SnapshotDetailTab } from '../SnapshotDetailsModal/SnapshotDetailsModal';
 import { formatDateDDMMMYYYY } from 'helpers';
+import ConditionalTooltip from '../../../../../components/ConditionalTooltip/ConditionalTooltip';
 
 const useStyles = createUseStyles({
   description: {
@@ -126,6 +127,69 @@ export default function SnapshotListModal() {
     };
   };
 
+  function getLatestSnapshot(snapshotsList: SnapshotItem[], direction: string) {
+    let latestSnapshot: SnapshotItem
+    if(direction === 'desc') {
+      latestSnapshot = snapshotsList[0]
+    } else {
+      latestSnapshot = snapshotsList[snapshotsList.length-1]
+    }
+
+    return (
+        <Fragment>
+          <Td>
+            Latest
+          </Td>
+          <Td>
+            <ChangedArrows
+                addedCount={latestSnapshot?.added_counts?.['rpm.package'] || 0}
+                removedCount={latestSnapshot?.removed_counts?.['rpm.package'] || 0}
+            />
+          </Td>
+          <Td>
+            <Button
+                variant='link'
+                ouiaId='snapshot_package_count_button'
+                isInline
+                isDisabled={!latestSnapshot?.content_counts?.['rpm.package']}
+                onClick={() =>
+                  navigate(
+                      `${rootPath}/${REPOSITORIES_ROUTE}/${uuid}/snapshots/${latestSnapshot.uuid}`,
+                  )
+                }
+            >
+              {latestSnapshot?.content_counts?.['rpm.package'] || 0}
+            </Button>
+          </Td>
+          <Td>
+            <Button
+                variant='link'
+                ouiaId='snapshot_advisory_count_button'
+                isInline
+                isDisabled={!latestSnapshot?.content_counts?.['rpm.advisory']}
+                onClick={() =>
+                    navigate(
+                        `${rootPath}/${REPOSITORIES_ROUTE}/${uuid}/snapshots/${latestSnapshot.uuid}?tab=${SnapshotDetailTab.ERRATA}`,
+                    )
+                }
+            >
+              {latestSnapshot?.content_counts?.['rpm.advisory'] || 0}
+            </Button>
+          </Td>
+          <Td>
+            <ConditionalTooltip
+                content='This repo config will always provide the latest snapshot'
+                show={true}
+                setDisabled
+                position='left-start'
+            >
+              <RepoConfig repoUUID={uuid} snapUUID='' latest={true} />
+            </ConditionalTooltip>
+          </Td>
+        </Fragment>
+    )
+  };
+
   const onClose = () =>
     navigate(
       `${rootPath}/${REPOSITORIES_ROUTE}` +
@@ -210,6 +274,9 @@ export default function SnapshotListModal() {
                 </Thead>
               </Hide>
               <Tbody>
+                <Tr key='latest'>
+                  {getLatestSnapshot(snapshotsList, activeSortDirection)}
+                </Tr>
                 {snapshotsList.map(
                   (
                     {
@@ -260,7 +327,7 @@ export default function SnapshotListModal() {
                         </Button>
                       </Td>
                       <Td>
-                        <RepoConfig repoUUID={uuid} snapUUID={snap_uuid} />
+                        <RepoConfig repoUUID={uuid} snapUUID={snap_uuid} latest={false} />
                       </Td>
                     </Tr>
                   ),
