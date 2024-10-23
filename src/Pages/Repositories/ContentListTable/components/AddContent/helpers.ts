@@ -164,8 +164,6 @@ export const validationSchema = (upload?: boolean) =>
       : { url: Yup.string().url('Invalid URL').required('Required').min(2, 'Too Short!') }),
   });
 
-export const maxUploadSize = 32000;
-
 export const failedFileUpload = (
   files: FileRejection[],
   notify: (arg: NotificationPayload) => void,
@@ -173,8 +171,6 @@ export const failedFileUpload = (
   let description = 'Check the file and try again.';
   if (files.length != 1) {
     description = 'Only a single file upload is supported.';
-  } else if (files[0].file.size > maxUploadSize) {
-    description = 'The file is larger than ' + maxUploadSize + ' bytes.';
   }
   notify({
     variant: AlertVariant.danger,

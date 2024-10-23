@@ -7,7 +7,6 @@ import {
   isValidURL,
   mapFormikToAPIValues,
   mapValidationData,
-  maxUploadSize,
 } from './helpers';
 
 it('REGEX_URL', () => {
@@ -110,24 +109,6 @@ it('mapValidationData, ensure url error heirarchy', () => {
   };
 
   expect(mapValidationData(validationData, formikErrors)).toEqual(success);
-});
-
-it('Notifies on file upload failure due to size', () => {
-  const notif = jest.fn((payload) => payload);
-  const file = new File([''], 'filename', { type: 'text/html' });
-  Object.defineProperty(file, 'size', { value: maxUploadSize + 1 });
-
-  failedFileUpload(
-    [
-      {
-        file,
-        errors: [],
-      },
-    ],
-    notif,
-  );
-  expect(notif.mock.calls).toHaveLength(1);
-  expect(notif.mock.calls[0][0].description).toMatch(/file is larger than/);
 });
 
 it('Notifies on file upload failure due to too many files', () => {

@@ -28,7 +28,6 @@ import {
   isValidURL,
   mapFormikToAPIValues,
   validationSchema,
-  maxUploadSize,
   failedFileUpload,
   getDefaultValues,
   mapValidationData,
@@ -690,7 +689,6 @@ const AddContent = ({ isEdit = false }: Props) => {
               onTextChange={(_event, value) => updateGpgKey(value)}
               onClearClick={() => updateVariable({ gpgKey: '' })}
               dropzoneProps={{
-                maxSize: maxUploadSize,
                 onDropRejected: (files) => failedFileUpload(files, notify),
               }}
               allowEditingUploadedText
