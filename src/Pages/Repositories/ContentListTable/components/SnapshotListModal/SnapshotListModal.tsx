@@ -21,7 +21,7 @@ import {
   Tr,
 } from '@patternfly/react-table';
 import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from 'components/Hide/Hide';
@@ -136,7 +136,7 @@ export default function SnapshotListModal() {
     }
 
     return (
-        <Fragment>
+        <Tr key='latest' data-uuid={latestSnapshot?.uuid}>
           <Td>
             Latest
           </Td>
@@ -186,7 +186,7 @@ export default function SnapshotListModal() {
               <RepoConfig repoUUID={uuid} snapUUID='' latest={true} />
             </ConditionalTooltip>
           </Td>
-        </Fragment>
+        </Tr>
     )
   };
 
@@ -274,9 +274,7 @@ export default function SnapshotListModal() {
                 </Thead>
               </Hide>
               <Tbody>
-                <Tr key='latest'>
-                  {getLatestSnapshot(snapshotsList, activeSortDirection)}
-                </Tr>
+                {getLatestSnapshot(snapshotsList, activeSortDirection)}
                 {snapshotsList.map(
                   (
                     {
