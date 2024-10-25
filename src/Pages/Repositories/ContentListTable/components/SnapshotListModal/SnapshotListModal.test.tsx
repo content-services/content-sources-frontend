@@ -40,18 +40,18 @@ it('Render 1 item', () => {
     isLoading: false,
     isFetching: false,
   }));
-  const { queryByText, queryAllByText } = render(
+  const { queryByText } = render(
     <ReactQueryTestWrapper>
       <SnapshotListModal />
     </ReactQueryTestWrapper>,
   );
 
   expect(queryByText(defaultContentItemWithSnapshot.name)).toBeInTheDocument();
-  expect(queryByText('Latest')).toBeInTheDocument();
+  expect(queryByText('Latest Snapshot Config')).toBeInTheDocument();
 
   expect(
-    queryAllByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
-  ).toHaveLength(2);
+    queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
+  ).toBeInTheDocument();
 });
 
 it('Render 20 items', () => {
@@ -75,16 +75,16 @@ it('Render 20 items', () => {
     isLoading: false,
     isFetching: false,
   }));
-  const { queryByText, queryAllByText } = render(
+  const { queryByText } = render(
     <ReactQueryTestWrapper>
       <SnapshotListModal />
     </ReactQueryTestWrapper>,
   );
 
   expect(queryByText(defaultContentItemWithSnapshot.name)).toBeInTheDocument();
-  expect(queryByText('Latest')).toBeInTheDocument();
+  expect(queryByText('Latest Snapshot Config')).toBeInTheDocument();
 
   expect(
-    queryAllByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
-  ).toHaveLength(2);
+    queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
+  ).toBeInTheDocument();
 });

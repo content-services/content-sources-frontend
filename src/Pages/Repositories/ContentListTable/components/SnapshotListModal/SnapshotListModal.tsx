@@ -3,7 +3,6 @@ import {
   Flex,
   FlexItem,
   Grid,
-  InputGroup,
   Modal,
   ModalVariant,
   Pagination,
@@ -20,7 +19,10 @@ import {
   ThProps,
   Tr,
 } from '@patternfly/react-table';
-import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
+import {
+  global_BackgroundColor_100,
+  global_Color_200
+} from '@patternfly/react-tokens';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@patternfly/react-component-groups';
@@ -35,7 +37,7 @@ import RepoConfig from './components/RepoConfig';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
 import { SnapshotDetailTab } from '../SnapshotDetailsModal/SnapshotDetailsModal';
 import { formatDateDDMMMYYYY } from 'helpers';
-import ConditionalTooltip from '../../../../../components/ConditionalTooltip/ConditionalTooltip';
+import LatestRepoConfig from './components/LatestRepoConfig';
 
 const useStyles = createUseStyles({
   description: {
@@ -127,69 +129,6 @@ export default function SnapshotListModal() {
     };
   };
 
-  function getLatestSnapshot(snapshotsList: SnapshotItem[], direction: string) {
-    let latestSnapshot: SnapshotItem
-    if(direction === 'desc') {
-      latestSnapshot = snapshotsList[0]
-    } else {
-      latestSnapshot = snapshotsList[snapshotsList.length-1]
-    }
-
-    return (
-        <Tr key='latest' data-uuid={latestSnapshot?.uuid}>
-          <Td>
-            Latest
-          </Td>
-          <Td>
-            <ChangedArrows
-                addedCount={latestSnapshot?.added_counts?.['rpm.package'] || 0}
-                removedCount={latestSnapshot?.removed_counts?.['rpm.package'] || 0}
-            />
-          </Td>
-          <Td>
-            <Button
-                variant='link'
-                ouiaId='snapshot_package_count_button'
-                isInline
-                isDisabled={!latestSnapshot?.content_counts?.['rpm.package']}
-                onClick={() =>
-                  navigate(
-                      `${rootPath}/${REPOSITORIES_ROUTE}/${uuid}/snapshots/${latestSnapshot.uuid}`,
-                  )
-                }
-            >
-              {latestSnapshot?.content_counts?.['rpm.package'] || 0}
-            </Button>
-          </Td>
-          <Td>
-            <Button
-                variant='link'
-                ouiaId='snapshot_advisory_count_button'
-                isInline
-                isDisabled={!latestSnapshot?.content_counts?.['rpm.advisory']}
-                onClick={() =>
-                    navigate(
-                        `${rootPath}/${REPOSITORIES_ROUTE}/${uuid}/snapshots/${latestSnapshot.uuid}?tab=${SnapshotDetailTab.ERRATA}`,
-                    )
-                }
-            >
-              {latestSnapshot?.content_counts?.['rpm.advisory'] || 0}
-            </Button>
-          </Td>
-          <Td>
-            <ConditionalTooltip
-                content='This repo config will always provide the latest snapshot'
-                show={true}
-                setDisabled
-                position='left-start'
-            >
-              <RepoConfig repoUUID={uuid} snapUUID='' latest={true} />
-            </ConditionalTooltip>
-          </Td>
-        </Tr>
-    )
-  };
-
   const onClose = () =>
     navigate(
       `${rootPath}/${REPOSITORIES_ROUTE}` +
@@ -233,21 +172,26 @@ export default function SnapshotListModal() {
     >
       <InnerScrollContainer>
         <Grid className={classes.mainContainer}>
-          <InputGroup className={classes.topContainer}>
             <Grid />
             <Hide hide={loadingOrZeroCount}>
-              <Pagination
-                id='top-pagination-id'
-                widgetId='topPaginationWidgetId'
-                itemCount={count}
-                perPage={perPage}
-                page={page}
-                onSetPage={onSetPage}
-                isCompact
-                onPerPageSelect={onPerPageSelect}
-              />
+              <Flex className={classes.topContainer}>
+                <FlexItem>
+                  <LatestRepoConfig repoUUID={uuid}/>
+                </FlexItem>
+                <FlexItem>
+                  <Pagination
+                      id='top-pagination-id'
+                      widgetId='topPaginationWidgetId'
+                      itemCount={count}
+                      perPage={perPage}
+                      page={page}
+                      onSetPage={onSetPage}
+                      isCompact
+                      onPerPageSelect={onPerPageSelect}
+                  />
+                </FlexItem>
+              </Flex>
             </Hide>
-          </InputGroup>
           <Hide hide={!fetchingOrLoading}>
             <Grid className={classes.mainContainer}>
               <SkeletonTable
@@ -274,7 +218,6 @@ export default function SnapshotListModal() {
                 </Thead>
               </Hide>
               <Tbody>
-                {getLatestSnapshot(snapshotsList, activeSortDirection)}
                 {snapshotsList.map(
                   (
                     {
