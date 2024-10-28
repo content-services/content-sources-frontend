@@ -155,9 +155,12 @@ export default function AddSystemModal() {
 
   const { data: template } = useFetchTemplate(uuid as string, true, polling);
 
-  const templatePending =
-    template?.last_update_task?.status === 'running' ||
-    template?.last_update_task?.status === 'pending';
+  const templatePending = useMemo(
+    () =>
+      template?.last_update_task?.status === 'running' ||
+      template?.last_update_task?.status === 'pending',
+    [template?.last_update_task],
+  );
 
   useEffect(() => {
     if (isError) {
@@ -176,7 +179,7 @@ export default function AddSystemModal() {
       return setPolling(false);
     }
     return setPolling(templatePending);
-  }, [template]);
+  }, [templatePending, isError]);
 
   useEffect(() => {
     if (
@@ -274,29 +277,31 @@ export default function AddSystemModal() {
       onClose={onClose}
       footer={
         <>
-          <ConditionalTooltip
-            content='Cannot assign this template to a system yet.'
-            show={!template?.rhsm_environment_created}
-            setDisabled
-          >
-            <Button
-              isLoading={isAdding}
-              isDisabled={
-                isAdding ||
-                !selected.length ||
-                (!template?.rhsm_environment_created &&
-                  template?.last_update_task?.status !== 'completed')
-              }
-              key='add_system'
-              variant='primary'
-              onClick={() => addSystems().then(onClose)}
+          <Flex gap={{ default: 'gapMd' }}>
+            <ConditionalTooltip
+              content='Cannot assign this template to a system yet.'
+              show={!template?.rhsm_environment_created}
+              setDisabled
             >
-              Assign
+              <Button
+                isLoading={isAdding}
+                isDisabled={
+                  isAdding ||
+                  !selected.length ||
+                  (!template?.rhsm_environment_created &&
+                    template?.last_update_task?.status !== 'completed')
+                }
+                key='add_system'
+                variant='primary'
+                onClick={() => addSystems().then(onClose)}
+              >
+                Assign
+              </Button>
+            </ConditionalTooltip>
+            <Button key='close' variant='secondary' onClick={onClose}>
+              Close
             </Button>
-          </ConditionalTooltip>
-          <Button key='close' variant='secondary' onClick={onClose}>
-            Close
-          </Button>
+          </Flex>
         </>
       }
     >
