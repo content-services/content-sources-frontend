@@ -490,29 +490,37 @@ const AddContent = ({ isEdit = false }: Props) => {
                   onClick={() =>
                     setValues({ ...values, snapshot: false, origin: ContentOrigin.EXTERNAL })
                   }
-                />{' '}
+                />
               </Hide>
               <Hide hide={isInProd || (isEdit && contentOrigin === ContentOrigin.EXTERNAL)}>
-                <Radio
-                  isChecked={isUploadRepo}
-                  id='upload_radio'
-                  label='Upload'
-                  isDisabled={isEdit && contentOrigin === ContentOrigin.UPLOAD}
-                  description={
-                    isUploadRepo
-                      ? 'Create a repository to upload custom content to. Snapshots will be taken after every new upload, allowing you to build images with uploaded content.'
-                      : ''
-                  }
-                  name='upload-radio'
-                  onClick={() =>
-                    setValues({
-                      ...values,
-                      url: '',
-                      snapshot: true,
-                      origin: ContentOrigin.UPLOAD,
-                    })
-                  }
-                />
+                <ConditionalTooltip
+                  show={isEdit && contentOrigin === ContentOrigin.UPLOAD}
+                  setDisabled={isEdit && contentOrigin === ContentOrigin.UPLOAD}
+                  position='top-start'
+                  enableFlip
+                  flipBehavior={['top-start', 'bottom-start']}
+                  content="Repository type cannot be changed for 'Upload' repositories"
+                >
+                  <Radio
+                    isChecked={isUploadRepo}
+                    id='upload_radio'
+                    label='Upload'
+                    description={
+                      isUploadRepo
+                        ? 'Create a repository to upload custom content to. Snapshots will be taken after every new upload, allowing you to build images with uploaded content.'
+                        : ''
+                    }
+                    name='upload-radio'
+                    onClick={() =>
+                      setValues({
+                        ...values,
+                        url: '',
+                        snapshot: true,
+                        origin: ContentOrigin.UPLOAD,
+                      })
+                    }
+                  />
+                </ConditionalTooltip>
               </Hide>
             </Flex>
 
