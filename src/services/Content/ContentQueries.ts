@@ -757,6 +757,7 @@ export const useIntrospectRepositoryMutate = (
         });
       }
       queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
+      queryClient.invalidateQueries(CONTENT_LIST_KEY);
     },
     // If the mutation fails, use the context returned from onMutate to roll back
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
