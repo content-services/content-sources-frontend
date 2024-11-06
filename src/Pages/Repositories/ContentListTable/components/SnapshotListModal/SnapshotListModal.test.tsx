@@ -47,7 +47,7 @@ it('Render 1 item', () => {
   );
 
   expect(queryByText(defaultContentItemWithSnapshot.name)).toBeInTheDocument();
-  expect(queryByText('Latest Snapshot Config')).toBeInTheDocument();
+  expect(queryByText('Latest Snapshot Config:')).toBeInTheDocument();
 
   expect(
     queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
@@ -82,7 +82,7 @@ it('Render 20 items', () => {
   );
 
   expect(queryByText(defaultContentItemWithSnapshot.name)).toBeInTheDocument();
-  expect(queryByText('Latest Snapshot Config')).toBeInTheDocument();
+  expect(queryByText('Latest Snapshot Config:')).toBeInTheDocument();
 
   expect(
     queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),

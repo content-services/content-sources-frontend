@@ -9,7 +9,7 @@ const LatestRepoConfig = ({ repoUUID }: Props) => (
         <Flex>
             <FlexItem>
                 <TextContent>
-                    <Text component={TextVariants.p}>Latest Snapshot Config</Text>
+                    <Text component={TextVariants.p}>Latest Snapshot Config:</Text>
                 </TextContent>
             </FlexItem>
             <FlexItem>
