@@ -62,7 +62,7 @@ jest.mock('../../ContentListTable', () => ({
 }));
 
 jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => () => ({
-  isProd: () => false,
+  isProd: () => false, isBeta: () => false
 }));
 
 const passingValidationMetaDataSigNotPresent = [

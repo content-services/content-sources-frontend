@@ -100,8 +100,9 @@ const AddContent = ({ isEdit = false }: Props) => {
   const { repoUUID: uuid } = useParams();
   const navigate = useNavigate();
   const rootPath = useRootPath();
-  const { isProd } = useChrome();
+  const { isProd, isBeta } = useChrome();
   const isInProd = useMemo(() => isProd(), []);
+  const isInBeta = useMemo(() => isBeta(), []);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { data, isLoading: isLoadingInitialContent, isSuccess } = useFetchContent(uuid!, isEdit);
@@ -492,7 +493,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                   }
                 />
               </Hide>
-              <Hide hide={isInProd || (isEdit && contentOrigin === ContentOrigin.EXTERNAL)}>
+              <Hide hide={(isInProd && !isInBeta) || (isEdit && contentOrigin === ContentOrigin.EXTERNAL)}>
                 <ConditionalTooltip
                   show={isEdit && contentOrigin === ContentOrigin.UPLOAD}
                   setDisabled={isEdit && contentOrigin === ContentOrigin.UPLOAD}
