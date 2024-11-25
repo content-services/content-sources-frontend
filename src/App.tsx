@@ -1,5 +1,6 @@
 import '@redhat-cloud-services/frontend-components-utilities/styles/_all';
 import 'react18-json-view/src/style.css';
+import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import NotificationsPortal from '@redhat-cloud-services/frontend-components-notifications/NotificationPortal';
 import { Bullseye, Spinner } from '@patternfly/react-core';
 import { useEffect, useMemo, useState } from 'react';
@@ -19,6 +20,7 @@ export default function App() {
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const { pathname } = useLocation();
   const pageSafe = usePageSafe();
+  const { hideGlobalFilter } = useChrome();
 
   const isDefaultRoute = useMemo(
     () => last(pathname.split('/')) === REPOSITORIES_ROUTE,
@@ -41,6 +43,11 @@ export default function App() {
       ContentOrigin.CUSTOM,
       isDefaultRoute && zeroState, // We only check if the route is correct and zerostate is true (defaults to true)
     );
+
+  // Hide Insights' global filter bar
+  useEffect(() => {
+    hideGlobalFilter(true);
+  }, [hideGlobalFilter]);
 
   // Check for user's custom repositories to determine whether we need to show zero state
   useEffect(() => {
