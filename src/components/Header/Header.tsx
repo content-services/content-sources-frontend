@@ -1,5 +1,6 @@
 import { Text } from '@patternfly/react-core';
 import {
+  OpenSourceBadge,
   PageHeader as _PageHeader,
   PageHeaderTitle,
 } from '@redhat-cloud-services/frontend-components';
@@ -37,7 +38,14 @@ export default function Header({ title, ouiaId, paragraph }: Props) {
 
   return (
     <PageHeader>
-      <PageHeaderTitle title={title} className={classes.remove100percent} />
+      <PageHeaderTitle title={
+        <>
+        {title}
+        <OpenSourceBadge
+            repositoriesURL='https://github.com/content-services/content-sources-frontend'
+        />
+        </>
+        } className={classes.remove100percent} />
       <Text className={classes.subtext} ouiaId={ouiaId}>
         {paragraph}
       </Text>
