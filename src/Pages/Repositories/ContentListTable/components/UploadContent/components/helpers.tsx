@@ -1,5 +1,11 @@
 import CryptoJS from 'crypto-js';
 
+export const MAX_CHUNK_SIZE = 1048576 * 3; // MB
+
+export const BATCH_SIZE = 5;
+
+export const MAX_RETRY_COUNT = 3;
+
 const readSlice = (file: File, start: number, size: number): Promise<Uint8Array> =>
   new Promise<Uint8Array>((resolve, reject) => {
     const fileReader = new FileReader();
@@ -28,6 +34,9 @@ export const getFileChecksumSHA256 = async (file: File): Promise<string> => {
 };
 
 export type Chunk = {
+  slice: Blob;
+  sha256: string;
+  chunkRange: string;
   start: number;
   end: number;
   queued: boolean;
@@ -38,10 +47,12 @@ export type Chunk = {
 export type FileInfo = {
   uuid: string;
   created: string;
+  artifact: string;
   chunks: Chunk[];
   checksum: string;
+  file: File;
   error?: string;
   completed?: boolean;
   failed?: boolean;
-  file: File;
+  isResumed?: boolean;
 };

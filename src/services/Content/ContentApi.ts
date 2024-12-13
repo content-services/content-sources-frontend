@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { objectToUrlParams } from 'helpers';
 import { AdminTask } from '../AdminTasks/AdminTaskApi';
+import { MAX_CHUNK_SIZE } from 'Pages/Repositories/ContentListTable/components/UploadContent/components/helpers';
 
 export interface ContentItem {
   uuid: string;
@@ -241,11 +242,13 @@ export type IntrospectRepositoryRequestItem = {
 };
 
 export interface UploadResponse {
-  completed: string;
-  created: string;
-  last_updated: string;
+  completed_checksums?: string[];
+  artifact_href?: string;
+  completed?: string;
+  created?: string;
+  last_updated?: string;
   size: number;
-  upload_uuid: string;
+  upload_uuid?: string;
 }
 
 export interface UploadChunkRequest {
@@ -258,6 +261,7 @@ export interface UploadChunkRequest {
 
 export interface AddUploadRequest {
   uploads: { sha256: string; uuid: string }[];
+  artifacts: { sha256: string; href: string }[];
   repoUUID: string;
 }
 
@@ -544,8 +548,15 @@ export const getSnapshotErrata: (
   return data;
 };
 
-export const createUpload: (size: number) => Promise<UploadResponse> = async (size) => {
-  const { data } = await axios.post('/api/content-sources/v1.0/repositories/uploads/', { size });
+export const createUpload: (size: number, sha256: string) => Promise<UploadResponse> = async (
+  size,
+  sha256,
+) => {
+  const { data } = await axios.post('/api/content-sources/v1.0/repositories/uploads/', {
+    size,
+    sha256,
+    chunkSize: MAX_CHUNK_SIZE,
+  });
   return data;
 };
 
@@ -568,11 +579,12 @@ export const uploadChunk: (chunkRequest: UploadChunkRequest) => Promise<UploadRe
 
 export const addUploads: (chunkRequest: AddUploadRequest) => Promise<AddUploadResponse> = async ({
   uploads,
+  artifacts,
   repoUUID,
 }) => {
   const { data } = await axios.post(
     `/api/content-sources/v1.0/repositories/${repoUUID}/add_uploads/`,
-    { uploads },
+    { uploads, artifacts },
   );
   return data;
 };
