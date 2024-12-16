@@ -268,7 +268,7 @@ const SnapshotListModal = () => {
                         {!checkedSnapshots.size || !rbac?.repoWrite
                           ? 'Remove selected snapshots'
                           : checkedSnapshots.size == count
-                            ? 'Can\'t remove all snapshots'
+                            ? "Can't remove all snapshots"
                             : `Remove ${checkedSnapshots.size} snapshots`}
                       </Button>
                     </ConditionalTooltip>
@@ -398,7 +398,7 @@ const SnapshotListModal = () => {
                             <ConditionalTooltip
                               content={
                                 count < 2
-                                  ? 'You can\'t delete the last snapshot in a repository'
+                                  ? "You can't delete the last snapshot in a repository"
                                   : 'You do not have the required permissions to perform this action.'
                               }
                               show={!isRedHatRepository && (!rbac?.repoWrite || count < 2)}

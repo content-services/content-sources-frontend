@@ -38,14 +38,15 @@ export default function Header({ title, ouiaId, paragraph }: Props) {
 
   return (
     <PageHeader>
-      <PageHeaderTitle title={
-        <>
-        {title}
-        <OpenSourceBadge
-            repositoriesURL='https://github.com/content-services/content-sources-frontend'
-        />
-        </>
-        } className={classes.remove100percent} />
+      <PageHeaderTitle
+        title={
+          <>
+            {title}
+            <OpenSourceBadge repositoriesURL='https://github.com/content-services/content-sources-frontend' />
+          </>
+        }
+        className={classes.remove100percent}
+      />
       <Text className={classes.subtext} ouiaId={ouiaId}>
         {paragraph}
       </Text>

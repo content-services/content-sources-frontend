@@ -1,6 +1,4 @@
 import {
-  Alert,
-  AlertActionCloseButton,
   Button,
   Flex,
   FlexItem,
@@ -36,12 +34,7 @@ import TemplateFilters from './components/TemplateFilters';
 import { formatDateDDMMMYYYY, formatDateUTC } from 'helpers';
 import Header from 'components/Header/Header';
 import useRootPath from 'Hooks/useRootPath';
-import {
-  DELETE_ROUTE,
-  DETAILS_ROUTE,
-  PATCH_SYSTEMS_ROUTE,
-  TEMPLATES_ROUTE,
-} from 'Routes/constants';
+import { DELETE_ROUTE, DETAILS_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
 import useArchVersion from 'Hooks/useArchVersion';
 import { useTemplateList } from 'services/Templates/TemplateQueries';
 import StatusIcon from './components/StatusIcon';
@@ -95,15 +88,6 @@ const TemplatesTable = () => {
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('desc');
   const [polling, setPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
-
-  const basePath = rootPath.slice(1).replace('content', '');
-  const storedBannerDismissal = !!sessionStorage.getItem('bannerDismissal');
-  const [dismissed, setDismissed] = useState(storedBannerDismissal);
-
-  const onDismissBanner = () => {
-    sessionStorage.setItem('bannerDismissal', 'true');
-    setDismissed(true);
-  };
 
   const defaultValues: TemplateFilterData = {
     arch: '',
@@ -234,29 +218,6 @@ const TemplatesTable = () => {
         ouiaId='templates_description'
         paragraph='View all content templates within your organization.'
       />
-      <Hide hide={dismissed}>
-        <Grid className={classes.bannerContainer}>
-          <Alert
-            variant='info'
-            title='Content templates is currently in preview'
-            actionClose={<AlertActionCloseButton onClose={onDismissBanner} />}
-          >
-            <p>
-              <b>Note:</b>{' '}
-              <Button
-                isInline
-                variant='link'
-                component='a'
-                href={`${basePath}${PATCH_SYSTEMS_ROUTE}`}
-              >
-                Systems within Patch
-              </Button>{' '}
-              might not properly indicate which template is assigned to a system or which updates
-              are installable.
-            </p>
-          </Alert>
-        </Grid>
-      </Hide>
       <Grid data-ouia-component-id='content_template_list_page' className={classes.mainContainer}>
         <Outlet />
         <Flex className={classes.topContainer}>
