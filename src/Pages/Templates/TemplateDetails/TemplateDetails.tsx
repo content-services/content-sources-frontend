@@ -1,4 +1,5 @@
 import {
+  Alert,
   Breadcrumb,
   BreadcrumbItem,
   Flex,
@@ -16,6 +17,7 @@ import useRootPath from 'Hooks/useRootPath';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
 import useArchVersion from 'Hooks/useArchVersion';
 import DetailItem from './components/DetaiItem';
+import Hide from 'components/Hide/Hide';
 import { formatDateDDMMMYYYY } from 'helpers';
 import TemplateDetailsTabs from './components/TemplateDetailsTabs';
 import { global_BackgroundColor_light_100 } from '@patternfly/react-tokens';
@@ -50,6 +52,9 @@ const useStyles = createUseStyles({
     '@media (min-width: 1400px)': {
       maxHeight: '165px',
     },
+  },
+  alertMargin: {
+    marginTop: '20px',
   },
 });
 
@@ -138,6 +143,20 @@ export default function TemplateDetails() {
               />
             </Flex>
           </StackItem>
+          <Hide hide={!(data?.to_be_deleted_snapshots && data.to_be_deleted_snapshots.length > 0)}>
+            <StackItem className={classes.alertMargin}>
+              <Alert
+                variant='warning'
+                isInline
+                title='Template contains soon to be deleted snapshots.'
+              >
+                This template contains snapshots that are going to be deleted in the next 14 days.
+                At that time the template will be updated automatically to use the next available
+                snapshot. Editing the template and selecting a more recent snapshot date will ensure
+                the template is not changing unexpectedly.
+              </Alert>
+            </StackItem>
+          </Hide>
         </Stack>
       </Grid>
       <Grid className={classes.childContainer}>
