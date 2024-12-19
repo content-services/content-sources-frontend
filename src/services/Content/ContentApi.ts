@@ -560,21 +560,21 @@ export const createUpload: (size: number, sha256: string) => Promise<UploadRespo
   return data;
 };
 
-export const uploadChunk: (chunkRequest: UploadChunkRequest) => Promise<UploadResponse> = async ({
-  chunkRange,
-  upload_uuid,
-  file,
-  sha256,
-}) => {
+export const uploadChunk: (
+  chunkRequest: UploadChunkRequest,
+) => [Promise<UploadResponse>, () => void] = ({ chunkRange, upload_uuid, file, sha256 }) => {
   const formData = new FormData();
+  const controller = new AbortController();
+
   formData.set('file', file);
   formData.set('sha256', sha256);
-  const { data } = await axios.post(
+  const request = axios.post(
     `/api/content-sources/v1.0/repositories/uploads/${upload_uuid}/upload_chunk/`,
     formData,
-    { headers: { 'Content-Range': chunkRange } },
+    { headers: { 'Content-Range': chunkRange }, signal: controller.signal },
   );
-  return data;
+  const abort = () => controller.abort();
+  return [request as unknown as Promise<UploadResponse>, abort];
 };
 
 export const addUploads: (chunkRequest: AddUploadRequest) => Promise<AddUploadResponse> = async ({
