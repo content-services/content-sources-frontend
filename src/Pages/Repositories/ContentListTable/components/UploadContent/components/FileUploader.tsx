@@ -3,41 +3,52 @@ import {
   MultipleFileUpload,
   MultipleFileUploadMain,
   MultipleFileUploadStatus,
+  Progress,
+  Tooltip,
   type DropEvent,
 } from '@patternfly/react-core';
 import UploadStatusItem from './UploadStatusItem';
 import StatusIcon from 'Pages/Repositories/AdminTaskTable/components/StatusIcon';
-import { getFileChecksumSHA256, type Chunk, type FileInfo } from './helpers';
+import {
+  BATCH_SIZE,
+  getFileChecksumSHA256,
+  MAX_CHUNK_SIZE,
+  MAX_RETRY_COUNT,
+  type Chunk,
+  type FileInfo,
+} from './helpers';
 import { createUseStyles } from 'react-jss';
 import { createUpload, uploadChunk } from 'services/Content/ContentApi';
 import Loader from 'components/Loader';
-import { UploadIcon } from '@patternfly/react-icons';
+import { DownloadIcon, FileIcon, UploadIcon } from '@patternfly/react-icons';
+import { global_info_color_100, global_primary_color_100 } from '@patternfly/react-tokens';
+import useDebounce from 'Hooks/useDebounce';
 
 const useStyles = createUseStyles({
   mainDropzone: {
     width: '625px',
     minHeight: '103px',
   },
+  pointer: {
+    cursor: 'pointer',
+  },
 });
 
-export const MAX_CHUNK_SIZE = 1048576 * 3; // MB
-
-export const BATCH_SIZE = 5;
-
-export const MAX_RETRY_COUNT = 3;
-
 interface Props {
-  setFileUUIDs: React.Dispatch<React.SetStateAction<{ sha256: string; uuid: string }[]>>;
+  setFileUUIDs: React.Dispatch<
+    React.SetStateAction<{ sha256: string; uuid: string; href: string }[]>
+  >;
   isLoading: boolean;
+  setChildLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
+export default function FileUploader({ setFileUUIDs, isLoading, setChildLoading }: Props) {
   const classes = useStyles();
   const [currentFiles, setCurrentFiles] = useState<Record<string, FileInfo>>({});
   const [isBatching, setIsBatching] = useState(false);
-  const [isDropping, setIsDropping] = useState(false);
+  const [isHashing, setisHashing] = useState(false);
 
-  const [fileCountGreaterThanZero, fileCount, completedCount, failedCount] = useMemo(
+  const [fileCountGreaterThanZero, fileCount, completedCount, failedCount, hasRetrying] = useMemo(
     () => [
       // showStatus
       !!Object.values(currentFiles).length,
@@ -47,20 +58,30 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
       Object.values(currentFiles).filter(({ completed }) => completed).length,
       // failedCount
       Object.values(currentFiles).filter(({ failed }) => failed).length,
+      // hasAnyfilesBeingRetried
+      Object.values(currentFiles).some(({ isRetrying }) => isRetrying),
     ],
     [currentFiles],
   );
 
   useEffect(() => {
     if (completedCount === fileCount) {
-      const items = Object.values(currentFiles).map(({ uuid, checksum }) => ({
+      // This means we are in a good state to allow the parent to continue
+      const items = Object.values(currentFiles).map(({ uuid, checksum, artifact }) => ({
         sha256: checksum,
         uuid,
+        href: artifact,
       }));
 
       setFileUUIDs(items);
     }
   }, [completedCount, fileCount]);
+
+  const isLoadingForParent = useDebounce(isBatching || isHashing || hasRetrying, 200);
+
+  useEffect(() => {
+    setChildLoading(isLoadingForParent);
+  }, [isLoadingForParent]);
 
   const statusIcon = useMemo(() => {
     if (failedCount) {
@@ -76,8 +97,8 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
     if (currentFiles[name]) {
       const targetIndexes = new Set(
         currentFiles[name].chunks
-          .map(({ queued }, index) => ({ index, queued }))
-          .filter(({ queued }) => !queued)
+          .map(({ queued, completed }, index) => ({ index, queued, completed }))
+          .filter(({ queued, completed }) => !completed && !queued)
           .map(({ index }) => index),
       );
 
@@ -86,36 +107,46 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
         const result = await Promise.all(
           itemsForBatch.map(async (targetIndex) => {
             if (!currentFiles[name]?.chunks[targetIndex]) return;
-            const { start, end } = currentFiles[name].chunks[targetIndex];
+            const { start, end, chunkRange, sha256, slice } =
+              currentFiles[name].chunks[targetIndex];
             currentFiles[name].chunks[targetIndex].queued = true;
             setCurrentFiles((prev) => ({ ...prev, [name]: currentFiles[name] }));
-            const slice = currentFiles[name].file.slice(start, end + 1);
-
-            const chunkRange = `bytes ${start}-${end}/${currentFiles[name].file.size}`;
 
             try {
-              await uploadChunk({
+              const [promise, abort] = uploadChunk({
                 chunkRange: chunkRange,
                 created: currentFiles[name].created,
-                sha256: await getFileChecksumSHA256(new File([slice], name + chunkRange)),
+                sha256,
                 file: slice,
                 upload_uuid: currentFiles[name].uuid,
               });
 
-              currentFiles[name].chunks[targetIndex].completed = true;
+              setCurrentFiles((prev) => {
+                prev[name].chunks[targetIndex].cancel = abort;
+                return { ...prev, [name]: prev[name] };
+              });
+
+              await promise;
 
               targetIndexes.delete(targetIndex);
-              if (targetIndexes.size === 0) {
-                currentFiles[name].completed = true;
-              }
-              setCurrentFiles((prev) => ({ ...prev, [name]: currentFiles[name] }));
+              setCurrentFiles((prev) => {
+                if (targetIndexes.size === 0) {
+                  prev[name].completed = true;
+                }
+                prev[name].chunks[targetIndex].completed = true;
+                return { ...prev, [name]: prev[name] };
+              });
             } catch (_error) {
-              currentFiles[name].chunks[targetIndex].retryCount += 1;
+              setCurrentFiles((prev) => {
+                prev[name].chunks[targetIndex].retryCount += 1;
+                prev[name].chunks[targetIndex].queued = false;
+                return { ...prev, [name]: prev[name] };
+              });
+
               if (currentFiles[name].chunks[targetIndex].retryCount > MAX_RETRY_COUNT) {
                 return `Failed to upload chunk: ${start} to ${end}`;
               }
-              currentFiles[name].chunks[targetIndex].queued = false;
-              setCurrentFiles((prev) => ({ ...prev, [name]: currentFiles[name] }));
+
               return (_error as Error).message;
             }
           }),
@@ -134,7 +165,7 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
   };
 
   useEffect(() => {
-    if (!isBatching && !isDropping) {
+    if (!isBatching && !isHashing) {
       setIsBatching(true);
       const allDownloads = Object.keys(currentFiles).filter(
         (name) =>
@@ -161,7 +192,7 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
         setIsBatching(false);
       })();
     }
-  }, [fileCount, completedCount, failedCount, isBatching, isDropping]);
+  }, [fileCount, completedCount, failedCount, isBatching, isHashing]);
 
   const storeFileInfoForUpdate = async (file: File) => {
     const totalCount =
@@ -169,7 +200,7 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
         ? file.size / MAX_CHUNK_SIZE
         : Math.floor(file.size / MAX_CHUNK_SIZE) + 1;
 
-    const chunks: Chunk[] = [];
+    let chunks: Chunk[] = [];
 
     for (let index = 0; index < totalCount; index++) {
       const start = index ? index * MAX_CHUNK_SIZE : 0;
@@ -178,10 +209,22 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
         end = file.size - 1;
       }
 
-      chunks.push({ start, end, queued: false, completed: false, retryCount: 0 });
+      const chunkRange = `bytes ${start}-${end}/${file.size}`;
+      const slice = file.slice(start, end + 1);
+
+      chunks.push({
+        slice,
+        start,
+        end,
+        queued: false,
+        completed: false,
+        retryCount: 0,
+        sha256: await getFileChecksumSHA256(new File([slice], file.name + chunkRange)),
+        chunkRange,
+      });
     }
 
-    let checksum: string;
+    let checksum: string = '';
     let error: string | undefined = undefined;
 
     try {
@@ -192,24 +235,46 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
 
     let uuid: string = '';
     let created: string = '';
+    let artifact: string = '';
+    let completedChunkChecksums = new Set<string>();
     if (!error) {
       try {
-        const res = await createUpload(file.size);
-        uuid = res.upload_uuid;
-        created = res.created;
+        const res = await createUpload(file.size, checksum);
+        if (res.upload_uuid) uuid = res.upload_uuid;
+        if (res.created) created = res.created;
+        if (res.completed_checksums)
+          completedChunkChecksums = new Set<string>(res.completed_checksums);
+        if (res.artifact_href) artifact = res.artifact_href;
       } catch (err) {
         error = 'Failed to create upload file: ' + (err as Error).message;
       }
     }
 
+    chunks = chunks.map((chunk) => ({
+      ...chunk,
+      completed: !!artifact || completedChunkChecksums.has(chunk.sha256),
+    }));
+
     setCurrentFiles((prev) => {
-      prev[file.name] = { uuid, created, chunks, file, checksum, error, failed: !!error };
+      prev[file.name] = {
+        uuid,
+        artifact,
+        created,
+        chunks,
+        file,
+        checksum,
+        error,
+        failed: !!error,
+        completed: !!artifact || chunks.every(({ completed }) => completed),
+        isResumed: chunks.some(({ completed }) => completed),
+      };
+
       return { ...prev };
     });
   };
 
   const handleFileDrop = async (_: DropEvent | undefined, droppedFiles: File[]) => {
-    setIsDropping(true);
+    setisHashing(true);
     if (currentFiles.length) {
       const droppedFileNames = droppedFiles.map(({ name }) => name);
 
@@ -219,39 +284,83 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
     }
 
     await Promise.all(droppedFiles.map((file) => storeFileInfoForUpdate(file)));
-    setIsDropping(false);
+    setisHashing(false);
   };
 
-  const retryItem = (name: string) => {
+  const retryItem = async (name: string) => {
     if (!currentFiles[name]) return;
-    currentFiles[name].error = '';
-    currentFiles[name].failed = false;
-
     // If there is no uuid, we know that the checksum or upload failed
     if (!currentFiles[name].uuid) {
-      setCurrentFiles((prev) => ({ ...prev, [name]: currentFiles[name] }));
-      handleFileDrop(undefined, [currentFiles[name].file]);
+      return handleFileDrop(undefined, [currentFiles[name].file]);
+    }
+    setCurrentFiles((prev) => ({ ...prev, [name]: { ...prev[name], isRetrying: true } }));
+    try {
+      // First get the currently finished chunks/check if item is already done (artifact_href).
+      const res = await createUpload(currentFiles[name].file.size, currentFiles[name].checksum);
+      if (res.upload_uuid) currentFiles[name].uuid = res.upload_uuid;
+      if (res.created) currentFiles[name].created = res.created;
+      if (res.artifact_href) {
+        currentFiles[name].artifact = res.artifact_href;
+      }
+      if (res.completed_checksums) {
+        const completedChunkChecksums = new Set<string>(res.completed_checksums);
+        currentFiles[name].chunks = currentFiles[name].chunks.map((chunk) => ({
+          ...chunk,
+          completed: !!currentFiles[name].artifact || completedChunkChecksums.has(chunk.sha256),
+        }));
+      }
+    } catch (err) {
+      return setCurrentFiles((prev) => {
+        prev[name].error = 'Failed to create upload file: ' + (err as Error).message;
+        prev[name].isRetrying = false;
+        return { ...prev, [name]: prev[name] };
+      });
+    }
+
+    currentFiles[name].error = ''; // Remove any previously existing error state
+    currentFiles[name].failed = false; // Mark failed as false so it can be requed below.
+    currentFiles[name].isRetrying = false;
+
+    // If there is chunk failures (IE we stopped a previous upload)
+    currentFiles[name].chunks = currentFiles[name].chunks.map((chunk) => ({
+      ...chunk,
+      retryCount: 0,
+      // If Chunk is not completed, we know that it failed or was stopped, so we want to reset it to be requeued
+      queued: chunk.completed,
+    }));
+
+    // If there is an artifact or if all chunks are completed, the file is completed
+    currentFiles[name].completed =
+      !!currentFiles[name].artifact || currentFiles[name].chunks.every((chunk) => chunk.completed);
+
+    setCurrentFiles((prev) => ({ ...prev, [name]: currentFiles[name] }));
+  };
+
+  const removeItem = (name: string) => {
+    if (!currentFiles[name]) return;
+    if (currentFiles[name].error || currentFiles[name].completed) {
+      setCurrentFiles((prev) => {
+        delete prev[name];
+        return { ...prev };
+      });
     } else {
-      // It is a chunk failure
-      currentFiles[name].chunks = currentFiles[name].chunks.map((chunk) => ({
-        ...chunk,
-        retryCount: 0,
-        // If Chunk is not completed, we know that it failed, so we want to reset it to be requeued
-        queued: chunk.completed,
-      }));
-      setCurrentFiles((prev) => ({ ...prev, [name]: currentFiles[name] }));
+      setCurrentFiles((prev) => {
+        prev[name].chunks = prev[name].chunks.map((chunk) => {
+          if (!chunk.completed && chunk?.cancel) {
+            chunk?.cancel();
+            return { ...chunk, cancel: undefined, completed: false };
+          }
+          return chunk;
+        });
+
+        return { ...prev };
+      });
     }
   };
 
-  const removeItem = (name: string) =>
-    setCurrentFiles((prev) => {
-      delete prev[name];
-      return { ...prev };
-    });
-
   const uploadMainProps = useMemo(() => {
     switch (true) {
-      case isDropping:
+      case isHashing:
         return {
           titleIcon: <StatusIcon status='running' removeText />,
           titleText: 'Calculating hash for each file',
@@ -261,6 +370,7 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
         return {
           titleIcon: <StatusIcon status='running' removeText />,
           titleText: `Uploading files (${Math.round((completedCount / fileCount) * 100)}% completed)`,
+          infoText: <Progress value={Math.round((completedCount / fileCount) * 100)} />,
           isUploadButtonHidden: true,
         };
       case fileCountGreaterThanZero && fileCount === completedCount:
@@ -282,7 +392,7 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
           infoText: 'Accepted file types: .rpm',
         };
     }
-  }, [isDropping, fileCountGreaterThanZero, fileCount, completedCount, failedCount]);
+  }, [isHashing, fileCountGreaterThanZero, fileCount, completedCount, failedCount]);
 
   const actionOngoing = uploadMainProps.isUploadButtonHidden;
   if (isLoading) return <Loader minHeight='20vh' />;
@@ -307,35 +417,60 @@ export default function FileUploader({ setFileUUIDs, isLoading }: Props) {
       {fileCountGreaterThanZero && (
         <MultipleFileUploadStatus
           statusToggleText={`${completedCount} of ${fileCount} files are ready to be added to the repository${failedCount ? `, ${failedCount} failed` : ''}`}
-          statusToggleIcon={statusIcon}
+          //   statusToggleIcon={statusIcon}
         >
-          {Object.values(currentFiles).map(({ checksum, chunks, error, file, failed }) => {
-            const completedChunks = chunks.filter(({ completed }) => completed).length;
-            const progressValue = Math.round((completedChunks / chunks.length) * 100);
+          {Object.values(currentFiles)
+            .reverse()
+            .map(({ checksum, isRetrying, chunks, error, file, failed, artifact, isResumed }) => {
+              const completedChunks = chunks.filter(({ completed }) => completed).length;
+              const progressValue = Math.round((completedChunks / chunks.length) * 100);
 
-            return (
-              <UploadStatusItem
-                fileSize={file.size}
-                key={file.name}
-                fileName={file.name}
-                progressVariant={(() => {
-                  switch (true) {
-                    case failed:
-                      return 'danger';
-                    case progressValue >= 100:
-                      return 'success';
-                    default:
-                      break;
+              return (
+                <UploadStatusItem
+                  fileSize={file.size}
+                  key={file.name}
+                  fileName={file.name}
+                  fileIcon={
+                    !!artifact || isResumed ? (
+                      <Tooltip
+                        key={file.name}
+                        content={`An identical file was previously uploaded, data has been reused.`}
+                      >
+                        <DownloadIcon
+                          className={classes.pointer}
+                          color={global_primary_color_100.value}
+                        />
+                      </Tooltip>
+                    ) : (
+                      <Tooltip
+                        key={file.name}
+                        content={`This file will be uploaded in chunks and added to your repository when you click 'Confirm changes' below.`}
+                      >
+                        <FileIcon
+                          className={classes.pointer}
+                          color={global_primary_color_100.value}
+                        />
+                      </Tooltip>
+                    )
                   }
-                })()}
-                retry={checksum ? () => retryItem(file.name) : undefined}
-                progressHelperText={error}
-                progressValue={progressValue}
-                deleteButtonDisabled={!failed && progressValue < 100 && progressValue > 0}
-                onClearClick={() => removeItem(file.name)}
-              />
-            );
-          })}
+                  progressVariant={(() => {
+                    switch (true) {
+                      case failed:
+                        return 'danger';
+                      case progressValue >= 100:
+                        return 'success';
+                      default:
+                        break;
+                    }
+                  })()}
+                  retry={checksum && !isRetrying ? () => retryItem(file.name) : undefined}
+                  progressHelperText={error}
+                  progressValue={progressValue}
+                  hideClearButton={isHashing}
+                  onClearClick={() => removeItem(file.name)}
+                />
+              );
+            })}
         </MultipleFileUploadStatus>
       )}
     </MultipleFileUpload>

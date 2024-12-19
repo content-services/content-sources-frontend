@@ -202,11 +202,12 @@ export const useAddUploadsQuery = (request: AddUploadRequest) => {
   const { notify } = useNotification();
   return useMutation(() => addUploads(request), {
     onSuccess: (data) => {
+      const uploadCount = (request?.uploads?.length || 0) + (request?.artifacts?.length || 0);
       notify({
         variant: AlertVariant.success,
         title:
-          request.uploads.length > 1
-            ? `${request.uploads.length} rpms successfully uploaded to ${data.object_name}`
+          uploadCount > 1
+            ? `${uploadCount} rpms successfully uploaded to ${data.object_name}`
             : `One rpm successfully uploaded to ${data.object_name}`,
         description: 'This repository will be snapshotted shortly',
         id: 'add-upload-success',
