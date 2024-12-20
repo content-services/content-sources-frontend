@@ -21,7 +21,7 @@ import { createUseStyles } from 'react-jss';
 import { createUpload, uploadChunk } from 'services/Content/ContentApi';
 import Loader from 'components/Loader';
 import { DownloadIcon, FileIcon, UploadIcon } from '@patternfly/react-icons';
-import { global_info_color_100, global_primary_color_100 } from '@patternfly/react-tokens';
+import { global_primary_color_100 } from '@patternfly/react-tokens';
 import useDebounce from 'Hooks/useDebounce';
 
 const useStyles = createUseStyles({
@@ -83,15 +83,15 @@ export default function FileUploader({ setFileUUIDs, isLoading, setChildLoading 
     setChildLoading(isLoadingForParent);
   }, [isLoadingForParent]);
 
-  const statusIcon = useMemo(() => {
-    if (failedCount) {
-      return <StatusIcon status='failed' removeText />;
-    }
-    if (completedCount === fileCount) {
-      return <StatusIcon status='completed' removeText />;
-    }
-    return <StatusIcon status='running' removeText />;
-  }, [completedCount, fileCount, failedCount]);
+  //   const statusIcon = useMemo(() => {
+  //     if (failedCount) {
+  //       return <StatusIcon status='failed' removeText />;
+  //     }
+  //     if (completedCount === fileCount) {
+  //       return <StatusIcon status='completed' removeText />;
+  //     }
+  //     return <StatusIcon status='running' removeText />;
+  //   }, [completedCount, fileCount, failedCount]);
 
   const updateItem = async (name: string) => {
     if (currentFiles[name]) {
@@ -434,7 +434,7 @@ export default function FileUploader({ setFileUUIDs, isLoading, setChildLoading 
                     !!artifact || isResumed ? (
                       <Tooltip
                         key={file.name}
-                        content={`An identical file was previously uploaded, data has been reused.`}
+                        content='An identical file was previously uploaded, data has been reused.'
                       >
                         <DownloadIcon
                           className={classes.pointer}
@@ -444,7 +444,7 @@ export default function FileUploader({ setFileUUIDs, isLoading, setChildLoading 
                     ) : (
                       <Tooltip
                         key={file.name}
-                        content={`This file will be uploaded in chunks and added to your repository when you click 'Confirm changes' below.`}
+                        content="This file will be uploaded in chunks and added to your repository when you click 'Confirm changes' below."
                       >
                         <FileIcon
                           className={classes.pointer}
