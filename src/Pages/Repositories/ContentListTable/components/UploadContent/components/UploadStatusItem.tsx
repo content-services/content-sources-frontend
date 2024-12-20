@@ -31,12 +31,13 @@ export interface MultipleFileUploadStatusItemProps extends React.HTMLProps<HTMLL
   className?: string;
   buttonAriaLabel?: string;
   onClearClick?: React.MouseEventHandler<HTMLButtonElement>;
-  deleteButtonDisabled?: boolean;
+  hideClearButton?: boolean;
   fileIcon?: React.ReactNode;
   fileName: string;
   maxFileNameLength?: number;
   fileSize?: number;
   progressValue: number;
+  progressLabel?: React.ReactNode;
   progressVariant?: 'danger' | 'success' | 'warning';
   progressAriaLabel?: string;
   progressAriaLabelledBy?: string;
@@ -51,11 +52,12 @@ export default function UploadStatusItem({
   className,
   fileIcon,
   onClearClick = () => {},
-  deleteButtonDisabled,
+  hideClearButton,
   fileName,
   maxFileNameLength = 50,
   fileSize,
   progressValue,
+  progressLabel,
   progressVariant,
   progressAriaLabel,
   progressAriaLabelledBy,
@@ -108,6 +110,7 @@ export default function UploadStatusItem({
             </span>
           }
           value={progressValue}
+          label={progressLabel}
           variant={progressVariant}
           aria-label={progressAriaLabel}
           aria-labelledby={progressAriaLabelledBy}
@@ -117,15 +120,11 @@ export default function UploadStatusItem({
       </div>
 
       <Flex direction={{ default: 'column' }} className={styles.multipleFileUploadStatusItemClose}>
-        <Button
-          isDisabled={deleteButtonDisabled}
-          variant='plain'
-          isDanger
-          aria-label={buttonAriaLabel}
-          onClick={onClearClick}
-        >
-          <TimesIcon />
-        </Button>
+        <Hide hide={!!hideClearButton}>
+          <Button variant='plain' isDanger aria-label={buttonAriaLabel} onClick={onClearClick}>
+            <TimesIcon />
+          </Button>
+        </Hide>
         <Hide hide={!retry || progressVariant !== 'danger'}>
           <Button className={classes.noPadding} variant='link' onClick={retry}>
             Retry
