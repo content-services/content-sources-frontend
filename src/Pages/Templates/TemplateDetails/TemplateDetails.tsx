@@ -7,7 +7,7 @@ import {
   LabelGroup,
   Stack,
   StackItem,
-  Title,
+  Title, Toolbar, ToolbarContent, ToolbarItem,
 } from '@patternfly/react-core';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { createUseStyles } from 'react-jss';
@@ -17,10 +17,12 @@ import { useFetchTemplate } from 'services/Templates/TemplateQueries';
 import useArchVersion from 'Hooks/useArchVersion';
 import DetailItem from './components/DetaiItem';
 import { formatDateDDMMMYYYY } from 'helpers';
-import TemplateDetailsTabs from './components/TemplateDetailsTabs';
 import { global_BackgroundColor_light_100 } from '@patternfly/react-tokens';
 import Loader from 'components/Loader';
 import TemplateActionDropdown from './components/TemplateActionDropdown';
+import UseTemplateModal from './components/UseTemplate/UseTemplateModal';
+import React from 'react';
+import TemplateDetailsTabs from './components/TemplateDetailsTabs';
 
 const useStyles = createUseStyles({
   fullHeight: {
@@ -107,7 +109,16 @@ export default function TemplateDetails() {
                 </Label>
               </LabelGroup>
             </Flex>
-            <TemplateActionDropdown />
+            <Toolbar>
+              <ToolbarContent>
+                <ToolbarItem spacer={{ default: 'spacerNone' }}>
+                  <UseTemplateModal/>
+                </ToolbarItem>
+                <ToolbarItem>
+                 <TemplateActionDropdown />
+                </ToolbarItem>
+              </ToolbarContent>
+            </Toolbar>
           </StackItem>
           <StackItem className={classes.descriptionMaxWidth}>
             <Flex
