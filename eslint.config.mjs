@@ -76,7 +76,7 @@ export default [
       'react/react-in-jsx-scope': 'off',
       camelcase: 'off',
       'spaced-comment': 'error',
-      quotes: ['warn', 'single'],
+      'prettier/prettier': ['warn', { singleQuote: true }],
       'no-duplicate-imports': 'error',
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': ['warn'],
