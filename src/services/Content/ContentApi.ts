@@ -555,7 +555,7 @@ export const createUpload: (size: number, sha256: string) => Promise<UploadRespo
   const { data } = await axios.post('/api/content-sources/v1.0/repositories/uploads/', {
     size,
     sha256,
-    chunkSize: MAX_CHUNK_SIZE,
+    chunk_size: MAX_CHUNK_SIZE,
   });
   return data;
 };
