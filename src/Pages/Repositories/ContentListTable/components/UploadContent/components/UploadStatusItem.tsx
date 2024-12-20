@@ -37,6 +37,7 @@ export interface MultipleFileUploadStatusItemProps extends React.HTMLProps<HTMLL
   maxFileNameLength?: number;
   fileSize?: number;
   progressValue: number;
+  progressLabel?: React.ReactNode;
   progressVariant?: 'danger' | 'success' | 'warning';
   progressAriaLabel?: string;
   progressAriaLabelledBy?: string;
@@ -56,6 +57,7 @@ export default function UploadStatusItem({
   maxFileNameLength = 50,
   fileSize,
   progressValue,
+  progressLabel,
   progressVariant,
   progressAriaLabel,
   progressAriaLabelledBy,
@@ -108,6 +110,7 @@ export default function UploadStatusItem({
             </span>
           }
           value={progressValue}
+          label={progressLabel}
           variant={progressVariant}
           aria-label={progressAriaLabel}
           aria-labelledby={progressAriaLabelledBy}
