@@ -1,4 +1,5 @@
 import {
+    Alert,
     ClipboardCopy,
     ClipboardCopyButton,
     ClipboardCopyVariant, CodeBlock, CodeBlockAction, CodeBlockCode,
@@ -11,6 +12,7 @@ import {
 import React from 'react';
 import {createUseStyles} from 'react-jss';
 import {useParams} from 'react-router-dom';
+import {ExternalLinkAltIcon} from "@patternfly/react-icons";
 
 export const ANSIBLE_TAB = 'ansible'
 
@@ -72,18 +74,32 @@ const AnsibleTab = ({ tabContentRef }: Props) => {
 
     return (
         <TabContent eventKey={ANSIBLE_TAB} id={ANSIBLE_TAB} ref={tabContentRef} hidden>
+            <div className={classes.textGroup}>
+                <Alert
+                    variant='warning'
+                    title='Consuming a template in this way will result in the system not reporting applicable errata properly within Insights.'
+                    isInline
+                >
+                    System advisory information will not be available via {' '}
+                    <a href="insights/patch/systems/" rel='noreferrer' target='_blank'>
+                        Systems <ExternalLinkAltIcon/>
+                    </a>
+                </Alert>
+            </div>
             <TextContent className={classes.textGroup}>
                 <Text component={TextVariants.h2}>Register for subscriptions</Text>
                 <TextList isPlain>
                     <TextListItem>
                         <Text component="h6">Register with rhc</Text>
-                        <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied" variant={ClipboardCopyVariant.expansion}>
+                        <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied"
+                                       variant={ClipboardCopyVariant.expansion}>
                             rhc connect
                         </ClipboardCopy>
                     </TextListItem>
                     <TextListItem>
                         <Text component="h6">Or register with subscription manager</Text>
-                        <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied" variant={ClipboardCopyVariant.expansion}>
+                        <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied"
+                                       variant={ClipboardCopyVariant.expansion}>
                             subscription-manager register
                         </ClipboardCopy>
                     </TextListItem>
@@ -93,13 +109,20 @@ const AnsibleTab = ({ tabContentRef }: Props) => {
                         <Text component={TextVariants.h2}>Use this ansible playbook to download the repo file</Text>
                         <CodeBlock actions={actions}>
                             <CodeBlockCode>
-                                {playbook1+`${templateUUID}`+playbook2}
+                                {playbook1 + `${templateUUID}` + playbook2}
                             </CodeBlockCode>
                         </CodeBlock>
-                        <Text>Note:  Adding or removing a repository from the template will not be reflected on the client until this file is re-downloaded</Text>
                     </TextListItem>
                 </TextList>
             </TextContent>
+            <div className={classes.textGroup}>
+                <Alert
+                    variant='info'
+                    title='Adding or removing a repository from the template will not be reflected on the
+                            client until the repo file is re-downloaded.'
+                    isInline
+                />
+            </div>
         </TabContent>
     )
 }

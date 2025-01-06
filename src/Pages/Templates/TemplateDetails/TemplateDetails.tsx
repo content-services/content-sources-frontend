@@ -111,7 +111,7 @@ export default function TemplateDetails() {
             </Flex>
             <Toolbar>
               <ToolbarContent>
-                <ToolbarItem spacer={{ default: 'spacerNone' }}>
+                <ToolbarItem>
                   <UseTemplateModal/>
                 </ToolbarItem>
                 <ToolbarItem>
