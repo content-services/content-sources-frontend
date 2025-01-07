@@ -46,6 +46,7 @@ import DeleteSnapshotsModal from 'Pages/Repositories/ContentListTable/components
 export default function RepositoriesRoutes() {
   const key = useMemo(() => Math.random(), []);
   const { zeroState, features, rbac, subscriptions } = useAppContext();
+
   return (
     <ErrorPage>
       <Routes key={key}>

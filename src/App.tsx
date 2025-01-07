@@ -12,7 +12,7 @@ import { useAppContext } from './middleware/AppContext';
 import { ContentOrigin, FilterData } from './services/Content/ContentApi';
 import { useContentListQuery } from './services/Content/ContentQueries';
 import { perPageKey } from './Pages/Repositories/ContentListTable/ContentListTable';
-import { REPOSITORIES_ROUTE } from './Routes/constants';
+import { CONTENT_ROUTE, REPOSITORIES_ROUTE } from './Routes/constants';
 import usePageSafe from 'Hooks/usePageSafe';
 
 export default function App() {
@@ -23,7 +23,7 @@ export default function App() {
   const { hideGlobalFilter } = useChrome();
 
   const isDefaultRoute = useMemo(
-    () => last(pathname.split('/')) === REPOSITORIES_ROUTE,
+    () => [REPOSITORIES_ROUTE, '', CONTENT_ROUTE].includes(last(pathname.split('/')) || ''),
     [pathname],
   );
 
@@ -55,7 +55,7 @@ export default function App() {
     if ((zeroState && data.data.length > 0) || (zeroState && !isDefaultRoute)) {
       setZeroState(false);
     }
-  }, [data.data.length]);
+  }, [data.data.length, zeroState]);
 
   if (!rbac || isFetchingPermissions || isLoading) {
     return (
