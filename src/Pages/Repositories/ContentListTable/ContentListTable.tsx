@@ -303,22 +303,26 @@ const ContentListTable = () => {
             ]
           : []
         : [
-            {
-              isDisabled: actionTakingPlace || rowData?.status === 'Pending',
-              title: 'Edit',
-              onClick: () => {
-                navigate(`${rowData.uuid}/${EDIT_ROUTE}`);
-              },
-            },
-            ...(rowData.origin === ContentOrigin.UPLOAD
+            ...(rbac?.repoWrite
               ? [
                   {
                     isDisabled: actionTakingPlace || rowData?.status === 'Pending',
-                    title: 'Upload content',
+                    title: 'Edit',
                     onClick: () => {
-                      navigate(`${rowData.uuid}/${UPLOAD_ROUTE}`);
+                      navigate(`${rowData.uuid}/${EDIT_ROUTE}`);
                     },
                   },
+                  ...(rowData.origin === ContentOrigin.UPLOAD
+                    ? [
+                        {
+                          isDisabled: actionTakingPlace || rowData?.status === 'Pending',
+                          title: 'Upload content',
+                          onClick: () => {
+                            navigate(`${rowData.uuid}/${UPLOAD_ROUTE}`);
+                          },
+                        },
+                      ]
+                    : []),
                 ]
               : []),
             ...(features?.snapshots?.accessible
@@ -330,7 +334,7 @@ const ContentListTable = () => {
                       navigate(`${rowData.uuid}/snapshots`);
                     },
                   },
-                  ...(rowData.origin !== ContentOrigin.UPLOAD
+                  ...(rbac?.repoWrite && rowData.origin !== ContentOrigin.UPLOAD
                     ? [
                         {
                           id: 'actions-column-snapshot',
@@ -358,7 +362,7 @@ const ContentListTable = () => {
                     : []),
                 ]
               : []),
-            ...(!rowData?.snapshot
+            ...(rbac?.repoWrite && !rowData?.snapshot
               ? [
                   {
                     isDisabled: actionTakingPlace || rowData?.status == 'Pending',
@@ -368,11 +372,15 @@ const ContentListTable = () => {
                   },
                 ]
               : []),
-            { isSeparator: true },
-            {
-              title: 'Delete',
-              onClick: () => navigate(`${DELETE_ROUTE}?repoUUID=${rowData.uuid}`),
-            },
+            ...(rbac?.repoWrite
+              ? [
+                  { isSeparator: true },
+                  {
+                    title: 'Delete',
+                    onClick: () => navigate(`${DELETE_ROUTE}?repoUUID=${rowData.uuid}`),
+                  },
+                ]
+              : []),
           ],
     [actionTakingPlace, checkedRepositories, isRedHatRepository],
   );
@@ -630,15 +638,11 @@ const ContentListTable = () => {
                           <Hide hide={!rowActions(rowData)?.length}>
                             <Td isActionCell>
                               <ConditionalTooltip
-                                content={
-                                  rowData?.status == 'Pending'
-                                    ? showPendingTooltip(
-                                        rowData?.last_snapshot_task?.status,
-                                        rowData.status,
-                                      )
-                                    : 'You do not have the required permissions to perform this action.'
-                                }
-                                show={!isRedHatRepository && !rbac?.repoWrite}
+                                content={showPendingTooltip(
+                                  rowData?.last_snapshot_task?.status,
+                                  rowData.status,
+                                )}
+                                show={!isRedHatRepository && rowData?.status === 'Pending'}
                                 setDisabled
                               >
                                 <ActionsColumn items={rowActions(rowData)} />

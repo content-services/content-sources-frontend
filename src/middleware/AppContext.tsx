@@ -14,8 +14,16 @@ import { useFetchSubscriptionsQuery } from 'services/Subscriptions/SubscriptionQ
 const getRegistry = _getRegistry as unknown as () => { register: ({ notifications }) => void };
 const { appname } = PackageJson.insights;
 
+// Add permissions here
+export enum RbacPermissions {
+  'repoRead', // If the user doesn't have this permission, they won't see the app, it is thus presumed true.
+  'repoWrite',
+  'templateWrite',
+  'templateRead',
+}
+
 export interface AppContextInterface {
-  rbac?: Record<string, boolean>;
+  rbac?: Record<keyof typeof RbacPermissions, boolean>;
   features: Features | null;
   isFetchingPermissions: boolean;
   subscriptions?: Subscriptions;
@@ -29,7 +37,9 @@ export interface AppContextInterface {
 export const AppContext = createContext({} as AppContextInterface);
 
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
-  const [rbac, setRbac] = useState<Record<string, boolean> | undefined>(undefined);
+  const [rbac, setRbac] = useState<Record<keyof typeof RbacPermissions, boolean> | undefined>(
+    undefined,
+  );
   const [zeroState, setZeroState] = useState(true);
   const [features, setFeatures] = useState<Features | null>(null);
   const chrome = useChrome();
