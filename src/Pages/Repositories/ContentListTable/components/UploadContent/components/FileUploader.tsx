@@ -83,16 +83,6 @@ export default function FileUploader({ setFileUUIDs, isLoading, setChildLoading 
     setChildLoading(isLoadingForParent);
   }, [isLoadingForParent]);
 
-  //   const statusIcon = useMemo(() => {
-  //     if (failedCount) {
-  //       return <StatusIcon status='failed' removeText />;
-  //     }
-  //     if (completedCount === fileCount) {
-  //       return <StatusIcon status='completed' removeText />;
-  //     }
-  //     return <StatusIcon status='running' removeText />;
-  //   }, [completedCount, fileCount, failedCount]);
-
   const updateItem = async (name: string) => {
     if (currentFiles[name]) {
       const targetIndexes = new Set(
