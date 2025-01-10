@@ -1,4 +1,4 @@
-import {fireEvent, render} from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import TemplateDetails from './TemplateDetails';
 import { defaultTemplateItem } from 'testingHelpers';
 
@@ -41,15 +41,15 @@ it('expect UseTemplateModal to render correctly', () => {
   const useTemplate = getByLabelText('use-template-button') as Element;
   expect(useTemplate).toBeInTheDocument();
   fireEvent.click(useTemplate);
-  expect(queryByText('Assign the template to a system')).toBeInTheDocument()
+  expect(queryByText('Assign the template to a system')).toBeInTheDocument();
 
   const curlTab = getByLabelText('curl-tab') as Element;
   expect(curlTab).toBeInTheDocument();
   fireEvent.click(curlTab);
-  expect(queryByText('Download the repo file')).toBeInTheDocument()
+  expect(queryByText('Download the repo file')).toBeInTheDocument();
 
   const ansibleTab = getByLabelText('ansible-tab') as Element;
   expect(ansibleTab).toBeInTheDocument();
   fireEvent.click(ansibleTab);
-  expect(queryByText('Use this ansible playbook to download the repo file')).toBeInTheDocument()
+  expect(queryByText('Use this ansible playbook to download the repo file')).toBeInTheDocument();
 });

@@ -26,6 +26,7 @@ const UploadContent = () => {
   const classes = useStyles();
   const { repoUUID: uuid } = useParams();
   const [fileUUIDs, setFileUUIDs] = useState<{ sha256: string; uuid: string; href: string }[]>([]);
+  const [childLoading, setChildLoading] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
 
   const rootPath = useRootPath();
@@ -75,10 +76,14 @@ const UploadContent = () => {
                 ouiaId='modal_save'
                 variant='primary'
                 isLoading={isLoading}
-                isDisabled={!fileUUIDs.length}
+                isDisabled={!fileUUIDs.length || childLoading}
                 onClick={() => uploadItems().then(onClose)}
               >
-                {fileUUIDs.length ? 'Confirm changes' : 'No content uploaded'}
+                {fileUUIDs.length && !childLoading
+                  ? 'Confirm changes'
+                  : childLoading
+                    ? 'Uploading'
+                    : 'No content uploaded'}
               </Button>
               <Button key='cancel' variant='link' onClick={onCloseClick} ouiaId='modal_cancel'>
                 Cancel
@@ -87,7 +92,7 @@ const UploadContent = () => {
           </Stack>
         }
       >
-        <FileUploader isLoading={isLoading} setFileUUIDs={setFileUUIDs} />
+        <FileUploader {...{ isLoading, setFileUUIDs, setChildLoading }} />
       </Modal>
       <Modal
         isOpen={confirmModal}

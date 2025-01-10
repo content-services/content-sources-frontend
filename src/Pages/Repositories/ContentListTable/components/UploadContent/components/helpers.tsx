@@ -1,5 +1,6 @@
 import CryptoJS from 'crypto-js';
 
+// Change this number to change chunk/slice size
 export const MAX_CHUNK_SIZE = 1048576 * 3; // MB
 
 export const BATCH_SIZE = 5;
@@ -18,14 +19,13 @@ const readSlice = (file: File, start: number, size: number): Promise<Uint8Array>
 
 export const getFileChecksumSHA256 = async (file: File): Promise<string> => {
   let sha256 = CryptoJS.algo.SHA256.create();
-  const sliceSize = 3_145_728; // 3 MiB
   let start = 0;
 
   while (start < file.size) {
-    const slice: Uint8Array = await readSlice(file, start, sliceSize);
+    const slice: Uint8Array = await readSlice(file, start, MAX_CHUNK_SIZE);
     const wordArray = CryptoJS.lib.WordArray.create(slice);
     sha256 = sha256.update(wordArray);
-    start += sliceSize;
+    start += MAX_CHUNK_SIZE;
   }
 
   sha256.finalize();
@@ -42,6 +42,7 @@ export type Chunk = {
   queued: boolean;
   completed: boolean;
   retryCount: number;
+  cancel?: () => void;
 };
 
 export type FileInfo = {
@@ -55,4 +56,5 @@ export type FileInfo = {
   completed?: boolean;
   failed?: boolean;
   isResumed?: boolean;
+  isRetrying?: boolean;
 };

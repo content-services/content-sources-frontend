@@ -20,8 +20,8 @@
     "local": "BACKEND_PORT=8000 npm start",
     "verify": "npm-run-all build lint test-ci",
     "postinstall": "ts-patch install",
-    "test": "TZ=UTC jest --config jest.config.js --verbose",
-    "test-ci": "TZ=UTC jest --config jest.ci.config.js --verbose --no-cache",
+    "test": "TZ=UTC jest --verbose",
+    "test-ci": "TZ=UTC jest --verbose --no-cache",
     "testAllPreviewFailures": "npm-run-all -p test jestPreview",
     "jestPreview": "jest-preview",
     "jestClear": "jest --clearCache"

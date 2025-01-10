@@ -8,7 +8,10 @@ import {
   LabelGroup,
   Stack,
   StackItem,
-  Title, Toolbar, ToolbarContent, ToolbarItem,
+  Title,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
 } from '@patternfly/react-core';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { createUseStyles } from 'react-jss';
@@ -117,10 +120,10 @@ export default function TemplateDetails() {
             <Toolbar>
               <ToolbarContent>
                 <ToolbarItem>
-                  <UseTemplateModal/>
+                  <UseTemplateModal />
                 </ToolbarItem>
                 <ToolbarItem>
-                 <TemplateActionDropdown />
+                  <TemplateActionDropdown />
                 </ToolbarItem>
               </ToolbarContent>
             </Toolbar>
