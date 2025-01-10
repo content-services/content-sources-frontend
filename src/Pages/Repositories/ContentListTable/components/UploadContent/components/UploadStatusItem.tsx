@@ -31,7 +31,7 @@ export interface MultipleFileUploadStatusItemProps extends React.HTMLProps<HTMLL
   className?: string;
   buttonAriaLabel?: string;
   onClearClick?: React.MouseEventHandler<HTMLButtonElement>;
-  deleteButtonDisabled?: boolean;
+  hideClearButton?: boolean;
   fileIcon?: React.ReactNode;
   fileName: string;
   maxFileNameLength?: number;
@@ -52,7 +52,7 @@ export default function UploadStatusItem({
   className,
   fileIcon,
   onClearClick = () => {},
-  deleteButtonDisabled,
+  hideClearButton,
   fileName,
   maxFileNameLength = 50,
   fileSize,
@@ -120,15 +120,11 @@ export default function UploadStatusItem({
       </div>
 
       <Flex direction={{ default: 'column' }} className={styles.multipleFileUploadStatusItemClose}>
-        <Button
-          isDisabled={deleteButtonDisabled}
-          variant='plain'
-          isDanger
-          aria-label={buttonAriaLabel}
-          onClick={onClearClick}
-        >
-          <TimesIcon />
-        </Button>
+        <Hide hide={!!hideClearButton}>
+          <Button variant='plain' isDanger aria-label={buttonAriaLabel} onClick={onClearClick}>
+            <TimesIcon />
+          </Button>
+        </Hide>
         <Hide hide={!retry || progressVariant !== 'danger'}>
           <Button className={classes.noPadding} variant='link' onClick={retry}>
             Retry
