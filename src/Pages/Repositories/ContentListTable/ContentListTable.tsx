@@ -643,7 +643,6 @@ const ContentListTable = () => {
                                   rowData.status,
                                 )}
                                 show={!isRedHatRepository && rowData?.status === 'Pending'}
-                                setDisabled
                               >
                                 <ActionsColumn items={rowActions(rowData)} />
                               </ConditionalTooltip>
