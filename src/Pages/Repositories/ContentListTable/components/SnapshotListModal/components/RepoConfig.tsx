@@ -56,6 +56,7 @@ const RepoConfig = ({ repoUUID, snapUUID, latest }: Props) => {
           variant='link'
           className={classes.link}
           onClick={() => copyConfigFile()}
+          data-uuid={snapUUID}
         >
           <Icon>
             <CopyIcon />
@@ -69,6 +70,7 @@ const RepoConfig = ({ repoUUID, snapUUID, latest }: Props) => {
           variant='link'
           className={classes.link}
           onClick={() => downloadConfigFile()}
+          data-uuid={snapUUID}
         >
           <Icon>
             <DownloadIcon />

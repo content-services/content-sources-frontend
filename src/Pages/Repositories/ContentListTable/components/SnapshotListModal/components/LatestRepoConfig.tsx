@@ -3,9 +3,10 @@ import RepoConfig from './RepoConfig';
 
 interface Props {
   repoUUID: string;
+  snapUUID: string;
 }
 
-const LatestRepoConfig = ({ repoUUID }: Props) => (
+const LatestRepoConfig = ({ repoUUID, snapUUID }: Props) => (
   <Flex>
     <FlexItem>
       <TextContent>
@@ -13,7 +14,7 @@ const LatestRepoConfig = ({ repoUUID }: Props) => (
       </TextContent>
     </FlexItem>
     <FlexItem>
-      <RepoConfig repoUUID={repoUUID} snapUUID='' latest />
+      <RepoConfig repoUUID={repoUUID} snapUUID={snapUUID} latest />
     </FlexItem>
   </Flex>
 );
