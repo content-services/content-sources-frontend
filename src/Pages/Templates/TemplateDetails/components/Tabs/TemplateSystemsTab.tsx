@@ -198,68 +198,97 @@ export default function TemplateSystemsTab() {
 
   return (
     <Grid className={classes.mainContainer}>
-      <InputGroup className={classes.topContainer}>
-        <Flex gap={{ default: 'gapMd' }}>
-          <InputGroupItem>
-            <TextInput
-              id='search'
-              ouiaId='name_search'
-              placeholder='Filter by name'
-              value={searchQuery}
-              onChange={(_event, value) => setSearchQuery(value)}
-            />
-            <InputGroupText id='search-icon'>
-              <SearchIcon />
-            </InputGroupText>
-          </InputGroupItem>
-          <FlexItem className={classes.ctions}>
+      <Hide hide={!total_items}>
+        <InputGroup className={classes.topContainer}>
+          <Flex gap={{ default: 'gapMd' }}>
+            <InputGroupItem>
+              <TextInput
+                id='search'
+                ouiaId='name_search'
+                placeholder='Filter by name'
+                value={searchQuery}
+                onChange={(_event, value) => setSearchQuery(value)}
+              />
+              <InputGroupText id='search-icon'>
+                <SearchIcon />
+              </InputGroupText>
+            </InputGroupItem>
+            <FlexItem className={classes.ctions}>
+              <ConditionalTooltip
+                content={`You do not have the required ${missingRequirements} to perform this action.`}
+                show={isMissingRequirements}
+                setDisabled
+              >
+                <Button
+                  id='assignTemplateToSystems'
+                  ouiaId='assign_template_to_systems'
+                  variant='primary'
+                  isDisabled={fetchingOrLoading}
+                  onClick={() => navigate('add')}
+                >
+                  Assign template to systems
+                </Button>
+              </ConditionalTooltip>
+            </FlexItem>
+            <ConditionalTooltip
+              content={`You do not have the required ${missingRequirements} to perform this action.`}
+              show={isMissingRequirements}
+              setDisabled
+            >
+              <SystemsDeleteKebab
+                deleteFromSystems={deleteFromSystems}
+                deselectAll={deselectAll}
+                isDisabled={!rbac?.templateWrite}
+                selected={selected}
+              />
+            </ConditionalTooltip>
+          </Flex>
+          <Pagination
+            id='top-pagination-id'
+            widgetId='topPaginationWidgetId'
+            itemCount={total_items}
+            perPage={perPage}
+            page={page}
+            onSetPage={onSetPage}
+            isCompact
+            onPerPageSelect={onPerPageSelect}
+          />
+        </InputGroup>
+      </Hide>
+<<<<<<< HEAD
+      <Bullseye data-ouia-component-id='systems_list_page'>
+        <EmptyTableState
+          notFiltered={!debouncedSearchQuery}
+          clearFilters={() => setSearchQuery('')}
+          itemName='associated systems'
+          notFilteredBody='To get started, add this template to a system.'
+          notFilteredButton={
             <ConditionalTooltip
               content={`You do not have the required ${missingRequirements} to perform this action.`}
               show={isMissingRequirements}
               setDisabled
             >
               <Button
-                id='assignTemplateToSystems'
-                ouiaId='assign_template_to_systems'
+                id='addSystemsButton'
+                ouiaId='add_systems'
                 variant='primary'
-                isDisabled={fetchingOrLoading}
-                onClick={() => navigate('add')}
+                isDisabled={isLoading}
+                onClick={() => navigate(ADD_ROUTE)}
               >
-                Assign template to systems
+                Add systems
               </Button>
             </ConditionalTooltip>
-          </FlexItem>
-          <ConditionalTooltip
-            content={`You do not have the required ${missingRequirements} to perform this action.`}
-            show={isMissingRequirements}
-            setDisabled
-          >
-            <SystemsDeleteKebab
-              deleteFromSystems={deleteFromSystems}
-              deselectAll={deselectAll}
-              isDisabled={!rbac?.templateWrite}
-              selected={selected}
-            />
-          </ConditionalTooltip>
-        </Flex>
-        <Pagination
-          id='top-pagination-id'
-          widgetId='topPaginationWidgetId'
-          itemCount={total_items}
-          perPage={perPage}
-          page={page}
-          onSetPage={onSetPage}
-          isCompact
-          onPerPageSelect={onPerPageSelect}
+          }
         />
-      </InputGroup>
-      <Hide hide={!!total_items}>
+      </Bullseye>
+=======
+      <Hide hide={total_items != 0}>
         <Bullseye data-ouia-component-id='systems_list_page'>
           <EmptyTableState
             notFiltered={!debouncedSearchQuery}
             clearFilters={() => setSearchQuery('')}
             itemName='associated systems'
-            notFilteredBody='To get started, add this template to a system.'
+            notFilteredBody='To get started, assign this template to a system.'
             notFilteredButton={
               <ConditionalTooltip
                 content={`You do not have the required ${missingRequirements} to perform this action.`}
@@ -273,13 +302,14 @@ export default function TemplateSystemsTab() {
                   isDisabled={isLoading}
                   onClick={() => navigate(ADD_ROUTE)}
                 >
-                  Add systems
+                  Assign to systems
                 </Button>
               </ConditionalTooltip>
             }
           />
         </Bullseye>
       </Hide>
+>>>>>>> 881cfb7 (Re-adding <Hide> as the empty state widget remains visible on the system page despite adding a system)
       <Hide hide={!total_items}>
         <SystemsTable
           allSelected={allSelected}
@@ -294,22 +324,23 @@ export default function TemplateSystemsTab() {
           editAllowed={!isMissingRequirements}
           setSelected={(id) => handleSelectItem(id)}
         />
+
+        <Flex className={classes.bottomContainer}>
+          <FlexItem />
+          <FlexItem>
+            <Pagination
+              id='bottom-pagination-id'
+              widgetId='bottomPaginationWidgetId'
+              itemCount={total_items}
+              perPage={perPage}
+              page={page}
+              onSetPage={onSetPage}
+              variant={PaginationVariant.bottom}
+              onPerPageSelect={onPerPageSelect}
+            />
+          </FlexItem>
+        </Flex>
       </Hide>
-      <Flex className={classes.bottomContainer}>
-        <FlexItem />
-        <FlexItem>
-          <Pagination
-            id='bottom-pagination-id'
-            widgetId='bottomPaginationWidgetId'
-            itemCount={total_items}
-            perPage={perPage}
-            page={page}
-            onSetPage={onSetPage}
-            variant={PaginationVariant.bottom}
-            onPerPageSelect={onPerPageSelect}
-          />
-        </FlexItem>
-      </Flex>
       <Outlet />
     </Grid>
   );
