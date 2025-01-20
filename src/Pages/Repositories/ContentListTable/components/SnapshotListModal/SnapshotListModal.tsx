@@ -190,6 +190,8 @@ const SnapshotListModal = () => {
 
   const isRedHatRepository = contentOrigin === ContentOrigin.REDHAT;
 
+  const latestSnapshotUUID = snapshotsList[0]?.uuid;
+
   const rowActions = useCallback(
     (snap_uuid: string): IAction[] =>
       isRedHatRepository
@@ -275,7 +277,7 @@ const SnapshotListModal = () => {
                   </FlexItem>
                 </Hide>
                 <FlexItem>
-                  <LatestRepoConfig repoUUID={uuid} />
+                  <LatestRepoConfig repoUUID={uuid} snapUUID={latestSnapshotUUID} />
                 </FlexItem>
                 <FlexItem>
                   <Pagination
