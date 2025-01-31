@@ -1,4 +1,4 @@
-name: build-unit-tests
+name: build-tests
 on:
   pull_request:
     branches: [main, prod-beta, prod-stable]
@@ -11,7 +11,95 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
+    name: lint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Cache - node_modules
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            dist
+          key: ${{ runner.os }}-build-test-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-test-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Lint
+        run: yarn lint
+
+  format:
+    runs-on: ubuntu-latest
+    name: format
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Cache - node_modules
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            dist
+          key: ${{ runner.os }}-build-test-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-test-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Format code with prettier
+        run: yarn format:check
+
+  build-check:
+    runs-on: ubuntu-latest
+    name: build-check
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Cache - node_modules
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            dist
+          key: ${{ runner.os }}-build-test-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-test-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Build the application
+        run: yarn build
+
+  unit-test:
+    name: unit-test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -38,12 +126,6 @@ jobs:
 
       - name: Tests
         run: yarn test
-
-      - name: Lint
-        run: yarn lint
-
-      - name: Build
-        run: yarn build --if-present
 
       - name: Convert JUnit report to CTRF format
         run: npx junit-to-ctrf test-results/jest-junit.xml -o test-results/ctrf-report.json
