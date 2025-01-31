@@ -19,3 +19,14 @@ export const navigateToRepositories = async (page: Page) => {
     await page.getByRole('button', { name: 'Add repositories now' }).click();
   }
 };
+
+export const navigateToTemplates = async (page: Page) => {
+  await page.goto('/insights/content/templates');
+
+  const repositoriesListPage = page.getByText(
+    'View all content templates within your organization.',
+  );
+
+  // Wait for either list page or zerostate
+  await repositoriesListPage.waitFor({ state: 'visible' });
+};
