@@ -27,3 +27,14 @@ yarn-error.log*
 coverage
 
 .env
+
+#playwright ignores 
+content-sources-backend
+test-results/
+playwright-report/
+playwright-ctrf/
+blob-report/
+playwright/.cache/
+.env
+.auth
+bin

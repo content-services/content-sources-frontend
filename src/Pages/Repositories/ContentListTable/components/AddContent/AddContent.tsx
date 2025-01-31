@@ -33,6 +33,7 @@ import {
   getDefaultValues,
   mapValidationData,
   mapContentItemToDefaultFormikValues,
+  type FileRejection,
 } from './helpers';
 import useNotification from 'Hooks/useNotification';
 import {
@@ -704,7 +705,7 @@ const AddContent = ({ isEdit = false }: Props) => {
               onClearClick={() => updateVariable({ gpgKey: '' })}
               dropzoneProps={{
                 maxSize: maxUploadSize,
-                onDropRejected: (files) => failedFileUpload(files, notify),
+                onDropRejected: (files) => failedFileUpload(files as FileRejection[], notify),
               }}
               allowEditingUploadedText
               browseButtonText='Upload'

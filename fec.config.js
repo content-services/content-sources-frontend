@@ -41,7 +41,7 @@ module.exports = {
   routes: {
     ...(process.env.BACKEND_PORT && {
       '/api/content-sources/': {
-        host: `http://localhost:${process.env.BACKEND_PORT}`,
+        host: `http://127.0.0.1:${process.env.BACKEND_PORT}`,
       },
     }),
   },
