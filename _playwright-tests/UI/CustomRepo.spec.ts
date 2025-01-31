@@ -71,14 +71,19 @@ const addRepository = async (page: Page, name: string, url: string) => {
   await page.getByRole('menuitem', { name: 'el8' }).locator('label').click();
   await versionFilterButton.click(); // Close the version filter dropdown
 
-  // Click on 'Save'
-  await page.getByRole('button', { name: 'Save' }).click();
-
   // Wait for the successful API call
-  await page.waitForResponse(
-    (resp) => resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,
-  );
+  const errorElement = page.locator('.pf-v5-c-helper-text__item.pf-m-error');
 
-  // Verify the modal is no longer visible
-  await expect(repositoryModal).not.toBeVisible();
+  if (await errorElement.isVisible()) {
+    throw new Error('Error message in element is visible');
+  }
+
+  await Promise.all([
+    // Click on 'Save'
+    page.getByRole('button', { name: 'Save' }).click(),
+    page.waitForResponse(
+      (resp) => resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,
+    ),
+    expect(repositoryModal).not.toBeVisible(),
+  ]);
 };

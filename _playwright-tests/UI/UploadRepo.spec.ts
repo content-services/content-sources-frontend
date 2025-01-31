@@ -39,13 +39,21 @@ describe('Upload Repositories', () => {
     await page.getByRole('menuitem', { name: 'el8' }).locator('label').click();
     await versionFilterButton.click(); // Close the filter dropdown
 
-    // Click 'Save and upload content'
-    await page.getByRole('button', { name: 'Save and upload content' }).click();
-
     // Wait for the successful API call
-    await page.waitForResponse(
-      (resp) => resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,
-    );
+    const errorElement = page.locator('.pf-v5-c-helper-text__item.pf-m-error');
+
+    if (await errorElement.isVisible()) {
+      throw new Error('Error message in element is visible');
+    }
+
+    // Click 'Save and upload content'
+    await Promise.all([
+      page.getByRole('button', { name: 'Save and upload content' }).click(),
+      page.waitForResponse(
+        (resp) =>
+          resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,
+      ),
+    ]);
 
     // Handle the file chooser and upload the file
     const [fileChooser] = await Promise.all([
@@ -82,20 +90,17 @@ describe('Upload Repositories', () => {
     // Click on the 'Delete' menu item
     await page.getByRole('menuitem', { name: 'Delete' }).click();
 
-    // Verify the 'Remove repositories?' dialog is visible
-    await expect(page.getByText('Remove repositories?')).toBeVisible();
-
     // Click on the 'Remove' button
     await Promise.all([
+      // Verify the 'Remove repositories?' dialog is visible
+      expect(page.getByText('Remove repositories?')).toBeVisible(),
       // Wait for the successful API call
       page.waitForResponse(
         (resp) => resp.url().includes('bulk_delete') && resp.status() >= 200 && resp.status() < 300,
       ),
       // Click the 'Remove' button
       page.getByRole('button', { name: 'Remove' }).click(),
+      expect(page.getByText('To get started, create a custom repository')).toBeVisible(),
     ]);
-
-    // Verify the success message is visible
-    await expect(page.getByText('To get started, create a custom repository')).toBeVisible();
   });
 });

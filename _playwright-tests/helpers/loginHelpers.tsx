@@ -63,6 +63,7 @@ export const storeStorageStateAndToken = async (page: Page) => {
 
 export const closePopupsIfExist = async (page: Page) => {
   const locatorsToCheck = [
+    page.locator('.pf-v5-c-alert.notification-item button'), // This closes all pop-ups
     page.locator(`button[id^="pendo-close-guide-"]`),
     page.locator(`button[id="truste-consent-button"]`),
     page.locator('button[aria-label="close-notification"]'),
