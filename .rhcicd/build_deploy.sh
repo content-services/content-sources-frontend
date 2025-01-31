@@ -17,6 +17,8 @@ else
     export NODE_BUILD_VERSION=18
 fi
 
+export YARN_BUILD_SCRIPT="build"
+
 COMMON_BUILDER=https://raw.githubusercontent.com/RedHatInsights/insights-frontend-builder-common/master
 
 set -exv
