@@ -33,7 +33,7 @@ export DEPLOY_FRONTENDS="true"
 export REF_ENV="insights-stage"
 
 export COMPONENTS_W_RESOURCES="pulp"
-
+export YARN_BUILD_SCRIPT="build"
 # Only deploy one small red hat repo
 EXTRA_DEPLOY_ARGS="--set-parameter content-sources-backend/OPTIONS_REPOSITORY_IMPORT_FILTER=small --set-parameter content-sources-backend/SUSPEND_CRON_JOB=true"
 
