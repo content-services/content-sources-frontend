@@ -29,5 +29,6 @@ cache:
     - "/root/.docker"
     - "/root/.npm"
     - "/root/.yarn"
-    - "/root/go/pkg/mod"
+    - "/root/.cache/go-build"
+    - "/root/go"
     - "/root/.composer/cache"

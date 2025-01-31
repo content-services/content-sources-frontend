@@ -33,12 +33,15 @@ describe('Custom Repositories', () => {
     await page.getByLabel('Kebab toggle').first().click();
     await page.getByRole('menuitem', { name: 'Delete' }).click();
     await expect(page.getByText('Remove repositories?')).toBeVisible();
-    await page.getByRole('button', { name: 'Remove' }).click();
 
-    // Example of waiting for a successful api call
-    await page.waitForResponse(
-      (resp) => resp.url().includes('bulk_delete') && resp.status() >= 200 && resp.status() < 300,
-    );
+    await Promise.all([
+      // Wait for the successful API call
+      page.waitForResponse(
+        (resp) => resp.url().includes('bulk_delete') && resp.status() >= 200 && resp.status() < 300,
+      ),
+      // Click the 'Remove' button
+      page.getByRole('button', { name: 'Remove' }).click(),
+    ]);
   });
 });
 
