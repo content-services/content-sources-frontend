@@ -105,7 +105,9 @@ jobs:
         if: always()
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: |
+            node_modules
+            dist
           key: ${{ runner.os }}-frontend-node-modules-${{ hashFiles('yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-frontend-node-modules-
