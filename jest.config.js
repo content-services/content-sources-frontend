@@ -2,6 +2,8 @@ module.exports = {
   roots: ['<rootDir>/src/'],
   preset: 'ts-jest',
   maxWorkers: '50%',
+  testResultsProcessor: 'jest-junit',
+  reporters: ['jest-junit'],
   testEnvironment: 'jsdom',
   transform: {
     '^.+\\.(t)s$': 'ts-jest',

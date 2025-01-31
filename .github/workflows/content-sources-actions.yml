@@ -1,9 +1,15 @@
-name: build-test
+name: build-unit-tests
 on:
   pull_request:
     branches: [main, prod-beta, prod-stable]
     paths-ignore:
       - "**.md"
+      - ".github/workflows/playwright-actions.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,7 +29,7 @@ jobs:
             ${{ runner.os }}-build-test-
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
 
@@ -38,3 +44,13 @@ jobs:
 
       - name: Build
         run: yarn build --if-present
+
+      - name: Convert JUnit report to CTRF format
+        run: npx junit-to-ctrf test-results/jest-junit.xml -o test-results/ctrf-report.json
+        if: always()
+
+      - name: Report test results
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: "./test-results/ctrf-report.json"
+        if: always()
