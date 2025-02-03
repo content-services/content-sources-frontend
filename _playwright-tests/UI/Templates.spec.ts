@@ -12,7 +12,7 @@ describe('Templates', () => {
 
     const AddButton = page.locator('[data-ouia-component-id="create_content_template"]');
 
-    if (await AddButton.first().isDisabled())
-      throw Error("The Add content template button is disabled when it shouldn't be");
+    // Wait for the Add button to become enabled (up to 10 seconds)
+    await AddButton.first().isEnabled({ timeout: 10000 });
   });
 });
