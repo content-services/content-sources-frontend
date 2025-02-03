@@ -16,7 +16,7 @@
     "start:prod": "fec dev --clouddotEnv=prod",
     "start:verbose": "VERBOSE=true fec dev",
     "local": "BACKEND_PORT=8000 yarn start",
-    "verify": "npm-run-all build lint test-ci",
+    "verify": "yarn build && yarn lint && yarn format:check && yarn test-ci",
     "postinstall": "ts-patch install",
     "test": "TZ=UTC jest --verbose",
     "test-ci": "TZ=UTC jest --verbose --no-cache",
