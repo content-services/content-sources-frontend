@@ -23,6 +23,7 @@ if [ -d "$CLONE_DIR" ]; then
         echo "Successfully removed the folder '$CLONE_DIR'."
     else
         echo "Failed to remove the folder '$CLONE_DIR'."
+        exit 1
     fi
 fi
 
