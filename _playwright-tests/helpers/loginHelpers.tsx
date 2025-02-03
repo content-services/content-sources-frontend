@@ -1,6 +1,8 @@
 import { expect, type Page } from '@playwright/test';
 import path from 'path';
 
+// This file can only contain functions that are referenced by authentication.
+
 export const logout = async (page: Page) => {
   const button = await page.locator(
     'div.pf-v5-c-toolbar__item.pf-m-hidden.pf-m-visible-on-lg.pf-v5-u-mr-0 > button',
@@ -59,21 +61,6 @@ export const storeStorageStateAndToken = async (page: Page) => {
     .storageState({ path: path.join(__dirname, '../../.auth/user.json') });
   process.env.TOKEN = `Bearer ${cookies.find((cookie) => cookie.name === 'cs_jwt')?.value}`;
   await page.waitForTimeout(100);
-};
-
-export const closePopupsIfExist = async (page: Page) => {
-  const locatorsToCheck = [
-    page.locator('.pf-v5-c-alert.notification-item button'), // This closes all toast pop-ups
-    page.locator(`button[id^="pendo-close-guide-"]`), // This closes the pendo guide pop-up
-    page.locator(`button[id="truste-consent-button"]`), // This closes the trusted consent pup-up
-    page.getByLabel('close-notification'), // This closes a one off info notification (May be covered by the toast above, needs recheck.)
-  ];
-
-  for (const locator of locatorsToCheck) {
-    await page.addLocatorHandler(locator, async () => {
-      await locator.click();
-    });
-  }
 };
 
 export const throwIfMissingEnvVariables = () => {

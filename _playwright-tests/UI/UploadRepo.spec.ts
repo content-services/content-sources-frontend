@@ -2,7 +2,7 @@ import { describe } from 'node:test';
 import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import path from 'path';
-import { closePopupsIfExist } from '../helpers/loginHelpers';
+import { closePopupsIfExist } from './helpers/helpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 
 describe('Upload Repositories', () => {
