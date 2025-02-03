@@ -2,7 +2,7 @@ import { describe } from 'node:test';
 import { test, expect, type Page } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
-import { closePopupsIfExist } from '../helpers/loginHelpers';
+import { closePopupsIfExist } from './helpers/helpers';
 
 describe('Custom Repositories', () => {
   test('Clean - Delete any current repos that exist', async ({ page }) => {

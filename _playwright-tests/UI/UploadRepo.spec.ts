@@ -56,11 +56,9 @@ describe('Upload Repositories', () => {
     ]);
 
     // Handle the file chooser and upload the file
-    const [fileChooser] = await Promise.all([
-      page.waitForEvent('filechooser'),
-      page.locator('div.pf-v5-c-multiple-file-upload__upload > button').click(),
-    ]);
-    await fileChooser.setFiles(path.join(__dirname, './fixtures/libreOffice.rpm'));
+    await page
+      .locator('input[type=file]')
+      .setInputFiles(path.join(__dirname, './fixtures/libreOffice.rpm'));
 
     // Verify the upload completion message
     await expect(page.getByText('All uploads completed!')).toBeVisible();
