@@ -39,7 +39,6 @@ describe('Custom Repositories', () => {
       page.waitForResponse(
         (resp) => resp.url().includes('bulk_delete') && resp.status() >= 200 && resp.status() < 300,
       ),
-      // Click the 'Remove' button
       page.getByRole('button', { name: 'Remove' }).click(),
     ]);
   });
