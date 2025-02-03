@@ -94,7 +94,7 @@ jobs:
           node-version-file: '.nvmrc'
 
       - name: Cache - API-test node_modules
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/cache@v4
         with:
           path: content-sources-backend/_playwright-tests/node_modules
@@ -102,7 +102,7 @@ jobs:
           restore-keys: ${{ runner.os }}-api-node-modules-
 
       - name: Cache - node_modules
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/cache@v4
         with:
           path: |
@@ -112,7 +112,7 @@ jobs:
           restore-keys: ${{ runner.os }}-frontend-node-modules-
 
       - name: Cache - Backend compose files
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/cache@v4
         with:
           path: content-sources-backend/release
@@ -120,7 +120,7 @@ jobs:
           restore-keys: ${{ runner.os }}-compose-
 
       - name: Cache Playwright browsers
-        if: always()
+        if: ${{ !cancelled() }}
         id: cache-playwright-browsers
         uses: actions/cache@v4
         with:
