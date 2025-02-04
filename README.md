@@ -8,7 +8,7 @@ To setup the hosts file run following command:
 yarn patch:hosts
 ```
 
-Alternativly, simply add these lines to your /etc/hosts:
+Alternatively, add these lines to your /etc/hosts file:
 
 ```
 127.0.0.1 prod.foo.redhat.com
@@ -68,12 +68,12 @@ It is recommended to test using vs-code and the [Playwright Test module for VSCo
 
 ## PR checks and linking front-end/backend-end PRs for testing
 
-The CICD pipeline for playwright (both front-end and backend) will check for presence in the description of the front-end prs, for the following formatted text:
+The CICD pipeline for playwright (both front-end and backend) will check in the description of the front-end PRs for the following formatted text:
 `#testwith https://github.com/content-services/content-sources-backend/pull/<PR NUMBER>`
 
-Note: the space between `#testwith https`.
+Note the space in `#testwith https`.
 
-If a backend PR is linked, the front-end/back-end PR's in question will both use the corresponding linked branch for their Playwright tests in the PR check.
+If a backend PR is linked, the front-end and back-end PR's in question will both use the corresponding linked branch for their Playwright tests in the PR check.
 
 ## Deploying
 
