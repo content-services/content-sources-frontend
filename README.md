@@ -31,9 +31,8 @@ Alternativly, simply add these lines to your /etc/hosts:
 
 1. Make sure [nvm](https://github.com/nvm-sh/nvm) is installed
 
-2. First time running the app do: `nvm use` to ensure you have the correct node version installed.
-   If you do not, follow the instructions nvm gives you to install the appropriate version.
-   Yarn WILL prevent you from progressing if you have not updated your node version.
+2. To ensure you have the correct node version installed do: `nvm use`.
+   Yarn WILL prevent you from progressing if you have not updated your node version to match the one in the .nvmrc file.
 
 3. `yarn install`
 
@@ -49,7 +48,7 @@ Keep in mind that you have to be connected to the VPN for this to work, even in 
    OR <br/>
    `yarn start:prod` to run against prod environment. <br/>
    OR <br/>
-   `yarn local` to run against our local backend running on port 8000.<br/>
+   `yarn local` to run against a local backend running on port 8000.<br/>
 
 2. With a browser, open the URL listed in the terminal output, https://stage.foo.redhat.com:1337/insights/content for example.
 
@@ -57,20 +56,21 @@ Keep in mind that you have to be connected to the VPN for this to work, even in 
 
 `yarn verify` will run `yarn build` `yarn lint` (eslint), `yarn format:check` Prettier formatting check and `yarn test` (Jest unit tests)
 
-Alternatively one can run simply: `yarn test` to run the unit tests.
+One can also: `yarn test` to run the unit tests directly.
 
 ## Testing with Playwright
 
 1. Ensure to `yarn playwright install --with-deps` this installs the required browsers (or vnc browsers) to view/run playwright front-end tests.
 
 2. Run the backend locally, steps to do this can be found in the [backend repository](https://github.com/content-services/content-sources-backend).
+
    Ensure that the backend is running prior to the following steps.
 
 3. `yarn local` will start up the front-end repository. If you do `yarn start` and choose stage, your tests will attempt to run against the stage ENV.
 
 4. `yarn playwright test` will spin-off all of the playwright test suite. `yarn playwright test --headed` will run the suite in a vnc-like browser so you can follow what it is doing.
 
-I highly recommend testing using vs-code and the [Playwright Test module for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright).
+It is recommended to test using vs-code and the [Playwright Test module for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright).
 
 ## PR checks and linking front-end/backend-end PRs for testing
 
