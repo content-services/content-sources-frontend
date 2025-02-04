@@ -64,7 +64,7 @@ Alternatively one can run simply: `yarn test` to run the unit tests.
 1. Ensure to `yarn playwright install --with-deps` this installs the required browsers (or vnc browsers) to view/run playwright front-end tests.
 
 2. Run the backend locally, steps to do this can be found in the [backend repository](https://github.com/content-services/content-sources-backend).
-   Eensure that the backend is running prior to the following steps.
+   Ensure that the backend is running prior to the following steps.
 
 3. `yarn local` will start up the front-end repository. If you do `yarn start` and choose stage, your tests will attempt to run against the stage ENV.
 
