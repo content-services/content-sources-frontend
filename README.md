@@ -5,13 +5,7 @@ In order to access the https://[env].foo.redhat.com in your browser, you have to
 To setup the hosts file run following command:
 
 ```bash
-npm run patch:hosts
-```
-
-If this command throws an error, you may need to install NPM system wide with `sudo yum install npm` and run it as a `sudo`:
-
-```bash
-sudo npm run patch:hosts
+yarn patch:hosts
 ```
 
 Alternativly, simply add these lines to your /etc/hosts:
