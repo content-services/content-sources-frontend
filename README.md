@@ -54,17 +54,29 @@ One can also: `yarn test` to run the unit tests directly.
 
 ## Testing with Playwright
 
-1. Ensure to `yarn playwright install --with-deps` this installs the required browsers (or vnc browsers) to view/run playwright front-end tests.
+1. Ensure the correct node version is installed and in use: `nvm use`
 
-2. Run the backend locally, steps to do this can be found in the [backend repository](https://github.com/content-services/content-sources-backend).
+2. Copy the [example env file](playwright_example.env) and create a file named:`.env`
+   For local development only the BASE_URL:`https://stage.foo.redhat.com:1337` is required, which is already set in the example config.
+
+3. Install Playwright browsers and dependencies
+   `yarn playwright install `
+
+   OR
+
+   If using any os other than Fedora/Rhel (IE:mac, ubuntu linux):
+
+   `yarn playwright install  --with-deps`
+
+4. Run the backend locally, steps to do this can be found in the [backend repository](https://github.com/content-services/content-sources-backend).
 
    Ensure that the backend is running prior to the following steps.
 
-3. `yarn local` will start up the front-end repository. If you do `yarn start` and choose stage, your tests will attempt to run against the stage ENV.
+5. `yarn local` will start up the front-end repository. If you do `yarn start` and choose stage, your tests will attempt to run against the stage ENV, please do not test in stage.
 
-4. `yarn playwright test` will spin-off all of the playwright test suite. `yarn playwright test --headed` will run the suite in a vnc-like browser so you can follow what it is doing.
+6. `yarn playwright test` will run the playwright test suite. `yarn playwright test --headed` will run the suite in a vnc-like browser so you can watch it's interactions.
 
-It is recommended to test using vs-code and the [Playwright Test module for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright).
+It is recommended to test using vs-code and the [Playwright Test module for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright). But other editors do have similar plugins to for ease of use, if so desired
 
 ## PR checks and linking front-end/backend-end PRs for testing
 
