@@ -36,6 +36,7 @@ export default defineConfig({
     baseURL: process.env.BASE_URL,
     trace: 'on-first-retry',
     ignoreHTTPSErrors: true,
+    testIdAttribute: 'data-ouia-component-id'
   },
   projects: [
     { name: 'setup', testMatch: /.*\.setup\.ts/ },

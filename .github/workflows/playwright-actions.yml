@@ -169,6 +169,12 @@ jobs:
         working-directory: content-sources-backend
         run: cp ./configs/config.yaml.example ./configs/config.yaml
 
+      - name: Add CDN cert to config
+        working-directory: content-sources-backend
+        run: |
+          echo $REDHAT_CDN_CERT > cdn.pem
+          sed -i 's|# cert_path:.*|cert_path: "cdn.pem"|' ./configs/config.yaml
+
       - name: Backend compose-up
         working-directory: content-sources-backend
         run: make compose-down compose-clean compose-up
