@@ -4,7 +4,7 @@ export const deleteAllPopularRepos = async ({ request }: Page) => {
   const response = await request.get('/api/content-sources/v1/popular_repositories/?');
 
   // Ensure the request was successful
-  expect(response.status()).toBe(200);
+  expect(response.status() >= 200 && response.status() <300).toBeTruthy();
 
   // Parse the response body
   const body = await response.json();
@@ -12,8 +12,7 @@ export const deleteAllPopularRepos = async ({ request }: Page) => {
   // Check that the response body contains an array of data
   expect(Array.isArray(body.data)).toBeTruthy();
 
-  // Extract UUIDs from the response data
-  const uuidList = body.data.map((data: { uuid: string }) => data.uuid) as string[];
+  const uuidList = body.data.map(({ uuid }) => uuid).filter((uuid) => !!uuid);
 
   // If there are UUIDs to delete, make the delete request
   if (uuidList.length > 0) {

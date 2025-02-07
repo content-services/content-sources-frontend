@@ -4,7 +4,6 @@ import { navigateToRepositories } from './helpers/navHelpers';
 import { closePopupsIfExist } from './helpers/helpers';
 import { deleteAllPopularRepos } from './helpers/deletePopularRepositories';
 
-
 describe('Popular Repositories', () => {
   test('Add popular repos', async ({ page }) => {
     // Ensure no popular repos are selected
@@ -12,9 +11,6 @@ describe('Popular Repositories', () => {
 
     await navigateToRepositories(page);
     await closePopupsIfExist(page);
-
-    const AddButton = page.locator('[data-ouia-component-id="add_popular_repo"]');
-    const AddButtonNoSnap = page.locator('[data-ouia-component-id="add-popular_repo_without-snapshotting"]');
 
     await page.getByRole('link', { name: 'Popular repositories' }).click();
 
