@@ -1,10 +1,9 @@
-import { describe } from 'node:test';
 import { test } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { closePopupsIfExist } from './helpers/helpers';
 import { deleteAllPopularRepos } from './helpers/deletePopularRepositories';
 
-describe('Popular Repositories', () => {
+test.describe('Popular Repositories', () => {
   test('Add popular repos', async ({ page }) => {
     // Ensure no popular repos are selected
     await deleteAllPopularRepos(page);
