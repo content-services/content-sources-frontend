@@ -16,7 +16,7 @@ test.describe('Popular Repositories', () => {
 
     // Select the first row then use main side toggle menu to add it
     await page
-      .getByRole('row', { name: 'EPEL 9' })
+      .getByRole('row', { name: 'EPEL 9 Everything x86_64' })
       .getByLabel('Select row 0', { exact: true })
       .click();
     // Open the drop-down menu
@@ -25,7 +25,7 @@ test.describe('Popular Repositories', () => {
     await page.getByTestId('add-selected-repos-no-snap').click();
     // Multiple toast pop-ups about snapshotting and the code tries to close that
     await page
-      .getByRole('row', { name: 'EPEL 8' })
+      .getByRole('row', { name: 'EPEL 8 Everything x86_64' })
       .getByLabel('Select row 1', { exact: true })
       .click();
     // Open the drop-down menu
