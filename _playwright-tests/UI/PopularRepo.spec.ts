@@ -13,6 +13,7 @@ test.describe('Popular Repositories', () => {
 
     await expect(page).toHaveTitle('Repositories - Content | RHEL');
     await page.getByRole('link', { name: 'Popular repositories' }).click();
+    await expect(page.getByTestId('popular_repos_table')).toBeVisible();
 
     // Select the first row then use main side toggle menu to add it
     await page
@@ -35,6 +36,8 @@ test.describe('Popular Repositories', () => {
     // Multiple toast pop-ups about snapshotting and the code tries to close that
     // Move to Custom repo tab
     await page.getByRole('link', { name: 'Your repositories' }).click();
+    await expect(page.getByTestId('custom_repositories_table')).toBeVisible();
+
     // Filter for EPEL and pick the first row
     await page.getByRole('textbox', { name: 'Filter by name/url' }).fill('EPEL');
     await page.getByRole('checkbox', { name: 'Select row 0' }).check();
