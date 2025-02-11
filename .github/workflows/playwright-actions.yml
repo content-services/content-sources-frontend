@@ -207,8 +207,6 @@ jobs:
     if: ${{ !cancelled() }}
     needs: [playwright-tests]
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     outputs:
       timestamp: ${{ steps.timestampid.outputs.timestamp }}
       summary: ${{ steps.summaryid.outputs.summary }}
