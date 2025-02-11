@@ -4,7 +4,8 @@ export const deleteAllPopularRepos = async ({ request }: Page) => {
   const response = await request.get('/api/content-sources/v1/popular_repositories/?');
 
   // Ensure the request was successful
-  expect(response.status() >= 200 && response.status() <300).toBeTruthy();
+  console.log('response.status');
+  expect(response.status() >= 200 && response.status() < 300).toBeTruthy();
 
   // Parse the response body
   const body = await response.json();
