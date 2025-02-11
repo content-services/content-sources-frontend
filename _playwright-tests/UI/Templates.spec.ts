@@ -8,10 +8,26 @@ test.describe('Templates', () => {
   }) => {
     await navigateToTemplates(page);
     await closePopupsIfExist(page);
-
-    const AddButton = page.locator('[data-ouia-component-id="create_content_template"]');
-
-    // Wait for the Add button to become enabled (up to 10 seconds)
-    await AddButton.first().isEnabled({ timeout: 10000 });
+    await page.getByRole('button', { name: 'Add content template' }).click();
+    await page.getByRole('button', { name: 'Select architecture' }).click();
+    await page.getByRole('option', { name: 'x86_64' }).click();
+    await page.getByRole('button', { name: 'Select version' }).click();
+    await page.getByRole('option', { name: 'el8' }).click(); 
+    await page.getByRole('button', { name: 'Next' }).click();
+    // Add the step to select 'Red hat repos Checkbox' 
+    await page.getByRole('button', { name: 'Next' }).click();
+    // Add the step to select 'checkbox for cutom repo'
+    page.getByRole('button', { name: 'Next' }).click();
+    page.getByRole('menuitem', { name: 'el8' }).locator('label').click();
+    await page.locator('input[name="use-latest-snapshot"]').click();
+    page.getByRole('button', { name: 'Next' }).click();
+    const nameInput = page.getByPlaceholder('Enter name');
+    // const descriptionInput = page.getByPlaceholder('Enter Description');
+    await nameInput.fill('demo_template');
+    // await descriptionInput.fill('test');
+    await page.getByRole('button', { name: 'Next' }).click();
+    // teamplate with system
+    await page.getByRole('button').locator('pf-v5-c-menu-toggle__button');
+    await page.getByRole('button', { name: 'Create template only' }).click();
   });
 });
