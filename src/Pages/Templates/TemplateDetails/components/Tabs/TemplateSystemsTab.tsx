@@ -295,21 +295,23 @@ export default function TemplateSystemsTab() {
           setSelected={(id) => handleSelectItem(id)}
         />
       </Hide>
-      <Flex className={classes.bottomContainer}>
-        <FlexItem />
-        <FlexItem>
-          <Pagination
-            id='bottom-pagination-id'
-            widgetId='bottomPaginationWidgetId'
-            itemCount={total_items}
-            perPage={perPage}
-            page={page}
-            onSetPage={onSetPage}
-            variant={PaginationVariant.bottom}
-            onPerPageSelect={onPerPageSelect}
-          />
-        </FlexItem>
-      </Flex>
+      <Hide hide={!total_items}>
+        <Flex className={classes.bottomContainer}>
+          <FlexItem />
+          <FlexItem>
+            <Pagination
+              id='bottom-pagination-id'
+              widgetId='bottomPaginationWidgetId'
+              itemCount={total_items}
+              perPage={perPage}
+              page={page}
+              onSetPage={onSetPage}
+              variant={PaginationVariant.bottom}
+              onPerPageSelect={onPerPageSelect}
+            />
+          </FlexItem>
+        </Flex>
+      </Hide>
       <Outlet />
     </Grid>
   );
