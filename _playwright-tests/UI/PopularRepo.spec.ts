@@ -10,50 +10,53 @@ test.describe('Popular Repositories', () => {
 
     await navigateToRepositories(page);
     await closePopupsIfExist(page);
-
     await expect(page).toHaveTitle('Repositories - Content | RHEL');
-    await page.getByRole('link', { name: 'Popular repositories' }).click();
-    await expect(page.getByTestId('popular_repos_table')).toBeVisible();
+   
+    await test.step('Select the Popular repos tab', async () => {
+      await page.getByRole('link', { name: 'Popular repositories' }).click();
+      await expect(page.getByTestId('popular_repos_table')).toBeVisible();
+    });
 
-    // Select the first row then use main side toggle menu to add it
-    await page
-      .getByRole('row', { name: 'EPEL 9 Everything x86_64' })
-      .getByLabel('Select row 0', { exact: true })
-      .click();
-    // Open the drop-down menu
-    await page.getByTestId('add-selected-dropdown-toggle-no-snap').click();
-    // Click the first and only button in the drop-down menu
-    await page.getByTestId('add-selected-repos-no-snap').click();
-    // Multiple toast pop-ups about snapshotting and the code tries to close that
-    await page
-      .getByRole('row', { name: 'EPEL 8 Everything x86_64' })
-      .getByLabel('Select row 1', { exact: true })
-      .click();
-    // Open the drop-down menu
-    await page.getByTestId('add-selected-dropdown-toggle-no-snap').click();
-    // Click the first and only button in the drop-down menu
-    await page.getByTestId('add-selected-repos-no-snap').click();
-    // Multiple toast pop-ups about snapshotting and the code tries to close that
-    // Move to Custom repo tab
-    await page.getByRole('link', { name: 'Your repositories' }).click();
-    await expect(page.getByTestId('custom_repositories_table')).toBeVisible();
+    await test.step('Select and add EPEL 9', async () => {
+      await page
+        .getByRole('row', { name: 'EPEL 9 Everything x86_64' })
+        .getByLabel('Select row 0', { exact: true })
+        .click();
+      await page.getByTestId('add-selected-dropdown-toggle-no-snap').click();
+      await page.getByTestId('add-selected-repos-no-snap').click();
+   });
 
-    // Filter for EPEL and pick the first row
-    await page.getByRole('textbox', { name: 'Filter by name/url' }).fill('EPEL');
-    await page.getByRole('checkbox', { name: 'Select row 0' }).check();
-    // Open kebab menu to delete it
-    await page.getByTestId('custom_repositories_kebab_toggle').click()
-    await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
-    // Confirm the removal in the pop-up
-    await page.getByRole('button', { name: 'Remove' }).click();
-    // Filter for EPEL and pick the first row
-    await page.getByRole('textbox', { name: 'Filter by name/url' }).fill('EPEL');
-    await page.getByRole('checkbox', { name: 'Select row 0' }).check();
-    // Open kebab menu to delete it
-    await page.getByTestId('custom_repositories_kebab_toggle').click()
-    await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
-    // Confirm the removal in the pop-up
-    await page.getByRole('button', { name: 'Remove' }).click();
-    await page.getByRole('link', { name: 'Popular repositories' }).click();
+    await test.step('Select and add EPEL 8', async () => {
+      await page
+        .getByRole('row', { name: 'EPEL 8 Everything x86_64' })
+        .getByLabel('Select row 1', { exact: true })
+        .click();
+      await page.getByTestId('add-selected-dropdown-toggle-no-snap').click();
+      await page.getByTestId('add-selected-repos-no-snap').click();
+    });
+
+    await test.step('Move to Custom repo tab', async () => { 
+        await page.getByRole('link', { name: 'Your repositories' }).click();
+        await expect(page.getByTestId('custom_repositories_table')).toBeVisible();
+    });
+
+    await test.step('Use kebab menu to delete a repo', async () => {
+      await page.getByRole('textbox', { name: 'Filter by name/url' }).fill('EPEL');
+      await page.getByRole('checkbox', { name: 'Select row 0' }).check();
+
+      await page.getByTestId('custom_repositories_kebab_toggle').click();
+      await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
+      // Confirm the removal in the pop-up
+      await page.getByRole('button', { name: 'Remove' }).click();
+    });
+
+    await test.step('Use kebab menu to delete a repo', async () => {
+      await page.getByRole('textbox', { name: 'Filter by name/url' }).fill('EPEL');
+      await page.getByRole('checkbox', { name: 'Select row 0' }).check();
+      await page.getByTestId('custom_repositories_kebab_toggle').click();
+      await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
+      // Confirm the removal in the pop-up
+      await page.getByRole('button', { name: 'Remove' }).click();
+    });
   });
 });
