@@ -57,6 +57,29 @@ jobs:
         run: |
           chmod +x .github/workflowScripts/getBackendBranch.sh
           .github/workflowScripts/getBackendBranch.sh "${{ env.pr_url }}"
+      
+      - name: Copy the example config
+        working-directory: content-sources-backend
+        run: cp ./configs/config.yaml.example ./configs/config.yaml
+
+      - name: Create cdn.pem file
+        working-directory: content-sources-backend
+        run: |
+          echo "$REDHAT_CDN_CERT" | sed 's/\\n/\n/g' > ./configs/cdn.pem
+
+      - name: Update cert_path in config.yaml
+        working-directory: content-sources-backend
+        run: |
+          sed -i 's|# cert_path:.*|cert_path: ./configs/cdn.pem|' ./configs/config.yaml
+
+      - name: Throw error if cert is invalid
+        working-directory: content-sources-backend
+        run: |
+          if ! openssl x509 -in ./configs/cdn.pem -noout; then
+            echo "Invalid PEM certificate format"
+            exit 1
+          fi
+          echo "PEM certificate is valid"
 
       - name: Compare .nvmrc files
         id: compare-nvmrc
@@ -160,10 +183,6 @@ jobs:
       - name: Set up Make
         working-directory: content-sources-backend
         run: sudo apt-get install make
-
-      - name: Copy the example config
-        working-directory: content-sources-backend
-        run: cp ./configs/config.yaml.example ./configs/config.yaml
 
       - name: Backend compose-up
         working-directory: content-sources-backend
