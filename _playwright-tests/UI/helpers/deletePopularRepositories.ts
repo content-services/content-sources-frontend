@@ -4,7 +4,6 @@ export const deleteAllPopularRepos = async ({ request }: Page) => {
   const response = await request.get('/api/content-sources/v1/popular_repositories/?');
 
   // Ensure the request was successful
-  console.log('response.status');
   expect(response.status() >= 200 && response.status() < 300).toBeTruthy();
 
   // Parse the response body
@@ -28,7 +27,7 @@ export const deleteAllPopularRepos = async ({ request }: Page) => {
       expect(result.status()).toBe(204);
     } catch (error) {
       console.error('Failed to delete repositories:', error);
-      throw error; // Optionally re-throw the error if you need to fail the test
+      throw error;
     }
   } else {
     console.log('No repositories to delete.');
