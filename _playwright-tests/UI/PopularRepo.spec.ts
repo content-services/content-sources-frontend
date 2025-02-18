@@ -11,7 +11,7 @@ test.describe('Popular Repositories', () => {
     await navigateToRepositories(page);
     await closePopupsIfExist(page);
     await expect(page).toHaveTitle('Repositories - Content | RHEL');
-   
+
     await test.step('Select the Popular repos tab', async () => {
       await page.getByRole('link', { name: 'Popular repositories' }).click();
       await expect(page.getByTestId('popular_repos_table')).toBeVisible();
@@ -24,7 +24,7 @@ test.describe('Popular Repositories', () => {
         .getByLabel('Select row 0', { exact: true })
         .click();
       await page.getByTestId('add-selected-dropdown-toggle-no-snap').click();
-      await page.getByRole('menuitem', { name: 'Add 1 repositories without snapshotting' }).click();
+      await page.getByRole('menuitem', { name: 'Add 1 repositories without snapshotting' });
       await page
         .getByRole('row', { name: 'EPEL 9 Everything x86_64' })
         .getByTestId('remove_popular_repo')
@@ -37,7 +37,7 @@ test.describe('Popular Repositories', () => {
         .getByLabel('Select row 1', { exact: true })
         .click();
       await page.getByTestId('add-selected-dropdown-toggle-no-snap').click();
-      await page.getByRole('menuitem', { name: 'Add 1 repositories without snapshotting' }).click();
+      await page.getByRole('menuitem', { name: 'Add 2 repositories without snapshotting' }).click();
       await page
         .getByRole('row', { name: 'EPEL 8 Everything x86_64' })
         .getByTestId('remove_popular_repo')
