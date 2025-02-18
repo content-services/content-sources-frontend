@@ -36,7 +36,7 @@ test.describe('Introspect Repositories', () => {
 
     await test.step('Submit the form and wait for modal to disappear', async () => {
       await Promise.all([
-        page.getByRole('button', { name: 'Save' }).click(),
+        page.getByRole('button', { name: 'Save' }).first().click(),
         page.waitForResponse(
           (resp) =>
             resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,

@@ -78,7 +78,7 @@ const addRepository = async (page: Page, name: string, url: string) => {
 
   await Promise.all([
     // Click on 'Save'
-    page.getByRole('button', { name: 'Save' }).click(),
+    page.getByRole('button', { name: 'Save' }).first().click(),
     page.waitForResponse(
       (resp) => resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,
     ),

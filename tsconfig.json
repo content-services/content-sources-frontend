@@ -23,6 +23,6 @@
       ]
     },
     "include": ["src/**/*.ts", "**/*.tsx", "**/*"],
-    "exclude": ["./node_modules/*", "**/*.js"]
+    "exclude": ["./node_modules/*", "**/*.js", "content-sources-backend"]
   }
   
