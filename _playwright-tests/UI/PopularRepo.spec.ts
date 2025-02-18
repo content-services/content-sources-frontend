@@ -15,6 +15,7 @@ test.describe('Popular Repositories', () => {
     await test.step('Select the Popular repos tab', async () => {
       await page.getByRole('link', { name: 'Popular repositories' }).click();
       await expect(page.getByTestId('popular_repos_table')).toBeVisible();
+      await page.getByRole('button', { name: 'Add selected repositories' });
     });
 
     await test.step('Select and add EPEL 9', async () => {
@@ -23,8 +24,12 @@ test.describe('Popular Repositories', () => {
         .getByLabel('Select row 0', { exact: true })
         .click();
       await page.getByTestId('add-selected-dropdown-toggle-no-snap').click();
-      await page.getByTestId('add-selected-repos-no-snap').click();
-   });
+      await page.getByRole('menuitem', { name: 'Add 1 repositories without snapshotting' }).click();
+      await page
+        .getByRole('row', { name: 'EPEL 9 Everything x86_64' })
+        .getByTestId('remove_popular_repo')
+        .getByText('Remove');
+    });
 
     await test.step('Select and add EPEL 8', async () => {
       await page
@@ -32,12 +37,16 @@ test.describe('Popular Repositories', () => {
         .getByLabel('Select row 1', { exact: true })
         .click();
       await page.getByTestId('add-selected-dropdown-toggle-no-snap').click();
-      await page.getByTestId('add-selected-repos-no-snap').click();
+      await page.getByRole('menuitem', { name: 'Add 1 repositories without snapshotting' }).click();
+      await page
+        .getByRole('row', { name: 'EPEL 8 Everything x86_64' })
+        .getByTestId('remove_popular_repo')
+        .getByText('Remove');
     });
 
     await test.step('Move to Custom repo tab', async () => { 
-        await page.getByRole('link', { name: 'Your repositories' }).click();
-        await expect(page.getByTestId('custom_repositories_table')).toBeVisible();
+      await page.getByRole('link', { name: 'Your repositories' }).click();
+      await expect(page.getByTestId('custom_repositories_table')).toBeVisible();
     });
 
     await test.step('Use kebab menu to delete a repo', async () => {
