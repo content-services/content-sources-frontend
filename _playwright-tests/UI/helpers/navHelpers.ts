@@ -1,6 +1,7 @@
 import { type Page } from '@playwright/test';
+import { retry } from './helpers';
 
-export const navigateToRepositories = async (page: Page) => {
+const navigateToRepositoriesFunc = async (page: Page) => {
   await page.goto('/insights/content/repositories');
 
   const zeroState = page.locator(
@@ -20,7 +21,11 @@ export const navigateToRepositories = async (page: Page) => {
   }
 };
 
-export const navigateToTemplates = async (page: Page) => {
+export const navigateToRepositories = async (page: Page) => {
+  await retry(page, navigateToRepositoriesFunc);
+};
+
+const navigateToTemplatesFunc = async (page: Page) => {
   await page.goto('/insights/content/templates');
 
   const repositoriesListPage = page.getByText(
@@ -29,4 +34,8 @@ export const navigateToTemplates = async (page: Page) => {
 
   // Wait for either list page or zerostate
   await repositoriesListPage.waitFor({ state: 'visible' });
+};
+
+export const navigateToTemplates = async (page: Page) => {
+  await retry(page, navigateToTemplatesFunc);
 };

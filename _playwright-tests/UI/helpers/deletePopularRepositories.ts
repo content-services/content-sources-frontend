@@ -29,7 +29,5 @@ export const deleteAllPopularRepos = async ({ request }: Page) => {
       console.error('Failed to delete repositories:', error);
       throw error;
     }
-  } else {
-    console.log('No repositories to delete.');
   }
 };

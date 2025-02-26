@@ -79,3 +79,31 @@ export const validateSnapshotTimestamp = async (timestamp: string, howRecent: nu
   }
   return true;
 };
+
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const retry = async (
+  page: Page,
+  callback: (page: Page) => Promise<void>,
+  tries = 3,
+  delay?: number,
+) => {
+  let rc = tries;
+  while (rc >= 0) {
+    if (delay) {
+      sleep(delay);
+    }
+
+    rc -= 1;
+    if (rc === 0) {
+      return await callback(page);
+    } else {
+      try {
+        await callback(page);
+      } catch {
+        continue;
+      }
+      break;
+    }
+  }
+};
