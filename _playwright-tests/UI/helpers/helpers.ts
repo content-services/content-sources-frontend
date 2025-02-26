@@ -43,7 +43,7 @@ export const getRowByNameOrUrl = async (page: Page, filterValue: string) => {
 };
 
 export const getRowCellByHeader = async (page: Page, row: Locator, name: string) => {
-  await expect(page.getByRole('columnheader', { name: name })).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: name })).toBeVisible();
   const table = row.locator('xpath=ancestor::*[@role="grid" or @role="table"][1]');
   const headers = table.getByRole('columnheader');
   const headerCount = await headers.count();
