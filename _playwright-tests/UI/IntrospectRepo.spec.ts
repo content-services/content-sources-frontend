@@ -5,6 +5,7 @@ import {
   closePopupsIfExist,
   getRowByNameOrUrl,
   getRowCellByHeader,
+  waitForTaskPickup,
 } from './helpers/helpers';
 
 test.describe('Introspect Repositories', () => {
@@ -50,8 +51,9 @@ test.describe('Introspect Repositories', () => {
     });
 
     await test.step('Wait for status to be "Valid"', async () => {
+      await waitForTaskPickup(page, repoUrl, 'introspect');
       const row = await getRowByNameOrUrl(page, repoName);
-      await expect(row.getByText('Valid')).toBeVisible();
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60_000 });
     });
   });
 
