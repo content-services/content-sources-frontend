@@ -16,7 +16,6 @@ test.describe('Red Hat Repositories', () => {
     });
 
     test('Wait for repository status to be "Valid"', async ({ page }) => {
-        test.setTimeout(600000);
         const status = page
             .getByRole('row')
             .filter({ hasText: smallRHRepo })
@@ -28,7 +27,7 @@ test.describe('Red Hat Repositories', () => {
         });
 
         await test.step('Wait for a valid status', async () => {
-            await status.waitFor({ state: 'visible' });
+            await status.waitFor({ state: 'visible', timeout: 600_000 });
         });
     });
 
