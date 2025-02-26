@@ -14,7 +14,11 @@ export const closePopupsIfExist = async (page: Page) => {
 
   for (const locator of locatorsToCheck) {
     await page.addLocatorHandler(locator, async () => {
-      await locator.first().click(); // There can be multiple toast pop-ups
+      try {
+        await locator.first().click(); // There can be multiple toast pop-ups
+      } catch {
+        return;
+      }
     });
   }
 };
