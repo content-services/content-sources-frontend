@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
-import { closePopupsIfExist, getRowByName, getRowCellByHeader } from './helpers/helpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
+import {
+  closePopupsIfExist,
+  getRowByName,
+  getRowCellByHeader,
+} from './helpers/helpers';
 
 test.describe('Introspect Repositories', () => {
   const repoName = 'introspection-test';
