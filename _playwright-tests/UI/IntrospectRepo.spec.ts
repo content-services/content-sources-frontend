@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
-import { closePopupsIfExist, getRowByName, getRowCellByHeader } from './helpers/helpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
+import {
+  closePopupsIfExist,
+  getRowByName,
+  getRowCellByHeader,
+  retry,
+} from './helpers/helpers';
 
 test.describe('Introspect Repositories', () => {
   const repoName = 'introspection-test';
@@ -14,7 +19,7 @@ test.describe('Introspect Repositories', () => {
 
   test.beforeEach(async ({ page }) => {
     await test.step('Navigate to the repository page', async () => {
-      await navigateToRepositories(page);
+      await retry(page, navigateToRepositories);
       await closePopupsIfExist(page);
     });
   });

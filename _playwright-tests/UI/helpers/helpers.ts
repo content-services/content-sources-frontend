@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 
 export const closePopupsIfExist = async (page: Page) => {
   const locatorsToCheck = [
@@ -55,4 +55,24 @@ export const getRowCellByHeader = async (row: Locator, name: string) => {
   }
 
   return row.getByRole('gridcell').nth(index);
+};
+
+export const retry = async (page: Page, callback: (page: Page) => Promise<void>, tries = 3) => {
+  let rc = tries;
+  while (rc >= 0) {
+    rc -= 1;
+
+    if (rc === 0) {
+      return await callback(page);
+    } else {
+      try {
+        await callback(page);
+      } catch {
+        continue;
+      }
+      break;
+    }
+  }
+
+  return;
 };
