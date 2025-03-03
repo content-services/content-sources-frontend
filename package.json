@@ -2,6 +2,9 @@
   "name": "content-sources-frontend",
   "version": "0.0.2",
   "private": false,
+  "engines": {
+    "node": "20.17.0"
+  },
   "scripts": {
     "test-ui": "yarn install && yarn playwright install && yarn playwright test",
     "build": "fec build",

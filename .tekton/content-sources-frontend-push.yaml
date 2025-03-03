@@ -229,6 +229,21 @@ spec:
         workspace: workspace
       runAfter:
       - clone-repository
+
+    - name: get-node-version
+      taskSpec:
+        steps:
+          - name: read-nvmrc
+            image: curlimages/curl:latest
+            script: |
+              #!/bin/sh
+              NODE_VERSION=$(curl -s https://raw.githubusercontent.com/content-services/content-sources-frontend/main/.nvmrc | tr -d '\n' | tr -d '\r')
+              echo "$(tasks.parse-build-deploy-script.results.image)"
+              echo "${NODE_VERSION}" > /tekton/results/node-version
+        results:
+          - name: node-version
+            description: The Node.js version from .nvmrc file
+
     - name: create-frontend-dockerfile
       taskRef:
         resolver: git
@@ -250,13 +265,13 @@ spec:
         - name: image
           value: $(tasks.parse-build-deploy-script.results.image)
         - name: node-build-version
-          value: $(tasks.parse-build-deploy-script.results.node-build-version)
+          value: $(tasks.get-node-version.results.node-version)
         - name: quay-expire-time
           value: $(tasks.parse-build-deploy-script.results.quay-expire-time)
         - name: npm-build-script
           value: $(tasks.parse-build-deploy-script.results.npm-build-script)
         - name: yarn-build-script
-          value: $(tasks.parse-build-deploy-script.results.yarn-build-script)
+          value: build
         - name: route-path
           value: $(tasks.parse-build-deploy-script.results.route-path)
         - name: beta-route-path
