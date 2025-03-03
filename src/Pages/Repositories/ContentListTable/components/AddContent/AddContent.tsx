@@ -56,7 +56,6 @@ import useRootPath from 'Hooks/useRootPath';
 import CustomHelperText from 'components/CustomHelperText/CustomHelperText';
 import { ADD_ROUTE, REPOSITORIES_ROUTE, UPLOAD_ROUTE } from 'Routes/constants';
 import { useFormik, type FormikValues } from 'formik';
-import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 import Loader from 'components/Loader';
 import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 
@@ -101,14 +100,11 @@ const AddContent = ({ isEdit = false }: Props) => {
   const { repoUUID: uuid } = useParams();
   const navigate = useNavigate();
   const rootPath = useRootPath();
-  const { isProd, isBeta } = useChrome();
-  const isInProd = useMemo(() => isProd(), []);
-  const isInBeta = useMemo(() => isBeta(), []);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { data, isLoading: isLoadingInitialContent, isSuccess } = useFetchContent(uuid!, isEdit);
 
-  const [values, setValues] = useState(getDefaultValues(isInProd ? { snapshot: false } : {}));
+  const [values, setValues] = useState(getDefaultValues({}));
   const [changeVerified, setChangeVerified] = useState(false);
 
   useEffect(() => {
@@ -495,11 +491,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                   }
                 />
               </Hide>
-              <Hide
-                hide={
-                  (isInProd && !isInBeta) || (isEdit && contentOrigin === ContentOrigin.EXTERNAL)
-                }
-              >
+              <Hide hide={isEdit && contentOrigin === ContentOrigin.EXTERNAL}>
                 <ConditionalTooltip
                   show={isEdit && contentOrigin === ContentOrigin.UPLOAD}
                   setDisabled={isEdit && contentOrigin === ContentOrigin.UPLOAD}

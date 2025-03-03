@@ -61,7 +61,6 @@ import {
   DropdownToggle,
   DropdownToggleAction,
 } from '@patternfly/react-core/deprecated';
-import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import { DELETE_ROUTE } from 'Routes/constants';
 import { Outlet, useNavigate, useOutletContext } from 'react-router-dom';
 import useArchVersion from 'Hooks/useArchVersion';
@@ -144,9 +143,6 @@ const PopularRepositoriesTable = () => {
   const debouncedSearchValue = useDebounce(searchValue);
   const [perPage, setPerPage] = useState(storedPerPage);
   const [isActionOpen, setIsActionOpen] = useState(false);
-  const { isProd, isBeta } = useChrome();
-  const isInProd = useMemo(() => isProd() === true, []);
-  const isInBeta = useMemo(() => isBeta() === true, []);
 
   const {
     archesDisplay,
@@ -334,30 +330,16 @@ const PopularRepositoriesTable = () => {
 
   const countIsZero = !data?.data?.length;
 
-  const dropdownItems = useMemo(() => {
-    if (isInProd && !isInBeta) {
-      return [
-        <DropdownItem
-          key='action'
-          component='button'
-          onClick={() => addSelected(true)}
-          ouiaId='add-selected-repos-with-snap'
-        >
-          {`Add ${checkedRepositoriesToAdd.size} repositories with snapshotting`}
-        </DropdownItem>,
-      ];
-    } else
-      return [
-        <DropdownItem
-          key='action'
-          component='button'
-          onClick={() => addSelected(false)}
-          ouiaId='add-selected-repos-no-snap'
-        >
-          {`Add ${checkedRepositoriesToAdd.size} repositories without snapshotting`}
-        </DropdownItem>,
-      ];
-  }, [isInProd, isInBeta, checkedRepositoriesToAdd.size]);
+  const dropdownItems = [
+    <DropdownItem
+      key='action'
+      component='button'
+      onClick={() => addSelected(false)}
+      ouiaId='add-selected-repos-no-snap'
+    >
+      {`Add ${checkedRepositoriesToAdd.size} repositories without snapshotting`}
+    </DropdownItem>,
+  ];
 
   return (
     <>
@@ -405,69 +387,36 @@ const PopularRepositoriesTable = () => {
                       const isDisabled = !rbac?.repoWrite || !atLeastOneRepoToAddChecked;
                       if (features?.snapshots?.enabled && features.snapshots.accessible) {
                         const className = isDisabled ? classes.disabledDropdownButton : undefined;
-                        // temporarily disable snapshotting by default for popular repos
-                        if (isInProd && !isInBeta) {
-                          return (
-                            <Dropdown
-                              onSelect={onDropdownSelect}
-                              className={classes.addRepositoriesButton}
-                              ouiaId='add-selected-toggle-dropdown'
-                              toggle={
-                                <DropdownToggle
-                                  ouiaId='add-selected-dropdown-toggle-no-snap'
-                                  className={className}
-                                  splitButtonItems={[
-                                    <DropdownToggleAction
-                                      key='action'
-                                      data-ouia-component-id='add_checked_repos-without-snap'
-                                      onClick={() => addSelected(false)}
-                                      className={className}
-                                    >
-                                      {defaultText}
-                                    </DropdownToggleAction>,
-                                  ]}
-                                  toggleVariant='primary'
-                                  splitButtonVariant='action'
-                                  onToggle={onDropdownToggle}
-                                  isDisabled={isDisabled}
-                                />
-                              }
-                              isOpen={isActionOpen}
-                            >
-                              {dropdownItems}
-                            </Dropdown>
-                          );
-                        } else
-                          return (
-                            <Dropdown
-                              onSelect={onDropdownSelect}
-                              className={classes.addRepositoriesButton}
-                              ouiaId='add-selected-toggle-dropdown'
-                              toggle={
-                                <DropdownToggle
-                                  ouiaId='add-selected-dropdown-toggle-no-snap'
-                                  className={className}
-                                  splitButtonItems={[
-                                    <DropdownToggleAction
-                                      key='action'
-                                      data-ouia-component-id='add_checked_repos-with-snap'
-                                      onClick={() => addSelected(true)}
-                                      className={className}
-                                    >
-                                      {defaultText}
-                                    </DropdownToggleAction>,
-                                  ]}
-                                  toggleVariant='primary'
-                                  splitButtonVariant='action'
-                                  onToggle={onDropdownToggle}
-                                  isDisabled={isDisabled}
-                                />
-                              }
-                              isOpen={isActionOpen}
-                            >
-                              {dropdownItems}
-                            </Dropdown>
-                          );
+                        return (
+                          <Dropdown
+                            onSelect={onDropdownSelect}
+                            className={classes.addRepositoriesButton}
+                            ouiaId='add-selected-toggle-dropdown'
+                            toggle={
+                              <DropdownToggle
+                                ouiaId='add-selected-dropdown-toggle-no-snap'
+                                className={className}
+                                splitButtonItems={[
+                                  <DropdownToggleAction
+                                    key='action'
+                                    data-ouia-component-id='add_checked_repos-with-snap'
+                                    onClick={() => addSelected(true)}
+                                    className={className}
+                                  >
+                                    {defaultText}
+                                  </DropdownToggleAction>,
+                                ]}
+                                toggleVariant='primary'
+                                splitButtonVariant='action'
+                                onToggle={onDropdownToggle}
+                                isDisabled={isDisabled}
+                              />
+                            }
+                            isOpen={isActionOpen}
+                          >
+                            {dropdownItems}
+                          </Dropdown>
+                        );
                       } else {
                         return (
                           <Button
