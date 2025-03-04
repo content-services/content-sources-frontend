@@ -261,7 +261,7 @@ export default function TemplateSystemsTab() {
           notFiltered={!debouncedSearchQuery}
           clearFilters={() => setSearchQuery('')}
           itemName='associated systems'
-          notFilteredBody='To get started, add this template to a system.'
+          notFilteredBody='To get started, assign this template to a system.'
           notFilteredButton={
             <ConditionalTooltip
               content={`You do not have the required ${missingRequirements} to perform this action.`}
@@ -275,7 +275,7 @@ export default function TemplateSystemsTab() {
                 isDisabled={isLoading}
                 onClick={() => navigate(ADD_ROUTE)}
               >
-                Add systems
+                Assign to systems
               </Button>
             </ConditionalTooltip>
           }
