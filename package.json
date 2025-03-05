@@ -5,6 +5,7 @@
   "scripts": {
     "test-ui": "yarn install && yarn playwright install && yarn playwright test",
     "build": "fec build",
+    "build:prod": "yarn build",
     "deploy": "npm-run-all build lint test",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}' --no-error-on-unmatched-pattern",
     "lint:fix": "eslint --fix 'src/**/*.{js,jsx,ts,tsx}' --no-error-on-unmatched-pattern",
