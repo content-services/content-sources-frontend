@@ -1,4 +1,8 @@
 import { Page, Locator, expect } from '@playwright/test';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+export const snapshotTimestampFormat = 'DD MMM YYYY - HH:mm:ss';
 
 export const closePopupsIfExist = async (page: Page) => {
   const locatorsToCheck = [
@@ -56,4 +60,22 @@ export const getRowCellByHeader = async (page: Page, row: Locator, name: string)
   }
 
   return row.getByRole('gridcell').nth(index);
+};
+
+export const validateSnapshotTimestamp = async (timestamp: string, howRecent: number) => {
+  /**
+   * Checks whether the Snaphot timestamp is recent to validate if the Snapshot was created successfully
+   * @param timestamp - Snapshot timestamp in string format
+   * @param howRecent - How recent the timestamp should be in minutes
+   * @returns true if the timestamp is less recent than howRecent, false otherwise
+   */
+  dayjs.extend(customParseFormat);
+  const formattedTimestamp = dayjs(timestamp, snapshotTimestampFormat);
+  const currentTime = dayjs();
+  // Compare the timestamp difference to current time in minutes
+  const difference = formattedTimestamp.diff(currentTime, 'minute');
+  if (difference > howRecent) {
+    return false;
+  }
+  return true;
 };
