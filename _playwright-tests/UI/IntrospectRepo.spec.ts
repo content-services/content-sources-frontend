@@ -64,8 +64,12 @@ test.describe('Introspect Repositories', () => {
       await Promise.all([
         expect(page.getByText(repoArch)).toHaveCount(8),
         expect((await getRowCellByHeader(page, row, 'Name')).getByText(testPackage)).toBeVisible(),
-        expect((await getRowCellByHeader(page, row, 'Version')).getByText(repoVersion)).toBeVisible(),
-        expect((await getRowCellByHeader(page, row, 'Release')).getByText(repoRelease)).toBeVisible(),
+        expect(
+          (await getRowCellByHeader(page, row, 'Version')).getByText(repoVersion),
+        ).toBeVisible(),
+        expect(
+          (await getRowCellByHeader(page, row, 'Release')).getByText(repoRelease),
+        ).toBeVisible(),
         expect((await getRowCellByHeader(page, row, 'Arch')).getByText(repoArch)).toBeVisible(),
       ]);
     });

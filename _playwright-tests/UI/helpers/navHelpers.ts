@@ -23,10 +23,8 @@ export const navigateToRepositories = async (page: Page) => {
 export const navigateToTemplates = async (page: Page) => {
   await page.goto('/insights/content/templates');
 
-  const repositoriesListPage = page.getByText(
-    'View all content templates within your organization.',
-  );
+  const templateText = page.getByText('View all content templates within your organization.');
 
   // Wait for either list page or zerostate
-  await repositoriesListPage.waitFor({ state: 'visible' });
+  await templateText.waitFor({ state: 'visible' });
 };

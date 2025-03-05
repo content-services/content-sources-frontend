@@ -30,6 +30,6 @@ export const deleteAllPopularRepos = async ({ request }: Page) => {
       throw error;
     }
   } else {
-    console.log('No repositories to delete.');
+    // console.log('No repositories to delete.'); We don't need to print this
   }
 };

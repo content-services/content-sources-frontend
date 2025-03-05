@@ -51,13 +51,15 @@ test.describe('Popular Repositories', () => {
       ).toBeVisible();
     });
 
-    await test.step('Move to Custom repo tab', async () => { 
+    await test.step('Move to Custom repo tab', async () => {
       await page.getByRole('link', { name: 'Your repositories' }).click();
       await expect(page.getByTestId('custom_repositories_table')).toBeVisible();
     });
 
     await test.step('Use kebab menu to delete a repo', async () => {
-      await page.getByRole('textbox', { name: 'Filter by name/url' }).fill('EPEL');
+      await page
+        .getByRole('textbox', { name: 'Filter by name/url' })
+        .fill('EPEL 8 Everything x86_64');
       await page.getByRole('checkbox', { name: 'Select row 0' }).check();
 
       await page.getByTestId('custom_repositories_kebab_toggle').click();
@@ -67,7 +69,9 @@ test.describe('Popular Repositories', () => {
     });
 
     await test.step('Use kebab menu to delete a repo', async () => {
-      await page.getByRole('textbox', { name: 'Filter by name/url' }).fill('EPEL');
+      await page
+        .getByRole('textbox', { name: 'Filter by name/url' })
+        .fill('EPEL 9 Everything x86_64');
       await page.getByRole('checkbox', { name: 'Select row 0' }).check();
       await page.getByTestId('custom_repositories_kebab_toggle').click();
       await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();

@@ -28,14 +28,14 @@ export const clearFilters = async (page: Page) => {
   await page.getByRole('button', { name: 'Clear filters' }).click();
 };
 
-export const getRowByName = async (page: Page, name: string) => {
+export const getRowByName = async (page: Page, name: string): Promise<Locator> => {
   await clearFilters(page);
   await filterByName(page, name);
   return page.getByRole('row').filter({ has: page.getByText(name) });
 };
 
 export const getRowCellByHeader = async (page: Page, row: Locator, name: string) => {
-  await expect(page.getByRole('columnheader', { name: name })).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: name })).toBeVisible();
   const table = row.locator('xpath=ancestor::*[@role="grid" or @role="table"][1]');
   const headers = table.getByRole('columnheader');
   const headerCount = await headers.count();

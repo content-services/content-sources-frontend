@@ -4,9 +4,11 @@ import path from 'path';
 import { closePopupsIfExist } from './helpers/helpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 
+const uploadRepoName = 'Upload Repo!';
+
 test.describe('Upload Repositories', () => {
   test('Clean - Delete any current repos that exist', async ({ page }) => {
-    await deleteAllRepos(page);
+    await deleteAllRepos(page, `&search=${uploadRepoName}`);
   });
 
   test('Create upload repository', async ({ page }) => {
@@ -22,7 +24,7 @@ test.describe('Upload Repositories', () => {
     // Fill in the 'Enter name' input
     const nameInput = page.getByPlaceholder('Enter name');
     await nameInput.click();
-    await nameInput.fill('Upload Repo!');
+    await nameInput.fill(uploadRepoName);
 
     // Check the 'Upload' checkbox
     await page.getByLabel('Upload', { exact: true }).check();
@@ -99,5 +101,9 @@ test.describe('Upload Repositories', () => {
       page.getByRole('button', { name: 'Remove' }).click(),
       expect(page.getByText('To get started, create a custom repository')).toBeVisible(),
     ]);
+  });
+
+  test('Clean - Double check upload repo for deletion', async ({ page }) => {
+    await deleteAllRepos(page, `&search=${uploadRepoName}`);
   });
 });

@@ -1,17 +1,22 @@
 import { test, expect, type Page } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
-import { closePopupsIfExist } from './helpers/helpers';
+import { closePopupsIfExist, getRowByName } from './helpers/helpers';
+
+const nameList = ['one', 'current'];
 
 test.describe('Custom Repositories', () => {
   test('Clean - Delete any current repos that exist', async ({ page }) => {
-    await deleteAllRepos(page);
+    await Promise.all(
+      nameList.map(async (name) => {
+        await deleteAllRepos(page, `&search=${name}`);
+      }),
+    );
   });
 
   test('Create two custom repositories', async ({ page }) => {
     await navigateToRepositories(page);
     await closePopupsIfExist(page);
-    const nameList = ['one', 'current'];
 
     // Do not use chain methods when using await (like foreach/map/etc..)
     for (const name of nameList) {
@@ -26,11 +31,12 @@ test.describe('Custom Repositories', () => {
   test('Delete one custom repository', async ({ page }) => {
     await navigateToRepositories(page);
     await closePopupsIfExist(page);
+    const row = await getRowByName(page, nameList[0]);
 
-    if (await page.getByLabel('Kebab toggle').first().isDisabled())
+    if (await row.getByLabel('Kebab toggle').first().isDisabled())
       throw Error("Kebab is disabled when it really shouldn't be");
-    await page.getByLabel('Kebab toggle').first().click();
-    await page.getByRole('menuitem', { name: 'Delete' }).click();
+    await row.getByLabel('Kebab toggle').first().click();
+    await row.getByRole('menuitem', { name: 'Delete' }).click();
     await expect(page.getByText('Remove repositories?')).toBeVisible();
 
     await Promise.all([
@@ -40,6 +46,14 @@ test.describe('Custom Repositories', () => {
       ),
       page.getByRole('button', { name: 'Remove' }).click(),
     ]);
+  });
+
+  test('Clean - Delete all related repos that exist', async ({ page }) => {
+    await Promise.all(
+      nameList.map(async (name) => {
+        await deleteAllRepos(page, `&search=${name}`);
+      }),
+    );
   });
 });
 
