@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
-import { closePopupsIfExist, getRowByName, validateSnapshotTimestamp } from './helpers/helpers';
+import { closePopupsIfExist, getRowByNameOrUrl, validateSnapshotTimestamp } from './helpers/helpers';
 
 test.describe('Snapshot Repositories', () => {
   test('Snapshot a repository', async ({ page }) => {
@@ -87,7 +87,10 @@ test.describe('Snapshot Repositories', () => {
     });
 
     await test.step('Delete created repository', async () => {
-      const row = await getRowByName(page, repoName);
+      const row = await getRowByNameOrUrl(
+        page,
+        'https://jlsherrill.fedorapeople.org/fake-repos/revision/' + repoName,
+      );
       await row.getByLabel('Kebab toggle').click();
       await row.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();

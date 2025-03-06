@@ -18,7 +18,7 @@ export const closePopupsIfExist = async (page: Page) => {
     });
   }
 };
-export const filterByName = async (page: Page, name: string) => {
+export const filterByNameOrUrl = async (page: Page, name: string) => {
   await page.getByPlaceholder(/^Filter by name.*$/).fill(name);
 };
 
@@ -32,10 +32,11 @@ export const clearFilters = async (page: Page) => {
   await page.getByRole('button', { name: 'Clear filters' }).click();
 };
 
-export const getRowByName = async (page: Page, name: string) => {
+export const getRowByNameOrUrl = async (page: Page, filterValue: string) => {
+  // TODO: rename by filter
   await clearFilters(page);
-  await filterByName(page, name);
-  return page.getByRole('row').filter({ has: page.getByText(name) });
+  await filterByNameOrUrl(page, filterValue);
+  return page.getByRole('row').filter({ has: page.getByText(filterValue) });
 };
 
 export const getRowCellByHeader = async (page: Page, row: Locator, name: string) => {
