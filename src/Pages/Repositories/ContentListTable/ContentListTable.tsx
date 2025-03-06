@@ -509,7 +509,7 @@ const ContentListTable = () => {
               notFilteredBody={notFilteredBody}
               notFilteredButton={
                 <ConditionalTooltip
-                  content='You do not have the required permissions to perform this action.'
+                  content='You do not have the required permissions to perform this action. And this is a test Pr anyways!'
                   show={!rbac?.repoWrite}
                   setDisabled
                 >
