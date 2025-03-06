@@ -28,6 +28,9 @@ test.describe('Custom Repositories CRUD', () => {
     await test.step('Create a repository', async () => {
       // Click on the 'Add repositories' button
       await page.getByRole('button', { name: 'Add repositories' }).first().click();
+      const repositoryModal = page.locator('div[id^="pf-modal-part"]').first();
+      await expect(repositoryModal).toBeVisible();
+      await expect(page.locator(':text=("Add custom repositories")')).toBeVisible();
       // Fill in the repository details
       await page.getByLabel('Name').fill(`${repoName}`);
       await page.getByLabel('URL').fill(url);
@@ -43,7 +46,10 @@ test.describe('Custom Repositories CRUD', () => {
       // Click on the Edit button to see the repo
       await page.getByRole('menuitem', { name: 'Edit' }).click();
       await expect(page.getByText('Edit custom repository')).toBeVisible();
-      await expect(page.getByText(`${repoName}`)).toBeVisible();
+      const modalLocator = page.locator(':text=("Add custom repositories")');
+
+      await expect(modalLocator.filter({ hasText: `${repoName}` })).toBeVisible();
+
       await expect(page.getByText(`${url}`)).toBeVisible();
     });
     await test.step('Update the repository', async () => {
