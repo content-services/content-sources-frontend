@@ -6,10 +6,9 @@ import 'dotenv/config';
  */
 export default defineConfig({
   testDir: './_playwright-tests/',
-  fullyParallel: false,
   forbidOnly: false,
   retries: process.env.CI ? 1 : 0,
-  workers: 1,
+  workers: 4,
   reporter: process.env.CI
     ? [
         ['html', { outputFolder: 'playwright-report' }],
@@ -23,6 +22,7 @@ export default defineConfig({
   globalTimeout: 29.5 * 60 * 1000, // 29.5m, Set because of codebuild, we want PW to timeout before CB to get the results.
   timeout: 10 * 60 * 1000, // 10m
   expect: { timeout: 30_000 }, // 30s
+
   use: {
     actionTimeout: 30_000, // 30s
     navigationTimeout: 30_000, // 30s
@@ -36,6 +36,7 @@ export default defineConfig({
           },
         }
       : {}),
+
     baseURL: process.env.BASE_URL,
     ignoreHTTPSErrors: true,
     testIdAttribute: 'data-ouia-component-id',
@@ -47,6 +48,7 @@ export default defineConfig({
     { name: 'setup', testMatch: /.*\.setup\.ts/ },
     {
       name: 'chromium',
+
       use: {
         ...devices['Desktop Chrome'],
         storageState: '.auth/user.json',

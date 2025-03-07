@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { getByText } from '@testing-library/dom';
 
 export const closePopupsIfExist = async (page: Page) => {
   const locatorsToCheck = [
@@ -14,8 +15,10 @@ export const closePopupsIfExist = async (page: Page) => {
     });
   }
 };
+
 export const filterByName = async (page: Page, name: string) => {
   await page.getByPlaceholder(/^Filter by name.*$/).fill(name);
+  await expect(page.getByText(name)).toHaveCount(2);
 };
 
 export const clearFilters = async (page: Page) => {
@@ -28,14 +31,14 @@ export const clearFilters = async (page: Page) => {
   await page.getByRole('button', { name: 'Clear filters' }).click();
 };
 
-export const getRowByName = async (page: Page, name: string) => {
+export const getRowByName = async (page: Page, name: string): Promise<Locator> => {
   await clearFilters(page);
   await filterByName(page, name);
   return page.getByRole('row').filter({ has: page.getByText(name) });
 };
 
 export const getRowCellByHeader = async (page: Page, row: Locator, name: string) => {
-  await expect(page.getByRole('columnheader', { name: name })).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: name })).toBeVisible();
   const table = row.locator('xpath=ancestor::*[@role="grid" or @role="table"][1]');
   const headers = table.getByRole('columnheader');
   const headerCount = await headers.count();
