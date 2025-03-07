@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
-import { closePopupsIfExist } from './helpers/helpers';
+import { closePopupsIfExist, getRowByName } from './helpers/helpers';
 import { deleteAllPopularRepos } from './helpers/deletePopularRepositories';
-
+const repoName = 'EPEL 9 Everything x86_64';
 test.describe('Popular Repositories', () => {
   test('Add popular repos', async ({ page }) => {
     // Ensure no popular repos are selected.
@@ -20,7 +20,7 @@ test.describe('Popular Repositories', () => {
 
     await test.step('Select EPEL 9', async () => {
       await page
-        .getByRole('row', { name: 'EPEL 9 Everything x86_64' })
+        .getByRole('row', { name: repoName })
         .getByLabel('Select row 0', { exact: true })
         .click();
       await page.getByTestId('add-selected-dropdown-toggle-no-snap');
@@ -45,7 +45,7 @@ test.describe('Popular Repositories', () => {
       ).toBeVisible();
       await expect(
         page
-          .getByRole('row', { name: 'EPEL 9 Everything x86_64' })
+          .getByRole('row', { name: repoName })
           .getByTestId('remove_popular_repo')
           .getByText('Remove'),
       ).toBeVisible();
@@ -69,10 +69,13 @@ test.describe('Popular Repositories', () => {
     });
 
     await test.step('Use kebab menu to delete a repo', async () => {
-      await page
-        .getByRole('textbox', { name: 'Filter by name/url' })
-        .fill('EPEL 9 Everything x86_64');
-      await page.getByRole('checkbox', { name: 'Select row 0' }).check();
+      const filterInput = page.getByRole('textbox', { name: 'Filter by name/url' });
+      // We need to remember to clear the filter after specifying it above!
+      await filterInput.clear();
+      // Now we can enter a new value...
+      await filterInput.fill(repoName);
+      const row = await getRowByName(page, repoName);
+      await row.getByRole('checkbox', { name: 'Select row 0' }).check();
       await page.getByTestId('custom_repositories_kebab_toggle').click();
       await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
       // Confirm the removal in the pop-up

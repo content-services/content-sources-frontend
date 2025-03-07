@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import path from 'path';
-import { closePopupsIfExist } from './helpers/helpers';
+import { closePopupsIfExist, getRowByName } from './helpers/helpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 
 const uploadRepoName = 'Upload Repo!';
@@ -56,8 +56,10 @@ test.describe('Upload Repositories', () => {
       ),
     ]);
 
+    const dragBoxSelector = page.locator('#pf-modal-part-1  > div');
+
     // Handle the file chooser and upload the file
-    await page
+    await dragBoxSelector
       .locator('input[type=file]')
       .setInputFiles(path.join(__dirname, './fixtures/libreOffice.rpm'));
 
@@ -67,27 +69,19 @@ test.describe('Upload Repositories', () => {
     // Confirm changes
     await page.getByRole('button', { name: 'Confirm changes' }).click();
 
+    // There may be many rows at this point, we nee to make sure that we filter the repo
+    const row = await getRowByName(page, uploadRepoName);
     // Verify the 'In progress' status
-    await expect(page.getByText('In progress')).toBeVisible();
+    await expect(row.getByText('In progress')).toBeVisible();
   });
 
   test('Delete one upload repository', async ({ page }) => {
     await navigateToRepositories(page);
     await closePopupsIfExist(page);
-
+    const row = await getRowByName(page, uploadRepoName);
     // Check if the 'Kebab toggle' button is disabled
-    const kebabToggle = page.getByLabel('Kebab toggle').first();
-    const isDisabled = await kebabToggle?.isDisabled();
-
-    if (isDisabled) {
-      throw Error("Kebab is disabled when it really shouldn't be");
-    }
-
-    // Click on the 'Kebab toggle' button
-    await kebabToggle.click();
-
-    // Click on the 'Delete' menu item
-    await page.getByRole('menuitem', { name: 'Delete' }).click();
+    await row.getByLabel('Kebab toggle').click();
+    await row.getByRole('menuitem', { name: 'Delete' }).click();
 
     // Click on the 'Remove' button
     await Promise.all([
@@ -99,7 +93,6 @@ test.describe('Upload Repositories', () => {
       ),
       // Click the 'Remove' button
       page.getByRole('button', { name: 'Remove' }).click(),
-      expect(page.getByText('To get started, create a custom repository')).toBeVisible(),
     ]);
   });
 

@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { getByText } from '@testing-library/dom';
 
 export const closePopupsIfExist = async (page: Page) => {
   const locatorsToCheck = [
@@ -14,8 +15,10 @@ export const closePopupsIfExist = async (page: Page) => {
     });
   }
 };
+
 export const filterByName = async (page: Page, name: string) => {
   await page.getByPlaceholder(/^Filter by name.*$/).fill(name);
+  await expect(page.getByText(name)).toHaveCount(2);
 };
 
 export const clearFilters = async (page: Page) => {
