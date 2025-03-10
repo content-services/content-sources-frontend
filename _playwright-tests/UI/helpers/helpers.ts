@@ -33,7 +33,6 @@ export const clearFilters = async (page: Page) => {
 };
 
 export const getRowByNameOrUrl = async (page: Page, filterValue: string) => {
-  // TODO: rename by filter
   await clearFilters(page);
   await filterByNameOrUrl(page, filterValue);
   return page.getByRole('row').filter({ has: page.getByText(filterValue) });

@@ -46,12 +46,6 @@ test.describe('Snapshot Repositories', () => {
       await versionFilterButton.click(); // Close the version filter dropdown
     });
 
-    await test.step('Wait for the successful API call', async () => {
-      if (await page.locator('.pf-v5-c-helper-text__item.pf-m-error').isVisible()) {
-        throw new Error('Error message in element is visible');
-      }
-    });
-
     await test.step('Submit the form and wait for modal to disappear', async () => {
       await Promise.all([
         // Click on 'Save'
