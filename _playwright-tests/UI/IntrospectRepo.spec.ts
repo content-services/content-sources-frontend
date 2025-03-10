@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
-import { closePopupsIfExist, getRowByName, getRowCellByHeader } from './helpers/helpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
+import {
+  closePopupsIfExist,
+  getRowByName,
+  getRowCellByHeader,
+  waitForTaskPickup,
+} from './helpers/helpers';
 
 test.describe('Introspect Repositories', () => {
   const repoName = 'introspection-test';
@@ -46,8 +51,9 @@ test.describe('Introspect Repositories', () => {
     });
 
     await test.step('Wait for status to be "Valid"', async () => {
+      await waitForTaskPickup(page, repoUrl, 'introspect');
       const row = await getRowByName(page, repoName);
-      await expect(row.getByText('Valid')).toBeVisible();
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60_000 });
     });
   });
 
