@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
-import { closePopupsIfExist, getRowByNameOrUrl, validateSnapshotTimestamp } from './helpers/helpers';
+import {
+  closePopupsIfExist,
+  getRowByNameOrUrl,
+  validateSnapshotTimestamp,
+} from './helpers/helpers';
 
 test.describe('Snapshot Repositories', () => {
   test('Snapshot a repository', async ({ page }) => {
@@ -20,10 +24,6 @@ test.describe('Snapshot Repositories', () => {
     await test.step('Open the add repository modal', async () => {
       await page.getByRole('button', { name: 'Add repositories' }).first().click();
       await expect(page.getByText('Add custom repositories')).toBeVisible();
-    });
-
-    await test.step('Select snapshotting', async () => {
-      await page.getByRole('radio', { name: 'Snapshotting' }).first().click();
     });
 
     await test.step('Fill in the repository details', async () => {
@@ -59,11 +59,12 @@ test.describe('Snapshot Repositories', () => {
     });
 
     await test.step('Verify that snapshot is successful', async () => {
-      await expect(page.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      const row = await getRowByNameOrUrl(page, repoName);
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
     });
 
     await test.step('Verify that snapshot is in snapshots list', async () => {
-      await page.getByRole('button', { name: 'Kebab toggle' }).first().click();
+      await page.getByRole('button', { name: 'Kebab toggle' }).click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
       await expect(page.getByLabel('SnapshotsView list of').locator('tbody')).toBeVisible();
       const snapshotTimestamp = await page
