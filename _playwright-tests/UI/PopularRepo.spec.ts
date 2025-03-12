@@ -51,7 +51,16 @@ test.describe('Popular Repositories', () => {
       ).toBeVisible();
     });
 
-    await test.step('Move to Custom repo tab', async () => { 
+    await test.step('Apply filter and clear it', async () => {
+      const searchInput = page.getByRole('textbox', { name: 'Filter by name/url' });
+      await searchInput.fill('EPEL 8 Everything x86_64');
+      const rows = page.locator('table tbody tr');
+      await expect(rows).toHaveCount(1);
+      await expect(page.getByRole('button', { name: 'Clear filters' })).toBeVisible();
+      await page.getByRole('button', { name: 'Clear filters' }).click();
+    });
+
+    await test.step('Move to Custom repo tab', async () => {
       await page.getByRole('link', { name: 'Your repositories' }).click();
       await expect(page.getByTestId('custom_repositories_table')).toBeVisible();
     });
