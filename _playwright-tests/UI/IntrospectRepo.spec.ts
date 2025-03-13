@@ -96,10 +96,8 @@ test.describe('Introspect Repositories', () => {
         ),
         page.getByRole('button', { name: 'Remove' }).click(),
       ]);
-
-      await expect(
-        page.getByText('No custom repositories match the filter criteria'),
-      ).toBeVisible();
+      // Ensure the specific row is removed
+      await expect(row).not.toBeVisible();
     });
   });
 });
