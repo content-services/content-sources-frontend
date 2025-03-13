@@ -3,7 +3,7 @@ module.exports = {
   preset: 'ts-jest',
   maxWorkers: '50%',
   testResultsProcessor: 'jest-junit',
-  reporters: ['jest-junit'],
+  reporters: ['default', 'jest-junit'],
   testEnvironment: 'jsdom',
   transform: {
     '^.+\\.(t)s$': 'ts-jest',
