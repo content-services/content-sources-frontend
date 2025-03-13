@@ -1,7 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-
 export const snapshotTimestampFormat = 'DD MMM YYYY - HH:mm:ss';
 
 export const closePopupsIfExist = async (page: Page) => {
