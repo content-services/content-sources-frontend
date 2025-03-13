@@ -24,7 +24,7 @@ test.describe('Upload Repositories', () => {
     // Fill in the 'Enter name' input
     const nameInput = page.getByPlaceholder('Enter name');
     await nameInput.click();
-    await nameInput.fill('Upload Repo!');
+    await nameInput.fill(uploadRepoName);
 
     // Check the 'Upload' checkbox
     await page.getByLabel('Upload', { exact: true }).check();
