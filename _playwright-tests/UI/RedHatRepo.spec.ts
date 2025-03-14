@@ -3,7 +3,7 @@ import { navigateToRepositories } from './helpers/navHelpers';
 import { closePopupsIfExist } from './helpers/helpers';
 
 test.describe('Red Hat Repositories', () => {
-  const smallRHRepo = 'Red Hat Ansible Engine 2 for RHEL 8 x86_64 (RPMs)';
+  const smallRHRepo = 'Red Hat CodeReady Linux Builder for RHEL 9 ARM 64 (RPMs)';
 
   test.beforeEach(async ({ page }) => {
     await test.step('Navigate to repositories page', async () => {
