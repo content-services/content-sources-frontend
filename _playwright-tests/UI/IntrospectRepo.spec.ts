@@ -66,9 +66,10 @@ test.describe('Introspect Repositories', () => {
     });
 
     await test.step('Check the modal for expected content', async () => {
-      const row = page.getByRole('row').filter({ has: page.getByText(testPackage) });
+      const modal = page.getByTestId('rpm_package_modal');
+      const row = modal.getByRole('row').filter({ has: page.getByText(testPackage) });
       await Promise.all([
-        expect(page.getByText(repoArch)).toHaveCount(8),
+        expect(modal.locator('tbody')).toHaveCount(8),
         expect((await getRowCellByHeader(page, row, 'Name')).getByText(testPackage)).toBeVisible(),
         expect(
           (await getRowCellByHeader(page, row, 'Version')).getByText(repoVersion),
@@ -95,10 +96,8 @@ test.describe('Introspect Repositories', () => {
         ),
         page.getByRole('button', { name: 'Remove' }).click(),
       ]);
-
-      await expect(
-        page.getByText('No custom repositories match the filter criteria'),
-      ).toBeVisible();
+      // Ensure the specific row is removed
+      await expect(row).not.toBeVisible();
     });
   });
 });

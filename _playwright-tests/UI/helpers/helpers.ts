@@ -1,7 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-
 export const snapshotTimestampFormat = 'DD MMM YYYY - HH:mm:ss';
 
 export const closePopupsIfExist = async (page: Page) => {
@@ -24,6 +23,9 @@ export const closePopupsIfExist = async (page: Page) => {
 };
 export const filterByNameOrUrl = async (page: Page, name: string) => {
   await page.getByPlaceholder(/^Filter by name.*$/).fill(name);
+  // We are expecting the first item in the table to contain the name
+  // Ensure that your filter is unique to your repository!
+  await expect(page.getByRole('row').filter({ has: page.getByText(name) })).toBeVisible();
 };
 
 export const clearFilters = async (page: Page) => {
@@ -36,10 +38,10 @@ export const clearFilters = async (page: Page) => {
   await page.getByRole('button', { name: 'Clear filters' }).click();
 };
 
-export const getRowByNameOrUrl = async (page: Page, filterValue: string) => {
+export const getRowByNameOrUrl = async (page: Page, name: string): Promise<Locator> => {
   await clearFilters(page);
-  await filterByNameOrUrl(page, filterValue);
-  return page.getByRole('row').filter({ has: page.getByText(filterValue) });
+  await filterByNameOrUrl(page, name);
+  return page.getByRole('row').filter({ has: page.getByText(name) });
 };
 
 export const getRowCellByHeader = async (page: Page, row: Locator, name: string) => {
