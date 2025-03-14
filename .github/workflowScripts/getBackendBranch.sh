@@ -66,10 +66,11 @@ if [[ $pr_description =~ $backend_pattern ]]; then
     # Fetch the backend PR details
     backend_pr=$(curl -s "$BACKEND_REPO_URL/pulls/$backend_pr_number")
     backend_pr_branch=$(echo "$backend_pr" | jq -r '.head.ref')
+    backend_pr_repo=$(echo "$backend_pr" | jq -r '.head.repo.clone_url')
 
     # Clone the backend repo with the associated PR branch
-    echo "Cloning backend PR #$backend_pr_number: $backend_pr_branch"
-    git clone --branch $backend_pr_branch $BACKEND_GIT_REPO_URL $CLONE_DIR
+    echo "Cloning backend PR #$backend_pr_number: $backend_pr_branch from $backend_pr_repo"
+    git clone --branch $backend_pr_branch $backend_pr_repo $CLONE_DIR
 
     # Check if the clone was successful
     if [ $? -eq 0 ]; then
