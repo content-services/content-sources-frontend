@@ -78,7 +78,7 @@ export default function TemplateRepositoriesTable({
     { name: 'Snapshot Date', width: 20 },
     { name: 'Change', width: 15 },
     { name: 'Packages', width: 15 },
-    { name: 'Errata', width: 15 },
+    { name: 'Advisories', width: 15 },
   ];
 
   return (
