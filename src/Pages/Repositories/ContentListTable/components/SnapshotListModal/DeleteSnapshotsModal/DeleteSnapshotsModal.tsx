@@ -113,7 +113,7 @@ export default function DeleteSnapshotsModal() {
 
   const actionTakingPlace = isDeletingSnapshots || isLoading;
 
-  const columnHeaders = ['Snapshots', 'Change', 'Packages', 'Errata', 'Associated Templates'];
+  const columnHeaders = ['Snapshots', 'Change', 'Packages', 'Advisories', 'Associated Templates'];
 
   return (
     <Modal

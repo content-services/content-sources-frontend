@@ -80,7 +80,7 @@ const SnapshotListModal = () => {
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('desc');
   const [checkedSnapshots, setCheckedSnapshots] = useState<Set<string>>(new Set<string>());
 
-  const columnHeaders = ['Snapshots', 'Change', 'Packages', 'Errata', 'Config'];
+  const columnHeaders = ['Snapshots', 'Change', 'Packages', 'Advisories', 'Config'];
 
   const columnSortAttributes = ['created_at'];
 
