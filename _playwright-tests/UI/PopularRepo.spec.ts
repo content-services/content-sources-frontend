@@ -80,11 +80,8 @@ test.describe('Popular Repositories', () => {
     });
 
     await test.step('Use kebab menu to delete a repo', async () => {
-      const filterInput = page.getByRole('textbox', { name: 'Filter by name/url' });
-      // We need to remember to clear the filter after specifying it above!
-      await filterInput.clear();
-      // Now we can enter a new value...
-      await filterInput.fill(repoName);
+      const searchInput = page.getByRole('textbox', { name: 'Filter by name/url' });
+      await searchInput.fill(repoName);
       const row = await getRowByNameOrUrl(page, repoName);
       await row.getByRole('checkbox', { name: 'Select row 0' }).check();
       await page.getByTestId('custom_repositories_kebab_toggle').click();
