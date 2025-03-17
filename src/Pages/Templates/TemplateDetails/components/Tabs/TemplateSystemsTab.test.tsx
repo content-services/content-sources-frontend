@@ -2,7 +2,6 @@ import { render } from '@testing-library/react';
 import { useListSystemsByTemplateId } from 'services/Systems/SystemsQueries';
 import TemplateSystemsTab from './TemplateSystemsTab';
 import { defaultTemplateSystemsListItem } from 'testingHelpers';
-import type { IDSystemItem } from 'services/Systems/SystemsApi';
 import { useAppContext } from 'middleware/AppContext';
 
 const bananaUUID = 'banana-uuid';
@@ -36,15 +35,8 @@ jest.mock('middleware/AppContext');
   isFetching: false,
   isError: false,
   data: {
-    data: new Array(15).fill(defaultTemplateSystemsListItem).map((item: IDSystemItem, index) => ({
-      ...item,
-      inventory_id: item.inventory_id + index,
-      attributes: {
-        ...item.attributes,
-        display_name: item.attributes.display_name + index,
-      },
-    })),
-    meta: { total_items: 15, limit: 20, offset: 0 },
+    data: [],
+    meta: { total_items: 0, limit: 20, offset: 0 },
   },
 }));
 
