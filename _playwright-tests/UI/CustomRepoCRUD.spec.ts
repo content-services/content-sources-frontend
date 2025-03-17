@@ -47,10 +47,8 @@ test.describe('Custom Repositories CRUD', () => {
       await expect(page.getByText('Edit custom repository')).toBeVisible();
       // Assert we can read some values
       await expect(page.getByRole('dialog', { name: 'Edit custom repository' })).toBeVisible();
-      const inputValue = await page.getByPlaceholder('Enter name', { exact: true }).inputValue();
-      expect(inputValue).toBe(`${repoName}`);
-      const inputValue2 = await page.getByPlaceholder('https://', { exact: true }).inputValue();
-      expect(inputValue2).toBe(`${url}`);
+      await expect(page.getByPlaceholder('Enter name', { exact: true })).toHaveValue(`${repoName}`);
+      await expect(page.getByPlaceholder('https://', { exact: true })).toHaveValue(`${url}`);
     });
     await test.step('Update the repository', async () => {
       await page.getByPlaceholder('Enter name', { exact: true }).fill(`${repoName}-Edited`);
@@ -69,10 +67,10 @@ test.describe('Custom Repositories CRUD', () => {
       await expect(page.getByText('Edit custom repository')).toBeVisible();
       // Assert we can read some values
       await expect(page.getByPlaceholder('Enter name', { exact: true })).toBeVisible();
-      const inputValue = await page.getByPlaceholder('Enter name', { exact: true }).inputValue();
-      expect(inputValue).toBe(`${repoName}-Edited`);
-      const inputValue2 = await page.getByPlaceholder('https://', { exact: true }).inputValue();
-      expect(inputValue2).toBe(`${url}`);
+      await expect(page.getByPlaceholder('Enter name', { exact: true })).toHaveValue(
+        `${repoName}-Edited`,
+      );
+      await expect(page.getByPlaceholder('https://', { exact: true })).toHaveValue(`${url}`);
       await page.getByTestId('modal_cancel').click();
     });
     await test.step('Delete one custom repository', async () => {
