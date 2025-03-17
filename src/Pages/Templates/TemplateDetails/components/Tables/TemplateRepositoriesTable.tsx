@@ -1,7 +1,7 @@
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Hide from 'components/Hide/Hide';
-import { formatDateDDMMMYYYY } from 'helpers';
+import { formatDateUTC } from 'helpers';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
 import useRootPath from 'Hooks/useRootPath';
 import { isEmpty } from 'lodash';
@@ -162,7 +162,7 @@ export default function TemplateRepositoriesTable({
                       </Hide>
                     </Flex>
                   </Td>
-                  <Td>{formatDateDDMMMYYYY(created_at, true)}</Td>
+                  <Td>{formatDateUTC(created_at)}</Td>
                   <Td>
                     <ChangedArrows
                       addedCount={added_counts?.['rpm.package'] || 0}
