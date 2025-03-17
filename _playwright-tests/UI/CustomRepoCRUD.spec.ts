@@ -23,8 +23,6 @@ test.describe('Custom Repositories CRUD', () => {
     });
     await test.step('Create a repository', async () => {
       // Click on the 'Add repositories' button
-      await navigateToRepositories(page);
-      await closePopupsIfExist(page);
       // HMS-5268 There are two buttons on the ZeroState page
       await page.getByRole('button', { name: 'Add repositories' }).first().click();
       const repositoryModal = page
@@ -46,8 +44,6 @@ test.describe('Custom Repositories CRUD', () => {
       // Search for the created repo
       await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName);
       await expect(page.getByRole('row', { name: `${repoName}` })).toBeVisible();
-      if (await page.getByLabel('Kebab toggle').isDisabled())
-        throw Error("Kebab is disabled when it really shouldn't be");
       await page.getByLabel('Kebab toggle').click();
       // Click on the Edit button to see the repo
       await page.getByRole('menuitem', { name: 'Edit' }).click();
@@ -73,8 +69,6 @@ test.describe('Custom Repositories CRUD', () => {
     });
     await test.step('Confirm repo was updated', async () => {
       await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(`${repoName}-Edited`);
-      if (await page.getByLabel('Kebab toggle').isDisabled())
-        throw Error("Kebab is disabled when it really shouldn't be");
       await page.getByLabel('Kebab toggle').click();
       // Click on the Edit button to see the repo
       await page.getByRole('menuitem', { name: 'Edit' }).click();
@@ -90,8 +84,6 @@ test.describe('Custom Repositories CRUD', () => {
     await test.step('Delete one custom repository', async () => {
       await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName);
       await expect(page.getByRole('row', { name: `${repoName}` })).toBeVisible;
-      if (await page.getByLabel('Kebab toggle').first().isDisabled())
-        throw Error("Kebab is disabled when it really shouldn't be");
       await page.getByLabel('Kebab toggle').click();
       await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
