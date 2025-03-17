@@ -255,33 +255,6 @@ export default function TemplateSystemsTab() {
           />
         </InputGroup>
       </Hide>
-<<<<<<< HEAD
-      <Bullseye data-ouia-component-id='systems_list_page'>
-        <EmptyTableState
-          notFiltered={!debouncedSearchQuery}
-          clearFilters={() => setSearchQuery('')}
-          itemName='associated systems'
-          notFilteredBody='To get started, assign this template to a system.'
-          notFilteredButton={
-            <ConditionalTooltip
-              content={`You do not have the required ${missingRequirements} to perform this action.`}
-              show={isMissingRequirements}
-              setDisabled
-            >
-              <Button
-                id='addSystemsButton'
-                ouiaId='add_systems'
-                variant='primary'
-                isDisabled={isLoading}
-                onClick={() => navigate(ADD_ROUTE)}
-              >
-                Assign to systems
-              </Button>
-            </ConditionalTooltip>
-          }
-        />
-      </Bullseye>
-=======
       <Hide hide={total_items != 0}>
         <Bullseye data-ouia-component-id='systems_list_page'>
           <EmptyTableState
@@ -309,7 +282,6 @@ export default function TemplateSystemsTab() {
           />
         </Bullseye>
       </Hide>
->>>>>>> 881cfb7 (Re-adding <Hide> as the empty state widget remains visible on the system page despite adding a system)
       <Hide hide={!total_items}>
         <SystemsTable
           allSelected={allSelected}
