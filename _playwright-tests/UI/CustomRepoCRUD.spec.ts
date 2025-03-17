@@ -25,10 +25,7 @@ test.describe('Custom Repositories CRUD', () => {
       // Click on the 'Add repositories' button
       // HMS-5268 There are two buttons on the ZeroState page
       await page.getByRole('button', { name: 'Add repositories' }).first().click();
-      const repositoryModal = page
-        .locator('div[id^="pf-modal-part"]')
-        .and(page.getByRole('dialog', { name: 'Add custom repositories' }));
-      await expect(repositoryModal).toBeVisible();
+      await expect(page.getByRole('dialog', { name: 'Add custom repositories' })).toBeVisible();
 
       // Fill in the repository details
       await page.getByLabel('Name').fill(`${repoName}`);
@@ -49,10 +46,7 @@ test.describe('Custom Repositories CRUD', () => {
       await page.getByRole('menuitem', { name: 'Edit' }).click();
       await expect(page.getByText('Edit custom repository')).toBeVisible();
       // Assert we can read some values
-      const repositoryEditModal = page
-        .locator('div[id^="pf-modal-part"]')
-        .and(page.getByRole('dialog', { name: 'Edit custom repository' }));
-      await expect(repositoryEditModal).toBeVisible();
+      await expect(page.getByRole('dialog', { name: 'Edit custom repository' })).toBeVisible();
       const inputValue = await page.getByPlaceholder('Enter name', { exact: true }).inputValue();
       expect(inputValue).toBe(`${repoName}`);
       const inputValue2 = await page.getByPlaceholder('https://', { exact: true }).inputValue();
