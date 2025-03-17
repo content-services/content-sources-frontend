@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
-import { exact } from 'prop-types';
 
 export const repoNamePrefix = 'Repo-CRUD';
 export const randomName = () => (Math.random() + 1).toString(36).substring(2, 6);
