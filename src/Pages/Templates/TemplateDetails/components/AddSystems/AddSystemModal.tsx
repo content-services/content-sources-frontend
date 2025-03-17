@@ -252,7 +252,7 @@ export default function AddSystemModal() {
       hasNoBodyWrapper
       aria-label='system modal'
       ouiaId='system_modal'
-      ouiaSafe={fetchingOrLoading}
+      ouiaSafe={!fetchingOrLoading}
       variant={ModalVariant.medium}
       title='Assign template to systems'
       description={
