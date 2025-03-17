@@ -31,7 +31,7 @@ test.describe('Custom Repositories CRUD', () => {
       await page.getByLabel('Name').fill(`${repoName}`);
       await page.getByLabel('Introspect only').click();
       await page.getByLabel('URL').fill(url);
-      await page.getByTestId('modal_save').click();
+      await page.getByRole('button', { name: 'Save', exact: true }).click();
     });
     await test.step('Wait for status to be "Valid"', async () => {
       const row = await getRowByNameOrUrl(page, repoName);
@@ -53,7 +53,7 @@ test.describe('Custom Repositories CRUD', () => {
     await test.step('Update the repository', async () => {
       await page.getByPlaceholder('Enter name', { exact: true }).fill(`${repoName}-Edited`);
       await page.getByLabel('Snapshotting').click();
-      await page.getByTestId('modal_save').click();
+      await page.getByRole('button', { name: 'Save', exact: true }).click();
     });
     await test.step('Wait for status to be "Valid"', async () => {
       const row = await getRowByNameOrUrl(page, repoName);
@@ -71,7 +71,7 @@ test.describe('Custom Repositories CRUD', () => {
         `${repoName}-Edited`,
       );
       await expect(page.getByPlaceholder('https://', { exact: true })).toHaveValue(`${url}`);
-      await page.getByTestId('modal_cancel').click();
+      await page.getByRole('button', { name: 'Cancel' }).click();
     });
     await test.step('Delete one custom repository', async () => {
       await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName);
