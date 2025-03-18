@@ -96,4 +96,8 @@ test.describe('Upload Repositories', () => {
       expect(page.getByText('No custom repositories match the filter criteria')).toBeVisible(),
     ]);
   });
+
+  test('Clean - Double check upload repo for deletion', async ({ page }) => {
+    await deleteAllRepos(page, `&search=${uploadRepoName}`);
+  });
 });
