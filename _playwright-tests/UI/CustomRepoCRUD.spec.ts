@@ -81,7 +81,6 @@ test.describe('Custom Repositories CRUD', () => {
       await row.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
       await page.getByRole('button', { name: 'Remove' }).click();
-      await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName);
       await expect(page.getByRole('row', { name: repoName })).not.toBeVisible;
     });
   });
