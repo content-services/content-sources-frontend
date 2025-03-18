@@ -79,7 +79,7 @@ const CurlTab = ({ tabContentRef }: Props) => {
               clickTip='Copied'
               variant={ClipboardCopyVariant.expansion}
             >
-              {'curl -o /etc/yum.repos.d/template.repo  https://console.redhat.com/api/content-sources/v1/templates/' +
+              {'curl -o /etc/yum.repos.d/template.repo  https://cert.console.redhat.com/api/content-sources/v1/templates/' +
                 templateUUID +
                 '/config.repo'}
             </ClipboardCopy>

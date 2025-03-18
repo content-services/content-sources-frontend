@@ -35,7 +35,7 @@ const playbook1 = `---
   tasks:
     - name: Download template.repo
       ansible.builtin.get_url:
-        url: https://console.redhat.com/api/content-sources/v1/templates/`;
+        url: https://cert.console.redhat.com/api/content-sources/v1/templates/`;
 const playbook2 = `/config.repo
         dest: /etc/yum.repos.d/template.repo
         mode: '0444'

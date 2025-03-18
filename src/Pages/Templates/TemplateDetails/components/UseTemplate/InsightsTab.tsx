@@ -70,7 +70,7 @@ const InsightsTab = ({ tabContentRef }: Props) => {
               clickTip='Copied'
               variant={ClipboardCopyVariant.expansion}
             >
-              {'curl --cert /etc/pki/consumer/cert.pem  --key /etc/pki/consumer/key.pem -X PATCH https://console.redhat.com/api/patch/v3/templates/' +
+              {'curl --cert /etc/pki/consumer/cert.pem  --key /etc/pki/consumer/key.pem -X PATCH https://cert.console.redhat.com/api/patch/v3/templates/' +
                 templateUUID +
                 '/subscribed-systems'}
             </ClipboardCopy>
