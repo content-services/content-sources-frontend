@@ -40,20 +40,20 @@ test.describe('Custom Repositories CRUD', () => {
     await test.step('Read the repo', async () => {
       // Search for the created repo
       await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName);
-      await expect(page.getByRole('row', { name: `${repoName}` })).toBeVisible();
-      await page.getByLabel('Kebab toggle').click();
+      const row = await getRowByNameOrUrl(page, repoName);
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await row.getByLabel('Kebab toggle').click();
       // Click on the Edit button to see the repo
       await page.getByRole('menuitem', { name: 'Edit' }).click();
-      await expect(page.getByText('Edit custom repository')).toBeVisible();
-      // Assert we can read some values
       await expect(page.getByRole('dialog', { name: 'Edit custom repository' })).toBeVisible();
+      // Assert we can read some values
       await expect(page.getByPlaceholder('Enter name', { exact: true })).toHaveValue(`${repoName}`);
       await expect(page.getByPlaceholder('https://', { exact: true })).toHaveValue(`${url}`);
     });
     await test.step('Update the repository', async () => {
       await page.getByPlaceholder('Enter name', { exact: true }).fill(`${repoName}-Edited`);
       await page.getByLabel('Snapshotting').click();
-      await page.getByRole('button', { name: 'Save', exact: true }).click();
+      await page.getByRole('button', { name: 'Save changes', exact: true }).click();
     });
     await test.step('Wait for status to be "Valid"', async () => {
       const row = await getRowByNameOrUrl(page, repoName);
@@ -61,12 +61,13 @@ test.describe('Custom Repositories CRUD', () => {
     });
     await test.step('Confirm repo was updated', async () => {
       await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(`${repoName}-Edited`);
-      await page.getByLabel('Kebab toggle').click();
+      const row = await getRowByNameOrUrl(page, `${repoName}-Edited`);
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await row.getByLabel('Kebab toggle').click();
       // Click on the Edit button to see the repo
       await page.getByRole('menuitem', { name: 'Edit' }).click();
       await expect(page.getByText('Edit custom repository')).toBeVisible();
       // Assert we can read some values
-      await expect(page.getByPlaceholder('Enter name', { exact: true })).toBeVisible();
       await expect(page.getByPlaceholder('Enter name', { exact: true })).toHaveValue(
         `${repoName}-Edited`,
       );
@@ -75,8 +76,9 @@ test.describe('Custom Repositories CRUD', () => {
     });
     await test.step('Delete one custom repository', async () => {
       await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName);
-      await expect(page.getByRole('row', { name: `${repoName}` })).toBeVisible;
-      await page.getByLabel('Kebab toggle').click();
+      const row = await getRowByNameOrUrl(page, `${repoName}-Edited`);
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await row.getByLabel('Kebab toggle').click();
       await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
       await page.getByRole('button', { name: 'Remove' }).click();
