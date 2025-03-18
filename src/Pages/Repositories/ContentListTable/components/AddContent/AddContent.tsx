@@ -654,10 +654,21 @@ const AddContent = ({ isEdit = false }: Props) => {
               ouiaId='restrict_to_os_version'
             />
           </FormGroup>
-          <FormGroup fieldId='enable_module_hotfixes'>
+          <FormGroup
+            fieldId='enable_module_hotfixes'
+            label={
+              modularityFilteringEnabled
+                ? 'Modularity filtering enabled'
+                : 'Modularity filtering disabled'
+            }
+            aria-label='module_hotfix_formgroup'
+            labelIcon={
+              <Tooltip content='When enabled, modularity filtering prevents updates to packages contained within an enabled module'>
+                <OutlinedQuestionCircleIcon className='pf-u-ml-xs' color={global_Color_200.value} />
+              </Tooltip>
+            }
+          >
             <Switch
-              label='Modularity filtering enabled'
-              labelOff='Modularity filtering disabled'
               ouiaId={`module_hotfixes_switch_${modularityFilteringEnabled ? 'on' : 'off'}`}
               aria-label='enable_module_hotfixes'
               hasCheckIcon
@@ -670,9 +681,6 @@ const AddContent = ({ isEdit = false }: Props) => {
                 });
               }}
             />
-            <Tooltip content='When enabled, modularity filtering prevents updates to packages contained within an enabled module'>
-              <OutlinedQuestionCircleIcon className='pf-u-ml-xs' color={global_Color_200.value} />
-            </Tooltip>
           </FormGroup>
           <FormGroup
             label='GPG key'
