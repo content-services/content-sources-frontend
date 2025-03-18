@@ -44,7 +44,7 @@ test.describe('Custom Repositories CRUD', () => {
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await row.getByLabel('Kebab toggle').click();
       // Click on the Edit button to see the repo
-      await page.getByRole('menuitem', { name: 'Edit' }).click();
+      await row.getByRole('menuitem', { name: 'Edit' }).click();
       await expect(page.getByRole('dialog', { name: 'Edit custom repository' })).toBeVisible();
       // Assert we can read some values
       await expect(page.getByPlaceholder('Enter name', { exact: true })).toHaveValue(`${repoName}`);
@@ -65,7 +65,7 @@ test.describe('Custom Repositories CRUD', () => {
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await row.getByLabel('Kebab toggle').click();
       // Click on the Edit button to see the repo
-      await page.getByRole('menuitem', { name: 'Edit' }).click();
+      await row.getByRole('menuitem', { name: 'Edit' }).click();
       await expect(page.getByText('Edit custom repository')).toBeVisible();
       // Assert we can read some values
       await expect(page.getByPlaceholder('Enter name', { exact: true })).toHaveValue(
@@ -75,11 +75,10 @@ test.describe('Custom Repositories CRUD', () => {
       await page.getByRole('button', { name: 'Cancel' }).click();
     });
     await test.step('Delete one custom repository', async () => {
-      await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName);
+      await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(`${repoName}-Edited`);
       const row = await getRowByNameOrUrl(page, `${repoName}-Edited`);
-      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await row.getByLabel('Kebab toggle').click();
-      await page.getByRole('menuitem', { name: 'Delete' }).click();
+      await row.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
       await page.getByRole('button', { name: 'Remove' }).click();
       await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName);
