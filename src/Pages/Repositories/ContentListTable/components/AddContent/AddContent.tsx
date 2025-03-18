@@ -468,7 +468,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                   label='Snapshotting'
                   description={
                     values.snapshot && values.origin === ContentOrigin.EXTERNAL
-                      ? 'Enable snapshotting for an external repository, allowing you to build images with historical snapshots.'
+                      ? 'Enable snapshotting for an external repository, allowing you to build images and use templates with historical snapshots'
                       : ''
                   }
                   name='snapshot-radio'
