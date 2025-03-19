@@ -1,15 +1,15 @@
 import { createUseStyles } from 'react-jss';
 import {
-  global_danger_color_200,
-  global_info_color_200,
-  global_success_color_200,
-  global_warning_color_200,
+  t_global_color_status_danger_100,
+  t_global_color_status_info_100,
+  t_global_color_status_success_100,
+  t_global_color_status_warning_100,
 } from '@patternfly/react-tokens';
 
-const red = global_danger_color_200.value;
-const green = global_success_color_200.value;
-const gold = global_warning_color_200.value;
-const blue = global_info_color_200.value;
+const red = t_global_color_status_danger_100.value;
+const green = t_global_color_status_success_100.value;
+const gold = t_global_color_status_warning_100.value;
+const blue = t_global_color_status_info_100.value;
 
 interface Props {
   color: 'red' | 'green' | 'gold' | 'blue';

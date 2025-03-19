@@ -1,37 +1,34 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Label,
+  LabelGroup,
   Button,
-  Chip,
-  ChipGroup,
   Flex,
   FlexItem,
-  InputGroup,
   TextInput,
-  InputGroupItem,
-  InputGroupText,
-  SelectOptionProps,
+  DropdownList,
+  DropdownItem,
+  Dropdown,
+  MenuToggle,
 } from '@patternfly/react-core';
 
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 
 import { createUseStyles } from 'react-jss';
 import useDebounce from 'Hooks/useDebounce';
 import Hide from 'components/Hide/Hide';
 import SeverityWithIcon from 'components/SeverityWithIcon/SeverityWithIcon';
-import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 import { isEmpty } from 'lodash';
 
 const useStyles = createUseStyles({
   chipsContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     paddingTop: '16px',
   },
   clearFilters: {
     marginLeft: '16px',
   },
   ensureMinHeight: {
-    minHeight: '126px',
+    flexFlow: 'column nowrap',
   },
 });
 
@@ -45,6 +42,8 @@ export type Filters = 'Name/Synopsis' | 'Type' | 'Severity';
 
 export default function SnapshotErrataFilters({ isLoading, setFilterData, filterData }: Props) {
   const classes = useStyles();
+  const [isActionOpen, setActionOpen] = useState(false);
+  const [typeFilterOpen, setTypeFilterOpen] = useState(false);
   const filters = ['Name/Synopsis', 'Type', 'Severity'];
   const [filterType, setFilterType] = useState<Filters>('Name/Synopsis');
   const [search, setSearch] = useState('');
@@ -99,124 +98,171 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
     switch (filterType) {
       case 'Name/Synopsis':
         return (
-          <InputGroupItem isFill>
-            <TextInput
-              isDisabled={isLoading}
-              id='search'
-              ouiaId='filter_search'
-              placeholder='Filter by name/synopsis'
-              value={search}
-              onChange={(_event, value) => setSearch(value)}
-            />
-            <InputGroupText isDisabled={isLoading} id='search-icon'>
-              <SearchIcon />
-            </InputGroupText>
-          </InputGroupItem>
+          <TextInput
+            isDisabled={isLoading}
+            id='search'
+            ouiaId='filter_search'
+            placeholder='Filter by name/synopsis'
+            value={search}
+            type='search'
+            customIcon={<SearchIcon />}
+            onChange={(_event, value) => setSearch(value)}
+          />
         );
       case 'Type':
         return (
-          <DropdownSelect
+          <Dropdown
             onSelect={(_, val) => addOrRemoveTypes(val as string)}
-            multiSelect
-            menuToggleProps={{
-              'aria-label': 'Filter by type',
-            }}
-            dropDownItems={
-              ['Security', 'Bugfix', 'Enhancement', 'Other'].map((type) => ({
-                hasCheckbox: true,
-                value: type,
-                isSelected: types.includes(type),
-                children: type,
-                'data-ouia-component-id': `filter_${type}`,
-              })) as SelectOptionProps[]
-            }
-            menuValue='Filter by type'
-            ouiaId='filter_by_type'
-          />
+            toggle={(toggleRef) => (
+              <MenuToggle
+                ref={toggleRef}
+                // className={classes.menuToggle}
+                aria-label='filter type'
+                id='typeSelect'
+                ouiaId='filter_by_type'
+                onClick={() => setActionOpen((prev) => !prev)}
+                isDisabled={isLoading}
+                isExpanded={isActionOpen}
+              >
+                Filter by type
+              </MenuToggle>
+            )}
+            onOpenChange={(isOpen) => setActionOpen(isOpen)}
+            isOpen={isActionOpen}
+          >
+            <DropdownList>
+              {['Security', 'Bugfix', 'Enhancement', 'Other'].map((type) => (
+                <DropdownItem
+                  key={type}
+                  hasCheckbox
+                  value={type}
+                  isSelected={types.includes(type)}
+                  component='button'
+                  data-ouia-component-id={`filter_${type}`}
+                >
+                  {type}
+                </DropdownItem>
+              ))}
+            </DropdownList>
+          </Dropdown>
         );
       case 'Severity':
         return (
-          <DropdownSelect
+          <Dropdown
             onSelect={(_, val) => addOrRemoveSeverity(val as string)}
-            multiSelect
-            dropDownItems={
-              ['Critical', 'Important', 'Moderate', 'Low', 'Unknown'].map((sev) => ({
-                value: sev,
-                hasCheckbox: true,
-                isSelected: severities.includes(sev),
-                children: <SeverityWithIcon severity={sev} />,
-                'data-ouia-component-id': `filter_${sev}`,
-              })) as SelectOptionProps[]
-            }
-            menuValue='Filter by severity'
-            ouiaId='filter_by_severity'
-          />
+            toggle={(toggleRef) => (
+              <MenuToggle
+                ref={toggleRef}
+                aria-label='filter type'
+                id='typeSelect'
+                ouiaId='filter_by_type'
+                onClick={() => setActionOpen((prev) => !prev)}
+                isDisabled={isLoading}
+                isExpanded={isActionOpen}
+              >
+                Filter by type
+              </MenuToggle>
+            )}
+            onOpenChange={(isOpen) => setActionOpen(isOpen)}
+            isOpen={isActionOpen}
+          >
+            <DropdownList>
+              {['Critical', 'Important', 'Moderate', 'Low', 'Unknown'].map((sev) => (
+                <DropdownItem
+                  key={sev}
+                  hasCheckbox
+                  value={sev}
+                  isSelected={severities.includes(sev)}
+                  component='button'
+                  data-ouia-component-id={`filter_${sev}`}
+                >
+                  <SeverityWithIcon severity={sev} />
+                </DropdownItem>
+              ))}
+            </DropdownList>
+          </Dropdown>
         );
 
       default:
         return <></>;
     }
-  }, [filterType, isLoading, search, types, severities]);
+  }, [filterType, isLoading, search, types, severities, isActionOpen]);
 
   const hasFilters = search !== '' || !isEmpty(types) || !isEmpty(severities);
 
   return (
-    <Flex direction={{ default: 'column' }}>
-      <FlexItem>
-        <InputGroup>
-          <InputGroupItem>
-            <FlexItem>
-              <DropdownSelect
-                key='filtertype'
-                ouiaId='filter_errata'
-                menuToggleProps={{
-                  isDisabled: isLoading,
-                  icon: <FilterIcon />,
-                }}
-                dropDownItems={filters.map((optionName) => ({
-                  value: optionName,
-                  children: optionName,
-                  'data-ouia-component-id': `filter_${optionName}`,
-                }))}
-                selected={filterType}
-                onSelect={(_, val) => {
-                  setFilterType(val as Filters);
-                }}
-                menuValue={filterType}
-              />
-            </FlexItem>
-          </InputGroupItem>
-          <InputGroupItem>
-            <FlexItem>{Filter}</FlexItem>
-          </InputGroupItem>
-        </InputGroup>
-      </FlexItem>
+    <Flex className={classes.ensureMinHeight}>
+      <Flex flexWrap={{ default: 'nowrap' }}>
+        <Dropdown
+          key='filtertype'
+          onSelect={(_, val) => {
+            setFilterType(val as Filters);
+            setTypeFilterOpen(false);
+          }}
+          toggle={(toggleRef) => (
+            <MenuToggle
+              icon={<FilterIcon />}
+              ref={toggleRef}
+              aria-label='filterSelectionDropdown'
+              id='filterSelectionDropdown'
+              ouiaId='filter_type_toggle'
+              onClick={() => setTypeFilterOpen((prev) => !prev)}
+              isDisabled={isLoading}
+              isExpanded={typeFilterOpen}
+            >
+              {filterType}
+            </MenuToggle>
+          )}
+          onOpenChange={(isOpen) => setTypeFilterOpen(isOpen)}
+          isOpen={typeFilterOpen}
+          ouiaId='filter_type'
+        >
+          <DropdownList>
+            {filters.map((filter) => (
+              <DropdownItem
+                key={filter}
+                value={filter}
+                isSelected={filterType === filter}
+                component='button'
+                data-ouia-component-id={`filter_${filter}`}
+              >
+                {filter}
+              </DropdownItem>
+            ))}
+          </DropdownList>
+        </Dropdown>
+        {Filter}
+      </Flex>
       <Hide hide={!hasFilters}>
         <FlexItem className={classes.chipsContainer}>
           {search !== '' && (
-            <ChipGroup categoryName='Name/Synopsis'>
-              <Chip key='search_chip' onClick={() => setSearch('')}>
+            <LabelGroup categoryName='Name/Synopsis'>
+              <Label variant='outline' key='search_chip' onClose={() => setSearch('')}>
                 {search}
-              </Chip>
-            </ChipGroup>
+              </Label>
+            </LabelGroup>
           )}
           {!isEmpty(types) && (
-            <ChipGroup categoryName='Type'>
+            <LabelGroup categoryName='Type'>
               {types.map((type) => (
-                <Chip key='type_chip' onClick={() => addOrRemoveTypes(type)}>
+                <Label variant='outline' key='type_chip' onClose={() => addOrRemoveTypes(type)}>
                   {type}
-                </Chip>
+                </Label>
               ))}
-            </ChipGroup>
+            </LabelGroup>
           )}
           {!isEmpty(severities) && (
-            <ChipGroup categoryName='Severity'>
+            <LabelGroup categoryName='Severity'>
               {severities.map((severity) => (
-                <Chip key='severity_chip' onClick={() => addOrRemoveSeverity(severity)}>
+                <Label
+                  variant='outline'
+                  key='severity_chip'
+                  onClose={() => addOrRemoveSeverity(severity)}
+                >
                   {severity}
-                </Chip>
+                </Label>
               ))}
-            </ChipGroup>
+            </LabelGroup>
           )}
           {(debouncedSearch !== '' && search !== '') || !isEmpty(types) || !isEmpty(severities) ? (
             <Button className={classes.clearFilters} onClick={clearFilters} variant='link' isInline>

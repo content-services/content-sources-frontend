@@ -1,4 +1,6 @@
 import {
+  Label,
+  LabelGroup,
   Button,
   Flex,
   FlexItem,
@@ -9,24 +11,12 @@ import {
   Spinner,
   TextInput,
   InputGroupItem,
-  InputGroupText,
-  Chip,
-  ChipGroup,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
+  MenuToggle,
 } from '@patternfly/react-core';
-import {
-  Table /* data-codemods */,
-  TableVariant,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from '@patternfly/react-table';
-import {
-  global_BackgroundColor_100,
-  global_disabled_color_100,
-  global_disabled_color_200,
-} from '@patternfly/react-tokens';
+import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { useEffect, useState, useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@patternfly/react-component-groups';
@@ -55,19 +45,13 @@ import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import DeleteKebab from 'components/DeleteKebab/DeleteKebab';
 import { repoToRequestItem } from './helper';
 import { AddRepo } from './components/AddRepo';
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownToggle,
-  DropdownToggleAction,
-} from '@patternfly/react-core/deprecated';
+
 import { DELETE_ROUTE } from 'Routes/constants';
 import { Outlet, useNavigate, useOutletContext } from 'react-router-dom';
 import useArchVersion from 'Hooks/useArchVersion';
 
 const useStyles = createUseStyles({
   chipsContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     paddingTop: '16px',
     display: 'flex',
     alignItems: 'center',
@@ -76,18 +60,9 @@ const useStyles = createUseStyles({
     marginLeft: '16px',
   },
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
-    // Remove the below targeted style when removing deprecated components
-    '& .pf-v5-c-dropdown__menu': {
-      marginLeft: '-138px',
-      '& li': {
-        listStyle: 'none',
-      },
-    },
   },
-
   topContainer: {
     justifyContent: 'space-between',
     padding: '16px 24px', // This is needed
@@ -95,7 +70,6 @@ const useStyles = createUseStyles({
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
   invisible: {
     opacity: 0,
@@ -106,16 +80,9 @@ const useStyles = createUseStyles({
   checkboxMinWidth: {
     minWidth: '45px!important',
   },
-  disabled: {
-    color: global_disabled_color_100.value,
-  },
   repositoryActions: {
     display: 'flex',
     flexDirection: 'row',
-  },
-  disabledDropdownButton: {
-    color: global_disabled_color_100.value + ' !important',
-    backgroundColor: global_disabled_color_200.value + ' !important',
   },
 });
 
@@ -152,8 +119,8 @@ const PopularRepositoriesTable = () => {
     error: repositoryParamsError,
   } = useArchVersion();
 
-  const onDropdownToggle = (_, isActionOpen: boolean) => {
-    setIsActionOpen(isActionOpen);
+  const onDropdownToggle = () => {
+    setIsActionOpen((prev) => !prev);
   };
 
   const onDropdownFocus = () => {
@@ -330,17 +297,6 @@ const PopularRepositoriesTable = () => {
 
   const countIsZero = !data?.data?.length;
 
-  const dropdownItems = [
-    <DropdownItem
-      key='action'
-      component='button'
-      onClick={() => addSelected(false)}
-      ouiaId='add-selected-repos-no-snap'
-    >
-      {`Add ${checkedRepositoriesToAdd.size} repositories without snapshotting`}
-    </DropdownItem>,
-  ];
-
   return (
     <>
       <Outlet
@@ -357,16 +313,14 @@ const PopularRepositoriesTable = () => {
               <InputGroupItem isFill>
                 <TextInput
                   isDisabled={isLoading}
-                  type='text'
+                  type='search'
                   id='search'
+                  customIcon={<SearchIcon />}
                   ouiaId='popular_filter_search'
                   placeholder='Filter by name/url'
                   value={searchValue}
                   onChange={(_event, val) => setSearchValue(val)}
                 />
-                <InputGroupText isDisabled={isLoading} id='search-icon'>
-                  <SearchIcon />
-                </InputGroupText>
               </InputGroupItem>
               <InputGroupItem>
                 <FlexItem className={classes.repositoryActions}>
@@ -386,35 +340,40 @@ const PopularRepositoriesTable = () => {
                         : 'Add selected repositories';
                       const isDisabled = !rbac?.repoWrite || !atLeastOneRepoToAddChecked;
                       if (features?.snapshots?.enabled && features.snapshots.accessible) {
-                        const className = isDisabled ? classes.disabledDropdownButton : undefined;
                         return (
                           <Dropdown
                             onSelect={onDropdownSelect}
                             className={classes.addRepositoriesButton}
                             ouiaId='add-selected-toggle-dropdown'
-                            toggle={
-                              <DropdownToggle
-                                ouiaId='add-selected-dropdown-toggle-no-snap'
-                                className={className}
+                            toggle={(toggleRef) => (
+                              <MenuToggle
+                                ref={toggleRef}
+                                onClick={onDropdownToggle}
+                                isDisabled={isDisabled}
                                 splitButtonItems={[
-                                  <DropdownToggleAction
+                                  <DropdownItem
                                     key='action'
-                                    data-ouia-component-id='add_checked_repos-with-snap'
+                                    component='button'
                                     onClick={() => addSelected(true)}
-                                    className={className}
+                                    ouiaId='add-selected-repos-no-snap'
                                   >
                                     {defaultText}
-                                  </DropdownToggleAction>,
+                                  </DropdownItem>,
                                 ]}
-                                toggleVariant='primary'
-                                splitButtonVariant='action'
-                                onToggle={onDropdownToggle}
-                                isDisabled={isDisabled}
                               />
-                            }
+                            )}
                             isOpen={isActionOpen}
                           >
-                            {dropdownItems}
+                            <DropdownList>
+                              <DropdownItem
+                                key='action'
+                                component='button'
+                                onClick={() => addSelected(false)}
+                                ouiaId='add-selected-repos-no-snap'
+                              >
+                                {`Add ${checkedRepositoriesToAdd.size} repositories without snapshotting`}
+                              </DropdownItem>
+                            </DropdownList>
                           </Dropdown>
                         );
                       } else {
@@ -449,11 +408,11 @@ const PopularRepositoriesTable = () => {
             {searchValue !== '' && (
               <Flex>
                 <FlexItem fullWidth={{ default: 'fullWidth' }} className={classes.chipsContainer}>
-                  <ChipGroup categoryName='Name/URL'>
-                    <Chip key='search_chip' onClick={() => setSearchValue('')}>
+                  <LabelGroup categoryName='Name/URL'>
+                    <Label variant='outline' key='search_chip' onClose={() => setSearchValue('')}>
                       {searchValue}
-                    </Chip>
-                  </ChipGroup>
+                    </Label>
+                  </LabelGroup>
                   <Button
                     className={classes.clearFilters}
                     onClick={() => setSearchValue('')}
@@ -548,9 +507,7 @@ const PopularRepositoriesTable = () => {
                           <Flex direction={{ default: 'row' }}>
                             <FlexItem>{suggested_name}</FlexItem>
                             {existing_name && suggested_name !== existing_name && (
-                              <FlexItem className={classes.disabled}>
-                                Current name: {existing_name}
-                              </FlexItem>
+                              <FlexItem>Current name: {existing_name}</FlexItem>
                             )}
                           </Flex>
                           <UrlWithExternalIcon href={url} />

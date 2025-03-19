@@ -12,7 +12,7 @@ import {
 import {
   ActionsColumn,
   IAction,
-  Table /* data-codemods */,
+  Table,
   TableVariant,
   Tbody,
   Td,
@@ -21,7 +21,7 @@ import {
   ThProps,
   Tr,
 } from '@patternfly/react-table';
-import { global_BackgroundColor_100, global_Color_400 } from '@patternfly/react-tokens';
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import {
@@ -56,7 +56,6 @@ import UploadRepositoryLabel from 'components/UploadRepositoryLabel/UploadReposi
 
 const useStyles = createUseStyles({
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
   },
@@ -71,7 +70,6 @@ const useStyles = createUseStyles({
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
   invisible: {
     opacity: 0,
@@ -80,7 +78,6 @@ const useStyles = createUseStyles({
     minWidth: '45px!important',
   },
   snapshotInfoText: {
-    color: global_Color_400.value,
     marginRight: '16px',
   },
   inline: {

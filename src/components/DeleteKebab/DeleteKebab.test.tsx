@@ -1,5 +1,6 @@
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import DeleteKebab from './DeleteKebab';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({ rbac: { read: true, write: true } }),
@@ -9,27 +10,29 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }));
 
-it('Render no checked repos', () => {
-  const { queryByText } = render(
+it('Render no checked repos', async () => {
+  const { getByRole } = render(
     <DeleteKebab atLeastOneRepoChecked={false} numberOfReposChecked={0} />,
   );
 
-  const kebab = document.getElementById('delete-kebab');
-  fireEvent.click(kebab as Element);
+  const kebab = getByRole('button', { name: 'plain kebab' });
+  await userEvent.click(kebab as Element);
 
-  const deleteButton = queryByText('Remove selected repositories');
-  expect(deleteButton).toHaveAttribute('aria-disabled', 'true');
+  const deleteButton = getByRole('menuitem', { name: 'Remove selected repositories' });
+  expect(deleteButton).toBeInTheDocument();
+  expect(deleteButton).toHaveAttribute('disabled');
 });
 
-it('Render with checked repos', () => {
+it('Render with checked repos', async () => {
   const repos = 100;
   const { queryByText } = render(
     <DeleteKebab atLeastOneRepoChecked={true} numberOfReposChecked={repos} />,
   );
 
   const kebab = document.getElementById('delete-kebab');
-  fireEvent.click(kebab as Element);
+  await userEvent.click(kebab as Element);
 
   const deleteButton = queryByText(`Remove ${repos} repositories`);
-  expect(deleteButton).toHaveAttribute('aria-disabled', 'false');
+  expect(deleteButton).toBeInTheDocument();
+  expect(deleteButton).not.toHaveAttribute('disabled');
 });

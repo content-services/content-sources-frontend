@@ -6,16 +6,14 @@ import {
   ExpandableSectionToggle,
   List,
   ListItem,
-  Modal,
-  ModalVariant,
   Spinner,
   Stack,
   StackItem,
-  Text,
+  Content,
 } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { global_Color_100 } from '@patternfly/react-tokens';
 import { useEffect, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import Hide from 'components/Hide/Hide';
@@ -35,7 +33,6 @@ import { SnapshotDetailTab } from '../../SnapshotDetailsModal/SnapshotDetailsMod
 const useStyles = createUseStyles({
   description: {
     paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
-    color: global_Color_100.value,
   },
   removeButton: {
     marginRight: '36px',
@@ -130,9 +127,9 @@ export default function DeleteSnapshotsModal() {
               will switch to a snapshot taken closest to the deleted one.
             </Alert>
           </Hide>
-          <Text component='p' className={classes.description}>
+          <Content component='p' className={classes.description}>
             Are you sure you want to remove these snapshots?
-          </Text>
+          </Content>
         </>
       }
       isOpen

@@ -41,8 +41,8 @@ test.describe('Snapshot Repositories', () => {
     await test.step('Filter by version', async () => {
       const versionFilterButton = page.getByRole('button', { name: 'filter version' });
       await versionFilterButton.click();
-      await page.getByRole('menuitem', { name: 'el9' }).locator('label').click();
-      await page.getByRole('menuitem', { name: 'el8' }).locator('label').click();
+      await page.getByRole('option', { name: 'el9' }).click();
+      await page.getByRole('option', { name: 'el8' }).click();
       await versionFilterButton.click(); // Close the version filter dropdown
     });
 

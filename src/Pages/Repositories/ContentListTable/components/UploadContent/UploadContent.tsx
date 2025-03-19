@@ -1,5 +1,5 @@
-import { Button, Flex, Modal, ModalVariant, Stack, StackItem } from '@patternfly/react-core';
-import { global_Color_200 } from '@patternfly/react-tokens';
+import { Button, Flex, Stack, StackItem } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import { createUseStyles } from 'react-jss';
 import { useNavigate, useParams } from 'react-router-dom';
 import useRootPath from 'Hooks/useRootPath';
@@ -9,10 +9,6 @@ import { useState } from 'react';
 import { useAddUploadsQuery } from 'services/Content/ContentQueries';
 
 const useStyles = createUseStyles({
-  description: {
-    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
-    color: global_Color_200.value,
-  },
   saveButton: {
     marginRight: '36px',
     transition: 'unset!important',
@@ -60,11 +56,7 @@ const UploadContent = () => {
         variant={ModalVariant.medium}
         title='Upload content'
         ouiaId='upload_content_modal'
-        description={
-          <p className={classes.description}>
-            Use the form below to upload content to your repository.
-          </p>
-        }
+        description='Use the form below to upload content to your repository.'
         isOpen={!!uuid}
         onClose={onCloseClick}
         footer={
@@ -101,11 +93,7 @@ const UploadContent = () => {
         title='You have unsaved uploaded items.'
         ouiaId='are_you_sure'
         onClose={() => setConfirmModal(false)}
-        description={
-          <p className={classes.description}>
-            Are you sure you want to quit without saving these changes?
-          </p>
-        }
+        description='Are you sure you want to quit without saving these changes?'
         footer={
           <Flex gap={{ default: 'gap' }}>
             <Button variant='secondary' onClick={onClose}>

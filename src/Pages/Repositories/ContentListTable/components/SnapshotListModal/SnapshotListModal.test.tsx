@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { getByText, render } from '@testing-library/react';
 import SnapshotListModal from './SnapshotListModal';
 import {
   ReactQueryTestWrapper,
@@ -41,17 +41,16 @@ it('Render 1 item', () => {
     isLoading: false,
     isFetching: false,
   }));
-  const { queryByText } = render(
+  const { getByText } = render(
     <ReactQueryTestWrapper>
       <SnapshotListModal />
     </ReactQueryTestWrapper>,
   );
 
-  expect(queryByText(defaultContentItemWithSnapshot.name)).toBeInTheDocument();
-  expect(queryByText('Latest Snapshot Config:')).toBeInTheDocument();
-
+  expect(getByText('View list of snapshots for AwesomeNamewwyylse12.')).toBeInTheDocument();
+  expect(getByText('Latest Snapshot Config:')).toBeInTheDocument();
   expect(
-    queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
+    getByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
   ).toBeInTheDocument();
 });
 
@@ -76,16 +75,17 @@ it('Render 20 items', () => {
     isLoading: false,
     isFetching: false,
   }));
-  const { queryByText } = render(
+
+  const { getByText } = render(
     <ReactQueryTestWrapper>
       <SnapshotListModal />
     </ReactQueryTestWrapper>,
   );
 
-  expect(queryByText(defaultContentItemWithSnapshot.name)).toBeInTheDocument();
-  expect(queryByText('Latest Snapshot Config:')).toBeInTheDocument();
+  expect(getByText('View list of snapshots for AwesomeNamewwyylse12.')).toBeInTheDocument();
+  expect(getByText('Latest Snapshot Config:')).toBeInTheDocument();
 
   expect(
-    queryByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
+    getByText((defaultSnapshotItem.content_counts['rpm.package'] as number)?.toString()),
   ).toBeInTheDocument();
 });
