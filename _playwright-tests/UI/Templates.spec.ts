@@ -10,20 +10,18 @@ test.describe('Templates', () => {
     await closePopupsIfExist(page);
     await page.getByRole('button', { name: 'Add content template' }).click();
     await page.getByRole('button', { name: 'Select architecture' }).click();
-    await page.getByRole('option', { name: 'x86_64' }).click();
+    await page.getByRole('option', { name: 'aarch64' }).click();
     await page.getByRole('button', { name: 'Select version' }).click();
-    await page.getByRole('option', { name: 'el8' }).click();
+    await page.getByRole('option', { name: 'el9' }).click();
     await page.getByRole('button', { name: 'Next' }).click();
     // Add the step to select 'Red hat repos Checkbox'
+    // Locate the checkbox in the table row
+    await page.locator('table tr:first-child input[type="checkbox"]').click();
     await page.getByRole('button', { name: 'Next' }).click();
-    // Add the step to select 'checkbox for cutom repo'
+    page.getByRole('radio', { name: 'Use latest content' }); // try this
     await page.getByRole('button', { name: 'Next' }).click();
-    await page.locator('input[name="use-latest-snapshot"]').click();
-    await page.getByRole('button', { name: 'Next' }).click();
-    const nameInput = page.getByPlaceholder('Enter name');
-    // const descriptionInput = page.getByPlaceholder('Enter Description');
-    await nameInput.fill('demo_template');
-    // await descriptionInput.fill('test');
+    await page.getByPlaceholder('Enter name').fill('demo_template');
+    // await page.getByPlaceholder('Enter Description').fill('test');
     await page.getByRole('button', { name: 'Next' }).click();
     // Add steps to create teamplate with system if you want to
     await page.locator('button.pf-v5-c-menu-toggle__button').click();
