@@ -7,9 +7,6 @@ import {
   Grid,
   InputGroup,
   InputGroupItem,
-  InputGroupText,
-  Modal,
-  ModalVariant,
   Pagination,
   PaginationVariant,
   Spinner,
@@ -17,8 +14,8 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import { InnerScrollContainer } from '@patternfly/react-table';
-import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import Hide from 'components/Hide/Hide';
@@ -47,13 +44,7 @@ import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip
 import useNotification from 'Hooks/useNotification';
 
 const useStyles = createUseStyles({
-  description: {
-    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
-    paddingBottom: '8px',
-    color: global_Color_200.value,
-  },
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -65,11 +56,10 @@ const useStyles = createUseStyles({
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
   leftMargin: {
     marginLeft: '1rem',
-    '& .pf-v5-c-toggle-group__text': {
+    '& button': {
       textWrap: 'nowrap',
     },
   },
@@ -256,7 +246,7 @@ export default function AddSystemModal() {
       variant={ModalVariant.medium}
       title='Assign template to systems'
       description={
-        <p className={classes.description}>
+        <>
           Choose the systems to apply <b>{name}</b> template to now. Be aware that assigning a
           template to a system with an existing template will overwrite the previous one. The
           available systems are filtered by the template&apos;s content definition.
@@ -271,38 +261,36 @@ export default function AddSystemModal() {
           >
             Refresh systems list
           </Button>
-        </p>
+        </>
       }
       isOpen
       onClose={onClose}
       footer={
-        <>
-          <Flex gap={{ default: 'gapMd' }}>
-            <ConditionalTooltip
-              content='Cannot assign this template to a system yet.'
-              show={!template?.rhsm_environment_created}
-              setDisabled
+        <Flex gap={{ default: 'gapMd' }}>
+          <ConditionalTooltip
+            content='Cannot assign this template to a system yet.'
+            show={!template?.rhsm_environment_created}
+            setDisabled
+          >
+            <Button
+              isLoading={isAdding}
+              isDisabled={
+                isAdding ||
+                !selected.length ||
+                (!template?.rhsm_environment_created &&
+                  template?.last_update_task?.status !== 'completed')
+              }
+              key='add_system'
+              variant='primary'
+              onClick={() => addSystems().then(onClose)}
             >
-              <Button
-                isLoading={isAdding}
-                isDisabled={
-                  isAdding ||
-                  !selected.length ||
-                  (!template?.rhsm_environment_created &&
-                    template?.last_update_task?.status !== 'completed')
-                }
-                key='add_system'
-                variant='primary'
-                onClick={() => addSystems().then(onClose)}
-              >
-                Assign
-              </Button>
-            </ConditionalTooltip>
-            <Button key='close' variant='secondary' onClick={onClose}>
-              Close
+              Assign
             </Button>
-          </Flex>
-        </>
+          </ConditionalTooltip>
+          <Button key='close' variant='secondary' onClick={onClose}>
+            Close
+          </Button>
+        </Flex>
       }
     >
       <InnerScrollContainer>
@@ -315,11 +303,9 @@ export default function AddSystemModal() {
                 placeholder='Filter by name'
                 value={searchQuery}
                 onChange={(_event, value) => setSearchQuery(value)}
+                type='search'
+                customIcon={<SearchIcon />}
               />
-              <InputGroupText id='search-icon'>
-                <SearchIcon />
-              </InputGroupText>
-
               <Hide hide={!total_items}>
                 <FlexItem className={classes.leftMargin}>
                   <ToggleGroup aria-label='Default with single selectable'>

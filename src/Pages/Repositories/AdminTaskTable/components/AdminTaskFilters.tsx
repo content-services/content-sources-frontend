@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Label,
+  LabelGroup,
   Button,
-  Chip,
-  ChipGroup,
   Flex,
   FlexItem,
-  InputGroup,
+  MenuToggle,
   TextInput,
-  InputGroupItem,
-  InputGroupText,
-  type SelectOptionProps,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
 } from '@patternfly/react-core';
-import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
+
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import Hide from 'components/Hide/Hide';
 import useDebounce from 'Hooks/useDebounce';
 import { createUseStyles } from 'react-jss';
@@ -27,15 +26,26 @@ interface Props {
 
 const useStyles = createUseStyles({
   chipsContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     paddingTop: '16px',
   },
   clearFilters: {
     marginLeft: '16px',
   },
+  filter: {
+    width: '100%',
+    maxWidth: 'unset',
+  },
+  filterDropdown: {
+    width: 'fit-content',
+  },
+  fullWidth: {
+    width: '100%',
+    maxWidth: 'unset',
+  },
 });
 
 const statusValues = ['Running', 'Failed', 'Completed', 'Canceled', 'Pending'];
+
 const typeValues = [
   'snapshot',
   'delete-repository-snapshots',
@@ -44,13 +54,17 @@ const typeValues = [
   'update-template-content',
   'update-repository',
 ];
+
 const filters = ['Account ID', 'Org ID', 'Status', 'Type'];
+
 export type AdminTaskFilters = 'Account ID' | 'Org ID' | 'Status' | 'Type';
 
 const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
   const classes = useStyles();
   const [filterType, setFilterType] = useState<AdminTaskFilters>('Account ID');
   const [accountId, setAccountId] = useState('');
+  const [typeFilterOpen, setTypeFilterOpen] = useState(false);
+  const [isActionOpen, setActionOpen] = useState(false);
   const [orgId, setOrgId] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedTypenames, setSelectedTypenames] = useState<string[]>([]);
@@ -106,40 +120,35 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
     switch (filterType) {
       case 'Account ID':
         return (
-          <InputGroupItem>
-            <TextInput
-              type='text'
-              isDisabled={isLoading}
-              id='account-id'
-              ouiaId='filter_account_id'
-              placeholder='Filter by account ID'
-              value={accountId}
-              onChange={(_event, value) => setAccountId(value)}
-            />
-            <InputGroupText isDisabled={isLoading} id='search-icon'>
-              <SearchIcon />
-            </InputGroupText>
-          </InputGroupItem>
+          <TextInput
+            type='search'
+            customIcon={<SearchIcon />}
+            className={classes.filter}
+            isDisabled={isLoading}
+            id='account-id'
+            ouiaId='filter_account_id'
+            placeholder='Filter by account ID'
+            value={accountId}
+            onChange={(_event, value) => setAccountId(value)}
+          />
         );
       case 'Org ID':
         return (
-          <InputGroupItem>
-            <TextInput
-              isDisabled={isLoading}
-              id='org-id'
-              ouiaId='filter_org_id'
-              placeholder='Filter by org ID'
-              value={orgId}
-              onChange={(_event, value) => setOrgId(value)}
-            />
-            <InputGroupText id='search-icon'>
-              <SearchIcon />
-            </InputGroupText>
-          </InputGroupItem>
+          <TextInput
+            isDisabled={isLoading}
+            id='org-id'
+            className={classes.filter}
+            type='search'
+            customIcon={<SearchIcon />}
+            ouiaId='filter_org_id'
+            placeholder='Filter by org ID'
+            value={orgId}
+            onChange={(_event, value) => setOrgId(value)}
+          />
         );
       case 'Status':
         return (
-          <DropdownSelect
+          <Dropdown
             onSelect={(_, val) =>
               setSelectedStatuses((prev) =>
                 selectedStatuses.includes(val as string)
@@ -147,28 +156,42 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
                   : [...prev, val as string],
               )
             }
-            menuToggleProps={{
-              'aria-label': 'filter status',
-              id: 'statusSelect',
-            }}
-            multiSelect
-            dropDownItems={
-              statusValues.map((status) => ({
-                hasCheckbox: true,
-                value: status,
-                isSelected: selectedStatuses.includes(status),
-                children: status,
-                'data-ouia-component-id': `filter_${status}`,
-              })) as SelectOptionProps[]
-            }
-            isDisabled={isLoading}
-            menuValue='Filter by status'
-            ouiaId='filter_status'
-          />
+            toggle={(toggleRef) => (
+              <MenuToggle
+                ref={toggleRef}
+                className={classes.filter}
+                aria-label='filter status'
+                id='statusSelect'
+                ouiaId='filter_status'
+                onClick={() => setActionOpen((prev) => !prev)}
+                isDisabled={isLoading}
+                isExpanded={isActionOpen}
+              >
+                Filter by status
+              </MenuToggle>
+            )}
+            onOpenChange={(isOpen) => setActionOpen(isOpen)}
+            isOpen={isActionOpen}
+          >
+            <DropdownList>
+              {statusValues.map((status) => (
+                <DropdownItem
+                  key={status}
+                  hasCheckbox
+                  value={status}
+                  isSelected={selectedStatuses.includes(status)}
+                  component='button'
+                  data-ouia-component-id={`filter_${status}`}
+                >
+                  {status}
+                </DropdownItem>
+              ))}
+            </DropdownList>
+          </Dropdown>
         );
       case 'Type':
         return (
-          <DropdownSelect
+          <Dropdown
             onSelect={(_, val) =>
               setSelectedTypenames((prev) =>
                 selectedTypenames.includes(val as string)
@@ -176,63 +199,91 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
                   : [...prev, val as string],
               )
             }
-            menuToggleProps={{
-              'aria-label': 'filter type',
-              id: 'typeSelect',
-            }}
-            multiSelect
-            dropDownItems={
-              typeValues.map((status) => ({
-                hasCheckbox: true,
-                value: status,
-                isSelected: selectedTypenames.includes(status),
-                children: status,
-                'data-ouia-component-id': `filter_${status}`,
-              })) as SelectOptionProps[]
-            }
-            isDisabled={isLoading}
-            menuValue='Filter by type'
-            ouiaId='filter_type'
-          />
+            toggle={(toggleRef) => (
+              <MenuToggle
+                ref={toggleRef}
+                className={classes.filter}
+                aria-label='filter type'
+                id='typeSelect'
+                ouiaId='filter_type'
+                onClick={() => setActionOpen((prev) => !prev)}
+                isDisabled={isLoading}
+                isExpanded={isActionOpen}
+              >
+                Filter by type
+              </MenuToggle>
+            )}
+            onOpenChange={(isOpen) => setActionOpen(isOpen)}
+            isOpen={isActionOpen}
+          >
+            <DropdownList>
+              {typeValues.map((type) => (
+                <DropdownItem
+                  key={type}
+                  hasCheckbox
+                  value={type}
+                  isSelected={selectedTypenames.includes(type)}
+                  component='button'
+                  data-ouia-component-id={`filter_${type}`}
+                >
+                  {type}
+                </DropdownItem>
+              ))}
+            </DropdownList>
+          </Dropdown>
         );
       default:
         return <></>;
     }
-  }, [filterType, isLoading, accountId, orgId, selectedStatuses, selectedTypenames]);
+  }, [filterType, isLoading, accountId, orgId, selectedStatuses, selectedTypenames, isActionOpen]);
 
   return (
     <Flex direction={{ default: 'column' }}>
-      <Flex>
-        <FlexItem>
-          <InputGroup>
-            <InputGroupItem>
-              <FlexItem>
-                <DropdownSelect
-                  onSelect={(_, val) => setFilterType(val as AdminTaskFilters)}
-                  menuToggleProps={{
-                    'aria-label': 'filterSelectionDropdown',
-                    id: 'typeSelect',
-                    icon: <FilterIcon />,
-                  }}
-                  dropDownItems={
-                    filters.map((filter) => ({
-                      value: filter,
-                      isSelected: filterType === filter,
-                      children: filter,
-                      'data-ouia-component-id': `filter_${filter}`,
-                    })) as SelectOptionProps[]
-                  }
-                  isDisabled={isLoading}
-                  menuValue={filterType}
-                  ouiaId='filter_type'
-                />
-              </FlexItem>
-            </InputGroupItem>
-            <InputGroupItem>
-              <FlexItem>{Filter}</FlexItem>
-            </InputGroupItem>
-          </InputGroup>
-        </FlexItem>
+      <Flex
+        direction={{ default: 'row' }}
+        gap={{ default: 'gap' }}
+        flexWrap={{ default: 'nowrap' }}
+        alignItems={{ default: 'alignItemsCenter' }}
+      >
+        <Dropdown
+          onSelect={(_, val) => {
+            setFilterType(val as AdminTaskFilters);
+            setTypeFilterOpen(false);
+          }}
+          toggle={(toggleRef) => (
+            <MenuToggle
+              icon={<FilterIcon />}
+              ref={toggleRef}
+              className={classes.filter}
+              aria-label='filterSelectionDropdown'
+              id='filterSelectionDropdown'
+              ouiaId='filter_type'
+              onClick={() => setTypeFilterOpen((prev) => !prev)}
+              isDisabled={isLoading}
+              isExpanded={typeFilterOpen}
+            >
+              {filterType}
+            </MenuToggle>
+          )}
+          onOpenChange={(isOpen) => setTypeFilterOpen(isOpen)}
+          isOpen={typeFilterOpen}
+          ouiaId='filter_type'
+        >
+          <DropdownList>
+            {filters.map((filter) => (
+              <DropdownItem
+                key={filter}
+                value={filter}
+                isSelected={filterType === filter}
+                component='button'
+                data-ouia-component-id={`filter_${filter}`}
+              >
+                {filter}
+              </DropdownItem>
+            ))}
+          </DropdownList>
+        </Dropdown>
+        <FlexItem className={classes.filterDropdown}>{Filter}</FlexItem>
       </Flex>
       <Hide
         hide={
@@ -240,39 +291,41 @@ const AdminTaskFilters = ({ isLoading, setFilterData, filterData }: Props) => {
         }
       >
         <FlexItem className={classes.chipsContainer}>
-          <ChipGroup categoryName='Type'>
+          <LabelGroup categoryName='Type'>
             {selectedTypenames.map((type) => (
-              <Chip
+              <Label
+                variant='outline'
                 key={type}
-                onClick={() => deleteItem(type, selectedTypenames, setSelectedTypenames)}
+                onClose={() => deleteItem(type, selectedTypenames, setSelectedTypenames)}
               >
                 {type}
-              </Chip>
+              </Label>
             ))}
-          </ChipGroup>
-          <ChipGroup categoryName='Status'>
+          </LabelGroup>
+          <LabelGroup categoryName='Status'>
             {selectedStatuses.map((status) => (
-              <Chip
+              <Label
+                variant='outline'
                 key={status}
-                onClick={() => deleteItem(status, selectedStatuses, setSelectedStatuses)}
+                onClose={() => deleteItem(status, selectedStatuses, setSelectedStatuses)}
               >
                 {status}
-              </Chip>
+              </Label>
             ))}
-          </ChipGroup>
+          </LabelGroup>
           {orgId !== '' && (
-            <ChipGroup categoryName='Org ID'>
-              <Chip key='org_id_chip' onClick={() => setOrgId('')}>
+            <LabelGroup categoryName='Org ID'>
+              <Label variant='outline' key='org_id_chip' onClose={() => setOrgId('')}>
                 {orgId}
-              </Chip>
-            </ChipGroup>
+              </Label>
+            </LabelGroup>
           )}
           {accountId !== '' && (
-            <ChipGroup categoryName='Account ID'>
-              <Chip key='account_id_chip' onClick={() => setAccountId('')}>
+            <LabelGroup categoryName='Account ID'>
+              <Label variant='outline' key='account_id_chip' onClose={() => setAccountId('')}>
                 {accountId}
-              </Chip>
-            </ChipGroup>
+              </Label>
+            </LabelGroup>
           )}
           {((debouncedAccountId !== '' && accountId !== '') ||
             (debouncedOrgId !== '' && orgId !== '') ||

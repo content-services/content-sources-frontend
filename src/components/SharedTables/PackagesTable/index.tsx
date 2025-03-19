@@ -3,14 +3,12 @@ import { PackageItem } from 'services/Content/ContentApi';
 import Hide from '../../Hide/Hide';
 import { Grid } from '@patternfly/react-core';
 import { SkeletonTable } from '@patternfly/react-component-groups';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import { useEffect, useState } from 'react';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 
 const useStyles = createUseStyles({
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',

@@ -1,5 +1,4 @@
-import { Button, ExpandableSection, Grid, Spinner, Text } from '@patternfly/react-core';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
+import { Button, ExpandableSection, Grid, Spinner, Content } from '@patternfly/react-core';
 
 import { useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
@@ -9,7 +8,6 @@ import { ArrowRightIcon } from '@patternfly/react-icons';
 const useStyles = createUseStyles({
   quickstartContainer: {
     margin: '24px 24px 0',
-    backgroundColor: global_BackgroundColor_100.value,
   },
   quickstartSpinner: {
     margin: '0 0 -4px 5px',
@@ -66,7 +64,7 @@ export default function RepositoryQuickStart() {
         aria-label='quickStart-expansion'
         data-ouia-component-id='quickstart_expand'
       >
-        <Text>For help getting started, access the quick start below:</Text>
+        <Content component='p'>For help getting started, access the quick start below:</Content>
         <Button
           className={classes.buildCustomButton}
           iconPosition='right'

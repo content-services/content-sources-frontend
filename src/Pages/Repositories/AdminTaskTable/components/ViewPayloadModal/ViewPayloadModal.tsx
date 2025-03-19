@@ -1,13 +1,5 @@
-import {
-  Bullseye,
-  Modal,
-  ModalVariant,
-  Spinner,
-  Tab,
-  TabContent,
-  TabTitleText,
-  Tabs,
-} from '@patternfly/react-core';
+import { Bullseye, Spinner, Tab, TabContent, TabTitleText, Tabs } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import { createUseStyles } from 'react-jss';
 import { createRef, useEffect, useMemo, useState } from 'react';
 import { AdminTask } from 'services/Admin/AdminTaskApi';

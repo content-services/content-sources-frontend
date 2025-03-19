@@ -5,15 +5,12 @@ import {
   Grid,
   InputGroup,
   InputGroupItem,
-  InputGroupText,
-  Modal,
-  ModalVariant,
   Pagination,
   PaginationVariant,
   TextInput,
 } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import { InnerScrollContainer } from '@patternfly/react-table';
-import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
 import { useEffect, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import Hide from 'components/Hide/Hide';
@@ -28,13 +25,7 @@ import PackagesTable from 'components/SharedTables/PackagesTable';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
 
 const useStyles = createUseStyles({
-  description: {
-    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
-    paddingBottom: '8px',
-    color: global_Color_200.value,
-  },
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -46,7 +37,6 @@ const useStyles = createUseStyles({
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
 });
 
@@ -115,7 +105,7 @@ export default function PackageModal() {
       ouiaId='rpm_package_modal'
       variant={ModalVariant.medium}
       title='Packages'
-      description={<p className={classes.description}>View list of packages</p>}
+      description='View list of packages'
       isOpen
       onClose={onClose}
       footer={
@@ -130,14 +120,13 @@ export default function PackageModal() {
             <InputGroupItem>
               <TextInput
                 id='search'
+                type='search'
+                customIcon={<SearchIcon />}
                 ouiaId='name_search'
                 placeholder='Filter by name'
                 value={searchQuery}
                 onChange={(_event, value) => setSearchQuery(value)}
               />
-              <InputGroupText id='search-icon'>
-                <SearchIcon />
-              </InputGroupText>
             </InputGroupItem>
             <Hide hide={loadingOrZeroCount}>
               <Pagination

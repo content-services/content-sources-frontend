@@ -1,10 +1,10 @@
 import { Grid } from '@patternfly/react-core';
 import { SecurityIcon } from '@patternfly/react-icons';
 import {
-  global_danger_color_100,
-  global_palette_orange_300,
-  global_warning_color_100,
-  global_Color_200,
+  c_alert_m_warning__icon_Color,
+  c_alert_m_danger__icon_Color,
+  t_global_icon_color_300,
+  c_alert_m_info__icon_Color,
 } from '@patternfly/react-tokens';
 
 import { createUseStyles } from 'react-jss';
@@ -13,16 +13,16 @@ const useStyles = (color: string) => {
   let finalColor = 'initial';
   switch (color) {
     case 'critical':
-      finalColor = global_danger_color_100.value;
+      finalColor = c_alert_m_danger__icon_Color.value;
       break;
     case 'important':
-      finalColor = global_palette_orange_300.value;
+      finalColor = t_global_icon_color_300.value;
       break;
     case 'moderate':
-      finalColor = global_warning_color_100.value;
+      finalColor = c_alert_m_warning__icon_Color.value;
       break;
     case 'low':
-      finalColor = global_Color_200.value;
+      finalColor = c_alert_m_info__icon_Color.value;
       break;
     default:
       break;

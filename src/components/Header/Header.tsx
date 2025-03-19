@@ -1,11 +1,10 @@
-import { Text } from '@patternfly/react-core';
+import { Content } from '@patternfly/react-core';
 import {
   OpenSourceBadge,
   PageHeader as _PageHeader,
   PageHeaderTitle,
 } from '@redhat-cloud-services/frontend-components';
 import { PageHeaderProps as _PageHeaderProps } from '@redhat-cloud-services/frontend-components/PageHeader/PageHeader';
-import { global_Color_100 } from '@patternfly/react-tokens';
 
 import { FunctionComponent, ReactElement } from 'react';
 import { createUseStyles } from 'react-jss';
@@ -19,7 +18,6 @@ const PageHeader = _PageHeader as FunctionComponent<PageHeaderProps>;
 
 const useStyles = createUseStyles({
   subtext: {
-    color: global_Color_100.value,
     paddingTop: '8px',
   },
   remove100percent: {
@@ -47,9 +45,9 @@ export default function Header({ title, ouiaId, paragraph }: Props) {
         }
         className={classes.remove100percent}
       />
-      <Text className={classes.subtext} ouiaId={ouiaId}>
+      <Content component='p' className={classes.subtext} ouiaId={ouiaId}>
         {paragraph}
-      </Text>
+      </Content>
     </PageHeader>
   );
 }

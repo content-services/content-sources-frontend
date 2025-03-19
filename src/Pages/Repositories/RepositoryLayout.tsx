@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Grid, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 
 import { createUseStyles } from 'react-jss';
 import { last } from 'lodash';
@@ -16,9 +15,6 @@ import {
 import { useAppContext } from 'middleware/AppContext';
 
 const useStyles = createUseStyles({
-  tabs: {
-    backgroundColor: global_BackgroundColor_100.value,
-  },
   tab: {
     '& button': {
       padding: 0, // Remove the default button padding
@@ -33,7 +29,7 @@ const useStyles = createUseStyles({
     },
   },
   containerMargin: {
-    margin: '24px',
+    margin: '16px 24px', // TODO: Check if side padding is desired
   },
 });
 
@@ -76,7 +72,7 @@ export default function RepositoryLayout() {
         ouiaId='custom_repositories_description'
         paragraph='View all repositories within your organization.'
       />
-      <Tabs className={classes.tabs} ouiaId='routed-tabs' activeKey={currentRoute}>
+      <Tabs ouiaId='routed-tabs' activeKey={currentRoute}>
         {tabs.map(({ title, route, key }) => (
           <Tab
             className={classes.tab}

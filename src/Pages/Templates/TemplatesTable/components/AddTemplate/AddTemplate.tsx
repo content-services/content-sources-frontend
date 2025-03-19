@@ -1,13 +1,12 @@
 import {
   Bullseye,
-  Modal,
-  ModalVariant,
   Spinner,
   Wizard,
   WizardFooterWrapper,
   WizardHeader,
   WizardStep,
 } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 
 import useRootPath from 'Hooks/useRootPath';
 import { useNavigate, useSearchParams } from 'react-router-dom';

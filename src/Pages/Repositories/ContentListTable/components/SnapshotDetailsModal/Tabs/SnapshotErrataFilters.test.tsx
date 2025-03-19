@@ -1,6 +1,7 @@
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import SnapshotErrataFilters from './SnapshotErrataFilters';
 import { ContentOrigin } from 'services/Content/ContentApi';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({
@@ -25,12 +26,12 @@ it('Render loading state (disabled)', () => {
     />,
   );
 
-  const filterInput = getByRole('textbox');
+  const filterInput = getByRole('searchbox');
   expect(filterInput).toHaveAttribute('disabled');
 });
 
-it('Select a filter of each type and ensure chips are present', () => {
-  const { queryByText, getByRole } = render(
+it('Select a filter of each type and ensure chips are present snapshotErrataFilters', async () => {
+  const { queryByText, getByRole, queryAllByText } = render(
     <SnapshotErrataFilters
       isLoading={false}
       setFilterData={() => null}
@@ -43,40 +44,45 @@ it('Select a filter of each type and ensure chips are present', () => {
   );
 
   // Filter on Name / Synopsis
-  const nameOrSynopsisFilter = getByRole('textbox');
+  const nameOrSynopsisFilter = getByRole('searchbox');
   expect(nameOrSynopsisFilter).not.toHaveAttribute('disabled');
-  fireEvent.change(nameOrSynopsisFilter, { target: { value: 'EPEL' } });
+  await userEvent.type(nameOrSynopsisFilter, 'EPEL');
 
   // Select a Type item
-  const optionMenu = document.getElementsByClassName('pf-v5-c-menu-toggle')[0];
-  waitFor(() => fireEvent.click(optionMenu));
+  const optionMenu = getByRole('button', { name: 'Name/Synopsis' });
+  await userEvent.click(optionMenu);
+
   const typeOption = queryByText('Type') as HTMLElement;
   expect(typeOption).toBeInTheDocument();
-  fireEvent.click(typeOption);
+  await userEvent.click(typeOption);
 
-  expect(queryByText('Filter by type')).toBeInTheDocument();
-  const typeSelector = document.getElementsByClassName('pf-v5-c-menu-toggle')[1];
-  fireEvent.click(typeSelector);
+  const typeSelector = queryByText('Filter by type') as HTMLElement;
+  expect(typeSelector).toBeInTheDocument();
+
+  await userEvent.click(typeSelector);
+
   const typeItem = queryByText('Security') as Element;
   expect(typeItem).toBeInTheDocument();
-  fireEvent.click(typeItem);
+  await userEvent.click(typeItem);
 
   // Select a Severity item
-  fireEvent.click(optionMenu);
+  await userEvent.click(optionMenu);
   const severityOption = queryByText('Severity') as Element;
   expect(severityOption).toBeInTheDocument();
-  fireEvent.click(severityOption);
+  await userEvent.click(severityOption);
 
-  expect(queryByText('Filter by severity')).toBeInTheDocument();
-  const severitySelector = document.getElementsByClassName('pf-v5-c-menu-toggle')[1];
-  fireEvent.click(severitySelector);
+  const severitySelector = queryByText('Filter by severity') as Element;
+  expect(severitySelector).toBeInTheDocument();
+
+  await userEvent.click(severitySelector);
   const severityItem = queryByText('Critical') as Element;
+
   expect(severityItem).toBeInTheDocument();
-  fireEvent.click(severityItem);
-  fireEvent.click(optionMenu);
+  await userEvent.click(severityItem);
+  await userEvent.click(severitySelector);
 
   // Check all the chips are there
   expect(queryByText('EPEL')).toBeInTheDocument();
   expect(queryByText('Security')).toBeInTheDocument();
-  expect(queryByText('Critical')).toBeInTheDocument();
+  expect(queryAllByText('Critical')).toHaveLength(2);
 });

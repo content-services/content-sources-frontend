@@ -3,11 +3,10 @@ import {
   Flex,
   FlexItem,
   Grid,
-  Modal,
-  ModalVariant,
   Pagination,
   PaginationVariant,
 } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import {
   ActionsColumn,
   IAction,
@@ -21,7 +20,6 @@ import {
   ThProps,
   Tr,
 } from '@patternfly/react-table';
-import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@patternfly/react-component-groups';
@@ -40,13 +38,7 @@ import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip
 import LatestRepoConfig from './components/LatestRepoConfig';
 
 const useStyles = createUseStyles({
-  description: {
-    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
-    paddingBottom: '8px',
-    color: global_Color_200.value,
-  },
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -58,7 +50,6 @@ const useStyles = createUseStyles({
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
   checkboxMinWidth: {
     minWidth: '45px!important',
@@ -226,15 +217,7 @@ const SnapshotListModal = () => {
         ouiaId='snapshot_list_modal'
         variant={ModalVariant.medium}
         title='Snapshots'
-        description={
-          <p className={classes.description}>
-            View list of snapshots for{' '}
-            {contentData?.name ? <b>{contentData?.name}</b> : 'a repository'}.
-            {/* You may select snapshots to delete them.
-            <br />
-            You may also view the snapshot comparisons <b>here</b>. */}
-          </p>
-        }
+        description={`View list of snapshots for ${contentData?.name ? contentData.name : 'a repository'}.`}
         isOpen
         onClose={onClose}
         footer={

@@ -21,7 +21,6 @@ import {
   Tr,
   type BaseCellProps,
 } from '@patternfly/react-table';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SkeletonTable } from '@patternfly/react-component-groups';
@@ -43,7 +42,6 @@ import { ExclamationTriangleIcon, ExternalLinkAltIcon } from '@patternfly/react-
 
 const useStyles = createUseStyles({
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     margin: '24px',
@@ -55,7 +53,6 @@ const useStyles = createUseStyles({
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
   invisible: {
     opacity: 0,

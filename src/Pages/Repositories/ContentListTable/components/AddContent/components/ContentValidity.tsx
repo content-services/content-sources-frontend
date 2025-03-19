@@ -1,6 +1,9 @@
 import { Flex, FlexItem, Spinner } from '@patternfly/react-core';
 import { FormikErrors, FormikTouched } from 'formik';
-import { global_success_color_100, global_danger_color_100 } from '@patternfly/react-tokens';
+import {
+  t_global_color_status_success_100 as global_success_color_100,
+  t_global_color_status_danger_100 as global_danger_color_100,
+} from '@patternfly/react-tokens';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@patternfly/react-icons';
 import { createUseStyles } from 'react-jss';
 

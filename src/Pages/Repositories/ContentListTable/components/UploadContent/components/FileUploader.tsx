@@ -21,7 +21,6 @@ import { createUseStyles } from 'react-jss';
 import { createUpload, uploadChunk } from 'services/Content/ContentApi';
 import Loader from 'components/Loader';
 import { DownloadIcon, FileIcon, UploadIcon } from '@patternfly/react-icons';
-import { global_primary_color_100 } from '@patternfly/react-tokens';
 import useDebounce from 'Hooks/useDebounce';
 
 const useStyles = createUseStyles({
@@ -31,6 +30,11 @@ const useStyles = createUseStyles({
   },
   pointer: {
     '&:hover': { cursor: 'pointer' },
+  },
+  filUploadStatus: {
+    '& button': {
+      alignItems: 'center', // Fixes dropdown and text alignment
+    },
   },
 });
 
@@ -407,7 +411,8 @@ export default function FileUploader({ setFileUUIDs, isLoading, setChildLoading 
       {fileCountGreaterThanZero && (
         <MultipleFileUploadStatus
           statusToggleText={`${completedCount} of ${fileCount} files are ready to be added to the repository${failedCount ? `, ${failedCount} failed` : ''}`}
-          //   statusToggleIcon={statusIcon}
+          // statusToggleIcon={statusIcon}
+          className={classes.filUploadStatus}
         >
           {Object.values(currentFiles)
             .reverse()
@@ -426,22 +431,14 @@ export default function FileUploader({ setFileUUIDs, isLoading, setChildLoading 
                         key={file.name}
                         content='An identical file was previously uploaded, data has been reused.'
                       >
-                        <DownloadIcon
-                          tabIndex={-1}
-                          className={classes.pointer}
-                          color={global_primary_color_100.value}
-                        />
+                        <DownloadIcon tabIndex={-1} className={classes.pointer} />
                       </Tooltip>
                     ) : (
                       <Tooltip
                         key={file.name}
                         content="This file will be uploaded in chunks and added to your repository when you click 'Confirm changes' below."
                       >
-                        <FileIcon
-                          tabIndex={-1}
-                          className={classes.pointer}
-                          color={global_primary_color_100.value}
-                        />
+                        <FileIcon tabIndex={-1} className={classes.pointer} />
                       </Tooltip>
                     )
                   }

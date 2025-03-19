@@ -1,26 +1,26 @@
 import {
+  Label,
+  LabelGroup,
   Button,
   Switch,
   FileUpload,
   Form,
   FormGroup,
-  Modal,
-  ModalVariant,
   Popover,
   Radio,
-  Stack,
-  StackItem,
   TextInput,
-  Tooltip,
   Flex,
   FormAlert,
   Alert,
-  ButtonVariant,
-  ChipGroup,
-  Chip,
+  FormGroupLabelHelp,
+  Dropdown,
+  MenuToggle,
+  MenuToggleAction,
+  DropdownList,
+  DropdownItem,
 } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
-import { global_Color_200 } from '@patternfly/react-tokens';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import Hide from 'components/Hide/Hide';
@@ -57,13 +57,8 @@ import CustomHelperText from 'components/CustomHelperText/CustomHelperText';
 import { ADD_ROUTE, REPOSITORIES_ROUTE, UPLOAD_ROUTE } from 'Routes/constants';
 import { useFormik, type FormikValues } from 'formik';
 import Loader from 'components/Loader';
-import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 
 const useStyles = createUseStyles({
-  description: {
-    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
-    color: global_Color_200.value,
-  },
   saveButton: {
     minWidth: '80px',
   },
@@ -75,16 +70,9 @@ const useStyles = createUseStyles({
   cancelButton: {
     marginLeft: '18px',
   },
-  gpgKeyInput: {
-    '& .pf-v5-svg': {
-      marginRight: '10px',
-    },
-  },
-  gpgKeyFormGroup: {
-    paddingBottom: '20px',
-    '& .pf-v5-c-radio': {
-      width: 'auto',
-    },
+  fullWidth: {
+    width: '100%!important',
+    maxWidth: 'unset!important',
   },
 });
 
@@ -100,7 +88,10 @@ const AddContent = ({ isEdit = false }: Props) => {
   const { repoUUID: uuid } = useParams();
   const navigate = useNavigate();
   const rootPath = useRootPath();
+  const [archOpen, setArchOpen] = useState(false);
+  const [versionOpen, setVersionOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isActionOpen, setIsActionOpen] = useState(false);
 
   const { data, isLoading: isLoadingInitialContent, isSuccess } = useFetchContent(uuid!, isEdit);
 
@@ -322,6 +313,8 @@ const AddContent = ({ isEdit = false }: Props) => {
     origin,
   } = values;
 
+  const isDisabled = !changeVerified || actionTakingPlace || hasErrors || editHasNotChanged;
+
   return (
     <Modal
       position='top'
@@ -335,47 +328,73 @@ const AddContent = ({ isEdit = false }: Props) => {
             <div>Use this form to {isEdit ? 'edit' : 'enter'} the values for a new repository.</div>
           }
         >
-          <Button variant='plain' aria-label='Help'>
-            <OutlinedQuestionCircleIcon />
-          </Button>
+          <Button icon={<OutlinedQuestionCircleIcon />} variant='plain' aria-label='Help' />
         </Popover>
       }
-      description={
-        <p className={classes.description}>
-          {isEdit ? 'Edit' : 'Add'} by completing the form. Default values may be provided
-          automatically.
-        </p>
-      }
+      description={`${isEdit ? 'Edit' : 'Add'} by completing the form. Default values may be provided`}
       isOpen
       onClose={onClose}
       footer={
-        <Stack>
-          <StackItem>
-            {isEdit ? (
-              <Button
-                key='confirm'
-                ouiaId='modal_save'
-                className={classes.saveButton}
+        isEdit ? (
+          <Button
+            key='confirm'
+            ouiaId='modal_save'
+            className={classes.saveButton}
+            variant='primary'
+            isLoading={actionTakingPlace}
+            isDisabled={isDisabled}
+            onClick={() => editContent().then(onClose)}
+          >
+            {editHasNotChanged ? 'No changes' : 'Save changes'}
+          </Button>
+        ) : (
+          <Dropdown
+            isOpen={isActionOpen}
+            onOpenChange={(isOpen: boolean) => setIsActionOpen(isOpen)}
+            key='confirm'
+            ouiaId='modal_save'
+            toggle={(toggleRef) => (
+              <MenuToggle
+                onClick={() => setIsActionOpen((prev) => !prev)}
+                ref={toggleRef}
+                isDisabled={isDisabled}
+                id='toggle-add'
                 variant='primary'
-                isLoading={actionTakingPlace}
-                isDisabled={!changeVerified || actionTakingPlace || hasErrors || editHasNotChanged}
-                onClick={() => editContent().then(onClose)}
-              >
-                {editHasNotChanged ? 'No changes' : 'Save changes'}
-              </Button>
-            ) : (
-              <DropdownSelect
-                isDisabled={!changeVerified || actionTakingPlace || hasErrors || editHasNotChanged}
-                dropDownItems={[
-                  {
-                    isDisabled: isAdding,
-                    children:
-                      origin === ContentOrigin.UPLOAD ? 'Save and close' : 'Save and add another',
-                    type: 'submit',
-                  },
+                ouiaId='add_repo_toggle'
+                splitButtonItems={[
+                  <MenuToggleAction
+                    isDisabled={isDisabled}
+                    data-ouia-component-id='add_popular_repo'
+                    key='action'
+                    onClick={() =>
+                      addContent().then((resp) => {
+                        clearCheckedRepositories();
+                        if (origin === ContentOrigin.UPLOAD) {
+                          navigate(
+                            `${rootPath}/${REPOSITORIES_ROUTE}/${resp[0]?.uuid}/${UPLOAD_ROUTE}`,
+                          );
+                        } else {
+                          navigate(`${rootPath}/${REPOSITORIES_ROUTE}`);
+                        }
+                      })
+                    }
+                  >
+                    {origin === ContentOrigin.UPLOAD ? 'Save and upload content' : 'Save'}
+                  </MenuToggleAction>,
                 ]}
-                ouiaId='wizard-create-btn'
-                onSelect={() =>
+                aria-label='add repository'
+              />
+            )}
+            shouldFocusToggleOnSelect
+          >
+            <DropdownList>
+              <DropdownItem
+                data-ouia-component-id='add-popular_repo_without-snapshotting'
+                key='action'
+                component='button'
+                type='submit'
+                isDisabled={isAdding}
+                onClick={() =>
                   addContent().then(() => {
                     clearCheckedRepositories();
                     if (origin === ContentOrigin.UPLOAD) {
@@ -385,54 +404,12 @@ const AddContent = ({ isEdit = false }: Props) => {
                     onClose();
                   })
                 }
-                menuValue=''
-                menuToggleProps={{
-                  'aria-label': 'Save other options',
-                  isFullWidth: false,
-                  variant: 'primary',
-                  splitButtonOptions: {
-                    variant: 'action',
-                    items: [
-                      <Button
-                        key='confirm'
-                        ouiaId='modal_save'
-                        className={actionTakingPlace ? classes.saveShifted : classes.saveButton}
-                        variant={ButtonVariant.primary}
-                        isLoading={actionTakingPlace}
-                        isDisabled={
-                          !changeVerified || actionTakingPlace || hasErrors || editHasNotChanged
-                        }
-                        onClick={() =>
-                          addContent().then((resp) => {
-                            clearCheckedRepositories();
-                            if (origin === ContentOrigin.UPLOAD) {
-                              navigate(
-                                `${rootPath}/${REPOSITORIES_ROUTE}/${resp[0]?.uuid}/${UPLOAD_ROUTE}`,
-                              );
-                            } else {
-                              navigate(`${rootPath}/${REPOSITORIES_ROUTE}`);
-                            }
-                          })
-                        }
-                      >
-                        {origin === ContentOrigin.UPLOAD ? 'Save and upload content' : 'Save'}
-                      </Button>,
-                    ],
-                  },
-                }}
-              />
-            )}
-            <Button
-              className={classes.cancelButton}
-              key='cancel'
-              variant='link'
-              onClick={onClose}
-              ouiaId='modal_cancel'
-            >
-              Cancel
-            </Button>
-          </StackItem>
-        </Stack>
+              >
+                {origin === ContentOrigin.UPLOAD ? 'Save and close' : 'Save and add another'}
+              </DropdownItem>
+            </DropdownList>
+          </Dropdown>
+        )
       }
     >
       {isEdit && isLoadingInitialContent ? (
@@ -562,50 +539,73 @@ const AddContent = ({ isEdit = false }: Props) => {
           <FormGroup
             label='Restrict architecture'
             aria-label='restrict_to_architecture'
-            labelIcon={
-              <Tooltip content='Optional: Select value to restrict package architecture'>
-                <OutlinedQuestionCircleIcon className='pf-u-ml-xs' color={global_Color_200.value} />
-              </Tooltip>
+            labelHelp={
+              <Popover
+                showClose={false}
+                bodyContent='Optional: Select value to restrict package architecture'
+              >
+                <FormGroupLabelHelp aria-label='Add GPG Key help' />
+              </Popover>
             }
             fieldId='archSelection'
           >
-            <DropdownSelect
-              onSelect={(_, val) =>
+            <Dropdown
+              onSelect={(_, val) => {
                 updateVariable({
                   arch: val,
-                })
-              }
-              selected={arch}
-              menuToggleProps={{
-                'aria-label': 'filter architecture',
-                id: 'archSelection',
+                });
+                setArchOpen(false);
               }}
-              dropDownItems={Object.keys(distributionArches).map((option) => ({
-                value: distributionArches[option],
-                isSelected: arch === distributionArches[option],
-                children: option,
-                'data-ouia-component-id': `filter_${option}`,
-              }))}
-              menuValue={
-                Object.keys(distributionArches).find(
-                  (key: string) => arch === distributionArches[key],
-                )!
-              }
-              ouiaId='restrict_to_architecture'
-            />
+              toggle={(toggleRef) => (
+                <MenuToggle
+                  isFullWidth
+                  className={classes.fullWidth}
+                  ref={toggleRef}
+                  aria-label='filter architecture'
+                  id='archSelection'
+                  ouiaId='filter architecture'
+                  onClick={() => setArchOpen((prev) => !prev)}
+                  isExpanded={archOpen}
+                >
+                  {
+                    Object.keys(distributionArches).find(
+                      (key: string) => arch === distributionArches[key],
+                    )!
+                  }
+                </MenuToggle>
+              )}
+              onOpenChange={(isOpen) => setArchOpen(isOpen)}
+              isOpen={archOpen}
+            >
+              <DropdownList>
+                {Object.keys(distributionArches).map((option) => (
+                  <DropdownItem
+                    key={option}
+                    value={distributionArches[option]}
+                    isSelected={arch === distributionArches[option]}
+                    component='button'
+                    data-ouia-component-id={`filter_${option}`}
+                  >
+                    {option}
+                  </DropdownItem>
+                ))}
+              </DropdownList>
+            </Dropdown>
           </FormGroup>
           <FormGroup
             label='Restrict OS version'
             aria-label='restrict_to_os_version'
-            labelIcon={
-              <Tooltip content='Optional: Select value to restrict package OS version'>
-                <OutlinedQuestionCircleIcon className='pf-u-ml-xs' color={global_Color_200.value} />
-              </Tooltip>
+            labelHelp={
+              <Popover
+                showClose={false}
+                bodyContent='Optional: Select value to restrict package OS version'
+              >
+                <FormGroupLabelHelp aria-label='Add GPG Key help' />
+              </Popover>
             }
             fieldId='versionSelection'
           >
-            <DropdownSelect
-              id='version'
+            <Dropdown
               onSelect={(_, val) => {
                 setVersionSelected(
                   versions.includes(val as string)
@@ -613,46 +613,61 @@ const AddContent = ({ isEdit = false }: Props) => {
                     : [...versions, val as string],
                 );
               }}
-              selected={versions}
-              menuToggleProps={{
-                'aria-label': 'filter version',
-                id: 'versionSelection',
-              }}
-              multiSelect
-              dropDownItems={Object.keys(distributionVersions).map((option) => ({
-                hasCheckbox: true,
-                value: distributionVersions[option],
-                isSelected: versions.includes(distributionVersions[option]),
-                children: option,
-                'data-ouia-component-id': `filter_${option}`,
-              }))}
-              menuValue={
-                versions?.length ? (
-                  <ChipGroup aria-label='Current selections'>
-                    {(
-                      Object.keys(distributionVersions).filter((key) =>
-                        versions.includes(distributionVersions[key as string]),
-                      ) as string[]
-                    ).map((val) => (
-                      <Chip
-                        key={val}
-                        onClick={(ev) => {
-                          ev.preventDefault();
-                          setVersionSelected(
-                            versions.filter((item) => item !== distributionVersions[val]),
-                          );
-                        }}
-                      >
-                        {val}
-                      </Chip>
-                    ))}
-                  </ChipGroup>
-                ) : (
-                  'Any version'
-                )
-              }
-              ouiaId='restrict_to_os_version'
-            />
+              toggle={(toggleRef) => (
+                <MenuToggle
+                  ref={toggleRef}
+                  className={classes.fullWidth}
+                  isFullWidth
+                  aria-label='filter version'
+                  id='versionSelect'
+                  ouiaId='filter_version'
+                  onClick={() => setVersionOpen((prev) => !prev)}
+                  isExpanded={versionOpen}
+                >
+                  {versions?.length ? (
+                    <LabelGroup aria-label='Current selections'>
+                      {(
+                        Object.keys(distributionVersions).filter((key) =>
+                          versions.includes(distributionVersions[key as string]),
+                        ) as string[]
+                      ).map((val) => (
+                        <Label
+                          variant='outline'
+                          key={val}
+                          onClose={(ev) => {
+                            ev.preventDefault();
+                            setVersionSelected(
+                              versions.filter((item) => item !== distributionVersions[val]),
+                            );
+                          }}
+                        >
+                          {val}
+                        </Label>
+                      ))}
+                    </LabelGroup>
+                  ) : (
+                    'Any version'
+                  )}
+                </MenuToggle>
+              )}
+              onOpenChange={(isOpen) => setVersionOpen(isOpen)}
+              isOpen={versionOpen}
+            >
+              <DropdownList>
+                {Object.keys(distributionVersions).map((option) => (
+                  <DropdownItem
+                    key={option}
+                    hasCheckbox
+                    value={distributionVersions[option]}
+                    isSelected={versions.includes(distributionVersions[option])}
+                    component='button'
+                    data-ouia-component-id={`filter_${option}`}
+                  >
+                    {option}
+                  </DropdownItem>
+                ))}
+              </DropdownList>
+            </Dropdown>
           </FormGroup>
           <FormGroup
             fieldId='enable_module_hotfixes'
@@ -662,13 +677,17 @@ const AddContent = ({ isEdit = false }: Props) => {
                 : 'Modularity filtering disabled'
             }
             aria-label='module_hotfix_formgroup'
-            labelIcon={
-              <Tooltip content='When enabled, modularity filtering prevents updates to packages contained within an enabled module'>
-                <OutlinedQuestionCircleIcon className='pf-u-ml-xs' color={global_Color_200.value} />
-              </Tooltip>
+            labelHelp={
+              <Popover
+                showClose={false}
+                bodyContent='When enabled, modularity filtering prevents updates to packages contained within an enabled module'
+              >
+                <FormGroupLabelHelp aria-label='Add GPG Key help' />
+              </Popover>
             }
           >
             <Switch
+              label='Modularity filtering enabled'
               ouiaId={`module_hotfixes_switch_${modularityFilteringEnabled ? 'on' : 'off'}`}
               aria-label='enable_module_hotfixes'
               hasCheckIcon
@@ -684,15 +703,14 @@ const AddContent = ({ isEdit = false }: Props) => {
           </FormGroup>
           <FormGroup
             label='GPG key'
-            labelIcon={
-              <Tooltip content='Optional: Add GPG Key file or URL'>
-                <OutlinedQuestionCircleIcon className='pf-u-ml-xs' color={global_Color_200.value} />
-              </Tooltip>
+            labelHelp={
+              <Popover showClose={false} bodyContent='Optional: Add GPG Key file or URL'>
+                <FormGroupLabelHelp aria-label='Add GPG Key help' />
+              </Popover>
             }
             fieldId='gpgKey-uploader'
           >
             <FileUpload
-              className={classes.gpgKeyInput}
               validated={getFieldValidation('gpgKey')}
               id='gpgKey-uploader'
               aria-label='gpgkey_file_to_upload'
@@ -718,12 +736,7 @@ const AddContent = ({ isEdit = false }: Props) => {
             />
           </FormGroup>
           <Hide hide={!gpgKey}>
-            <FormGroup
-              fieldId='metadataVerification'
-              label='Use GPG key for'
-              isInline
-              className={classes.gpgKeyFormGroup}
-            >
+            <FormGroup fieldId='metadataVerification' label='Use GPG key for' isInline>
               <Radio
                 id='package-verification-only'
                 name='package-verification-only'

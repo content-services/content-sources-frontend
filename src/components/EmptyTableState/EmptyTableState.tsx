@@ -2,9 +2,7 @@ import {
   EmptyStateBody,
   EmptyState,
   EmptyStateVariant,
-  EmptyStateIcon,
   Button,
-  EmptyStateHeader,
   EmptyStateFooter,
 } from '@patternfly/react-core';
 import { SearchIcon, PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons';
@@ -39,14 +37,13 @@ const EmptyTableState = ({
 }: Props) => {
   const classes = useStyles();
   return (
-    <EmptyState variant={EmptyStateVariant.full} className={classes.emptyStateContainer}>
-      <EmptyStateHeader
-        titleText={
-          <>{notFiltered ? `No ${itemName}` : `No ${itemName} match the filter criteria`}</>
-        }
-        icon={<EmptyStateIcon icon={notFiltered ? PlusCircleIcon : SearchIcon} />}
-        headingLevel='h2'
-      />
+    <EmptyState
+      headingLevel='h2'
+      icon={notFiltered ? PlusCircleIcon : SearchIcon}
+      titleText={<>{notFiltered ? `No ${itemName}` : `No ${itemName} match the filter criteria`}</>}
+      variant={EmptyStateVariant.full}
+      className={classes.emptyStateContainer}
+    >
       <EmptyStateBody className={classes.emptyStateBody}>
         {notFiltered ? notFilteredBody : 'Clear all filters to show more results'}
       </EmptyStateBody>

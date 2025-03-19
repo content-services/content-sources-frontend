@@ -1,6 +1,16 @@
-import { useWizardContext, Flex, Button, ButtonVariant } from '@patternfly/react-core';
-import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
+import {
+  useWizardContext,
+  Flex,
+  Button,
+  ButtonVariant,
+  Dropdown,
+  MenuToggle,
+  MenuToggleAction,
+  DropdownList,
+  DropdownItem,
+} from '@patternfly/react-core';
 import useRootPath from 'Hooks/useRootPath';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TEMPLATES_ROUTE, DETAILS_ROUTE, SYSTEMS_ROUTE, ADD_ROUTE } from 'Routes/constants';
 import type { TemplateItem } from 'services/Templates/TemplateApi';
@@ -14,6 +24,7 @@ interface Props {
 export const AddNavigateButton = ({ isAdding, add, onClose }: Props) => {
   const root = useRootPath();
   const navigate = useNavigate();
+  const [isActionOpen, setIsActionOpen] = useState(false);
   const { goToPrevStep } = useWizardContext();
 
   return (
@@ -21,23 +32,24 @@ export const AddNavigateButton = ({ isAdding, add, onClose }: Props) => {
       <Button ouiaId='wizard-back-btn' variant={ButtonVariant.secondary} onClick={goToPrevStep}>
         Back
       </Button>
-      <DropdownSelect
-        dropDownItems={[{ isDisabled: isAdding, children: 'Create template only', type: 'submit' }]}
-        ouiaId='wizard-create-btn'
-        onSelect={() => add().then(() => onClose())}
-        menuValue=''
-        menuToggleProps={{
-          isFullWidth: false,
-          variant: 'primary',
-          'aria-label': 'Create other options',
-          splitButtonOptions: {
-            variant: 'action',
-            items: [
-              <Button
-                key='submit'
-                variant={ButtonVariant.primary}
-                isLoading={isAdding}
+      <Dropdown
+        isOpen={isActionOpen}
+        onOpenChange={(isOpen: boolean) => setIsActionOpen(isOpen)}
+        key='confirm'
+        ouiaId='create-template'
+        toggle={(toggleRef) => (
+          <MenuToggle
+            onClick={() => setIsActionOpen((prev) => !prev)}
+            ref={toggleRef}
+            isDisabled={isAdding}
+            id='toggle-add'
+            variant='primary'
+            ouiaId='add_repo_toggle'
+            splitButtonItems={[
+              <MenuToggleAction
                 isDisabled={isAdding}
+                data-ouia-component-id='wizard-create-template-and-add'
+                key='action'
                 onClick={() =>
                   add().then((resp) => {
                     navigate(
@@ -47,11 +59,27 @@ export const AddNavigateButton = ({ isAdding, add, onClose }: Props) => {
                 }
               >
                 Create template and add to systems
-              </Button>,
-            ],
-          },
-        }}
-      />
+              </MenuToggleAction>,
+            ]}
+            aria-label='Create other options'
+          />
+        )}
+        shouldFocusToggleOnSelect
+      >
+        <DropdownList>
+          <DropdownItem
+            data-ouia-component-id='wizard-create-template-only'
+            key='submit'
+            component='button'
+            type='submit'
+            isLoading={isAdding}
+            isDisabled={isAdding}
+            onClick={() => add().then(() => onClose())}
+          >
+            Create template only
+          </DropdownItem>
+        </DropdownList>
+      </Dropdown>
     </Flex>
   );
 };

@@ -6,7 +6,7 @@ import {
   Pagination,
   PaginationVariant,
 } from '@patternfly/react-core';
-import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
+
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { useParams } from 'react-router-dom';
@@ -20,24 +20,20 @@ const useStyles = createUseStyles({
   description: {
     paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
     paddingBottom: '8px',
-    color: global_Color_200.value,
   },
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
+    flexFlow: 'column nowrap',
   },
   topContainer: {
     justifyContent: 'space-between',
     padding: '16px 24px',
     height: 'fit-content',
-    flexDirection: 'row!important',
-    minHeight: '68px', // Prevents compacting of the search box (patternfly bug?)
   },
   topContainerWithFilterHeight: { extend: 'topContainer', minHeight: '128px' },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
 });
 

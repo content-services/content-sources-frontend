@@ -4,7 +4,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import * as Redux from 'redux';
 
 import App from './App';
-import 'index.scss';
+
 import { ContextProvider } from './middleware/AppContext';
 import { createStore, restoreStore } from './store';
 

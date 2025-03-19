@@ -1,6 +1,6 @@
-import { Button, Text } from '@patternfly/react-core';
+import { Button, Content } from '@patternfly/react-core';
 
-import { global_disabled_color_100 } from '@patternfly/react-tokens';
+import { t_global_color_disabled_100 as global_disabled_color_100 } from '@patternfly/react-tokens';
 import useRootPath from 'Hooks/useRootPath';
 import { createUseStyles } from 'react-jss';
 import { INVENTORY_WORKSPACES_ROUTE } from 'Routes/constants';
@@ -22,7 +22,12 @@ export default function Workspace({ workspace }: Props) {
 
   const classes = useStyles();
   // Only show the first workspace if there is one for now
-  if (!workspace.length) return <Text className={classes.forceDisabled}>No workspace</Text>;
+  if (!workspace.length)
+    return (
+      <Content component='p' className={classes.forceDisabled}>
+        No workspace
+      </Content>
+    );
   const { id, name } = workspace[0];
   return (
     <Button

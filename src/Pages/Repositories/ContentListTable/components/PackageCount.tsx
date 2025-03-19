@@ -1,6 +1,6 @@
-import { Button, Text, Tooltip } from '@patternfly/react-core';
+import { Button, Content, Tooltip } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
-import { global_disabled_color_100 } from '@patternfly/react-tokens';
+import { t_global_color_disabled_100 as global_disabled_color_100 } from '@patternfly/react-tokens';
 import { useNavigate } from 'react-router-dom';
 
 import { ContentItem } from 'services/Content/ContentApi';
@@ -28,7 +28,9 @@ const PackageCount = ({ rowData, href, opensNewTab }: Props) => {
   if (!rowData.package_count && rowData.status === 'Pending') {
     return (
       <Tooltip isContentLeftAligned content='Introspection is in progress'>
-        <Text className={classes.text}>N/A</Text>
+        <Content component='p' className={classes.text}>
+          N/A
+        </Content>
       </Tooltip>
     );
   }
@@ -36,7 +38,9 @@ const PackageCount = ({ rowData, href, opensNewTab }: Props) => {
   if (rowData.status === 'Invalid') {
     return (
       <Tooltip isContentLeftAligned content='Repository is invalid.'>
-        <Text className={classes.text}>N/A</Text>
+        <Content component='p' className={classes.text}>
+          N/A
+        </Content>
       </Tooltip>
     );
   }

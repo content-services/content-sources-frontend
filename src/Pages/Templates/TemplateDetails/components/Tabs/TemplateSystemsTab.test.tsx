@@ -79,7 +79,7 @@ it('expect TemplateSystemsTab to render 15 items, read-only', async () => {
   expect(queryByRole('checkbox', { name: 'Select row 0' })).not.toBeInTheDocument();
 
   // Ensure top kebab is disabled.
-  expect(getByRole('button', { name: 'Actions' })).toHaveAttribute('disabled');
+  expect(getByRole('button', { name: 'plain kebab' })).toHaveAttribute('disabled');
 
   // Ensure the row kebab is disabled
   expect(getAllByRole('button', { name: 'Kebab toggle' })[0]).toHaveAttribute('disabled');

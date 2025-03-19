@@ -1,4 +1,5 @@
-import { Button, Modal, ModalVariant, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
+import { Button, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import React from 'react';
 import InsightsTab, { INSIGHTS_TAB } from './InsightsTab';
 import CurlTab, { CURL_TAB } from './CurlTab';

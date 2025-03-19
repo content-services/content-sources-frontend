@@ -5,7 +5,7 @@ import { Button, Flex, Progress } from '@patternfly/react-core';
 import { reduceStringToCharsWithEllipsis } from 'helpers';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { createUseStyles } from 'react-jss';
-import { global_danger_color_100 } from '@patternfly/react-tokens';
+import { c_popover_m_danger__title_icon_Color } from '@patternfly/react-tokens';
 import { FileIcon, TimesIcon } from '@patternfly/react-icons';
 import Hide from 'components/Hide/Hide';
 
@@ -18,8 +18,8 @@ const useStyles = createUseStyles({
     justifyContent: 'space-between',
   },
   errorText: {
-    '& .pf-v5-c-progress__helper-text': {
-      color: global_danger_color_100.value,
+    '& .pf-v6-c-progress__helper-text': {
+      color: c_popover_m_danger__title_icon_Color.value,
     },
   },
   noPadding: {
@@ -68,6 +68,7 @@ export default function UploadStatusItem({
   ...props
 }: MultipleFileUploadStatusItemProps) {
   const classes = useStyles();
+
   const getHumanReadableFileSize = (size: number) => {
     const prefixes = ['', 'K', 'M', 'G', 'T'];
     let prefixUnit = 0;
@@ -87,7 +88,7 @@ export default function UploadStatusItem({
     <li className={css(styles.multipleFileUploadStatusItem, className)} {...props}>
       <div className={styles.multipleFileUploadStatusItemIcon}>{fileIcon || <FileIcon />}</div>
       <div className={styles.multipleFileUploadStatusItemMain + ' ' + classes.statusMinWidth}>
-        <div className='pf-v5-screen-reader' aria-live='polite'>
+        <div className='pf-v6-screen-reader' aria-live='polite'>
           {progressAriaLiveMessage &&
             typeof progressAriaLiveMessage === 'string' &&
             progressAriaLiveMessage}
@@ -119,11 +120,15 @@ export default function UploadStatusItem({
         />
       </div>
 
-      <Flex direction={{ default: 'column' }} className={styles.multipleFileUploadStatusItemClose}>
+      <Flex direction={{ default: 'column' }} className={styles.multipleFileUploadStatusItemIcon}>
         <Hide hide={!!hideClearButton}>
-          <Button variant='plain' isDanger aria-label={buttonAriaLabel} onClick={onClearClick}>
-            <TimesIcon />
-          </Button>
+          <Button
+            icon={<TimesIcon />}
+            variant='plain'
+            isDanger
+            aria-label={buttonAriaLabel}
+            onClick={onClearClick}
+          />
         </Hide>
         <Hide hide={!retry || progressVariant !== 'danger'}>
           <Button className={classes.noPadding} variant='link' onClick={retry}>

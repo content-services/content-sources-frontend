@@ -1,6 +1,6 @@
 import { Button, Flex, FlexItem, Icon } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
-import { global_disabled_color_100 } from '@patternfly/react-tokens';
+import { t_global_color_disabled_100 as global_disabled_color_100 } from '@patternfly/react-tokens';
 
 import {
   useGetRepoConfigFileQuery,
@@ -51,31 +51,33 @@ const RepoConfig = ({ repoUUID, snapUUID, latest }: Props) => {
     <Flex>
       <FlexItem>
         <Button
+          icon={
+            <Icon>
+              <CopyIcon />
+            </Icon>
+          }
           ouiaId='repo_config_file_copy_button'
           label='repo_config_file_copy_button'
           variant='link'
           className={classes.link}
           onClick={() => copyConfigFile()}
           data-uuid={snapUUID}
-        >
-          <Icon>
-            <CopyIcon />
-          </Icon>
-        </Button>
+        ></Button>
       </FlexItem>
       <FlexItem>
         <Button
+          icon={
+            <Icon>
+              <DownloadIcon />
+            </Icon>
+          }
           ouiaId='repo_config_file_download_button'
           label='repo_config_file_download_button'
           variant='link'
           className={classes.link}
           onClick={() => downloadConfigFile()}
           data-uuid={snapUUID}
-        >
-          <Icon>
-            <DownloadIcon />
-          </Icon>
-        </Button>
+        ></Button>
       </FlexItem>
     </Flex>
   );

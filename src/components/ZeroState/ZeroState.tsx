@@ -10,8 +10,7 @@ import {
   Grid,
   PageSection,
   Spinner,
-  Text,
-  TextContent,
+  Content,
   Title,
 } from '@patternfly/react-core';
 import AsyncComponent from '@redhat-cloud-services/frontend-components/AsyncComponent';
@@ -86,7 +85,7 @@ export const ZeroState = () => {
             ouiaId='get_started_from_zerostate_description'
             customText='Get started with Insights by adding repositories'
             customSection={
-              <PageSection className={classes.removeBottomPadding}>
+              <PageSection hasBodyWrapper={false} className={classes.removeBottomPadding}>
                 <Flex direction={{ default: 'row' }} gap={{ default: 'gap' }}>
                   {repoList.map(({ title, description, onClick }) => (
                     <FlexItem flex={{ default: 'flex_1' }} key={title}>
@@ -95,9 +94,9 @@ export const ZeroState = () => {
                           <Title headingLevel='h3'>{title}</Title>
                         </CardTitle>
                         <CardBody>
-                          <TextContent className={classes.textContent}>
-                            <Text>{description}</Text>
-                          </TextContent>
+                          <Content className={classes.textContent}>
+                            <Content component='p'>{description}</Content>
+                          </Content>
                           <Button onClick={onClick} variant='secondary' size='lg'>
                             Browse {title}
                           </Button>
@@ -112,7 +111,6 @@ export const ZeroState = () => {
               <Button
                 id='get-started-repositories-button'
                 ouiaId='get_started_repositories_button'
-                className='pf-v5-u-p-md pf-v5-u-font-size-md'
                 onClick={() => handleMainButtonClick()}
               >
                 Add repositories now

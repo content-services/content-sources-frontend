@@ -1,7 +1,8 @@
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { testRepositoryParamsResponse } from 'testingHelpers';
 import TemplateFilters from './TemplateFilters';
 import { useQueryClient } from 'react-query';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({}),
@@ -34,12 +35,12 @@ it('Render loading state (disabled)', async () => {
     />,
   );
 
-  const filterInput = getByRole('textbox');
+  const filterInput = getByRole('button', { name: 'filterSelectionDropdown' });
   expect(filterInput).toHaveAttribute('disabled');
 });
 
-it('Select a filter of each type and ensure chips are present', async () => {
-  const { queryByText, getByRole, getByLabelText, queryAllByText } = render(
+it('Select a filter of each type and ensure chips are present ContentListFilters', async () => {
+  const { queryByText, getByRole, getByLabelText, queryAllByText, getByText } = render(
     <TemplateFilters
       setFilterData={() => null}
       filterData={{
@@ -52,46 +53,47 @@ it('Select a filter of each type and ensure chips are present', async () => {
     />,
   );
 
-  const filterInput = getByRole('textbox');
+  const filterInput = getByRole('searchbox', { name: '' });
   expect(filterInput).not.toHaveAttribute('disabled');
-  fireEvent.change(filterInput, { target: { value: 'EPEL' } });
+
+  await userEvent.type(filterInput, 'EPEL');
+  expect(filterInput).toHaveValue('EPEL');
 
   const optionMenu = getByRole('button', { name: 'filterSelectionDropdown' });
 
-  waitFor(() => {
-    fireEvent.click(optionMenu);
-  });
+  await userEvent.click(optionMenu);
 
   // Select a Version item
-  const versionOption = queryByText('Version') as Element;
+  const versionOption = getByText('Version')?.closest('button') as Element;
+
   expect(versionOption).toBeInTheDocument();
-  fireEvent.click(versionOption);
+  await userEvent.click(versionOption);
 
   const versionSelector = getByLabelText('filter version') as Element;
   expect(versionSelector).toBeInTheDocument();
-  fireEvent.click(versionSelector);
-  const versionItem = queryByText('el7') as Element;
-  expect(versionItem).toBeInTheDocument();
-  fireEvent.click(versionItem);
+  await userEvent.click(versionSelector);
 
-  fireEvent.click(optionMenu);
+  const versionItem = getByRole('option', { name: 'el7' }) as Element;
+  expect(versionItem).toBeInTheDocument();
+  await userEvent.click(versionItem);
+
+  await userEvent.click(optionMenu);
 
   // Select an architecture item
   const archOption = queryByText('Architecture') as Element;
   expect(archOption).toBeInTheDocument();
-  fireEvent.click(archOption);
+  await userEvent.click(archOption);
 
   const archSelector = getByLabelText('filter architecture') as Element;
   expect(archSelector).toBeInTheDocument();
-  fireEvent.click(archSelector);
+  await userEvent.click(archSelector);
 
   const archItem = queryByText('aarch64') as Element;
   expect(archItem).toBeInTheDocument();
-  fireEvent.click(archItem);
+  await userEvent.click(archItem);
 
-  fireEvent.click(optionMenu);
   // Check all the chips are there
   expect(queryByText('el7')).toBeInTheDocument();
-  expect(queryAllByText('aarch64')).toHaveLength(2);
+  expect(queryAllByText('aarch64')).toHaveLength(3);
   expect(queryByText('EPEL')).toBeInTheDocument();
 });

@@ -26,12 +26,10 @@ import {
   ThProps,
   Tr,
 } from '@patternfly/react-table';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 
 const useStyles = createUseStyles({
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',

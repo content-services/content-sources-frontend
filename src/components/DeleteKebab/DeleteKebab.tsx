@@ -1,8 +1,9 @@
-import { Dropdown, DropdownItem, KebabToggle } from '@patternfly/react-core/deprecated';
+import { Dropdown, DropdownItem, DropdownList, MenuToggle } from '@patternfly/react-core';
 import { useState } from 'react';
 import ConditionalTooltip from '../ConditionalTooltip/ConditionalTooltip';
 import { useNavigate } from 'react-router-dom';
 import { DELETE_ROUTE } from 'Routes/constants';
+import { EllipsisVIcon } from '@patternfly/react-icons';
 
 interface Props {
   atLeastOneRepoChecked: boolean;
@@ -11,18 +12,9 @@ interface Props {
   isDisabled?: boolean;
 }
 
-const DeleteKebab = ({
-  atLeastOneRepoChecked,
-  numberOfReposChecked,
-  toggleOuiaId,
-  isDisabled,
-}: Props) => {
+const DeleteKebab = ({ atLeastOneRepoChecked, numberOfReposChecked, isDisabled }: Props) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-
-  const onToggle = (isOpen: boolean) => {
-    setIsOpen(isOpen);
-  };
 
   const onFocus = () => {
     const element = document.getElementById('delete-kebab') as HTMLElement;
@@ -34,37 +26,40 @@ const DeleteKebab = ({
     onFocus();
   };
 
-  const dropdownItems = [
-    <ConditionalTooltip
-      key='delete'
-      content='Make a selection below to delete multiple repositories'
-      show={!atLeastOneRepoChecked}
-      setDisabled
-    >
-      <DropdownItem onClick={() => navigate(DELETE_ROUTE)}>
-        {atLeastOneRepoChecked
-          ? `Remove ${numberOfReposChecked} repositories`
-          : 'Remove selected repositories'}
-      </DropdownItem>
-    </ConditionalTooltip>,
-  ];
-
   return (
     <Dropdown
-      onSelect={onSelect}
-      toggle={
-        <KebabToggle
-          id='delete-kebab'
-          data-ouia-component-id={toggleOuiaId}
-          onToggle={(_event, isOpen: boolean) => onToggle(isOpen)}
-          isDisabled={isDisabled}
-        />
-      }
       isOpen={isOpen}
-      isPlain
-      dropdownItems={dropdownItems}
-      direction='down'
-    />
+      onSelect={onSelect}
+      onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
+      toggle={(toggleRef) => (
+        <MenuToggle
+          ref={toggleRef}
+          disabled={isDisabled}
+          id='delete-kebab'
+          onClick={() => setIsOpen((prev) => !prev)}
+          isDisabled={isDisabled}
+          icon={<EllipsisVIcon />}
+          variant='plain'
+          aria-label='plain kebab'
+        />
+      )}
+      shouldFocusToggleOnSelect
+    >
+      <DropdownList>
+        <ConditionalTooltip
+          key='delete'
+          content='Make a selection below to delete multiple repositories'
+          show={!atLeastOneRepoChecked}
+          setDisabled
+        >
+          <DropdownItem onClick={() => navigate(DELETE_ROUTE)}>
+            {atLeastOneRepoChecked
+              ? `Remove ${numberOfReposChecked} repositories`
+              : 'Remove selected repositories'}
+          </DropdownItem>
+        </ConditionalTooltip>
+      </DropdownList>
+    </Dropdown>
   );
 };
 

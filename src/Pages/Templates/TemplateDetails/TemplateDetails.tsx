@@ -22,11 +22,9 @@ import useArchVersion from 'Hooks/useArchVersion';
 import DetailItem from './components/DetaiItem';
 import Hide from 'components/Hide/Hide';
 import { formatDateDDMMMYYYY } from 'helpers';
-import { global_BackgroundColor_light_100 } from '@patternfly/react-tokens';
 import Loader from 'components/Loader';
 import TemplateActionDropdown from './components/TemplateActionDropdown';
 import UseTemplateModal from './components/UseTemplate/UseTemplateModal';
-import React from 'react';
 import TemplateDetailsTabs from './components/TemplateDetailsTabs';
 
 const useStyles = createUseStyles({
@@ -34,8 +32,7 @@ const useStyles = createUseStyles({
     height: 'calc(100vh - 250px)',
   },
   topContainer: {
-    padding: '24px',
-    background: global_BackgroundColor_light_100.value,
+    padding: '16px 24px',
   },
   titleWrapper: {
     display: 'flex',
@@ -51,7 +48,6 @@ const useStyles = createUseStyles({
   },
   childContainer: {
     margin: '24px',
-    background: global_BackgroundColor_light_100.value,
   },
   detailItems: {
     '@media (min-width: 1400px)': {

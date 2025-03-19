@@ -12,12 +12,11 @@ import {
 } from '@patternfly/react-table';
 import { ErrataItem } from 'services/Content/ContentApi';
 import Hide from '../../Hide/Hide';
-import { Flex, FlexItem, Grid, Stack, Text } from '@patternfly/react-core';
+import { Flex, FlexItem, Grid, Stack, Content } from '@patternfly/react-core';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import {
-  global_BackgroundColor_100,
-  global_danger_color_200,
-  global_success_color_200,
+  t_global_color_status_danger_100,
+  t_global_color_status_success_100,
 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
@@ -30,12 +29,11 @@ import SeverityWithIcon from '../../SeverityWithIcon/SeverityWithIcon';
 import UrlWithExternalIcon from '../../UrlWithLinkIcon/UrlWithLinkIcon';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 
-const red = global_danger_color_200.value;
-const green = global_success_color_200.value;
+const red = t_global_color_status_danger_100.value;
+const green = t_global_color_status_success_100.value;
 
 const useStyles = createUseStyles({
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -171,16 +169,16 @@ export default function AdvisoriesTable({
                           <Flex direction={{ default: 'row' }}>
                             <FlexItem>
                               <strong>Updated date</strong>
-                              <Text>
+                              <Content component='p'>
                                 {updated_date ? formatDateDDMMMYYYY(updated_date) : 'N/A'}
-                              </Text>
+                              </Content>
                             </FlexItem>
                           </Flex>
                           <Grid>
                             <strong>Description</strong>
-                            <Text className={classes.retainSpaces}>
+                            <Content component='p' className={classes.retainSpaces}>
                               {formatDescription(description)}
-                            </Text>
+                            </Content>
                           </Grid>
                           <Grid>
                             <strong>Reboot</strong>

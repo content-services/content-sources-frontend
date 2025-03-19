@@ -1,19 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Label,
+  LabelGroup,
   Button,
-  Chip,
-  ChipGroup,
   Flex,
   FlexItem,
   InputGroup,
   TextInput,
-  InputGroupItem,
-  InputGroupText,
   ToggleGroup,
   ToggleGroupItem,
+  Dropdown,
+  MenuToggle,
+  DropdownItem,
+  DropdownList,
 } from '@patternfly/react-core';
+
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
-import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import Hide from 'components/Hide/Hide';
 import { FilterData, ContentOrigin, RepositoryParamsResponse } from 'services/Content/ContentApi';
 import { useQueryClient } from 'react-query';
@@ -26,7 +28,6 @@ import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip
 import { useNavigate } from 'react-router-dom';
 import DeleteKebab from 'components/DeleteKebab/DeleteKebab';
 import { ADD_ROUTE } from 'Routes/constants';
-import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 
 interface Props {
   isLoading?: boolean;
@@ -40,7 +41,6 @@ interface Props {
 
 const useStyles = createUseStyles({
   chipsContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     paddingTop: '16px',
   },
   clearFilters: {
@@ -50,6 +50,10 @@ const useStyles = createUseStyles({
   repositoryActions: {
     display: 'flex',
     flexDirection: 'row',
+  },
+  fullWidth: {
+    width: '100%',
+    maxWidth: 'unset',
   },
 });
 
@@ -69,6 +73,8 @@ const ContentListFilters = ({
   const { rbac, features } = useAppContext();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [isActionOpen, setActionOpen] = useState(false);
+  const [typeFilterOpen, setTypeFilterOpen] = useState(false);
   const filters = ['Name/URL', 'Version', 'Architecture', 'Status'];
   const [filterType, setFilterType] = useState<Filters>('Name/URL');
   const [versionNamesLabels, setVersionNamesLabels] = useState({});
@@ -172,100 +178,144 @@ const ContentListFilters = ({
     switch (filterType) {
       case 'Name/URL':
         return (
-          <InputGroupItem isFill>
-            <TextInput
-              isDisabled={isLoading}
-              id='search'
-              ouiaId='filter_search'
-              placeholder='Filter by name/url'
-              value={searchQuery}
-              onChange={(_event, value) => setSearchQuery(value)}
-            />
-            <InputGroupText isDisabled={isLoading} id='search-icon'>
-              <SearchIcon />
-            </InputGroupText>
-          </InputGroupItem>
+          <TextInput
+            isDisabled={isLoading}
+            id='search'
+            type='search'
+            className={classes.fullWidth}
+            customIcon={<SearchIcon />}
+            ouiaId='filter_search'
+            placeholder='Filter by name/url'
+            value={searchQuery}
+            onChange={(_event, value) => setSearchQuery(value)}
+          />
         );
       case 'Version':
         return (
-          <DropdownSelect
-            onSelect={(_, val) =>
+          <Dropdown
+            onSelect={(_, val) => {
               setSelectedVersions((prev) =>
                 selectedVersions.includes(val as string)
                   ? prev.filter((item) => item !== (val as string))
                   : [...prev, val as string],
-              )
-            }
-            menuToggleProps={{
-              'aria-label': 'filter version',
-              id: 'versionSelect',
+              );
             }}
-            multiSelect
-            dropDownItems={Object.keys(versionNamesLabels).map((version) => ({
-              hasCheckbox: true,
-              value: version,
-              isSelected: selectedVersions.includes(version),
-              children: version,
-              'data-ouia-component-id': `filter_${version}`,
-            }))}
-            isDisabled={isLoading}
-            menuValue='Filter by version'
-            ouiaId='filter_version'
-          />
+            toggle={(toggleRef) => (
+              <MenuToggle
+                ref={toggleRef}
+                aria-label='filter version'
+                id='versionSelect'
+                ouiaId='filter_version'
+                className={classes.fullWidth}
+                onClick={() => setActionOpen((prev) => !prev)}
+                isDisabled={isLoading}
+                isExpanded={isActionOpen}
+              >
+                Filter by version
+              </MenuToggle>
+            )}
+            onOpenChange={(isOpen) => setActionOpen(isOpen)}
+            isOpen={isActionOpen}
+          >
+            <DropdownList>
+              {Object.keys(versionNamesLabels).map((version) => (
+                <DropdownItem
+                  key={version}
+                  hasCheckbox
+                  value={version}
+                  isSelected={selectedVersions.includes(version)}
+                  component='button'
+                  data-ouia-component-id={`filter_${version}`}
+                >
+                  {version}
+                </DropdownItem>
+              ))}
+            </DropdownList>
+          </Dropdown>
         );
       case 'Architecture':
         return (
-          <DropdownSelect
-            onSelect={(_, val) =>
+          <Dropdown
+            onSelect={(_, val) => {
               setSelectedArches((prev) =>
                 selectedArches.includes(val as string)
                   ? prev.filter((item) => item !== (val as string))
                   : [...prev, val as string],
-              )
-            }
-            menuToggleProps={{
-              'aria-label': 'filter architecture',
-              id: 'archSelect',
+              );
             }}
-            multiSelect
-            dropDownItems={Object.keys(archNamesLabels).map((arch) => ({
-              hasCheckbox: true,
-              value: arch,
-              isSelected: selectedArches.includes(arch),
-              children: arch,
-              'data-ouia-component-id': `filter_${arch}`,
-            }))}
-            isDisabled={isLoading}
-            menuValue='Filter by architecture'
-            ouiaId='filter_arch'
-          />
+            toggle={(toggleRef) => (
+              <MenuToggle
+                ref={toggleRef}
+                aria-label='filter architecture'
+                id='archSelect'
+                ouiaId='filter_arch'
+                className={classes.fullWidth}
+                onClick={() => setActionOpen((prev) => !prev)}
+                isDisabled={isLoading}
+                isExpanded={isActionOpen}
+              >
+                Filter by architecture
+              </MenuToggle>
+            )}
+            onOpenChange={(isOpen) => setActionOpen(isOpen)}
+            isOpen={isActionOpen}
+          >
+            <DropdownList>
+              {Object.keys(archNamesLabels).map((architecture) => (
+                <DropdownItem
+                  key={`arch_${architecture}`}
+                  value={architecture}
+                  isSelected={selectedArches.includes(architecture)}
+                  component='button'
+                  data-ouia-component-id={`filter_${architecture}`}
+                >
+                  {architecture}
+                </DropdownItem>
+              ))}
+            </DropdownList>
+          </Dropdown>
         );
       case 'Status':
         return (
-          <DropdownSelect
-            onSelect={(_, val) =>
+          <Dropdown
+            onSelect={(_, val) => {
               setSelectedStatuses((prev) =>
                 selectedStatuses.includes(val as string)
                   ? prev.filter((item) => item !== (val as string))
                   : [...prev, val as string],
-              )
-            }
-            menuToggleProps={{
-              'aria-label': 'filter status',
-              id: 'statusSelect',
+              );
             }}
-            multiSelect
-            dropDownItems={statusValues.map((status) => ({
-              hasCheckbox: true,
-              value: status,
-              isSelected: selectedStatuses.includes(status),
-              children: status,
-              'data-ouia-component-id': `filter_${status}`,
-            }))}
-            isDisabled={isLoading}
-            menuValue='Filter by status'
-            ouiaId='filter_status'
-          />
+            toggle={(toggleRef) => (
+              <MenuToggle
+                ref={toggleRef}
+                aria-label='filter status'
+                id='statusSelect'
+                ouiaId='filter_status'
+                className={classes.fullWidth}
+                onClick={() => setActionOpen((prev) => !prev)}
+                isDisabled={isLoading}
+                isExpanded={isActionOpen}
+              >
+                Filter by status
+              </MenuToggle>
+            )}
+            onOpenChange={(isOpen) => setActionOpen(isOpen)}
+            isOpen={isActionOpen}
+          >
+            <DropdownList>
+              {statusValues.map((status) => (
+                <DropdownItem
+                  key={status}
+                  value={status}
+                  isSelected={selectedStatuses.includes(status)}
+                  component='button'
+                  data-ouia-component-id={`filter_${status}`}
+                >
+                  {status}
+                </DropdownItem>
+              ))}
+            </DropdownList>
+          </Dropdown>
         );
       default:
         return <></>;
@@ -279,6 +329,7 @@ const ContentListFilters = ({
     archNamesLabels,
     selectedArches,
     selectedStatuses,
+    isActionOpen,
   ]);
 
   return (
@@ -286,30 +337,46 @@ const ContentListFilters = ({
       <Flex>
         <FlexItem>
           <InputGroup>
-            <InputGroupItem>
-              <FlexItem>
-                <DropdownSelect
-                  onSelect={(_, val) => setFilterType(val as Filters)}
-                  menuToggleProps={{
-                    'aria-label': 'filterSelectionDropdown',
-                    id: 'typeSelect',
-                    icon: <FilterIcon />,
-                  }}
-                  dropDownItems={filters.map((filter) => ({
-                    value: filter,
-                    isSelected: filterType === filter,
-                    children: filter,
-                    'data-ouia-component-id': `filter_${filter}`,
-                  }))}
-                  isDisabled={isLoading}
-                  menuValue={filterType}
+            <Dropdown
+              key='filtertype'
+              onSelect={(_, val) => {
+                setFilterType(val as Filters);
+                setTypeFilterOpen(false);
+              }}
+              toggle={(toggleRef) => (
+                <MenuToggle
+                  icon={<FilterIcon />}
+                  ref={toggleRef}
+                  className={classes.fullWidth}
+                  aria-label='filterSelectionDropdown'
+                  id='typeSelect'
                   ouiaId='filter_type'
-                />
-              </FlexItem>
-            </InputGroupItem>
-            <InputGroupItem>
-              <FlexItem>{Filter}</FlexItem>
-            </InputGroupItem>
+                  onClick={() => setTypeFilterOpen((prev) => !prev)}
+                  isDisabled={isLoading}
+                  isExpanded={typeFilterOpen}
+                >
+                  {filterType}
+                </MenuToggle>
+              )}
+              onOpenChange={(isOpen) => setTypeFilterOpen(isOpen)}
+              isOpen={typeFilterOpen}
+              ouiaId='filter_type'
+            >
+              <DropdownList>
+                {filters.map((filter) => (
+                  <DropdownItem
+                    key={filter}
+                    value={filter}
+                    isSelected={filterType === filter}
+                    component='button'
+                    data-ouia-component-id={`filter_${filter}`}
+                  >
+                    {filter}
+                  </DropdownItem>
+                ))}
+              </DropdownList>
+            </Dropdown>
+            {Filter}
           </InputGroup>
         </FlexItem>
         <Hide hide={!features?.snapshots?.accessible}>
@@ -383,39 +450,45 @@ const ContentListFilters = ({
         }
       >
         <FlexItem className={classes.chipsContainer}>
-          <ChipGroup categoryName='Version'>
+          <LabelGroup categoryName='Version'>
             {selectedVersions.map((version) => (
-              <Chip
+              <Label
+                variant='outline'
                 key={version}
-                onClick={() => deleteItem(version, selectedVersions, setSelectedVersions)}
+                onClose={() => deleteItem(version, selectedVersions, setSelectedVersions)}
               >
                 {version}
-              </Chip>
+              </Label>
             ))}
-          </ChipGroup>
-          <ChipGroup categoryName='Architecture'>
+          </LabelGroup>
+          <LabelGroup categoryName='Architecture'>
             {selectedArches.map((arch) => (
-              <Chip key={arch} onClick={() => deleteItem(arch, selectedArches, setSelectedArches)}>
+              <Label
+                variant='outline'
+                key={arch}
+                onClose={() => deleteItem(arch, selectedArches, setSelectedArches)}
+              >
                 {arch}
-              </Chip>
+              </Label>
             ))}
-          </ChipGroup>
-          <ChipGroup categoryName='Status'>
+          </LabelGroup>
+          <LabelGroup categoryName='Status'>
             {selectedStatuses.map((status) => (
-              <Chip
+              <Label
+                variant='outline'
                 key={status}
-                onClick={() => deleteItem(status, selectedStatuses, setSelectedStatuses)}
+                onClose={() => deleteItem(status, selectedStatuses, setSelectedStatuses)}
               >
                 {status}
-              </Chip>
+              </Label>
             ))}
-          </ChipGroup>
+          </LabelGroup>
           {searchQuery !== '' && (
-            <ChipGroup categoryName='Name/URL'>
-              <Chip key='search_chip' onClick={() => setSearchQuery('')}>
+            <LabelGroup categoryName='Name/URL'>
+              <Label variant='outline' key='search_chip' onClose={() => setSearchQuery('')}>
                 {searchQuery}
-              </Chip>
-            </ChipGroup>
+              </Label>
+            </LabelGroup>
           )}
           {((debouncedSearchQuery !== '' && searchQuery !== '') ||
             !!selectedVersions?.length ||

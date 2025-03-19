@@ -2,11 +2,8 @@ import {
   ClipboardCopy,
   ClipboardCopyVariant,
   TabContent,
-  Text,
-  TextContent,
-  TextList,
-  TextListItem,
-  TextVariants,
+  Content,
+  ContentVariants,
 } from '@patternfly/react-core';
 import React from 'react';
 import { ADD_ROUTE, DETAILS_ROUTE, SYSTEMS_ROUTE } from '../../../../../Routes/constants';
@@ -36,11 +33,11 @@ const InsightsTab = ({ tabContentRef }: Props) => {
 
   return (
     <TabContent eventKey={INSIGHTS_TAB} id={INSIGHTS_TAB} ref={tabContentRef}>
-      <TextContent className={classes.textGroup}>
-        <Text component={TextVariants.h2}>Register for subscriptions</Text>
-        <TextList isPlain>
-          <TextListItem>
-            <Text component='h6'>Register with rhc</Text>
+      <Content className={classes.textGroup}>
+        <Content component={ContentVariants.h2}>Register for subscriptions</Content>
+        <Content component='ul' isPlainList>
+          <Content component='li'>
+            <Content component='h6'>Register with rhc</Content>
             <ClipboardCopy
               isReadOnly
               hoverTip='Copy'
@@ -49,21 +46,21 @@ const InsightsTab = ({ tabContentRef }: Props) => {
             >
               rhc connect
             </ClipboardCopy>
-          </TextListItem>
-        </TextList>
-        <Text component={TextVariants.h2}>Assign the template to a system</Text>
-        <TextList isPlain>
-          <TextListItem>
-            <Text component='h6'> Add the template via the UI </Text>
-            <Text>
+          </Content>
+        </Content>
+        <Content component={ContentVariants.h2}>Assign the template to a system</Content>
+        <Content component='ul' isPlainList>
+          <Content component='li'>
+            <Content component='h6'> Add the template via the UI </Content>
+            <Content component='p'>
               Add the template in{' '}
               <a href={addSystemsRoute} rel='noreferrer' target='_blank'>
                 Systems <ExternalLinkAltIcon />
               </a>
-            </Text>
-          </TextListItem>
-          <TextListItem>
-            <Text component='h6'> Or add the template via the API </Text>
+            </Content>
+          </Content>
+          <Content component='li'>
+            <Content component='h6'> Or add the template via the API </Content>
             <ClipboardCopy
               isReadOnly
               hoverTip='Copy'
@@ -74,11 +71,11 @@ const InsightsTab = ({ tabContentRef }: Props) => {
                 templateUUID +
                 '/subscribed-systems'}
             </ClipboardCopy>
-          </TextListItem>
-        </TextList>
-        <Text component={TextVariants.h2}>Refresh Subscription Manager</Text>
-        <TextList isPlain>
-          <TextListItem>
+          </Content>
+        </Content>
+        <Content component={ContentVariants.h2}>Refresh Subscription Manager</Content>
+        <Content component='ul' isPlainList>
+          <Content component='li'>
             <ClipboardCopy
               isReadOnly
               hoverTip='Copy'
@@ -87,9 +84,9 @@ const InsightsTab = ({ tabContentRef }: Props) => {
             >
               subscription-manager refresh
             </ClipboardCopy>
-          </TextListItem>
-        </TextList>
-      </TextContent>
+          </Content>
+        </Content>
+      </Content>
     </TabContent>
   );
 };
