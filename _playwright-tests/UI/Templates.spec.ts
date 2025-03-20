@@ -8,11 +8,25 @@ test.describe('Templates', () => {
   }) => {
     await navigateToTemplates(page);
     await closePopupsIfExist(page);
-
-    const AddButton = page.locator('[data-ouia-component-id="create_content_template"]');
-
-    // Wait for the Add button to become enabled (up to 10 seconds)
-    await AddButton.first().isEnabled({ timeout: 10000 });
+    await page.getByRole('button', { name: 'Add content template' }).click();
+    await page.getByRole('button', { name: 'Select architecture' }).click();
+    await page.getByRole('option', { name: 'aarch64' }).click();
+    await page.getByRole('button', { name: 'Select version' }).click();
+    await page.getByRole('option', { name: 'el9' }).click();
+    await page.getByRole('button', { name: 'Next' }).click();
+    // Add the step to select 'Red hat repos Checkbox'
+    // Locate the checkbox in the table row
+    await page.locator('table tr:first-child input[type="checkbox"]').click();
+    await page.getByRole('button', { name: 'Next' }).click();
+    page.getByRole('radio', { name: 'Use latest content' }); // try this
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.getByPlaceholder('Enter name').fill('demo_template');
+    // await page.getByPlaceholder('Enter Description').fill('test');
+    await page.getByRole('button', { name: 'Next' }).click();
+    // Add steps to create teamplate with system if you want to
+    await page.locator('button.pf-v5-c-menu-toggle__button').click();
+    await page.getByRole('option', { name: 'Create template only' }).click();
+    await expect(page.getByText('Content Template "demo_template" created')).toBeVisible();
   });
 
   test('Validate documentation link in empty state', async ({ page }) => {
