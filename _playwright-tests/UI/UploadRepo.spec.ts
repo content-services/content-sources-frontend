@@ -93,7 +93,7 @@ test.describe('Upload Repositories', () => {
       ),
       // Click the 'Remove' button
       page.getByRole('button', { name: 'Remove' }).click(),
-      expect(page.getByText('No custom repositories match the filter criteria')).toBeVisible(),
+      await expect(row).not.toBeVisible(),
     ]);
   });
 

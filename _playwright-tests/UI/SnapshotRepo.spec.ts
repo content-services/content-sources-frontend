@@ -99,9 +99,7 @@ test.describe('Snapshot Repositories', () => {
         page.getByRole('button', { name: 'Remove' }).click(),
       ]);
 
-      await expect(
-        page.getByText('No custom repositories match the filter criteria'),
-      ).toBeVisible();
+      await expect(row).not.toBeVisible();
     });
   });
 });
