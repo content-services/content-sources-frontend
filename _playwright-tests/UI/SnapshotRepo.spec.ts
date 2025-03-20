@@ -23,7 +23,7 @@ test.describe('Snapshot Repositories', () => {
 
     await test.step('Open the add repository modal', async () => {
       await page.getByRole('button', { name: 'Add repositories' }).first().click();
-      await expect(page.getByText('Add custom repositories')).toBeVisible();
+      await expect(page.getByRole('dialog', { name: 'Add custom repositories' })).toBeVisible();
     });
 
     await test.step('Fill in the repository details', async () => {
@@ -54,7 +54,7 @@ test.describe('Snapshot Repositories', () => {
           (resp) =>
             resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,
         ),
-        expect(page.locator('div[id^="pf-modal-part"]').first()).not.toBeVisible(),
+        expect(page.getByRole('dialog', { name: 'Add custom repositories' })).not.toBeVisible(),
       ]);
     });
 
