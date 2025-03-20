@@ -22,6 +22,7 @@ export const closePopupsIfExist = async (page: Page) => {
     });
   }
 };
+
 export const filterByNameOrUrl = async (page: Page, name: string) => {
   await page.getByPlaceholder(/^Filter by name.*$/).fill(name);
   // We are expecting the first item in the table to contain the name
@@ -39,10 +40,23 @@ export const clearFilters = async (page: Page) => {
   await page.getByRole('button', { name: 'Clear filters' }).click();
 };
 
-export const getRowByNameOrUrl = async (page: Page, name: string): Promise<Locator> => {
+/**
+ * Returns the locator for a given named row.
+ * Conditionally filters if row is not present.
+ * Set "forceFilter" to enforce filtering logic.
+ **/
+export const getRowByNameOrUrl = async (
+  page: Page,
+  name: string,
+  forceFilter: boolean = false,
+): Promise<Locator> => {
   await clearFilters(page);
+  const target = page.getByRole('row').filter({ has: page.getByText(name) });
+  // First check if the row is visible, if so don't filter, and just return the target
+  if (!forceFilter && (await target.isVisible())) return target;
+  // Now run the filter
   await filterByNameOrUrl(page, name);
-  return page.getByRole('row').filter({ has: page.getByText(name) });
+  return target;
 };
 
 export const getRowCellByHeader = async (page: Page, row: Locator, name: string) => {
