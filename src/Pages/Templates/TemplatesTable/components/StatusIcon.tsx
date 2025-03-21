@@ -3,7 +3,7 @@ import { Button, Flex, FlexItem, Popover, Spinner, Tooltip } from '@patternfly/r
 import StatusText from 'components/StatusText/StatusText';
 import { global_danger_color_100, global_success_color_100 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
-import { AdminTask } from 'services/AdminTasks/AdminTaskApi';
+import { AdminTask } from 'services/Admin/AdminTaskApi';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import { useMemo } from 'react';
 

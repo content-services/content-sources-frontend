@@ -8,7 +8,7 @@ import {
   SnapshotItem,
 } from '../Content/ContentApi';
 import { objectToUrlParams } from 'helpers';
-import { AdminTask } from 'services/AdminTasks/AdminTaskApi';
+import { AdminTask } from 'services/Admin/AdminTaskApi';
 
 export interface TemplateRequest {
   arch: string;

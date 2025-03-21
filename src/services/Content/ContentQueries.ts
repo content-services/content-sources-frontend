@@ -43,7 +43,7 @@ import {
   deleteSnapshots,
   getLatestRepoConfigFile,
 } from './ContentApi';
-import { ADMIN_TASK_LIST_KEY } from '../AdminTasks/AdminTaskQueries';
+import { ADMIN_TASK_LIST_KEY } from '../Admin/AdminTaskQueries';
 import useErrorNotification from 'Hooks/useErrorNotification';
 import useNotification from 'Hooks/useNotification';
 import {

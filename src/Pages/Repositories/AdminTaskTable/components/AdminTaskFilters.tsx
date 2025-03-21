@@ -17,7 +17,7 @@ import { global_BackgroundColor_100 } from '@patternfly/react-tokens';
 import Hide from 'components/Hide/Hide';
 import useDebounce from 'Hooks/useDebounce';
 import { createUseStyles } from 'react-jss';
-import { AdminTaskFilterData } from 'services/AdminTasks/AdminTaskApi';
+import { AdminTaskFilterData } from 'services/Admin/AdminTaskApi';
 
 interface Props {
   isLoading?: boolean;

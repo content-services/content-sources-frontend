@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import AdminTaskInfo from './AdminTaskInfo';
-import { AdminTask } from 'services/AdminTasks/AdminTaskApi';
+import { AdminTask } from 'services/Admin/AdminTaskApi';
 import { defaultIntrospectTask } from 'testingHelpers';
 import { formatDateDDMMMYYYY } from 'helpers';
 
