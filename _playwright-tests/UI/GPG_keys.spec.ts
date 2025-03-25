@@ -64,5 +64,8 @@ test.describe('Test GPG keys', () => {
       // Save button would be disabled for bad or incorrect gpg key
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
     });
+    await test.step('Post test cleanup', async () => {
+      await deleteAllRepos(page, `&search=${repoNamePrefix}`);
+    });
   });
 });
