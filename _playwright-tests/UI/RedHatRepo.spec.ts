@@ -12,7 +12,7 @@ test.describe('Red Hat Repositories', () => {
     });
 
     await test.step('Navigate to Red Hat repositories', async () => {
-      await page.getByRole('button', { name: 'Red Hat' }).click();
+      await page.getByRole('button', { name: 'Red Hat', exact: true }).click();
     });
   });
 
