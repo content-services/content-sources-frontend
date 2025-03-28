@@ -38,6 +38,11 @@ export default defineConfig({
       : {}),
     baseURL: process.env.BASE_URL,
     ignoreHTTPSErrors: true,
+          ...process.env.PROXY ? {
+          proxy: {
+              server: process.env.PROXY,
+          }
+      } : {},
     testIdAttribute: 'data-ouia-component-id',
     trace: 'on',
     screenshot: 'on',
