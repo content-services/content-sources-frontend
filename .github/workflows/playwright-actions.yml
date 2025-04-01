@@ -11,7 +11,7 @@ concurrency:
 jobs:
   playwright-tests:
     runs-on:
-      - codebuild-content-services-frontend-repo-${{ github.run_id }}-${{ github.run_attempt }}
+      - codebuild-content-services-fe-repo-${{ github.run_id }}-${{ github.run_attempt }}
       - instance-size:medium
       - buildspec-override:true
 
