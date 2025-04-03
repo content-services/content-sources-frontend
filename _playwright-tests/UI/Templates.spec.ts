@@ -8,11 +8,29 @@ test.describe('Templates', () => {
   }) => {
     await navigateToTemplates(page);
     await closePopupsIfExist(page);
-
-    const AddButton = page.locator('[data-ouia-component-id="create_content_template"]');
-
-    // Wait for the Add button to become enabled (up to 10 seconds)
-    await AddButton.first().isEnabled({ timeout: 10000 });
+    await page.getByRole('button', { name: 'Add content template' }).click();
+    await page.getByRole('button', { name: 'Select architecture' }).click();
+    await page.getByRole('option', { name: 'aarch64' }).click();
+    await page.getByRole('button', { name: 'Select version' }).click();
+    await page.getByRole('option', { name: 'el9' }).click();
+    await page.getByRole('button', { name: 'Next' }).click();
+    // Locate the checkbox in the table row and click it.
+    await page.locator('table tr:first-child input[type="checkbox"]').click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    await page.getByRole('button', { name: 'Next' }).click();
+    // Select 'use latest content' radio button
+    page.getByRole('radio', { name: 'Use latest content' }).click();
+    await page.getByRole('button', { name: 'Next' }).click();
+    // Populate the template with a name and description.
+    await page.getByPlaceholder('Enter name').fill('demo_template');
+    await page.getByPlaceholder('Enter Description').fill('test');
+    await page.getByRole('button', { name: 'Next' }).click();
+    // Submit the template without a system. This step is optional, so it is being skipped.
+    await page.locator('button.pf-v5-c-menu-toggle__button').click();
+    await page.getByRole('option', { name: 'Create template only' }).click();
+    // Check if the table contains the template with the name "abc"
+    const table = page.locator('table');
+    await expect(table).toContainText('demo_template');
   });
 
   test('Validate documentation link in empty state', async ({ page }) => {
