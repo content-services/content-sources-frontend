@@ -14,19 +14,23 @@ test.describe('Templates', () => {
     await page.getByRole('button', { name: 'Select version' }).click();
     await page.getByRole('option', { name: 'el9' }).click();
     await page.getByRole('button', { name: 'Next' }).click();
-    // Add the step to select 'Red hat repos Checkbox'
-    // Locate the checkbox in the table row
+    // Locate the checkbox in the table row and click it.
     await page.locator('table tr:first-child input[type="checkbox"]').click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
     await page.getByRole('button', { name: 'Next' }).click();
-    page.getByRole('radio', { name: 'Use latest content' }); // try this
+    // Select 'use latest content' radio button
+    page.getByRole('radio', { name: 'Use latest content' }).click();
     await page.getByRole('button', { name: 'Next' }).click();
+    // Populate the template with a name and description.
     await page.getByPlaceholder('Enter name').fill('demo_template');
-    // await page.getByPlaceholder('Enter Description').fill('test');
+    await page.getByPlaceholder('Enter Description').fill('test');
     await page.getByRole('button', { name: 'Next' }).click();
-    // Add steps to create teamplate with system if you want to
+    // Submit the template without a system. This step is optional, so it is being skipped.
     await page.locator('button.pf-v5-c-menu-toggle__button').click();
     await page.getByRole('option', { name: 'Create template only' }).click();
-    await expect(page.getByText('Content Template "demo_template" created')).toBeVisible();
+    // Check if the table contains the template with the name "abc"
+    const table = page.locator('table');
+    await expect(table).toContainText('demo_template');
   });
 
   test('Validate documentation link in empty state', async ({ page }) => {
