@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { navigateToTemplates } from './helpers/navHelpers';
-import { closePopupsIfExist } from './helpers/helpers';
+import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
+const smallRHRepo = 'Red Hat CodeReady Linux Builder for RHEL 9 ARM 64 (RPMs)';
 
 test.describe('Templates', () => {
   test('Navigate to templates, make sure the Add content template button can be clicked', async ({
@@ -14,19 +15,24 @@ test.describe('Templates', () => {
     await page.getByRole('button', { name: 'Select version' }).click();
     await page.getByRole('option', { name: 'el9' }).click();
     await page.getByRole('button', { name: 'Next' }).click();
-    // Add the step to select 'Red hat repos Checkbox'
-    // Locate the checkbox in the table row
-    await page.locator('table tr:first-child input[type="checkbox"]').click();
+    // Locate the checkbox in the table row and click it.
+    const rowRHELRepo = await getRowByNameOrUrl(page, smallRHRepo);
+    await rowRHELRepo.getByRole('checkbox', { name: 'Select row' }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
     await page.getByRole('button', { name: 'Next' }).click();
-    page.getByRole('radio', { name: 'Use latest content' }); // try this
+    // Select 'use latest content' radio button
+    page.getByRole('radio', { name: 'Use latest content' }).click();
     await page.getByRole('button', { name: 'Next' }).click();
-    await page.getByPlaceholder('Enter name').fill('demo_template');
-    // await page.getByPlaceholder('Enter Description').fill('test');
+    // Populate the template with a name and description.
+    await page.getByPlaceholder('Enter name').fill('demo_template2');
+    await page.getByPlaceholder('Enter Description').fill('test');
     await page.getByRole('button', { name: 'Next' }).click();
-    // Add steps to create teamplate with system if you want to
-    await page.locator('button.pf-v5-c-menu-toggle__button').click();
+    // Submit the template without a system. This step is optional, so it is being skipped.
+    await page.getByText('Create template only', { exact: true }).click();
     await page.getByRole('option', { name: 'Create template only' }).click();
-    await expect(page.getByText('Content Template "demo_template" created')).toBeVisible();
+    // Check if the table contains the template with the name "demo_template"
+    const table = page.locator('table');
+    await expect(table).toContainText('demo_template');
   });
 
   test('Validate documentation link in empty state', async ({ page }) => {
