@@ -1,12 +1,12 @@
 import { defaultIntrospectTask, defaultSnapshotTask, ReactQueryTestWrapper } from 'testingHelpers';
 import ViewPayloadModal from './ViewPayloadModal';
 import { fireEvent, render } from '@testing-library/react';
-import { AdminTask } from 'services/AdminTasks/AdminTaskApi';
-import { useFetchAdminTaskQuery } from 'services/AdminTasks/AdminTaskQueries';
+import { AdminTask } from 'services/Admin/AdminTaskApi';
+import { useFetchAdminTaskQuery } from 'services/Admin/AdminTaskQueries';
 
 jest.mock('Hooks/useNotification', () => () => ({ notify: () => null }));
 
-jest.mock('services/AdminTasks/AdminTaskQueries', () => ({
+jest.mock('services/Admin/AdminTaskQueries', () => ({
   useFetchAdminTaskQuery: jest.fn(),
 }));
 

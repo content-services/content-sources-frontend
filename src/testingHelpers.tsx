@@ -12,7 +12,7 @@ import {
   type ErrataItem,
   type PackageItem,
 } from 'services/Content/ContentApi';
-import { AdminTask } from 'services/AdminTasks/AdminTaskApi';
+import { AdminTask } from 'services/Admin/AdminTaskApi';
 import { TemplateItem } from 'services/Templates/TemplateApi';
 import type { IDSystemItem, SystemItem } from 'services/Systems/SystemsApi';
 
