@@ -18,7 +18,6 @@ export const deleteAllTemplates = async ({ request }: Page, filter?: string) => 
   // If there are UUIDs to delete, make the delete request
   if (uuidList.length > 0)
     for (const value of uuidList) {
-      console.log(value);
       try {
         const result = await request.delete(`/api/content-sources/v1/templates/${value}`);
 
@@ -26,7 +25,7 @@ export const deleteAllTemplates = async ({ request }: Page, filter?: string) => 
         expect(result.status()).toBe(204);
       } catch (error) {
         console.error('Failed to delete template:', error);
-        throw error; // Optionally re-throw the error if you need to fail the test
+        throw error;
       }
     }
 };

@@ -30,7 +30,7 @@ export const deleteAllRepos = async ({ request }: Page, filter?: string) => {
       expect(result.status()).toBe(204);
     } catch (error) {
       console.error('Failed to delete repositories:', error);
-      throw error; // Optionally re-throw the error if you need to fail the test
+      throw error;
     }
   }
 };
