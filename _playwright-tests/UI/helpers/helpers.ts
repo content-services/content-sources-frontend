@@ -4,6 +4,8 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 export const snapshotTimestampFormat = 'DD MMM YYYY - HH:mm:ss';
 
+export const randomName = () => (Math.random() + 1).toString(36).substring(2, 6);
+
 export const closePopupsIfExist = async (page: Page) => {
   const locatorsToCheck = [
     page.locator('.pf-v5-c-alert.notification-item button'), // This closes all toast pop-ups
