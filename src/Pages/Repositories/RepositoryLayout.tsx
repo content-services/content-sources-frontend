@@ -10,6 +10,7 @@ import RepositoryQuickStart from 'components/QuickStart/RepositoryQuickStart';
 import {
   ADMIN_TASKS_ROUTE,
   POPULAR_REPOSITORIES_ROUTE,
+  REDHAT_REPO_GEN_ROUTE,
   REPOSITORIES_ROUTE,
 } from '../../Routes/constants';
 import { useAppContext } from 'middleware/AppContext';
@@ -56,6 +57,11 @@ export default function RepositoryLayout() {
               title: 'Admin tasks',
               route: ADMIN_TASKS_ROUTE,
               key: ADMIN_TASKS_ROUTE,
+            },
+            {
+              title: 'Admin features',
+              route: REDHAT_REPO_GEN_ROUTE,
+              key: REDHAT_REPO_GEN_ROUTE,
             },
           ]
         : []),

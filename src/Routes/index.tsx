@@ -14,6 +14,7 @@ import {
   EDIT_ROUTE,
   PACKAGES_ROUTE,
   POPULAR_REPOSITORIES_ROUTE,
+  REDHAT_REPO_GEN_ROUTE,
   REPOSITORIES_ROUTE,
   SNAPSHOTS_ROUTE,
   SYSTEMS_ROUTE,
@@ -42,6 +43,7 @@ import DeleteTemplateModal from 'Pages/Templates/TemplatesTable/components/Delet
 import TemplateRepositoriesTab from 'Pages/Templates/TemplateDetails/components/Tabs/TemplateRepositoriesTab';
 import UploadContent from 'Pages/Repositories/ContentListTable/components/UploadContent/UploadContent';
 import DeleteSnapshotsModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/DeleteSnapshotsModal/DeleteSnapshotsModal';
+import AdminFeaturesTable from 'Pages/Repositories/AdminFeaturesTable/AdminFeaturesTable';
 
 export default function RepositoriesRoutes() {
   const key = useMemo(() => Math.random(), []);
@@ -110,13 +112,22 @@ export default function RepositoriesRoutes() {
               ''
             )}
           </Route>
-          {features?.admintasks?.enabled && features.admintasks?.accessible ? (
-            <Route path={ADMIN_TASKS_ROUTE} element={<AdminTaskTable />}>
-              <Route key=':taskUUID' path=':taskUUID' element={<ViewPayloadModal />} />
-            </Route>
-          ) : (
-            ''
-          )}
+          {...features?.admintasks?.enabled && features.admintasks?.accessible
+            ? [
+                <Route
+                  key={ADMIN_TASKS_ROUTE}
+                  path={ADMIN_TASKS_ROUTE}
+                  element={<AdminTaskTable />}
+                >
+                  <Route key=':taskUUID' path=':taskUUID' element={<ViewPayloadModal />} />
+                </Route>,
+                <Route
+                  key={REDHAT_REPO_GEN_ROUTE}
+                  path={REDHAT_REPO_GEN_ROUTE}
+                  element={<AdminFeaturesTable />}
+                />,
+              ]
+            : []}
         </Route>
         {!rbac?.templateRead ? (
           <Route path={TEMPLATES_ROUTE} element={<NoPermissionsPage />} />
