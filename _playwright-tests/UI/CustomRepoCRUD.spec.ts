@@ -2,17 +2,12 @@ import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
+import { randomName, randomUrl } from './helpers/repoHelpers';
 
-export const repoNamePrefix = 'Repo-CRUD';
-export const randomName = () => (Math.random() + 1).toString(36).substring(2, 6);
-export const repoName = `${repoNamePrefix}-${randomName()}`;
-export const rank = () => Math.floor(Math.random() * 10 + 1).toString();
-export const randomNum = () =>
-  Math.floor(Math.random() * 10 + 1)
-    .toString()
-    .padStart(2, '0');
+const repoNamePrefix = 'Repo-CRUD';
+const repoName = `${repoNamePrefix}-${randomName()}`;
 
-export const url = `https://stephenw.fedorapeople.org/multirepos/${rank()}/repo${randomNum()}/`;
+const url = randomUrl();
 
 test.describe('Custom Repositories CRUD', () => {
   test('Add, Read, update, delete a repo', async ({ page }) => {
