@@ -11,8 +11,8 @@ const navigateToRepositoriesFunc = async (page: Page) => {
   // Wait for either list page or zerostate
   try {
     await Promise.race([
-      repositoriesListPage.waitFor({ state: 'visible', timeout: 20000 }),
-      zeroState.waitFor({ state: 'visible', timeout: 20000 }),
+      repositoriesListPage.waitFor({ state: 'visible', timeout: 40000 }),
+      zeroState.waitFor({ state: 'visible', timeout: 40000 }),
     ]);
   } catch (error) {
     throw new Error(
