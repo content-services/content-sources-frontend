@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { randomUrl } from './repoHelpers';
 
 export const bulkCreateRepos = async (
   { request }: Page,
@@ -22,4 +23,41 @@ export const bulkCreateRepos = async (
 
   // Ensure the request was successful
   expect(response.status()).toBe(201);
+};
+
+export const createCustomRepo = async ({ request }: Page, repoName: string) => {
+  const repoData = {
+    distribution_arch: 'aarch64',
+    distribution_versions: ['8', '9'],
+    name: repoName,
+    origin: 'external',
+    snapshot: true,
+    url: randomUrl(), // Ensure randomUrl() returns a valid string
+  };
+
+  try {
+    const response = await request.post('/api/content-sources/v1/repositories/', {
+      data: repoData, // Will be automatically stringified by Playwright
+      headers: { 'Content-Type': 'application/json' }, // Optional if data is an object
+    });
+
+    // Check if response is successful
+    if (!response.ok()) {
+      throw new Error(`Request failed with status ${response.status()}`);
+    }
+
+    // Parse response body
+    const data = await response.json();
+
+    // Extract and return UUID (assuming it's in data.uuid)
+    const uuid = data?.uuid;
+    if (!uuid) {
+      throw new Error('UUID not found in response');
+    }
+
+    return uuid;
+  } catch (error) {
+    console.error('Error creating custom repo:', error);
+    throw error;
+  }
 };
