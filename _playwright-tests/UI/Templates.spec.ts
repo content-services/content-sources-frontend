@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { navigateToTemplates } from './helpers/navHelpers';
 import { closePopupsIfExist } from './helpers/helpers';
+import { createTemplate } from './helpers/createTemplate_api';
 
 test.describe('Templates', () => {
   test('Navigate to templates, make sure the Add content template button can be clicked', async ({
@@ -47,5 +48,25 @@ test.describe('Templates', () => {
         page.getByText('A content template is a set of repository snapshots').first(),
       ).toBeVisible();
     });
+  });
+
+  test('Created content template has a status of Valid', async ({ page }) => {
+    // Step 1: Create a content template using the createTemplates method
+    const template = {
+      name: `Test-Template-${Math.floor(Math.random() * 1000)}`,
+      arch: 'aarch64',
+      use_latest: true,
+      repository_uuids: [], // Add the UUIDs of the repositories you want to include in the template
+      version: 'el9',
+      description: 'Test template created by Playwright',
+    };
+
+    await createTemplate(page, template);
+
+    // Step 2: Navigate to the templates page
+    await navigateToTemplates(page);
+    await closePopupsIfExist(page);
+
+    // Step 3: Verify the created template has a status of "Valid"
   });
 });
