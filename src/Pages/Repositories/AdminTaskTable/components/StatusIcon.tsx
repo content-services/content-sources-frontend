@@ -12,7 +12,7 @@ import {
   global_warning_color_100,
 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
-import { AdminTask } from 'services/AdminTasks/AdminTaskApi';
+import { AdminTask } from 'services/Admin/AdminTaskApi';
 
 const red = global_danger_color_100.value;
 const green = global_success_color_100.value;
