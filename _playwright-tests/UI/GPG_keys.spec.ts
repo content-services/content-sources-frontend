@@ -40,7 +40,9 @@ test.describe('Test GPG keys', () => {
       // Save button would be disabled for bad or incorrect gpg key
       await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeEnabled;
       await page.getByPlaceholder('Paste GPG key or URL here').fill('I am not a GPG Key');
-      await expect(page.getByText('Error validating signature:')).toBeVisible();
+      await expect(
+        page.getByText('Error loading GPG Key: no gpg key was found. Is this a valid GPG Key?'),
+      ).toBeVisible();
       await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
       await page.getByPlaceholder('Paste GPG key or URL here').fill(packages_key);
       await page.getByRole('button', { name: 'Save', exact: true }).click();
