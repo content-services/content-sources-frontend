@@ -5,4 +5,5 @@ export const randomNum = () =>
     .toString()
     .padStart(2, '0');
 
-export const randomUrl = () => `https://stephenw.fedorapeople.org/centirepos/repo${randomNum()}/`;
+export const randomUrl = () =>
+  `https://content-services.github.io/fixtures/yum/centirepos/repo${randomNum()}/`;
