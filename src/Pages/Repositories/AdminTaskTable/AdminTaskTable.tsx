@@ -26,8 +26,8 @@ import Hide from 'components/Hide/Hide';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import AdminTaskFilters from './components/AdminTaskFilters';
 import StatusIcon from './components/StatusIcon';
-import { useAdminTaskListQuery } from 'services/AdminTasks/AdminTaskQueries';
-import { AdminTaskFilterData, AdminTask } from 'services/AdminTasks/AdminTaskApi';
+import { useAdminTaskListQuery } from 'services/Admin/AdminTaskQueries';
+import { AdminTaskFilterData, AdminTask } from 'services/Admin/AdminTaskApi';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { formatDateDDMMMYYYY } from 'helpers';
 

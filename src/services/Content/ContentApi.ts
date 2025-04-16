@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { objectToUrlParams } from 'helpers';
-import { AdminTask } from '../AdminTasks/AdminTaskApi';
+import { AdminTask } from '../Admin/AdminTaskApi';
 import { MAX_CHUNK_SIZE } from 'Pages/Repositories/ContentListTable/components/UploadContent/components/helpers';
 
 export interface ContentItem {
