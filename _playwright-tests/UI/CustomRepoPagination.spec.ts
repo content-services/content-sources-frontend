@@ -12,7 +12,7 @@ test.describe('Custom repositories pagination', () => {
       await deleteAllRepos(page, `&search=${repoNamePrefix}`);
     });
     await test.step('Populate the custom repo table', async () => {
-      await bulkCreateRepos(page, 12);
+      await bulkCreateRepos(page, 12, repoNamePrefix);
       await navigateToRepositories(page);
       await closePopupsIfExist(page);
       await page.getByPlaceholder(/^Filter by name.*$/).fill(repoNamePrefix);
