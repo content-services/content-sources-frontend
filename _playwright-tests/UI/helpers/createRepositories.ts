@@ -9,7 +9,8 @@ export const bulkCreateRepos = async (
   const list: Record<string, string | boolean | number>[] = [];
   for (let count = 1; count <= repoCount; count++) {
     const repoNum = `${count.toString().padStart(2, '0')}`;
-    const randomURL = () => `https://stephenw.fedorapeople.org/centirepos/repo${repoNum}/`;
+    const randomURL = () =>
+      `https://content-services.github.io/fixtures/yum/centirepos/repo${repoNum}/`;
     list.push({
       name: `${repoNamePrefix}-${repoNum}`,
       url: randomURL(),
