@@ -15,12 +15,26 @@ export const closePopupsIfExist = async (page: Page) => {
   for (const locator of locatorsToCheck) {
     await page.addLocatorHandler(locator, async () => {
       try {
-        await locator.first().click(); // There can be multiple toast pop-ups
+        await page.getByRole('dialog').waitFor({ state: 'hidden', timeout: 1000 });
+        await locator.first().click({ noWaitAfter: true }); // There can be multiple toast pop-ups
       } catch {
         return;
       }
     });
   }
+};
+
+export const sentryLocator = (page: Page) =>
+  page.getByText(/^Something went wrong Sentry error ID:.*$/);
+
+export const reloadOnSentry = async (page: Page) => {
+  await page.addLocatorHandler(sentryLocator(page), async () => {
+    try {
+      await page.reload();
+    } catch {
+      return;
+    }
+  });
 };
 
 export const filterByNameOrUrl = async (locator: Locator | Page, name: string) => {
