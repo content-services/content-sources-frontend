@@ -1,3 +1,7 @@
 [submodule "build-tools"]
 	path = build-tools
 	url = https://github.com/RedHatInsights/insights-frontend-builder-common.git
+[submodule "_playwright-tests/test-utils"]
+	path = _playwright-tests/test-utils
+	url = git@github.com:dominikvagner/content-sources-backend.git
+  branch = test-shared-utils
