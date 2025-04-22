@@ -2,15 +2,14 @@ import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
-import { randomName, randomUrl } from './helpers/repoHelpers';
+import { randomName } from './helpers/repoHelpers';
+import { test as fixtureTest } from './fixtures/repoFixture';
 
-const repoNamePrefix = 'Repo-CRUD';
-const repoName = `${repoNamePrefix}-${randomName()}`;
-
-const url = randomUrl();
+export const repoNamePrefix = 'Repo-CRUD';
+export const repoName = `${repoNamePrefix}-${randomName()}`;
 
 test.describe('Custom Repositories CRUD', () => {
-  test('Add, Read, update, delete a repo', async ({ page }) => {
+  fixtureTest('Add, Read, update, delete a repo', async ({ page, fedoraUrl }) => {
     await test.step('Delete any CRUD test repos that exist', async () => {
       await navigateToRepositories(page);
       await closePopupsIfExist(page);
@@ -23,9 +22,9 @@ test.describe('Custom Repositories CRUD', () => {
       await expect(page.getByRole('dialog', { name: 'Add custom repositories' })).toBeVisible();
 
       // Fill in the repository details
-      await page.getByLabel('Name').fill(`${repoName}`);
+      await page.getByLabel('Name').fill(repoName);
       await page.getByLabel('Introspect only').click();
-      await page.getByLabel('URL').fill(url);
+      await page.getByLabel('URL').fill(fedoraUrl);
       await page.getByRole('button', { name: 'Save', exact: true }).click();
     });
     await test.step('Wait for status to be "Valid"', async () => {
@@ -43,7 +42,7 @@ test.describe('Custom Repositories CRUD', () => {
       await expect(page.getByRole('dialog', { name: 'Edit custom repository' })).toBeVisible();
       // Assert we can read some values
       await expect(page.getByPlaceholder('Enter name', { exact: true })).toHaveValue(`${repoName}`);
-      await expect(page.getByPlaceholder('https://', { exact: true })).toHaveValue(`${url}`);
+      await expect(page.getByPlaceholder('https://', { exact: true })).toHaveValue(`${fedoraUrl}`);
     });
     await test.step('Update the repository', async () => {
       await page.getByPlaceholder('Enter name', { exact: true }).fill(`${repoName}-Edited`);
@@ -66,7 +65,7 @@ test.describe('Custom Repositories CRUD', () => {
       await expect(page.getByPlaceholder('Enter name', { exact: true })).toHaveValue(
         `${repoName}-Edited`,
       );
-      await expect(page.getByPlaceholder('https://', { exact: true })).toHaveValue(`${url}`);
+      await expect(page.getByPlaceholder('https://', { exact: true })).toHaveValue(`${fedoraUrl}`);
       await page.getByRole('button', { name: 'Cancel' }).click();
     });
     await test.step('Delete one custom repository', async () => {
