@@ -42,7 +42,7 @@ test.describe('Upload Repositories', () => {
       await versionFilterButton.click(); // Close the filter dropdown
 
       // Wait for the successful API call
-      const errorElement = page.locator('.pf-v5-c-helper-text__item.pf-m-error');
+      const errorElement = page.locator('.pf-v6-c-helper-text__item.pf-m-error');
 
       if (await errorElement.isVisible()) {
         throw new Error('Error message in element is visible');
