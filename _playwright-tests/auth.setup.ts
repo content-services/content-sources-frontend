@@ -1,9 +1,12 @@
-import { expect, test as setup } from '@playwright/test';
+import { expect, test as setup, type Page } from "@playwright/test";
 import {
-  throwIfMissingEnvVariables,
-  logInWithUser1,
-  storeStorageStateAndToken,
-} from './helpers/loginHelpers';
+  closePopupsIfExist,
+} from './UI/helpers/helpers';
+import {
+ throwIfMissingEnvVariables,
+ logInWithUsernameAndPassword,
+ logout,
+} from "./helpers/loginHelpers";
 import { closePopupsIfExist } from './UI/helpers/helpers';
 
 setup.describe('Setup', async () => {
@@ -17,7 +20,30 @@ setup.describe('Setup', async () => {
     setup.setTimeout(60_000);
 
     await closePopupsIfExist(page);
-    await logInWithUser1(page);
+    await logInWithUsernameAndPassword(
+      page, 
+      process.env.USER1USERNAME,
+      process.env.USER1PASSWORD,
+    );
     await storeStorageStateAndToken(page);
+    await logout(page);
+    await logInWithUsernameAndPassword(
+      page,
+      process.env.RO_USER_USERNAME,
+      process.env.RO_USER_PASSWORD,
+    );
+    await storeStorageStateAndToken(page);
+    await logout(page);
+    // Example of how to add another user
+    // await logout(page)
+    // await logInWithUsernameAndPassword(
+    //     page,
+    //     process.env.USER2USERNAME,
+    //     process.env.USER2PASSWORD
+    // );
+    // Example of how to switch to said user
+    // await switchToUser(page, process.env.USER1USERNAME!);
+    // await ensureNotInPreview(page);
+    // Other users for other tests can be added below after logging out
   });
 });
