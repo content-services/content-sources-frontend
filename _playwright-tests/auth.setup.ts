@@ -5,9 +5,9 @@ import {
 import {
  throwIfMissingEnvVariables,
  logInWithUsernameAndPassword,
+ storeStorageStateAndToken,
  logout,
 } from "./helpers/loginHelpers";
-import { closePopupsIfExist } from './UI/helpers/helpers';
 
 setup.describe('Setup', async () => {
   setup.describe.configure({ retries: 3 });
