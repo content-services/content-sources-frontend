@@ -35,15 +35,14 @@ test.describe('Snapshot Repositories', () => {
 
     await test.step('Filter by architecture', async () => {
       await page.getByRole('button', { name: 'filter architecture' }).click();
-      await page.getByRole('option', { name: 'x86_64' }).click();
+      await page.getByTestId('filter_x86_64').click();
     });
 
     await test.step('Filter by version', async () => {
-      const versionFilterButton = page.getByRole('button', { name: 'filter version' });
-      await versionFilterButton.click();
-      await page.getByRole('option', { name: 'el9' }).click();
-      await page.getByRole('option', { name: 'el8' }).click();
-      await versionFilterButton.click(); // Close the version filter dropdown
+      await page.getByRole('button', { name: 'filter version' }).click();
+      await page.getByTestId('filter_el9').click();
+      await page.getByTestId('filter_el8').click();
+      await page.getByRole('button', { name: 'filter version' }).click();
     });
 
     await test.step('Submit the form and wait for modal to disappear', async () => {
@@ -88,7 +87,7 @@ test.describe('Snapshot Repositories', () => {
         'https://jlsherrill.fedorapeople.org/fake-repos/revision/' + repoName,
       );
       await row.getByLabel('Kebab toggle').click();
-      await row.getByRole('menuitem', { name: 'Delete' }).click();
+      await page.getByTestId('kebab_delete').click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
 
       await Promise.all([

@@ -289,6 +289,8 @@ const ContentListTable = () => {
                   actionTakingPlace ||
                   !rowData.snapshot ||
                   !(rowData.snapshot && rowData.last_snapshot_uuid),
+
+                ouiaId: 'kebab_view_snapshots',
                 title:
                   rowData.snapshot && rowData.last_snapshot_uuid
                     ? 'View all snapshots'
@@ -305,6 +307,7 @@ const ContentListTable = () => {
                   {
                     isDisabled: actionTakingPlace || rowData?.status === 'Pending',
                     title: 'Edit',
+                    ouiaId: 'kebab_edit',
                     onClick: () => {
                       navigate(`${rowData.uuid}/${EDIT_ROUTE}`);
                     },
@@ -314,6 +317,7 @@ const ContentListTable = () => {
                         {
                           isDisabled: actionTakingPlace || rowData?.status === 'Pending',
                           title: 'Upload content',
+                          ouiaId: 'kebab_upload_content',
                           onClick: () => {
                             navigate(`${rowData.uuid}/${UPLOAD_ROUTE}`);
                           },
@@ -327,6 +331,7 @@ const ContentListTable = () => {
                   {
                     isDisabled: actionTakingPlace || !rowData.last_snapshot_uuid,
                     title: rowData.last_snapshot_uuid ? 'View all snapshots' : 'No snapshots yet',
+                    ouiaId: 'kebab_view_snapshots',
                     onClick: () => {
                       navigate(`${rowData.uuid}/snapshots`);
                     },
@@ -342,6 +347,7 @@ const ContentListTable = () => {
                           isDisabled:
                             actionTakingPlace || rowData?.status === 'Pending' || !rowData.snapshot,
                           title: 'Trigger snapshot',
+                          ouiaId: 'kebab_trigger_snapshots',
                           onClick: () => {
                             triggerIntrospectionAndSnapshot(rowData?.uuid);
                           },
@@ -364,6 +370,7 @@ const ContentListTable = () => {
                   {
                     isDisabled: actionTakingPlace || rowData?.status == 'Pending',
                     title: 'Introspect now',
+                    ouiaId: 'kebab_introspect_now',
                     onClick: () =>
                       introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
                   },
@@ -374,6 +381,7 @@ const ContentListTable = () => {
                   { isSeparator: true },
                   {
                     title: 'Delete',
+                    ouiaId: 'kebab_delete',
                     onClick: () => navigate(`${DELETE_ROUTE}?repoUUID=${rowData.uuid}`),
                   },
                 ]

@@ -34,13 +34,13 @@ test.describe('Upload Repositories', () => {
 
       // Filter by architecture
       await page.getByRole('button', { name: 'filter architecture' }).click();
-      await page.getByRole('option', { name: 'x86_64' }).click();
+      await page.getByTestId('filter_x86_64').click();
 
       // Filter by version
       const versionFilterButton = page.getByRole('button', { name: 'filter version' });
       await versionFilterButton.click();
-      await page.getByRole('menuitem', { name: 'el9' }).locator('label').click();
-      await page.getByRole('menuitem', { name: 'el8' }).locator('label').click();
+      await page.getByTestId('filter_el9').click();
+      await page.getByTestId('filter_el8').click();
       await versionFilterButton.click(); // Close the filter dropdown
 
       // Wait for the successful API call
@@ -82,7 +82,7 @@ test.describe('Upload Repositories', () => {
       const row = await getRowByNameOrUrl(page, uploadRepoName);
       // Check if the 'Kebab toggle' button is disabled
       await row.getByLabel('Kebab toggle').click();
-      await row.getByRole('menuitem', { name: 'Delete' }).click();
+      await page.getByTestId('kebab_delete').click();
 
       // Click on the 'Remove' button
       await Promise.all([

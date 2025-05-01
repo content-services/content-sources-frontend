@@ -581,6 +581,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                 {Object.keys(distributionArches).map((option) => (
                   <DropdownItem
                     key={option}
+                    ouiaId={`filter_${option}`}
                     value={distributionArches[option]}
                     isSelected={arch === distributionArches[option]}
                     component='button'
