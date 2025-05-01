@@ -165,7 +165,7 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
                 isDisabled={isLoading}
                 isExpanded={isActionOpen}
               >
-                Filter by version
+                {selectedVersion || 'Filter by version'}
               </MenuToggle>
             )}
             onOpenChange={(isOpen) => setActionOpen(isOpen)}
@@ -203,7 +203,7 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
                 isDisabled={isLoading}
                 isExpanded={isActionOpen}
               >
-                Filter by architecture
+                {selectedArch || 'Filter by architecture'}
               </MenuToggle>
             )}
             onOpenChange={(isOpen) => setActionOpen(isOpen)}

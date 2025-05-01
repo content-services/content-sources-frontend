@@ -62,6 +62,7 @@ export default function RepositoryQuickStart() {
         isExpanded={isExpanded}
         displaySize='lg'
         aria-label='quickStart-expansion'
+        toggleId='quickstart_button'
         data-ouia-component-id='quickstart_expand'
       >
         <Content component='p'>For help getting started, access the quick start below:</Content>

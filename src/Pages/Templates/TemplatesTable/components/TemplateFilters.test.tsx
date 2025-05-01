@@ -73,7 +73,7 @@ it('Select a filter of each type and ensure chips are present ContentListFilters
   expect(versionSelector).toBeInTheDocument();
   await userEvent.click(versionSelector);
 
-  const versionItem = getByRole('option', { name: 'el7' }) as Element;
+  const versionItem = getByRole('menuitem', { name: 'el7' }) as Element;
   expect(versionItem).toBeInTheDocument();
   await userEvent.click(versionItem);
 
