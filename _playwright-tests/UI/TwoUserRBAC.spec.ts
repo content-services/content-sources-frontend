@@ -13,7 +13,7 @@ export const repoName = `${repoNamePrefix}-${randomName()}`;
 test.describe('User Permissions Test', () => {
   test.beforeAll(async ({ browser }) => {
     // Default user login
-    if (!process.env.USER1USERNAME || !process.env.STAGE_RO_USER_USERNAME) {
+    if (!process.env.USER1USERNAME || !process.env.RO_USER_USERNAME) {
         throw new Error('Required environment variables are not set');
     };
     let context = await browser.newContext();
@@ -25,7 +25,7 @@ test.describe('User Permissions Test', () => {
     // Read-only user login
     context = await browser.newContext();
     page = await context.newPage();
-    await logInWithUsernameAndPassword(page, process.env.STAGE_RO_USER_USERNAME!);
+    await logInWithUsernameAndPassword(page, process.env.RO_USER_USERNAME!);
     await context.storageState({ path: 'readonly_user.json' });
     await context.close();
   });
