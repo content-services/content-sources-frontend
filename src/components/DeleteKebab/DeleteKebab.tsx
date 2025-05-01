@@ -34,7 +34,7 @@ const DeleteKebab = ({ atLeastOneRepoChecked, numberOfReposChecked, isDisabled }
       toggle={(toggleRef) => (
         <MenuToggle
           ref={toggleRef}
-          ouiaId={'delete-kebab'}
+          ouiaId='delete-kebab'
           disabled={isDisabled}
           id='delete-kebab'
           onClick={() => setIsOpen((prev) => !prev)}

@@ -325,27 +325,28 @@ const PopularRepositoriesTable = () => {
               <InputGroupItem>
                 <FlexItem className={classes.repositoryActions}>
                   {/* RBAC popover takes precedence */}
-                  <ConditionalTooltip
-                    content={
-                      !rbac?.repoWrite
-                        ? 'You do not have the required permissions to perform this action.'
-                        : 'Make a selection below to add multiple repositories'
-                    }
-                    show={!rbac?.repoWrite || !atLeastOneRepoToAddChecked}
-                    setDisabled
-                  >
-                    {(() => {
-                      const defaultText = atLeastOneRepoToAddChecked
-                        ? `Add ${checkedRepositoriesToAdd.size} repositories`
-                        : 'Add selected repositories';
-                      const isDisabled = !rbac?.repoWrite || !atLeastOneRepoToAddChecked;
-                      if (features?.snapshots?.enabled && features.snapshots.accessible) {
-                        return (
-                          <Dropdown
-                            onSelect={onDropdownSelect}
-                            className={classes.addRepositoriesButton}
-                            ouiaId='add-selected-toggle-dropdown'
-                            toggle={(toggleRef) => (
+
+                  {(() => {
+                    const defaultText = atLeastOneRepoToAddChecked
+                      ? `Add ${checkedRepositoriesToAdd.size} repositories`
+                      : 'Add selected repositories';
+                    const isDisabled = !rbac?.repoWrite || !atLeastOneRepoToAddChecked;
+                    if (features?.snapshots?.enabled && features.snapshots.accessible) {
+                      return (
+                        <Dropdown
+                          onSelect={onDropdownSelect}
+                          className={classes.addRepositoriesButton}
+                          ouiaId='add-selected-toggle-dropdown'
+                          toggle={(toggleRef) => (
+                            <ConditionalTooltip
+                              content={
+                                !rbac?.repoWrite
+                                  ? 'You do not have the required permissions to perform this action.'
+                                  : 'Make a selection below to add multiple repositories'
+                              }
+                              show={!rbac?.repoWrite || !atLeastOneRepoToAddChecked}
+                              setDisabled
+                            >
                               <MenuToggle
                                 ref={toggleRef}
                                 ouiaId='add-selected-dropdown-toggle-no-snap'
@@ -362,35 +363,35 @@ const PopularRepositoriesTable = () => {
                                   </DropdownItem>,
                                 ]}
                               />
-                            )}
-                            isOpen={isActionOpen}
-                          >
-                            <DropdownList>
-                              <DropdownItem
-                                key='action'
-                                component='button'
-                                onClick={() => addSelected(false)}
-                                ouiaId='add-selected-repos-no-snap'
-                              >
-                                {`Add ${checkedRepositoriesToAdd.size} repositories without snapshotting`}
-                              </DropdownItem>
-                            </DropdownList>
-                          </Dropdown>
-                        );
-                      } else {
-                        return (
-                          <Button
-                            onClick={() => addSelected(false)}
-                            className={classes.addRepositoriesButton}
-                            isDisabled={isDisabled}
-                            ouiaId='add_checked_repos'
-                          >
-                            {defaultText}
-                          </Button>
-                        );
-                      }
-                    })()}
-                  </ConditionalTooltip>
+                            </ConditionalTooltip>
+                          )}
+                          isOpen={isActionOpen}
+                        >
+                          <DropdownList>
+                            <DropdownItem
+                              key='action'
+                              component='button'
+                              onClick={() => addSelected(false)}
+                              ouiaId='add-selected-repos-no-snap'
+                            >
+                              {`Add ${checkedRepositoriesToAdd.size} repositories without snapshotting`}
+                            </DropdownItem>
+                          </DropdownList>
+                        </Dropdown>
+                      );
+                    } else {
+                      return (
+                        <Button
+                          onClick={() => addSelected(false)}
+                          className={classes.addRepositoriesButton}
+                          isDisabled={isDisabled}
+                          ouiaId='add_checked_repos'
+                        >
+                          {defaultText}
+                        </Button>
+                      );
+                    }
+                  })()}
                   <ConditionalTooltip
                     content='You do not have the required permissions to perform this action.'
                     show={!rbac?.repoWrite}

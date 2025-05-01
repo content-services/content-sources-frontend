@@ -16,14 +16,14 @@ it('expect DefineContentStep to render correctly', () => {
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
   }));
 
-  const { getByRole } = render(<DefineContentStep />);
+  const { getByText } = render(<DefineContentStep />);
 
-  const archTextBox = getByRole('button', { name: defaultTemplateItem.arch });
+  const archTextBox = getByText(defaultTemplateItem.arch);
 
   expect(archTextBox).toBeInTheDocument();
   expect(archTextBox).not.toHaveAttribute('disabled');
 
-  const versionTextBox = getByRole('button', { name: 'el' + defaultTemplateItem.version });
+  const versionTextBox = getByText('el' + defaultTemplateItem.version);
 
   expect(versionTextBox).toBeInTheDocument();
   expect(versionTextBox).not.toHaveAttribute('disabled');
@@ -38,14 +38,14 @@ it('expect DefineContentStep to render with disabled inputs', () => {
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
   }));
 
-  const { getByRole } = render(<DefineContentStep />);
+  const { getByTestId } = render(<DefineContentStep />);
 
-  const archTextBox = getByRole('button', { name: defaultTemplateItem.arch });
+  const archTextBox = getByTestId('restrict_to_architecture');
 
   expect(archTextBox).toBeInTheDocument();
   expect(archTextBox).toHaveAttribute('disabled');
 
-  const versionTextBox = getByRole('button', { name: 'el' + defaultTemplateItem.version });
+  const versionTextBox = getByTestId('restrict_to_os_version');
 
   expect(versionTextBox).toBeInTheDocument();
   expect(versionTextBox).toHaveAttribute('disabled');

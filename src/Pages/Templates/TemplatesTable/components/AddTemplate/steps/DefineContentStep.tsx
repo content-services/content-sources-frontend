@@ -69,18 +69,18 @@ export default function DefineContentStep() {
         </Content>
       </GridItem>
       <FormGroup label='Architecture' isRequired>
-        <ConditionalTooltip
-          position='top-start'
-          content='Architecture cannot be changed after creation'
-          show={!!isEdit}
-          setDisabled
-        >
-          <Dropdown
-            onSelect={(_, val) => {
-              setTemplateRequest((prev) => ({ ...prev, arch: val as string }));
-              setArchOpen(false);
-            }}
-            toggle={(toggleRef) => (
+        <Dropdown
+          onSelect={(_, val) => {
+            setTemplateRequest((prev) => ({ ...prev, arch: val as string }));
+            setArchOpen(false);
+          }}
+          toggle={(toggleRef) => (
+            <ConditionalTooltip
+              position='top-start'
+              content='Architecture cannot be changed after creation'
+              show={!!isEdit}
+              setDisabled
+            >
               <MenuToggle
                 ref={toggleRef}
                 className={classes.fullWidth}
@@ -93,41 +93,41 @@ export default function DefineContentStep() {
               >
                 {archesDisplay(templateRequest?.arch)}
               </MenuToggle>
-            )}
-            onOpenChange={(isOpen) => setArchOpen(isOpen)}
-            isOpen={archOpen}
-          >
-            <DropdownList>
-              {distribution_arches
-                .filter(({ label }) => ['x86_64', 'aarch64'].includes(label))
-                .map(({ label, name }) => (
-                  <DropdownItem
-                    key={label}
-                    value={label}
-                    isSelected={label === templateRequest?.arch}
-                    component='button'
-                    data-ouia-component-id={`filter_${label}`}
-                  >
-                    {name}
-                  </DropdownItem>
-                ))}
-            </DropdownList>
-          </Dropdown>
-        </ConditionalTooltip>
+            </ConditionalTooltip>
+          )}
+          onOpenChange={(isOpen) => setArchOpen(isOpen)}
+          isOpen={archOpen}
+        >
+          <DropdownList>
+            {distribution_arches
+              .filter(({ label }) => ['x86_64', 'aarch64'].includes(label))
+              .map(({ label, name }) => (
+                <DropdownItem
+                  key={label}
+                  value={label}
+                  isSelected={label === templateRequest?.arch}
+                  component='button'
+                  data-ouia-component-id={`filter_${label}`}
+                >
+                  {name}
+                </DropdownItem>
+              ))}
+          </DropdownList>
+        </Dropdown>
       </FormGroup>
       <FormGroup label='OS Version' isRequired>
-        <ConditionalTooltip
-          position='top-start'
-          content='OS Version cannot be changed after creation'
-          show={!!isEdit}
-          setDisabled
-        >
-          <Dropdown
-            onSelect={(_, val) => {
-              setTemplateRequest((prev) => ({ ...prev, version: val as string }));
-              setVersionOpen(false);
-            }}
-            toggle={(toggleRef) => (
+        <Dropdown
+          onSelect={(_, val) => {
+            setTemplateRequest((prev) => ({ ...prev, version: val as string }));
+            setVersionOpen(false);
+          }}
+          toggle={(toggleRef) => (
+            <ConditionalTooltip
+              position='top-start'
+              content='OS Version cannot be changed after creation'
+              show={!!isEdit}
+              setDisabled
+            >
               <MenuToggle
                 ref={toggleRef}
                 className={classes.fullWidth}
@@ -140,27 +140,27 @@ export default function DefineContentStep() {
               >
                 {versionDisplay(templateRequest?.version)}
               </MenuToggle>
-            )}
-            onOpenChange={(isOpen) => setVersionOpen(isOpen)}
-            isOpen={versionOpen}
-          >
-            <DropdownList>
-              {distribution_versions
-                .filter(({ label }) => ['8', '9'].includes(label))
-                .map(({ label, name }) => (
-                  <DropdownItem
-                    key={label}
-                    value={label}
-                    isSelected={label === templateRequest?.version}
-                    component='button'
-                    data-ouia-component-id={`filter_${label}`}
-                  >
-                    {name}
-                  </DropdownItem>
-                ))}
-            </DropdownList>
-          </Dropdown>
-        </ConditionalTooltip>
+            </ConditionalTooltip>
+          )}
+          onOpenChange={(isOpen) => setVersionOpen(isOpen)}
+          isOpen={versionOpen}
+        >
+          <DropdownList>
+            {distribution_versions
+              .filter(({ label }) => ['8', '9'].includes(label))
+              .map(({ label, name }) => (
+                <DropdownItem
+                  key={label}
+                  value={label}
+                  isSelected={label === templateRequest?.version}
+                  component='button'
+                  data-ouia-component-id={`filter_${label}`}
+                >
+                  {name}
+                </DropdownItem>
+              ))}
+          </DropdownList>
+        </Dropdown>
       </FormGroup>
       <ExpandableSection
         toggleText='What does it mean?'

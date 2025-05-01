@@ -1,4 +1,4 @@
-import { getByText, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import SnapshotListModal from './SnapshotListModal';
 import {
   ReactQueryTestWrapper,
