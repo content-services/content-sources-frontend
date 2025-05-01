@@ -348,6 +348,7 @@ const PopularRepositoriesTable = () => {
                             toggle={(toggleRef) => (
                               <MenuToggle
                                 ref={toggleRef}
+                                ouiaId='add-selected-dropdown-toggle-no-snap'
                                 onClick={onDropdownToggle}
                                 isDisabled={isDisabled}
                                 splitButtonItems={[
