@@ -66,7 +66,7 @@ export const CONTENT_ITEM_KEY = 'CONTENT_ITEM_KEY';
 export const REPO_CONFIG_FILE_KEY = 'REPO_CONFIG_FILE_KEY';
 export const LATEST_REPO_CONFIG_FILE_KEY = 'LATEST_REPO_CONFIG_FILE_KEY';
 
-const CONTENT_LIST_POLLING_TIME = 15000; // 15 seconds
+const CONTENT_LIST_POLLING_TIME = 10000; // 15 seconds
 
 const buildContentListKey = (
   page: number,
