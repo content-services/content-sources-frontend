@@ -267,11 +267,11 @@ const TemplatesTable = () => {
                 <Tr>
                   {columnHeaders.map(({ title, width }, index) =>
                     title === 'Status' ? (
-                      <Th key={title + 'column'} width={width}>
+                      <Th key={title + 'column'} width={width} modifier='wrap'>
                         {title}
                       </Th>
                     ) : (
-                      <Th key={title + 'column'} width={width} sort={sortParams(index)}>
+                      <Th key={title + 'column'} width={width} modifier='wrap' sort={sortParams(index)}>
                         {title}
                       </Th>
                     ),

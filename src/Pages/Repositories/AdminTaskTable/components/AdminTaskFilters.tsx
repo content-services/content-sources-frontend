@@ -32,15 +32,11 @@ const useStyles = createUseStyles({
     marginLeft: '16px',
   },
   filter: {
-    width: '100%',
+    width: 'auto',
     maxWidth: 'unset',
   },
   filterDropdown: {
     width: 'fit-content',
-  },
-  fullWidth: {
-    width: '100%',
-    maxWidth: 'unset',
   },
 });
 
