@@ -30,6 +30,10 @@ const useStyles = createUseStyles({
   ensureMinHeight: {
     flexFlow: 'column nowrap',
   },
+  fullWidth: {
+    width: 'auto',
+    maxWidth: 'unset',
+  },
 });
 
 interface Props {
@@ -102,6 +106,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
             isDisabled={isLoading}
             id='search'
             ouiaId='filter_search'
+            className={classes.fullWidth}
             placeholder='Filter by name/synopsis'
             value={search}
             type='search'
@@ -116,10 +121,10 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
             toggle={(toggleRef) => (
               <MenuToggle
                 ref={toggleRef}
-                // className={classes.menuToggle}
                 aria-label='filter type'
                 id='typeSelect'
                 ouiaId='filter_by_type'
+                className={classes.fullWidth}
                 onClick={() => setActionOpen((prev) => !prev)}
                 isDisabled={isLoading}
                 isExpanded={isActionOpen}
@@ -156,6 +161,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
                 aria-label='filter severity'
                 id='severitySelect'
                 ouiaId='filter_by_severity'
+                className={classes.fullWidth}
                 onClick={() => setActionOpen((prev) => !prev)}
                 isDisabled={isLoading}
                 isExpanded={isActionOpen}
@@ -206,6 +212,7 @@ export default function SnapshotErrataFilters({ isLoading, setFilterData, filter
               aria-label='filterSelectionDropdown'
               id='filterSelectionDropdown'
               ouiaId='filter_type_toggle'
+              className={classes.fullWidth}
               onClick={() => setTypeFilterOpen((prev) => !prev)}
               isDisabled={isLoading}
               isExpanded={typeFilterOpen}

@@ -3,8 +3,8 @@ import { SecurityIcon } from '@patternfly/react-icons';
 import {
   c_alert_m_warning__icon_Color,
   c_alert_m_danger__icon_Color,
-  t_global_icon_color_300,
-  c_alert_m_info__icon_Color,
+  t_color_orange_50,
+  t_color_gray_50,
 } from '@patternfly/react-tokens';
 
 import { createUseStyles } from 'react-jss';
@@ -16,13 +16,13 @@ const useStyles = (color: string) => {
       finalColor = c_alert_m_danger__icon_Color.value;
       break;
     case 'important':
-      finalColor = t_global_icon_color_300.value;
+      finalColor = t_color_orange_50.value;
       break;
     case 'moderate':
       finalColor = c_alert_m_warning__icon_Color.value;
       break;
     case 'low':
-      finalColor = c_alert_m_info__icon_Color.value;
+      finalColor = t_color_gray_50.value;
       break;
     default:
       break;

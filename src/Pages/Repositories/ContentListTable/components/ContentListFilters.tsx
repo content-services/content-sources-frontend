@@ -52,7 +52,7 @@ const useStyles = createUseStyles({
     flexDirection: 'row',
   },
   fullWidth: {
-    width: '100%',
+    width: 'auto',
     maxWidth: 'unset',
   },
 });
