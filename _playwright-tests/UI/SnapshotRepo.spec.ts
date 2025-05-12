@@ -144,7 +144,6 @@ test('Snapshot deletion', async ({ page }) => {
     await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
     await page.getByRole('button', { name: 'Kebab toggle' }).click();
     await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
-    await page.getByRole('checkbox', { name: 'Select all rows' }).check();
     // Count the number of rows in the snapshot list table
     const snapshotCount = (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
     // Create a template which uses the repo and assert that is uses the latest snapshot
@@ -159,7 +158,6 @@ test('Snapshot deletion', async ({ page }) => {
     await page.getByRole('button', { name: 'Next', exact: true }).click();
     await row.getByRole('gridcell', { name: 'Select row' }).locator('label').click();
     await page.getByRole('button', { name: 'Next', exact: true }).click();
-
     await page.getByText('Use latest contentAlways use').click();
     await page.getByRole('radio', { name: 'Use latest content' }).check();
     await page.getByRole('button', { name: 'Next' }).click();
@@ -176,32 +174,45 @@ test('Snapshot deletion', async ({ page }) => {
     ).toBe('Use latest');
     // Assert that the template snapshot count matches the repo snapshot count
     expect(snapshotCount).toBe(4);
-//     // Test deletion of a single snapshot.
-//     await test.step('Delete a single snapshot', async () => {
-//       await navigateToRepositories(page);
-//       const row = await getRowByNameOrUrl(page, repoName);
-//       await row.getByLabel('Kebab toggle').click();
-//       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
-//       await expect(page.getByLabel('SnapshotsView list of').locator('tbody')).toBeVisible();
-//       await page
-//         .getByTestId('snapshot_list_table')
-//         .locator('tbody tr')
-//         .first()
-//         .getByLabel('Kebab toggle')
-//         .click();
-//       //   await row.getByLabel('Kebab toggle').first().click();
-//       await row.getByRole('menuitem', { name: 'Delete' }).click();
-//       await expect(page.getByText('Remove repositories?')).toBeVisible();
-//       await Promise.all([
-//         page.waitForResponse(
-//           (resp) =>
-//             resp.url().includes('bulk_delete') && resp.status() >= 200 && resp.status() < 300,
-//         ),
-//         page.getByRole('button', { name: 'Remove' }).click(),
-//       ]);
-//       await expect(templateRow).not.toBeVisible();
-//     });
-//     // Test bulk deletion of multiple snapshots.
-//   });
-//   await deleteAllRepos(page, `&search=${repoNamePrefix}`);
-// });
+
+    // Test deletion of a single snapshot.
+    await test.step('Delete a single snapshot', async () => {
+      await navigateToRepositories(page);
+      const row = await getRowByNameOrUrl(page, repoName);
+      await row.getByLabel('Kebab toggle').click();
+      await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
+      await expect(page.getByLabel('SnapshotsView list of').locator('tbody')).toBeVisible();
+      await page
+        .getByTestId('snapshot_list_table')
+        .locator('tbody tr')
+        .first()
+        .getByLabel('Kebab toggle')
+        .click();
+      await page.getByRole('menuitem', { name: 'Delete' }).click();
+      await expect(page.getByText('Remove snapshots?')).toBeVisible();
+      await page.getByText('Remove', { exact: true }).click();
+      const snapshotCountAfterSingleDeletion =
+        (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
+      expect(snapshotCountAfterSingleDeletion).toBe(3);
+    });
+
+    await test.step('Bulk delete snapshot', async () => {
+      // Test bulk deletion of multiple snapshots.
+      await page.getByRole('row', { name: 'select-snapshot-checkbox' }).locator('label').click();
+      // Verify that you can't delete all snapshots
+      // Bulk delete button is disabled
+      await expect(page.getByTestId('remove_snapshots_bulk')).toBeDisabled();
+      // Therefore uncheck the first snapshot
+      await page.getByRole('checkbox', { name: 'Select row 0' }).uncheck();
+      await page.getByTestId('remove_snapshots_bulk').click();
+      await expect(page.getByText('Remove snapshots?')).toBeVisible();
+      await page.getByText('Remove', { exact: true }).click();
+      // Verify that the remaining snapshot count is 1 after bulk deletion
+      const snapshotCountAfterBulkDeletion =
+        (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
+      expect(snapshotCountAfterBulkDeletion).toBe(1);
+      await page.getByText('Close').click();
+    });
+  });
+  await deleteAllRepos(page, `&search=${repoNamePrefix}`);
+});
