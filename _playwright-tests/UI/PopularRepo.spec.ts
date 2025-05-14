@@ -22,7 +22,7 @@ test.describe('Popular Repositories', () => {
       await expect(page.getByRole('button', { name: 'Add selected repositories' })).toBeVisible();
     });
 
-     await test.step('Select EPEL 10', async () => {
+    await test.step('Select EPEL 10', async () => {
       await page
         .getByRole('row', { name: repoName10 })
         .getByLabel('Select row 0', { exact: true })
