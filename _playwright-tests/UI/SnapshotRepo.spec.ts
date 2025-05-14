@@ -101,9 +101,7 @@ test.describe('Snapshot Repositories', () => {
       await expect(row).not.toBeVisible();
     });
   });
-});
 
-test.describe('Snapshot Deletion with Template creation', () => {
   test('Snapshot deletion', async ({ page }) => {
     await navigateToRepositories(page);
     await closePopupsIfExist(page);
@@ -111,8 +109,17 @@ test.describe('Snapshot Deletion with Template creation', () => {
     const randomName = () => `${(Math.random() + 1).toString(36).substring(2, 6)}`;
     const repoName = `${repoNamePrefix}-${randomName()}`;
     const templateName = `Test-template-for-snapshot-deletion-${randomName()}`;
-    await test.step('Cleanup repositories using "zoo" URL', async () => {
-      await deleteAllRepos(page, `&url=zoo`);
+
+    await test.step('Cleanup repositories using "zoo" URLs', async () => {
+      const zooUrls = [
+        'https://fedorapeople.org/groups/katello/fakerepos/zoo',
+        'https://fedorapeople.org/groups/katello/fakerepos/zoo2',
+        'https://fedorapeople.org/groups/katello/fakerepos/zoo3',
+        'https://fedorapeople.org/groups/katello/fakerepos/zoo4',
+      ];
+      for (const url of zooUrls) {
+        await deleteAllRepos(page, `&url=${url}`);
+      }
     });
 
     await test.step('Create a repository', async () => {
@@ -143,19 +150,16 @@ test.describe('Snapshot Deletion with Template creation', () => {
       }
     });
 
-    await test.step('Verify the snapshot count for the repo.', async () => {
+    await test.step('Create a template', async () => {
       const row = await getRowByNameOrUrl(page, repoName);
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
-      await page.getByRole('button', { name: 'Kebab toggle' }).click();
+      await row.getByRole('button', { name: 'Kebab toggle' }).click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
       // Count the number of rows in the snapshot list table
-      //   const snapshotCount =
-      //     (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
+      const snapshotCount =
+        (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
       await page.getByLabel('Close', { exact: true }).click();
-    });
-    await test.step('Create a template', async () => {
       // Create a template which uses the repo and assert that is uses the latest snapshot
-      const row = await getRowByNameOrUrl(page, repoName);
       await navigateToTemplates(page);
       await page.getByRole('button', { name: 'Add content template' }).click();
       await page.getByRole('button', { name: 'Select architecture' }).click();
@@ -177,10 +181,11 @@ test.describe('Snapshot Deletion with Template creation', () => {
       const templateRow = await getRowByNameOrUrl(page, templateName);
       await expect(templateRow.getByText('Valid')).toBeVisible({ timeout: 60000 });
       // Verify the template is created and uses the latest snapshot
-      //   const snapshotDateElement = await templateRow.getByTitle('Snapshot date');
-      //   expect(await snapshotDateElement.textContent()).toBe('Use latest');
+      await expect(templateRow.getByText('Use latest')).toBeVisible();
+
       // Assert that the template snapshot count matches the repo snapshot count
-      //   expect(snapshotCount).toBe(4);
+      // add timeout in below step
+      expect(snapshotCount).toBe(4);
     });
 
     // Test deletion of a single snapshot.
