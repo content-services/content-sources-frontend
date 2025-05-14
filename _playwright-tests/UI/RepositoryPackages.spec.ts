@@ -62,8 +62,6 @@ test.describe('Snapshot Package Count and List', async () => {
         .textContent();
       await editedRow.getByRole('button', { name: 'Kebab toggle' }).click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
-      // refresh page to get the updated snapshot
-      await page.reload();
       const editedRepoSnapshotPackagesColumn = await page
         .getByTestId('snapshot_package_count_button')
         .first()
