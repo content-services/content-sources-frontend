@@ -55,7 +55,7 @@ export const logInWithUser1 = async (page: Page) =>
 export const storeStorageStateAndToken = async (page: Page) => {
   const { cookies } = await page
     .context()
-    .storageState({ path: path.join(__dirname, '../../.auth/user.json') });
+    .storageState({ path: path.join(__dirname, '../../.auth/default_user.json') });
   process.env.TOKEN = `Bearer ${cookies.find((cookie) => cookie.name === 'cs_jwt')?.value}`;
   await page.waitForTimeout(100);
 };
