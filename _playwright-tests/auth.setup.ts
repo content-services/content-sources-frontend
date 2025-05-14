@@ -25,13 +25,16 @@ setup.describe('Setup', async () => {
       process.env.USER1USERNAME,
       process.env.USER1PASSWORD,
     );
-    await storeStorageStateAndToken(page);
+    // Save admin user storage state
+    await page.context().storageState({ path: '.auth/default_user.json' });
     await logout(page);
     await logInWithUsernameAndPassword(
       page,
       process.env.RO_USER_USERNAME,
       process.env.RO_USER_PASSWORD,
     );
+    // Save read-only user storage state
+    await page.context().storageState({ path: '.auth/readonly_user.json' });
     await logout(page);
     // Example of how to add another user
     // await logout(page)
