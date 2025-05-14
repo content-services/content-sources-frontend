@@ -76,6 +76,4 @@ test.describe('User Permissions Test', () => {
     
     await context.close();
    });
-
-  });
-});
+ });
