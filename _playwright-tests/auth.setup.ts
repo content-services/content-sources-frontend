@@ -32,7 +32,6 @@ setup.describe('Setup', async () => {
       process.env.RO_USER_USERNAME,
       process.env.RO_USER_PASSWORD,
     );
-    await storeStorageStateAndToken(page);
     await logout(page);
     // Example of how to add another user
     // await logout(page)
