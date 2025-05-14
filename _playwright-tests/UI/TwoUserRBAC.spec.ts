@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
-import { logInWithUsernameAndPassword } from "../helpers/loginHelpers";
+import { logInWithUsernameAndPassword, logout, logInWithUser1 } from "../helpers/loginHelpers";
 
 export const url = `https://stephenw.fedorapeople.org/centirepos/repo99/`;
 
@@ -11,27 +11,8 @@ export const randomName = () => (Math.random() + 1).toString(36).substring(2, 6)
 export const repoName = `${repoNamePrefix}-${randomName()}`;
 
 test.describe('User Permissions Test', () => {
-  test.beforeAll(async ({ browser }) => {
-    // Default user login
-    if (!process.env.USER1USERNAME || !process.env.RO_USER_USERNAME) {
-        throw new Error('Required environment variables are not set');
-    };
-    let context = await browser.newContext();
-    let page = await context.newPage();
-    await logInWithUsernameAndPassword(page, process.env.USER1USERNAME!);
-    await context.storageState({ path: 'default_user.json' });
-    await context.close();
-  
-    // Read-only user login
-    context = await browser.newContext();
-    page = await context.newPage();
-    await logInWithUsernameAndPassword(page, process.env.RO_USER_USERNAME!);
-    await context.storageState({ path: 'readonly_user.json' });
-    await context.close();
-  });
-
   test('Default user configures repo', async ({ browser }) => {
-    const context = await browser.newContext({ storageState: 'default_user.json' });
+    const context = await browser.newContext({ storageState: '.auth/default_user.json' });
     const page = await context.newPage();
     await deleteAllRepos(page, `&search=${repoNamePrefix}`);
     await navigateToRepositories(page);
@@ -40,7 +21,6 @@ test.describe('User Permissions Test', () => {
     await test.step('Create a repository', async () => {
         // Click on the 'Add repositories' button
         // HMS-5268 There are two buttons on the ZeroState page
-        await page.pause();
         await page.getByRole('button', { name: 'Add repositories' }).first().click();
         await expect(page.getByRole('dialog', { name: 'Add custom repositories' })).toBeVisible();
   
@@ -65,20 +45,24 @@ test.describe('User Permissions Test', () => {
       });
       await test.step('Update the repository', async () => {
         await page.getByPlaceholder('Enter name', { exact: true }).fill(`${repoName}-Edited`);
-        await page.pause();
         await page.getByRole('button', { name: 'Save changes', exact: true }).click();
       });
-
-      await context.close();
+      await page.context().clearCookies();
+      await logout(page);
+      await page.context().close();
     });
 
   test('Read-only user can view but not edit', async ({ browser }) => {
-    const context = await browser.newContext({ storageState: 'readonly_user.json' });
+    const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const page = await context.newPage();
+    // Read-only user login
+    await page.context().clearCookies();
+    await logInWithUsernameAndPassword(page, process.env.RO_USER_USERNAME!, process.env.RO_USER_PASSWORD!);
     await navigateToRepositories(page);
     await closePopupsIfExist(page);
 
-    // Assert can read
+    // Assert read-only user can list but not edit previously created repo
+    await expect(page.getByRole('button', { name: 'Add repositories', exact: true })).not.toBeEnabled();
     // Search for the created repo
     await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName);
     const row = await getRowByNameOrUrl(page, repoName);
@@ -93,4 +77,5 @@ test.describe('User Permissions Test', () => {
     await context.close();
    });
 
+  });
 });
