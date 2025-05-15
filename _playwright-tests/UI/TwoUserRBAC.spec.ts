@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
-import { logout } from '../helpers/loginHelpers';
 import { randomUrl } from './helpers/repoHelpers';
 
 export const url = randomUrl();
@@ -48,7 +47,6 @@ test.describe('User Permissions Test', () => {
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
     });
     await page.context().clearCookies();
-    await logout(page);
     await page.context().close();
   });
 
