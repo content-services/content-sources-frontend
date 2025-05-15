@@ -31,7 +31,7 @@ export const navigateToRepositories = async (page: Page) => {
     await page.route('https://smetrics.redhat.com/**', (route) => route.abort());
 
     const repositoriesNavLink = page
-      .getByRole('navigation')
+      .getByRole('navigation', { name: 'Breadcrumb' })
       .getByRole('link', { name: 'Repositories' });
     await repositoriesNavLink.waitFor({ state: 'visible', timeout: 1500 });
     await repositoriesNavLink.click();
