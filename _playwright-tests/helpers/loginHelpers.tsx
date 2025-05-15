@@ -3,23 +3,29 @@ import path from 'path';
 
 // This file can only contain functions that are referenced by authentication.
 
-export const logout = async (page: Page) => {
-  const button = await page.locator(
-    'div.pf-v5-c-toolbar__item.pf-m-hidden.pf-m-visible-on-lg.pf-v5-u-mr-0 > button',
-  );
+export const logout = async (page: Page, username: string) => {
+  const menuButton = page.getByRole('button', { name: username });
 
-  await button.click();
+  // Ensure the button is visible and enabled
+  await expect(menuButton).toBeVisible({ timeout: 5000 });
+  await expect(menuButton).toBeEnabled({ timeout: 5000 });
 
-  await expect(async () => page.getByRole('menuitem', { name: 'Log out' }).isVisible()).toPass();
+  // Click the button to open the menu
+  await menuButton.click();
 
-  await page.getByRole('menuitem', { name: 'Log out' }).click();
+  // Locate and click the logout menu item
+  const logoutMenuItem = page.getByRole('menuitem', { name: 'Log out' });
+  await expect(logoutMenuItem).toBeVisible({ timeout: 10000 });
+  await expect(logoutMenuItem).toBeEnabled({ timeout: 5000 });
+  await logoutMenuItem.click();
 
-  await expect(async () => {
-    expect(page.url()).not.toBe('/insights/content/repositories');
-  }).toPass();
-  await expect(async () =>
-    expect(page.getByText('Log in to your Red Hat account')).toBeVisible(),
-  ).toPass();
+  // Wait for navigation and verify login page
+  await page.waitForURL((url) => !url.pathname.includes('/insights/content/repositories'), {
+    timeout: 10000,
+  });
+  await expect(page.getByText('Log in to your Red Hat account')).toBeVisible({
+    timeout: 10000,
+  });
 };
 
 export const logInWithUsernameAndPassword = async (
