@@ -1,11 +1,21 @@
-import { Button, Flex, Form, FormGroup, InputGroup, TextInput } from '@patternfly/react-core';
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
+  Flex,
+  Form,
+  FormGroup,
+  InputGroup,
+  MenuToggle,
+  TextInput,
+} from '@patternfly/react-core';
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { useEffect, useMemo, useState } from 'react';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from 'components/Hide/Hide';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import { useNavigate } from 'react-router-dom';
-import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 import useDebounce from 'Hooks/useDebounce';
 import useRootPath from 'Hooks/useRootPath';
 import { ADMIN_TASKS_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
@@ -47,12 +57,18 @@ const useStyles = createUseStyles({
     },
   },
   featureFilter: { '& .pf-m-inline ': { flexFlow: 'nowrap' } },
+  fullWidth: {
+    width: '100%',
+    maxWidth: 'unset',
+  },
 });
 
 const AdminFeaturesTable = () => {
   const classes = useStyles();
   const navigate = useNavigate();
   const rootPath = useRootPath();
+  const [isFeatureOpen, setIsFeatureOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const storedFeature = sessionStorage.getItem('feature');
   const [feature, setFeature] = useState<string | undefined>(storedFeature || '');
   const [filterType, setFilterType] = useState<string | undefined>();
@@ -154,49 +170,88 @@ const AdminFeaturesTable = () => {
       <Form onSubmit={(e) => e.preventDefault()}>
         <InputGroup className={classes.filterContainer}>
           <FormGroup label='Feature' isRequired fieldId='feature'>
-            <DropdownSelect
+            <Dropdown
               onSelect={(_, val) => {
                 setFeature(val as string);
+                setIsFeatureOpen(false);
               }}
-              selected={feature}
-              menuToggleProps={{
-                'aria-label': 'feature select',
-                id: 'featureSelection',
-              }}
-              menuValue={feature}
-              dropDownItems={
-                data?.features.map((value) => ({
-                  value,
-                  isSelected: value === feature,
-                  children: value,
-                })) || []
-              }
-            />
+              toggle={(toggleRef) => (
+                <MenuToggle
+                  isFullWidth
+                  className={classes.fullWidth}
+                  ref={toggleRef}
+                  aria-label='filter selection'
+                  id='featureSelection'
+                  ouiaId='featureSelection'
+                  onClick={() => setIsFeatureOpen((prev) => !prev)}
+                  isDisabled={isLoading}
+                  isExpanded={isFeatureOpen}
+                >
+                  {feature || 'Select feature'}
+                </MenuToggle>
+              )}
+              onOpenChange={(isOpen) => setIsFeatureOpen(isOpen)}
+              isOpen={isFeatureOpen}
+            >
+              <DropdownList>
+                {data?.features.map((value) => (
+                  <DropdownItem
+                    key={value}
+                    value={value}
+                    isSelected={value === feature}
+                    component='button'
+                    data-ouia-component-id={`filter_${value}`}
+                  >
+                    {value}
+                  </DropdownItem>
+                ))}
+              </DropdownList>
+            </Dropdown>
           </FormGroup>
           <Hide hide={!featureData}>
             <FormGroup label='Filter' fieldId='filter' isInline className={classes.featureFilter}>
-              <DropdownSelect
+              <Dropdown
                 onSelect={(_, val) => {
                   setFilterType(val as string);
+                  setIsFilterOpen(false);
                 }}
-                selected={filterType}
-                menuToggleProps={{
-                  'aria-label': 'filterType select',
-                  id: 'filterTypeSelection',
-                }}
-                menuValue={capitalizeFirst(filterType)}
-                dropDownItems={
-                  subsetList.map((value) => ({
-                    value,
-                    isSelected: value === filterType,
-                    children: capitalizeFirst(value),
-                  })) || []
-                }
-              />
+                toggle={(toggleRef) => (
+                  <MenuToggle
+                    isFullWidth
+                    className={classes.fullWidth}
+                    ref={toggleRef}
+                    aria-label='type selection'
+                    id='filterTypeSelection'
+                    ouiaId='filterTypeSelection'
+                    onClick={() => setIsFilterOpen((prev) => !prev)}
+                    isDisabled={isLoading}
+                    isExpanded={isFilterOpen}
+                  >
+                    {capitalizeFirst(filterType) || 'Select type'}
+                  </MenuToggle>
+                )}
+                onOpenChange={(isOpen) => setIsFilterOpen(isOpen)}
+                isOpen={isFilterOpen}
+              >
+                <DropdownList>
+                  {subsetList.map((value) => (
+                    <DropdownItem
+                      key={value}
+                      value={value}
+                      isSelected={value === feature}
+                      component='button'
+                      data-ouia-component-id={`filter_${value}`}
+                    >
+                      {capitalizeFirst(value)}
+                    </DropdownItem>
+                  ))}
+                </DropdownList>
+              </Dropdown>
               <TextInput
                 id='search'
                 type='search'
                 value={search}
+                className={classes.fullWidth}
                 onChange={(_, val) => {
                   setSearch(val.toLowerCase());
                 }}
@@ -205,7 +260,7 @@ const AdminFeaturesTable = () => {
             <FormGroup label='View' fieldId='view'>
               <Button
                 isInline
-                isActive={isJsonView}
+                isClicked={isJsonView}
                 onClick={() => setJsonView(true)}
                 variant={isJsonView ? 'primary' : 'secondary'}
               >
@@ -213,7 +268,7 @@ const AdminFeaturesTable = () => {
               </Button>
               <Button
                 isInline
-                isActive={!isJsonView}
+                isClicked={!isJsonView}
                 onClick={() => setJsonView(false)}
                 variant={!isJsonView ? 'primary' : 'secondary'}
               >

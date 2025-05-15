@@ -1,10 +1,10 @@
 import {
   FormGroup,
   Grid,
-  Text,
+  Content,
   TextArea,
   TextInput,
-  TextVariants,
+  ContentVariants,
   Title,
 } from '@patternfly/react-core';
 import { useAddTemplateContext } from '../AddTemplateContext';
@@ -32,7 +32,9 @@ export default function DetailStep() {
       <Title ouiaId='enter_template_details' headingLevel='h1'>
         Enter template details
       </Title>
-      <Text component={TextVariants.h6}>Enter a name and description for your template.</Text>
+      <Content component={ContentVariants.h6}>
+        Enter a name and description for your template.
+      </Content>
 
       <FormGroup label='Name' isRequired>
         <TextInput

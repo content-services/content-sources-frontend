@@ -5,18 +5,16 @@ import {
   Grid,
   InputGroup,
   InputGroupItem,
-  InputGroupText,
   Pagination,
   PaginationVariant,
-  Text,
+  Content,
   TextInput,
-  TextVariants,
+  ContentVariants,
   Title,
   ToggleGroup,
   ToggleGroupItem,
 } from '@patternfly/react-core';
 import { useAddTemplateContext } from '../AddTemplateContext';
-import { global_Color_300 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import { ContentItem, ContentOrigin } from 'services/Content/ContentApi';
 import { useState } from 'react';
@@ -36,9 +34,6 @@ import { reduceStringToCharsWithEllipsis } from 'helpers';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 
 const useStyles = createUseStyles({
-  global_300: {
-    color: global_Color_300.value,
-  },
   topBottomContainers: {
     justifyContent: 'space-between',
     height: 'fit-content',
@@ -148,12 +143,12 @@ export default function RedhatRepositoriesStep() {
         </Title>
       </Flex>
       <Flex direction={{ default: 'row' }}>
-        <Text component={TextVariants.h6}>
+        <Content component={ContentVariants.h6}>
           {additionalReposAvailableToSelect
             ? 'You can select additional Red Hat repositories. '
             : ''}
           Core repositories of your OS version have been added.
-        </Text>
+        </Content>
       </Flex>
       <Hide hide={(countIsZero && !searchQuery) || isLoading}>
         <Flex className={classes.topBottomContainers}>
@@ -168,10 +163,9 @@ export default function RedhatRepositoriesStep() {
                     placeholder='Filter by name'
                     value={searchQuery}
                     onChange={(_event, value) => setSearchQuery(value)}
+                    type='search'
+                    customIcon={<SearchIcon />}
                   />
-                  <InputGroupText isDisabled={isLoading} id='search-icon'>
-                    <SearchIcon />
-                  </InputGroupText>
                 </InputGroupItem>
               </InputGroup>
             </FlexItem>

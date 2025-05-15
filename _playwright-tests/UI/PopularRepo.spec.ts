@@ -19,7 +19,7 @@ test.describe('Popular Repositories', () => {
     await test.step('Select the Popular repos tab', async () => {
       await page.getByRole('link', { name: 'Popular repositories' }).click();
       await expect(page.getByTestId('popular_repos_table')).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Add selected repositories' })).toBeVisible();
+      await expect(page.getByRole('menuitem', { name: 'Add selected repositories' })).toBeVisible();
     });
 
     await test.step('Select EPEL 10', async () => {
@@ -71,7 +71,7 @@ test.describe('Popular Repositories', () => {
     });
 
     await test.step('Apply filter and clear it', async () => {
-      await page.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName8);
+      await page.getByRole('searchbox', { name: 'Filter by name/url' }).fill(repoName8);
       const rows = page.locator('table tbody tr');
       await expect(rows).toHaveCount(1);
       await expect(page.getByRole('button', { name: 'Clear filters' })).toBeVisible();
@@ -87,7 +87,7 @@ test.describe('Popular Repositories', () => {
       const row = await getRowByNameOrUrl(page, repoName8);
       await row.getByRole('checkbox', { name: 'Select row' }).check();
 
-      await page.getByTestId('custom_repositories_kebab_toggle').click();
+      await page.getByTestId('delete-kebab').click();
       await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
       // Confirm the removal in the pop-up
       await page
@@ -100,7 +100,7 @@ test.describe('Popular Repositories', () => {
       const row = await getRowByNameOrUrl(page, repoName9);
       await row.getByRole('checkbox', { name: 'Select row' }).check();
 
-      await page.getByTestId('custom_repositories_kebab_toggle').click();
+      await page.getByTestId('delete-kebab').click();
       await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
       // Confirm the removal in the pop-up
       await page
@@ -113,7 +113,7 @@ test.describe('Popular Repositories', () => {
       const row = await getRowByNameOrUrl(page, repoName10);
       await row.getByRole('checkbox', { name: 'Select row' }).check();
 
-      await page.getByTestId('custom_repositories_kebab_toggle').click();
+      await page.getByTestId('delete-kebab').click();
       await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
       // Confirm the removal in the pop-up
       await page

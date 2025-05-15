@@ -6,17 +6,13 @@ import {
   FormGroup,
   Grid,
   Radio,
-  Text,
-  TextContent,
-  TextList,
-  TextListItem,
-  TextVariants,
+  Content,
+  ContentVariants,
   Title,
 } from '@patternfly/react-core';
 import { useAddTemplateContext } from '../AddTemplateContext';
 import { useContentListQuery, useGetSnapshotsByDates } from 'services/Content/ContentQueries';
 import { useEffect, useMemo } from 'react';
-import { global_Color_400 } from '@patternfly/react-tokens';
 import Hide from 'components/Hide/Hide';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import { formatDateForPicker, formatTemplateDate, isDateValid } from 'helpers';
@@ -24,7 +20,6 @@ import { createUseStyles } from 'react-jss';
 
 const useStyles = createUseStyles({
   snapshotInfoText: {
-    color: global_Color_400.value,
     marginRight: '16px',
   },
   whatDoesItMean: {
@@ -102,13 +97,13 @@ export default function SetUpDateStep() {
       <Title ouiaId='set_up_date' headingLevel='h1'>
         Set up date
       </Title>
-      <Text component={TextVariants.h6}>
+      <Content component={ContentVariants.h6}>
         This will include snapshots up to a specific date. Content of the snapshots created after
         the selected date will be displayed as applicable, not installable.
-      </Text>
-      <Text component={TextVariants.h6}>
+      </Content>
+      <Content component={ContentVariants.h6}>
         <b>Select date for snapshotted repositories</b>
-      </Text>
+      </Content>
       <FormGroup className={classes.radioGroup}>
         <Radio
           id='use latest snapshot radio'
@@ -186,18 +181,20 @@ export default function SetUpDateStep() {
               data-ouia-component-id='quickstart_expand'
               className={classes.whatDoesItMean}
             >
-              <TextContent>
-                <TextList>
-                  <TextListItem>
+              <Content>
+                <Content component='ul'>
+                  <Content component='li'>
                     No snapshots exist for these repositories on the specified date or before it.
-                  </TextListItem>
-                  <TextListItem>The closest snapshots after that date will be used.</TextListItem>
-                  <TextListItem>
+                  </Content>
+                  <Content component='li'>
+                    The closest snapshots after that date will be used.
+                  </Content>
+                  <Content component='li'>
                     Depending on the repository and time difference, this could cause a dependency
                     issue.
-                  </TextListItem>
-                </TextList>
-              </TextContent>
+                  </Content>
+                </Content>
+              </Content>
             </ExpandableSection>
           </Alert>
         </FormAlert>

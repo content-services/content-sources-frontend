@@ -1,4 +1,4 @@
-import { Flex, FlexItem, Text, TextContent, TextVariants } from '@patternfly/react-core';
+import { Flex, FlexItem, Content, ContentVariants } from '@patternfly/react-core';
 import RepoConfig from './RepoConfig';
 
 interface Props {
@@ -9,9 +9,9 @@ interface Props {
 const LatestRepoConfig = ({ repoUUID, snapUUID }: Props) => (
   <Flex>
     <FlexItem>
-      <TextContent>
-        <Text component={TextVariants.p}>Latest Snapshot Config:</Text>
-      </TextContent>
+      <Content>
+        <Content component={ContentVariants.p}>Latest Snapshot Config:</Content>
+      </Content>
     </FlexItem>
     <FlexItem>
       <RepoConfig repoUUID={repoUUID} snapUUID={snapUUID} latest />

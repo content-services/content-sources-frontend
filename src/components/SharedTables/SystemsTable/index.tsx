@@ -12,7 +12,7 @@ import {
 
 import { Button, Grid } from '@patternfly/react-core';
 import { SkeletonTable } from '@patternfly/react-component-groups';
-import { global_BackgroundColor_100, global_disabled_color_100 } from '@patternfly/react-tokens';
+import { t_global_color_disabled_100 as global_disabled_color_100 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import { useEffect, useState } from 'react';
 import type { IDSystemItem } from 'services/Systems/SystemsApi';
@@ -27,7 +27,6 @@ import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip
 
 const useStyles = createUseStyles({
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',

@@ -3,15 +3,13 @@ import {
   Bullseye,
   Button,
   Flex,
-  Modal,
-  ModalVariant,
   Spinner,
   Stack,
   StackItem,
-  Text,
+  Content,
 } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 
-import { global_Color_100 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import Hide from 'components/Hide/Hide';
 import { useQueryClient } from 'react-query';
@@ -24,7 +22,6 @@ import { useListSystemsByTemplateId } from 'services/Systems/SystemsQueries';
 const useStyles = createUseStyles({
   description: {
     paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
-    color: global_Color_100.value,
   },
   removeButton: {
     marginRight: '36px',
@@ -114,9 +111,9 @@ export default function DeleteTemplateModal() {
           </Flex>
         </Alert>
       </Hide>
-      <Text component='p' className={classes.description}>
+      <Content component='p' className={classes.description}>
         Are you sure you want to remove this template?
-      </Text>
+      </Content>
     </Modal>
   );
 }

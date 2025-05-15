@@ -5,7 +5,7 @@ import path from 'path';
 
 export const logout = async (page: Page) => {
   const button = await page.locator(
-    'div.pf-v5-c-toolbar__item.pf-m-hidden.pf-m-visible-on-lg.pf-v5-u-mr-0 > button',
+    'div.pf-v6-c-toolbar__item.pf-m-hidden.pf-m-visible-on-lg.pf-v6-u-mr-0 > button',
   );
 
   await button.click();
@@ -44,9 +44,9 @@ export const logInWithUsernameAndPassword = async (
   await passwordField.fill(password);
   await passwordField.press('Enter');
 
-  await expect(async () => {
-    expect(page.url()).toBe(`${process.env.BASE_URL}/insights/content/repositories`);
-  }).toPass();
+  await expect(async () =>
+    expect(page.url()).toBe(`${process.env.BASE_URL}/insights/content/repositories`),
+  ).toPass();
 };
 
 export const logInWithUser1 = async (page: Page) =>

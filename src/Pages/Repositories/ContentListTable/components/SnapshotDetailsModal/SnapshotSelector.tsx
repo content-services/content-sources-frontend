@@ -1,9 +1,15 @@
-import { Form, FormGroup } from '@patternfly/react-core';
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownList,
+  Form,
+  FormGroup,
+  MenuToggle,
+} from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { useNavigate, useParams } from 'react-router-dom';
-import DropdownSelect from 'components/DropdownSelect/DropdownSelect';
 import { useGetSnapshotList } from 'services/Content/ContentQueries';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import useRootPath from 'Hooks/useRootPath';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
 import { formatDateDDMMMYYYY } from 'helpers';
@@ -21,6 +27,7 @@ export function SnapshotSelector() {
   const classes = useStyles();
   const rootPath = useRootPath();
   const navigate = useNavigate();
+  const [selectorOpen, setSelectorOpen] = useState(false);
   const { repoUUID: uuid = '', snapshotUUID = '' } = useParams();
 
   const {
@@ -52,25 +59,42 @@ export function SnapshotSelector() {
         aria-label='snapshot-selector'
         fieldId='snapshot'
       >
-        <DropdownSelect
-          id='snapshot'
-          onSelect={(_, val) => setSelected(val as string)}
-          selected={uuidMapper[snapshotUUID]}
-          menuToggleProps={{
-            className: classes.minWidth,
-            'aria-label': 'filter date',
-            id: 'snapshotSelector',
+        <Dropdown
+          onSelect={(_, val) => {
+            setSelected(val as string);
+            setSelectorOpen(false);
           }}
-          dropDownItems={Object.keys(dateMapper).map((date) => ({
-            value: date,
-            isSelected: uuidMapper[snapshotUUID] === date,
-            children: date,
-            'data-ouia-component-id': `filter_${date}`,
-          }))}
-          isDisabled={isLoading || isFetching}
-          menuValue={uuidMapper[snapshotUUID]}
-          ouiaId='snapshot_selector'
-        />
+          toggle={(toggleRef) => (
+            <MenuToggle
+              className={classes.minWidth}
+              ref={toggleRef}
+              aria-label='snapshot selector'
+              id='snapshotSelector'
+              ouiaId='snapshot_selector'
+              onClick={() => setSelectorOpen((prev) => !prev)}
+              isDisabled={isLoading || isFetching}
+              isExpanded={selectorOpen}
+            >
+              {uuidMapper[snapshotUUID] || 'Select a snapshot'}
+            </MenuToggle>
+          )}
+          onOpenChange={(isOpen) => setSelectorOpen(isOpen)}
+          isOpen={selectorOpen}
+        >
+          <DropdownList>
+            {Object.keys(dateMapper).map((date) => (
+              <DropdownItem
+                key={date}
+                value={date}
+                isSelected={uuidMapper[snapshotUUID] === date}
+                component='button'
+                data-ouia-component-id={`filter_${date}`}
+              >
+                {date}
+              </DropdownItem>
+            ))}
+          </DropdownList>
+        </Dropdown>
       </FormGroup>
     </Form>
   );

@@ -3,7 +3,6 @@ import {
   InputGroup,
   InputGroupItem,
   TextInput,
-  InputGroupText,
   Pagination,
   Flex,
   FlexItem,
@@ -13,7 +12,6 @@ import { SearchIcon } from '@patternfly/react-icons';
 import Hide from 'components/Hide/Hide';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import { createUseStyles } from 'react-jss';
-import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useDebounce from 'Hooks/useDebounce';
@@ -23,13 +21,7 @@ import { useGetSnapshotPackagesQuery } from 'services/Content/ContentQueries';
 import PackagesTable from 'components/SharedTables/PackagesTable';
 
 const useStyles = createUseStyles({
-  description: {
-    paddingTop: '12px',
-    paddingBottom: '8px',
-    color: global_Color_200.value,
-  },
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -41,7 +33,6 @@ const useStyles = createUseStyles({
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
 });
 
@@ -106,11 +97,10 @@ export function SnapshotPackagesTab() {
             ouiaId='name_search'
             placeholder='Filter by name'
             value={searchQuery}
+            type='search'
+            customIcon={<SearchIcon />}
             onChange={(_event, value) => setSearchQuery(value)}
           />
-          <InputGroupText id='search-icon'>
-            <SearchIcon />
-          </InputGroupText>
         </InputGroupItem>
         <Hide hide={isLoading}>
           <Pagination

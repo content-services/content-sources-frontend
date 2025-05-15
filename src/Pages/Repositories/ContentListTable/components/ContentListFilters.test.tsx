@@ -43,11 +43,11 @@ it('Render loading state (disabled)', () => {
     />,
   );
 
-  const filterInput = getByRole('textbox');
+  const filterInput = getByRole('searchbox');
   expect(filterInput).toHaveAttribute('disabled');
 });
 
-it('Select a filter of each type and ensure chips are present', () => {
+it('Select a filter of each type and ensure chips are present contentlistfilters', () => {
   const { queryByText, getByRole, getByLabelText } = render(
     <ContentListFilters
       contentOrigin={ContentOrigin.CUSTOM}
@@ -64,7 +64,7 @@ it('Select a filter of each type and ensure chips are present', () => {
     />,
   );
 
-  const filterInput = getByRole('textbox');
+  const filterInput = getByRole('searchbox');
   expect(filterInput).not.toHaveAttribute('disabled');
   fireEvent.change(filterInput, { target: { value: 'EPEL' } });
 

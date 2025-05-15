@@ -1,4 +1,11 @@
-import { ExpandableSection, Flex, Grid, Text, TextVariants, Title } from '@patternfly/react-core';
+import {
+  ExpandableSection,
+  Flex,
+  Grid,
+  Content,
+  ContentVariants,
+  Title,
+} from '@patternfly/react-core';
 import { useAddTemplateContext } from '../AddTemplateContext';
 import { useMemo, useState } from 'react';
 import { formatDateDDMMMYYYY } from 'helpers';
@@ -62,9 +69,9 @@ export default function ReviewStep() {
       <Title ouiaId='review' headingLevel='h1'>
         Review
       </Title>
-      <Text component={TextVariants.h6}>
+      <Content component={ContentVariants.h6}>
         Review the information and then click <b>{isEdit ? 'Confirm changes' : 'Create'}</b>.
-      </Text>
+      </Content>
       {Object.keys(reviewTemplate).map((key, index) => (
         <ExpandableSection
           key={key}
@@ -79,12 +86,16 @@ export default function ReviewStep() {
           <Flex direction={{ default: 'row' }}>
             <Flex direction={{ default: 'column' }}>
               {Object.keys(reviewTemplate[key]).map((title) => (
-                <Text key={title + '' + index}>{title}</Text>
+                <Content component='p' key={title + '' + index}>
+                  {title}
+                </Content>
               ))}
             </Flex>
             <Flex direction={{ default: 'column' }}>
               {Object.values(reviewTemplate[key]).map((value, index) => (
-                <Text key={value + '' + index}>{value}</Text>
+                <Content component='p' key={value + '' + index}>
+                  {value}
+                </Content>
               ))}
             </Flex>
           </Flex>
