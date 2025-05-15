@@ -87,7 +87,7 @@ test.describe('Popular Repositories', () => {
       const row = await getRowByNameOrUrl(page, repoName8);
       await row.getByRole('checkbox', { name: 'Select row' }).check();
 
-      await page.getByTestId('custom_repositories_kebab_toggle').click();
+      await page.getByTestId('delete-kebab').click();
       await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
       // Confirm the removal in the pop-up
       await page
@@ -100,7 +100,7 @@ test.describe('Popular Repositories', () => {
       const row = await getRowByNameOrUrl(page, repoName9);
       await row.getByRole('checkbox', { name: 'Select row' }).check();
 
-      await page.getByTestId('custom_repositories_kebab_toggle').click();
+      await page.getByTestId('delete-kebab').click();
       await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
       // Confirm the removal in the pop-up
       await page
@@ -113,7 +113,7 @@ test.describe('Popular Repositories', () => {
       const row = await getRowByNameOrUrl(page, repoName10);
       await row.getByRole('checkbox', { name: 'Select row' }).check();
 
-      await page.getByTestId('custom_repositories_kebab_toggle').click();
+      await page.getByTestId('delete-kebab').click();
       await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
       // Confirm the removal in the pop-up
       await page
