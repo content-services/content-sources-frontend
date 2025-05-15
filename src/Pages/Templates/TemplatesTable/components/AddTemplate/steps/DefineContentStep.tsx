@@ -43,14 +43,6 @@ export default function DefineContentStep() {
   ): string => // arm64 aarch64
     distribution_versions.find(({ label }) => version === label)?.name || 'Select version';
 
-  const allowedDistributionarches = distribution_arches
-    .filter(({ label }) => ['x86_64', 'aarch64'].includes(label))
-    .map(({ label, name }) => ({ value: label, children: name }));
-
-  const allowedDistributionVersions = distribution_versions
-    .filter(({ label }) => ['8', '9', '10'].includes(label))
-    .map(({ label, name }) => ({ value: label, children: name }));
-
   return (
     <Grid hasGutter>
       <Title ouiaId='define_template_content' headingLevel='h1'>
@@ -147,7 +139,7 @@ export default function DefineContentStep() {
         >
           <DropdownList>
             {distribution_versions
-              .filter(({ label }) => ['8', '9'].includes(label))
+              .filter(({ label }) => ['8', '9', '10'].includes(label))
               .map(({ label, name }) => (
                 <DropdownItem
                   key={label}
