@@ -1,13 +1,10 @@
-import { expect, test as setup, type Page } from "@playwright/test";
+import { expect, test as setup } from '@playwright/test';
+import { closePopupsIfExist } from './UI/helpers/helpers';
 import {
-  closePopupsIfExist,
-} from './UI/helpers/helpers';
-import {
- throwIfMissingEnvVariables,
- logInWithUsernameAndPassword,
- storeStorageStateAndToken,
- logout,
-} from "./helpers/loginHelpers";
+  throwIfMissingEnvVariables,
+  logInWithUsernameAndPassword,
+  logout,
+} from './helpers/loginHelpers';
 
 setup.describe('Setup', async () => {
   setup.describe.configure({ retries: 3 });
@@ -20,11 +17,7 @@ setup.describe('Setup', async () => {
     setup.setTimeout(60_000);
 
     await closePopupsIfExist(page);
-    await logInWithUsernameAndPassword(
-      page, 
-      process.env.USER1USERNAME,
-      process.env.USER1PASSWORD,
-    );
+    await logInWithUsernameAndPassword(page, process.env.USER1USERNAME, process.env.USER1PASSWORD);
     // Save admin user storage state
     await page.context().storageState({ path: '.auth/default_user.json' });
     await logout(page);
