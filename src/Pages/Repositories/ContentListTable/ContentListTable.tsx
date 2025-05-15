@@ -91,9 +91,9 @@ const useStyles = createUseStyles({
     marginLeft: '8px',
   },
   tightPadding: {
-  '& th, & td': {
-    padding: '4px 8px',
-   }
+    '& th, & td': {
+      padding: '4px 8px',
+    },
   },
 });
 

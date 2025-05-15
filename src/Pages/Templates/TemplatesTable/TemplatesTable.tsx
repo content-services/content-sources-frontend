@@ -271,7 +271,12 @@ const TemplatesTable = () => {
                         {title}
                       </Th>
                     ) : (
-                      <Th key={title + 'column'} width={width} modifier='wrap' sort={sortParams(index)}>
+                      <Th
+                        key={title + 'column'}
+                        width={width}
+                        modifier='wrap'
+                        sort={sortParams(index)}
+                      >
                         {title}
                       </Th>
                     ),
