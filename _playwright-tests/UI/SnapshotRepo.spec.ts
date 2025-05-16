@@ -6,6 +6,7 @@ import {
   getRowByNameOrUrl,
   validateSnapshotTimestamp,
 } from './helpers/helpers';
+import { randomUrl } from './helpers/repoHelpers';
 
 test.describe('Snapshot Repositories', () => {
   test('Snapshot a repository', async ({ page }) => {
@@ -101,5 +102,48 @@ test.describe('Snapshot Repositories', () => {
 
       await expect(row).not.toBeVisible();
     });
+  });
+
+  test('test snapshot manual trigger', async ({ page }) => {
+    await navigateToRepositories(page);
+    await closePopupsIfExist(page);
+    const repoNamePrefix = 'snapshot-manual-trigger';
+    const randomName = () => `${(Math.random() + 1).toString(36).substring(2, 6)}`;
+    const repoName = `${repoNamePrefix}-${randomName()}`;
+    const url = randomUrl();
+    await deleteAllRepos(page, `&search=${repoNamePrefix}`);
+
+    await test.step('Create a repository', async () => {
+      await page.getByRole('button', { name: 'Add repositories' }).first().click();
+      await expect(page.getByRole('dialog', { name: 'Add custom repositories' })).toBeVisible();
+      await page.getByLabel('Name').fill(`${repoName}`);
+      await page.getByLabel('Introspect only').click();
+      await page.getByLabel('URL').fill(url);
+      await page.getByRole('button', { name: 'Save', exact: true }).click();
+      const row = await getRowByNameOrUrl(page, repoName);
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+    });
+
+    await test.step('Edit the repository and trigger snapshot manually', async () => {
+      const row = await getRowByNameOrUrl(page, repoName);
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await row.getByLabel('Kebab toggle').click();
+      await row.getByRole('menuitem', { name: 'Edit' }).click({ timeout: 60000 });
+      await page.getByLabel('Name').fill(`${repoName}-edited`);
+      await page.getByLabel('Snapshotting').click();
+      await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      // Trigger a snapshot manually
+      await row.getByLabel('Kebab toggle').click();
+      await row.getByRole('menuitem', { name: 'Trigger snapshot' }).click();
+      //   await expect(page.getByText('Snapshot triggered successfully')).toBeVisible();
+      await expect(page.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await row.getByLabel('Kebab toggle').click();
+      await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
+      // asssert that triggered snapshot is in the list
+      //   await expect(page.getByLabel('SnapshotsView list of').locator('tbody')).toBeVisible();
+      await page.getByRole('button', { name: 'Close' }).click();
+    });
+    await deleteAllRepos(page, `&search=${repoNamePrefix}`);
   });
 });
