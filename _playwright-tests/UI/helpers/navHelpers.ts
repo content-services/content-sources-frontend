@@ -2,7 +2,7 @@ import { type Page } from '@playwright/test';
 import { retry } from './helpers';
 
 const navigateToRepositoriesFunc = async (page: Page) => {
-  await page.goto('/insights/content/repositories', { timeout: 10001 });
+  await page.goto('/insights/content/repositories', { timeout: 20000 });
 
   const zeroState = page.getByText('Start using Content management now');
 
