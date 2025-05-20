@@ -155,11 +155,34 @@ test.describe('Snapshot Repositories', () => {
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await row.getByRole('button', { name: 'Kebab toggle' }).click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
-      // Count the number of rows in the snapshot list table
-      const snapshotCount =
-        (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
-      await page.getByLabel('Close', { exact: true }).click();
-      // Create a template which uses the repo and assert that is uses the latest snapshot
+      // Initialize a variable to store the count
+      let totalRowCount = 0;
+
+      for (let i = 1; i <= 4; i++) {
+        const snapshotPrefix = new Date()
+          .toLocaleString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour12: false,
+          })
+          .replace(',', ''); // Format: 20 May 2025
+
+        const targetRows = page
+          .getByLabel('snapshot list table')
+          .locator('tbody')
+          .filter({ hasText: snapshotPrefix });
+
+        // Store the count of rows for each iteration
+        const rowCount = await targetRows.count();
+        totalRowCount += rowCount;
+
+        // Assert the count for the current iteration
+        await expect(targetRows).toHaveCount(i);
+      }
+
+      // Assert the total count at the end
+      await expect(totalRowCount).toBe(4);
       await navigateToTemplates(page);
       await page.getByRole('button', { name: 'Add content template' }).click();
       await page.getByRole('button', { name: 'Select architecture' }).click();
@@ -182,10 +205,6 @@ test.describe('Snapshot Repositories', () => {
       await expect(templateRow.getByText('Valid')).toBeVisible({ timeout: 60000 });
       // Verify the template is created and uses the latest snapshot
       await expect(templateRow.getByText('Use latest')).toBeVisible();
-
-      // Assert that the template snapshot count matches the repo snapshot count
-      // add timeout in below step
-      expect(snapshotCount).toBe(4);
     });
 
     // Test deletion of a single snapshot.
