@@ -5,7 +5,7 @@ import path from 'path';
 
 export const logout = async (page: Page) => {
   const button = await page.locator(
-    'div.pf-v5-c-toolbar__item.pf-m-hidden.pf-m-visible-on-lg.pf-v5-u-mr-0 > button',
+    'div.pf-v6-c-toolbar__item.pf-m-hidden.pf-m-visible-on-lg.pf-v6-u-mr-0 > button',
   );
 
   await button.click();

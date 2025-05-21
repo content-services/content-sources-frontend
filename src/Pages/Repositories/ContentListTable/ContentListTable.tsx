@@ -12,7 +12,7 @@ import {
 import {
   ActionsColumn,
   IAction,
-  Table /* data-codemods */,
+  Table,
   TableVariant,
   Tbody,
   Td,
@@ -21,7 +21,7 @@ import {
   ThProps,
   Tr,
 } from '@patternfly/react-table';
-import { global_BackgroundColor_100, global_Color_400 } from '@patternfly/react-tokens';
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import {
@@ -56,7 +56,6 @@ import UploadRepositoryLabel from 'components/UploadRepositoryLabel/UploadReposi
 
 const useStyles = createUseStyles({
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
   },
@@ -71,7 +70,6 @@ const useStyles = createUseStyles({
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
   invisible: {
     opacity: 0,
@@ -80,7 +78,6 @@ const useStyles = createUseStyles({
     minWidth: '45px!important',
   },
   snapshotInfoText: {
-    color: global_Color_400.value,
     marginRight: '16px',
   },
   inline: {
@@ -292,6 +289,8 @@ const ContentListTable = () => {
                   actionTakingPlace ||
                   !rowData.snapshot ||
                   !(rowData.snapshot && rowData.last_snapshot_uuid),
+
+                ouiaId: 'kebab_view_snapshots',
                 title:
                   rowData.snapshot && rowData.last_snapshot_uuid
                     ? 'View all snapshots'
@@ -308,6 +307,7 @@ const ContentListTable = () => {
                   {
                     isDisabled: actionTakingPlace || rowData?.status === 'Pending',
                     title: 'Edit',
+                    ouiaId: 'kebab_edit',
                     onClick: () => {
                       navigate(`${rowData.uuid}/${EDIT_ROUTE}`);
                     },
@@ -317,6 +317,7 @@ const ContentListTable = () => {
                         {
                           isDisabled: actionTakingPlace || rowData?.status === 'Pending',
                           title: 'Upload content',
+                          ouiaId: 'kebab_upload_content',
                           onClick: () => {
                             navigate(`${rowData.uuid}/${UPLOAD_ROUTE}`);
                           },
@@ -330,6 +331,7 @@ const ContentListTable = () => {
                   {
                     isDisabled: actionTakingPlace || !rowData.last_snapshot_uuid,
                     title: rowData.last_snapshot_uuid ? 'View all snapshots' : 'No snapshots yet',
+                    ouiaId: 'kebab_view_snapshots',
                     onClick: () => {
                       navigate(`${rowData.uuid}/snapshots`);
                     },
@@ -345,6 +347,7 @@ const ContentListTable = () => {
                           isDisabled:
                             actionTakingPlace || rowData?.status === 'Pending' || !rowData.snapshot,
                           title: 'Trigger snapshot',
+                          ouiaId: 'kebab_trigger_snapshots',
                           onClick: () => {
                             triggerIntrospectionAndSnapshot(rowData?.uuid);
                           },
@@ -367,6 +370,7 @@ const ContentListTable = () => {
                   {
                     isDisabled: actionTakingPlace || rowData?.status == 'Pending',
                     title: 'Introspect now',
+                    ouiaId: 'kebab_introspect_now',
                     onClick: () =>
                       introspectRepoForUuid(rowData?.uuid).then(clearCheckedRepositories),
                   },
@@ -377,6 +381,7 @@ const ContentListTable = () => {
                   { isSeparator: true },
                   {
                     title: 'Delete',
+                    ouiaId: 'kebab_delete',
                     onClick: () => navigate(`${DELETE_ROUTE}?repoUUID=${rowData.uuid}`),
                   },
                 ]

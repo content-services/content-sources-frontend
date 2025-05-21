@@ -19,11 +19,12 @@ test.describe('Test GPG keys', () => {
       await closePopupsIfExist(page);
       await deleteAllRepos(page, `&search=${repoNamePrefix}`);
     });
+
     await test.step('Create a repository', async () => {
       // Click on the 'Add repositories' button
       // HMS-5268 There are two buttons on the ZeroState page
       await page.getByRole('button', { name: 'Add repositories' }).first().click();
-      await expect(page.getByRole('dialog', { name: 'Add custom repositories' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Add custom repositories' })).toBeVisible();
       // Fill in the repository details
       await page.getByLabel('Name').fill(`${repoName}`);
       await page.getByLabel('Introspect only').click();
@@ -52,8 +53,8 @@ test.describe('Test GPG keys', () => {
       const row = await getRowByNameOrUrl(page, repoName);
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       // Open edit modal
-      await row.getByLabel('Kebab toggle').click();
-      await row.getByRole('menuitem', { name: 'Edit' }).click();
+      await row.getByRole('button', { name: 'Kebab toggle' }).click();
+      await page.getByRole('menuitem', { name: 'Edit' }).click();
       await expect(page.getByRole('dialog', { name: 'Edit custom repository' })).toBeVisible();
       await page.getByPlaceholder('Paste GPG key or URL here').fill(meta_key);
       await expect(page.getByRole('textbox', { name: 'gpgkey_file_to_upload' })).toContainText(

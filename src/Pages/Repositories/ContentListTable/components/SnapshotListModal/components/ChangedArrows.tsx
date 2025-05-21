@@ -1,6 +1,9 @@
 import { LongArrowAltDownIcon, LongArrowAltUpIcon } from '@patternfly/react-icons';
 import { Flex, FlexItem } from '@patternfly/react-core';
-import { global_danger_color_100, global_success_color_100 } from '@patternfly/react-tokens';
+import {
+  t_global_color_status_danger_100 as global_danger_color_100,
+  t_global_color_status_success_100 as global_success_color_100,
+} from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 
 const red = global_danger_color_100.value;

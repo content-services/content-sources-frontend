@@ -3,11 +3,8 @@ import {
   ClipboardCopy,
   ClipboardCopyVariant,
   TabContent,
-  Text,
-  TextContent,
-  TextList,
-  TextListItem,
-  TextVariants,
+  Content,
+  ContentVariants,
 } from '@patternfly/react-core';
 import React from 'react';
 import { createUseStyles } from 'react-jss';
@@ -44,11 +41,11 @@ const CurlTab = ({ tabContentRef }: Props) => {
           </a>
         </Alert>
       </div>
-      <TextContent className={classes.textGroup}>
-        <Text component={TextVariants.h2}>Register for subscriptions</Text>
-        <TextList isPlain>
-          <TextListItem>
-            <Text component='h6'>Register with rhc</Text>
+      <Content className={classes.textGroup}>
+        <Content component={ContentVariants.h2}>Register for subscriptions</Content>
+        <Content component='ul' isPlainList>
+          <Content component='li'>
+            <Content component='h6'>Register with rhc</Content>
             <ClipboardCopy
               isReadOnly
               hoverTip='Copy'
@@ -57,9 +54,9 @@ const CurlTab = ({ tabContentRef }: Props) => {
             >
               rhc connect
             </ClipboardCopy>
-          </TextListItem>
-          <TextListItem>
-            <Text component='h6'>Or register with subscription manager</Text>
+          </Content>
+          <Content component='li'>
+            <Content component='h6'>Or register with subscription manager</Content>
             <ClipboardCopy
               isReadOnly
               hoverTip='Copy'
@@ -68,11 +65,11 @@ const CurlTab = ({ tabContentRef }: Props) => {
             >
               subscription-manager register
             </ClipboardCopy>
-          </TextListItem>
-        </TextList>
-        <TextList isPlain>
-          <TextListItem>
-            <Text component={TextVariants.h2}>Download the repo file</Text>
+          </Content>
+        </Content>
+        <Content component='ul' isPlainList>
+          <Content component='li'>
+            <Content component={ContentVariants.h2}>Download the repo file</Content>
             <ClipboardCopy
               isReadOnly
               hoverTip='Copy'
@@ -83,9 +80,9 @@ const CurlTab = ({ tabContentRef }: Props) => {
                 templateUUID +
                 '/config.repo'}
             </ClipboardCopy>
-          </TextListItem>
-        </TextList>
-      </TextContent>
+          </Content>
+        </Content>
+      </Content>
       <div className={classes.textGroup}>
         <Alert
           variant='info'

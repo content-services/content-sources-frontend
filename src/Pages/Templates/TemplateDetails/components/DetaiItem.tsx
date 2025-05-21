@@ -1,4 +1,4 @@
-import { Flex, Text } from '@patternfly/react-core';
+import { Flex, Content } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 
 const useStyles = createUseStyles({
@@ -12,7 +12,7 @@ const useStyles = createUseStyles({
   },
   content: {
     width: '500px',
-    extend: 'pf-v5-u-color-100',
+    extend: 'pf-v6-u-color-100',
   },
 });
 
@@ -25,8 +25,12 @@ export default function DetailItem({ title, value }: { title: string; value?: st
       flexWrap={{ default: 'nowrap' }}
       className={classes.container}
     >
-      <Text className={classes.title}>{title}</Text>
-      <Text className={classes.content}>{value || '-'}</Text>
+      <Content component='p' className={classes.title}>
+        {title}
+      </Content>
+      <Content component='p' className={classes.content}>
+        {value || '-'}
+      </Content>
     </Flex>
   );
 }

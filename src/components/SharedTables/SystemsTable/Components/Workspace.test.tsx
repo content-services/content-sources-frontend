@@ -3,15 +3,15 @@ import Workspace from './Workspace';
 
 jest.mock('Hooks/useRootPath', () => () => '/someUrl');
 
-it('Render no workspace', () => {
+it('Render no workspace', async () => {
   const { queryByText } = render(<Workspace workspace={[]} />);
   expect(queryByText('No workspace')).toBeInTheDocument();
 });
 
 it('Render workspace', () => {
-  const { queryByText } = render(<Workspace workspace={[{ id: 'steve1', name: 'Steve' }]} />);
+  const { getByRole } = render(<Workspace workspace={[{ id: 'steve1', name: 'Steve' }]} />);
 
-  const aTag = queryByText('Steve');
+  const aTag = getByRole('link', { name: 'Steve' });
   expect(aTag).toBeInTheDocument();
   expect(aTag).toHaveAttribute('href', 'someUrlinventory/workspaces/steve1');
 });

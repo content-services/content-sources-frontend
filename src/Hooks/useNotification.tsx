@@ -1,4 +1,5 @@
 import { AlertVariant } from '@patternfly/react-core';
+import type { PortalNotificationConfig } from '@redhat-cloud-services/frontend-components-notifications/Portal';
 import { addNotification } from '@redhat-cloud-services/frontend-components-notifications/redux';
 import { useDispatch } from 'react-redux';
 
@@ -12,7 +13,7 @@ export interface NotificationPayload {
 
 export default function useNotification() {
   const dispatch = useDispatch();
-  const notify = (payload: NotificationPayload) => dispatch(addNotification(payload));
+  const notify = (payload: PortalNotificationConfig) => dispatch(addNotification(payload));
 
   return { notify };
 }

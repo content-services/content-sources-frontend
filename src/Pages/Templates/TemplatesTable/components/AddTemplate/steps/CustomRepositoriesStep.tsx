@@ -6,18 +6,16 @@ import {
   Grid,
   InputGroup,
   InputGroupItem,
-  InputGroupText,
   Pagination,
   PaginationVariant,
-  Text,
+  Content,
   TextInput,
-  TextVariants,
+  ContentVariants,
   Title,
   ToggleGroup,
   ToggleGroupItem,
 } from '@patternfly/react-core';
 import { useAddTemplateContext } from '../AddTemplateContext';
-import { global_Color_300 } from '@patternfly/react-tokens';
 import { createUseStyles } from 'react-jss';
 import { ContentItem, ContentOrigin } from 'services/Content/ContentApi';
 import { useState } from 'react';
@@ -39,9 +37,6 @@ import { reduceStringToCharsWithEllipsis } from 'helpers';
 import UploadRepositoryLabel from 'components/UploadRepositoryLabel/UploadRepositoryLabel';
 
 const useStyles = createUseStyles({
-  global_300: {
-    color: global_Color_300.value,
-  },
   topBottomContainers: {
     justifyContent: 'space-between',
     height: 'fit-content',
@@ -157,9 +152,9 @@ export default function CustomRepositoriesStep() {
         </Button>
       </Flex>
       <Flex direction={{ default: 'row' }}>
-        <Text component={TextVariants.h6} className={classes.reduceTrailingMargin}>
+        <Content component={ContentVariants.h6} className={classes.reduceTrailingMargin}>
           Select custom repositories.
-        </Text>
+        </Content>
         <UrlWithExternalIcon
           href={pathname + '/' + REPOSITORIES_ROUTE}
           customText='Create and  manage repositories here.'
@@ -178,10 +173,9 @@ export default function CustomRepositoriesStep() {
                     placeholder='Filter by name/url'
                     value={searchQuery}
                     onChange={(_event, value) => setSearchQuery(value)}
+                    type='search'
+                    customIcon={<SearchIcon />}
                   />
-                  <InputGroupText isDisabled={isLoading} id='search-icon'>
-                    <SearchIcon />
-                  </InputGroupText>
                 </InputGroupItem>
               </InputGroup>
             </FlexItem>

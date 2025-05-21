@@ -9,7 +9,6 @@ import {
 import Hide from 'components/Hide/Hide';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import { createUseStyles } from 'react-jss';
-import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useRootPath from 'Hooks/useRootPath';
@@ -20,13 +19,7 @@ import SnapshotErrataFilters from './SnapshotErrataFilters';
 import { ThProps } from '@patternfly/react-table';
 
 const useStyles = createUseStyles({
-  description: {
-    paddingTop: '12px',
-    paddingBottom: '8px',
-    color: global_Color_200.value,
-  },
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -40,7 +33,6 @@ const useStyles = createUseStyles({
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
   alignTop: {
     alignItems: 'baseline',

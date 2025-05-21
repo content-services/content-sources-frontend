@@ -1,13 +1,5 @@
-import {
-  Button,
-  Modal,
-  ModalVariant,
-  Stack,
-  StackItem,
-  Tab,
-  TabTitleText,
-  Tabs,
-} from '@patternfly/react-core';
+import { Button, Stack, StackItem, Tab, TabTitleText, Tabs } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import { InnerScrollContainer } from '@patternfly/react-table';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -27,7 +19,8 @@ const useStyles = createUseStyles({
   topContainer: {
     display: 'flex',
     justifyContent: 'space-between',
-    padding: '24px 0',
+    marginBottom: '16px',
+    '& button': { maxHeight: '37px', marginTop: 'auto' },
   },
 });
 

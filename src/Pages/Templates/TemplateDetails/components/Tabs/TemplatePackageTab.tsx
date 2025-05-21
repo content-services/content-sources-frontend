@@ -4,12 +4,11 @@ import {
   Grid,
   InputGroup,
   InputGroupItem,
-  InputGroupText,
   Pagination,
   PaginationVariant,
   TextInput,
 } from '@patternfly/react-core';
-import { global_BackgroundColor_100, global_Color_200 } from '@patternfly/react-tokens';
+
 import { useEffect, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { SearchIcon } from '@patternfly/react-icons';
@@ -23,10 +22,8 @@ const useStyles = createUseStyles({
   description: {
     paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
     paddingBottom: '8px',
-    color: global_Color_200.value,
   },
   mainContainer: {
-    backgroundColor: global_BackgroundColor_100.value,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -35,11 +32,9 @@ const useStyles = createUseStyles({
     justifyContent: 'space-between',
     padding: '16px 24px',
     height: 'fit-content',
-    minHeight: '68px', // Prevents compacting of the search box (patternfly bug?)
   },
   bottomContainer: {
     justifyContent: 'space-between',
-    minHeight: '68px',
   },
 });
 
@@ -97,10 +92,9 @@ export default function TemplatePackageTab() {
             placeholder='Filter by name'
             value={searchQuery}
             onChange={(_event, value) => setSearchQuery(value)}
+            type='search'
+            customIcon={<SearchIcon />}
           />
-          <InputGroupText id='search-icon'>
-            <SearchIcon />
-          </InputGroupText>
         </InputGroupItem>
         <Pagination
           id='top-pagination-id'

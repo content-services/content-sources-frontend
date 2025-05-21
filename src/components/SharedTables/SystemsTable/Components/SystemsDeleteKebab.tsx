@@ -1,4 +1,5 @@
-import { Dropdown, DropdownItem, KebabToggle } from '@patternfly/react-core/deprecated';
+import { Dropdown, DropdownItem, DropdownList, MenuToggle } from '@patternfly/react-core';
+import { EllipsisVIcon } from '@patternfly/react-icons';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { useState } from 'react';
 
@@ -12,44 +13,43 @@ interface Props {
 const SystemsDeleteKebab = ({ deselectAll, isDisabled, selected, deleteFromSystems }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const onToggle = (isOpen: boolean) => {
-    setIsOpen(isOpen);
-  };
-
   const onSelect = () => {
     setIsOpen(false);
     deselectAll();
   };
 
-  const dropdownItems = [
-    <ConditionalTooltip
-      key='delete'
-      content='Make a selection below to remove this template from multiple systems'
-      show={!selected.length}
-      setDisabled
-    >
-      <DropdownItem autoFocus onClick={() => deleteFromSystems(selected)}>
-        {`Remove template from ${selected.length} system(s)`}
-      </DropdownItem>
-    </ConditionalTooltip>,
-  ];
-
   return (
     <Dropdown
-      onSelect={onSelect}
-      toggle={
-        <KebabToggle
-          id='delete-kebab'
-          data-ouia-component-id='template_systems_kebab_toggle'
-          onToggle={(_event, isOpen: boolean) => onToggle(isOpen)}
-          isDisabled={isDisabled}
-        />
-      }
       isOpen={isOpen}
-      isPlain
-      dropdownItems={dropdownItems}
-      direction='down'
-    />
+      onSelect={onSelect}
+      onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
+      toggle={(toggleRef) => (
+        <MenuToggle
+          ref={toggleRef}
+          disabled={isDisabled}
+          id='delete-kebab'
+          onClick={() => setIsOpen((prev) => !prev)}
+          isDisabled={isDisabled}
+          icon={<EllipsisVIcon />}
+          variant='plain'
+          aria-label='plain kebab'
+        />
+      )}
+      shouldFocusToggleOnSelect
+    >
+      <DropdownList>
+        <ConditionalTooltip
+          key='delete'
+          content='Make a selection below to remove this template from multiple systems'
+          show={!selected.length}
+          setDisabled
+        >
+          <DropdownItem autoFocus onClick={() => deleteFromSystems(selected)}>
+            {`Remove template from ${selected.length} system(s)`}
+          </DropdownItem>
+        </ConditionalTooltip>
+      </DropdownList>
+    </Dropdown>
   );
 };
 

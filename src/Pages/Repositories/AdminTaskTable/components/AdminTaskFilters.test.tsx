@@ -1,5 +1,6 @@
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import AdminTaskFilters from './AdminTaskFilters';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({}),
@@ -21,12 +22,12 @@ it('Render loading state (disabled)', () => {
     />,
   );
 
-  const filterInput = getByRole('textbox');
+  const filterInput = getByRole('searchbox', { name: '' });
   expect(filterInput).toHaveAttribute('disabled');
 });
 
-it('Select a filter of each type and ensure chips are present', () => {
-  const { queryByText, getByRole, getByLabelText } = render(
+it('Select a filter of each type and ensure chips are present admin', async () => {
+  const { queryByText, getByRole, getByLabelText, queryAllByText } = render(
     <AdminTaskFilters
       setFilterData={() => null}
       filterData={{
@@ -39,62 +40,59 @@ it('Select a filter of each type and ensure chips are present', () => {
   );
 
   // Enter an account ID item
-  const accountIdInput = getByRole('textbox');
-  expect(accountIdInput).not.toHaveAttribute('disabled');
-  fireEvent.change(accountIdInput, { target: { value: '11593016' } });
+  const filterInput = getByRole('searchbox', { name: '' });
+  expect(filterInput).not.toHaveAttribute('disabled');
+
+  await userEvent.type(filterInput, '11593016');
 
   const optionMenu = getByRole('button', { name: 'filterSelectionDropdown' });
-
-  waitFor(() => {
-    fireEvent.click(optionMenu);
-  });
+  await userEvent.click(optionMenu);
 
   const orgIdOption = queryByText('Org ID') as Element;
   expect(orgIdOption).toBeInTheDocument();
-  fireEvent.click(orgIdOption);
+  await userEvent.click(orgIdOption);
 
   // Enter an org ID item
-  const orgIdInput = getByRole('textbox');
-  expect(orgIdInput).not.toHaveAttribute('disabled');
-  fireEvent.change(orgIdInput, { target: { value: '13446804' } });
 
-  fireEvent.click(optionMenu);
+  await userEvent.type(filterInput, '13446804');
+  expect(filterInput).toHaveValue('13446804');
 
   // Select a Status item
+  await userEvent.click(optionMenu);
   const statusOption = queryByText('Status') as Element;
   expect(statusOption).toBeInTheDocument();
-  fireEvent.click(statusOption);
+  await userEvent.click(statusOption);
 
   const statusSelector = getByLabelText('filter status') as Element;
   expect(statusSelector).toBeInTheDocument();
-  fireEvent.click(statusSelector);
+  await userEvent.click(statusSelector);
 
   const statusItem = queryByText('Running') as Element;
   expect(statusItem).toBeInTheDocument();
-  fireEvent.click(statusItem);
+  await userEvent.click(statusItem);
 
   // Click the optionsButton to make the statusMenu disappear
-  fireEvent.click(optionMenu);
-
+  await userEvent.click(optionMenu);
   // Select a Type item
   const typeOption = queryByText('Type') as Element;
   expect(typeOption).toBeInTheDocument();
-  fireEvent.click(typeOption);
+  await userEvent.click(typeOption);
 
   const typeSelector = getByLabelText('filter type') as Element;
   expect(typeSelector).toBeInTheDocument();
-  fireEvent.click(typeSelector);
+  await userEvent.click(typeSelector);
 
   const typeItem = queryByText('introspect') as Element;
   expect(typeItem).toBeInTheDocument();
-  fireEvent.click(typeItem);
+  await userEvent.click(typeItem);
 
   // Click the optionsButton to make the typeMenu disappear
-  fireEvent.click(optionMenu);
+  await userEvent.click(typeSelector);
 
   // Check all the chips are there
   expect(queryByText('11593016')).toBeInTheDocument();
   expect(queryByText('13446804')).toBeInTheDocument();
+
   expect(queryByText('Running')).toBeInTheDocument();
-  expect(queryByText('introspect')).toBeInTheDocument();
+  expect(queryAllByText('introspect')).toHaveLength(2);
 });

@@ -35,15 +35,20 @@ test.describe('Snapshot Repositories', () => {
 
     await test.step('Filter by architecture', async () => {
       await page.getByRole('button', { name: 'filter architecture' }).click();
-      await page.getByRole('option', { name: 'x86_64' }).click();
+      const archMenu = page.locator('[role="menu"]', {
+        has: page.getByText('x86_64', { exact: true }),
+      });
+      await archMenu.getByText('x86_64', { exact: true }).click();
     });
 
     await test.step('Filter by version', async () => {
-      const versionFilterButton = page.getByRole('button', { name: 'filter version' });
-      await versionFilterButton.click();
-      await page.getByRole('menuitem', { name: 'el9' }).locator('label').click();
-      await page.getByRole('menuitem', { name: 'el8' }).locator('label').click();
-      await versionFilterButton.click(); // Close the version filter dropdown
+      await page.getByRole('button', { name: 'filter version' }).click();
+      const versionMenu = page.locator('[role="menu"]', {
+        has: page.getByText('el9', { exact: true }),
+      });
+      await versionMenu.getByText('el9', { exact: true }).click();
+      await versionMenu.getByText('el8', { exact: true }).click();
+      await page.getByRole('button', { name: 'filter version' }).click();
     });
 
     await test.step('Submit the form and wait for modal to disappear', async () => {
@@ -87,8 +92,8 @@ test.describe('Snapshot Repositories', () => {
         page,
         'https://jlsherrill.fedorapeople.org/fake-repos/revision/' + repoName,
       );
-      await row.getByLabel('Kebab toggle').click();
-      await row.getByRole('menuitem', { name: 'Delete' }).click();
+      await row.getByRole('button', { name: 'Kebab toggle' }).click();
+      await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
 
       await Promise.all([

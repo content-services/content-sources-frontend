@@ -34,13 +34,19 @@ test.describe('Upload Repositories', () => {
 
       // Filter by architecture
       await page.getByRole('button', { name: 'filter architecture' }).click();
-      await page.getByRole('option', { name: 'x86_64' }).click();
+      const archMenu = page.locator('[role="menu"]', {
+        has: page.getByText('x86_64', { exact: true }),
+      });
+      await archMenu.getByText('x86_64', { exact: true }).click();
 
       // Filter by version
       const versionFilterButton = page.getByRole('button', { name: 'filter version' });
       await versionFilterButton.click();
-      await page.getByRole('menuitem', { name: 'el9' }).locator('label').click();
-      await page.getByRole('menuitem', { name: 'el8' }).locator('label').click();
+      const versionMenu = page.locator('[role="menu"]', {
+        has: page.getByText('el9', { exact: true }),
+      });
+      await versionMenu.getByText('el9', { exact: true }).click();
+      await versionMenu.getByText('el8', { exact: true }).click();
       await versionFilterButton.click(); // Close the filter dropdown
 
       // Wait for the successful API call
@@ -81,8 +87,8 @@ test.describe('Upload Repositories', () => {
     await test.step('Delete one upload repository', async () => {
       const row = await getRowByNameOrUrl(page, uploadRepoName);
       // Check if the 'Kebab toggle' button is disabled
-      await row.getByLabel('Kebab toggle').click();
-      await row.getByRole('menuitem', { name: 'Delete' }).click();
+      await row.getByRole('button', { name: 'Kebab toggle' }).click();
+      await page.getByRole('menuitem', { name: 'Delete' }).click();
 
       // Click on the 'Remove' button
       await Promise.all([
