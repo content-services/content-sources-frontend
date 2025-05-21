@@ -1,44 +1,39 @@
-import { expect, test as setup } from '@playwright/test';
-import { closePopupsIfExist } from './UI/helpers/helpers';
+import { expect, test as setup, type Page } from '@playwright/test';
 import {
   throwIfMissingEnvVariables,
   logInWithUsernameAndPassword,
   logout,
 } from './helpers/loginHelpers';
+import { describe } from 'node:test';
+import { closePopupsIfExist } from './UI/helpers/helpers';
 
-setup.describe('Setup', async () => {
-  setup.describe.configure({ retries: 3 });
-
-  setup('Ensure needed ENV variables exist', async () => {
+describe('Setup', async () => {
+  setup('Ensure needed ENV variables exist', async ({}) => {
     expect(() => throwIfMissingEnvVariables()).not.toThrow();
   });
 
-  setup('Authenticate', async ({ page }) => {
-    setup.setTimeout(60_000);
-
+  setup('Authenticate all the users', async ({ page }) => {
     await closePopupsIfExist(page);
-    await logInWithUsernameAndPassword(page, process.env.USER1USERNAME, process.env.USER1PASSWORD);
-    // Save admin user storage state
-    await page.context().storageState({ path: '.auth/default_user.json' });
-    await logout(page);
+
     await logInWithUsernameAndPassword(
       page,
-      process.env.RO_USER_USERNAME,
-      process.env.RO_USER_PASSWORD,
+      process.env.READONLY_USERNAME,
+      process.env.READONLY_PASSWORD,
     );
-    // Save read-only user storage state
-    await page.context().storageState({ path: '.auth/readonly_user.json' });
+
     await logout(page);
-    // Example of how to add another user
-    // await logout(page)
-    // await logInWithUsernameAndPassword(
-    //     page,
-    //     process.env.USER2USERNAME,
-    //     process.env.USER2PASSWORD
-    // );
-    // Example of how to switch to said user
-    // await switchToUser(page, process.env.USER1USERNAME!);
-    // await ensureNotInPreview(page);
-    // Other users for other tests can be added below after logging out
+
+    await logInWithUsernameAndPassword(
+      page,
+      process.env.ADMIN_USERNAME,
+      process.env.ADMIN_PASSWORD,
+    );
+
+    await switchToUser(page, process.env.ADMIN_USERNAME!);
+
+    // We do this as we run admin tests first.
   });
 });
+function switchToUser(page: Page, arg1: string) {
+  throw new Error('Function not implemented.');
+}
