@@ -3,6 +3,7 @@ import {
   throwIfMissingEnvVariables,
   logInWithUsernameAndPassword,
   logout,
+  switchToUser,
 } from './helpers/loginHelpers';
 import { describe } from 'node:test';
 import { closePopupsIfExist } from './UI/helpers/helpers';
@@ -34,6 +35,3 @@ describe('Setup', async () => {
     // We do this as we run admin tests first.
   });
 });
-function switchToUser(page: Page, arg1: string) {
-  throw new Error('Function not implemented.');
-}

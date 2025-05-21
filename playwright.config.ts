@@ -53,12 +53,27 @@ export default defineConfig({
   projects: [
     { name: 'setup', testMatch: /.*\.setup\.ts/ },
     {
-      name: 'chromium',
+      name: 'AdminTests', // 'Run admin user tests',
+      grepInvert: [/read-only/], // !!process.env.PROD ? [/preview-only/, /switch-to-preview/],  ] : [/switch-to-preview/],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: '.auth/default_user.json',
+        storageState: `./.auth/${process.env.ADMIN_USERNAME}.json`,
       },
       dependencies: ['setup'],
+    },
+    {
+      name: "SwitchToUser2",
+      testMatch: /.switchToUser2\.setup\.ts/,
+      dependencies: ["setup"],
+    },
+    {
+      name: "ReadOnlyTests", // 'Run read-only user tests',
+      grep: [/read-only/],
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: `.auth/${process.env.READONLY_USERNAME}.json`,
+      },
+      dependencies: ["SwitchToUser2"],
     },
   ],
 });
