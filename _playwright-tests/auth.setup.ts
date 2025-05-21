@@ -1,23 +1,37 @@
-import { expect, test as setup } from '@playwright/test';
+import { expect, test as setup, type Page } from '@playwright/test';
 import {
   throwIfMissingEnvVariables,
-  logInWithUser1,
-  storeStorageStateAndToken,
+  logInWithUsernameAndPassword,
+  logout,
+  switchToUser,
 } from './helpers/loginHelpers';
+import { describe } from 'node:test';
 import { closePopupsIfExist } from './UI/helpers/helpers';
 
-setup.describe('Setup', async () => {
-  setup.describe.configure({ retries: 3 });
-
-  setup('Ensure needed ENV variables exist', async () => {
+describe('Setup', async () => {
+  setup('Ensure needed ENV variables exist', async ({}) => {
     expect(() => throwIfMissingEnvVariables()).not.toThrow();
   });
 
-  setup('Authenticate', async ({ page }) => {
-    setup.setTimeout(60_000);
-
+  setup('Authenticate all the users', async ({ page }) => {
     await closePopupsIfExist(page);
-    await logInWithUser1(page);
-    await storeStorageStateAndToken(page);
+
+    await logInWithUsernameAndPassword(
+      page,
+      process.env.READONLY_USERNAME,
+      process.env.READONLY_PASSWORD,
+    );
+
+    await logout(page);
+
+    await logInWithUsernameAndPassword(
+      page,
+      process.env.ADMIN_USERNAME,
+      process.env.ADMIN_PASSWORD,
+    );
+
+    await switchToUser(page, process.env.ADMIN_USERNAME!);
+
+    // We do this as we run admin tests first.
   });
 });
