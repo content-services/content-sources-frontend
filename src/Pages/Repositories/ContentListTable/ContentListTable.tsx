@@ -90,11 +90,6 @@ const useStyles = createUseStyles({
   uploadIcon: {
     marginLeft: '8px',
   },
-  tightPadding: {
-    '& th, & td': {
-      padding: '4px 8px',
-    },
-  },
 });
 
 export const perPageKey = 'contentListPerPage';
@@ -553,7 +548,6 @@ const ContentListTable = () => {
                   aria-label='Custom repositories table'
                   ouiaId='custom_repositories_table'
                   variant='compact'
-                  className={classes.tightPadding}
                 >
                   <Thead>
                     <Tr>

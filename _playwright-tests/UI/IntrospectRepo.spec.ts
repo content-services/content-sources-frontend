@@ -76,8 +76,8 @@ test.describe('Introspect Repositories', () => {
 
     await test.step('Delete the created repository', async () => {
       const row = await getRowByNameOrUrl(page, repoName);
-      await row.getByLabel('Kebab toggle').click();
-      await page.getByTestId('kebab_delete').click();
+      await row.getByRole('button', { name: 'Kebab toggle' }).click();
+      await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
 
       await Promise.all([

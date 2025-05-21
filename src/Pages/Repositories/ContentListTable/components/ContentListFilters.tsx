@@ -50,6 +50,7 @@ const useStyles = createUseStyles({
   repositoryActions: {
     display: 'flex',
     flexDirection: 'row',
+    gap: '6px',
   },
   fullWidth: {
     width: 'auto',

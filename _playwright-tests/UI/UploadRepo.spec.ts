@@ -81,8 +81,8 @@ test.describe('Upload Repositories', () => {
     await test.step('Delete one upload repository', async () => {
       const row = await getRowByNameOrUrl(page, uploadRepoName);
       // Check if the 'Kebab toggle' button is disabled
-      await row.getByLabel('Kebab toggle').click();
-      await page.getByTestId('kebab_delete').click();
+      await row.getByRole('button', { name: 'Kebab toggle' }).click();
+      await page.getByRole('menuitem', { name: 'Delete' }).click();
 
       // Click on the 'Remove' button
       await Promise.all([

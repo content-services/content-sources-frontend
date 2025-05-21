@@ -86,8 +86,8 @@ test.describe('Snapshot Repositories', () => {
         page,
         'https://jlsherrill.fedorapeople.org/fake-repos/revision/' + repoName,
       );
-      await row.getByLabel('Kebab toggle').click();
-      await page.getByTestId('kebab_delete').click();
+      await row.getByRole('button', { name: 'Kebab toggle' }).click();
+      await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
 
       await Promise.all([

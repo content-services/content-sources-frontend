@@ -45,7 +45,7 @@ test.describe('Snapshot Package Count and List', async () => {
     await test.step('Update the repository', async () => {
       const row = await getRowByNameOrUrl(page, repoName);
       await row.getByLabel('Kebab toggle').click();
-      await row.getByRole('menuitem', { name: 'Edit' }).click();
+      await page.getByRole('menuitem', { name: 'Edit' }).click();
       await page.getByPlaceholder('Enter name', { exact: true }).fill(editedRepo);
       await page
         .getByLabel('URL')

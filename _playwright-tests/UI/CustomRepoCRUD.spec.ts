@@ -72,8 +72,8 @@ test.describe('Custom Repositories CRUD', () => {
     await test.step('Delete one custom repository', async () => {
       await page.getByRole('searchbox', { name: 'Filter by name/url' }).fill(`${repoName}-Edited`);
       const row = await getRowByNameOrUrl(page, `${repoName}-Edited`);
-      await row.getByLabel('Kebab toggle').click();
-      await page.getByTestId('kebab_delete').click();
+      await row.getByRole('button', { name: 'Kebab toggle' }).click();
+      await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
       await page.getByRole('button', { name: 'Remove' }).click();
       await expect(page.getByRole('row', { name: repoName })).not.toBeVisible;
