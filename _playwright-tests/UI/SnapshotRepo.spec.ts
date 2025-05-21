@@ -35,13 +35,19 @@ test.describe('Snapshot Repositories', () => {
 
     await test.step('Filter by architecture', async () => {
       await page.getByRole('button', { name: 'filter architecture' }).click();
-      await page.getByTestId('filter_x86_64').click();
+      const archMenu = page.locator('[role="menu"]', {
+        has: page.getByText('x86_64', { exact: true }),
+      });
+      await archMenu.getByText('x86_64', { exact: true }).click();
     });
 
     await test.step('Filter by version', async () => {
       await page.getByRole('button', { name: 'filter version' }).click();
-      await page.getByTestId('filter_el9').click();
-      await page.getByTestId('filter_el8').click();
+      const versionMenu = page.locator('[role="menu"]', {
+        has: page.getByText('el9', { exact: true }),
+      });
+      await versionMenu.getByText('el9', { exact: true }).click();
+      await versionMenu.getByText('el8', { exact: true }).click();
       await page.getByRole('button', { name: 'filter version' }).click();
     });
 

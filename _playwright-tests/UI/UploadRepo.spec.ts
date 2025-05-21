@@ -34,13 +34,19 @@ test.describe('Upload Repositories', () => {
 
       // Filter by architecture
       await page.getByRole('button', { name: 'filter architecture' }).click();
-      await page.getByTestId('filter_x86_64').click();
+      const archMenu = page.locator('[role="menu"]', {
+        has: page.getByText('x86_64', { exact: true }),
+      });
+      await archMenu.getByText('x86_64', { exact: true }).click();
 
       // Filter by version
       const versionFilterButton = page.getByRole('button', { name: 'filter version' });
       await versionFilterButton.click();
-      await page.getByTestId('filter_el9').click();
-      await page.getByTestId('filter_el8').click();
+      const versionMenu = page.locator('[role="menu"]', {
+        has: page.getByText('el9', { exact: true }),
+      });
+      await versionMenu.getByText('el9', { exact: true }).click();
+      await versionMenu.getByText('el8', { exact: true }).click();
       await versionFilterButton.click(); // Close the filter dropdown
 
       // Wait for the successful API call
