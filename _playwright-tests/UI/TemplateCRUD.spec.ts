@@ -34,16 +34,16 @@ test.describe('Templates CRUD', () => {
     });
     await test.step('Create a template', async () => {
       await page.getByRole('button', { name: 'Add content template' }).click();
-      await page.getByRole('button', { name: 'Select architecture' }).click();
-      await page.getByRole('option', { name: 'aarch64' }).click();
-      await page.getByRole('button', { name: 'Select version' }).click();
-      await page.getByRole('option', { name: 'el9' }).click();
+      await page.getByRole('button', { name: 'filter arch' }).click();
+      await page.getByTestId('filter_aarch64').click();
+      await page.getByRole('button', { name: 'filter version' }).click();
+      await page.getByTestId('filter_9').click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       const modalPage = page.getByTestId('add_template_modal');
       const rowRHELRepo = await getRowByNameOrUrl(modalPage, smallRHRepo);
       await rowRHELRepo.getByLabel('Select row').click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
-      await modalPage.getByRole('textbox', { name: 'Filter by name/url' }).fill(repoName);
+      await modalPage.getByRole('searchbox', { name: 'Filter by name/url' }).fill(repoName);
       const rowRepo = await getRowByNameOrUrl(modalPage, repoName);
       await rowRepo.getByLabel('Select row').click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
@@ -91,7 +91,7 @@ test.describe('Templates CRUD', () => {
       const rowTemplate = await getRowByNameOrUrl(page, `${templateName}-edited`);
       await expect(rowTemplate.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await rowTemplate.getByLabel('Kebab toggle').click();
-      await rowTemplate.getByRole('menuitem', { name: 'Delete' }).click();
+      await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove template?')).toBeVisible();
       await page.getByRole('button', { name: 'Remove' }).click();
       await expect(rowTemplate.getByText('Valid')).not.toBeVisible();
