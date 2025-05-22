@@ -1,6 +1,5 @@
 // _playwright-tests/UI/RBAC.spec.ts
 import { test, expect } from '@playwright/test';
-// ... other imports ...
 import fs from 'fs';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 import { randomName, randomUrl } from './helpers/repoHelpers';
@@ -30,13 +29,18 @@ test.beforeAll('Clean up existing repo name file', async () => {
     console.log(`Deleting old repo name file: ${repoNameFile}`);
     fs.unlinkSync(repoNameFile);
   }
-  // await deleteAllRepos(page, `&search=${repoNamePrefix}`);
+  // IMPORTANT: deleteAllRepos needs an APIRequestContext or Page to work.
+  // If you want to purge old repos before *all* tests (across describe blocks),
+  // you'd typically need to create an APIRequestContext here,
+  // potentially by loading a storageState specifically for it.
+  // Given your earlier discussion, this might be a separate setup step.
+  // For now, I'm assuming deleteAllRepos might happen in beforeEach or part of admin setup.
 });
 
 // Define a test group for admin user
 test.describe('Admin User Tests', () => {
   // Use the default user's storageState for all tests in this describe block
-  test.use({ storageState: '.auth/user.json' });
+  test.use({ storageState: '.auth/default_user.json' }); // Changed from '.auth/user.json' based on previous conversation
 
   test.beforeEach(async ({ page }) => {
     // This beforeEach will run for all tests in this describe block
@@ -46,7 +50,6 @@ test.describe('Admin User Tests', () => {
 
   test('Login as user 1 (admin) and manage repo', async ({ page }) => {
     // All setup is done in beforeEach for this user
-    // This test now focuses purely on the actions after navigation
     await test.step('Create a repository', async () => {
       await page.getByRole('button', { name: 'Add repositories' }).first().click();
       await expect(page.getByRole('dialog', { name: 'Add custom repositories' })).toBeVisible();
@@ -89,8 +92,11 @@ test.describe('Read-Only User Tests', () => {
     await closePopupsIfExist(page);
   });
 
-  test('Read-only user can view but not edit', { tag: '@read-only' }, async ({ page }) => {
-    // No need for browser.newContext() or switchToUser here, `page` already has storageState loaded
+  test('Read-only user can view but not edit', async ({ browser }) => {
+    const context = await browser.newContext({
+      storageState: '.auth/contentPlaywrightReader.json',
+    });
+    const page = await context.newPage();
     const repoName = getRepoName(); // Get the name from the previous test
     const row = await getRowByNameOrUrl(page, `${repoName}-Edited`);
     await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
