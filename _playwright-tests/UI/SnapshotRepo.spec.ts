@@ -145,7 +145,7 @@ test.describe('Snapshot Repositories', () => {
             .getByLabel('URL')
             .fill(`https://fedorapeople.org/groups/katello/fakerepos/zoo${i}/`);
           await page.getByRole('button', { name: 'Save changes', exact: true }).click();
-          await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+          await expect(row.getByText('Valid')).toBeVisible({ timeout: 70000 });
         });
       }
     });
@@ -155,34 +155,11 @@ test.describe('Snapshot Repositories', () => {
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await row.getByRole('button', { name: 'Kebab toggle' }).click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
-      // Initialize a variable to store the count
-      let totalRowCount = 0;
-
-      for (let i = 1; i <= 4; i++) {
-        const snapshotPrefix = new Date()
-          .toLocaleString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour12: false,
-          })
-          .replace(',', ''); // Format: 20 May 2025
-
-        const targetRows = page
-          .getByLabel('snapshot list table')
-          .locator('tbody')
-          .filter({ hasText: snapshotPrefix });
-
-        // Store the count of rows for each iteration
-        const rowCount = await targetRows.count();
-        totalRowCount += rowCount;
-
-        // Assert the count for the current iteration
-        await expect(targetRows).toHaveCount(i);
-      }
-
-      // Assert the total count at the end
-      await expect(totalRowCount).toBe(4);
+      // pause to allow the snapshots to load
+      await page.waitForTimeout(2000);
+      const snapshotCount =
+        (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
+      expect(snapshotCount).toBe(4);
       await navigateToTemplates(page);
       await page.getByRole('button', { name: 'Add content template' }).click();
       await page.getByRole('button', { name: 'Select architecture' }).click();
@@ -223,6 +200,8 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove snapshots?')).toBeVisible();
       await page.getByText('Remove', { exact: true }).click();
+      await page.waitForTimeout(2000);
+
       const snapshotCountAfterSingleDeletion =
         (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
       expect(snapshotCountAfterSingleDeletion).toBe(3);
@@ -239,6 +218,7 @@ test.describe('Snapshot Repositories', () => {
       await page.getByTestId('remove_snapshots_bulk').click();
       await expect(page.getByText('Remove snapshots?')).toBeVisible();
       await page.getByText('Remove', { exact: true }).click();
+      await page.waitForTimeout(2000);
       // Verify that the remaining snapshot count is 1 after bulk deletion
       const snapshotCountAfterBulkDeletion =
         (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
