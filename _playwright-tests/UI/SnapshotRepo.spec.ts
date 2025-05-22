@@ -155,11 +155,16 @@ test.describe('Snapshot Repositories', () => {
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await row.getByRole('button', { name: 'Kebab toggle' }).click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
-      // pause to allow the snapshots to load
-      await page.waitForTimeout(2000);
-      const snapshotCount =
-        (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
-      expect(snapshotCount).toBe(4);
+      const snapshotPrefix = new Date()
+        .toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour12: false,
+        })
+        .replace(',', ''); // Format: 20 May 2025
+      const targetRows = page.getByRole('row').filter({ has: page.getByText(snapshotPrefix) });
+      await expect(targetRows).toHaveCount(4);
       await navigateToTemplates(page);
       await page.getByRole('button', { name: 'Add content template' }).click();
       await page.getByRole('button', { name: 'Select architecture' }).click();
@@ -167,9 +172,14 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('button', { name: 'Select version' }).click();
       await page.getByRole('option', { name: 'el9' }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
+      await expect(page.getByTestId('additional_red_hat_repositories')).toBeVisible();
+      // wait till next button is enabled
+      await page.getByRole('button', { name: 'Next', exact: true }).isEnabled();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
+      await expect(page.getByTestId('custom_repositories_step')).toBeVisible();
       await row.click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
+      await expect(page.getByTestId('set_up_date')).toBeVisible();
       await page.getByTestId('use-latest-snapshot-radio').click();
       await page.getByRole('radio', { name: 'Use latest content' }).check();
       await page.getByRole('button', { name: 'Next' }).click();
@@ -200,15 +210,23 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove snapshots?')).toBeVisible();
       await page.getByText('Remove', { exact: true }).click();
-      await page.waitForTimeout(2000);
-      const snapshotCountAfterSingleDeletion =
-        (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
-      expect(snapshotCountAfterSingleDeletion).toBe(3);
+      const snapshotPrefix = new Date()
+        .toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour12: false,
+        })
+        .replace(',', ''); // Format: 20 May 2025
+      const targetRows = page.getByRole('row').filter({ has: page.getByText(snapshotPrefix) });
+      await expect(targetRows).toHaveCount(3);
       await page.getByText('Close').click();
     });
 
     await test.step('Bulk delete snapshot', async () => {
       // Test bulk deletion of multiple snapshots.
+      // Before bulk delete we need to wait for previous deletion to finish or it will fail.
+      await page.waitForTimeout(6000);
       const row = await getRowByNameOrUrl(page, repoName);
       await row.getByLabel('Kebab toggle').click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
@@ -221,13 +239,19 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('checkbox', { name: 'Select row 0' }).uncheck();
       await page.getByTestId('remove_snapshots_bulk').click();
       await expect(page.getByText('Remove snapshots?')).toBeVisible();
-      await page.waitForTimeout(10000); // wait for previous deletion to finish
       await page.getByText('Remove', { exact: true }).click();
-      await page.waitForTimeout(2000);
       // Verify that the remaining snapshot count is 1 after bulk deletion
-      const snapshotCountAfterBulkDeletion =
-        (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
-      expect(snapshotCountAfterBulkDeletion).toBe(1);
+      const snapshotPrefix = new Date()
+        .toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour12: false,
+        })
+        .replace(',', ''); // Format: 20 May 2025 (same day date)
+
+      const targetRows = page.getByRole('row').filter({ has: page.getByText(snapshotPrefix) });
+      await expect(targetRows).toHaveCount(1);
       await page.getByText('Close').click();
     });
     await deleteAllRepos(page, `&search=${repoNamePrefix}`);
