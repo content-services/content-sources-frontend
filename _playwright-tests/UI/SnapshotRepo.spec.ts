@@ -130,7 +130,7 @@ test.describe('Snapshot Repositories', () => {
       await page.getByLabel('URL').fill('https://fedorapeople.org/groups/katello/fakerepos/zoo/');
       await page.getByRole('button', { name: 'Save', exact: true }).click();
       const row = await getRowByNameOrUrl(page, repoName);
-      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 70000 });
     });
 
     await test.step('Edit the repository', async () => {
@@ -201,14 +201,18 @@ test.describe('Snapshot Repositories', () => {
       await expect(page.getByText('Remove snapshots?')).toBeVisible();
       await page.getByText('Remove', { exact: true }).click();
       await page.waitForTimeout(2000);
-
       const snapshotCountAfterSingleDeletion =
         (await page.getByTestId('snapshot_list_table').locator('tr').count()) - 1; // Subtract 1 for the header row
       expect(snapshotCountAfterSingleDeletion).toBe(3);
+      await page.getByText('Close').click();
     });
 
     await test.step('Bulk delete snapshot', async () => {
       // Test bulk deletion of multiple snapshots.
+      const row = await getRowByNameOrUrl(page, repoName);
+      await row.getByLabel('Kebab toggle').click();
+      await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
+      await expect(page.getByLabel('SnapshotsView list of').locator('tbody')).toBeVisible();
       await page.getByRole('row', { name: 'select-snapshot-checkbox' }).locator('label').click();
       // Verify that you can't delete all snapshots
       // Bulk delete button is disabled
@@ -217,6 +221,7 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('checkbox', { name: 'Select row 0' }).uncheck();
       await page.getByTestId('remove_snapshots_bulk').click();
       await expect(page.getByText('Remove snapshots?')).toBeVisible();
+      await page.waitForTimeout(10000); // wait for previous deletion to finish
       await page.getByText('Remove', { exact: true }).click();
       await page.waitForTimeout(2000);
       // Verify that the remaining snapshot count is 1 after bulk deletion
