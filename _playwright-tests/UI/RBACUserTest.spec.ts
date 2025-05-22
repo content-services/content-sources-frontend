@@ -65,5 +65,4 @@ test.describe('Create, update, and read a repo as admin user', () => {
       const repoButton = page.getByRole('button', { name: 'Add repositories', exact: true });
       await expect(repoButton).toBeDisabled();
     });
-  });
 });
