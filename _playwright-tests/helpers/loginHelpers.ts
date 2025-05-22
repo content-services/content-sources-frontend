@@ -8,6 +8,7 @@ export const logout = async (page: Page) => {
     'div.pf-v6-c-toolbar__item.pf-m-hidden.pf-m-visible-on-lg.pf-v6-u-mr-0 > button',
   );
 
+  await page.pause();
   await button.click();
 
   await expect(async () => page.getByRole('menuitem', { name: 'Log out' }).isVisible()).toPass();
