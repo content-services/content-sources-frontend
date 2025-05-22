@@ -5,7 +5,7 @@ import path from 'path';
 
 export const logout = async (page: Page) => {
   const button = await page.locator(
-    'div.pf-v5-c-toolbar__item.pf-m-hidden.pf-m-visible-on-lg.pf-v5-u-mr-0 > button',
+    'div.pf-v6-c-toolbar__item.pf-m-hidden.pf-m-visible-on-lg.pf-v6-u-mr-0 > button',
   );
 
   await button.click();
@@ -58,7 +58,7 @@ export const logInWithUser1 = async (page: Page) =>
 export const storeStorageStateAndToken = async (page: Page) => {
   const { cookies } = await page
     .context()
-    .storageState({ path: path.join(__dirname, '../../.auth/user.json') });
+    .storageState({ path: path.join(__dirname, '../../.auth/default_user.json') });
   process.env.TOKEN = `Bearer ${cookies.find((cookie) => cookie.name === 'cs_jwt')?.value}`;
   await page.waitForTimeout(100);
 };
