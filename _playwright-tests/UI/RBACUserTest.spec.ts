@@ -3,6 +3,7 @@ import { deleteAllRepos } from './helpers/deleteRepositories';
 import { randomName, randomUrl } from './helpers/repoHelpers';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
+import { getUserAuthToken } from '../helpers/loginHelpers';
 
 const repoNamePrefix = 'Repo-RBAC';
 const repoName = `${repoNamePrefix}-${randomName()}`;
