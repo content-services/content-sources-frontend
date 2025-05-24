@@ -35,10 +35,8 @@ setup.describe('Setup Authentication States', async () => {
     );
 
     // Save state for read-only user
-    await storeStorageStateAndToken(page, 'contentPlaywrightReader.json');
-
-    // Verify successful login?
-    // await expect(page.locator('text=Logged in as read-only user')).toBeVisible({ timeout: 10000 }); // Adjust based on your UI
+    await storeStorageStateAndToken(page, 'read-only.json');
+    await logout(page);
   });
 
   setup('Authenticate Default User and Save State', async ({ page }) => {
@@ -50,8 +48,5 @@ setup.describe('Setup Authentication States', async () => {
 
     // Save state for default user
     await storeStorageStateAndToken(page, 'default_user.json');
-
-    // Verify successful login?
-    // await expect(page.locator('text=Logged in as default user')).toBeVisible({ timeout: 10000 }); // Adjust based on your UI
   });
 });
