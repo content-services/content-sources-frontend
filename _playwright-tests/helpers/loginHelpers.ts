@@ -4,11 +4,10 @@ import path from 'path';
 // This file can only contain functions that are referenced by authentication.
 
 export const logout = async (page: Page) => {
-  const button = await page.locator(
-    'div.pf-v6-c-toolbar__item.pf-m-hidden.pf-m-visible-on-lg.pf-v6-u-mr-0 > button',
-  );
-
-  await button.click();
+  await page
+    .getByRole('button')
+    .filter({ has: page.getByRole('img', { name: 'User Avatar' }) })
+    .click();
 
   await expect(async () => page.getByRole('menuitem', { name: 'Log out' }).isVisible()).toPass();
 
