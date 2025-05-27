@@ -103,6 +103,8 @@ test.describe('Snapshot Repositories', () => {
   });
 
   test('Snapshot deletion', async ({ page }) => {
+    const smallRHRepo = 'Red Hat CodeReady Linux Builder for RHEL 9 ARM 64 (RPMs)';
+
     await navigateToRepositories(page);
     await closePopupsIfExist(page);
     const repoNamePrefix = 'snapshot-deletion';
@@ -172,7 +174,9 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('button', { name: 'Select version' }).click();
       await page.getByRole('option', { name: 'el9' }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
-      await expect(page.getByTestId('additional_red_hat_repositories')).toBeVisible();
+      const modalPage = page.getByTestId('add_template_modal');
+      const rowRHELRepo = await getRowByNameOrUrl(modalPage, smallRHRepo);
+      await rowRHELRepo.getByLabel('Select row').click();
       // wait till next button is enabled
       await page.getByRole('button', { name: 'Next', exact: true }).isEnabled();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
