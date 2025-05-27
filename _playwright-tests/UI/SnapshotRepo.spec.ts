@@ -119,6 +119,8 @@ test.describe('Snapshot Repositories', () => {
       await page.getByLabel('Introspect only').click();
       await page.getByLabel('URL').fill(url);
       await page.getByRole('button', { name: 'Save', exact: true }).click();
+      // Need to wait for introspection task to finish
+      await page.waitForTimeout(7000);
       const row = await getRowByNameOrUrl(page, repoName);
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
     });
@@ -132,11 +134,12 @@ test.describe('Snapshot Repositories', () => {
       await page.getByLabel('Snapshotting').click();
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      // Need to wait for the introspection task to finish
+      await page.waitForTimeout(20000);
       await row.getByLabel('Kebab toggle').click();
       // Trigger a snapshot manually
       await row.getByRole('menuitem', { name: 'Trigger snapshot' }).click();
-      //   await expect(page.getByText('Snapshot triggered successfully')).toBeVisible();
-      await expect(page.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await row.getByLabel('Kebab toggle').click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
       // asssert that triggered snapshot is in the list
