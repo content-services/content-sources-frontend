@@ -35,15 +35,9 @@ test.describe('Templates CRUD', () => {
     await test.step('Create a template', async () => {
       await page.getByRole('button', { name: 'Add content template' }).click();
       await page.getByRole('button', { name: 'filter arch' }).click();
-      const archMenu = page.locator('[role="menu"]', {
-        has: page.getByText('aarch64', { exact: true }),
-      });
-      await archMenu.getByText('aarch64', { exact: true }).click();
+      await page.getByRole('menuitem', { name: 'aarch64' }).click();
       await page.getByRole('button', { name: 'filter version' }).click();
-      const versionMenu = page.locator('[role="menu"]', {
-        has: page.getByText('el9', { exact: true }),
-      });
-      await versionMenu.getByText('el9', { exact: true }).click();
+      await page.getByRole('menuitem', { name: 'el9' }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       const modalPage = page.getByTestId('add_template_modal');
       const rowRHELRepo = await getRowByNameOrUrl(modalPage, smallRHRepo);

@@ -576,6 +576,7 @@ const AddContent = ({ isEdit = false }: Props) => {
               )}
               onOpenChange={(isOpen) => setArchOpen(isOpen)}
               isOpen={archOpen}
+              popperProps={archOpen ? { appendTo: 'inline' } : undefined}
             >
               <DropdownList>
                 {Object.keys(distributionArches).map((option) => (
@@ -653,6 +654,7 @@ const AddContent = ({ isEdit = false }: Props) => {
               )}
               onOpenChange={(isOpen) => setVersionOpen(isOpen)}
               isOpen={versionOpen}
+              popperProps={versionOpen ? { appendTo: 'inline' } : undefined}
             >
               <DropdownList>
                 {Object.keys(distributionVersions).map((option) => (
