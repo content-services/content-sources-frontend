@@ -113,15 +113,7 @@ test.describe('Snapshot Repositories', () => {
     const templateName = `Test-template-for-snapshot-deletion-${randomName()}`;
 
     await test.step('Cleanup repositories using "zoo" URLs', async () => {
-      const zooUrls = [
-        'https://fedorapeople.org/groups/katello/fakerepos/zoo',
-        'https://fedorapeople.org/groups/katello/fakerepos/zoo2',
-        'https://fedorapeople.org/groups/katello/fakerepos/zoo3',
-        'https://fedorapeople.org/groups/katello/fakerepos/zoo4',
-      ];
-      for (const url of zooUrls) {
-        await deleteAllRepos(page, `&url=${url}`);
-      }
+      await deleteAllRepos(page, `&search=https://fedorapeople.org/groups/katello/fakerepos/zoo`);
     });
 
     await test.step('Create a repository', async () => {
@@ -157,16 +149,9 @@ test.describe('Snapshot Repositories', () => {
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await row.getByRole('button', { name: 'Kebab toggle' }).click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
-      const snapshotPrefix = new Date()
-        .toLocaleString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour12: false,
-        })
-        .replace(',', ''); // Format: 20 May 2025
-      const targetRows = page.getByRole('row').filter({ has: page.getByText(snapshotPrefix) });
-      await expect(targetRows).toHaveCount(4);
+      await expect(page.getByRole('button', { name: '1 - 4 of 4' }).first()).toBeVisible({
+        timeout: 60000,
+      });
       await navigateToTemplates(page);
       await page.getByRole('button', { name: 'Add content template' }).click();
       await page.getByRole('button', { name: 'Select architecture' }).click();
@@ -214,16 +199,9 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove snapshots?')).toBeVisible();
       await page.getByText('Remove', { exact: true }).click();
-      const snapshotPrefix = new Date()
-        .toLocaleString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour12: false,
-        })
-        .replace(',', ''); // Format: 20 May 2025
-      const targetRows = page.getByRole('row').filter({ has: page.getByText(snapshotPrefix) });
-      await expect(targetRows).toHaveCount(3);
+      await expect(page.getByRole('button', { name: '1 - 3 of 3' }).first()).toBeVisible({
+        timeout: 60000,
+      });
       await page.getByText('Close').click();
     });
 
@@ -244,18 +222,9 @@ test.describe('Snapshot Repositories', () => {
       await page.getByTestId('remove_snapshots_bulk').click();
       await expect(page.getByText('Remove snapshots?')).toBeVisible();
       await page.getByText('Remove', { exact: true }).click();
-      // Verify that the remaining snapshot count is 1 after bulk deletion
-      const snapshotPrefix = new Date()
-        .toLocaleString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour12: false,
-        })
-        .replace(',', ''); // Format: 20 May 2025 (same day date)
-
-      const targetRows = page.getByRole('row').filter({ has: page.getByText(snapshotPrefix) });
-      await expect(targetRows).toHaveCount(1);
+      await expect(page.getByRole('button', { name: '1 - 1 of 1' }).first()).toBeVisible({
+        timeout: 60000,
+      });
       await page.getByText('Close').click();
     });
     await deleteAllRepos(page, `&search=${repoNamePrefix}`);
