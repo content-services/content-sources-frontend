@@ -29,7 +29,7 @@ const useStyles = createUseStyles({
     },
   },
   containerMargin: {
-    margin: '16px 24px', // TODO: Check if side padding is desired
+    margin: '16px 24px',
   },
 });
 
