@@ -41,7 +41,7 @@ parameters:
   - name: IMAGE_TAG
     required: true
   - name: IMAGE
-    value: quay.io/cloudservices/content-sources-frontend
+    value: quay.io/redhat-user-workloads/insights-management-tenant/insights-content-sources/content-sources-frontend
   - name: SELENIUM_MEMORY_LIMIT
     value: 3Gi
   - name: SELENIUM_CPU_REQUEST
