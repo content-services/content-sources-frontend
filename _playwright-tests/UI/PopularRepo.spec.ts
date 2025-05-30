@@ -8,7 +8,7 @@ const repoName9 = 'EPEL 9 Everything x86_64';
 const repoName8 = 'EPEL 8 Everything x86_64';
 
 test.describe('Popular Repositories', () => {
-  test('Add popular repos', async ({ page }) => {
+  test('Test adding and removing popular repos', async ({ page }) => {
     // Ensure no popular repos are selected.
     await deleteAllPopularRepos(page);
 
@@ -22,52 +22,28 @@ test.describe('Popular Repositories', () => {
       await expect(page.getByRole('menuitem', { name: 'Add selected repositories' })).toBeVisible();
     });
 
-    await test.step('Select EPEL 10', async () => {
-      await page
-        .getByRole('row', { name: repoName10 })
-        .getByLabel('Select row 0', { exact: true })
-        .click();
-      await page.getByTestId('add-selected-dropdown-toggle-no-snap');
-      await page.getByRole('menuitem', { name: 'Add 1 repositories without snapshotting' });
-    });
-
-    await test.step('Select EPEL 9', async () => {
-      await page
-        .getByRole('row', { name: repoName9 })
-        .getByLabel('Select row 1', { exact: true })
-        .click();
-      await page.getByTestId('add-selected-dropdown-toggle-no-snap');
-      await page.getByRole('menuitem', { name: 'Add 2 repositories without snapshotting' });
-    });
-
-    await test.step('Select EPEL 8 and add both repos', async () => {
-      await page
-        .getByRole('row', { name: repoName8 })
-        .getByLabel('Select row 2', { exact: true })
-        .click();
+    await test.step('Add the 3 popular repos without snapshotting', async () => {
+      const repos = [repoName10, repoName9, repoName8];
+      for (let i = 0; i < repos.length; i++) {
+        await page
+          .getByRole('row', { name: repos[i] })
+          .getByLabel(`Select row ${i}`, { exact: true })
+          .click();
+      }
       await page.getByTestId('add-selected-dropdown-toggle-no-snap').click();
-      await page.getByRole('menuitem', { name: 'Add 3 repositories without snapshotting' }).click();
+      await page.getByRole('menuitem', { name: `Add 3 repositories without snapshotting` }).click();
     });
 
     await test.step('Check buttons have changed from Add to Remove', async () => {
-      await expect(
-        page
-          .getByRole('row', { name: repoName10 })
-          .getByTestId('remove_popular_repo')
-          .getByText('Remove'),
-      ).toBeVisible();
-      await expect(
-        page
-          .getByRole('row', { name: repoName8 })
-          .getByTestId('remove_popular_repo')
-          .getByText('Remove'),
-      ).toBeVisible();
-      await expect(
-        page
-          .getByRole('row', { name: repoName9 })
-          .getByTestId('remove_popular_repo')
-          .getByText('Remove'),
-      ).toBeVisible();
+      const repos = [repoName10, repoName9, repoName8];
+      for (const repoName of repos) {
+        await expect(
+          page
+            .getByRole('row', { name: repoName })
+            .getByTestId('remove_popular_repo')
+            .getByText('Remove'),
+        ).toBeVisible();
+      }
     });
 
     await test.step('Apply filter and clear it', async () => {
@@ -83,38 +59,23 @@ test.describe('Popular Repositories', () => {
       await expect(page.getByTestId('custom_repositories_table')).toBeVisible();
     });
 
-    await test.step('Use kebab menu to delete a repo', async () => {
-      const row = await getRowByNameOrUrl(page, repoName8);
-      await row.getByRole('checkbox', { name: 'Select row' }).check();
-
-      await page.getByTestId('delete-kebab').click();
-      await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
-      // Confirm the removal in the pop-up
-      await page
-        .getByRole('dialog', { name: 'Remove repositories?' })
-        .getByRole('button', { name: 'Remove' })
-        .click();
+    await test.step('Check all popular repos have valid status', async () => {
+      const repos = [repoName10, repoName9, repoName8];
+      for (const repoName of repos) {
+        const row = await getRowByNameOrUrl(page, repoName);
+        await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      }
     });
 
-    await test.step('Use kebab menu to delete a repo', async () => {
-      const row = await getRowByNameOrUrl(page, repoName9);
-      await row.getByRole('checkbox', { name: 'Select row' }).check();
+    await test.step('Use kebab menu to delete all repos', async () => {
+      const repoNames = [repoName10, repoName9, repoName8];
+      for (const repoName of repoNames) {
+        const row = await getRowByNameOrUrl(page, repoName);
+        await row.getByRole('checkbox', { name: 'Select row' }).check();
 
-      await page.getByTestId('delete-kebab').click();
-      await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
-      // Confirm the removal in the pop-up
-      await page
-        .getByRole('dialog', { name: 'Remove repositories?' })
-        .getByRole('button', { name: 'Remove' })
-        .click();
-    });
-
-    await test.step('Use kebab menu to delete a repo', async () => {
-      const row = await getRowByNameOrUrl(page, repoName10);
-      await row.getByRole('checkbox', { name: 'Select row' }).check();
-
-      await page.getByTestId('delete-kebab').click();
-      await page.getByRole('menuitem', { name: 'Remove 1 repositories' }).click();
+        await page.getByTestId('delete-kebab').click();
+      }
+      await page.getByRole('menuitem', { name: 'Remove 3 repositories' }).click();
       // Confirm the removal in the pop-up
       await page
         .getByRole('dialog', { name: 'Remove repositories?' })
