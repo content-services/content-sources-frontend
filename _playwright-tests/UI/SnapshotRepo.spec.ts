@@ -134,7 +134,7 @@ test.describe('Snapshot Repositories', () => {
         await test.step(`Edit repository and create snapshot ${i}`, async () => {
           // Open the edit modal
           await row.getByLabel('Kebab toggle').click();
-          await row.getByRole('menuitem', { name: 'Edit' }).click({ timeout: 60000 });
+          await page.getByRole('menuitem', { name: 'Edit' }).click({ timeout: 60000 });
           await page
             .getByLabel('URL')
             .fill(`https://fedorapeople.org/groups/katello/fakerepos/zoo${i}/`);
@@ -154,10 +154,10 @@ test.describe('Snapshot Repositories', () => {
       });
       await navigateToTemplates(page);
       await page.getByRole('button', { name: 'Add content template' }).click();
-      await page.getByRole('button', { name: 'Select architecture' }).click();
-      await page.getByRole('option', { name: 'aarch64' }).click();
-      await page.getByRole('button', { name: 'Select version' }).click();
-      await page.getByRole('option', { name: 'el9' }).click();
+      await page.getByRole('button', { name: 'filter arch' }).click();
+      await page.getByRole('menuitem', { name: 'aarch64' }).click();
+      await page.getByRole('button', { name: 'filter version' }).click();
+      await page.getByRole('menuitem', { name: 'el9' }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       const modalPage = page.getByTestId('add_template_modal');
       const rowRHELRepo = await getRowByNameOrUrl(modalPage, smallRHRepo);
