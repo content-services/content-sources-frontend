@@ -13,6 +13,7 @@ test.describe('Snapshot Repositories', () => {
     await closePopupsIfExist(page);
 
     const repoName = 'one';
+    const editedRepoName = `${repoName}-edited`;
 
     await test.step('Cleanup repository, if using the same url', async () => {
       await deleteAllRepos(
@@ -31,6 +32,7 @@ test.describe('Snapshot Repositories', () => {
       await page
         .getByLabel('URL')
         .fill('https://jlsherrill.fedorapeople.org/fake-repos/revision/' + repoName);
+      await page.getByLabel('Introspect only').click();
     });
 
     await test.step('Filter by architecture', async () => {
@@ -47,7 +49,6 @@ test.describe('Snapshot Repositories', () => {
 
     await test.step('Submit the form and wait for modal to disappear', async () => {
       await Promise.all([
-        // Click on 'Save'
         page.getByRole('button', { name: 'Save' }).first().click(),
         page.waitForResponse(
           (resp) =>
@@ -57,15 +58,27 @@ test.describe('Snapshot Repositories', () => {
       ]);
     });
 
-    await test.step('Verify that snapshot is successful', async () => {
+    await test.step('Edit the repository', async () => {
       const row = await getRowByNameOrUrl(page, repoName);
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await row.getByLabel('Kebab toggle').click();
+      await page.getByRole('menuitem', { name: 'Edit' }).click({ timeout: 60000 });
+      await page.getByLabel('Name').fill(editedRepoName);
+      await page.getByLabel('Snapshotting').click();
+      await page.getByRole('button', { name: 'Save changes', exact: true }).click();
     });
 
-    await test.step('Verify that snapshot is in snapshots list', async () => {
-      const row = await getRowByNameOrUrl(page, repoName);
-      await row.getByLabel('Kebab toggle').click();
+    await test.step('Trigger snapshot manually', async () => {
+      const edited_row = await getRowByNameOrUrl(page, editedRepoName);
+      // prevention of the error regarding re-triggering introspection task too early after the previous one
+      await page.waitForTimeout(60000);
+      await edited_row.getByLabel('Kebab toggle').click();
+      // Trigger a snapshot manually
+      await page.getByRole('menuitem', { name: 'Trigger snapshot' }).click();
+      await expect(edited_row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await edited_row.getByLabel('Kebab toggle').click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
+      // Verify that snapshot is in snapshots list
       await expect(page.getByLabel('SnapshotsView list of').locator('tbody')).toBeVisible();
       const snapshotTimestamp = await page
         .getByLabel('SnapshotsView list of')
@@ -82,11 +95,11 @@ test.describe('Snapshot Repositories', () => {
     });
 
     await test.step('Delete created repository', async () => {
-      const row = await getRowByNameOrUrl(
+      const edited_row = await getRowByNameOrUrl(
         page,
         'https://jlsherrill.fedorapeople.org/fake-repos/revision/' + repoName,
       );
-      await row.getByRole('button', { name: 'Kebab toggle' }).click();
+      await edited_row.getByLabel('Kebab toggle').click();
       await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
 
@@ -98,7 +111,7 @@ test.describe('Snapshot Repositories', () => {
         page.getByRole('button', { name: 'Remove' }).click(),
       ]);
 
-      await expect(row).not.toBeVisible();
+      await expect(edited_row).not.toBeVisible();
     });
   });
 
