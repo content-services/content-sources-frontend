@@ -58,11 +58,11 @@ test.describe('Snapshot Repositories', () => {
       ]);
     });
 
-    await test.step('Edit the repository', async () => {
+    await test.step('Enable snapshotting for the created repository', async () => {
       const row = await getRowByNameOrUrl(page, repoName);
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await row.getByLabel('Kebab toggle').click();
-      await row.getByRole('menuitem', { name: 'Edit' }).click({ timeout: 60000 });
+      await page.getByRole('menuitem', { name: 'Edit' }).click({ timeout: 60000 });
       await page.getByLabel('Name').fill(editedRepoName);
       await page.getByLabel('Snapshotting').click();
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
@@ -71,10 +71,10 @@ test.describe('Snapshot Repositories', () => {
     await test.step('Trigger snapshot manually', async () => {
       const edited_row = await getRowByNameOrUrl(page, editedRepoName);
       // prevention of the error regarding re-triggering introspection task too early after the previous one
-      await page.waitForTimeout(60000);
+      await page.waitForTimeout(30000);
       await edited_row.getByLabel('Kebab toggle').click();
       // Trigger a snapshot manually
-      await edited_row.getByRole('menuitem', { name: 'Trigger snapshot' }).click();
+      await page.getByRole('menuitem', { name: 'Trigger snapshot' }).click();
       await expect(edited_row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await edited_row.getByLabel('Kebab toggle').click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
@@ -100,7 +100,7 @@ test.describe('Snapshot Repositories', () => {
         'https://jlsherrill.fedorapeople.org/fake-repos/revision/' + repoName,
       );
       await edited_row.getByLabel('Kebab toggle').click();
-      await edited_row.getByRole('menuitem', { name: 'Delete' }).click();
+      await page.getByRole('menuitem', { name: 'Delete' }).click();
       await expect(page.getByText('Remove repositories?')).toBeVisible();
 
       await Promise.all([
