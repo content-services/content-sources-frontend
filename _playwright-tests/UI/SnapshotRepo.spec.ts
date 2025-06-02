@@ -70,8 +70,6 @@ test.describe('Snapshot Repositories', () => {
 
     await test.step('Trigger snapshot manually', async () => {
       const edited_row = await getRowByNameOrUrl(page, editedRepoName);
-      // prevention of the error regarding re-triggering introspection task too early after the previous one
-      //   await page.waitForTimeout(30000);
       await edited_row.getByLabel('Kebab toggle').click();
       // Trigger a snapshot manually
       await page.getByRole('menuitem', { name: 'Trigger snapshot' }).click();
