@@ -6,6 +6,7 @@ import { deleteAllPopularRepos } from './helpers/deletePopularRepositories';
 const repoName10 = 'EPEL 10 Everything x86_64';
 const repoName9 = 'EPEL 9 Everything x86_64';
 const repoName8 = 'EPEL 8 Everything x86_64';
+const repos = [repoName10, repoName9, repoName8];
 
 test.describe('Popular Repositories', () => {
   test('Test adding and removing popular repos', async ({ page }) => {
@@ -23,7 +24,6 @@ test.describe('Popular Repositories', () => {
     });
 
     await test.step('Add the 3 popular repos without snapshotting', async () => {
-      const repos = [repoName10, repoName9, repoName8];
       for (let i = 0; i < repos.length; i++) {
         await page
           .getByRole('row', { name: repos[i] })
@@ -31,11 +31,10 @@ test.describe('Popular Repositories', () => {
           .click();
       }
       await page.getByTestId('add-selected-dropdown-toggle-no-snap').click();
-      await page.getByRole('menuitem', { name: `Add 3 repositories without snapshotting` }).click();
+      await page.getByRole('menuitem', { name: 'Add 3 repositories without snapshotting' }).click();
     });
 
     await test.step('Check buttons have changed from Add to Remove', async () => {
-      const repos = [repoName10, repoName9, repoName8];
       for (const repoName of repos) {
         await expect(
           page
@@ -60,7 +59,6 @@ test.describe('Popular Repositories', () => {
     });
 
     await test.step('Check all popular repos have valid status', async () => {
-      const repos = [repoName10, repoName9, repoName8];
       for (const repoName of repos) {
         const row = await getRowByNameOrUrl(page, repoName);
         await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
@@ -68,8 +66,7 @@ test.describe('Popular Repositories', () => {
     });
 
     await test.step('Use kebab menu to delete all repos', async () => {
-      const repoNames = [repoName10, repoName9, repoName8];
-      for (const repoName of repoNames) {
+      for (const repoName of repos) {
         const row = await getRowByNameOrUrl(page, repoName);
         await row.getByRole('checkbox', { name: 'Select row' }).check();
 
