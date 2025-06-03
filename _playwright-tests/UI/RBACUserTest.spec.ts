@@ -5,6 +5,7 @@ import { deleteAllRepos } from './helpers/deleteRepositories';
 import { randomName, randomUrl } from './helpers/repoHelpers';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
+import { getUserAuthToken, logInWithUsernameAndPassword } from '../helpers/loginHelpers';
 
 const repoNamePrefix = 'Repo-RBAC';
 const repoNameFile = 'repoName.txt';
@@ -24,33 +25,17 @@ const getRepoName = (): string => {
 
 const url = randomUrl();
 
-test.beforeAll('Clean up existing repo name file', async () => {
-  if (fs.existsSync(repoNameFile)) {
-    console.log(`Deleting old repo name file: ${repoNameFile}`);
-    fs.unlinkSync(repoNameFile);
-  }
-  // IMPORTANT: deleteAllRepos needs an APIRequestContext or Page to work.
-  // If you want to purge old repos before *all* tests (across describe blocks),
-  // you'd typically need to create an APIRequestContext here,
-  // potentially by loading a storageState specifically for it.
-  // Given your earlier discussion, this might be a separate setup step.
-  // For now, I'm assuming deleteAllRepos might happen in beforeEach or part of admin setup.
-});
-
 // Define a test group for admin user
 test.describe('Admin User Tests', () => {
   // Use the default user's storageState for all tests in this describe block
   test.use({ storageState: '.auth/default_user.json' }); // Changed from '.auth/user.json' based on previous conversation
 
-  test.beforeEach(async ({ page }) => {
-    // This beforeEach will run for all tests in this describe block
-    await navigateToRepositories(page);
-    await closePopupsIfExist(page);
-  });
-
   test('Login as user 1 (admin) and manage repo', async ({ page }) => {
     // All setup is done in beforeEach for this user
     await test.step('Create a repository', async () => {
+      await navigateToRepositories(page);
+      await closePopupsIfExist(page);
+      await deleteAllRepos(page, `&search=${repoNamePrefix}`);
       await page.getByRole('button', { name: 'Add repositories' }).first().click();
       await expect(page.getByRole('dialog', { name: 'Add custom repositories' })).toBeVisible();
 
@@ -66,7 +51,7 @@ test.describe('Admin User Tests', () => {
       const row = await getRowByNameOrUrl(page, repoName);
       await expect(row.getByText('Valid')).toBeVisible();
       await row.getByLabel('Kebab toggle').click();
-      await row.getByRole('menuitem', { name: 'Edit' }).click();
+      await page.getByRole('menuitem', { name: 'Edit' }).click();
       await expect(page.getByRole('dialog', { name: 'Edit custom repository' })).toBeVisible();
       await expect(page.getByPlaceholder('Enter name', { exact: true })).toHaveValue(repoName);
       await expect(page.getByPlaceholder('https://', { exact: true })).toHaveValue(url);
