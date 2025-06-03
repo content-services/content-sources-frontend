@@ -80,29 +80,27 @@ test.describe('Admin User Tests', () => {
   });
 });
 
-// Define a separate test group for read-only user
-test.describe('Read-Only User Tests', () => {
-  // Use the read-only user's storageState for all tests in this describe block
-  test.use({ storageState: '.auth/contentPlaywrightReader.json' });
+  // Define a separate test group for read-only user
+  test.describe('Read-Only User Tests', () => {
 
-  test.beforeEach(async ({ page }) => {
-    // This beforeEach runs for tests in this describe block
-    await page.pause();
-    await navigateToRepositories(page);
-    await closePopupsIfExist(page);
-  });
-
-  test('Read-only user can view but not edit', async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: '.auth/contentPlaywrightReader.json',
+    test.use({
+      storageState: '.auth/read-only.json',
+      extraHTTPHeaders: { Authorization: getUserAuthToken('read-only') },
     });
-    const page = await context.newPage();
-    const repoName = getRepoName(); // Get the name from the previous test
-    const row = await getRowByNameOrUrl(page, `${repoName}-Edited`);
-    await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
-    await row.getByLabel('Kebab toggle').click();
-    // This is the critical assertion for permissions
-    await expect(row.getByRole('menuitem', { name: 'Edit' })).not.toBeVisible({ timeout: 500 });
+
+    test('Read-only user can view but not edit', async ({ browser }) => {
+      const context = await browser.newContext({
+        storageState: '.auth/read-only.json',
+      });
+      const page = await context.newPage();
+      await navigateToRepositories(page);
+      await closePopupsIfExist(page);
+      const repoName = getRepoName(); // Get the name from the previous test
+      const row = await getRowByNameOrUrl(page, `${repoName}-Edited`);
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await row.getByLabel('Kebab toggle').click();
+      // This is the critical assertion for permissions
+      await expect(row.getByRole('menuitem', { name: 'Edit' })).not.toBeVisible({ timeout: 500 });
 
     // Additionally, check if the "Add repositories" button is disabled
     const repoButton = page.getByRole('button', { name: 'Add repositories', exact: true });

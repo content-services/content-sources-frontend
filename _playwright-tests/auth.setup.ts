@@ -34,7 +34,7 @@ setup.describe('Setup Authentication States', async () => {
     );
 
     // Save state for read-only user
-    await storeStorageStateAndToken(page, 'contentPlaywrightReader.json');
+    await storeStorageStateAndToken(page, 'read-only.json');
     await logout(page);
   });
 
