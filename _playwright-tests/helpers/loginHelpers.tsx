@@ -74,6 +74,13 @@ export const storeStorageStateAndToken = async (page: Page, fileName: string) =>
   await page.waitForTimeout(100);
 };
 
+export const logInWithReadOnlyUser = async (page: Page) =>
+  await logInWithUsernameAndPassword(
+    page,
+    process.env.READONLYUSERNAME,
+    process.env.READONLYPASSWORD,
+  );
+
 export const getUserAuthToken = (name: string) => {
   const userPath = path.join(__dirname, `../../.auth/${name}.json`);
   const fileContent = readFileSync(userPath, { encoding: 'utf8' });
