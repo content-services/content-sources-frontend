@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { readFileSync } from 'fs';
 import path from 'path';
 
 // This file can only contain functions that are referenced by authentication.
@@ -54,9 +55,6 @@ export const logInWithUsernameAndPassword = async (
 export const logInWithUser1 = async (page: Page) =>
   await logInWithUsernameAndPassword(page, process.env.USER1USERNAME, process.env.USER1PASSWORD);
 
-// Helper function to create a delay (if not already present and needed)
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 export const storeStorageStateAndToken = async (page: Page, fileName: string) => {
   const filePath = path.join(__dirname, '../../.auth', fileName); // Construct full path
   console.log(`Saving storage state to: ${filePath}`); // Added for debugging
@@ -73,7 +71,21 @@ export const storeStorageStateAndToken = async (page: Page, fileName: string) =>
     process.env.TOKEN = undefined; // Clear it if not found, to avoid stale tokens
   }
 
-  await delay(100); // Wait for a short moment if needed, often not strictly necessary after storageState
+  await page.waitForTimeout(100);
+};
+
+export const getUserAuthToken = (name: string) => {
+  const userPath = path.join(__dirname, `../../.auth/${name}.json`);
+  const fileContent = readFileSync(userPath, { encoding: 'utf8' });
+
+  const regex = /"name":\s*"cs_jwt",\s*"value":\s*"(.*?)"/;
+
+  const match = fileContent.match(regex);
+  if (match && match[1]) {
+    return `Bearer ${match[1]}`;
+  }
+
+  return '';
 };
 
 export const throwIfMissingEnvVariables = () => {
