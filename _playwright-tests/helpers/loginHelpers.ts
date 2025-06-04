@@ -57,20 +57,20 @@ export const logInWithUsernameAndPassword = async (
 };
 
 export const logInWithUser1 = async (page: Page) =>
-  await logInWithUsernameAndPassword(page, process.env.USER1USERNAME, process.env.USER1PASSWORD);
+  await logInWithUsernameAndPassword(page, process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD);
 
 export const storeStorageStateAndToken = async (page: Page) => {
   const { cookies } = await page
     .context()
-    .storageState({ path: path.join(__dirname, '../../.auth/user.json') });
+    .storageState({ path: path.join(__dirname, '../../.auth/admin_user.json') });
   process.env.TOKEN = `Bearer ${cookies.find((cookie) => cookie.name === 'cs_jwt')?.value}`;
   await page.waitForTimeout(100);
 };
 
 export const throwIfMissingEnvVariables = () => {
   const ManditoryEnvVariables = [
-    'USER1USERNAME',
-    'USER1PASSWORD',
+    'ADMIN_USERNAME',
+    'ADMIN_PASSWORD',
     'BASE_URL',
     ...(process.env.INTEGRATION ? ['PROXY', 'ORG_ID_1', 'ACTIVATION_KEY_1'] : []),
   ];

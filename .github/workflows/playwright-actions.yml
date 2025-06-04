@@ -24,20 +24,20 @@ jobs:
       - name: Create front-end .env file
         run: |
           # Check if the secrets are set
-          if [ -z "$USER1USERNAME" ]; then
-            echo "Error: USER1USERNAME secret is not set."
+          if [ -z "$" ]; then
+            echo "Error: ADMIN_USERNAME secret is not set."
             exit 1
           fi
 
-          if [ -z "$USER1PASSWORD" ]; then
-            echo "Error: USER1PASSWORD secret is not set."
+          if [ -z "$ADMIN_PASSWORD" ]; then
+            echo "Error: ADMIN_PASSWORD secret is not set."
             exit 1
           fi
 
           # Create the .env file and write the secrets and other variables to it
           {
-            echo "USER1USERNAME=$USER1USERNAME"
-            echo "USER1PASSWORD=$USER1PASSWORD"
+            echo "ADMIN_USERNAME=$ADMIN_USERNAME"
+            echo "ADMIN_PASSWORD=$ADMIN_PASSWORD"
             echo "BASE_URL=https://stage.foo.redhat.com:1337"
             echo "CI=true"
           } >> .env

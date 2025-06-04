@@ -60,7 +60,7 @@ export default defineConfig({
             : [/switch-to-preview/, /local-only/],
           use: {
             ...devices['Desktop Chrome'],
-            storageState: `.auth/user.json`,
+            storageState: `.auth/admin_user.json`,
           },
           testDir: './_playwright-tests/Integration/',
           dependencies: ['setup'],
@@ -69,7 +69,7 @@ export default defineConfig({
           name: 'UI',
           use: {
             ...devices['Desktop Chrome'],
-            storageState: '.auth/user.json',
+            storageState: '.auth/admin_user.json',
           },
           testDir: './_playwright-tests/UI',
           dependencies: ['setup'],
@@ -81,7 +81,7 @@ export default defineConfig({
             grep: [/switch-to-preview/],
             use: {
               ...devices['Desktop Chrome'],
-              storageState: `.auth/user.json`,
+              storageState: `.auth/admin_user.json`,
             },
             dependencies: ['setup', 'integration'],
           },
@@ -90,12 +90,20 @@ export default defineConfig({
             grep: [/preview-only/],
             use: {
               ...devices['Desktop Chrome'],
-              storageState: `.auth/user.json`,
+              storageState: `.auth/admin_user.json`,
             },
             testDir: './_playwright-tests/Integration',
             dependencies: ['Switch to preview'],
           },
         ]
       : []),
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: '.auth/admin_user.json',
+      },
+      dependencies: ['setup'],
+    },
   ],
 });
