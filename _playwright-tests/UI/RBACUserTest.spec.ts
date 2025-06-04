@@ -43,7 +43,6 @@ test.describe('Admin User Tests', () => {
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
     });
   });
-});
 
   // Define a separate test group for read-only user
   test.describe('Read-Only User Tests', () => {
@@ -70,4 +69,5 @@ test.describe('Admin User Tests', () => {
     const repoButton = page.getByRole('button', { name: 'Add repositories', exact: true });
     await expect(repoButton).toBeDisabled();
   });
+ });
 });
