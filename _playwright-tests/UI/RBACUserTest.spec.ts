@@ -1,37 +1,20 @@
 // _playwright-tests/UI/RBAC.spec.ts
 import { test, expect } from '@playwright/test';
-import fs from 'fs';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 import { randomName, randomUrl } from './helpers/repoHelpers';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
-import { getUserAuthToken, logInWithUsernameAndPassword } from '../helpers/loginHelpers';
+import { getUserAuthToken } from '../helpers/loginHelpers';
 
 const repoNamePrefix = 'Repo-RBAC';
-const repoNameFile = 'repoName.txt';
-
-// Function to get or generate repo name using file persistence
-const getRepoName = (): string => {
-  if (fs.existsSync(repoNameFile)) {
-    const repoName = fs.readFileSync(repoNameFile, 'utf8');
-    console.log(`Loaded repo name from file: ${repoName}`);
-    return repoName;
-  }
-  const repoName = `${repoNamePrefix}-${randomName()}`;
-  fs.writeFileSync(repoNameFile, repoName);
-  console.log(`Generated and saved repo name: ${repoName}`);
-  return repoName;
-};
-
+const repoName = `${repoNamePrefix}-${randomName()}`;
 const url = randomUrl();
 
 // Define a test group for admin user
 test.describe('Admin User Tests', () => {
-  // Use the default user's storageState for all tests in this describe block
-  test.use({ storageState: '.auth/default_user.json' }); // Changed from '.auth/user.json' based on previous conversation
+  test.use({ storageState: '.auth/default_user.json' });
 
   test('Login as user 1 (admin) and manage repo', async ({ page }) => {
-    // All setup is done in beforeEach for this user
     await test.step('Create a repository', async () => {
       await navigateToRepositories(page);
       await closePopupsIfExist(page);
@@ -39,7 +22,6 @@ test.describe('Admin User Tests', () => {
       await page.getByRole('button', { name: 'Add repositories' }).first().click();
       await expect(page.getByRole('dialog', { name: 'Add custom repositories' })).toBeVisible();
 
-      const repoName = getRepoName();
       await page.getByLabel('Name').fill(repoName);
       await page.getByLabel('Introspect only').click();
       await page.getByLabel('URL').fill(url);
@@ -47,7 +29,6 @@ test.describe('Admin User Tests', () => {
     });
 
     await test.step('Read the repo', async () => {
-      const repoName = getRepoName();
       const row = await getRowByNameOrUrl(page, repoName);
       await expect(row.getByText('Valid')).toBeVisible();
       await row.getByLabel('Kebab toggle').click();
@@ -58,7 +39,6 @@ test.describe('Admin User Tests', () => {
     });
 
     await test.step('Update the repository', async () => {
-      const repoName = getRepoName();
       await page.getByPlaceholder('Enter name', { exact: true }).fill(`${repoName}-Edited`);
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
     });
@@ -80,7 +60,6 @@ test.describe('Admin User Tests', () => {
       const page = await context.newPage();
       await navigateToRepositories(page);
       await closePopupsIfExist(page);
-      const repoName = getRepoName(); // Get the name from the previous test
       const row = await getRowByNameOrUrl(page, `${repoName}-Edited`);
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await row.getByLabel('Kebab toggle').click();
