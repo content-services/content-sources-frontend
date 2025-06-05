@@ -52,58 +52,29 @@ export default defineConfig({
   },
   projects: [
     { name: 'setup', testMatch: /.*\.setup\.ts/ },
-    ...(process.env.INTEGRATION
-      ? [
-          {
-            name: 'API',
-            grepInvert: process.env.PROD
-              ? [/preview-only/, /switch-to-preview/, /local-only/]
-              : [/switch-to-preview/, /local-only/],
-            use: {
-              ...devices['Desktop Chrome'],
-              storageState: `.auth/user.json`,
-            },
-            workers: 1,
-            testDir: './_playwright-tests/Integration/API',
-            dependencies: ['setup'],
+    process.env.INTEGRATION
+      ? {
+          name: 'integration',
+          grepInvert: process.env.PROD
+            ? [/preview-only/, /switch-to-preview/, /local-only/]
+            : [/switch-to-preview/, /local-only/],
+          use: {
+            ...devices['Desktop Chrome'],
+            storageState: `.auth/user.json`,
           },
-          {
-            name: 'UI',
-            grepInvert: process.env.PROD
-              ? [/preview-only/, /switch-to-preview/, /local-only/]
-              : [/switch-to-preview/, /local-only/],
-            use: {
-              ...devices['Desktop Chrome'],
-              storageState: `.auth/user.json`,
-            },
-            testDir: './_playwright-tests/Integration/UI',
-            dependencies: ['setup', 'API'],
+          testIgnore: ['**/UI/**', '**/API/**'],
+          testDir: './_playwright-tests/Integration/',
+          dependencies: ['setup'],
+        }
+      : {
+          name: 'UI',
+          use: {
+            ...devices['Desktop Chrome'],
+            storageState: '.auth/user.json',
           },
-          {
-            name: 'Integration',
-            grepInvert: process.env.PROD
-              ? [/preview-only/, /switch-to-preview/, /local-only/]
-              : [/switch-to-preview/, /local-only/],
-            use: {
-              ...devices['Desktop Chrome'],
-              storageState: `.auth/user.json`,
-            },
-            testIgnore: ['**/UI/**', '**/API/**'],
-            testDir: './_playwright-tests/Integration/',
-            dependencies: ['setup', 'API'],
-          },
-        ]
-      : [
-          {
-            name: 'chromium',
-            use: {
-              ...devices['Desktop Chrome'],
-              storageState: '.auth/user.json',
-            },
-            testDir: './_playwright-tests/UI',
-            dependencies: ['setup'],
-          },
-        ]),
+          testDir: './_playwright-tests/UI',
+          dependencies: ['setup'],
+        },
     ...(process.env.INTEGRATION && process.env.PROD
       ? [
           {
@@ -113,7 +84,7 @@ export default defineConfig({
               ...devices['Desktop Chrome'],
               storageState: `.auth/user.json`,
             },
-            dependencies: ['setup'], // 'chromium',
+            dependencies: ['setup', 'integration'],
           },
           {
             name: 'Run preview only',

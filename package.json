@@ -24,8 +24,7 @@
     "testAllPreviewFailures": "npm-run-all -p test jestPreview",
     "jestPreview": "jest-preview",
     "jestClear": "jest --clearCache",
-    "get-tests": ".github/workflowScripts/getFrontendTestsStage.sh && .github/workflowScripts/getBackendTestsStage.sh",
-    "get-tests-prod": ".github/workflowScripts/getFrontendTestsProd.sh && .github/workflowScripts/getBackendTestsProd.sh"
+    "get-tests-prod": ".github/workflowScripts/getProdTests.sh"
   },
   "dependencies": {
     "@patternfly/react-core": "^6.3.0-prerelease.2",

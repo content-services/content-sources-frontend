@@ -62,9 +62,6 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
-      - name: Get front-end/backend-tests
-        run: yarn get-tests
-
       - name: Install dependencies
         run: yarn install
 

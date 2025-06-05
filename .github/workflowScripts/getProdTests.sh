@@ -48,29 +48,4 @@ fi
 # Clean up
 rm $yaml_file
 
-# Variables for cloning the repo
-REPO_URL="https://github.com/content-services/content-sources-frontend.git"
-FOLDER_PATH="UI"
-LOCAL_DIR="_playwright-tests/Integration"
-rm -rf $TEMP_DIR
-# Create a temporary directory
-TEMP_DIR=./temp_frontend
-mkdir $TEMP_DIR
-
-# Remove the existing folder in the local directory if it exists
-rm -rf $LOCAL_DIR/$FOLDER_PATH
-
-# Clone the repo and checkout the specific commit
-git clone $REPO_URL $TEMP_DIR
-cd $TEMP_DIR
 git checkout $commit_hash
-
-# Copy the specific folder to the local directory
-cp -r _playwright-tests/$FOLDER_PATH ../$LOCAL_DIR
-
-# Clean up the temporary directory
-cd ../
-rm -rf $TEMP_DIR
-
-echo "Folder copied to $LOCAL_DIR/$FOLDER_PATH"
-

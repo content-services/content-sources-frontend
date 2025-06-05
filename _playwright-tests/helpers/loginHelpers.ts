@@ -46,6 +46,10 @@ export const logInWithUsernameAndPassword = async (
 
   await expect(async () => {
     expect(page.url()).toBe(`${process.env.BASE_URL}/insights/content/repositories`);
+
+    const cookies = await page.context().cookies();
+    const found = cookies.find((cookie) => cookie.name === 'cs_jwt');
+    expect(found).not.toBe(undefined);
   }).toPass({
     intervals: [1_000],
     timeout: 30_000,
@@ -84,14 +88,14 @@ export const throwIfMissingEnvVariables = () => {
 };
 
 export const ensureNotInPreview = async (page: Page) => {
-  const toggle = page.locator('.pf-v6-c-switch__toggle');
+  const toggle = page.locator('div').filter({ hasText: 'Preview mode' }).getByRole('switch');
   if ((await toggle.isVisible()) && (await toggle.isChecked())) {
     await toggle.click();
   }
 };
 
 export const ensureInPreview = async (page: Page) => {
-  const toggle = page.locator('.pf-v6-c-switch__toggle');
+  const toggle = page.locator('div').filter({ hasText: 'Preview mode' }).getByRole('switch');
   await expect(toggle).toBeVisible();
   if (!(await toggle.isChecked())) {
     await toggle.click();
