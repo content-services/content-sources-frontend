@@ -8,7 +8,8 @@ import {
 } from './helpers/helpers';
 
 test.describe('Snapshot Repositories', () => {
-  test('Snapshot a repository', async ({ page }) => {
+  // Fix after HMS-8627 gets resolved.
+  test.fixme('Snapshot a repository', async ({ page }) => {
     await navigateToRepositories(page);
     await closePopupsIfExist(page);
 
