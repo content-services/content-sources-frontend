@@ -8,7 +8,6 @@ import Header from 'components/Header/Header';
 import RepositoryQuickStart from 'components/QuickStart/RepositoryQuickStart';
 import {
   ADMIN_TASKS_ROUTE,
-  POPULAR_REPOSITORIES_ROUTE,
   REDHAT_REPO_GEN_ROUTE,
   REPOSITORIES_ROUTE,
 } from '../../Routes/constants';
@@ -42,11 +41,6 @@ export default function RepositoryLayout() {
   const tabs = useMemo(
     () => [
       { title: 'Your repositories', route: '', key: REPOSITORIES_ROUTE },
-      {
-        title: 'Popular repositories',
-        route: POPULAR_REPOSITORIES_ROUTE,
-        key: POPULAR_REPOSITORIES_ROUTE,
-      },
       ...(features?.admintasks?.enabled && features.admintasks?.accessible
         ? [
             {

@@ -127,7 +127,9 @@ const SnapshotListModal = () => {
   const onClose = () =>
     navigate(
       `${rootPath}/${REPOSITORIES_ROUTE}` +
-        (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''),
+        (contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT
+          ? `?origin=${contentOrigin}`
+          : ''),
     );
 
   const onSelectSnapshot = (uuid: string, value: boolean) => {
@@ -179,7 +181,8 @@ const SnapshotListModal = () => {
 
   const loadingOrZeroCount = fetchingOrLoading || !count;
 
-  const isRedHatRepository = contentOrigin === ContentOrigin.REDHAT;
+  const isRedHatRepository =
+    contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT;
 
   const latestSnapshotUUID = snapshotsList[0]?.uuid;
 

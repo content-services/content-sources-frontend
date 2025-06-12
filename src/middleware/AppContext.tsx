@@ -27,8 +27,8 @@ export interface AppContextInterface {
   features: Features | null;
   isFetchingPermissions: boolean;
   subscriptions?: Subscriptions;
-  contentOrigin: ContentOrigin;
-  setContentOrigin: (contentOrigin: ContentOrigin) => void;
+  contentOrigin: ContentOrigin[];
+  setContentOrigin: React.Dispatch<React.SetStateAction<ContentOrigin[]>>;
   chrome?: ChromeAPI;
   zeroState: boolean;
   setZeroState: (zeroState: boolean) => void;
@@ -43,7 +43,11 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [zeroState, setZeroState] = useState(true);
   const [features, setFeatures] = useState<Features | null>(null);
   const chrome = useChrome();
-  const [contentOrigin, setContentOrigin] = useState<ContentOrigin>(ContentOrigin.CUSTOM);
+  const [contentOrigin, setContentOrigin] = useState<ContentOrigin[]>([
+    ContentOrigin.EXTERNAL,
+    ContentOrigin.UPLOAD,
+    ContentOrigin.COMMUNITY,
+  ]);
   const { fetchFeatures, isLoading: isFetchingFeatures } = useFetchFeaturesQuery();
   const { data: subscriptions, isLoading: isFetchingSubscriptions } = useFetchSubscriptionsQuery();
 

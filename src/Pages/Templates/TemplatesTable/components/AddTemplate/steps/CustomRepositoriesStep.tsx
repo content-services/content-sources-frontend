@@ -121,7 +121,7 @@ export default function CustomRepositoriesStep() {
       uuids: toggled ? [...selectedCustomRepos] : undefined,
     },
     sortString(),
-    ContentOrigin.CUSTOM,
+    [ContentOrigin.CUSTOM],
   );
 
   const {

@@ -19,7 +19,7 @@ import { createUseStyles } from 'react-jss';
 
 import { useAppContext } from 'middleware/AppContext';
 import { useHref, useNavigate } from 'react-router-dom';
-import { POPULAR_REPOSITORIES_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
+import { REPOSITORIES_ROUTE } from 'Routes/constants';
 
 const useStyles = createUseStyles({
   contentZerostate: {
@@ -53,14 +53,6 @@ export const ZeroState = () => {
       onClick: () => {
         setZeroState(false);
         navigate(`${pathname}/${REPOSITORIES_ROUTE}?origin=red_hat`);
-      },
-    },
-    {
-      title: 'Popular repositories',
-      description: 'Add popular repositories with a single click.',
-      onClick: () => {
-        setZeroState(false);
-        navigate(`${pathname}/${REPOSITORIES_ROUTE}/${POPULAR_REPOSITORIES_ROUTE}`);
       },
     },
   ];
