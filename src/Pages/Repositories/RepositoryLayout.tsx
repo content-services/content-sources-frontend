@@ -72,24 +72,26 @@ export default function RepositoryLayout() {
         ouiaId='custom_repositories_description'
         paragraph='View all repositories within your organization.'
       />
-      <Tabs ouiaId='routed-tabs' activeKey={currentRoute}>
-        {tabs.map(({ title, route, key }) => (
-          <Tab
-            className={classes.tab}
-            keyParams={route}
-            key={key}
-            tabIndex={-1} // This prevents the tab from being targetable by accessibility features.
-            eventKey={key}
-            aria-label={title}
-            ouiaId={title}
-            title={
-              <Link className={classes.link} accessKey={key} key={key} to={route}>
-                <TabTitleText>{title}</TabTitleText>
-              </Link>
-            }
-          />
-        ))}
-      </Tabs>
+      {features?.admintasks?.enabled && features.admintasks?.accessible ? (
+        <Tabs ouiaId='routed-tabs' activeKey={currentRoute}>
+          {tabs.map(({ title, route, key }) => (
+            <Tab
+              className={classes.tab}
+              keyParams={route}
+              key={key}
+              tabIndex={-1} // This prevents the tab from being targetable by accessibility features.
+              eventKey={key}
+              aria-label={title}
+              ouiaId={title}
+              title={
+                <Link className={classes.link} accessKey={key} key={key} to={route}>
+                  <TabTitleText>{title}</TabTitleText>
+                </Link>
+              }
+            />
+          ))}
+        </Tabs>
+      ) : null}
       <RepositoryQuickStart />
       {/* Render the app routes via the Layout Outlet */}
       <Grid className={classes.containerMargin}>
