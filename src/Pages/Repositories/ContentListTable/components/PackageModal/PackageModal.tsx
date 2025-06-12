@@ -84,7 +84,9 @@ export default function PackageModal() {
   const onClose = () =>
     navigate(
       `${rootPath}/${REPOSITORIES_ROUTE}` +
-        (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''),
+        (contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT
+          ? `?origin=${contentOrigin}`
+          : ''),
     );
 
   const {

@@ -42,6 +42,7 @@ import {
   type AddUploadRequest,
   deleteSnapshots,
   getLatestRepoConfigFile,
+  PopularRepository,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../Admin/AdminTaskQueries';
 import useErrorNotification from 'Hooks/useErrorNotification';
@@ -72,10 +73,10 @@ const buildContentListKey = (
   page: number,
   limit: number,
   sortBy?: string,
-  contentOrigin?: ContentOrigin,
+  contentOrigin?: ContentOrigin[],
   filterData?: Partial<FilterData>,
 ) =>
-  `${page}${limit}${sortBy}${contentOrigin}${filterData?.arches?.join(
+  `${page}${limit}${sortBy}${contentOrigin?.sort().join(',')}${filterData?.arches?.join(
     '',
   )}${filterData?.versions?.join('')}${filterData?.urls?.join('')}${filterData?.uuids?.join(
     '',
@@ -128,7 +129,7 @@ export const useContentListQuery = (
   limit: number,
   filterData: FilterData,
   sortBy: string,
-  contentOrigin: ContentOrigin = ContentOrigin.CUSTOM,
+  contentOrigin: ContentOrigin[],
   enabled: boolean = true,
   polling: boolean = false,
 ) => {
@@ -403,8 +404,8 @@ export const useDeleteContentItemMutate = (
   queryClient: QueryClient,
   page: number,
   perPage: number,
+  contentOrigin: ContentOrigin[],
   filterData?: FilterData,
-  contentOrigin?: ContentOrigin,
   sortString?: string,
 ) => {
   // Below MUST match the "useContentList" key found above or updates will fail.
@@ -470,77 +471,84 @@ export const useDeleteContentItemMutate = (
   });
 };
 
-export const useBulkDeleteContentItemMutate = (
+type DeletableItem = ContentItem | PopularRepository;
+
+export const useBulkDeleteContentItemMutate = <T extends DeletableItem>(
   queryClient: QueryClient,
-  selected: Set<string>,
+  selected: Map<string, T>,
   page: number,
   perPage: number,
-  contentOrigin: ContentOrigin,
+  contentOrigin: ContentOrigin[],
   filterData?: FilterData,
   sortString?: string,
 ) => {
-  const uuids = Array.from(selected);
   // Below MUST match the "useContentList" key found above or updates will fail.
   const contentListKeyArray = [
     CONTENT_LIST_KEY,
     buildContentListKey(page, perPage, sortString, contentOrigin, filterData),
   ];
   const errorNotifier = useErrorNotification();
-  return useMutation(() => deleteContentListItems(uuids), {
-    onMutate: async (checkedRepositories: Set<string>) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries(contentListKeyArray);
-      // Snapshot the previous value
-      const previousData: Partial<ContentListResponse> =
-        queryClient.getQueryData(contentListKeyArray) || {};
-
-      const newMeta = previousData.meta
-        ? {
-            ...previousData.meta,
-            count: previousData.meta.count ? previousData.meta.count - checkedRepositories.size : 1,
-          }
-        : undefined;
-
-      // Optimistically update to the new value
-      queryClient.setQueryData(contentListKeyArray, () => ({
-        ...previousData,
-        data: previousData.data?.filter((data) => !checkedRepositories.has(data.uuid)),
-        meta: newMeta,
-      }));
-      // Return a context object with the snapshotted value
-      return { previousData, newMeta, queryClient };
+  return useMutation(
+    (selected: Map<string, ContentItem>) => {
+      const uuids = Array.from(selected.keys());
+      return deleteContentListItems(uuids);
     },
-    onSuccess: (_data, _variables, context) => {
-      // Update all of the existing calls "count" to prevent number jumping on pagination
-      const { newMeta } = context as {
-        newMeta: Meta;
-      };
-      queryClient.setQueriesData(CONTENT_LIST_KEY, (data: Partial<ContentListResponse> = {}) => {
-        if (data?.meta?.count) {
-          data.meta.count = newMeta?.count;
-        }
-        return data;
-      });
-      queryClient.invalidateQueries(CONTENT_LIST_KEY);
-      queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
-      queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
-    },
-    // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (err: { response?: { data: ErrorResponse } }, _newData, context) => {
-      if (context) {
-        const { previousData } = context as {
-          previousData: ContentListResponse;
+    {
+      onMutate: async (selected: Map<string, ContentItem>) => {
+        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+        await queryClient.cancelQueries(contentListKeyArray);
+        // Snapshot the previous value
+        const previousData: Partial<ContentListResponse> =
+          queryClient.getQueryData(contentListKeyArray) || {};
+
+        const newMeta = previousData.meta
+          ? {
+              ...previousData.meta,
+              count: previousData.meta.count ? previousData.meta.count - selected.size : 1,
+            }
+          : undefined;
+
+        // Optimistically update to the new value
+        queryClient.setQueryData(contentListKeyArray, () => ({
+          ...previousData,
+          data: previousData.data?.filter((data) => !selected.has(data.uuid)),
+          meta: newMeta,
+        }));
+        // Return a context object with the snapshotted value
+        return { previousData, newMeta, queryClient };
+      },
+      onSuccess: (_data, _variables, context) => {
+        // Update all of the existing calls "count" to prevent number jumping on pagination
+        const { newMeta } = context as {
+          newMeta: Meta;
         };
-        queryClient.setQueryData(contentListKeyArray, previousData);
-      }
-      errorNotifier(
-        'Error deleting items from content list',
-        'An error occurred',
-        err,
-        'bulk-delete-error',
-      );
+        queryClient.setQueriesData(CONTENT_LIST_KEY, (data: Partial<ContentListResponse> = {}) => {
+          if (data?.meta?.count) {
+            data.meta.count = newMeta?.count;
+          }
+          return data;
+        });
+        queryClient.invalidateQueries(CONTENT_LIST_KEY);
+        queryClient.invalidateQueries(ADMIN_TASK_LIST_KEY);
+        queryClient.invalidateQueries(POPULAR_REPOSITORIES_LIST_KEY);
+      },
+      // If the mutation fails, use the context returned from onMutate to roll back
+      onError: (err: { response?: { data: ErrorResponse } }, _newData, context) => {
+        if (context) {
+          const { previousData } = context as {
+            previousData: ContentListResponse;
+          };
+          queryClient.setQueryData(contentListKeyArray, previousData);
+        }
+        errorNotifier(
+          'Error deleting items from content list',
+          'An error occurred',
+          err,
+          'bulk-delete-error',
+        );
+      },
     },
-  });
+  );
 };
 
 export const useGetSnapshotsByDates = (uuids: string[], date: string) => {
@@ -724,7 +732,7 @@ export const useIntrospectRepositoryMutate = (
   queryClient: QueryClient,
   page: number,
   perPage: number,
-  contentOrigin: ContentOrigin,
+  contentOrigin: ContentOrigin[],
   filterData?: FilterData,
   sortString?: string,
 ) => {

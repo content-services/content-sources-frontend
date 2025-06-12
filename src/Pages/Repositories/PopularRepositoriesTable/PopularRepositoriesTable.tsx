@@ -97,10 +97,10 @@ const PopularRepositoriesTable = () => {
   const [checkedRepositoriesToAdd, setCheckedRepositoriesToAdd] = useState<
     Map<string, CreateContentRequestItem>
   >(new Map());
-  // Set of uuids which are required for bulk delete
-  const [checkedRepositoriesToDelete, setCheckedRepositoriesToDelete] = useState<Set<string>>(
-    new Set(),
-  );
+  // Map of uuids and repos which are required for bulk delete
+  const [checkedRepositoriesToDelete, setCheckedRepositoriesToDelete] = useState<
+    Map<string, PopularRepository>
+  >(new Map());
   const [selectedData, setSelectedData] = useState<CreateContentRequest>([]);
   const [selectedUUID, setSelectedUUID] = useState<string>('');
 
@@ -153,31 +153,31 @@ const PopularRepositoriesTable = () => {
 
   const clearCheckedRepositories = () => {
     setCheckedRepositoriesToAdd(new Map());
-    setCheckedRepositoriesToDelete(new Set());
+    setCheckedRepositoriesToDelete(new Map());
   };
 
   const selectAllRepos = (_, checked: boolean) => {
-    const newSet = new Set(checkedRepositoriesToDelete);
-    const newMap = new Map(checkedRepositoriesToAdd);
+    const newDeleteMap = new Map(checkedRepositoriesToDelete);
+    const newAddMap = new Map(checkedRepositoriesToAdd);
     if (checked) {
       popularData.forEach((repo) => {
         if (repo.uuid) {
-          newSet.add(repo.uuid);
+          newDeleteMap.set(repo.uuid, repo);
         } else {
-          newMap.set(repo.url, repoToRequestItem(repo));
+          newAddMap.set(repo.url, repoToRequestItem(repo));
         }
       });
     } else {
       popularData.forEach((repo) => {
         if (repo.uuid) {
-          newSet.delete(repo.uuid);
+          newDeleteMap.delete(repo.uuid);
         } else {
-          newMap.delete(repo.url);
+          newAddMap.delete(repo.url);
         }
       });
     }
-    setCheckedRepositoriesToDelete(newSet);
-    setCheckedRepositoriesToAdd(newMap);
+    setCheckedRepositoriesToDelete(newDeleteMap);
+    setCheckedRepositoriesToAdd(newAddMap);
   };
 
   const atLeastOneRepoToDeleteChecked = useMemo(
@@ -203,13 +203,13 @@ const PopularRepositoriesTable = () => {
 
   const onSelectRepo = (repo: PopularRepository, value: boolean) => {
     if (repo.uuid) {
-      const newSet = new Set(checkedRepositoriesToDelete);
+      const newMap = new Map(checkedRepositoriesToDelete);
       if (value) {
-        newSet.add(repo.uuid);
+        newMap.set(repo.uuid, repo);
       } else {
-        newSet.delete(repo.uuid);
+        newMap.delete(repo.uuid);
       }
-      setCheckedRepositoriesToDelete(newSet);
+      setCheckedRepositoriesToDelete(newMap);
     } else {
       const newMap = new Map(checkedRepositoriesToAdd);
       if (value) {
@@ -249,7 +249,7 @@ const PopularRepositoriesTable = () => {
     checkedRepositoriesToDelete,
     page,
     perPage,
-    ContentOrigin.CUSTOM,
+    [ContentOrigin.CUSTOM],
     { searchQuery: debouncedSearchValue } as FilterData,
     undefined, // sort string
   );
@@ -584,7 +584,7 @@ const PopularRepositoriesTable = () => {
 export const usePopularListOutletContext = () =>
   useOutletContext<{
     deletionContext: {
-      checkedRepositoriesToDelete: Set<string>;
+      checkedRepositoriesToDelete: Map<string, PopularRepository>;
     };
   }>();
 

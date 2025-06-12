@@ -89,7 +89,7 @@ export default function SetUpDateStep() {
         uuids: itemsAfterDate.map(({ repository_uuid }) => repository_uuid),
       },
       '',
-      ContentOrigin.ALL,
+      [ContentOrigin.ALL],
     );
 
   return (

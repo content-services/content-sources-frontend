@@ -78,7 +78,12 @@ export function SnapshotPackagesTab() {
   };
 
   const onClose = () =>
-    navigate(rootPath + (contentOrigin === ContentOrigin.REDHAT ? `?origin=${contentOrigin}` : ''));
+    navigate(
+      rootPath +
+        (contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT
+          ? `?origin=${contentOrigin}`
+          : ''),
+    );
 
   const {
     data: packagesList = [],

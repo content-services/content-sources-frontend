@@ -3,7 +3,7 @@ import { testRepositoryParamsResponse } from 'testingHelpers';
 import AddContent from './AddContent/AddContent';
 import ContentListFilters from './ContentListFilters';
 import { useQueryClient } from 'react-query';
-import { ContentOrigin } from 'services/Content/ContentApi';
+import { ContentItem, ContentOrigin } from 'services/Content/ContentApi';
 
 jest.mock('./AddContent/AddContent');
 
@@ -28,7 +28,7 @@ beforeAll(() => {
 it('Render loading state (disabled)', () => {
   const { getByRole } = render(
     <ContentListFilters
-      contentOrigin={ContentOrigin.CUSTOM}
+      contentOrigin={[ContentOrigin.CUSTOM]}
       setContentOrigin={() => null}
       isLoading={true}
       setFilterData={() => null}
@@ -40,6 +40,7 @@ it('Render loading state (disabled)', () => {
       }}
       atLeastOneRepoChecked={false}
       numberOfReposChecked={0}
+      checkedRepositories={new Map<string, ContentItem>()}
     />,
   );
 
@@ -50,7 +51,7 @@ it('Render loading state (disabled)', () => {
 it('Select a filter of each type and ensure chips are present contentlistfilters', () => {
   const { queryByText, getByRole, getByLabelText } = render(
     <ContentListFilters
-      contentOrigin={ContentOrigin.CUSTOM}
+      contentOrigin={[ContentOrigin.CUSTOM]}
       setContentOrigin={() => null}
       setFilterData={() => null}
       filterData={{
@@ -61,6 +62,7 @@ it('Select a filter of each type and ensure chips are present contentlistfilters
       }}
       atLeastOneRepoChecked={false}
       numberOfReposChecked={0}
+      checkedRepositories={new Map<string, ContentItem>()}
     />,
   );
 

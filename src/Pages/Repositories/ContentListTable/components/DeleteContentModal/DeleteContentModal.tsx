@@ -25,14 +25,14 @@ import {
 import { useQueryClient } from 'react-query';
 import { useHref, useLocation, useNavigate } from 'react-router-dom';
 import { useContentListOutletContext } from '../../ContentListTable';
-import { usePopularListOutletContext } from '../../../PopularRepositoriesTable/PopularRepositoriesTable';
 import useRootPath from 'Hooks/useRootPath';
 import { GET_TEMPLATES_KEY, useTemplateList } from 'services/Templates/TemplateQueries';
 import { TemplateFilterData, TemplateItem } from 'services/Templates/TemplateApi';
-import { POPULAR_REPOSITORIES_ROUTE, REPOSITORIES_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
-import { ContentItem, FilterData } from 'services/Content/ContentApi';
+import { REPOSITORIES_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
+import { ContentItem, ContentOrigin, FilterData } from 'services/Content/ContentApi';
 import { isEmpty } from 'lodash';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
+import { usePopularListOutletContext } from 'Pages/Repositories/PopularRepositoriesTable/PopularRepositoriesTable';
 
 const useStyles = createUseStyles({
   removeButton: {
@@ -70,24 +70,34 @@ export default function DeleteContentModal() {
     clearCheckedRepositories,
     deletionContext: { page, perPage, filterData, contentOrigin, sortString, checkedRepositories },
   } = useContentListOutletContext();
+
   const {
     deletionContext: { checkedRepositoriesToDelete },
   } = usePopularListOutletContext();
 
   const repoUUIDFromPath = new URLSearchParams(search).get('repoUUID')?.split(',');
-  const checkedCustomRepos = checkedRepositories ? Array.from(checkedRepositories) : [];
-  const checkedPopularRepos = checkedRepositoriesToDelete
-    ? Array.from(checkedRepositoriesToDelete)
-    : [];
 
-  const uuids = repoUUIDFromPath?.length
-    ? repoUUIDFromPath
-    : checkedCustomRepos.length
-      ? checkedCustomRepos
-      : checkedPopularRepos.length
-        ? checkedPopularRepos
-        : [];
-  const reposToDelete = new Set(uuids);
+  const uuids =
+    repoUUIDFromPath && repoUUIDFromPath.length > 0
+      ? repoUUIDFromPath
+      : checkedRepositories
+        ? Array.from(checkedRepositories.keys())
+        : Array.from(checkedRepositoriesToDelete.keys());
+
+  const repoFilterData: FilterData = { uuids: uuids };
+
+  // Ignore pagination if fetching by a uuid from the path
+  const selectedPage = repoUUIDFromPath && repoUUIDFromPath.length > 0 ? 1 : page;
+  const selectedPerPage = repoUUIDFromPath && repoUUIDFromPath.length ? uuids.length : perPage;
+
+  const {
+    isError: isRepoError,
+    data: repos = { data: [] as ContentItem[], meta: { count: 0, limit: 20, offset: 0 } },
+  } = useContentListQuery(selectedPage, selectedPerPage, repoFilterData, '', [
+    ContentOrigin.CUSTOM,
+  ]);
+
+  const reposToDelete = new Map(repos.data.map((repo) => [repo.uuid, repo]));
 
   const { mutateAsync: deleteItems, isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
     queryClient,
@@ -99,10 +109,7 @@ export default function DeleteContentModal() {
     sortString,
   );
 
-  const onClose = () =>
-    navigate(
-      `${rootPath}/${REPOSITORIES_ROUTE}${checkedPopularRepos.length ? `/${POPULAR_REPOSITORIES_ROUTE}` : ''}`,
-    );
+  const onClose = () => navigate(`${rootPath}/${REPOSITORIES_ROUTE}}`);
 
   const onSave = async () => {
     deleteItems(reposToDelete).then(() => {
@@ -112,13 +119,6 @@ export default function DeleteContentModal() {
       queryClient.invalidateQueries(GET_TEMPLATES_KEY);
     });
   };
-
-  const repoFilterData: FilterData = { uuids: uuids };
-
-  const {
-    isError: isRepoError,
-    data: repos = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useContentListQuery(page, perPage, repoFilterData, '');
 
   const templateFilterData: TemplateFilterData = {
     arch: '',

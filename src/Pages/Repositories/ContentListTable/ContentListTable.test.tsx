@@ -25,7 +25,7 @@ jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({
     features: { snapshots: { accessible: true } },
     rbac: { repoWrite: true, repoRead: true },
-    contentOrigin: ContentOrigin.CUSTOM,
+    contentOrigin: [ContentOrigin.EXTERNAL, ContentOrigin.UPLOAD],
     setContentOrigin: () => {},
   }),
 }));
