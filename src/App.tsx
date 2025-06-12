@@ -40,7 +40,7 @@ export default function App() {
       storedPerPage,
       filterData,
       '',
-      ContentOrigin.CUSTOM,
+      [ContentOrigin.EXTERNAL, ContentOrigin.UPLOAD, ContentOrigin.COMMUNITY],
       isDefaultRoute && zeroState, // We only check if the route is correct and zerostate is true (defaults to true)
     );
 

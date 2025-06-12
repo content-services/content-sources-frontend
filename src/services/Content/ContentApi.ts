@@ -304,6 +304,7 @@ export enum ContentOrigin {
   'REDHAT' = 'red_hat',
   'EXTERNAL' = 'external',
   'UPLOAD' = 'upload',
+  'COMMUNITY' = 'community',
   'CUSTOM' = 'external,upload',
   'ALL' = 'red_hat,external,upload',
 }
@@ -313,7 +314,7 @@ export const getContentList: (
   limit: number,
   filterData: FilterData,
   sortBy: string,
-  contentOrigin: ContentOrigin,
+  contentOrigin: string[],
 ) => Promise<ContentListResponse> = async (page, limit, filterData, sortBy, contentOrigin) => {
   const search = filterData.searchQuery;
   const versionParam = filterData.versions?.join(',');
@@ -323,7 +324,7 @@ export const getContentList: (
   const uuidsParam = filterData.uuids?.join(',');
   const { data } = await axios.get(
     `/api/content-sources/v1/repositories/?${objectToUrlParams({
-      origin: contentOrigin,
+      origin: contentOrigin.length ? contentOrigin.join(',') : undefined,
       offset: ((page - 1) * limit).toString(),
       limit: limit?.toString(),
       search,
