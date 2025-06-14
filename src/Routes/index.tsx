@@ -13,7 +13,6 @@ import {
   DETAILS_ROUTE,
   EDIT_ROUTE,
   PACKAGES_ROUTE,
-  POPULAR_REPOSITORIES_ROUTE,
   REDHAT_REPO_GEN_ROUTE,
   REPOSITORIES_ROUTE,
   SNAPSHOTS_ROUTE,
@@ -36,7 +35,6 @@ import DeleteContentModal from 'Pages/Repositories/ContentListTable/components/D
 import SnapshotListModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/SnapshotListModal';
 import SnapshotDetailsModal from 'Pages/Repositories/ContentListTable/components/SnapshotDetailsModal/SnapshotDetailsModal';
 import PackageModal from 'Pages/Repositories/ContentListTable/components/PackageModal/PackageModal';
-import PopularRepositoriesTable from 'Pages/Repositories/PopularRepositoriesTable/PopularRepositoriesTable';
 import AdminTaskTable from 'Pages/Repositories/AdminTaskTable/AdminTaskTable';
 import ViewPayloadModal from 'Pages/Repositories/AdminTaskTable/components/ViewPayloadModal/ViewPayloadModal';
 import DeleteTemplateModal from 'Pages/Templates/TemplatesTable/components/DeleteTemplateModal';
@@ -104,13 +102,6 @@ export default function RepositoriesRoutes() {
               path={`:repoUUID/${PACKAGES_ROUTE}`}
               element={<PackageModal />}
             />
-          </Route>
-          <Route path={POPULAR_REPOSITORIES_ROUTE} element={<PopularRepositoriesTable />}>
-            {rbac?.repoWrite ? (
-              <Route key={DELETE_ROUTE} path={DELETE_ROUTE} element={<DeleteContentModal />} />
-            ) : (
-              ''
-            )}
           </Route>
           {...features?.admintasks?.enabled && features.admintasks?.accessible
             ? [
