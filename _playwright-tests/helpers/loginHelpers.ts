@@ -68,7 +68,7 @@ export const storeStorageStateAndToken = async (page: Page) => {
 };
 
 export const throwIfMissingEnvVariables = () => {
-  const ManditoryEnvVariables = [
+  const MandatoryEnvVariables = [
     'ADMIN_USERNAME',
     'ADMIN_PASSWORD',
     'BASE_URL',
@@ -76,7 +76,7 @@ export const throwIfMissingEnvVariables = () => {
   ];
 
   const missing: string[] = [];
-  ManditoryEnvVariables.forEach((envVar) => {
+  MandatoryEnvVariables.forEach((envVar) => {
     if (!process.env[envVar]) {
       missing.push(envVar);
     }
