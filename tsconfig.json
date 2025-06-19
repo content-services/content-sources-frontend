@@ -17,9 +17,13 @@
     "noImplicitAny": false,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "types": ["node", "jest", "@testing-library/jest-dom"]
+    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "paths": {
+      "test-utils": ["../_playwright-tests/test-utils/_playwright-tests/test-utils/src/index.ts"],
+      "test-utils/*": ["../_playwright-tests/test-utils/_playwright-tests/test-utils/src/*"]
+    }
   },
-  "include": ["src"],
+  "include": ["src", "_playwright-tests/**/*.ts"],
   "exclude": [
     "cache",
     "auth",
