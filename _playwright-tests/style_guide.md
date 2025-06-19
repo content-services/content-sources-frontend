@@ -5,7 +5,7 @@ This style guide outlines the standards and best practices for writing Playwrigh
 Most of the things here are in-line with the [official Playwright best practices/guidelines](https://playwright.dev/docs/best-practices).
 
 > [!TIP]
-> The official Playwright documentation is **awesome** and should be your first stop for any questions you have about Playwright. Often this will pay of more than jumping into AI chat-bots first.
+> The official Playwright documentation is **awesome** and should be your first stop for any questions you have about Playwright. Often this will pay off more than jumping into AI chat-bots first.
 
 ## Table of Contents 📜
 
@@ -25,13 +25,13 @@ Most of the things here are in-line with the [official Playwright best practices
    Each test should be idempotent, i.e.: be able to run on repeat with the same _(successful)_ outcome.
 
 3. **Parallelization**: \
-   Structure tests to run in parallel for faster execution. Optimize or be vary of the length of tests, as you want a speedy feedback loop.
+   Structure tests to run in parallel for faster execution. Avoid long tests and optimize for a speedy feedback loop.
 
 4. **Use playwright's capturing features**: \
-   Configure Playwright to take screenshots, videos and record test traces on test failures. And ideally use some tool to collect and visualize them.
+   Configure Playwright to take screenshots, videos, and record test traces on test failures. Ideally use some tool to collect and visualize them.
 
 5. **Don't try to reinvent the wheel**: \
-   Simplicity is king, test can be simple. Only reach for custom (complicated/hard to maintain) things if there isn't a good solution out of the box. _(for vast majority of things there is)_
+   Simplicity is king, test can be simple. Only reach for custom (complicated and hard to maintain) things if there isn't a good solution out of the box. _(for vast majority of things there is)_
 
 6. **Keep abstractions to minimum**: \
    To keep tests readable and maintainable, define selectors directly within the test where they are used. Avoid abstracting selectors into separate files and don't use page objects. The test should be easy to understand and readable as an article, after which you know what it does and don't have more questions than answers.
@@ -56,7 +56,7 @@ Most of the things here are in-line with the [official Playwright best practices
 
 A good test structure makes it easier to locate, run, and maintain tests. Consider organizing your tests by feature or page.
 
-Recommended folder/file structure:
+Recommended directory structure:
 
 ```sh
 /_playwright-tests
@@ -234,5 +234,5 @@ But don't worry, the vast majority if not everything can be achieved through the
     ```
 
 - Navigation inside Insights (stage and proxy especially) can be flaky.
-  - This can be caused by multiple reasons (stage/proxy instability, sentry errors, cache failures, slooow loads 🐌).
-  - If you are experiencing this, try to add retry logic to auth/navigation.
+  - This can be caused by multiple reasons (stage or proxy instability, sentry errors, cache failures, slooow loads 🐌).
+  - If you are experiencing this, try to add retry logic to auth and navigation.
