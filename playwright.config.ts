@@ -101,7 +101,15 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        storageState: '.auth/admin_user.json',
+        storageState: `./.auth/${process.env.ADMIN_USERNAME}.json`,
+      },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'read-only',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: `.auth/${process.env.READONLY_USERNAME}.json`,
       },
       dependencies: ['setup'],
     },

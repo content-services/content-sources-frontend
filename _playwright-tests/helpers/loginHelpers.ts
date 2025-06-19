@@ -92,6 +92,8 @@ export const throwIfMissingEnvVariables = () => {
   const MandatoryEnvVariables = [
     'ADMIN_USERNAME',
     'ADMIN_PASSWORD',
+    'READONLY_USERNAME',
+    'READONLY_PASSWORD',
     'BASE_URL',
     ...(process.env.INTEGRATION ? ['PROXY', 'ORG_ID_1', 'ACTIVATION_KEY_1'] : []),
   ];
