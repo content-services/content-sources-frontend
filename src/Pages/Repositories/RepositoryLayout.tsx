@@ -42,11 +42,15 @@ export default function RepositoryLayout() {
   const tabs = useMemo(
     () => [
       { title: 'Your repositories', route: '', key: REPOSITORIES_ROUTE },
-      {
-        title: 'Popular repositories',
-        route: POPULAR_REPOSITORIES_ROUTE,
-        key: POPULAR_REPOSITORIES_ROUTE,
-      },
+      ...(!features?.communityrepos?.enabled
+        ? [
+            {
+              title: 'Popular repositories',
+              route: POPULAR_REPOSITORIES_ROUTE,
+              key: POPULAR_REPOSITORIES_ROUTE,
+            },
+          ]
+        : []),
       ...(features?.admintasks?.enabled && features.admintasks?.accessible
         ? [
             {

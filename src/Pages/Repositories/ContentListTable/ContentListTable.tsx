@@ -440,7 +440,7 @@ const ContentListTable = () => {
   };
 
   const itemName =
-    contentOrigin.length === 2 &&
+    contentOrigin.length >= 2 &&
     contentOrigin.includes(ContentOrigin.EXTERNAL) &&
     contentOrigin.includes(ContentOrigin.UPLOAD)
       ? 'custom repositories'

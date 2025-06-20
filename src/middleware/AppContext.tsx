@@ -46,7 +46,6 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [contentOrigin, setContentOrigin] = useState<ContentOrigin[]>([
     ContentOrigin.EXTERNAL,
     ContentOrigin.UPLOAD,
-    ContentOrigin.COMMUNITY,
   ]);
   const { fetchFeatures, isLoading: isFetchingFeatures } = useFetchFeaturesQuery();
   const { data: subscriptions, isLoading: isFetchingSubscriptions } = useFetchSubscriptionsQuery();
@@ -75,6 +74,14 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     (async () => {
       const fetchedFeatures = await fetchFeatures();
       setFeatures(fetchedFeatures);
+
+      if (fetchedFeatures?.communityrepos?.enabled) {
+        setContentOrigin((prev) =>
+          prev.includes(ContentOrigin.COMMUNITY) ? prev : [...prev, ContentOrigin.COMMUNITY],
+        );
+      } else {
+        setContentOrigin((prev) => prev.filter((origin) => origin !== ContentOrigin.COMMUNITY));
+      }
     })();
   }, [!!chrome]);
 

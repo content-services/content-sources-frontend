@@ -418,19 +418,21 @@ const ContentListFilters = ({
                   });
                 }}
               />
-              <ToggleGroupItem
-                text='EPEL'
-                buttonId='epel-repositories-toggle-button'
-                data-ouia-component-id='epel-repositories-toggle'
-                isSelected={contentOrigin.includes(ContentOrigin.COMMUNITY)}
-                onChange={() => {
-                  setContentOrigin((prev) =>
-                    prev.includes(ContentOrigin.COMMUNITY)
-                      ? prev.filter((origin) => origin !== ContentOrigin.COMMUNITY)
-                      : [...prev, ContentOrigin.COMMUNITY],
-                  );
-                }}
-              />
+              {features?.communityrepos?.enabled ? (
+                <ToggleGroupItem
+                  text='EPEL'
+                  buttonId='epel-repositories-toggle-button'
+                  data-ouia-component-id='epel-repositories-toggle'
+                  isSelected={contentOrigin.includes(ContentOrigin.COMMUNITY)}
+                  onChange={() => {
+                    setContentOrigin((prev) =>
+                      prev.includes(ContentOrigin.COMMUNITY)
+                        ? prev.filter((origin) => origin !== ContentOrigin.COMMUNITY)
+                        : [...prev, ContentOrigin.COMMUNITY],
+                    );
+                  }}
+                />
+              ) : null}
               <ToggleGroupItem
                 text='Red Hat'
                 buttonId='redhat-repositories-toggle-button'
