@@ -36,7 +36,6 @@ import DeleteContentModal from 'Pages/Repositories/ContentListTable/components/D
 import SnapshotListModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/SnapshotListModal';
 import SnapshotDetailsModal from 'Pages/Repositories/ContentListTable/components/SnapshotDetailsModal/SnapshotDetailsModal';
 import PackageModal from 'Pages/Repositories/ContentListTable/components/PackageModal/PackageModal';
-import PopularRepositoriesTable from 'Pages/Repositories/PopularRepositoriesTable/PopularRepositoriesTable';
 import AdminTaskTable from 'Pages/Repositories/AdminTaskTable/AdminTaskTable';
 import ViewPayloadModal from 'Pages/Repositories/AdminTaskTable/components/ViewPayloadModal/ViewPayloadModal';
 import DeleteTemplateModal from 'Pages/Templates/TemplatesTable/components/DeleteTemplateModal';
@@ -44,6 +43,7 @@ import TemplateRepositoriesTab from 'Pages/Templates/TemplateDetails/components/
 import UploadContent from 'Pages/Repositories/ContentListTable/components/UploadContent/UploadContent';
 import DeleteSnapshotsModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/DeleteSnapshotsModal/DeleteSnapshotsModal';
 import AdminFeaturesTable from 'Pages/Repositories/AdminFeaturesTable/AdminFeaturesTable';
+import PopularRepositoriesTable from 'Pages/Repositories/PopularRepositoriesTable/PopularRepositoriesTable';
 
 export default function RepositoriesRoutes() {
   const key = useMemo(() => Math.random(), []);

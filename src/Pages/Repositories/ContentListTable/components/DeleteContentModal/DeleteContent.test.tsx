@@ -38,14 +38,6 @@ jest.mock('../../ContentListTable', () => ({
   }),
 }));
 
-jest.mock('../../../PopularRepositoriesTable/PopularRepositoriesTable', () => ({
-  usePopularListOutletContext: () => ({
-    deletionContext: {
-      checkedRepositoriesToDelete: new Set<string>('some-uuid'),
-    },
-  }),
-}));
-
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
 jest.mock('services/Content/ContentQueries', () => ({

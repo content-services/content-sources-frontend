@@ -119,7 +119,7 @@ export default function RedhatRepositoriesStep() {
         uuids: toggled ? [...selectedRedhatRepos] : undefined,
       },
       sortString(),
-      ContentOrigin.REDHAT,
+      [ContentOrigin.REDHAT],
     );
 
   const {
