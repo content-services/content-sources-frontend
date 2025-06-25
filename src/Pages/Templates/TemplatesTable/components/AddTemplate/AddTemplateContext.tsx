@@ -80,7 +80,7 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
     10,
     { urls: hardcodedRedhatRepositories },
     '',
-    ContentOrigin.REDHAT,
+    [ContentOrigin.REDHAT],
     !!hardcodedRedhatRepositories.length,
   );
 
@@ -89,7 +89,7 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
     10,
     { uuids: editTemplateData?.repository_uuids },
     '',
-    ContentOrigin.ALL,
+    [ContentOrigin.ALL],
     !!uuid && !!editTemplateData?.repository_uuids.length,
   );
 
