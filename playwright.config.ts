@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
+import path from 'path';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -99,5 +100,14 @@ export default defineConfig({
           },
         ]
       : []),
+    {
+      name: 'read-only',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: path.join(__dirname, `.auth/read-only.json`),
+      },
+      dependencies: ['setup'],
+      testMatch: '**/RBAC.spec.ts',
+    },
   ],
 });
