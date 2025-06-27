@@ -63,6 +63,7 @@ test.describe('Snapshot Repositories', () => {
 
     await test.step('Trigger snapshot manually', async () => {
       const edited_row = await getRowByNameOrUrl(page, editedRepoName);
+      await expect(edited_row.getByText('Valid')).toBeVisible({ timeout: 60000 });
       await edited_row.getByLabel('Kebab toggle').click();
       // Trigger a snapshot manually
       await page.getByRole('menuitem', { name: 'Trigger snapshot' }).click();
