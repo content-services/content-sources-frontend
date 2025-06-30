@@ -56,7 +56,7 @@ export const logInWithUsernameAndPassword = async (
   });
 };
 
-export const logInWithUser1 = async (page: Page) =>
+export const logInWithAdminUser = async (page: Page) =>
   await logInWithUsernameAndPassword(page, process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD);
 
 export const storeStorageStateAndToken = async (page: Page, fileName: string) => {

@@ -1,11 +1,11 @@
 import { expect, test as setup } from '@playwright/test';
 import {
   ensureNotInPreview,
-  logInWithUser1,
   storeStorageStateAndToken,
   throwIfMissingEnvVariables,
-  logInWithUsernameAndPassword,
   logout,
+  logInWithReadOnlyUser,
+  logInWithAdminUser,
 } from './helpers/loginHelpers';
 import { closePopupsIfExist } from './UI/helpers/helpers';
 
@@ -28,11 +28,7 @@ setup.describe('Setup Authentication States', async () => {
     await closePopupsIfExist(page);
 
     // Login read-only user
-    await logInWithUsernameAndPassword(
-      page,
-      process.env.READONLY_USERNAME!,
-      process.env.READONLY_PASSWORD!,
-    );
+    await logInWithReadOnlyUser(page);
 
     // Save state for read-only user
     await storeStorageStateAndToken(page, 'read-only.json');
@@ -42,8 +38,8 @@ setup.describe('Setup Authentication States', async () => {
   setup('Authenticate Default User and Save State', async ({ page }) => {
     setup.setTimeout(60_000);
 
-    // Login default user (assuming logInWithUser1 performs a full login)
-    await logInWithUser1(page);
+    // Login default admin user
+    await logInWithAdminUser(page);
     await ensureNotInPreview(page);
 
     // Save state for default admin user

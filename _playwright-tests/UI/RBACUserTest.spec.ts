@@ -1,4 +1,3 @@
-// _playwright-tests/UI/RBAC.spec.ts
 import { test, expect } from '@playwright/test';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 import { randomName, randomUrl } from './helpers/repoHelpers';
@@ -11,10 +10,11 @@ const repoName = `${repoNamePrefix}-${randomName()}`;
 const url = randomUrl();
 
 // Define a test group for admin user
-test.describe('Admin User Tests', () => {
+test.describe('Create, update, and read a repo as admin user', () => {
   test.use({ storageState: '.auth/admin_user.json' });
+  test.describe.configure({ mode: 'serial' });
 
-  test('Login as user 1 (admin) and manage repo', async ({ page }) => {
+  test('Login as admin and manage repo', async ({ page }) => {
     await test.step('Create a repository', async () => {
       await navigateToRepositories(page);
       await closePopupsIfExist(page);
@@ -45,19 +45,13 @@ test.describe('Admin User Tests', () => {
   });
 
   // Define a separate test group for read-only user
-  test.describe('Read-Only User Tests', () => {
+  test.describe('Check read-only user can view but not edit the repo', () => {
     test.use({
       storageState: '.auth/read-only.json',
+      extraHTTPHeaders: { Authorization: getUserAuthToken('read-only') },
     });
-    test.describe.configure({ mode: 'serial' });
 
-    test('Read-only user can view but not edit', async ({ browser }) => {
-      // Launch a new browser instance for complete isolation
-      const context = await browser.newContext({
-        storageState: '.auth/read-only.json',
-        extraHTTPHeaders: { Authorization: getUserAuthToken('read-only') },
-      });
-      const page = await context.newPage();
+    test('Login as read-only user and attempt to edit', async ({ page }) => {
       await navigateToRepositories(page);
       await closePopupsIfExist(page);
       const row = await getRowByNameOrUrl(page, `${repoName}-Edited`);
@@ -69,8 +63,6 @@ test.describe('Admin User Tests', () => {
       // Additionally, check if the "Add repositories" button is disabled
       const repoButton = page.getByRole('button', { name: 'Add repositories', exact: true });
       await expect(repoButton).toBeDisabled();
-
-      await context.close();
     });
   });
 });
