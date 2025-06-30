@@ -1,9 +1,9 @@
 import { test, expect } from 'test-utils';
-import { cleanupRepositories, randomName, randomUrl } from 'test-utils/helpers';
+import { randomName } from 'test-utils/helpers';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
-import { randomName } from './helpers/repoHelpers';
 import { test as fixtureTest } from './fixtures/repoFixture';
+import { deleteAllRepos } from './helpers/deleteRepositories';
 
 export const repoNamePrefix = 'Repo-CRUD';
 export const repoName = `${repoNamePrefix}-${randomName()}`;
@@ -71,7 +71,7 @@ test.describe('Custom Repositories CRUD', () => {
         `${repoName}-Edited`,
       );
       await expect(page.getByPlaceholder('https://', { exact: true })).toHaveValue(`${fedoraUrl}`);
-      await page.getByRole('button', { name: 'Cancel' }).click();
+      await page.getByTestId('add_edit_custom_repository-ModalBoxCloseButton').click();
     });
 
     await test.step('Delete one custom repository', async () => {
