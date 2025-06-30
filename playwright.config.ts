@@ -107,7 +107,6 @@ export default defineConfig({
         storageState: path.join(__dirname, `.auth/read-only.json`),
       },
       dependencies: ['setup'],
-      testMatch: '**/RBAC.spec.ts',
     },
   ],
 });
