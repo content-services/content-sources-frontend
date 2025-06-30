@@ -48,9 +48,7 @@ test.describe('Create, update, and read a repo as admin user', () => {
   test.describe('Check read-only user can view but not edit the repo', () => {
     test.use({
       storageState: '.auth/read-only.json',
-      extraHTTPHeaders: process.env.READONLY_TOKEN
-        ? { Authorization: process.env.READONLY_TOKEN }
-        : {},
+      extraHTTPHeaders: { Authorization: getUserAuthToken('read-only') },
     });
 
     test('Login as read-only user and attempt to edit', async ({ page }) => {
