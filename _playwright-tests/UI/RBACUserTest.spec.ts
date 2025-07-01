@@ -3,7 +3,6 @@ import { deleteAllRepos } from './helpers/deleteRepositories';
 import { randomName, randomUrl } from './helpers/repoHelpers';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { closePopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
-import { getUserAuthToken } from '../helpers/loginHelpers';
 
 const repoNamePrefix = 'Repo-RBAC';
 const repoName = `${repoNamePrefix}-${randomName()}`;
@@ -48,7 +47,9 @@ test.describe('Create, update, and read a repo as admin user', () => {
   test.describe('Check read-only user can view but not edit the repo', () => {
     test.use({
       storageState: '.auth/read-only.json',
-      extraHTTPHeaders: { Authorization: getUserAuthToken('read-only') },
+      extraHTTPHeaders: process.env.READONLY_TOKEN
+        ? { Authorization: process.env.READONLY_TOKEN }
+        : {},
     });
 
     test('Login as read-only user and attempt to edit', async ({ page }) => {
