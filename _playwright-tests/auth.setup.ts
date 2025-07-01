@@ -10,6 +10,7 @@ import {
 import { closePopupsIfExist } from './UI/helpers/helpers';
 
 import { existsSync, mkdirSync } from 'fs';
+import path from 'path';
 const authDir = '.auth';
 if (!existsSync(authDir)) {
   mkdirSync(authDir);
@@ -31,6 +32,13 @@ setup.describe('Setup Authentication States', async () => {
     await logInWithReadOnlyUser(page);
 
     // Save state for read-only user
+    const { cookies } = await page
+      .context()
+      .storageState({ path: path.join(__dirname, '../../.auth', 'read-only.json') });
+    const readOnlyToken = cookies.find((cookie) => cookie.name === 'cs_jwt')?.value;
+
+    process.env.READONLY_TOKEN = `Bearer ${readOnlyToken}`;
+
     await storeStorageStateAndToken(page, 'read-only.json');
     await logout(page);
   });
@@ -43,6 +51,7 @@ setup.describe('Setup Authentication States', async () => {
     await ensureNotInPreview(page);
 
     // Save state for default admin user
+    // This also sets process.env.TOKEN, which is picked up by main config.
     await storeStorageStateAndToken(page, 'admin_user.json');
   });
 });

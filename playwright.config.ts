@@ -1,6 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
-import path from 'path';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -72,6 +71,13 @@ export default defineConfig({
           use: {
             ...devices['Desktop Chrome'],
             storageState: '.auth/admin_user.json',
+            ...(process.env.TOKEN
+              ? {
+                  extraHTTPHeaders: {
+                    Authorization: process.env.TOKEN,
+                  },
+                }
+              : {}),
           },
           testIgnore: ['**/Integration/**'],
           testDir: './_playwright-tests/UI/',
