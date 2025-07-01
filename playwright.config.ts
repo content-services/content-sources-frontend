@@ -100,13 +100,5 @@ export default defineConfig({
           },
         ]
       : []),
-    {
-      name: 'read-only',
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: path.join(__dirname, `.auth/read-only.json`),
-      },
-      dependencies: ['setup'],
-    },
   ],
 });
