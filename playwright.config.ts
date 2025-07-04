@@ -71,13 +71,6 @@ export default defineConfig({
           use: {
             ...devices['Desktop Chrome'],
             storageState: '.auth/admin_user.json',
-            ...(process.env.TOKEN
-              ? {
-                  extraHTTPHeaders: {
-                    Authorization: process.env.TOKEN,
-                  },
-                }
-              : {}),
           },
           testIgnore: ['**/Integration/**'],
           testDir: './_playwright-tests/UI/',

@@ -67,6 +67,13 @@ export const storeStorageStateAndToken = async (page: Page, fileName: string) =>
   await page.waitForTimeout(100);
 };
 
+export const logInWithRHELOperatorUser = async (page: Page) =>
+  await logInWithUsernameAndPassword(
+    page,
+    process.env.RHEL_OPERATOR_USERNAME,
+    process.env.RHEL_OPERATOR_PASSWORD,
+  );
+
 export const logInWithReadOnlyUser = async (page: Page) =>
   await logInWithUsernameAndPassword(
     page,
