@@ -45,10 +45,13 @@ const statusValues = ['Running', 'Failed', 'Completed', 'Canceled', 'Pending'];
 const typeValues = [
   'snapshot',
   'delete-repository-snapshots',
+  'delete-snapshots',
   'introspect',
   'delete-templates',
   'update-template-content',
   'update-repository',
+  'add-uploads-repository',
+  'update-latest-snapshot',
 ];
 
 const filters = ['Account ID', 'Org ID', 'Status', 'Type'];
