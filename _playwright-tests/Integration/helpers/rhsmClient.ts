@@ -4,7 +4,7 @@ import { ExecReturn, killContainer, runCommand, startNewContainer } from './cont
 /**
  * Supported Operating System versions
  */
-export type OSVersion = 'rhel9' | 'rhel8';
+export type OSVersion = 'rhel9' | 'rhel8' | 'rhel9dev';
 
 /**
  * List of containers to use
@@ -37,19 +37,33 @@ export class RHSMClient {
    * configures this client for stage registration
    * @returns
    */
-  async ConfigureForStage() {
+  async ConfigureSubManForStage() {
     return runCommand(this.name, stageConfigureCommand());
+  }
+
+  /**
+   * configures this client for stage registration
+   * @returns
+   */
+  async ConfigureRHCForStage() {
+    const command = [
+      'echo',
+      `"proxy=${process.env.PROXY}" >> /etc/insights-client/insights-client.conf`,
+    ];
+    return runCommand(this.name, command);
   }
 
   /**
    * Registers to configured environment using RHC
    * @param activationKey key to register with.  Defaults to $ACTIVATION_KEY_1
    * @param orgId orgId to register with.  Defaults to $ORG_ID_1
+   * @param template template name to register with.
    * @returns
    */
-  async RegisterRHC(activationKey?: string, orgId?: string) {
+  async RegisterRHC(activationKey?: string, orgId?: string, template?: string) {
     if (!process.env.PROD) {
-      await this.ConfigureForStage();
+      await this.ConfigureSubManForStage();
+      await this.ConfigureRHCForStage();
     }
     if (activationKey == undefined) {
       activationKey = process.env.ACTIVATION_KEY_1 || 'COULD_NOT_FIND_KEY';
@@ -57,8 +71,12 @@ export class RHSMClient {
     if (orgId == undefined) {
       orgId = process.env.ORG_ID_1 || 'COULD_NOT_FIND_ORG_ID';
     }
-
-    return runCommand(this.name, ['rhc', 'connect', '-a', activationKey, '-o', orgId], 75000);
+    const connect = ['rhc', 'connect', '-a', activationKey, '-o', orgId];
+    if (template != undefined) {
+      connect.push('--content-template');
+      connect.push(`${template}`);
+    }
+    return runCommand(this.name, connect, 75000);
   }
 
   /**
@@ -69,7 +87,7 @@ export class RHSMClient {
    */
   async RegisterSubMan(activationKey?: string, orgId?: string) {
     if (!process.env.PROD) {
-      await this.ConfigureForStage();
+      await this.ConfigureSubManForStage();
     }
 
     if (activationKey == undefined) {
@@ -108,15 +126,19 @@ export class RHSMClient {
    * Unregister with subscription-manager
    * @returns
    */
-  async Unregister() {
-    return runCommand(this.name, ['subscription-manager', 'unregister']);
+  async Unregister(withRhc: boolean) {
+    if (withRhc) {
+      return runCommand(this.name, ['rhc', 'disconnect']);
+    } else {
+      return runCommand(this.name, ['subscription-manager', 'disconnect']);
+    }
   }
 
   /**
    * Unregister and destroy the client container
    */
-  async Destroy() {
-    const cmd = await this.Unregister();
+  async Destroy(withRhc: boolean = false) {
+    const cmd = await this.Unregister(withRhc);
     console.log(cmd?.stdout);
     console.log(cmd?.stderr);
     return killContainer(this.name);
