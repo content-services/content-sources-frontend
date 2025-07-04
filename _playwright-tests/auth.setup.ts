@@ -6,6 +6,7 @@ import {
   logout,
   logInWithReadOnlyUser,
   logInWithAdminUser,
+  logInWithRHELOperatorUser,
 } from './helpers/loginHelpers';
 
 import { existsSync, mkdirSync } from 'fs';
@@ -22,7 +23,27 @@ setup.describe('Setup Authentication States', async () => {
     expect(() => throwIfMissingEnvVariables()).not.toThrow();
   });
 
-  setup('Authenticate Read-Only User and Save State', async ({ page }) => {
+  setup('Authenticate rhel-operator user and save state', async ({ page }) => {
+    setup.setTimeout(60_000);
+
+    await closePopupsIfExist(page);
+
+    // Login rhel-operator user
+    await logInWithRHELOperatorUser(page);
+
+    // Save state for rhel-operator user
+    const { cookies } = await page
+      .context()
+      .storageState({ path: path.join(__dirname, '../../.auth', 'rhel_operator.json') });
+    const rhelOperatorToken = cookies.find((cookie) => cookie.name === 'cs_jwt')?.value;
+
+    process.env.RHEL_OPERATOR_TOKEN = `Bearer ${rhelOperatorToken}`;
+
+    await storeStorageStateAndToken(page, 'rhel_operator.json');
+    await logout(page);
+  });
+
+  setup('Authenticate read-only user and save state', async ({ page }) => {
     setup.setTimeout(60_000);
 
     // Login read-only user

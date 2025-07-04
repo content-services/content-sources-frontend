@@ -65,4 +65,29 @@ test.describe('Create, update, and read a repo as admin user', () => {
       const repoButton = page.getByRole('button', { name: 'Add repositories', exact: true });
       await expect(repoButton).toBeDisabled();
     });
+  });
+
+  // Define a separate test group for rhel-operator user
+  test.describe('Check rhel-operator user can view but not edit the repo', () => {
+    test.use({
+      storageState: '.auth/rhel_operator.json',
+      extraHTTPHeaders: process.env.RHEL_OPERATOR_TOKEN
+        ? { Authorization: process.env.RHEL_OPERATOR_TOKEN }
+        : {},
+    });
+
+    test('Login as rhel-operator user and attempt to edit', async ({ page }) => {
+      await navigateToRepositories(page);
+      await closePopupsIfExist(page);
+      const row = await getRowByNameOrUrl(page, `${repoName}-Edited`);
+      await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
+      await row.getByLabel('Kebab toggle').click();
+      // This is the critical assertion for permissions
+      await expect(row.getByRole('menuitem', { name: 'Edit' })).not.toBeVisible({ timeout: 500 });
+
+      // Additionally, check if the "Add repositories" button is disabled
+      const repoButton = page.getByRole('button', { name: 'Add repositories', exact: true });
+      await expect(repoButton).toBeDisabled();
+    });
+  });
 });
