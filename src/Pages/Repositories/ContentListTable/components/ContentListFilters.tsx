@@ -17,7 +17,12 @@ import {
 
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import Hide from 'components/Hide/Hide';
-import { FilterData, ContentOrigin, RepositoryParamsResponse } from 'services/Content/ContentApi';
+import {
+  FilterData,
+  ContentOrigin,
+  RepositoryParamsResponse,
+  ContentItem,
+} from 'services/Content/ContentApi';
 import { useQueryClient } from 'react-query';
 import { REPOSITORY_PARAMS_KEY } from 'services/Content/ContentQueries';
 import useDebounce from 'Hooks/useDebounce';
@@ -35,8 +40,9 @@ interface Props {
   filterData: FilterData;
   atLeastOneRepoChecked: boolean;
   numberOfReposChecked: number;
-  setContentOrigin: (origin: ContentOrigin) => void;
-  contentOrigin: ContentOrigin;
+  setContentOrigin: React.Dispatch<React.SetStateAction<ContentOrigin[]>>;
+  contentOrigin: ContentOrigin[];
+  checkedRepositories: Map<string, ContentItem>;
 }
 
 const useStyles = createUseStyles({
@@ -69,6 +75,7 @@ const ContentListFilters = ({
   numberOfReposChecked,
   setContentOrigin,
   contentOrigin,
+  checkedRepositories,
 }: Props) => {
   const classes = useStyles();
   const { rbac, features } = useAppContext();
@@ -84,7 +91,8 @@ const ContentListFilters = ({
   const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
   const [selectedArches, setSelectedArches] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const isRedHatRepository = contentOrigin === ContentOrigin.REDHAT;
+  const isRedHatRepository =
+    contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT;
 
   const { distribution_arches = [], distribution_versions = [] } =
     queryClient.getQueryData<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY) || {};
@@ -174,6 +182,10 @@ const ContentListFilters = ({
       setArchNamesLabels(arches);
     }
   }, [distribution_arches, distribution_versions]);
+
+  const allSelectedReposDeletable = [...checkedRepositories.values()].every(
+    (repo) => repo.origin !== ContentOrigin.REDHAT && repo.origin !== ContentOrigin.COMMUNITY,
+  );
 
   const Filter = useMemo(() => {
     switch (filterType) {
@@ -387,24 +399,50 @@ const ContentListFilters = ({
                 text='Custom'
                 buttonId='custom-repositories-toggle-button'
                 data-ouia-component-id='custom-repositories-toggle'
-                isSelected={contentOrigin === ContentOrigin.CUSTOM}
+                isSelected={
+                  contentOrigin.includes(ContentOrigin.EXTERNAL) &&
+                  contentOrigin.includes(ContentOrigin.UPLOAD)
+                }
                 onChange={() => {
-                  if (contentOrigin !== ContentOrigin.CUSTOM) {
-                    setContentOrigin(ContentOrigin.CUSTOM);
-                    // clearFilters(); //This resets the filters when changing Origins if desired.
-                  }
+                  setContentOrigin((prev) => {
+                    const custom =
+                      contentOrigin.includes(ContentOrigin.EXTERNAL) &&
+                      contentOrigin.includes(ContentOrigin.UPLOAD);
+                    return custom
+                      ? prev.filter(
+                          (origin) =>
+                            origin !== ContentOrigin.EXTERNAL && origin !== ContentOrigin.UPLOAD,
+                        )
+                      : [...new Set([...prev, ContentOrigin.EXTERNAL, ContentOrigin.UPLOAD])];
+                  });
                 }}
               />
+              {features?.communityrepos?.enabled ? (
+                <ToggleGroupItem
+                  text='EPEL'
+                  buttonId='epel-repositories-toggle-button'
+                  data-ouia-component-id='epel-repositories-toggle'
+                  isSelected={contentOrigin.includes(ContentOrigin.COMMUNITY)}
+                  onChange={() => {
+                    setContentOrigin((prev) =>
+                      prev.includes(ContentOrigin.COMMUNITY)
+                        ? prev.filter((origin) => origin !== ContentOrigin.COMMUNITY)
+                        : [...prev, ContentOrigin.COMMUNITY],
+                    );
+                  }}
+                />
+              ) : null}
               <ToggleGroupItem
                 text='Red Hat'
                 buttonId='redhat-repositories-toggle-button'
                 data-ouia-component-id='redhat-repositories-toggle'
-                isSelected={contentOrigin === ContentOrigin.REDHAT}
+                isSelected={contentOrigin.includes(ContentOrigin.REDHAT)}
                 onChange={() => {
-                  if (contentOrigin !== ContentOrigin.REDHAT) {
-                    setContentOrigin(ContentOrigin.REDHAT);
-                    // clearFilters();//This resets the filters when changing Origins if desired.
-                  }
+                  setContentOrigin((prev) =>
+                    prev.includes(ContentOrigin.REDHAT)
+                      ? prev.filter((origin) => origin !== ContentOrigin.REDHAT)
+                      : [...prev, ContentOrigin.REDHAT],
+                  );
                 }}
               />
             </ToggleGroup>
@@ -427,12 +465,16 @@ const ContentListFilters = ({
             </Button>
           </ConditionalTooltip>
           <ConditionalTooltip
-            content='You do not have the required permissions to perform this action.'
-            show={!rbac?.repoWrite && !isRedHatRepository}
+            content={
+              !rbac?.repoWrite
+                ? 'You do not have the required permissions to perform this action.'
+                : 'Some selected repositories (Red Hat or EPEL) cannot be deleted.'
+            }
+            show={!rbac?.repoWrite || !allSelectedReposDeletable}
             setDisabled
           >
             <DeleteKebab
-              isDisabled={!rbac?.repoWrite || isRedHatRepository}
+              isDisabled={!rbac?.repoWrite || !allSelectedReposDeletable}
               atLeastOneRepoChecked={atLeastOneRepoChecked}
               numberOfReposChecked={numberOfReposChecked}
               toggleOuiaId='custom_repositories_kebab_toggle'

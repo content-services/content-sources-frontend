@@ -105,7 +105,9 @@ const ContentListTable = () => {
   const [perPage, setPerPage] = useState(storedPerPage);
   const [activeSortIndex, setActiveSortIndex] = useState<number>(-1);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [checkedRepositories, setCheckedRepositories] = useState<Set<string>>(new Set<string>());
+  const [checkedRepositories, setCheckedRepositories] = useState<Map<string, ContentItem>>(
+    new Map(),
+  );
   const [polling, setPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
 
@@ -117,7 +119,8 @@ const ContentListTable = () => {
     error: repositoryParamsError,
   } = useArchVersion();
 
-  const isRedHatRepository = contentOrigin === ContentOrigin.REDHAT;
+  const isRedHatRepository =
+    contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT;
 
   const [filterData, setFilterData] = useState<FilterData>({
     searchQuery: '',
@@ -126,20 +129,23 @@ const ContentListTable = () => {
     statuses: [],
   });
 
-  const setOriginAndSearchParams = (origin: ContentOrigin) => {
-    if (!features?.snapshots?.accessible) return;
-    setContentOrigin(origin);
-    setUrlSearchParams(origin === ContentOrigin.CUSTOM ? {} : { origin });
-  };
+  const originParam = urlSearchParams.get('origin');
 
   useEffect(() => {
-    if (
-      contentOrigin === ContentOrigin.REDHAT ||
-      urlSearchParams.get('origin') === ContentOrigin.REDHAT
-    ) {
-      setOriginAndSearchParams(ContentOrigin.REDHAT);
-    }
+    if (!features?.snapshots?.accessible) return;
+
+    if (originParam === ContentOrigin.REDHAT) setContentOrigin([ContentOrigin.REDHAT]);
   }, []);
+
+  useEffect(() => {
+    if (!features?.snapshots?.accessible) return;
+
+    if (isRedHatRepository && originParam !== ContentOrigin.REDHAT) {
+      setUrlSearchParams({ origin: ContentOrigin.REDHAT });
+    } else if (!isRedHatRepository && originParam) {
+      setUrlSearchParams({});
+    }
+  }, [contentOrigin, features?.snapshots?.accessible]);
 
   const clearFilters = () =>
     setFilterData({ searchQuery: '', versions: [], arches: [], statuses: [] });
@@ -281,7 +287,9 @@ const ContentListTable = () => {
 
   const rowActions = useCallback(
     (rowData: ContentItem): IAction[] =>
-      isRedHatRepository
+      isRedHatRepository ||
+      rowData.origin === ContentOrigin.REDHAT ||
+      rowData.origin === ContentOrigin.COMMUNITY
         ? features?.snapshots?.accessible
           ? [
               {
@@ -390,20 +398,20 @@ const ContentListTable = () => {
     [actionTakingPlace, checkedRepositories, isRedHatRepository],
   );
 
-  const clearCheckedRepositories = () => setCheckedRepositories(new Set<string>());
+  const clearCheckedRepositories = () => setCheckedRepositories(new Map<string, ContentItem>());
 
   // Applied to all repos on current page
   const selectAllRepos = (_, checked: boolean) => {
     if (checked) {
-      const newSet = new Set<string>(checkedRepositories);
-      data.data.forEach((contentItem) => newSet.add(contentItem.uuid));
-      setCheckedRepositories(newSet);
+      const newMap = new Map<string, ContentItem>(checkedRepositories);
+      data.data.forEach((contentItem) => newMap.set(contentItem.uuid, contentItem));
+      setCheckedRepositories(newMap);
     } else {
-      const newSet = new Set<string>(checkedRepositories);
+      const newMap = new Map<string, ContentItem>(checkedRepositories);
       for (const contentItem of data.data) {
-        newSet.delete(contentItem.uuid);
+        newMap.delete(contentItem.uuid);
       }
-      setCheckedRepositories(newSet);
+      setCheckedRepositories(newMap);
     }
   };
 
@@ -421,25 +429,29 @@ const ContentListTable = () => {
     return allSelectedOrPending && atLeastOneSelectedOnPage;
   }, [data, checkedRepositories]);
 
-  const onSelectRepo = (uuid: string, value: boolean) => {
-    const newSet = new Set<string>(checkedRepositories);
+  const onSelectRepo = (uuid: string, value: boolean, contentItem: ContentItem) => {
+    const newMap = new Map(checkedRepositories);
     if (value) {
-      newSet.add(uuid);
+      newMap.set(uuid, contentItem);
     } else {
-      newSet.delete(uuid);
+      newMap.delete(uuid);
     }
-    setCheckedRepositories(newSet);
+    setCheckedRepositories(newMap);
   };
 
   const itemName =
-    contentOrigin === ContentOrigin.CUSTOM ? 'custom repositories' : 'Red Hat repositories';
+    contentOrigin.length >= 2 &&
+    contentOrigin.includes(ContentOrigin.EXTERNAL) &&
+    contentOrigin.includes(ContentOrigin.UPLOAD)
+      ? 'custom repositories'
+      : 'Red Hat repositories';
   const notFilteredBody = 'To get started, create a custom repository';
 
   const countIsZero = count === 0;
   const showLoader = countIsZero && notFiltered && !isLoading;
 
   // If Red Hat repositories returns a 0 count
-  if (notFiltered && countIsZero && !isFetching && contentOrigin === ContentOrigin.REDHAT) {
+  if (notFiltered && countIsZero && !isFetching && isRedHatRepository) {
     throw new Error('Unable to load Red Hat repositories');
   }
 
@@ -481,7 +493,7 @@ const ContentListTable = () => {
         <Flex className={classes.topContainer}>
           <ContentListFilters
             contentOrigin={contentOrigin}
-            setContentOrigin={setOriginAndSearchParams}
+            setContentOrigin={setContentOrigin}
             isLoading={isLoading}
             setFilterData={(values) => {
               setFilterData(values);
@@ -490,6 +502,7 @@ const ContentListTable = () => {
             filterData={filterData}
             atLeastOneRepoChecked={atLeastOneRepoChecked}
             numberOfReposChecked={checkedRepositories.size}
+            checkedRepositories={checkedRepositories}
           />
           <FlexItem>
             <Pagination
@@ -595,7 +608,7 @@ const ContentListTable = () => {
                               select={{
                                 rowIndex: index,
                                 onSelect: (_event, isSelecting) =>
-                                  onSelectRepo(rowData.uuid, isSelecting),
+                                  onSelectRepo(rowData.uuid, isSelecting, rowData),
                                 isSelected: checkedRepositories.has(rowData.uuid),
                               }}
                             />
@@ -714,9 +727,9 @@ export const useContentListOutletContext = () =>
       page: number;
       perPage: number;
       filterData: FilterData;
-      contentOrigin: ContentOrigin;
+      contentOrigin: ContentOrigin[];
       sortString: string;
-      checkedRepositories: Set<string>;
+      checkedRepositories: Map<string, ContentItem>;
     };
   }>();
 
