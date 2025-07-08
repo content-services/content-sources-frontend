@@ -133,6 +133,23 @@ _I am using the regular submodule setup. When working on new tests I thought of 
 
 </details>
 
+
+## Running integration tests
+
+## Podman
+
+For podman to serve the API for client testing, enter:
+
+```
+podman system service -t 0 unix:///tmp/podman.sock
+```
+
+Uncomment the DOCKER_SOCKET option in the `.env file:
+
+```
+DOCKER_SOCKET="/tmp/podman.sock"
+```
+
 ## PR checks and linking front-end/back-end PRs for testing
 
 The CICD pipeline for playwright (both front-end and back-end) will check in the description of the front-end PRs for the following formatted text:
