@@ -101,6 +101,8 @@ export const throwIfMissingEnvVariables = () => {
     'ADMIN_PASSWORD',
     'READONLY_USERNAME',
     'READONLY_PASSWORD',
+    'RHEL_OPERATOR_USERNAME',
+    'RHEL_OPERATOR_PASSWORD',
     'BASE_URL',
     ...(process.env.INTEGRATION ? ['PROXY', 'ORG_ID_1', 'ACTIVATION_KEY_1'] : []),
   ];

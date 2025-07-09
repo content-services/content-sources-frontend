@@ -26,8 +26,6 @@ setup.describe('Setup Authentication States', async () => {
   setup('Authenticate rhel-operator user and save state', async ({ page }) => {
     setup.setTimeout(60_000);
 
-    await closePopupsIfExist(page);
-
     // Login rhel-operator user
     await logInWithRHELOperatorUser(page);
 
