@@ -196,6 +196,10 @@ jobs:
         working-directory: content-sources-backend
         run: OPTIONS_REPOSITORY_IMPORT_FILTER=small make repos-import
 
+      - name: Import the shared EPEL10 repo
+        working-directory: content-sources-backend
+        run: OPTIONS_REPOSITORY_IMPORT_FILTER=epel10 make repos-import
+
       - name: Run snapshot for redhat repo
         working-directory: content-sources-backend
         run: go run cmd/external-repos/main.go snapshot --url https://cdn.redhat.com/content/dist/rhel9/9/aarch64/codeready-builder/os/ --force
