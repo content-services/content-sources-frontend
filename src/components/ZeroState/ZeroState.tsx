@@ -38,7 +38,7 @@ const useStyles = createUseStyles({
 export const ZeroState = () => {
   const classes = useStyles();
   const navigate = useNavigate();
-  const { setZeroState } = useAppContext();
+  const { setZeroState, features } = useAppContext();
   const path = useHref('content');
   const pathname = path.split('content')[0] + 'content';
 
@@ -55,14 +55,18 @@ export const ZeroState = () => {
         navigate(`${pathname}/${REPOSITORIES_ROUTE}?origin=red_hat`);
       },
     },
-    {
-      title: 'Popular repositories',
-      description: 'Add popular repositories with a single click.',
-      onClick: () => {
-        setZeroState(false);
-        navigate(`${pathname}/${REPOSITORIES_ROUTE}/${POPULAR_REPOSITORIES_ROUTE}`);
-      },
-    },
+    ...(!features?.communityrepos?.enabled
+      ? [
+          {
+            title: 'Popular repositories',
+            description: 'Add popular repositories with a single click.',
+            onClick: () => {
+              setZeroState(false);
+              navigate(`${pathname}/${REPOSITORIES_ROUTE}/${POPULAR_REPOSITORIES_ROUTE}`);
+            },
+          },
+        ]
+      : []),
   ];
 
   return (

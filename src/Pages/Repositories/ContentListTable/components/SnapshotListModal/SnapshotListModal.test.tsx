@@ -7,6 +7,7 @@ import {
   defaultSnapshotItem,
 } from 'testingHelpers';
 import { useFetchContent, useGetSnapshotList } from 'services/Content/ContentQueries';
+import { ContentOrigin } from 'services/Content/ContentApi';
 
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
@@ -26,7 +27,10 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('middleware/AppContext', () => ({
-  useAppContext: () => ({ rbac: { read: true, write: true } }),
+  useAppContext: () => ({
+    rbac: { read: true, write: true },
+    contentOrigin: [ContentOrigin.EXTERNAL, ContentOrigin.UPLOAD],
+  }),
 }));
 
 it('Render 1 item', () => {

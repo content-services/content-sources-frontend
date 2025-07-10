@@ -10,6 +10,14 @@ const repos = [repoName10, repoName9, repoName8];
 
 test.describe('Popular Repositories', () => {
   test('Test adding and removing popular repos', async ({ page, cleanup }) => {
+    // Skip if community repos feature is enabled
+    const response = await page.request.get('/api/content-sources/v1/features/');
+    const features = await response.json();
+    test.skip(
+      features?.communityrepos?.enabled,
+      'Community repositories feature is enabled, skipping test',
+    );
+
     // Ensure no popular repos are selected.
     await cleanup.runAndAdd(() => deleteAllPopularRepos(page));
 
@@ -78,6 +86,55 @@ test.describe('Popular Repositories', () => {
         .getByRole('dialog', { name: 'Remove repositories?' })
         .getByRole('button', { name: 'Remove' })
         .click();
+    });
+  });
+
+  test('Test shared EPEL repos exist and cannot be edited', async ({ page }) => {
+    // Skip if community repos feature is disabled
+    const response = await page.request.get('/api/content-sources/v1/features/');
+    const features = await response.json();
+    test.skip(
+      !features?.communityrepos?.enabled,
+      'Community repositories feature is disabled, skipping test',
+    );
+
+    await navigateToRepositories(page);
+    await closePopupsIfExist(page);
+    await expect(page).toHaveTitle('Repositories - Content | RHEL');
+
+    await test.step('Custom and EPEL tabs are selected by default', async () => {
+      await expect(page.getByRole('link', { name: 'Popular repositories' })).not.toBeVisible();
+      await expect(page.getByRole('button', { name: 'Custom', exact: true })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+      await expect(page.getByRole('button', { name: 'EPEL', exact: true })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+    });
+
+    await test.step('EPEL tab shows only the shared EPEL repository', async () => {
+      await page.getByRole('button', { name: 'Custom', exact: true }).click();
+      const rows = page.locator('table tbody tr');
+      await expect(rows).toHaveCount(1);
+      await expect(page.getByRole('row', { name: repoName10 })).toBeVisible();
+    });
+
+    await test.step('Apply filter and clear it', async () => {
+      await page.getByRole('searchbox', { name: 'Filter by name/url' }).fill(repoName10);
+      const rows = page.locator('table tbody tr');
+      await expect(rows).toHaveCount(1);
+      await expect(page.getByRole('row', { name: repoName10 })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Clear filters' })).toBeVisible();
+      await page.getByRole('button', { name: 'Clear filters' }).click();
+    });
+
+    await test.step('Shared EPEL repository cannot be edited or deleted', async () => {
+      const row = await getRowByNameOrUrl(page, repoName10);
+      await row.getByLabel('Kebab toggle').click();
+      await expect(page.getByRole('menuitem', { name: 'Edit' })).not.toBeVisible();
+      await expect(page.getByRole('menuitem', { name: 'Delete' })).not.toBeVisible();
     });
   });
 });
