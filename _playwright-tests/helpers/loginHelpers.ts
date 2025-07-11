@@ -67,6 +67,13 @@ export const storeStorageStateAndToken = async (page: Page, fileName: string) =>
   await page.waitForTimeout(100);
 };
 
+export const logInWithRHELOperatorUser = async (page: Page) =>
+  await logInWithUsernameAndPassword(
+    page,
+    process.env.RHEL_OPERATOR_USERNAME,
+    process.env.RHEL_OPERATOR_PASSWORD,
+  );
+
 export const logInWithReadOnlyUser = async (page: Page) =>
   await logInWithUsernameAndPassword(
     page,
@@ -94,6 +101,8 @@ export const throwIfMissingEnvVariables = () => {
     'ADMIN_PASSWORD',
     'READONLY_USERNAME',
     'READONLY_PASSWORD',
+    'RHEL_OPERATOR_USERNAME',
+    'RHEL_OPERATOR_PASSWORD',
     'BASE_URL',
     ...(process.env.INTEGRATION ? ['PROXY', 'ORG_ID_1', 'ACTIVATION_KEY_1'] : []),
   ];
