@@ -143,6 +143,14 @@ export class RHSMClient {
     console.log(cmd?.stderr);
     return killContainer(this.name);
   }
+
+  /**
+   * Destroy the client container without attempting to unregister
+   * (for cases where the system has already been manually unregistered)
+   */
+  async DestroyWithoutUnregister() {
+    return killContainer(this.name);
+  }
 }
 
 const stageConfigureCommand = (): string[] => {
