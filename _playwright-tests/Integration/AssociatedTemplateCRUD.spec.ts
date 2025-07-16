@@ -11,6 +11,7 @@ import { closePopupsIfExist, getRowByNameOrUrl } from '../UI/helpers/helpers';
 const templateNamePrefix = 'associated_template_test';
 const templateName = `${templateNamePrefix}-${randomName()}`;
 const regClient = new RHSMClient('AssociatedTemplateCRUDTest');
+let manuallyUnregistered = false;
 
 test.describe('Associated Template CRUD Operations', async () => {
   test('should warn against template deletion when associated to a system and not warn after unregistration', async ({
@@ -20,7 +21,15 @@ test.describe('Associated Template CRUD Operations', async () => {
   }) => {
     await test.step('Set up cleanup for templates and RHSM client', async () => {
       await cleanup.runAndAdd(() => cleanupTemplates(client, templateNamePrefix));
-      cleanup.add(() => regClient.Destroy(true));
+      cleanup.add(async () => {
+        if (manuallyUnregistered) {
+          // System already unregistered manually, just kill container
+          return regClient.DestroyWithoutUnregister();
+        } else {
+          // System not manually unregistered, disconnect and kill container
+          return regClient.Destroy(true);
+        }
+      });
     });
 
     await test.step('Navigate to templates and create a new template', async () => {
@@ -115,6 +124,7 @@ test.describe('Associated Template CRUD Operations', async () => {
         console.log('Unregistration stderr:', unreg?.stderr);
       }
       expect(unreg?.exitCode).toBe(0);
+      manuallyUnregistered = true; // Flag for cleanup to avoid duplicate disconnect
     });
 
     await test.step('Verify template can now be deleted without warning', async () => {
