@@ -38,16 +38,14 @@ Most of the things here are in-line with the [official Playwright best practices
 
 7. **Helpers and fixtures**: \
    Extend Playwright with custom functionality only when the abstracted thing is generic enough.
-
    - Good examples: cleanup of resources before and after a test, navigation to your app with auto retrying, locating a row in a table.
    - Bad examples: page objects, clicking on a button, filling in a form (that's the core of the test, if you want to use that for setting up the test environment use the API).
 
-8. **Use the built-in Playwright auto-waiting functionality and not sleep:**
+8. **Use the built-in Playwright auto-waiting functionality and not sleep:** \
    Playwright provides [auto-waiting](https://playwright.dev/docs/actionability) for actions inside tests (e.g. clicking a button is an action). These perform a range of actionability checks on the elements before making actions to ensure these actions behave as expected.
    This eliminates the need to use manual wait or sleep statements that make tests flaky and slow.
 
 9. **Describe tests**:
-
    - Use clear descriptive test names that explain what you're testing.
    - Group tests in describe blocks if they relate to the overarching feature.
    - Use steps to describe what the test does in more detail, these show up in the test report.
@@ -242,7 +240,6 @@ But don't worry, the vast majority if not everything can be achieved through the
 ## Caveats, gotchas and things to be aware of ⚠
 
 - When working with PF modals, wizards, and dialogs, there is a problem where they can incorrectly 'hide' or disable the page behind them.
-
   - This can cause issues with Playwright, as it might try to interact with elements that are and should not visible or enabled.
   - To work around this, you can target the dialog and save it to a variable, then use that variable to interact with any elements inside the dialog.
 
