@@ -85,6 +85,125 @@ test.describe('Templates CRUD', () => {
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Confirm changes', exact: true }).click();
     });
+    await test.step('Filter systems in Add systems modal', async () => {
+      await page.route('**/api/patch/v3/templates/*/systems?offset=0&limit=20', async (route) => {
+        const response = await route.fetch();
+        const json = {
+          data: [],
+          links: {
+            first: '',
+            last: '',
+          },
+          meta: { total_items: 0, limit: 20, offset: 0 },
+        };
+        await route.fulfill({ response, status: 200, json });
+      });
+      await page.route('**/api/patch/v3/systems**', async (route, request) => {
+        const response = await route.fetch();
+
+        if (request.url().includes('tags=123%2Fabc%3Dxyz')) {
+          const json = {
+            data: [],
+            links: {
+              first: '',
+              last: '',
+            },
+            meta: { total_items: 0, limit: 20, offset: 0 },
+          };
+          return route.fulfill({ response, status: 200, json });
+        }
+
+        const json = {
+          data: [
+            {
+              attributes: {
+                display_name: 'test_host',
+                os: 'RHEL 9.4',
+                tags: [
+                  {
+                    key: 'foo',
+                    namespace: 'test',
+                    value: 'bar',
+                  },
+                ],
+                template_name: '',
+                template_uuid: '',
+              },
+              id: '43d54269-aede-430f-8ec6-ef38102aaa88',
+              type: 'system',
+            },
+            {
+              attributes: {
+                display_name: 'test_host2',
+                os: 'RHEL 9.4',
+                tags: [
+                  {
+                    key: 'abc',
+                    namespace: '123',
+                    value: 'xyz',
+                  },
+                ],
+                template_name: '',
+                template_uuid: '',
+              },
+              id: '43d54269-aede-430f-8ec6-ef38102aaa88',
+              type: 'system',
+            },
+          ],
+          links: {
+            first: '',
+            last: '',
+          },
+          meta: { total_items: 2, limit: 20, offset: 0 },
+        };
+        await route.fulfill({ response, status: 200, json });
+      });
+      await page.route('**/api/patch/v3/tags?offset=0&limit=10', async (route) => {
+        const response = await route.fetch();
+        const json = {
+          data: [
+            {
+              count: 1,
+              tag: {
+                key: 'foo',
+                namespace: 'test',
+                value: 'bar',
+              },
+            },
+            {
+              count: 1,
+              tag: {
+                key: 'abc',
+                namespace: '123',
+                value: 'xyz',
+              },
+            },
+          ],
+          links: {
+            first: '',
+            last: '',
+          },
+          meta: { total_items: 2, limit: 20, offset: 0 },
+        };
+        await route.fulfill({ response, status: 200, json });
+      });
+      const rowTemplate = await getRowByNameOrUrl(page, `${templateName}-edited`);
+      await rowTemplate.getByRole('button', { name: templateName }).click();
+      await page.getByTestId('systems_tab').click();
+      await page.getByRole('button', { name: 'Assign to systems' }).click();
+      await expect(page.getByRole('row', { name: 'test_host' }).first()).toBeVisible();
+      await page.getByTestId('OUIA-Generated-MenuToggle-1').click();
+      await page.getByTestId('filter_Tags').locator('button').click();
+      await page.getByTestId('system_modal').getByTestId('OUIA-Generated-MenuToggle-2').click();
+      const tagSelector = page.locator('label').filter({ hasText: 'abc=xyz' });
+      await expect(tagSelector).toBeVisible();
+      const systemsRequestPromise = page.waitForRequest('**/api/patch/v3/systems**');
+      await tagSelector.click();
+      await systemsRequestPromise;
+
+      await page.getByTestId('system_modal-ModalBoxCloseButton').click();
+      await page.getByRole('button', { name: 'Templates' }).click();
+    });
     await test.step('Delete the template', async () => {
       const rowTemplate = await getRowByNameOrUrl(page, `${templateName}-edited`);
       await expect(rowTemplate.getByText('Valid')).toBeVisible({ timeout: 60000 });
