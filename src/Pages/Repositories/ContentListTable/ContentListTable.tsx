@@ -7,6 +7,7 @@ import {
   Pagination,
   PaginationVariant,
   Spinner,
+  Stack,
   TooltipPosition,
 } from '@patternfly/react-core';
 import {
@@ -62,11 +63,6 @@ const useStyles = createUseStyles({
   mainContainer100Height: {
     composes: ['$mainContainer'], // This extends another class within this stylesheet
     minHeight: '100%',
-  },
-  topContainer: {
-    justifyContent: 'space-between',
-    padding: '16px 24px', // This is needed
-    height: 'fit-content',
   },
   bottomContainer: {
     justifyContent: 'space-between',
@@ -490,7 +486,10 @@ const ContentListTable = () => {
         data-ouia-component-id='content_list_page'
         className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
       >
-        <Flex className={classes.topContainer}>
+        <Flex
+          justifyContent={{ default: 'justifyContentSpaceBetween' }}
+          className='pf-v6-u-py-md pf-v6-u-px-lg'
+        >
           <ContentListFilters
             contentOrigin={contentOrigin}
             setContentOrigin={setContentOrigin}
@@ -556,7 +555,7 @@ const ContentListTable = () => {
               </Grid>
             </Hide>
             <Hide hide={countIsZero || isLoading}>
-              <>
+              <Stack className='pf-v6-u-px-lg'>
                 <Table
                   aria-label='Custom repositories table'
                   ouiaId='custom_repositories_table'
@@ -686,7 +685,7 @@ const ContentListTable = () => {
                     />
                   </FlexItem>
                 </Flex>
-              </>
+              </Stack>
             </Hide>
             <Hide hide={!countIsZero || isLoading}>
               <EmptyTableState
