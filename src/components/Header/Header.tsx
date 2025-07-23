@@ -1,4 +1,5 @@
-import { Content } from '@patternfly/react-core';
+import { Button, Content, Popover } from '@patternfly/react-core';
+import { ExternalLinkAltIcon, HelpIcon } from '@patternfly/react-icons';
 import {
   OpenSourceBadge,
   PageHeader as _PageHeader,
@@ -25,13 +26,49 @@ const useStyles = createUseStyles({
   },
 });
 
-interface Props {
+interface HeaderProps {
   title: string;
   ouiaId: string;
   paragraph: string;
+  aboutData?: AboutProps;
 }
 
-export default function Header({ title, ouiaId, paragraph }: Props) {
+interface AboutProps {
+  text: string;
+  docsURL: string;
+  docsLabel: string;
+  header: string;
+}
+
+const About = ({ header, text, docsURL, docsLabel }: AboutProps) => (
+  <Popover
+    headerContent={header}
+    bodyContent={text}
+    footerContent={
+      <Button
+        component='a'
+        target='_blank'
+        variant='link'
+        icon={<ExternalLinkAltIcon />}
+        iconPosition='right'
+        isInline
+        href={docsURL}
+      >
+        {docsLabel}
+      </Button>
+    }
+  >
+    <Button
+      icon={<HelpIcon />}
+      variant='plain'
+      aria-label={header}
+      className='pf-v6-u-ml-sm'
+      style={{ verticalAlign: '2px' }}
+    />
+  </Popover>
+);
+
+export default function Header({ title, ouiaId, paragraph, aboutData }: HeaderProps) {
   const classes = useStyles();
 
   return (
@@ -40,7 +77,10 @@ export default function Header({ title, ouiaId, paragraph }: Props) {
         title={
           <>
             {title}
-            <OpenSourceBadge repositoriesURL='https://github.com/content-services/content-sources-frontend' />
+            {aboutData && <About {...aboutData} />}
+            <span style={{ verticalAlign: '2px' }}>
+              <OpenSourceBadge repositoriesURL='https://github.com/content-services/content-sources-frontend' />
+            </span>
           </>
         }
         className={classes.remove100percent}
