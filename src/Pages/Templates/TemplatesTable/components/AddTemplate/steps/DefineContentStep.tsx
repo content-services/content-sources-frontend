@@ -72,7 +72,7 @@ export default function DefineContentStep() {
             toggle={(toggleRef) => (
               <ConditionalTooltip
                 position='top-start'
-                content='Architecture cannot be changed after creation'
+                content='Architecture cannot be changed after creation.'
                 show={!!isEdit}
                 setDisabled
               >
