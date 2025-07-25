@@ -7,6 +7,7 @@ import {
   Pagination,
   PaginationVariant,
   Spinner,
+  Stack,
   TooltipPosition,
 } from '@patternfly/react-core';
 import {
@@ -39,16 +40,12 @@ import useArchVersion from 'Hooks/useArchVersion';
 import { useTemplateList } from 'services/Templates/TemplateQueries';
 import StatusIcon from './components/StatusIcon';
 import { ExclamationTriangleIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
+import { SPACING } from 'stylingHelpers';
 
 const useStyles = createUseStyles({
-  mainContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    margin: '24px',
-  },
   topContainer: {
     justifyContent: 'space-between',
-    padding: '16px 24px', // This is needed
+    padding: '16px 24px',
     height: 'fit-content',
   },
   bottomContainer: {
@@ -220,7 +217,7 @@ const TemplatesTable = () => {
         ouiaId='templates_description'
         paragraph='View all content templates within your organization.'
       />
-      <Grid data-ouia-component-id='content_template_list_page' className={classes.mainContainer}>
+      <Grid data-ouia-component-id='content_template_list_page'>
         <Outlet />
         <Flex className={classes.topContainer}>
           <TemplateFilters
@@ -248,7 +245,7 @@ const TemplatesTable = () => {
           </FlexItem>
         </Flex>
         <Hide hide={!isLoading}>
-          <Grid className={classes.mainContainer}>
+          <Grid>
             <SkeletonTable
               rows={perPage}
               columnsCount={columnHeaders.length}
@@ -257,7 +254,7 @@ const TemplatesTable = () => {
           </Grid>
         </Hide>
         <Hide hide={countIsZero || isLoading}>
-          <>
+          <Stack className={SPACING.paddingHorizontalLarge}>
             <Table
               aria-label='Content template table'
               ouiaId='content_template_table'
@@ -410,7 +407,7 @@ const TemplatesTable = () => {
                 />
               </FlexItem>
             </Flex>
-          </>
+          </Stack>
         </Hide>
         <Hide hide={!countIsZero || isLoading}>
           <EmptyTableState

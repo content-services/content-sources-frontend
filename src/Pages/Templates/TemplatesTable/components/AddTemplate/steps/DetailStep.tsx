@@ -33,8 +33,8 @@ export default function DetailStep() {
       <Title ouiaId='enter_template_details' headingLevel='h1'>
         Enter template details
       </Title>
-      <Content component={ContentVariants.h6}>
-        Enter a name and a description for your template.
+      <Content component={ContentVariants.p}>
+        Enter a name and description for your template.
       </Content>
 
       <Form>

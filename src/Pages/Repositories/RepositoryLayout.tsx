@@ -13,23 +13,11 @@ import {
   REPOSITORIES_ROUTE,
 } from '../../Routes/constants';
 import { useAppContext } from 'middleware/AppContext';
+import { SPACING } from 'stylingHelpers';
 
 const useStyles = createUseStyles({
-  tab: {
-    '& button': {
-      padding: 0, // Remove the default button padding
-    },
-  },
   link: {
-    color: 'inherit', // Receives parent "Tab" components color
-    textDecoration: 'none',
-    padding: '8px 16px', // Add it back so that the entire clickable area works
-    '&:focus-visible': {
-      outlineOffset: '-6px',
-    },
-  },
-  containerMargin: {
-    margin: '16px 24px',
+    all: 'unset',
   },
 });
 
@@ -78,28 +66,28 @@ export default function RepositoryLayout() {
       />
       {(features?.admintasks?.enabled && features.admintasks?.accessible) ||
       !features?.communityrepos?.enabled ? (
-        <Tabs ouiaId='routed-tabs' activeKey={currentRoute}>
-          {tabs.map(({ title, route, key }) => (
-            <Tab
-              className={classes.tab}
-              keyParams={route}
-              key={key}
-              tabIndex={-1} // This prevents the tab from being targetable by accessibility features.
-              eventKey={key}
-              aria-label={title}
-              ouiaId={title}
-              title={
-                <Link className={classes.link} accessKey={key} key={key} to={route}>
-                  <TabTitleText>{title}</TabTitleText>
-                </Link>
-              }
-            />
-          ))}
-        </Tabs>
+        <div className={SPACING.paddingHorizontalLarge}>
+          <Tabs ouiaId='routed-tabs' activeKey={currentRoute}>
+            {tabs.map(({ title, route, key }) => (
+              <Tab
+                keyParams={route}
+                key={key}
+                tabIndex={-1} // This prevents the tab from being targetable by accessibility features.
+                eventKey={key}
+                aria-label={title}
+                ouiaId={title}
+                title={
+                  <Link className={classes.link} accessKey={key} key={key} to={route}>
+                    <TabTitleText>{title}</TabTitleText>
+                  </Link>
+                }
+              />
+            ))}
+          </Tabs>
+        </div>
       ) : null}
       <RepositoryQuickStart />
-      {/* Render the app routes via the Layout Outlet */}
-      <Grid className={classes.containerMargin}>
+      <Grid>
         <Outlet />
       </Grid>
     </>

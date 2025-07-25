@@ -7,6 +7,7 @@ import {
   Pagination,
   PaginationVariant,
   Spinner,
+  Stack,
   TooltipPosition,
 } from '@patternfly/react-core';
 import {
@@ -53,6 +54,7 @@ import { Outlet, useNavigate, useOutletContext, useSearchParams } from 'react-ro
 import useArchVersion from 'Hooks/useArchVersion';
 import { ADD_ROUTE, DELETE_ROUTE, EDIT_ROUTE, UPLOAD_ROUTE } from 'Routes/constants';
 import UploadRepositoryLabel from 'components/UploadRepositoryLabel/UploadRepositoryLabel';
+import { SPACING } from 'stylingHelpers';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -62,11 +64,6 @@ const useStyles = createUseStyles({
   mainContainer100Height: {
     composes: ['$mainContainer'], // This extends another class within this stylesheet
     minHeight: '100%',
-  },
-  topContainer: {
-    justifyContent: 'space-between',
-    padding: '16px 24px', // This is needed
-    height: 'fit-content',
   },
   bottomContainer: {
     justifyContent: 'space-between',
@@ -486,11 +483,14 @@ const ContentListTable = () => {
           }}
         />
       </Hide>
-      <Grid
+      <div
         data-ouia-component-id='content_list_page'
         className={countIsZero ? classes.mainContainer100Height : classes.mainContainer}
       >
-        <Flex className={classes.topContainer}>
+        <Flex
+          justifyContent={{ default: 'justifyContentSpaceBetween' }}
+          className={`${SPACING.paddingVerticalMedium} ${SPACING.paddingHorizontalLarge}`}
+        >
           <ContentListFilters
             contentOrigin={contentOrigin}
             setContentOrigin={setContentOrigin}
@@ -504,19 +504,17 @@ const ContentListTable = () => {
             numberOfReposChecked={checkedRepositories.size}
             checkedRepositories={checkedRepositories}
           />
-          <FlexItem>
-            <Pagination
-              id='top-pagination-id'
-              widgetId='topPaginationWidgetId'
-              isDisabled={isLoading}
-              itemCount={count}
-              perPage={perPage}
-              page={page}
-              onSetPage={onSetPage}
-              isCompact
-              onPerPageSelect={onPerPageSelect}
-            />
-          </FlexItem>
+          <Pagination
+            id='top-pagination-id'
+            widgetId='topPaginationWidgetId'
+            isDisabled={isLoading}
+            itemCount={count}
+            perPage={perPage}
+            page={page}
+            onSetPage={onSetPage}
+            isCompact
+            onPerPageSelect={onPerPageSelect}
+          />
         </Flex>
         {showLoader ? (
           <Bullseye data-ouia-component-id='content_list_page'>
@@ -556,7 +554,7 @@ const ContentListTable = () => {
               </Grid>
             </Hide>
             <Hide hide={countIsZero || isLoading}>
-              <>
+              <Stack className={SPACING.paddingHorizontalLarge}>
                 <Table
                   aria-label='Custom repositories table'
                   ouiaId='custom_repositories_table'
@@ -686,7 +684,7 @@ const ContentListTable = () => {
                     />
                   </FlexItem>
                 </Flex>
-              </>
+              </Stack>
             </Hide>
             <Hide hide={!countIsZero || isLoading}>
               <EmptyTableState
@@ -715,7 +713,7 @@ const ContentListTable = () => {
             </Hide>
           </>
         )}
-      </Grid>
+      </div>
     </>
   );
 };
