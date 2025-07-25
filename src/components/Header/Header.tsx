@@ -7,6 +7,7 @@ import {
 import { PageHeaderProps as _PageHeaderProps } from '@redhat-cloud-services/frontend-components/PageHeader/PageHeader';
 
 import { FunctionComponent, ReactElement } from 'react';
+import { SPACING } from 'stylingHelpers';
 
 interface PageHeaderProps extends _PageHeaderProps {
   children?: ReactElement | Array<ReactElement>;
@@ -23,7 +24,10 @@ interface Props {
 export default function Header({ title, ouiaId, paragraph }: Props) {
   return (
     <PageHeader>
-      <Flex className='pf-v6-u-m-xs pf-v6-u-pb-sm' direction={{ default: 'column' }}>
+      <Flex
+        className={`${SPACING.marginAllXSmall} ${SPACING.paddingBottomSmall}`}
+        direction={{ default: 'column' }}
+      >
         <PageHeaderTitle
           title={
             <Flex

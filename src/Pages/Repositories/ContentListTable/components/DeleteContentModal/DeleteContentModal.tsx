@@ -33,6 +33,7 @@ import { isEmpty } from 'lodash';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
 import { usePopularListOutletContext } from 'Pages/Repositories/PopularRepositoriesTable/PopularRepositoriesTable';
 import { ActionButtons } from 'components/ActionButtons/ActionButtons';
+import { SPACING } from 'stylingHelpers';
 
 const useStyles = createUseStyles({
   removeButton: {
@@ -164,7 +165,7 @@ export default function DeleteContentModal() {
               Removing these repositories will remove that content from their associated templates.
             </Alert>
           </Hide>
-          <div className='pf-v6-u-px-lg'>
+          <div className={SPACING.paddingHorizontalLarge}>
             <Content component='p'>Are you sure you want to remove these repositories?</Content>
           </div>
         </Stack>
