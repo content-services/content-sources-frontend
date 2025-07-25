@@ -284,7 +284,7 @@ const PopularRepositoriesTable = () => {
     setSelectedData(newData);
   };
 
-  const columnHeaders = ['Name', 'Architecture', 'Versions'];
+  const columnHeaders = ['Name', 'Architecture', 'OS versions'];
 
   // Error is caught in the wrapper component
   if (isError) throw error;
@@ -342,7 +342,7 @@ const PopularRepositoriesTable = () => {
                               content={
                                 !rbac?.repoWrite
                                   ? 'You do not have the required permissions to perform this action.'
-                                  : 'Make a selection below to add multiple repositories'
+                                  : 'Make a selection below to add multiple repositories.'
                               }
                               show={!rbac?.repoWrite || !atLeastOneRepoToAddChecked}
                               setDisabled

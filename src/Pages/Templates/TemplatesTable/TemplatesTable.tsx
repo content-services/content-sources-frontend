@@ -178,7 +178,7 @@ const TemplatesTable = () => {
     { title: 'Name', width: 15 },
     { title: 'Description' },
     { title: 'Architecture', width: 10 },
-    { title: 'Version', width: 10 },
+    { title: 'OS version', width: 10 },
     { title: 'Snapshot date', width: 15 },
     { title: 'Status', width: 15 },
   ];
@@ -219,6 +219,13 @@ const TemplatesTable = () => {
         title='Templates'
         ouiaId='templates_description'
         paragraph='View all content templates within your organization.'
+        aboutData={{
+          header: 'About content templates',
+          text: 'Templates provide consistent content across environments and time. They enable you to control the scope of package and advisory updates that will be installed on selected systems.',
+          docsLabel: 'Content templates documentation',
+          docsURL:
+            'https://docs.redhat.com/en/documentation/red_hat_insights/1-latest/html/managing_system_content_and_patch_updates_with_red_hat_insights/patching-using-content-templates_patch-service-overview',
+        }}
       />
       <Grid data-ouia-component-id='content_template_list_page' className={classes.mainContainer}>
         <Outlet />

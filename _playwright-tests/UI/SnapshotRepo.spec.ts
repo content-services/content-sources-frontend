@@ -33,11 +33,11 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('menuitem', { name: 'x86_64' }).click();
     });
 
-    await test.step('Filter by version', async () => {
-      await page.getByRole('button', { name: 'filter version' }).click();
+    await test.step('Filter by OS version', async () => {
+      await page.getByRole('button', { name: 'filter OS version' }).click();
       await page.getByRole('menuitem', { name: 'el9' }).click();
       await page.getByRole('menuitem', { name: 'el8' }).click();
-      await page.getByRole('button', { name: 'filter version' }).click();
+      await page.getByRole('button', { name: 'filter OS version' }).click();
     });
 
     await test.step('Submit the form and wait for modal to disappear', async () => {
@@ -158,7 +158,7 @@ test.describe('Snapshot Repositories', () => {
         timeout: 60000,
       });
       await navigateToTemplates(page);
-      await page.getByRole('button', { name: 'Add content template' }).click();
+      await page.getByRole('button', { name: 'Create template' }).click();
       await page.getByRole('button', { name: 'filter architecture' }).click();
       await page.getByRole('menuitem', { name: 'aarch64' }).click();
       await page.getByRole('button', { name: 'filter OS version' }).click();

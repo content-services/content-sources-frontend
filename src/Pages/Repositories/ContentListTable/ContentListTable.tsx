@@ -267,7 +267,7 @@ const ContentListTable = () => {
   const columnHeaders = [
     'Name',
     'Architecture',
-    'Versions',
+    'OS versions',
     'Packages',
     'Last Introspection',
     'Status',
