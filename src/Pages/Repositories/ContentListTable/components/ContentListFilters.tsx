@@ -64,7 +64,7 @@ const useStyles = createUseStyles({
   },
 });
 
-const statusValues = ['Invalid', 'Pending', 'Unavailable', 'Valid'];
+const statusValues = ['Invalid', 'In progress', 'Unavailable', 'Valid'];
 export type Filters = 'Name/URL' | 'Version' | 'Architecture' | 'Status';
 
 const ContentListFilters = ({
