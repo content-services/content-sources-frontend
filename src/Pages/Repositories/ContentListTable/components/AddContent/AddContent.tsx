@@ -350,7 +350,13 @@ const AddContent = ({ isEdit = false }: Props) => {
               >
                 {editHasNotChanged ? 'No changes' : 'Save changes'}
               </Button>
-              <Button key='cancel' variant='link' onClick={onClose} ouiaId='modal_cancel'>
+              <Button
+                key='cancel'
+                variant='link'
+                className={classes.cancelButton}
+                onClick={onClose}
+                ouiaId='modal_cancel'
+              >
                 Cancel
               </Button>
             </StackItem>
