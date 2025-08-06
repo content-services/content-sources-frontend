@@ -81,6 +81,20 @@ export const logInWithReadOnlyUser = async (page: Page) =>
     process.env.READONLY_PASSWORD,
   );
 
+export const logInWithLayeredRepoUser = async (page: Page) =>
+  await logInWithUsernameAndPassword(
+    page,
+    process.env.LAYERED_REPO_ACCESS_USERNAME,
+    process.env.LAYERED_REPO_ACCESS_PASSWORD,
+  );
+
+export const logInWithRHELOnlyUser = async (page: Page) =>
+  await logInWithUsernameAndPassword(
+    page,
+    process.env.RHEL_ONLY_ACCESS_USERNAME,
+    process.env.RHEL_ONLY_ACCESS_PASSWORD,
+  );
+
 export const getUserAuthToken = (name: string) => {
   const userPath = path.join(__dirname, `../../.auth/${name}.json`);
   const fileContent = readFileSync(userPath, { encoding: 'utf8' });
@@ -108,7 +122,19 @@ export const throwIfMissingEnvVariables = () => {
           'RHEL_OPERATOR_PASSWORD',
         ]
       : []),
-    ...(process.env.INTEGRATION ? ['PROXY', 'ORG_ID_1', 'ACTIVATION_KEY_1'] : []),
+    ...(process.env.INTEGRATION
+      ? [
+          'PROXY',
+          'ORG_ID_1',
+          'ACTIVATION_KEY_1',
+          'LAYERED_REPO_ACCESS_USERNAME',
+          'LAYERED_REPO_ACCESS_PASSWORD',
+          'RHEL_ONLY_ACCESS_USERNAME',
+          'RHEL_ONLY_ACCESS_PASSWORD',
+          'LAYERED_REPO_ACCESS_ORG_ID',
+          'LAYERED_REPO_ACCESS_ACTIVATION_KEY',
+        ]
+      : []),
   ];
 
   const missing: string[] = [];
