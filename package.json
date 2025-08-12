@@ -24,7 +24,8 @@
     "testAllPreviewFailures": "npm-run-all -p test jestPreview",
     "jestPreview": "jest-preview",
     "jestClear": "jest --clearCache",
-    "get-tests-prod": ".github/workflowScripts/getProdTests.sh"
+    "get-tests-prod": ".github/workflowScripts/getProdTests.sh",
+    "validate:metadata": "playwright-meta-validator --fail-on-error"
   },
   "dependencies": {
     "@patternfly/react-core": "^6.3.1",
@@ -65,6 +66,7 @@
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.36.0",
     "@playwright/test": "^1.51.1",
+    "playwright-meta-schema": "^0.0.3",
     "@redhat-cloud-services/tsc-transform-imports": "^1.0.25",
     "@redhat-cloud-services/types": "^3.3.0",
     "@svgr/babel-preset": "^8.1.0",

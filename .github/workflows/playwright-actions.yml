@@ -199,6 +199,9 @@ jobs:
       - name: Run front-end and back-end setup in parallel
         run: 'parallel --line-buffer --tagstring "[{#}]:" ::: "yarn install && yarn build && yarn playwright install --with-deps" "cd content-sources-backend && make compose-down compose-clean compose-up"'
 
+      - name: Validate Playwright test metadata
+        run: yarn validate:metadata
+
       - name: Frontend run (static)
         run: yarn fec static --port 8003 &
 
