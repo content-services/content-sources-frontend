@@ -27,7 +27,8 @@ async function sleep(ms: number): Promise<void> {
  */
 const startContainer = async (containerName: string, imageName: string) => {
   await pullImage(imageName);
-  console.log('starting container ' + containerName);
+
+  console.log(`starting container ${containerName}`);
   const container = await docker().createContainer({
     Image: imageName,
     name: containerName,

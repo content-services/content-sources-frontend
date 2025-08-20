@@ -51,31 +51,57 @@ test.describe('Test System With Template', async () => {
       // Start the rhel9 container
       await regClient.Boot('rhel9');
 
-      // Register, overriding the default key and org
-      const reg = await regClient.RegisterRHC(
-        process.env.ACTIVATION_KEY_1,
-        process.env.ORG_ID_1,
-        templateName,
-      );
-      if (reg?.exitCode != 0) {
-        console.log(reg?.stdout);
-        console.log(reg?.stderr);
+      // Register, overriding the default key and org (with retry logic)
+      let reg;
+      let registrationSucceeded = false;
+      const maxRetries = 3;
+
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        console.log(`=== REGISTRATION ATTEMPT ${attempt}/${maxRetries} ===`);
+
+        reg = await regClient.RegisterRHC(
+          process.env.ACTIVATION_KEY_1,
+          process.env.ORG_ID_1,
+          templateName,
+        );
+
+        if (reg?.exitCode === 0) {
+          console.log(`Registration succeeded on attempt ${attempt}`);
+          registrationSucceeded = true;
+          break;
+        } else {
+          console.log(`Registration failed on attempt ${attempt}:`);
+          console.log('Exit code:', reg?.exitCode);
+          console.log('stdout:', reg?.stdout);
+          console.log('stderr:', reg?.stderr);
+
+          if (attempt < maxRetries) {
+            console.log(`Retrying in 5 seconds...`);
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+          }
+        }
       }
+
+      if (!registrationSucceeded) {
+        console.log(`=== REGISTRATION FAILED AFTER ${maxRetries} ATTEMPTS ===`);
+      }
+
       expect(reg?.exitCode).toBe(0);
 
-      // refresh subscription-manager
-      const subManRefresh = await regClient.Exec(['subscription-manager', 'refresh', '--force']);
+      const subManRefresh = await regClient.Exec(['subscription-manager', 'refresh']);
+      if (subManRefresh?.exitCode != 0) {
+        console.log('=== SUBSCRIPTION-MANAGER REFRESH FAILURE ===');
+        console.log('Exit code:', subManRefresh?.exitCode);
+        console.log('stdout:', subManRefresh?.stdout);
+        console.log('stderr:', subManRefresh?.stderr);
+        console.log('=== END REFRESH FAILURE ===');
+      }
       expect(subManRefresh?.exitCode).toBe(0);
 
-      // clean cached metadata
       const dnfCleanAll = await regClient.Exec(['dnf', 'clean', 'all']);
       expect(dnfCleanAll?.exitCode).toBe(0);
 
-      // List errata the system is vulnerable to
-      const exist = await regClient.Exec(
-        ['sh', '-c', 'dnf updateinfo --list --all | grep RH | sort | tail -n 1'],
-        10 * 60 * 1000,
-      );
+      const exist = await regClient.Exec(['dnf', 'updateinfo', '--list', '--quiet'], 120 * 1000);
       if (exist?.exitCode != 0) {
         console.log(exist?.stdout);
         console.log(exist?.stderr);
@@ -113,18 +139,22 @@ test.describe('Test System With Template', async () => {
     });
 
     await test.step('Refresh system', async () => {
-      // refresh subscription-manager
-      const subManRefresh = await regClient.Exec(['subscription-manager', 'refresh', '--force']);
+      const subManRefresh = await regClient.Exec(['subscription-manager', 'refresh']);
+      if (subManRefresh?.exitCode != 0) {
+        console.log('=== SECOND SUBSCRIPTION-MANAGER REFRESH FAILURE ===');
+        console.log('Exit code:', subManRefresh?.exitCode);
+        console.log('stdout:', subManRefresh?.stdout);
+        console.log('stderr:', subManRefresh?.stderr);
+        console.log('=== END SECOND REFRESH FAILURE ===');
+      }
       expect(subManRefresh?.exitCode).toBe(0);
 
-      // clean cached metadata
       const dnfCleanAll = await regClient.Exec(['dnf', 'clean', 'all']);
       expect(dnfCleanAll?.exitCode).toBe(0);
 
-      // List errata the system is vulnerable to
       const updateInfo = await regClient.Exec(
-        ['sh', '-c', 'dnf updateinfo --list --all | grep RH | sort | tail -n 1'],
-        10 * 60 * 1000,
+        ['dnf', 'updateinfo', '--list', '--quiet'],
+        120 * 1000,
       );
       if (updateInfo?.exitCode != 0) {
         console.log(updateInfo?.stdout);
