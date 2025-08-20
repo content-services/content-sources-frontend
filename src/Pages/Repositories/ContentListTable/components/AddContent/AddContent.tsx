@@ -153,6 +153,25 @@ const AddContent = ({ isEdit = false }: Props) => {
 
   const onClose = () => navigate(`${rootPath}/${REPOSITORIES_ROUTE}`);
 
+  const onFocus = () => {
+    const modalElement = document.getElementById('add-edit-custom-repository-modal-with-dropdown');
+    modalElement?.focus();
+  };
+
+  const onEscapePress = () => {
+    // First close the dropdowns if they are open
+    if (archOpen) {
+      setArchOpen(!archOpen);
+      onFocus();
+    } else if (versionOpen) {
+      setVersionOpen(!versionOpen);
+      onFocus();
+    } else {
+      // Finally, close the modal
+      onClose();
+    }
+  };
+
   const { mutateAsync: addContent, isLoading: isAdding } = useAddContentQuery([
     mapFormikToAPIValues(values),
   ]);
@@ -323,11 +342,14 @@ const AddContent = ({ isEdit = false }: Props) => {
 
   return (
     <Modal
+      tabIndex={0}
       position='top'
       variant={ModalVariant.medium}
       ouiaId='add_edit_custom_repository'
       isOpen
       onClose={onClose}
+      onEscapePress={onEscapePress}
+      id='add-edit-custom-repository-modal-with-dropdown'
       aria-labelledby='add-edit-custom-repository-modal-title'
       aria-describedby='add-edit-custom-repository-modal-description'
     >
@@ -520,6 +542,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                 onOpenChange={(isOpen) => setArchOpen(isOpen)}
                 isOpen={archOpen}
                 popperProps={archOpen ? { appendTo: 'inline' } : undefined}
+                shouldFocusToggleOnSelect
               >
                 <DropdownList>
                   {Object.keys(distributionArches).map((option) => (
@@ -603,6 +626,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                 onOpenChange={(isOpen) => setVersionOpen(isOpen)}
                 isOpen={versionOpen}
                 popperProps={versionOpen ? { appendTo: 'inline' } : undefined}
+                shouldFocusToggleOnSelect
               >
                 <DropdownList>
                   {Object.keys(distributionVersions).map((option) => (
