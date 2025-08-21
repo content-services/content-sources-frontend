@@ -53,8 +53,9 @@ import ChangedArrows from './components/SnapshotListModal/components/ChangedArro
 import { Outlet, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import useArchVersion from 'Hooks/useArchVersion';
 import { ADD_ROUTE, DELETE_ROUTE, EDIT_ROUTE, UPLOAD_ROUTE } from 'Routes/constants';
-import UploadRepositoryLabel from 'components/UploadRepositoryLabel/UploadRepositoryLabel';
+import UploadRepositoryLabel from 'components/RepositoryLabels/UploadRepositoryLabel';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
+import CommunityRepositoryLabel from 'components/RepositoryLabels/CommunityRepositoryLabel';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -118,6 +119,12 @@ const ContentListTable = () => {
 
   const isRedHatRepository =
     contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT;
+  const isCommunityRepository =
+    contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.COMMUNITY;
+  const isRedHatOrCommunity =
+    contentOrigin.length === 2 &&
+    contentOrigin.includes(ContentOrigin.COMMUNITY) &&
+    contentOrigin.includes(ContentOrigin.REDHAT);
 
   const [filterData, setFilterData] = useState<FilterData>({
     searchQuery: '',
@@ -562,7 +569,14 @@ const ContentListTable = () => {
                 >
                   <Thead>
                     <Tr>
-                      <Hide hide={!rbac?.repoWrite || isRedHatRepository}>
+                      <Hide
+                        hide={
+                          !rbac?.repoWrite ||
+                          isRedHatRepository ||
+                          isCommunityRepository ||
+                          isRedHatOrCommunity
+                        }
+                      >
                         <Th
                           aria-label='select-repo-checkbox'
                           className={classes.checkboxMinWidth}
@@ -601,7 +615,14 @@ const ContentListTable = () => {
                       } = rowData;
                       return (
                         <Tr key={uuid + status}>
-                          <Hide hide={!rbac?.repoWrite || isRedHatRepository}>
+                          <Hide
+                            hide={
+                              !rbac?.repoWrite ||
+                              isRedHatRepository ||
+                              isCommunityRepository ||
+                              isRedHatOrCommunity
+                            }
+                          >
                             <Td
                               select={{
                                 rowIndex: index,
@@ -615,6 +636,9 @@ const ContentListTable = () => {
                             {name}
                             <Hide hide={origin !== ContentOrigin.UPLOAD}>
                               <UploadRepositoryLabel />
+                            </Hide>
+                            <Hide hide={origin !== ContentOrigin.COMMUNITY}>
+                              <CommunityRepositoryLabel />
                             </Hide>
                             <Hide hide={origin === ContentOrigin.UPLOAD}>
                               <UrlWithExternalIcon href={url} />
