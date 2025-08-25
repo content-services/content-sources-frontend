@@ -1,16 +1,17 @@
 import {
   Alert,
+  Content,
+  ContentVariants,
   DatePicker,
   ExpandableSection,
+  Flex,
+  FlexItem,
   Form,
   FormAlert,
   FormGroup,
   Grid,
   Radio,
-  Content,
-  ContentVariants,
   Title,
-  Flex,
 } from '@patternfly/react-core';
 import { useAddTemplateContext } from '../AddTemplateContext';
 import { useContentListQuery, useGetSnapshotsByDates } from 'services/Content/ContentQueries';
@@ -130,22 +131,26 @@ export default function SetUpDateStep() {
                 }}
               />
               <Hide hide={templateRequest.use_latest ?? false}>
-                <DatePicker
-                  id='use-snapshot-date-picker'
-                  value={templateRequest.date ?? ''}
-                  required={!templateRequest.use_latest}
-                  requiredDateOptions={{ isRequired: !templateRequest.use_latest }}
-                  style={{ paddingLeft: '20px' }}
-                  validators={dateValidators}
-                  popoverProps={{
-                    position: 'right',
-                    enableFlip: true,
-                    flipBehavior: ['right', 'right-start', 'right-end', 'top-start', 'top'],
-                  }}
-                  onChange={(_, val) => {
-                    setTemplateRequest((prev) => ({ ...prev, date: val }));
-                  }}
-                />
+                <Flex>
+                  <FlexItem>
+                    <DatePicker
+                      id='use-snapshot-date-picker'
+                      value={templateRequest.date ?? ''}
+                      required={!templateRequest.use_latest}
+                      requiredDateOptions={{ isRequired: !templateRequest.use_latest }}
+                      style={{ paddingLeft: '20px' }}
+                      validators={dateValidators}
+                      popoverProps={{
+                        position: 'right',
+                        enableFlip: true,
+                        flipBehavior: ['right', 'right-start', 'right-end', 'top-start', 'top'],
+                      }}
+                      onChange={(_, val) => {
+                        setTemplateRequest((prev) => ({ ...prev, date: val }));
+                      }}
+                    />
+                  </FlexItem>
+                </Flex>
               </Hide>
             </Flex>
           </Flex>
