@@ -15,6 +15,9 @@ jest.mock('react-router-dom', () => ({
     templateUUID: `${defaultTemplateItem.uuid}`,
   }),
   useNavigate: () => jest.fn,
+  useLocation: () => ({
+    pathname: '/mocked/details',
+  }),
 }));
 
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
