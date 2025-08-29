@@ -44,6 +44,7 @@ import UploadContent from 'Pages/Repositories/ContentListTable/components/Upload
 import DeleteSnapshotsModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/DeleteSnapshotsModal/DeleteSnapshotsModal';
 import AdminFeaturesTable from 'Pages/Repositories/AdminFeaturesTable/AdminFeaturesTable';
 import PopularRepositoriesTable from 'Pages/Repositories/PopularRepositoriesTable/PopularRepositoriesTable';
+// import { DeleteTemplateModalTest } from 'Pages/Templates/TemplatesTable/components/DeleteTemplateTest';
 
 export default function RepositoriesRoutes() {
   const key = useMemo(() => Math.random(), []);
@@ -141,11 +142,7 @@ export default function RepositoriesRoutes() {
               ]
             : []}
         </Route>
-        {!rbac?.templateRead ? (
-          <Route path={TEMPLATES_ROUTE} element={<NoPermissionsPage />} />
-        ) : (
-          ''
-        )}
+        {!rbac?.templateRead && <Route path={TEMPLATES_ROUTE} element={<NoPermissionsPage />} />}
         <Route
           path={`${TEMPLATES_ROUTE}/:templateUUID/${DETAILS_ROUTE}`}
           element={<TemplateDetails />}
@@ -159,15 +156,16 @@ export default function RepositoriesRoutes() {
             <Route path='*' element={<Navigate to={PACKAGES_ROUTE} replace />} />
           </Route>
           <Route path={SYSTEMS_ROUTE} element={<TemplateSystemsTab />}>
-            {rbac?.templateWrite && subscriptions?.red_hat_enterprise_linux ? (
+            {rbac?.templateWrite && subscriptions?.red_hat_enterprise_linux && (
               <Route path={ADD_ROUTE} element={<AddSystemModal />} />
-            ) : (
-              ''
             )}
           </Route>
+          {rbac?.templateWrite && (
+            <Route path={`${DELETE_ROUTE}`} element={<DeleteTemplateModal />} />
+          )}
         </Route>
         <Route path={TEMPLATES_ROUTE} element={<TemplatesTable />}>
-          {rbac?.templateWrite && subscriptions?.red_hat_enterprise_linux ? (
+          {rbac?.templateWrite && subscriptions?.red_hat_enterprise_linux && (
             <>
               <Route key='1' path={ADD_ROUTE} element={<AddTemplate />} />
               <Route key='2' path={`:templateUUID/${EDIT_ROUTE}`} element={<AddTemplate />} />
@@ -177,16 +175,13 @@ export default function RepositoriesRoutes() {
                 element={<DeleteTemplateModal />}
               />
             </>
-          ) : rbac?.templateWrite ? (
-            <>
-              <Route
-                key='3'
-                path={`:templateUUID/${DELETE_ROUTE}`}
-                element={<DeleteTemplateModal />}
-              />
-            </>
-          ) : (
-            ''
+          )}
+          {rbac?.templateWrite && (
+            <Route
+              key='3'
+              path={`:templateUUID/${DELETE_ROUTE}`}
+              element={<DeleteTemplateModal />}
+            />
           )}
           <Route path='*' element={<Navigate to='' replace />} />
         </Route>
