@@ -72,7 +72,23 @@ test.describe('Associated Template CRUD', async () => {
       }
       expect(reg?.exitCode).toBe(0);
 
-      const subManRefresh = await regClient.Exec(['subscription-manager', 'refresh', '--force']);
+      let subManRefresh;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          subManRefresh = await regClient.Exec(['subscription-manager', 'refresh']);
+          if (subManRefresh?.exitCode === 0) {
+            break;
+          }
+          if (subManRefresh?.stderr || subManRefresh?.stdout) {
+            console.log(`subscription-manager refresh attempt ${attempt} failed:`);
+            console.log('STDOUT:', subManRefresh?.stdout);
+            console.log('STDERR:', subManRefresh?.stderr);
+          }
+        } catch (error) {
+          console.log(`subscription-manager refresh attempt ${attempt} error:`, error);
+          if (attempt === 3) throw error;
+        }
+      }
       expect(subManRefresh?.exitCode).toBe(0);
     });
 

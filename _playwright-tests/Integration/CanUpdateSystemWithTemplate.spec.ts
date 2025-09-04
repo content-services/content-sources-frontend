@@ -75,8 +75,23 @@ test.describe('Test System With Template', async () => {
       }
       expect(reg?.exitCode).toBe(0);
 
-      // refresh subscription-manager
-      const subManRefresh = await regClient.Exec(['subscription-manager', 'refresh', '--force']);
+      let subManRefresh;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          subManRefresh = await regClient.Exec(['subscription-manager', 'refresh']);
+          if (subManRefresh?.exitCode === 0) {
+            break;
+          }
+          if (subManRefresh?.stderr || subManRefresh?.stdout) {
+            console.log(`subscription-manager refresh attempt ${attempt} failed:`);
+            console.log('STDOUT:', subManRefresh?.stdout);
+            console.log('STDERR:', subManRefresh?.stderr);
+          }
+        } catch (error) {
+          console.log(`subscription-manager refresh attempt ${attempt} error:`, error);
+          if (attempt === 3) throw error;
+        }
+      }
       expect(subManRefresh?.exitCode).toBe(0);
 
       // clean cached metadata
@@ -125,8 +140,24 @@ test.describe('Test System With Template', async () => {
     });
 
     await test.step('Refresh system', async () => {
-      // refresh subscription-manager
-      const subManRefresh = await regClient.Exec(['subscription-manager', 'refresh', '--force']);
+      // refresh subscription-manager with retry logic
+      let subManRefresh;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          subManRefresh = await regClient.Exec(['subscription-manager', 'refresh']);
+          if (subManRefresh?.exitCode === 0) {
+            break;
+          }
+          if (subManRefresh?.stderr || subManRefresh?.stdout) {
+            console.log(`subscription-manager refresh attempt ${attempt} failed:`);
+            console.log('STDOUT:', subManRefresh?.stdout);
+            console.log('STDERR:', subManRefresh?.stderr);
+          }
+        } catch (error) {
+          console.log(`subscription-manager refresh attempt ${attempt} error:`, error);
+          if (attempt === 3) throw error;
+        }
+      }
       expect(subManRefresh?.exitCode).toBe(0);
 
       // clean cached metadata
