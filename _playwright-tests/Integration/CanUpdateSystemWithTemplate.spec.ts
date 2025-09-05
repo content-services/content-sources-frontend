@@ -1,5 +1,5 @@
 import { test, expect, cleanupTemplates, randomName } from 'test-utils';
-import { RHSMClient } from './helpers/rhsmClient';
+import { RHSMClient, refreshSubscriptionManager } from './helpers/rhsmClient';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
 import { closePopupsIfExist, getRowByNameOrUrl } from '../UI/helpers/helpers';
 
@@ -75,24 +75,7 @@ test.describe('Test System With Template', async () => {
       }
       expect(reg?.exitCode).toBe(0);
 
-      let subManRefresh;
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        try {
-          subManRefresh = await regClient.Exec(['subscription-manager', 'refresh']);
-          if (subManRefresh?.exitCode === 0) {
-            break;
-          }
-          if (subManRefresh?.stderr || subManRefresh?.stdout) {
-            console.log(`subscription-manager refresh attempt ${attempt} failed:`);
-            console.log('STDOUT:', subManRefresh?.stdout);
-            console.log('STDERR:', subManRefresh?.stderr);
-          }
-        } catch (error) {
-          console.log(`subscription-manager refresh attempt ${attempt} error:`, error);
-          if (attempt === 3) throw error;
-        }
-      }
-      expect(subManRefresh?.exitCode).toBe(0);
+      await refreshSubscriptionManager(regClient);
 
       // clean cached metadata
       const dnfCleanAll = await regClient.Exec(['dnf', 'clean', 'all']);
@@ -140,25 +123,7 @@ test.describe('Test System With Template', async () => {
     });
 
     await test.step('Refresh system', async () => {
-      // refresh subscription-manager with retry logic
-      let subManRefresh;
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        try {
-          subManRefresh = await regClient.Exec(['subscription-manager', 'refresh']);
-          if (subManRefresh?.exitCode === 0) {
-            break;
-          }
-          if (subManRefresh?.stderr || subManRefresh?.stdout) {
-            console.log(`subscription-manager refresh attempt ${attempt} failed:`);
-            console.log('STDOUT:', subManRefresh?.stdout);
-            console.log('STDERR:', subManRefresh?.stderr);
-          }
-        } catch (error) {
-          console.log(`subscription-manager refresh attempt ${attempt} error:`, error);
-          if (attempt === 3) throw error;
-        }
-      }
-      expect(subManRefresh?.exitCode).toBe(0);
+      await refreshSubscriptionManager(regClient);
 
       // clean cached metadata
       const dnfCleanAll = await regClient.Exec(['dnf', 'clean', 'all']);
