@@ -133,8 +133,9 @@ test.describe('Popular Repositories', () => {
     await test.step('Shared EPEL repository cannot be edited or deleted', async () => {
       const row = await getRowByNameOrUrl(page, repoName10);
       await row.getByLabel('Kebab toggle').click();
-      await expect(page.getByRole('menuitem', { name: 'Edit' })).not.toBeVisible();
-      await expect(page.getByRole('menuitem', { name: 'Delete' })).not.toBeVisible();
+      await expect(page.getByRole('menu')).toBeVisible();
+      await expect(page.getByRole('menuitem', { name: 'View all snapshots' })).toBeVisible();
+      await expect(page.getByRole('menuitem')).toHaveCount(1); // No Edit or Delete menu items
     });
   });
 });
