@@ -59,6 +59,12 @@
     "redux": "^5.0.1",
     "yup": "^1.7.0"
   },
+  "resolutions": {
+    "ansi-styles": "6.2.1",
+    "chalk": ">5.6.1",
+    "strip-ansi": "7.1.0",
+    "wrap-ansi": "9.0.0"
+  },
   "devDependencies": {
     "@currents/playwright": "^1.16.0",
     "@eslint/eslintrc": "^3.2.0",
