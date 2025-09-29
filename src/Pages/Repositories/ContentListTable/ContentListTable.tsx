@@ -10,7 +10,7 @@ import {
   DataViewCheckboxFilter,
   DataViewTrObject,
 } from '@patternfly/react-data-view';
-import { ThProps, Td, Tr, Tbody, ActionsColumn, IAction } from '@patternfly/react-table';
+import { ThProps, ActionsColumn, IAction } from '@patternfly/react-table';
 import {
   useContentListQuery,
   useIntrospectRepositoryMutate,
@@ -28,15 +28,11 @@ import { useAppContext } from '../../../middleware/AppContext';
 import {
   Pagination,
   Button,
-  EmptyState,
   EmptyStateActions,
-  EmptyStateBody,
-  EmptyStateFooter,
   Flex,
   FlexItem,
   TooltipPosition,
 } from '@patternfly/react-core';
-import { RepositoryIcon, CubesIcon } from '@patternfly/react-icons';
 import useArchVersion from 'Hooks/useArchVersion';
 import dayjs from 'dayjs';
 import { useSearchParams, useNavigate, Outlet, useOutletContext } from 'react-router-dom';
@@ -63,6 +59,7 @@ import { useContentListFilters, FilterLabelsMap } from './hooks/useContentListFi
 import ContentOriginFilter from './components/ContentOriginFilter';
 import CommunityRepositoryLabel from '../../../components/RepositoryLabels/CommunityRepositoryLabel';
 import { DataViewTr } from '@patternfly/react-data-view/src/DataViewTable';
+import EmptyTableDataView from 'components/EmptyTableDataView/EmptyTableDataView';
 
 type ActionRowData = Pick<
   ContentItem,
@@ -651,68 +648,6 @@ const ContentListTable = () => {
 
   const ouiaId = 'custom_repositories_table';
 
-  // We do not reuse the shared EmptyTableState component here. The DataView
-  // implementation needs slightly different behavior. EmptyTableState is also used by
-  // other tables that are not DataView-based, so changing it now would risk
-  // breaking existing logic in those components
-  const EmptyTable = () => {
-    const itemName =
-      contentOrigin.length >= 2 &&
-      contentOrigin.includes(ContentOrigin.EXTERNAL) &&
-      contentOrigin.includes(ContentOrigin.UPLOAD)
-        ? 'custom repositories'
-        : 'Red Hat repositories';
-
-    const titleText = isFiltered ? `No ${itemName} match the filter criteria` : `No ${itemName}`;
-
-    return (
-      <Tbody>
-        <Tr key='empty' ouiaId={`${ouiaId}-tr-empty`}>
-          <Td colSpan={columns.length}>
-            <EmptyState
-              icon={isFiltered ? CubesIcon : RepositoryIcon}
-              titleText={titleText}
-              headingLevel='h4'
-            >
-              <EmptyStateBody>
-                {isFiltered
-                  ? 'Clear all filters to show more results.'
-                  : 'To get started, create a custom repository.'}
-              </EmptyStateBody>
-              <EmptyStateFooter>
-                <EmptyStateActions>
-                  {isFiltered ? (
-                    <Button
-                      variant='primary'
-                      ouiaId='clear_filters'
-                      onClick={resetFiltersAndPagination}
-                    >
-                      Clear all filters
-                    </Button>
-                  ) : (
-                    <ConditionalTooltip
-                      content='You do not have the required permissions to perform this action.'
-                      show={!rbac?.repoWrite}
-                      setDisabled
-                    >
-                      <Button
-                        variant='primary'
-                        onClick={() => navigate(ADD_ROUTE)}
-                        isDisabled={isLoading || isRedHatOrCommunity}
-                      >
-                        Add repositories
-                      </Button>
-                    </ConditionalTooltip>
-                  )}
-                </EmptyStateActions>
-              </EmptyStateFooter>
-            </EmptyState>
-          </Td>
-        </Tr>
-      </Tbody>
-    );
-  };
-
   const [activeState, setActiveState] = useState<DataViewState | undefined>(DataViewState.loading);
 
   useEffect(() => {
@@ -908,7 +843,33 @@ const ContentListTable = () => {
           columns={dataViewColumns}
           rows={rows}
           bodyStates={{
-            empty: <EmptyTable />,
+            empty: (
+              <EmptyTableDataView
+                ouiaId={ouiaId}
+                variant={isFiltered ? 'filtered' : 'zero'}
+                itemName='repositories'
+                zeroBody='To get started, create a custom repository.'
+                colSpan={columns.length}
+                onClearFilters={resetFiltersAndPagination}
+                actions={
+                  <EmptyStateActions>
+                    <ConditionalTooltip
+                      content='You do not have the required permissions to perform this action.'
+                      show={!rbac?.repoWrite}
+                      setDisabled
+                    >
+                      <Button
+                        variant='primary'
+                        onClick={() => navigate(ADD_ROUTE)}
+                        isDisabled={isLoading || isRedHatOrCommunity}
+                      >
+                        Add repositories
+                      </Button>
+                    </ConditionalTooltip>
+                  </EmptyStateActions>
+                }
+              />
+            ),
             loading: <SkeletonTableBody rowsCount={perPage} columnsCount={columns.length} />,
           }}
         />
