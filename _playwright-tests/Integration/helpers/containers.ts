@@ -27,7 +27,7 @@ async function sleep(ms: number): Promise<void> {
  */
 const startContainer = async (containerName: string, imageName: string) => {
   await pullImage(imageName);
-  console.log('starting container ' + containerName);
+  console.log('starting container ' + containerName + ' with systemd support');
   const container = await docker().createContainer({
     Image: imageName,
     name: containerName,
@@ -39,10 +39,22 @@ const startContainer = async (containerName: string, imageName: string) => {
         '/run': 'rw,noexec,nosuid,size=100m',
         '/run/lock': 'rw,noexec,nosuid,size=100m',
       },
+      // Additional systemd requirements
+      SecurityOpt: ['seccomp=unconfined'],
+      CapAdd: ['SYS_ADMIN'],
     },
     Tty: true,
+    // Set environment variables for systemd
+    Env: ['container=docker', 'SYSTEMD_LOG_LEVEL=debug'],
   });
-  return container?.start();
+
+  const result = await container?.start();
+  console.log(`Container ${containerName} started, waiting for systemd initialization...`);
+
+  // Give systemd a moment to initialize before returning
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
+  return result;
 };
 
 /**

@@ -41,31 +41,77 @@ export class RHSMClient {
    * @returns
    */
   private async waitForServicesReady() {
+    console.log(`Starting service readiness check for container ${this.name}`);
+
     // Wait for systemd to be ready
     let attempts = 0;
-    const maxAttempts = 30; // 30 seconds max wait
+    const maxAttempts = 60; // 60 seconds max wait (increased)
 
     while (attempts < maxAttempts) {
       try {
+        // First, check if systemd is running
+        const systemdCheck = await runCommand(this.name, ['systemctl', 'is-system-running'], 2000);
+        console.log(
+          `Systemd status for ${this.name}: ${systemdCheck?.stdout?.trim()} (exit: ${systemdCheck?.exitCode})`,
+        );
+
         // Check if dbus socket exists
         const dbusCheck = await runCommand(
           this.name,
           ['test', '-S', '/var/run/dbus/system_bus_socket'],
-          1000,
+          2000,
         );
+
         if (dbusCheck?.exitCode === 0) {
-          console.log(`Services ready for container ${this.name}`);
+          console.log(`✅ Services ready for container ${this.name} - dbus socket found`);
           return;
         }
 
-        // If dbus socket doesn't exist, try to start dbus service
-        if (attempts === 5) {
-          console.log(`Attempting to start dbus service for container ${this.name}`);
-          await runCommand(this.name, ['systemctl', 'start', 'dbus'], 5000);
-        }
-      } catch {
         console.log(
-          `Waiting for services in container ${this.name}, attempt ${attempts + 1}/${maxAttempts}`,
+          `❌ Dbus socket not found for ${this.name}, attempt ${attempts + 1}/${maxAttempts}`,
+        );
+
+        // Try multiple approaches to start dbus
+        if (attempts === 5) {
+          console.log(`🔧 Installing and starting dbus service for container ${this.name}`);
+
+          // Ensure dbus is installed
+          await runCommand(this.name, ['yum', 'install', '-y', 'dbus'], 10000);
+
+          // Try to start dbus service
+          const startResult = await runCommand(this.name, ['systemctl', 'start', 'dbus'], 10000);
+          console.log(
+            `Dbus start result: exit=${startResult?.exitCode}, stdout=${startResult?.stdout}, stderr=${startResult?.stderr}`,
+          );
+        }
+
+        if (attempts === 10) {
+          console.log(`🔧 Alternative dbus start attempt for container ${this.name}`);
+
+          // Try alternative dbus start methods
+          await runCommand(this.name, ['systemctl', 'enable', 'dbus'], 5000);
+          await runCommand(this.name, ['systemctl', 'restart', 'dbus'], 5000);
+
+          // Try manual dbus daemon start
+          await runCommand(this.name, ['dbus-daemon', '--system', '--fork'], 5000);
+        }
+
+        if (attempts === 20) {
+          console.log(`🔧 Creating dbus socket manually for container ${this.name}`);
+
+          // Ensure dbus directory exists
+          await runCommand(this.name, ['mkdir', '-p', '/var/run/dbus'], 2000);
+
+          // Try to start dbus daemon manually
+          await runCommand(
+            this.name,
+            ['dbus-daemon', '--system', '--fork', '--pid=/var/run/dbus/pid'],
+            5000,
+          );
+        }
+      } catch (error) {
+        console.log(
+          `⚠️  Error in service check for ${this.name}, attempt ${attempts + 1}/${maxAttempts}: ${error}`,
         );
       }
 
@@ -73,9 +119,11 @@ export class RHSMClient {
       attempts++;
     }
 
-    console.warn(
-      `Services may not be fully ready for container ${this.name} after ${maxAttempts} seconds`,
-    );
+    console.error(`❌ Services not ready for container ${this.name} after ${maxAttempts} seconds`);
+
+    // Final diagnostic
+    const finalCheck = await runCommand(this.name, ['ls', '-la', '/var/run/dbus/'], 5000);
+    console.log(`Final dbus directory check: ${finalCheck?.stdout}`);
   }
 
   /**
