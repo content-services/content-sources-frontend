@@ -79,6 +79,7 @@ jobs:
           echo "DOCKER_SOCKET=/var/run/docker.sock" >> .env
           echo "STABLE_SAM_USERNAME=$PROD_STABLE_SAM_USERNAME" >> .env
           echo "STABLE_SAM_PASSWORD=$PROD_STABLE_SAM_PASSWORD" >> .env
+          source .env
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
