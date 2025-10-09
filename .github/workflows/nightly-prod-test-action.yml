@@ -56,7 +56,7 @@ jobs:
           echo "CI=true" >> .env
           echo "RBAC=true" >> .env
           echo "INTEGRATION=true" >> .env
-          echo "BASE_URL=$BASE_URL" >> .env
+          echo "BASE_URL=$PROD_BASE_URL" >> .env
           echo "PROXY=$PROXY" >> .env
           echo "ADMIN_USERNAME=$PROD_ADMIN_USERNAME" >> .env
           echo "ADMIN_PASSWORD=$PROD_ADMIN_PASSWORD" >> .env
