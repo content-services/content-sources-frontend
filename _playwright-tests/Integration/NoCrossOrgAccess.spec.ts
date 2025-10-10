@@ -33,7 +33,7 @@ test.describe('No Cross Organization Access', () => {
 
       console.log('Attempting registration with NO_SUBS_USER credentials to get identity cert');
       const registerResult = await client.RegisterSubMan(noSubsActivationKey, noSubsOrgId);
-      console.log('Registration result with NO_SUBS_USER credentials:', registerResult);
+      console.log('Registration completed with NO_SUBS_USER credentials');
       console.log('Registration exit code:', registerResult?.exitCode);
 
       const identityCertCheck = await client.Exec(['ls', '/etc/pki/consumer/cert.pem'], 5000);
@@ -136,9 +136,9 @@ test.describe('No Cross Organization Access', () => {
 
   test('Search for a repository and test snapshot access with NO_SUBS_USER', async ({ client }) => {
     test.skip(
-      !process.env.STABLE_SAM_STAGE_TOKEN ||
-        !process.env.STABLE_SAM_STAGE_USERNAME ||
-        !process.env.STABLE_SAM_STAGE_PASSWORD,
+      !process.env.STABLE_SAM_TOKEN ||
+        !process.env.STABLE_SAM_USERNAME ||
+        !process.env.STABLE_SAM_PASSWORD,
       'Skipping as stable_sam_stage user credentials or token are not configured.',
     );
     const repositoriesApi = new RepositoriesApi(client);
@@ -154,7 +154,7 @@ test.describe('No Cross Organization Access', () => {
         { search: targetUrl },
         {
           headers: {
-            Authorization: process.env.STABLE_SAM_STAGE_TOKEN || '',
+            Authorization: process.env.STABLE_SAM_TOKEN || '',
           },
         },
       );
@@ -182,7 +182,7 @@ test.describe('No Cross Organization Access', () => {
         },
         {
           headers: {
-            Authorization: process.env.STABLE_SAM_STAGE_TOKEN || '',
+            Authorization: process.env.STABLE_SAM_TOKEN || '',
           },
         },
       );

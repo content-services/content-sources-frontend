@@ -142,8 +142,11 @@ export class RHSMClient {
   async Destroy(unregisterMethod: 'rhc' | 'sm' | 'none' = 'none') {
     if (unregisterMethod !== 'none') {
       const cmd = await this.Unregister(unregisterMethod === 'rhc');
-      console.log(cmd?.stdout);
-      console.log(cmd?.stderr);
+      // Log only exit code and sanitized output to avoid exposing sensitive information
+      console.log('Unregister command completed with exit code:', cmd?.exitCode);
+      if (cmd?.stderr && !cmd.stderr.includes('activation') && !cmd.stderr.includes('password')) {
+        console.log('STDERR:', cmd.stderr);
+      }
     }
     return killContainer(this.name);
   }
@@ -168,8 +171,21 @@ export async function refreshSubscriptionManager(
       }
       if (subManRefresh?.stderr || subManRefresh?.stdout) {
         console.log(`subscription-manager refresh attempt ${attempt} failed:`);
-        console.log('STDOUT:', subManRefresh?.stdout);
-        console.log('STDERR:', subManRefresh?.stderr);
+        // Only log output if it doesn't contain sensitive information
+        if (
+          subManRefresh?.stdout &&
+          !subManRefresh.stdout.includes('activation') &&
+          !subManRefresh.stdout.includes('password')
+        ) {
+          console.log('STDOUT:', subManRefresh.stdout);
+        }
+        if (
+          subManRefresh?.stderr &&
+          !subManRefresh.stderr.includes('activation') &&
+          !subManRefresh.stderr.includes('password')
+        ) {
+          console.log('STDERR:', subManRefresh.stderr);
+        }
       }
     } catch (error) {
       console.log(`subscription-manager refresh attempt ${attempt} error:`, error);
