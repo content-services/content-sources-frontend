@@ -77,8 +77,8 @@ jobs:
           echo "LAYERED_REPO_ACCESS_ORG_ID=\"$PROD_LAYERED_REPO_ACCESS_ORG_ID\"" >> .env
           echo "LAYERED_REPO_ACCESS_ACTIVATION_KEY=\"$PROD_LAYERED_REPO_ACCESS_ACTIVATION_KEY\"" >> .env
           echo "DOCKER_SOCKET=/var/run/docker.sock" >> .env
-          echo "STABLE_SAM_USERNAME=\"$PROD_STABLE_SAM_USERNAME\"" >> .env
-          echo "STABLE_SAM_PASSWORD=\"$PROD_STABLE_SAM_PASSWORD\"" >> .env
+          echo "STABLE_SAM_STAGE_USERNAME=\"$PROD_STABLE_SAM_USERNAME\"" >> .env
+          echo "STABLE_SAM_STAGE_PASSWORD=\"$PROD_STABLE_SAM_PASSWORD\"" >> .env
           source .env
           echo "=== Environment Variables Debug ==="
           env | grep -E "(PROD|NO_SUBS_USER)" | sort
