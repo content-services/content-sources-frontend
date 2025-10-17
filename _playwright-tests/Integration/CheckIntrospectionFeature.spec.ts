@@ -7,7 +7,7 @@ test.describe('Verify Repository Introspection of a persistent user', () => {
       ? { Authorization: process.env.STABLE_SAM_TOKEN }
       : {},
   });
-  test('Verify Repository Introspection Feature with pulp repo', async ({ client }) => {
+  test('Verify Continual Repository Introspection of a pulp repo', async ({ client }) => {
     const repositoriesApi = new RepositoriesApi(client);
     const pulpReposResponse = await repositoriesApi.listRepositories({
       search: 'fixtures.pulpproject.org',
