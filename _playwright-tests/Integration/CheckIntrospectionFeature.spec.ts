@@ -1,6 +1,6 @@
 import { test, expect, RepositoriesApi } from 'test-utils';
 
-test.describe('Verify Repository Introspection Feature with pulp repo', () => {
+test.describe('Verify Repository Introspection of a persistent user', () => {
   test.use({
     storageState: '.auth/stable_sam_stage.json',
     extraHTTPHeaders: process.env.STABLE_SAM_TOKEN
