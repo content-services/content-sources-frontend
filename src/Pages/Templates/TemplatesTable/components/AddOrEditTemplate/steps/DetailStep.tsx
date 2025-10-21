@@ -47,7 +47,10 @@ export default function DetailStep() {
             ouiaId='input_name'
             type='text'
             validated={errors.name ? 'error' : 'default'}
-            onChange={(_event, value) => setFieldValues(value, 'name')}
+            onChange={(_event, value) => {
+              _event.preventDefault();
+              setFieldValues(value, 'name');
+            }}
             value={templateRequest?.name || ''}
             placeholder='Enter name'
           />
