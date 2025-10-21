@@ -47,12 +47,14 @@ export default function DetailStep() {
             ouiaId='input_name'
             type='text'
             validated={errors.name ? 'error' : 'default'}
-            onChange={(_event, value) => {
-              _event.preventDefault();
-              setFieldValues(value, 'name');
-            }}
+            onChange={(_event, value) => setFieldValues(value, 'name')}
             value={templateRequest?.name || ''}
             placeholder='Enter name'
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+              }
+            }}
           />
           <CustomHelperText hide={!errors.name} textValue={errors.name} />
         </FormGroup>
