@@ -33,6 +33,7 @@ playwright-report/
 playwright-ctrf/
 blob-report/
 playwright/.cache/
+junit-results.xml
 .env
 .auth
 bin
