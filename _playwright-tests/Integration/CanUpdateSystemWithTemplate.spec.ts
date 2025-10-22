@@ -122,9 +122,13 @@ test.describe('Test System With Template', async () => {
       await page.getByRole('button', { name: 'Confirm changes', exact: true }).click();
     });
 
-    await test.step('Refresh system', async () => {
-      await refreshSubscriptionManager(regClient);
+    await test.step('Wait for template to be valid after update', async () => {
+      await navigateToTemplates(page);
+      const rowTemplate = await getRowByNameOrUrl(page, templateName);
+      await expect(rowTemplate.getByText('Valid')).toBeVisible({ timeout: 60000 });
+    });
 
+    await test.step('Verify system can access updated content and install packages', async () => {
       // clean cached metadata
       const dnfCleanAll = await regClient.Exec(['dnf', 'clean', 'all']);
       expect(dnfCleanAll?.exitCode).toBe(0);
