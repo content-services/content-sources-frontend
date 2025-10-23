@@ -1,9 +1,4 @@
-import {
-  test,
-  expect,
-  cleanupTemplates,
-  randomName,
-} from '../test-utils/_playwright-tests/test-utils/src';
+import { test, expect, cleanupTemplates, randomName, sleep } from 'test-utils';
 import { RHSMClient, refreshSubscriptionManager } from './helpers/rhsmClient';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
 import { closePopupsIfExist, getRowByNameOrUrl } from '../UI/helpers/helpers';
@@ -19,8 +14,13 @@ test.describe('Associated Template CRUD', async () => {
     cleanup,
   }) => {
     await test.step('Set up cleanup for templates and RHSM client', async () => {
-      await cleanup.runAndAdd(() => cleanupTemplates(client, templateNamePrefix));
-      cleanup.add(() => regClient.Destroy('rhc'));
+      // Clean up this test's template by exact name
+      cleanup.add(() => cleanupTemplates(client, templateName));
+      cleanup.add(async () => {
+        await regClient.Destroy('rhc');
+        // Wait for backend to process the unregistration before template cleanup
+        await sleep(5000);
+      });
     });
 
     await test.step('Navigate to templates and create a new template', async () => {

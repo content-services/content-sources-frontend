@@ -1,4 +1,4 @@
-import { test, expect, cleanupTemplates, randomName } from 'test-utils';
+import { test, expect, cleanupTemplates, randomName, sleep } from 'test-utils';
 import { RHSMClient, refreshSubscriptionManager } from './helpers/rhsmClient';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
 import { closePopupsIfExist, getRowByNameOrUrl } from '../UI/helpers/helpers';
@@ -19,8 +19,13 @@ test.describe('Test System With Template', async () => {
     const HARepo = 'Red Hat Enterprise Linux 9 for x86_64 - High Availability';
 
     await test.step('Add cleanup, delete any templates and template test repos that exist', async () => {
-      await cleanup.runAndAdd(() => cleanupTemplates(client, templateNamePrefix));
-      cleanup.add(() => regClient.Destroy('rhc'));
+      // Clean up this test's template by exact name
+      cleanup.add(() => cleanupTemplates(client, templateName));
+      cleanup.add(async () => {
+        await regClient.Destroy('rhc');
+        // Wait for backend to process the unregistration before template cleanup
+        await sleep(5000);
+      });
     });
     await test.step('Navigate to templates, ensure the Create template button can be clicked', async () => {
       await navigateToTemplates(page);
