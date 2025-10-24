@@ -49,11 +49,12 @@ test.describe('Test System With Template', async () => {
       await page.getByText('Use up to a specific date', { exact: true }).click();
       await page.getByPlaceholder('YYYY-MM-DD', { exact: true }).fill('2021-05-17'); // Older than any snapshot date
       await page.getByRole('button', { name: 'Next', exact: true }).click();
-      await page.getByText('add template modal', { exact: true });
+      await expect(page.getByText('Enter template details')).toBeVisible();
       await page.getByPlaceholder('Enter name').fill(`${templateName}`);
       await page.getByPlaceholder('Description').fill('Template test');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Create other options' }).click();
+      await expect(page.getByText('Create template only', { exact: true })).toBeVisible();
       await page.getByText('Create template only', { exact: true }).click();
       const rowTemplate = await getRowByNameOrUrl(page, `${templateName}`);
       await expect(rowTemplate.getByText('Valid')).toBeVisible({ timeout: 60000 });
@@ -122,9 +123,13 @@ test.describe('Test System With Template', async () => {
       await page.getByRole('button', { name: 'Confirm changes', exact: true }).click();
     });
 
-    await test.step('Refresh system', async () => {
-      await refreshSubscriptionManager(regClient);
+    await test.step('Wait for template to be valid after update', async () => {
+      await navigateToTemplates(page);
+      const rowTemplate = await getRowByNameOrUrl(page, templateName);
+      await expect(rowTemplate.getByText('Valid')).toBeVisible({ timeout: 60000 });
+    });
 
+    await test.step('Verify system can access updated content and install packages', async () => {
       // clean cached metadata
       const dnfCleanAll = await regClient.Exec(['dnf', 'clean', 'all']);
       expect(dnfCleanAll?.exitCode).toBe(0);
