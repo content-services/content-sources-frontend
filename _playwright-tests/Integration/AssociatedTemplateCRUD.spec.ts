@@ -75,8 +75,6 @@ test.describe('Associated Template CRUD', async () => {
     });
 
     await test.step('Attempt to delete template and verify warning appears', async () => {
-      await navigateToTemplates(page);
-
       const rowTemplate = await getRowByNameOrUrl(page, templateName);
       await rowTemplate.getByLabel('Kebab toggle').click();
       await page.getByRole('menuitem', { name: 'Delete' }).click();
@@ -108,8 +106,6 @@ test.describe('Associated Template CRUD', async () => {
     });
 
     await test.step('Verify template can now be deleted without warning', async () => {
-      await navigateToTemplates(page);
-
       const rowTemplate = await getRowByNameOrUrl(page, templateName);
       await rowTemplate.getByLabel('Kebab toggle').click();
       await page.getByRole('menuitem', { name: 'Delete' }).click();
