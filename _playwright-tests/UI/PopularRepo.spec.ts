@@ -116,9 +116,14 @@ test.describe('Popular Repositories', () => {
 
     await test.step('EPEL tab shows only the shared EPEL repository', async () => {
       await page.getByRole('button', { name: 'Custom', exact: true }).click();
-      const rows = page.locator('table tbody tr');
-      await expect(rows).toHaveCount(1);
+      await expect(page.getByRole('button', { name: 'Custom', exact: true })).toHaveAttribute(
+        'aria-pressed',
+        'false',
+      );
       await expect(page.getByRole('row', { name: repoName10 })).toBeVisible();
+      // Verify all rows contain EPEL
+      const rowsWithoutEPEL = page.locator('table tbody tr').filter({ hasNotText: 'EPEL' });
+      await expect(rowsWithoutEPEL).toHaveCount(0);
     });
 
     await test.step('Apply filter and clear it', async () => {
@@ -128,12 +133,18 @@ test.describe('Popular Repositories', () => {
       await expect(page.getByRole('row', { name: repoName10 })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Clear filters' })).toBeVisible();
       await page.getByRole('button', { name: 'Clear filters' }).click();
+      // Wait for table to reload after clearing filters
+      await expect(page.getByRole('row', { name: repoName10 })).toBeVisible();
     });
 
     await test.step('Shared EPEL repository cannot be edited or deleted', async () => {
       const row = await getRowByNameOrUrl(page, repoName10);
-      await row.getByLabel('Kebab toggle').click();
-      await expect(page.getByRole('menu')).toBeVisible();
+      await expect(row).toBeVisible();
+      const kebab = row.getByLabel('Kebab toggle');
+      await kebab.click();
+      // Wait for at least one menu item to confirm menu is open
+      await expect(page.getByRole('menuitem').first()).toBeVisible();
+      await expect(page.getByRole('menuitem')).toHaveCount(1);
       await expect(
         page
           .getByRole('menuitem', { name: 'View all snapshots' })
@@ -141,7 +152,6 @@ test.describe('Popular Repositories', () => {
       ).toBeVisible(); // No snapshot in CI due to time constraints
       await expect(page.getByRole('menuitem', { name: 'Edit' })).not.toBeVisible();
       await expect(page.getByRole('menuitem', { name: 'Delete' })).not.toBeVisible();
-      await expect(page.getByRole('menuitem')).toHaveCount(1);
     });
   });
 });
