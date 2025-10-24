@@ -8253,6 +8253,11 @@ playwright-ctrf-json-reporter@^0.0.23:
   resolved "https://registry.yarnpkg.com/playwright-ctrf-json-reporter/-/playwright-ctrf-json-reporter-0.0.23.tgz#ab2a5bcf31afb3345450f493f9dbfcf8bbf2fe3a"
   integrity sha512-49e1gSdq7Rytz9ji8kwgrrWZ0w39RNVDH5FlPiBeosdn12VTfWmhYRBcKpC2D29pa1ZdTxGhHdbB4UML2MNITg==
 
+playwright-meta-schema@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/playwright-meta-schema/-/playwright-meta-schema-0.0.3.tgz#702eaba5b991bb42b2c0f471f20e2c737f94ca97"
+  integrity sha512-RgW/FSKUdOLJFUN8wgTzeHtxKO3UOslo316MTdOw28ws6HsLpA4Ju83Cm8n0DHAYUvAq2HHQFrU42lW3Iw6GAw==
+
 playwright@1.55.0:
   version "1.55.0"
   resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.55.0.tgz#7aca7ac3ffd9e083a8ad8b2514d6f9ba401cc78b"
