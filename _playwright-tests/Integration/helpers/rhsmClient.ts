@@ -169,6 +169,18 @@ export class RHSMClient {
   }
 
   /**
+   * Get the host name from inside the container
+   * @returns The host name of the container as a string
+   */
+  async GetHostname(): Promise<string> {
+    const result = await this.Exec(['hostname'], 5000);
+    if (result?.exitCode !== 0) {
+      throw new Error(`Failed to get hostname: ${result?.stderr}`);
+    }
+    return result?.stdout?.trim() || '';
+  }
+
+  /**
    * Unregister with subscription-manager
    * @returns
    */
@@ -193,16 +205,37 @@ export class RHSMClient {
   async Destroy(unregisterMethod: 'rhc' | 'sm' | 'none' = 'none') {
     if (unregisterMethod !== 'none') {
       const cmd = await this.Unregister(unregisterMethod === 'rhc');
-      // Log only exit code and sanitized output to avoid exposing sensitive information
-      console.log('Unregister command completed with exit code:', cmd?.exitCode);
-      if (
-        cmd?.stderr &&
-        !cmd.stderr.includes('--activationkey') &&
-        !cmd.stderr.includes('--password') &&
-        !cmd.stderr.includes('-a') &&
-        !cmd.stderr.includes('-p')
-      ) {
-        console.log('STDERR:', cmd.stderr);
+
+      // Check if system is already unregistered
+      const alreadyUnregistered =
+        cmd?.exitCode !== 0 &&
+        (cmd?.stderr?.includes('already unregistered') ||
+          cmd?.stdout?.includes('already unregistered'));
+
+      if (alreadyUnregistered) {
+        console.log('Continuing with container cleanup (system is already unregistered)');
+      } else if (cmd?.exitCode !== 0) {
+        // Unregister failed for a different reason, log details
+        console.log('Unregister command completed with exit code:', cmd?.exitCode);
+        if (
+          cmd?.stdout &&
+          !cmd.stdout.includes('--activationkey') &&
+          !cmd.stdout.includes('--password') &&
+          !cmd.stdout.includes('-a') &&
+          !cmd.stdout.includes('-p')
+        ) {
+          console.log('STDOUT:', cmd.stdout);
+        }
+        if (
+          cmd?.stderr &&
+          !cmd.stderr.includes('--activationkey') &&
+          !cmd.stderr.includes('--password') &&
+          !cmd.stderr.includes('-a') &&
+          !cmd.stderr.includes('-p')
+        ) {
+          console.log('STDERR:', cmd.stderr);
+        }
+        console.log('Continuing with container cleanup despite unregister failure');
       }
     }
     return killContainer(this.name);
