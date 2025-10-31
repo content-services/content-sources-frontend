@@ -47,6 +47,9 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
+      - name: Validate Playwright test metadata
+        run: yarn validate:metadata
+
       - name: Lint
         run: yarn lint
 
