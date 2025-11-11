@@ -1,10 +1,10 @@
 name: nightly-stage-test-action
 on:
   pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled]
     # paths:
     #   - _playwright-tests/Integration/**
     #   - .github/workflows/nightly-stage-test-action.yml
-    types: [opened, reopened, synchronize, labeled, unlabeled]
 
   schedule:
     - cron: '0 0 * * *' # This cron expression runs the action every 24 hours at midnight UTC
