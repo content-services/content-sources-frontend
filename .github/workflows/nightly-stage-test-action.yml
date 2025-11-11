@@ -1,9 +1,9 @@
 name: nightly-stage-test-action
 on:
   pull_request:
-    paths:
-      - _playwright-tests/Integration/**
-      - .github/workflows/nightly-stage-test-action.yml
+    # paths:
+    #   - _playwright-tests/Integration/**
+    #   - .github/workflows/nightly-stage-test-action.yml
     types: [opened, reopened, synchronize, labeled, unlabeled]
 
   schedule:
@@ -80,6 +80,11 @@ jobs:
             echo "STABLE_SAM_USERNAME=\"$STAGE_STABLE_SAM_USERNAME\""
             echo "STABLE_SAM_PASSWORD=\"$STAGE_STABLE_SAM_PASSWORD\""
           } >> .env 2>/dev/null
+          if [[ ${{ github.event_name }} -eq "pull_request" ]]; then
+            echo "BASE_URL=https://stage.foo.redhat.com:1337" >> .env
+          else
+            echo "BASE_URL=$STAGE_BASE_URL" >> .env
+          fi
           echo "✅ Environment file created successfully"
 
       - name: Compare .nvmrc files
@@ -119,6 +124,34 @@ jobs:
       - name: Install Playwright Browsers
         run: yarn playwright install --with-deps
 
+      ### Pull request specific steps ###
+      # This prevents an error related to minimum watchers when running the front-end and playwright
+      - name: Increase file watchers limit
+        if: ${{ github.event_name == 'pull_request' }}
+        run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
+      - name: Update /etc/hosts
+        if: ${{ github.event_name == 'pull_request' }}
+        run: sudo npm run patch:hosts
+      
+      - name: Build front-end
+        if: ${{ github.event_name == 'pull_request' }}
+        run: yarn build
+      
+      - name: Frontend run (static)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: yarn fec static --port 8003 &
+      
+      - name: Wait for frontend to be ready
+        if: ${{ github.event_name == 'pull_request' }}
+        timeout-minutes: 3
+        run: npx wait-on http://localhost:8003/apps/content-sources/
+
+      - name: Run testing proxy
+        if: ${{ github.event_name == 'pull_request' }}
+        run: docker run -d --network=host -e HTTPS_PROXY=$RH_PROXY_URL -e ROUTES_JSON_PATH=/config/routes-ci.json -p 1337:1337 -v "$(pwd)/config:/config:ro,Z" --name consoledot-testing-proxy quay.io/dvagner/consoledot-testing-proxy
+      ### End of pull request specific steps ###
+      
       - name: Run Playwright tests
         run: CURRENTS_PROJECT_ID=jRJFbV CURRENTS_RECORD_KEY=$CURRENTS_RECORD_KEY CURRENTS_CI_BUILD_ID="${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}" yarn playwright test
 
