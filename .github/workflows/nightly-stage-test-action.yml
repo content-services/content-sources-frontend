@@ -85,7 +85,6 @@ jobs:
             echo "PROXY=$RH_PROXY_URL" >> .env
           fi
           echo "✅ Environment file created successfully"
-          cat .env
           unset PROXY
 
       - name: Compare .nvmrc files
