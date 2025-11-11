@@ -139,7 +139,6 @@ export const throwIfMissingEnvVariables = () => {
       : []),
     ...(process.env.INTEGRATION
       ? [
-          //   'PROXY',
           'ORG_ID_1',
           'ACTIVATION_KEY_1',
           'LAYERED_REPO_ACCESS_USERNAME',
@@ -151,6 +150,7 @@ export const throwIfMissingEnvVariables = () => {
           ...(process.env.STABLE_SAM_USERNAME && process.env.STABLE_SAM_PASSWORD
             ? ['STABLE_SAM_USERNAME', 'STABLE_SAM_PASSWORD']
             : []),
+          ...(process.env.BASE_URL?.includes('foo') ? [] : ['PROXY']),
         ]
       : []),
   ];
