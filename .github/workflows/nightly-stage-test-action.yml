@@ -85,6 +85,7 @@ jobs:
             echo "PROXY=$RH_PROXY_URL" >> .env
           fi
           echo "✅ Environment file created successfully"
+          cat .env
 
       - name: Compare .nvmrc files
         id: compare-nvmrc
@@ -148,7 +149,7 @@ jobs:
 
       - name: Run testing proxy
         if: ${{ github.event_name == 'pull_request' }}
-        run: docker run -d --network=host -e HTTPS_PROXY=${{ secrets.RH_PROXY_URL }} -e ROUTES_JSON_PATH=/config/routes-ci.json -p 1337:1337 -v "$(pwd)/config:/config:ro,Z" --name consoledot-testing-proxy quay.io/dvagner/consoledot-testing-proxy
+        run: docker run -d --network=host -e HTTPS_PROXY=$RH_PROXY_URL -e ROUTES_JSON_PATH=/config/routes-ci.json -v "$(pwd)/config:/config:ro,Z" --name consoledot-testing-proxy quay.io/dvagner/consoledot-testing-proxy
       ### End of pull request specific steps ###
       
       - name: Run Playwright tests
