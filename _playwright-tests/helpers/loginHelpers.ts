@@ -139,7 +139,7 @@ export const throwIfMissingEnvVariables = () => {
       : []),
     ...(process.env.INTEGRATION
       ? [
-          'PROXY',
+          //   'PROXY',
           'ORG_ID_1',
           'ACTIVATION_KEY_1',
           'LAYERED_REPO_ACCESS_USERNAME',
