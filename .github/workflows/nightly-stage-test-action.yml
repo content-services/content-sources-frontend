@@ -86,6 +86,7 @@ jobs:
           fi
           echo "✅ Environment file created successfully"
           cat .env
+          unset PROXY
 
       - name: Compare .nvmrc files
         id: compare-nvmrc
