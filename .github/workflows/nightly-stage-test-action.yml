@@ -77,6 +77,7 @@ jobs:
             echo "DOCKER_SOCKET=/var/run/docker.sock"
             echo "STABLE_SAM_USERNAME=\"$STAGE_STABLE_SAM_USERNAME\""
             echo "STABLE_SAM_PASSWORD=\"$STAGE_STABLE_SAM_PASSWORD\""
+            echo "RH_CLIENT_PROXY=\"$RH_PROXY_URL\""
           } >> .env 2>/dev/null
           if [[ ${{ github.event_name }} -eq "pull_request" ]]; then
             echo "BASE_URL=https://stage.foo.redhat.com:1337" >> .env
