@@ -14,6 +14,7 @@ concurrency:
 
 jobs:
   playwright-integration-test:
+    if: ${{ ! contains(github.event.pull_request.labels.*.name, 'skip-integration-tests') }}
     runs-on:
       - codebuild-content-services-int-repo-${{ github.run_id }}-${{ github.run_attempt }}
       - instance-size:large
