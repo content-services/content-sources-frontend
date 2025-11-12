@@ -17,13 +17,68 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           submodules: recursive
 
       - name: Set up sparse checkout
         uses: ./.github/actions/sparse-checkout-utils
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Cache - node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            dist
+          key: ${{ runner.os }}-frontend-node-modules-${{ hashFiles('yarn.lock') }}
+          restore-keys: ${{ runner.os }}-frontend-node-modules-
+
+      - name: Cache - Backend compose files
+        uses: actions/cache@v4
+        with:
+          path: content-sources-backend/release
+          key: ${{ runner.os }}-compose-${{ hashFiles('content-sources-backend/compose_files/pulp/docker-compose.yml') }}-${{ hashFiles('content_sources_backend/compose_files/candlepin/Dockerfile') }}
+          restore-keys: ${{ runner.os }}-compose-
+
+      - name: Install Make
+        working-directory: content-sources-backend
+        run: sudo apt-get install make
+
+      - name: Install Parallel
+        working-directory: content-sources-backend
+        run: sudo apt-get install -y parallel
+
+      # This prevents an error related to minimum watchers when running the front-end and playwright
+      - name: Increase file watchers limit
+        run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
+      - name: Run get_go_version.sh script
+        working-directory: content-sources-backend
+        id: get-go-version
+        run: |
+          chmod +x ./scripts/get_go_version.sh
+          GO_VERSION=$(./scripts/get_go_version.sh ./go.mod)
+          echo "go-version=$GO_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '${{ steps.get-go-version.outputs.go-version }}'
+
+      - name: Update /etc/hosts
+        run: sudo npm run patch:hosts
+
+      - name: Run front-end and back-end setup in parallel
+        run: 'parallel --line-buffer --tagstring "[{#}]:" ::: "yarn install --frozen-lockfile && yarn build" "cd content-sources-backend && make compose-down compose-clean compose-up"'
+
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
 
       - name: Create front-end .env file
         run: |
@@ -126,69 +181,6 @@ jobs:
             echo "CDN certificate is valid for $DAYS_UNTIL_EXPIRY more days."
           fi
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-
-      - name: Cache - node_modules
-        if: ${{ !cancelled() }}
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            dist
-          key: ${{ runner.os }}-frontend-node-modules-${{ hashFiles('yarn.lock') }}
-          restore-keys: ${{ runner.os }}-frontend-node-modules-
-
-      - name: Cache - Backend compose files
-        if: ${{ !cancelled() }}
-        uses: actions/cache@v4
-        with:
-          path: content-sources-backend/release
-          key: ${{ runner.os }}-compose-${{ hashFiles('content-sources-backend/compose_files/pulp/docker-compose.yml') }}-${{ hashFiles('content_sources_backend/compose_files/candlepin/Dockerfile') }}
-          restore-keys: ${{ runner.os }}-compose-
-
-      - name: Cache - Playwright browsers
-        if: ${{ !cancelled() }}
-        id: cache-playwright-browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('playwright.config.ts') }}
-          restore-keys: ${{ runner.os }}-playwright-
-
-      - name: Install Make
-        working-directory: content-sources-backend
-        run: sudo apt-get install make
-
-      - name: Install Parallel
-        working-directory: content-sources-backend
-        run: sudo apt-get install -y parallel
-
-      # This prevents an error related to minimum watchers when running the front-end and playwright
-      - name: Increase file watchers limit
-        run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
-      - name: Run get_go_version.sh script
-        working-directory: content-sources-backend
-        id: get-go-version
-        run: |
-          chmod +x ./scripts/get_go_version.sh
-          GO_VERSION=$(./scripts/get_go_version.sh ./go.mod)
-          echo "go-version=$GO_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '${{ steps.get-go-version.outputs.go-version }}'
-
-      - name: Update /etc/hosts
-        run: sudo npm run patch:hosts
-
-      - name: Run front-end and back-end setup in parallel
-        run: 'parallel --line-buffer --tagstring "[{#}]:" ::: "yarn install && yarn build && yarn playwright install --with-deps" "cd content-sources-backend && make compose-down compose-clean compose-up"'
-
       - name: Frontend run (static)
         run: yarn fec static --port 8003 &
 
@@ -223,11 +215,9 @@ jobs:
         uses: ctrf-io/github-test-reporter@v1
         with:
           report-path: './playwright-ctrf/playwright-ctrf.json'
-        if: ${{ !cancelled() }}
 
       - name: Store front-end Test report
         uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: playwright-report/
