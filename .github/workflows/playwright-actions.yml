@@ -25,75 +25,6 @@ jobs:
       - name: Set up sparse checkout
         uses: ./.github/actions/sparse-checkout-utils
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-
-      - name: Cache - node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            dist
-          key: ${{ runner.os }}-frontend-node-modules-${{ hashFiles('yarn.lock') }}
-          restore-keys: ${{ runner.os }}-frontend-node-modules-
-
-      - name: Cache - Backend compose files
-        uses: actions/cache@v4
-        with:
-          path: content-sources-backend/release
-          key: ${{ runner.os }}-compose-${{ hashFiles('content-sources-backend/compose_files/pulp/docker-compose.yml') }}-${{ hashFiles('content_sources_backend/compose_files/candlepin/Dockerfile') }}
-          restore-keys: ${{ runner.os }}-compose-
-
-      - name: Install Make
-        working-directory: content-sources-backend
-        run: sudo apt-get install make
-
-      - name: Install Parallel
-        working-directory: content-sources-backend
-        run: sudo apt-get install -y parallel
-
-      # This prevents an error related to minimum watchers when running the front-end and playwright
-      - name: Increase file watchers limit
-        run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
-      - name: Get current PR URL
-        id: get-pr-url
-        run: |
-          # Extract the pull request URL from the event payload
-          pr_url=$(jq -r '.pull_request.html_url' < "$GITHUB_EVENT_PATH")
-          echo "Pull Request URL: $pr_url"
-          # Set the PR URL as an output using the environment file
-          echo "pr_url=$pr_url" >> $GITHUB_ENV
-
-      - name: Get appropriate back-end branch
-        run: |
-          chmod +x .github/workflowScripts/getBackendBranch.sh
-          .github/workflowScripts/getBackendBranch.sh "${{ env.pr_url }}"
-
-      - name: Run get_go_version.sh script
-        working-directory: content-sources-backend
-        id: get-go-version
-        run: |
-          chmod +x ./scripts/get_go_version.sh
-          GO_VERSION=$(./scripts/get_go_version.sh ./go.mod)
-          echo "go-version=$GO_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '${{ steps.get-go-version.outputs.go-version }}'
-
-      - name: Update /etc/hosts
-        run: sudo npm run patch:hosts
-
-      - name: Run front-end and back-end setup in parallel
-        run: 'parallel --line-buffer --tagstring "[{#}]:" ::: "yarn install --frozen-lockfile && yarn build" "cd content-sources-backend && make compose-down compose-clean compose-up"'
-
-      - name: Setup Playwright
-        uses: ./.github/actions/setup-playwright
-
       - name: Create front-end .env file
         run: |
           # Check if the secrets are set
@@ -142,6 +73,20 @@ jobs:
 
           echo ".env file created successfully."
 
+      - name: Get current PR URL
+        id: get-pr-url
+        run: |
+          # Extract the pull request URL from the event payload
+          pr_url=$(jq -r '.pull_request.html_url' < "$GITHUB_EVENT_PATH")
+          echo "Pull Request URL: $pr_url"
+          # Set the PR URL as an output using the environment file
+          echo "pr_url=$pr_url" >> $GITHUB_ENV
+
+      - name: Get appropriate back-end branch
+        run: |
+          chmod +x .github/workflowScripts/getBackendBranch.sh
+          .github/workflowScripts/getBackendBranch.sh "${{ env.pr_url }}"
+
       - name: Copy the example config
         working-directory: content-sources-backend
         run: cp ./configs/config.yaml.example ./configs/config.yaml
@@ -180,6 +125,61 @@ jobs:
           else
             echo "CDN certificate is valid for $DAYS_UNTIL_EXPIRY more days."
           fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Cache - node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            dist
+          key: ${{ runner.os }}-frontend-node-modules-${{ hashFiles('yarn.lock') }}
+          restore-keys: ${{ runner.os }}-frontend-node-modules-
+
+      - name: Cache - Backend compose files
+        uses: actions/cache@v4
+        with:
+          path: content-sources-backend/release
+          key: ${{ runner.os }}-compose-${{ hashFiles('content-sources-backend/compose_files/pulp/docker-compose.yml') }}-${{ hashFiles('content_sources_backend/compose_files/candlepin/Dockerfile') }}
+          restore-keys: ${{ runner.os }}-compose-
+
+      - name: Setup Playwright Browsers
+        uses: ./.github/actions/setup-playwright
+
+      - name: Install Make
+        working-directory: content-sources-backend
+        run: sudo apt-get install make
+
+      - name: Install Parallel
+        working-directory: content-sources-backend
+        run: sudo apt-get install -y parallel
+
+      # This prevents an error related to minimum watchers when running the front-end and playwright
+      - name: Increase file watchers limit
+        run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
+      - name: Run get_go_version.sh script
+        working-directory: content-sources-backend
+        id: get-go-version
+        run: |
+          chmod +x ./scripts/get_go_version.sh
+          GO_VERSION=$(./scripts/get_go_version.sh ./go.mod)
+          echo "go-version=$GO_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '${{ steps.get-go-version.outputs.go-version }}'
+
+      - name: Update /etc/hosts
+        run: sudo npm run patch:hosts
+
+      - name: Run front-end and back-end setup in parallel
+        run: 'parallel --line-buffer --tagstring "[{#}]:" ::: "yarn install && yarn build --frozen-lockfile" "cd content-sources-backend && make compose-down compose-clean compose-up"'
 
       - name: Frontend run (static)
         run: yarn fec static --port 8003 &
