@@ -1,4 +1,4 @@
-name: nightly-prod-test-action
+name: "E2E tests: Nightly prod"
 on:
   schedule:
     - cron: '0 0 * * *' # This cron expression runs the action every 24 hours at midnight UTC

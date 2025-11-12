@@ -1,4 +1,4 @@
-name: nightly-stage-test-action
+name: "E2E tests: Integration"
 on:
   pull_request:
     types: [opened, reopened, synchronize, labeled, unlabeled]

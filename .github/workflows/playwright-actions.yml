@@ -1,4 +1,4 @@
-name: build-playwright-test
+name: "E2E tests: UI"
 on:
   pull_request:
     types: [opened, reopened, synchronize, labeled, unlabeled]
