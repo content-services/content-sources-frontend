@@ -140,6 +140,7 @@ export const throwIfMissingEnvVariables = () => {
     ...(process.env.INTEGRATION
       ? [
           'ORG_ID_1',
+          'RH_CLIENT_PROXY',
           'ACTIVATION_KEY_1',
           'LAYERED_REPO_ACCESS_USERNAME',
           'LAYERED_REPO_ACCESS_PASSWORD',
