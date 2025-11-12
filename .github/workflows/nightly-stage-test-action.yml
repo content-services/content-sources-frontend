@@ -39,6 +39,18 @@ jobs:
           key: ${{ runner.os }}-frontend-node-modules-${{ hashFiles('yarn.lock') }}
           restore-keys: ${{ runner.os }}-frontend-node-modules-
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Setup Playwright
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/setup-playwright
+
       - name: Create .env file
         run: |
           {
@@ -101,18 +113,6 @@ jobs:
           else
             echo "The .nvmrc versions are the same!"
           fi
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version-file: '.nvmrc'
-
-      - name: Install dependencies
-        run: yarn install
-
-      - name: Setup Playwright
-        if: ${{ !cancelled() }}
-        uses: ./.github/actions/setup-playwright
 
       ### Pull request specific steps ###
       # This prevents an error related to minimum watchers when running the front-end and playwright
