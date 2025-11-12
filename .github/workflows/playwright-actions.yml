@@ -58,6 +58,20 @@ jobs:
       - name: Increase file watchers limit
         run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
+      - name: Get current PR URL
+        id: get-pr-url
+        run: |
+          # Extract the pull request URL from the event payload
+          pr_url=$(jq -r '.pull_request.html_url' < "$GITHUB_EVENT_PATH")
+          echo "Pull Request URL: $pr_url"
+          # Set the PR URL as an output using the environment file
+          echo "pr_url=$pr_url" >> $GITHUB_ENV
+
+      - name: Get appropriate back-end branch
+        run: |
+          chmod +x .github/workflowScripts/getBackendBranch.sh
+          .github/workflowScripts/getBackendBranch.sh "${{ env.pr_url }}"
+
       - name: Run get_go_version.sh script
         working-directory: content-sources-backend
         id: get-go-version
@@ -127,20 +141,6 @@ jobs:
           } >> .env
 
           echo ".env file created successfully."
-
-      - name: Get current PR URL
-        id: get-pr-url
-        run: |
-          # Extract the pull request URL from the event payload
-          pr_url=$(jq -r '.pull_request.html_url' < "$GITHUB_EVENT_PATH")
-          echo "Pull Request URL: $pr_url"
-          # Set the PR URL as an output using the environment file
-          echo "pr_url=$pr_url" >> $GITHUB_ENV
-
-      - name: Get appropriate back-end branch
-        run: |
-          chmod +x .github/workflowScripts/getBackendBranch.sh
-          .github/workflowScripts/getBackendBranch.sh "${{ env.pr_url }}"
 
       - name: Copy the example config
         working-directory: content-sources-backend
