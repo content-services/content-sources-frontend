@@ -39,15 +39,6 @@ jobs:
           key: ${{ runner.os }}-frontend-node-modules-${{ hashFiles('yarn.lock') }}
           restore-keys: ${{ runner.os }}-frontend-node-modules-
 
-      - name: Cache Playwright browsers
-        if: ${{ !cancelled() }}
-        id: cache-playwright-browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('playwright.config.ts') }}
-          restore-keys: ${{ runner.os }}-playwright-
-
       - name: Create .env file
         run: |
           {
@@ -119,8 +110,9 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Install Playwright Browsers
-        run: yarn playwright install --with-deps
+      - name: Setup Playwright
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/setup-playwright
 
       ### Pull request specific steps ###
       # This prevents an error related to minimum watchers when running the front-end and playwright
