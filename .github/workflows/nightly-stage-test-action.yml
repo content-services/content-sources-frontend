@@ -79,11 +79,9 @@ jobs:
           } >> .env 2>/dev/null
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             echo "BASE_URL=https://stage.foo.redhat.com:1337" >> .env
-            echo "Pull request trigger"
           else
             echo "BASE_URL=$STAGE_BASE_URL" >> .env
             echo "PROXY=$RH_PROXY_URL" >> .env
-            echo "Schedule or other trigger"
           fi
           echo "✅ Environment file created successfully"
 
