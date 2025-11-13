@@ -47,7 +47,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Setup Playwright
-        uses: ./.github/actions/setup-playwright
+        run: yarn playwright install chromium --only-shell
 
       - name: Create .env file
         run: |

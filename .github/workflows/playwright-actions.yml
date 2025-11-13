@@ -147,9 +147,6 @@ jobs:
           key: ${{ runner.os }}-compose-${{ hashFiles('content-sources-backend/compose_files/pulp/docker-compose.yml') }}-${{ hashFiles('content_sources_backend/compose_files/candlepin/Dockerfile') }}
           restore-keys: ${{ runner.os }}-compose-
 
-      - name: Setup Playwright Browsers
-        uses: ./.github/actions/setup-playwright
-
       - name: Install Make
         working-directory: content-sources-backend
         run: sudo apt-get install make
@@ -179,7 +176,7 @@ jobs:
         run: sudo npm run patch:hosts
 
       - name: Run front-end and back-end setup in parallel
-        run: 'parallel --line-buffer --tagstring "[{#}]:" ::: "yarn install && yarn build --frozen-lockfile" "cd content-sources-backend && make compose-down compose-clean compose-up"'
+        run: 'parallel --line-buffer --tagstring "[{#}]:" ::: "yarn install && yarn build --frozen-lockfile && yarn playwright install chromium --only-shell" "cd content-sources-backend && make compose-down compose-clean compose-up"'
 
       - name: Frontend run (static)
         run: yarn fec static --port 8003 &
