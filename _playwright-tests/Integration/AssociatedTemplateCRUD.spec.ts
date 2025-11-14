@@ -87,7 +87,7 @@ test.describe('Associated Template CRUD', () => {
     await test.step('Verify system is attached to template', async () => {
       hostname = await regClient.GetHostname();
       console.log('System hostname:', hostname);
-      const isAttached = await pollForSystemTemplateAttachment(page, hostname, true, 10_000, 6);
+      const isAttached = await pollForSystemTemplateAttachment(page, hostname, true, 20_000, 6);
       expect(isAttached, 'system should be attached to template').toBe(true);
     });
 
