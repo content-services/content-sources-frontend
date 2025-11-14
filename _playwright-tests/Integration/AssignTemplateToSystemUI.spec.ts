@@ -13,8 +13,9 @@ test.describe('Assign Template to System via UI', () => {
     cleanup,
   }) => {
     const templateName = `${templateNamePrefix}-${randomName()}`;
-    const hostname = `RHSMClientTest-${randomName()}`;
-    const regClient = new RHSMClient(hostname);
+    const containerName = `RHSMClientTest-${randomName()}`;
+    const regClient = new RHSMClient(containerName);
+    let hostname = '';
 
     await test.step('Add cleanup', async () => {
       await cleanup.runAndAdd(() => cleanupTemplates(client, templateNamePrefix));
@@ -51,12 +52,18 @@ test.describe('Assign Template to System via UI', () => {
       await expect(rowTemplate.getByText('Valid')).toBeVisible({ timeout: 660000 });
     });
 
-    await test.step('Boot RHSM client', async () => {
+    await test.step('Boot and register RHSM client', async () => {
       await regClient.Boot('rhel9');
       const hostnameResult = await runCmd('Get hostname', ['hostname'], regClient);
-      console.log('Hostname:', hostnameResult);
-      // hostname is not present in the system list
-      // Hostname: { exitCode: 0, stderr: undefined, stdout: '7845781bcf73\n' }
+      hostname = hostnameResult?.stdout?.toString().trim() || '';
+      console.log('Container hostname:', hostname);
+
+      const reg = await regClient.RegisterRHC(process.env.ACTIVATION_KEY_1, process.env.ORG_ID_1);
+      if (reg?.exitCode != 0) {
+        console.log('Registration stdout:', reg?.stdout);
+        console.log('Registration stderr:', reg?.stderr);
+      }
+      expect(reg?.exitCode).toBe(0);
     });
 
     await test.step('Navigate to template and open Systems tab', async () => {
@@ -121,8 +128,9 @@ test.describe('Assign Template to System via UI', () => {
     const templateNamePrefix = 'Template_and_add_to_systems_ui_test';
 
     const templateName = `${templateNamePrefix}-${randomName()}`;
-    const hostname = `RHSMClientTest-${randomName()}`;
-    const regClient = new RHSMClient(hostname);
+    const containerName = `RHSMClientTest-${randomName()}`;
+    const regClient = new RHSMClient(containerName);
+    let hostname = '';
 
     await test.step('Add cleanup', async () => {
       await cleanup.runAndAdd(() => cleanupTemplates(client, templateNamePrefix));
@@ -155,16 +163,23 @@ test.describe('Assign Template to System via UI', () => {
       await page.getByRole('button', { name: 'Create template and add to systems' }).click();
     });
 
-    await test.step('Boot RHSM client', async () => {
+    await test.step('Boot and register RHSM client', async () => {
       await regClient.Boot('rhel9');
       const hostnameResult = await runCmd('Get hostname', ['hostname'], regClient);
-      console.log('Hostname:', hostnameResult);
+      hostname = hostnameResult?.stdout?.toString().trim() || '';
+      console.log('Container hostname:', hostname);
+
+      const reg = await regClient.RegisterRHC(process.env.ACTIVATION_KEY_1, process.env.ORG_ID_1);
+      if (reg?.exitCode != 0) {
+        console.log('Registration stdout:', reg?.stdout);
+        console.log('Registration stderr:', reg?.stderr);
+      }
+      expect(reg?.exitCode).toBe(0);
     });
 
     await test.step('Assign template to systems', async () => {
       await expect(page.getByText('Assign template to systems')).toBeVisible({ timeout: 30000 });
       await page.getByRole('searchbox', { name: 'Filter by name' }).fill(hostname);
-      // grep for exact hostname
       const systemRow = page.getByRole('row').filter({ hasText: hostname });
       await expect(systemRow).toBeVisible({ timeout: 30000 });
       await systemRow.getByRole('checkbox').click();
