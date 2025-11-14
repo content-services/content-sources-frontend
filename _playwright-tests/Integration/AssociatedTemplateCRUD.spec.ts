@@ -70,16 +70,36 @@ test.describe('Associated Template CRUD', () => {
     await test.step('Register system with template using RHSM client', async () => {
       await regClient.Boot('rhel9');
 
-      const reg = await regClient.RegisterRHC(
-        process.env.ACTIVATION_KEY_1,
-        process.env.ORG_ID_1,
-        templateName,
-      );
-      if (reg?.exitCode != 0) {
+      // Retry registration up to 3 times with 1 minute between attempts
+      let reg;
+      const maxRetries = 3;
+      const retryDelay = 60000; // 1 minute in milliseconds
+
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        console.log(`Registration attempt ${attempt} of ${maxRetries}`);
+
+        reg = await regClient.RegisterRHC(
+          process.env.ACTIVATION_KEY_1,
+          process.env.ORG_ID_1,
+          templateName,
+        );
+
+        if (reg?.exitCode === 0) {
+          console.log(`Registration successful on attempt ${attempt}`);
+          break;
+        }
+
+        console.log(`Registration attempt ${attempt} failed`);
         console.log('Registration stdout:', reg?.stdout);
         console.log('Registration stderr:', reg?.stderr);
+
+        if (attempt < maxRetries) {
+          console.log(`Waiting ${retryDelay / 1000} seconds before retry...`);
+          await page.waitForTimeout(retryDelay);
+        }
       }
-      expect(reg?.exitCode, 'registration should be successful').toBe(0);
+
+      expect(reg?.exitCode, 'registration should be successful after retries').toBe(0);
 
       await refreshSubscriptionManager(regClient);
     });
