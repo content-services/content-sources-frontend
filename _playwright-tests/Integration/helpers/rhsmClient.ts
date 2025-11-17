@@ -122,6 +122,26 @@ export class RHSMClient {
       connect.push('--content-template');
       connect.push(`${template}`);
     }
+
+    // Test connectivity to RHSM URL
+    const rhsmUrl = process.env.PROD
+      ? 'https://subscription.rhsm.redhat.com'
+      : 'https://subscription.rhsm.stage.redhat.com';
+    console.log(`Testing connectivity to RHSM URL: ${rhsmUrl}`);
+    const connectTest = await runCommand(
+      this.name,
+      ['curl', '-I', '--insecure', '--connect-timeout', '10', '--max-time', '15', rhsmUrl],
+      20000,
+    );
+    if (connectTest) {
+      console.log('Connectivity test stdout:', connectTest.stdout);
+      console.log('Connectivity test stderr:', connectTest.stderr);
+      console.log('Connectivity test exit code:', connectTest.exitCode);
+    } else {
+      console.log('Connectivity test timed out or failed to execute');
+    }
+
+    console.log('Attempting to register with rhc connect');
     return runCommand(this.name, connect, 75000);
   }
 
