@@ -176,7 +176,7 @@ jobs:
         run: sudo npm run patch:hosts
 
       - name: Run front-end and back-end setup in parallel
-        run: 'parallel --line-buffer --tagstring "[{#}]:" ::: "yarn install && yarn build --frozen-lockfile && yarn playwright install chromium --only-shell" "cd content-sources-backend && make compose-down compose-clean compose-up"'
+        run: 'parallel --line-buffer --tagstring "[{#}]:" ::: "yarn install --frozen-lockfile && yarn build&& yarn playwright install chromium --only-shell" "cd content-sources-backend && make compose-down compose-clean compose-up"'
 
       - name: Frontend run (static)
         run: yarn fec static --port 8003 &
