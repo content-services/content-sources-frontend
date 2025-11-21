@@ -1,0 +1,1 @@
+export const CONTENT_LIST_KEY = 'CONTENT_LIST_KEY';
