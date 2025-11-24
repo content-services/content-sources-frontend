@@ -21,6 +21,7 @@ module.exports = {
     '^uuid$': require.resolve('uuid'),
     // use cjs versions of patternfly packages, not esm
     '^(@patternfly/[a-zA-Z0-9_-]+)/dist/esm/(.*)$': '$1/dist/js/$2',
+    '^@src/(.*)$': '<rootDir>/src/$1',
   },
 
   transformIgnorePatterns: [
