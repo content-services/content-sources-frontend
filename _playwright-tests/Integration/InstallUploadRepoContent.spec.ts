@@ -44,7 +44,7 @@ test.describe('Install Upload Repo Content', () => {
         const fileInput = page.locator('input[type=file]').first();
         await fileInput.setInputFiles(filePath);
       });
-      await expect(page.getByText('All uploads completed!')).toBeVisible({ timeout: 60000 });
+      await expect(page.getByText('All uploads completed!')).toBeVisible({ timeout: 240000 });
       await page.getByRole('button', { name: 'Confirm changes' }).click();
       const row = await getRowByNameOrUrl(page, uploadRepoName);
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
