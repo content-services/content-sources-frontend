@@ -46,6 +46,10 @@ test.describe('Install Upload Repo Content', () => {
       });
       await expect(page.getByText('All uploads completed!')).toBeVisible({ timeout: 240000 });
       await page.getByRole('button', { name: 'Confirm changes' }).click();
+      await expect(page.getByRole('dialog', { name: 'Upload content' })).toBeHidden({
+        timeout: 30000,
+      });
+      // Wait for the repository row to appear and reach Valid status
       const row = await getRowByNameOrUrl(page, uploadRepoName);
       await expect(row.getByText('Valid')).toBeVisible({ timeout: 60000 });
     });
