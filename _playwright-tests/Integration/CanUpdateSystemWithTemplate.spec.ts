@@ -135,7 +135,18 @@ test.describe('Test System With Template', () => {
               name: templateName,
             });
             const template = templates.data?.[0];
-            return template?.lastUpdateTask?.status;
+            const taskStatus = template?.lastUpdateTask?.status;
+            const taskError = template?.lastUpdateTask?.error;
+
+            // Log task status for debugging
+            if (taskStatus) {
+              console.log(`Template update task status: ${taskStatus}`);
+              if (taskError) {
+                console.log(`Template update task error: ${taskError}`);
+              }
+            }
+
+            return taskStatus;
           },
           {
             message: 'Wait for template update task to complete',
