@@ -1,8 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { readFileSync } from 'fs';
 import path from 'path';
-
-// This file can only contain functions that are referenced by authentication.
+import { fileNameToEnvVar } from 'test-utils/helpers';
 
 export const logout = async (page: Page) => {
   await page
@@ -63,7 +62,10 @@ export const storeStorageStateAndToken = async (page: Page, fileName: string) =>
   const { cookies } = await page
     .context()
     .storageState({ path: path.join(__dirname, '../../.auth', fileName) });
-  process.env.TOKEN = `Bearer ${cookies.find((cookie) => cookie.name === 'cs_jwt')?.value}`;
+
+  const token = `Bearer ${cookies.find((cookie) => cookie.name === 'cs_jwt')?.value}`;
+  const envVarName = fileNameToEnvVar[fileName] || 'TOKEN';
+  process.env[envVarName] = token;
 };
 
 export const logInWithRHELOperatorUser = async (page: Page) =>
