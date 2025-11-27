@@ -23,8 +23,9 @@
       "test-utils/*": ["../_playwright-tests/test-utils/_playwright-tests/test-utils/src/*"]
     }
   },
-  "include": ["src", "_playwright-tests/**/*.ts"],
+  "include": ["src"],
   "exclude": [
+    "_playwright-tests",
     "cache",
     "auth",
     "node_modules",
