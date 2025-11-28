@@ -11,7 +11,7 @@ import {
 
 import useRootPath from 'Hooks/useRootPath';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { DETAILS_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
+import { TEMPLATES_ROUTE } from 'Routes/constants';
 import { useCreateTemplateQuery, useEditTemplateQuery } from 'services/Templates/TemplateQueries';
 import { AddTemplateContextProvider, useAddTemplateContext } from './AddTemplateContext';
 import RedhatRepositoriesStep from './steps/RedhatRepositoriesStep';
@@ -22,7 +22,7 @@ import DefineContentStep from './steps/DefineContentStep';
 import SetUpDateStep from './steps/SetUpDateStep';
 import DetailStep from './steps/DetailStep';
 import ReviewStep from './steps/ReviewStep';
-import { checkValidUUID, formatTemplateDate } from 'helpers';
+import { formatTemplateDate } from 'helpers';
 import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
 import { useMemo } from 'react';
@@ -59,9 +59,9 @@ const AddOrEditTemplateBase = () => {
 
   const { isEdit, templateRequest, checkIfCurrentStepValid, editUUID } = useAddTemplateContext();
 
-  // only checking when in EditTemplate mode
-  const isValidUUID = isEdit ? checkValidUUID(editUUID!) : null;
-  if (isValidUUID !== null && !isValidUUID) throw new Error('UUID is invalid');
+  // useSafeUUIDParam in AddTemplateContext already validates the UUID
+  // If in edit mode and UUID is invalid, it will be an empty string
+  if (isEdit && !editUUID) throw new Error('UUID is invalid');
 
   const initialIndex = useMemo(() => {
     const tabValue = urlSearchParams.get('tab');
@@ -74,7 +74,7 @@ const AddOrEditTemplateBase = () => {
   const onCancel = () =>
     navigate(
       isOverTemplateDetail
-        ? `${rootPath}/${TEMPLATES_ROUTE}/${editUUID}/${DETAILS_ROUTE}`
+        ? `${rootPath}/${TEMPLATES_ROUTE}/${editUUID}`
         : `${rootPath}/${TEMPLATES_ROUTE}`,
     );
 

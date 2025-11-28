@@ -1,14 +1,16 @@
 import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
-import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   ADVISORIES_ROUTE,
   CONTENT_ROUTE,
-  DETAILS_ROUTE,
   PACKAGES_ROUTE,
   SYSTEMS_ROUTE,
   REPOSITORIES_ROUTE,
+  TEMPLATES_ROUTE,
 } from 'Routes/constants';
+import { useEffect, useState } from 'react';
+import useRootPath from 'Hooks/useRootPath';
+import useSafeUUIDParam from '../../../../Hooks/useSafeUUIDParam';
 
 type ContentTabType = typeof CONTENT_ROUTE | typeof SYSTEMS_ROUTE;
 type ContentSubTabType =
@@ -16,51 +18,90 @@ type ContentSubTabType =
   | typeof ADVISORIES_ROUTE
   | typeof REPOSITORIES_ROUTE;
 
+const isSafeTabKey = (key: string) => {
+  const ALLOWED_ROUTES = [
+    CONTENT_ROUTE,
+    SYSTEMS_ROUTE,
+    PACKAGES_ROUTE,
+    ADVISORIES_ROUTE,
+    REPOSITORIES_ROUTE,
+  ];
+  return ALLOWED_ROUTES.includes(key);
+};
+
 export default function TemplateDetailsTabs() {
   const { pathname } = useLocation();
-  const [mainRoute, subpath] = pathname?.split(`${DETAILS_ROUTE}/`) || [];
-  const baseRoute = mainRoute + `${DETAILS_ROUTE}`;
+  const rootPath = useRootPath();
   const navigate = useNavigate();
+  const uuid = useSafeUUIDParam('templateUUID');
 
-  const [topTabKey, setTopTabKey] = useState<ContentTabType>(CONTENT_ROUTE);
-  const [contentTabKey, setContentTabKey] = useState<ContentSubTabType>(PACKAGES_ROUTE);
+  const baseRoute = `${rootPath}/${TEMPLATES_ROUTE}/${uuid}`;
 
+  // State to track active tabs
+  const [primaryTabKey, setPrimaryTabKey] = useState<ContentTabType>(SYSTEMS_ROUTE);
+  const [secondaryTabKey, setSecondaryTabKey] = useState<ContentSubTabType>(PACKAGES_ROUTE);
+
+  // Sync state with URL changes
   useEffect(() => {
-    const [topTabRoute, bottomTabRoute] = subpath?.split('/') || [];
+    const tabPath = pathname.replace(baseRoute, '').replace(/^\//, '');
+    const [firstSegment, secondSegment] = tabPath.split('/').filter(Boolean);
 
-    // Update tabs on route change
-    if (topTabRoute) {
-      setTopTabKey(topTabRoute as ContentTabType);
-      if (topTabRoute === CONTENT_ROUTE) {
-        setContentTabKey((bottomTabRoute as ContentSubTabType) || PACKAGES_ROUTE);
+    if ([SYSTEMS_ROUTE, CONTENT_ROUTE].includes(firstSegment)) {
+      setPrimaryTabKey(firstSegment as ContentTabType);
+    }
+
+    if (secondSegment && firstSegment === CONTENT_ROUTE) {
+      if ([PACKAGES_ROUTE, ADVISORIES_ROUTE, REPOSITORIES_ROUTE].includes(secondSegment)) {
+        setSecondaryTabKey(secondSegment as ContentSubTabType);
       }
     }
-  }, [subpath]);
+  }, [pathname, baseRoute]);
 
-  const navigateContentTab = (eventKey: string) => {
+  const handlePrimaryTabSelect = (eventKey: string) => {
+    if (!isSafeTabKey(eventKey)) {
+      return;
+    }
+
     if (eventKey === CONTENT_ROUTE) {
-      navigate(`${baseRoute}/${eventKey}/${contentTabKey}`);
+      navigate(
+        `${baseRoute}/${CONTENT_ROUTE}/${isSafeTabKey(secondaryTabKey) ? secondaryTabKey : PACKAGES_ROUTE}`,
+      );
     } else {
       navigate(`${baseRoute}/${eventKey}`);
     }
   };
 
+  const handleSecondaryTabSelect = (eventKey: string) => {
+    if (isSafeTabKey(eventKey)) {
+      navigate(`${baseRoute}/${CONTENT_ROUTE}/${eventKey}`);
+    }
+  };
+
   return (
     <Tabs
-      activeKey={topTabKey}
-      onSelect={(_, eventKey) => navigateContentTab(eventKey as string)}
-      aria-label='Snapshot detail tabs'
+      activeKey={primaryTabKey}
+      variant='default'
+      onSelect={(_, eventKey) => handlePrimaryTabSelect(eventKey as string)}
+      aria-label='Template detail tabs'
     >
+      <Tab
+        eventKey={SYSTEMS_ROUTE}
+        ouiaId='systems_tab'
+        title={<TabTitleText>Systems</TabTitleText>}
+        aria-label='Template systems detail tab'
+      />
       <Tab
         eventKey={CONTENT_ROUTE}
         ouiaId='content_tab'
         title={<TabTitleText>Content</TabTitleText>}
-        aria-label='Template package detail tab'
+        aria-label='Template content detail tab'
       >
         <Tabs
-          activeKey={contentTabKey}
-          onSelect={(_, eventKey) => navigate(`${baseRoute}/${topTabKey}/${eventKey}`)}
-          aria-label='Template details tab'
+          activeKey={secondaryTabKey}
+          onSelect={(_, eventKey) => handleSecondaryTabSelect(eventKey as string)}
+          aria-label='Template content subtabs'
+          isSubtab={true}
+          variant='secondary'
         >
           <Tab
             eventKey={PACKAGES_ROUTE}
@@ -82,12 +123,6 @@ export default function TemplateDetailsTabs() {
           />
         </Tabs>
       </Tab>
-      <Tab
-        eventKey={SYSTEMS_ROUTE}
-        ouiaId='systems_tab'
-        title={<TabTitleText>Systems</TabTitleText>}
-        aria-label='Template systems detail tab'
-      />
     </Tabs>
   );
 }

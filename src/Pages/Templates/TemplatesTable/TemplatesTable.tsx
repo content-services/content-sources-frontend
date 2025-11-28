@@ -35,7 +35,7 @@ import TemplateFilters from './components/TemplateFilters';
 import { formatDateDDMMMYYYY, formatDateUTC } from 'helpers';
 import Header from 'components/Header/Header';
 import useRootPath from 'Hooks/useRootPath';
-import { DELETE_ROUTE, DETAILS_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
+import { DELETE_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
 import useArchVersion from 'Hooks/useArchVersion';
 import { useTemplateList } from 'services/Templates/TemplateQueries';
 import StatusIcon from './components/StatusIcon';
@@ -217,10 +217,11 @@ const TemplatesTable = () => {
         ouiaId='templates_description'
         paragraph='View all content templates within your organization.'
         aboutData={{
-          header: 'About content templates',
-          text: 'Templates provide consistent content across environments and time. They enable you to control the scope of package and advisory updates that will be installed on selected systems.',
-          docsLabel: 'Content templates documentation',
-          docsURL:
+          headerContent: 'About content templates',
+          bodyContent:
+            'Templates provide consistent content across environments and time. They enable you to control the scope of package and advisory updates that will be installed on selected systems.',
+          linkText: 'Content templates documentation',
+          linkUrl:
             'https://docs.redhat.com/en/documentation/red_hat_insights/1-latest/html/managing_system_content_and_patch_updates_on_rhel_systems/patching-using-content-templates_patch-service-overview',
         }}
       />
@@ -312,11 +313,8 @@ const TemplatesTable = () => {
                         <Flex gap={{ default: 'gapXs' }}>
                           <FlexItem>
                             <Button
-                              className={classes.leftPaddingZero}
                               variant='link'
-                              onClick={() =>
-                                navigate(`${rootPath}/${TEMPLATES_ROUTE}/${uuid}/${DETAILS_ROUTE}`)
-                              }
+                              onClick={() => navigate(`${rootPath}/${TEMPLATES_ROUTE}/${uuid}`)}
                             >
                               {name}
                             </Button>
