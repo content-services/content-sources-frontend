@@ -1,3 +1,5 @@
+// demo comments
+
 import path from 'path';
 import { test, expect, cleanupRepositories, cleanupTemplates, randomName } from 'test-utils';
 import { RHSMClient, refreshSubscriptionManager } from './helpers/rhsmClient';
