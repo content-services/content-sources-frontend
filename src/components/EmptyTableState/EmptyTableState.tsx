@@ -36,26 +36,40 @@ const EmptyTableState = ({
   notFilteredButton,
 }: Props) => {
   const classes = useStyles();
-  return (
-    <EmptyState
-      headingLevel='h2'
-      icon={notFiltered ? PlusCircleIcon : SearchIcon}
-      titleText={<>{notFiltered ? `No ${itemName}` : `No ${itemName} match the filter criteria`}</>}
-      variant={EmptyStateVariant.full}
-      className={classes.emptyStateContainer}
-    >
-      <EmptyStateBody className={classes.emptyStateBody}>
-        {notFiltered ? notFilteredBody : 'Clear all filters to show more results.'}
-      </EmptyStateBody>
-      <EmptyStateFooter>
-        {notFiltered ? (
-          notFilteredButton
-        ) : (
+
+  const isFiltered = !notFiltered;
+
+  if (isFiltered) {
+    return (
+      <EmptyState
+        headingLevel='h2'
+        icon={SearchIcon}
+        titleText={<>{`No ${itemName} match the filter criteria`}</>}
+        variant={EmptyStateVariant.full}
+        className={classes.emptyStateContainer}
+      >
+        <EmptyStateBody className={classes.emptyStateBody}>
+          Clear all filters to show more results.
+        </EmptyStateBody>
+        <EmptyStateFooter>
           <Button ouiaId='clear_filters' variant='link' onClick={clearFilters}>
             Clear all filters
           </Button>
-        )}
-      </EmptyStateFooter>
+        </EmptyStateFooter>
+      </EmptyState>
+    );
+  }
+
+  return (
+    <EmptyState
+      headingLevel='h2'
+      icon={PlusCircleIcon}
+      titleText={<>{`No ${itemName}`}</>}
+      variant={EmptyStateVariant.full}
+      className={classes.emptyStateContainer}
+    >
+      <EmptyStateBody className={classes.emptyStateBody}>{notFilteredBody}</EmptyStateBody>
+      <EmptyStateFooter>{notFilteredButton}</EmptyStateFooter>
     </EmptyState>
   );
 };
