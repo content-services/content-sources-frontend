@@ -86,7 +86,6 @@ export default function DefineContentStep() {
                 </MenuToggle>
               </ConditionalTooltip>
             )}
-            onOpenChange={(isOpen) => setArchOpen(isOpen)}
             isOpen={archOpen}
           >
             <DropdownList>
@@ -133,7 +132,6 @@ export default function DefineContentStep() {
                 </MenuToggle>
               </ConditionalTooltip>
             )}
-            onOpenChange={(isOpen) => setVersionOpen(isOpen)}
             isOpen={versionOpen}
           >
             <DropdownList>
