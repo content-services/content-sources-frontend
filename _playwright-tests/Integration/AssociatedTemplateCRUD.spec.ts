@@ -8,6 +8,7 @@ import { RHSMClient, refreshSubscriptionManager, waitForRhcdActive } from './hel
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
 import { closeGenericPopupsIfExist, getRowByNameOrUrl } from '../UI/helpers/helpers';
 import { pollForSystemTemplateAttachment, isInInventory } from './helpers/systemHelpers';
+import { performance } from 'perf_hooks';
 
 const templateNamePrefix = 'associated_template_test';
 const templateName = `${templateNamePrefix}-${randomName()}`;
@@ -93,14 +94,18 @@ test.describe('Associated Template CRUD', () => {
       hostname = await regClient.GetHostname();
       console.log('System hostname:', hostname);
 
-      await expect.poll(
-        async () => await isInInventory(page, hostname, true),
-          {
-            message: 'System did not appear in inventory in time',
-            timeout: 600_000,
-            intervals: [10_000],
-          }
-        ).toBe(true);
+      const start = performance.now();
+
+      await expect
+        .poll(async () => await isInInventory(page, hostname, true), {
+          message: 'System did not appear in inventory in time',
+          timeout: 600_000,
+          intervals: [10_000],
+        })
+        .toBe(true);
+
+      const durationSec = (performance.now() - start) / 1000;
+      console.log(`⏰ Waiting on host to appear in Patch took ${durationSec.toFixed(3)} seconds`);
 
       const isAttached = await pollForSystemTemplateAttachment(page, hostname, true, 10_000, 12);
       expect(isAttached, 'system should be attached to template').toBe(true);
