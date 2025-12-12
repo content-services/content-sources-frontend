@@ -2,7 +2,11 @@ import { test, expect } from 'test-utils';
 import { cleanupRepositories, cleanupTemplates, randomName } from 'test-utils/helpers';
 
 import { navigateToRepositories, navigateToTemplates } from './helpers/navHelpers';
-import { closeGenericPopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
+import {
+  closeGenericPopupsIfExist,
+  closeNotificationPopup,
+  getRowByNameOrUrl,
+} from './helpers/helpers';
 import { createCustomRepo } from './helpers/createRepositories';
 import { randomUrl } from './helpers/repoHelpers';
 
@@ -107,6 +111,7 @@ test.describe('Templates CRUD', () => {
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();
+      await closeNotificationPopup(page, `Content Template "${templateName}" created`);
       const rowTemplate = await getRowByNameOrUrl(page, templateName);
       await expect(rowTemplate.getByText('Valid')).toBeVisible({ timeout: 60000 });
     });
@@ -147,6 +152,7 @@ test.describe('Templates CRUD', () => {
       await page.getByPlaceholder('Description').fill('Template test edited');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Confirm changes', exact: true }).click();
+      await closeNotificationPopup(page, `Successfully edited template "${templateName}-edited"`);
     });
     await test.step('Delete the template', async () => {
       await navigateToTemplates(page);

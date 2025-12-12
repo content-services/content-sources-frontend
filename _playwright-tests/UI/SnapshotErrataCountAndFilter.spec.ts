@@ -1,7 +1,11 @@
 import { test, expect } from 'test-utils';
 import { cleanupRepositories, randomName } from 'test-utils/helpers';
 import { navigateToRepositories } from './helpers/navHelpers';
-import { closeGenericPopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
+import {
+  closeGenericPopupsIfExist,
+  closeNotificationPopup,
+  getRowByNameOrUrl,
+} from './helpers/helpers';
 
 test.describe('Snapshot Errata Count and Filter', () => {
   test('Verify errata count matches after snapshotting and test filtering', async ({
@@ -31,6 +35,7 @@ test.describe('Snapshot Errata Count and Filter', () => {
       await addRepoModal.getByLabel('URL').fill(firstRepoUrl);
 
       await addRepoModal.getByRole('button', { name: 'Save', exact: true }).click();
+      await closeNotificationPopup(page, `Custom repository "${firstSnapshotName}" added`);
 
       await getRowByNameOrUrl(page, firstSnapshotName);
       await expect(addRepoModal).toBeHidden();
@@ -63,7 +68,7 @@ test.describe('Snapshot Errata Count and Filter', () => {
       await editRepoModal.getByLabel('URL').fill(secondRepoUrl);
 
       await editRepoModal.getByRole('button', { name: 'Save changes', exact: true }).click();
-
+      await closeNotificationPopup(page, `Successfully edited repository "${secondSnapshotName}"`);
       const editedRow = await getRowByNameOrUrl(page, secondSnapshotName);
       await expect(editedRow).toBeVisible();
       await expect(editRepoModal).toBeHidden();

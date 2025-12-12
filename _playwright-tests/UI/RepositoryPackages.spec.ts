@@ -2,7 +2,11 @@ import { test, expect } from 'test-utils';
 import { cleanupRepositories, randomName } from 'test-utils/helpers';
 
 import { navigateToRepositories } from './helpers/navHelpers';
-import { closeGenericPopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
+import {
+  closeGenericPopupsIfExist,
+  closeNotificationPopup,
+  getRowByNameOrUrl,
+} from './helpers/helpers';
 
 const repoNamePrefix = 'snapshot-package-list-test';
 const repoName = `${repoNamePrefix}-${randomName()}`;
@@ -27,6 +31,7 @@ test.describe('Snapshot Package Count and List', () => {
       await page.getByLabel('Snapshotting').click();
       await page.getByRole('textbox', { name: 'URL', exact: true }).fill(repoUrl);
       await page.getByRole('button', { name: 'Save', exact: true }).click();
+      await closeNotificationPopup(page, `Custom repository "${repoName}" added`);
     });
 
     await test.step('Wait for status to be "Valid"', async () => {
@@ -51,6 +56,7 @@ test.describe('Snapshot Package Count and List', () => {
       await page.getByPlaceholder('Enter name', { exact: true }).fill(editedRepo);
       await page.getByRole('textbox', { name: 'URL', exact: true }).fill(editedRepoUrl);
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+      await closeNotificationPopup(page, `Successfully edited repository "${editedRepo}"`);
       const editedRow = await getRowByNameOrUrl(page, editedRepo);
       await expect(editedRow.getByText('Valid')).toBeVisible({ timeout: 60000 });
     });

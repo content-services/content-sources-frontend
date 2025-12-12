@@ -6,7 +6,11 @@ import {
 } from '../test-utils/_playwright-tests/test-utils/src';
 import { RHSMClient, refreshSubscriptionManager, waitForRhcdActive } from './helpers/rhsmClient';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
-import { closeGenericPopupsIfExist, getRowByNameOrUrl } from '../UI/helpers/helpers';
+import {
+  closeGenericPopupsIfExist,
+  closeNotificationPopup,
+  getRowByNameOrUrl,
+} from '../UI/helpers/helpers';
 import { pollForSystemTemplateAttachment, isInInventory } from './helpers/systemHelpers';
 
 const templateNamePrefix = 'associated_template_test';
@@ -64,6 +68,8 @@ test.describe('Associated Template CRUD', () => {
 
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();
+      await closeNotificationPopup(page, `Content Template "${templateName}" created`);
+
       const rowTemplate = await getRowByNameOrUrl(page, `${templateName}`);
       await expect(rowTemplate.getByText('Valid'), 'repo should show Valid status').toBeVisible({
         timeout: 660000,

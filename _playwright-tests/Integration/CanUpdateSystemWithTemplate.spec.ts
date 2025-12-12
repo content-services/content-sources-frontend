@@ -9,7 +9,11 @@ import {
 import { RHSMClient, refreshSubscriptionManager, waitForRhcdActive } from './helpers/rhsmClient';
 import { runCmd } from './helpers/helpers';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
-import { closeGenericPopupsIfExist, getRowByNameOrUrl } from '../UI/helpers/helpers';
+import {
+  closeGenericPopupsIfExist,
+  closeNotificationPopup,
+  getRowByNameOrUrl,
+} from '../UI/helpers/helpers';
 
 const templateNamePrefix = 'integration_test_template';
 const templateName = `${templateNamePrefix}-${randomName()}`;
@@ -65,6 +69,9 @@ test.describe('Test System With Template', () => {
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();
+      expect(await closeNotificationPopup(page, `Content Template "${templateName}" created`)).toBe(
+        true,
+      );
       const rowTemplate = await getRowByNameOrUrl(page, `${templateName}`);
       await expect(rowTemplate.getByText('Valid')).toBeVisible({ timeout: 660000 });
     });
@@ -126,6 +133,7 @@ test.describe('Test System With Template', () => {
       await page.getByPlaceholder('Description').fill('Template test edited');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Confirm changes', exact: true }).click();
+      await closeNotificationPopup(page, `Successfully edited template "${templateName}"`);
 
       // Wait for the template update task to complete
       await expect
