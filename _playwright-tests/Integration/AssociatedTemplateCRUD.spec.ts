@@ -4,7 +4,7 @@ import {
   cleanupTemplates,
   randomName,
 } from '../test-utils/_playwright-tests/test-utils/src';
-import { RHSMClient, refreshSubscriptionManager, waitForRhcdActive } from './helpers/rhsmClient';
+import { RHSMClient } from './helpers/rhsmClient';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
 import {
   closeGenericPopupsIfExist,
@@ -12,6 +12,7 @@ import {
   waitForValidStatus,
 } from '../UI/helpers/helpers';
 import { pollForSystemTemplateAttachment, isInInventory } from './helpers/systemHelpers';
+import { performance } from 'perf_hooks';
 
 const templateNamePrefix = 'associated_template_test';
 const templateName = `${templateNamePrefix}-${randomName()}`;
@@ -73,6 +74,9 @@ test.describe('Associated Template CRUD', () => {
     await test.step('Register system with template using RHSM client', async () => {
       await regClient.Boot('rhel9');
 
+      hostname = await regClient.GetHostname();
+      console.log('System hostname:', hostname);
+
       const reg = await regClient.RegisterRHC(
         process.env.ACTIVATION_KEY_1,
         process.env.ORG_ID_1,
@@ -84,20 +88,21 @@ test.describe('Associated Template CRUD', () => {
       }
       expect(reg?.exitCode, 'registration should be successful').toBe(0);
 
-      await waitForRhcdActive(regClient);
+      const start = performance.now();
 
-      await refreshSubscriptionManager(regClient);
+      await expect
+        .poll(async () => await isInInventory(page, hostname, true), {
+          message: 'System did not appear in inventory in time',
+          timeout: 600_000,
+          intervals: [10_000],
+        })
+        .toBe(true);
+
+      const durationSec = (performance.now() - start) / 1000;
+      console.log(`⏰ Waiting on host to appear in Patch took ${durationSec.toFixed(3)} seconds`);
     });
 
     await test.step('Verify system is attached to template', async () => {
-      hostname = await regClient.GetHostname();
-      console.log('System hostname:', hostname);
-
-      // Check if system exists in inventory before polling
-      await test.step('Check initial system state in inventory', async () => {
-        await isInInventory(page, hostname, true);
-      });
-
       const isAttached = await pollForSystemTemplateAttachment(page, hostname, true, 10_000, 12);
       expect(isAttached, 'system should be attached to template').toBe(true);
     });
