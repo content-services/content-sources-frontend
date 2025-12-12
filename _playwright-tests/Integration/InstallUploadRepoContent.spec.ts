@@ -54,6 +54,7 @@ test.describe('Install Upload Repo Content', () => {
             resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,
           { timeout: 600000 },
         ),
+        closeNotificationPopup(page, `Custom repository "${uploadRepoName}" added`),
       ]);
 
       // Upload can fail if repository is not valid HMS-9856
@@ -111,6 +112,7 @@ test.describe('Install Upload Repo Content', () => {
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();
+      await closeNotificationPopup(page, `Content Template "${templateName}" created`);
       const rowTemplate = await getRowByNameOrUrl(page, `${templateName}`);
       await expect(rowTemplate.getByText('Valid')).toBeVisible({ timeout: 660000 });
     });

@@ -1,7 +1,11 @@
 import { test, expect } from 'test-utils';
 import { cleanupRepositories, randomName, randomUrl } from 'test-utils/helpers';
 import { navigateToRepositories } from './helpers/navHelpers';
-import { closeGenericPopupsIfExist, getRowByNameOrUrl } from './helpers/helpers';
+import {
+  closeGenericPopupsIfExist,
+  closeNotificationPopup,
+  getRowByNameOrUrl,
+} from './helpers/helpers';
 
 const repoNamePrefix = 'Repo-CRUD';
 const repoName = `${repoNamePrefix}-${randomName()}`;
@@ -24,6 +28,7 @@ test.describe('Custom Repositories CRUD', () => {
       await page.getByLabel('Introspect only').click();
       await page.getByRole('textbox', { name: 'URL', exact: true }).fill(url);
       await page.getByRole('button', { name: 'Save', exact: true }).click();
+      await closeNotificationPopup(page, `Custom repository "${repoName}" added`);
     });
 
     await test.step('Wait for status to be "Valid"', async () => {
@@ -50,6 +55,7 @@ test.describe('Custom Repositories CRUD', () => {
       await page.getByPlaceholder('https://', { exact: true }).fill(urlWithoutSlash);
       await page.getByLabel('Snapshotting').click();
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+      await closeNotificationPopup(page, `Successfully edited repository "${repoName}-Edited"`);
     });
 
     await test.step('Wait for status to be "Valid"', async () => {
