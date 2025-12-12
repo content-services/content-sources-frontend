@@ -53,7 +53,7 @@ export const closeNotificationPopup = async (
   const locator = page.locator(alertSelector).filter({ hasText: popupText });
 
   await expect(locator.first()).toBeVisible({ timeout });
-  await locator.first().getByRole('button').first().click();
+  await locator.first().getByLabel('close-notification').click();
   await expect(locator.first()).toBeHidden();
 };
 

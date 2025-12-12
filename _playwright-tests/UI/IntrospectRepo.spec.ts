@@ -3,6 +3,7 @@ import { cleanupRepositories } from 'test-utils/helpers';
 import { navigateToRepositories } from './helpers/navHelpers';
 import {
   closeGenericPopupsIfExist,
+  closeNotificationPopup,
   getRowByNameOrUrl,
   getRowCellByHeader,
   waitForValidStatus,
@@ -39,6 +40,7 @@ test.describe('Introspect Repositories', () => {
           (resp) =>
             resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,
         ),
+        closeNotificationPopup(page, `Custom repository "${repoName}" added`),
         expect(page.getByText('Add custom repositories')).toBeHidden(),
       ]);
     });

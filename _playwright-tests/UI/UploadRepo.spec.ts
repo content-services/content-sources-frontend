@@ -3,6 +3,7 @@ import { test, expect, cleanupRepositories, waitWhileRepositoryIsPending } from 
 import { navigateToRepositories } from './helpers/navHelpers';
 import {
   closeGenericPopupsIfExist,
+  closeNotificationPopup,
   getRowByNameOrUrl,
   retry,
   waitForValidStatus,
@@ -56,6 +57,7 @@ test.describe('Upload Repositories', () => {
           (resp) =>
             resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,
         ),
+        closeNotificationPopup(page, `Custom repository "${uploadRepoName}" added`),
       ]);
 
       // Upload can fail if repository is not valid HMS-9856
@@ -80,6 +82,7 @@ test.describe('Upload Repositories', () => {
 
       // Confirm changes
       await page.getByRole('button', { name: 'Confirm changes' }).click();
+      // todo: add notification popup check
 
       // Verify the 'Valid' status
       await waitForValidStatus(page, uploadRepoName);

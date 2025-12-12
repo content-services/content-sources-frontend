@@ -2,7 +2,11 @@ import { test, expect } from 'test-utils';
 import { cleanupRepositories, randomName } from 'test-utils/helpers';
 
 import { navigateToRepositories } from './helpers/navHelpers';
-import { closeGenericPopupsIfExist, waitForValidStatus } from './helpers/helpers';
+import {
+  closeGenericPopupsIfExist,
+  waitForValidStatus,
+  closeNotificationPopup,
+} from './helpers/helpers';
 
 const repoNamePrefix = 'GPG-key';
 const repoName = `${repoNamePrefix}-${randomName()}`;
@@ -47,6 +51,7 @@ test.describe('Test GPG keys', () => {
       await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
       await page.getByPlaceholder('Paste GPG key or URL here').fill(packages_key);
       await page.getByRole('button', { name: 'Save', exact: true }).click();
+      await closeNotificationPopup(page, `Custom repository "${repoName}" added`);
     });
 
     await test.step('Change to Metadata GPG Key', async () => {
@@ -63,6 +68,7 @@ test.describe('Test GPG keys', () => {
       await page.getByText('Package and metadata').click();
       // Save button would be disabled for bad or incorrect gpg key
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+      await closeNotificationPopup(page, `Successfully edited repository "${repoName}"`);
     });
   });
 });

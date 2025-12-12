@@ -3,6 +3,7 @@ import { cleanupRepositories, randomName } from 'test-utils/helpers';
 import { navigateToRepositories, navigateToTemplates } from './helpers/navHelpers';
 import {
   closeGenericPopupsIfExist,
+  closeNotificationPopup,
   getRowByNameOrUrl,
   validateSnapshotTimestamp,
   waitForLastTaskStatus,
@@ -45,6 +46,7 @@ test.describe('Snapshot Repositories', () => {
     await test.step('Submit the form and wait for modal to disappear', async () => {
       await Promise.all([
         page.getByRole('button', { name: 'Save' }).first().click(),
+        closeNotificationPopup(page, `Custom repository "${repoName}" added`),
         page.waitForResponse(
           (resp) =>
             resp.url().includes('/bulk_create/') && resp.status() >= 200 && resp.status() < 300,
@@ -60,6 +62,7 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('textbox', { name: 'Name', exact: true }).fill(editedRepoName);
       await page.getByLabel('Snapshotting').click();
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+      await closeNotificationPopup(page, `Successfully edited repository "${editedRepoName}"`);
     });
 
     await test.step('Trigger snapshot manually', async () => {
@@ -67,6 +70,7 @@ test.describe('Snapshot Repositories', () => {
       await edited_row.getByLabel('Kebab toggle').click();
       // Trigger a snapshot manually
       await page.getByRole('menuitem', { name: 'Trigger snapshot' }).click();
+      await closeNotificationPopup(page, `Snapshot triggered successfully`);
       await waitForValidStatus(page, editedRepoName);
       await edited_row.getByLabel('Kebab toggle').click();
       await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
@@ -130,6 +134,7 @@ test.describe('Snapshot Repositories', () => {
         .getByRole('textbox', { name: 'URL', exact: true })
         .fill('https://fedorapeople.org/groups/katello/fakerepos/zoo/');
       await page.getByRole('button', { name: 'Save', exact: true }).click();
+      await closeNotificationPopup(page, `Custom repository "${repoName}" added`);
       await waitForValidStatus(page, repoName, 70000);
     });
 
@@ -146,6 +151,7 @@ test.describe('Snapshot Repositories', () => {
             .getByRole('textbox', { name: 'URL', exact: true })
             .fill(`https://fedorapeople.org/groups/katello/fakerepos/zoo${i}/`);
           await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+          await closeNotificationPopup(page, `Successfully edited repository "${repoName}"`);
         });
       }
 
@@ -188,6 +194,7 @@ test.describe('Snapshot Repositories', () => {
 
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();
+      await closeNotificationPopup(page, `Content Template "${templateName}" created`);
 
       const templateRow = await waitForValidStatus(page, templateName);
       await expect(templateRow.getByText('Use latest')).toBeVisible();

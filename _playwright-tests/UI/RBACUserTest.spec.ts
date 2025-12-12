@@ -2,7 +2,11 @@ import { test, expect } from '@playwright/test';
 import { deleteAllRepos } from './helpers/deleteRepositories';
 import { randomName, randomUrl } from './helpers/repoHelpers';
 import { navigateToRepositories } from './helpers/navHelpers';
-import { closeGenericPopupsIfExist, waitForValidStatus } from './helpers/helpers';
+import {
+  closeGenericPopupsIfExist,
+  closeNotificationPopup,
+  waitForValidStatus,
+} from './helpers/helpers';
 
 const repoNamePrefix = 'Repo-RBAC';
 const repoName = `${repoNamePrefix}-${randomName()}`;
@@ -25,6 +29,7 @@ test.describe('Create, update, and read a repo as admin user', () => {
       await page.getByLabel('Introspect only').click();
       await page.getByRole('textbox', { name: 'URL', exact: true }).fill(url);
       await page.getByRole('button', { name: 'Save', exact: true }).click();
+      await closeNotificationPopup(page, `Custom repository "${repoName}" added`);
     });
 
     await test.step('Read the repo', async () => {
@@ -39,6 +44,7 @@ test.describe('Create, update, and read a repo as admin user', () => {
     await test.step('Update the repository', async () => {
       await page.getByPlaceholder('Enter name', { exact: true }).fill(`${repoName}-Edited`);
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+      await closeNotificationPopup(page, `Successfully edited repository "${repoName}-Edited"`);
     });
   });
 

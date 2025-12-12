@@ -4,6 +4,7 @@ import { cleanupRepositories, randomName } from 'test-utils/helpers';
 import { navigateToRepositories } from './helpers/navHelpers';
 import {
   closeGenericPopupsIfExist,
+  closeNotificationPopup,
   getRowByNameOrUrl,
   waitForValidStatus,
 } from './helpers/helpers';
@@ -31,6 +32,7 @@ test.describe('Snapshot Package Count and List', () => {
       await page.getByLabel('Snapshotting').click();
       await page.getByRole('textbox', { name: 'URL', exact: true }).fill(repoUrl);
       await page.getByRole('button', { name: 'Save', exact: true }).click();
+      await closeNotificationPopup(page, `Custom repository "${repoName}" added`);
     });
 
     await test.step('Wait for status to be "Valid"', async () => {
@@ -54,6 +56,7 @@ test.describe('Snapshot Package Count and List', () => {
       await page.getByPlaceholder('Enter name', { exact: true }).fill(editedRepo);
       await page.getByRole('textbox', { name: 'URL', exact: true }).fill(editedRepoUrl);
       await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+      await closeNotificationPopup(page, `Successfully edited repository "${editedRepo}"`);
       await waitForValidStatus(page, editedRepo);
     });
 

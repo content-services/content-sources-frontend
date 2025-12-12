@@ -10,6 +10,7 @@ import {
   closeGenericPopupsIfExist,
   getRowByNameOrUrl,
   waitForValidStatus,
+  closeNotificationPopup,
 } from '../UI/helpers/helpers';
 import { pollForSystemTemplateAttachment, isInInventory } from './helpers/systemHelpers';
 
@@ -67,6 +68,7 @@ test.describe('Associated Template CRUD', () => {
 
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();
+      await closeNotificationPopup(page, `Content Template "${templateName}" created`);
       await waitForValidStatus(page, templateName, 660000, 'repo should show Valid status');
     });
 
