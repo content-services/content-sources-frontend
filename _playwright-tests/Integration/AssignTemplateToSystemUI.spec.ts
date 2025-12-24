@@ -88,6 +88,7 @@ test.describe('Assign Template to System via UI', () => {
       await expect(modalPage.getByRole('button', { name: 'Save', exact: true })).toBeDisabled({
         timeout: 30000,
       });
+      page.getByRole('button', { name: 'Refresh' }).click();
 
       const rowSystem = await getRowByNameOrUrl(modalPage, hostname);
       await rowSystem.getByRole('checkbox').check();
