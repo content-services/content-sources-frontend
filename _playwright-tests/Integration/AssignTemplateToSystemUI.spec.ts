@@ -3,6 +3,7 @@ import { refreshSubscriptionManager, RHSMClient, waitForRhcdActive } from './hel
 import { runCmd } from './helpers/helpers';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
 import { closeGenericPopupsIfExist, getRowByNameOrUrl } from '../UI/helpers/helpers';
+import { pollForSystemTemplateAttachment } from './helpers/systemHelpers';
 
 test.describe('Assign Template to System via UI', () => {
   const templateNamePrefix = 'Template_test_for_system_assignment';
@@ -82,6 +83,15 @@ test.describe('Assign Template to System via UI', () => {
     });
 
     await test.step('Assign template to systems', async () => {
+      // Wait for the system to appear
+      console.log('Waiting for system to be present...');
+      const isItPresent = await pollForSystemTemplateAttachment(
+        page,
+        hostname,
+        false, // System should NOT have a template yet
+      );
+      expect(isItPresent, 'System should be present').toBe(true);
+
       const modalPage = page.getByRole('dialog', { name: 'Assign template to systems' });
       await expect(modalPage).toBeVisible({ timeout: 30000 });
 
