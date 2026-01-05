@@ -19,7 +19,7 @@ test.describe('Assign Template to System via UI', () => {
     let hostname = '';
 
     await test.step('Boot and register RHSM client', async () => {
-      await regClient.Boot('rhel9');
+      await regClient.Boot('rhel8');
       hostname = await regClient.GetHostname();
       console.log('Container hostname:', hostname);
 
@@ -66,7 +66,7 @@ test.describe('Assign Template to System via UI', () => {
       await page.getByRole('button', { name: 'filter architecture' }).click();
       await page.getByRole('menuitem', { name: 'x86_64' }).click();
       await page.getByRole('button', { name: 'filter OS version' }).click();
-      await page.getByRole('menuitem', { name: 'el9' }).click();
+      await page.getByRole('menuitem', { name: 'el8' }).click();
       await nextButton.click();
 
       await expect(
