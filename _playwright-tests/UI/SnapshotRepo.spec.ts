@@ -107,7 +107,6 @@ test.describe('Snapshot Repositories', () => {
   });
 
   test('Snapshot deletion', async ({ page, client, cleanup }) => {
-    const smallRHRepo = 'Red Hat CodeReady Linux Builder for RHEL 9 ARM 64 (RPMs)';
     const repoNamePrefix = 'snapshot-deletion';
     const repoName = `${repoNamePrefix}-${randomName()}`;
     const templateName = `Test-template-for-snapshot-deletion-${randomName()}`;
@@ -161,33 +160,39 @@ test.describe('Snapshot Repositories', () => {
 
     await test.step('Create a template', async () => {
       await navigateToTemplates(page);
+
+      // step 1 - select repo version combination
       await page.getByRole('button', { name: 'Create template' }).click();
       await page.getByRole('button', { name: 'filter architecture' }).click();
       await page.getByRole('menuitem', { name: 'aarch64' }).click();
       await page.getByRole('button', { name: 'filter OS version' }).click();
-      await page.getByRole('menuitem', { name: 'el9' }).click();
+      await page.getByRole('menuitem', { name: 'el10' }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+      // step 2 - select additional repos - the hardcoded ones are already selected
+      // all other repositories are optional to select
       const modalPage = page.getByTestId('add_template_modal');
-      const rowRHELRepo = await getRowByNameOrUrl(modalPage, smallRHRepo);
-      await rowRHELRepo.getByLabel('Select row').click();
-      // wait till next button is enabled
       await page.getByRole('button', { name: 'Next', exact: true }).isEnabled();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
 
+      // step 3 - select other repos
       await expect(page.getByTestId('custom_repositories_step')).toBeVisible();
       const customRepo = await getRowByNameOrUrl(modalPage, repoName);
       await customRepo.getByLabel('Select row').click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
 
+      // step 4 - select snapshots
       await expect(page.getByTestId('set_up_date')).toBeVisible();
       await page.getByTestId('use-latest-snapshot-radio').click();
       await page.getByRole('radio', { name: 'Use the latest content' }).check();
       await page.getByRole('button', { name: 'Next' }).click();
 
-      await page.getByPlaceholder('Enter name').fill(`${templateName}`);
-      await page.getByPlaceholder('Description').fill('Template test');
+      // step 5 - fill in template description
+      await page.getByPlaceholder('Enter title').fill(`${templateName}`);
+      await page.getByPlaceholder('Enter detail').fill('Template test');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
 
+      // step 6 - create template
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();
 

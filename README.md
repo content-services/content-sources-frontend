@@ -83,6 +83,12 @@ One can also: `yarn test` to run the unit tests directly.
 
 ## Testing with Playwright
 
+There are 2 kinds of Playwright tests - UI tests and Itegration tests.
+
+### First time running Playwright
+
+Before running any of the Playwright tests for the first time:
+
 1. Ensure the correct node version is installed and in use: `nvm use`
 
 2. Copy the [example env file](playwright_example.env) and create a file named:`.env`
@@ -97,23 +103,46 @@ One can also: `yarn test` to run the unit tests directly.
 
    `yarn playwright install  --with-deps`
 
-4. Run the backend locally, steps to do this can be found in the [backend repository](https://github.com/content-services/content-sources-backend).
+### Running UI Playwright tests:
+
+1. Run the backend locally, steps to do this can be found in the [backend repository](https://github.com/content-services/content-sources-backend).
 
    Ensure that the backend is running prior to the following steps.
 
-5. `yarn local` will start up the front-end repository. If you do `yarn start` and choose stage, your tests will attempt to run against the stage ENV, please do not test in stage.
+2. make sure values in your `.env` file are:
+   1. `PROXY = ""`
+   2. `INTEGRATION=""`
 
-6. `yarn playwright test` will run the playwright test suite. `yarn playwright test --headed` will run the suite in a vnc-like browser so you can watch it's interactions.
+3. run `make repo-minimal` in the backend repository to import and snapshot the initial required RedHat repositories. Wait until all the repositories become `Valid`.
+
+4. `yarn local` will start up the front-end repository. If you do `yarn start` and choose stage, your tests will attempt to run against the stage ENV, please do not test in stage.
+
+5. `yarn playwright test` will run the playwright test suite. `yarn playwright test --headed` will run the suite in a vnc-like browser so you can watch it's interactions.
+
+### Running Integration Playwright tests with your frontend changes:
+
+1. Point Playwright to stage directly in your `.env` file (check `playwright_example.env`):
+   1. set proxy: `http://squid.corp.redhat.com:3128`
+   2. change URL to: `https://stage.foo.redhat.com` to run against stage backend
+2. set the `INTEGRATION` flag to `true` in your `.env`
+
+3. For Podman, uncomment the DOCKER_SOCKET option in the `.env` file, so testing containers can reach out: `DOCKER_SOCKET="/tmp/podman.sock"`
+
+4. For Podman to serve the API for client testing, enter the following into a terminal and let it run: `podman system service -t 0 unix:///tmp/podman.sock`
+
+5. `yarn start:stage` to run your local frontend against stage
+
+6. Run the tests
+
+For running RBAC tests locally you just need to set the RBAC environment variable to `true`. See the `playwright_example.env` file for the `RBAC` flag.
+
+For any other `.env` variables you might need consult our `aws account`.
+
+To add new users, edit the `ALL_USERS` array in `_playwright-tests/auth.setup.ts`. To authenticate only specific users, set `AUTH_USERS=admin,readonly` (comma-separated keys).
 
 For tips and recommendations on how to write Playwright tests. Check out the Playwright [style guide](/_playwright-tests/style_guide.md) in this repo.
 
 It is recommended to test using vs-code and the [Playwright Test module for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright). But other editors do have similar plugins to for ease of use, if so desired.
-
-For running the integration tests you will need to point playwright to stage directly (i.e.: set proxy and change URL, check `playwright_example.env`), set the `INTEGRATION` flag to true and run the tests.
-
-For running RBAC tests locally you just need to set the RBAC environment variable to `true`. See the `playwright_example.env` file for the `RBAC` flag.
-
-To add new users, edit the `ALL_USERS` array in `_playwright-tests/auth.setup.ts`. To authenticate only specific users, set `AUTH_USERS=admin,readonly` (comma-separated keys).
 
 ### Shared Playwright test utilities
 
@@ -137,23 +166,7 @@ _I am using the regular submodule setup. When working on new tests I thought of 
 
 </details>
 
-## Running integration tests
-
-## Podman
-
-For podman to serve the API for client testing, enter:
-
-```
-podman system service -t 0 unix:///tmp/podman.sock
-```
-
-Uncomment the DOCKER_SOCKET option in the `.env file:
-
-```
-DOCKER_SOCKET="/tmp/podman.sock"
-```
-
-## PR checks and linking front-end/back-end PRs for testing
+### PR checks and linking front-end/back-end PRs for testing
 
 The CICD pipeline for playwright (both front-end and back-end) will check in the description of the front-end PRs for the following formatted text:
 `#testwith https://github.com/content-services/content-sources-backend/pull/<PR NUMBER>`

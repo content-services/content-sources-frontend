@@ -32,7 +32,7 @@ export const createCustomRepo = async (
   const url = await unusedRepoUrl();
   const repoData = {
     distribution_arch: 'aarch64',
-    distribution_versions: ['8', '9'],
+    distribution_versions: ['9', '10'],
     name: repoName,
     origin: 'external',
     snapshot: true,

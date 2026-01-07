@@ -66,8 +66,8 @@ test.describe('Test System With Template', () => {
       await page.getByPlaceholder('YYYY-MM-DD', { exact: true }).fill('2021-05-17'); // Older than any snapshot date
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await expect(page.getByText('Enter template details')).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(`${templateName}`);
-      await page.getByPlaceholder('Description').fill('Template test');
+      await page.getByPlaceholder('Enter title').fill(`${templateName}`);
+      await page.getByPlaceholder('Enter detail').fill('Template test');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();

@@ -74,8 +74,8 @@ test.describe('Assign Template to System via UI', () => {
       await nextButton.click();
 
       await expect(page.getByText('Enter template details')).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(templateName);
-      await page.getByPlaceholder('Description').fill('Test template for system assignment');
+      await page.getByPlaceholder('Enter title').fill(templateName);
+      await page.getByPlaceholder('Enter detail').fill('Test template for system assignment');
       await nextButton.click();
 
       await page.getByRole('button', { name: 'Create template and add to systems' }).click();
