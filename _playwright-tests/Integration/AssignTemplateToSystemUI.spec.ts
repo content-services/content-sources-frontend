@@ -3,7 +3,7 @@ import { refreshSubscriptionManager, RHSMClient } from './helpers/rhsmClient';
 import { runCmd } from './helpers/helpers';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
 import { closeGenericPopupsIfExist, getRowByNameOrUrl } from '../UI/helpers/helpers';
-import { isInInventory } from './helpers/systemHelpers';
+import { isInPatch } from './helpers/systemHelpers';
 
 test.describe('Assign Template to System via UI', () => {
   const templateNamePrefix = 'Template_test_for_system_assignment';
@@ -30,7 +30,7 @@ test.describe('Assign Template to System via UI', () => {
       }
 
       await expect
-        .poll(async () => await isInInventory(page, hostname, true), {
+        .poll(async () => await isInPatch(page, hostname, true), {
           message: 'System did not appear in inventory in time',
           timeout: 600_000,
           intervals: [10_000],

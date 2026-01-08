@@ -4,16 +4,16 @@ import { Page } from '@playwright/test';
 export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 /**
- * Diagnostic helper to check if a system exists in inventory and log its details.
+ * Diagnostic helper to check if a system exists in patch and log its details.
  * @param page - Playwright Page object
  * @param hostname - The display name of the system to check
- * @param expectInInventory - Whether we expect the system to be in inventory (true) or not (false)
+ * @param expectInPatch - Whether we expect the system to be in patch (true) or not (false)
  * @returns Promise<boolean> - true if system state matches expectation, false otherwise
  */
-export const isInInventory = async (
+export const isInPatch = async (
   page: Page,
   hostname: string,
-  expectInInventory: boolean = true,
+  expectInPatch: boolean = true,
 ): Promise<boolean> => {
   try {
     const response = await page.request.get(
@@ -32,8 +32,8 @@ export const isInInventory = async (
 
     if (system) {
       // System found
-      if (expectInInventory) {
-        console.log('✅ System found in inventory:', {
+      if (expectInPatch) {
+        console.log('✅ System found in patch:', {
           display_name: system.attributes.display_name,
           id: system.id,
           template_uuid: system.attributes.template_uuid,
@@ -41,7 +41,7 @@ export const isInInventory = async (
           last_upload: system.attributes.last_upload,
         });
       } else {
-        console.log('ℹ️  System still in inventory (expected to be removed):', {
+        console.log('ℹ️  System still in patch (expected to be removed):', {
           display_name: system.attributes.display_name,
           id: system.id,
           template_uuid: system.attributes.template_uuid,
@@ -53,16 +53,16 @@ export const isInInventory = async (
       return true;
     } else {
       // System not found
-      if (expectInInventory) {
-        console.log('⚠️  System not found in inventory yet. Will poll.');
+      if (expectInPatch) {
+        console.log('⚠️  System not found in patch yet. Will poll.');
         console.log(`   Total systems in response: ${body.data?.length || 0}`);
       } else {
-        console.log('✅ System already removed from inventory');
+        console.log('✅ System already removed from patch');
       }
       return false;
     }
   } catch (error) {
-    console.log('⚠️  Error checking system in inventory:', error);
+    console.log('⚠️  Error checking system in patch:', error);
     return false;
   }
 };
@@ -114,19 +114,17 @@ export const pollForSystemTemplateAttachment = async (
           );
 
           if (!system) {
-            // System not found in inventory
+            // System not found in patch
             if (expectedAttachment === false) {
-              // The system is expected to not be attached and so if it's not in inventory,
+              // The system is expected to not be attached and so if it's not in patch,
               // that's a success (system was removed)
-              console.log(
-                `System '${hostname}' not found in inventory (as expected - system removed)`,
-              );
+              console.log(`System '${hostname}' not found in patch (as expected - system removed)`);
               return true;
             } else {
               // If we expect the system to be attached but it's not found,
               // continue polling as it might be slow to appear
               console.log(
-                `System '${hostname}' not found in inventory, attempt ${attempts}/${maxAttempts}`,
+                `System '${hostname}' not found in patch, attempt ${attempts}/${maxAttempts}`,
               );
               shouldRetry = true;
             }
