@@ -11,7 +11,7 @@ import {
   getRowByNameOrUrl,
   waitForValidStatus,
 } from '../UI/helpers/helpers';
-import { pollForSystemTemplateAttachment, isInInventory } from './helpers/systemHelpers';
+import { pollForSystemTemplateAttachment, isInPatch } from './helpers/systemHelpers';
 import { performance } from 'perf_hooks';
 
 const templateNamePrefix = 'associated_template_test';
@@ -91,7 +91,7 @@ test.describe('Associated Template CRUD', () => {
       const start = performance.now();
 
       await expect
-        .poll(async () => await isInInventory(page, hostname, true), {
+        .poll(async () => await isInPatch(page, hostname, true), {
           message: 'System did not appear in inventory in time',
           timeout: 600_000,
           intervals: [10_000],
