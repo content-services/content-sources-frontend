@@ -68,6 +68,64 @@ export const isInPatch = async (
 };
 
 /**
+ * Diagnostic helper to check if a system exists in Inventory and log its details.
+ * @param page - Playwright Page object
+ * @param hostname - The display name of the system to check
+ * @param expectInInventory - Whether we expect the system to be in inventory (true) or not (false)
+ * @returns Promise<boolean> - true if system state matches expectation, false otherwise
+ */
+export const isInInventory = async (
+  page: Page,
+  hostname: string,
+  expectInInventory: boolean = true,
+): Promise<boolean> => {
+  try {
+    const response = await page.request.get(
+      `/api/inventory/v1/hosts?display_name=${encodeURIComponent(hostname)}`,
+    );
+
+    if (response.status() !== 200) {
+      console.log(`⚠️  API request failed with status ${response.status()}`);
+      return false;
+    }
+
+    const body = await response.json();
+    const system = body.results;
+
+    if (system && system.length == 1) {
+      // System found
+      if (expectInInventory) {
+        console.log('✅ System found in inventory:', {
+          display_name: system[0].display_name,
+          id: system[0].id,
+          last_upload: system[0].last_check_in,
+        });
+      } else {
+        console.log('ℹ️  System still in invenotry (expected to be removed):', {
+          display_name: system[0].display_name,
+          id: system[0].id,
+          last_upload: system[0].last_check_in,
+        });
+        console.log('   Will poll for removal.');
+      }
+      return true;
+    } else {
+      // System not found
+      if (expectInInventory) {
+        console.log('⚠️  System not found in inventory yet. Will poll.');
+        console.log(`   Total systems in response: ${body.results?.length || 0}`);
+      } else {
+        console.log('✅ System already removed from inventory');
+      }
+      return false;
+    }
+  } catch (error) {
+    console.log('⚠️  Error checking system in inventory:', error);
+    return false;
+  }
+};
+
+/**
  * Polls the API to check if a system with the given host name is attached to a template.
  * @param page - Playwright Page object
  * @param hostname - The display name of the system to check
