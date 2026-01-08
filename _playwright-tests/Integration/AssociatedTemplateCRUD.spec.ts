@@ -11,7 +11,7 @@ import {
   getRowByNameOrUrl,
   waitForValidStatus,
 } from '../UI/helpers/helpers';
-import { pollForSystemTemplateAttachment, isInPatch } from './helpers/systemHelpers';
+import { pollForSystemTemplateAttachment, isInPatch, isInInventory } from './helpers/systemHelpers';
 import { performance } from 'perf_hooks';
 
 const templateNamePrefix = 'associated_template_test';
@@ -91,15 +91,28 @@ test.describe('Associated Template CRUD', () => {
       const start = performance.now();
 
       await expect
-        .poll(async () => await isInPatch(page, hostname, true), {
+        .poll(async () => await isInInventory(page, hostname, true), {
           message: 'System did not appear in inventory in time',
           timeout: 600_000,
-          intervals: [10_000],
         })
         .toBe(true);
 
-      const durationSec = (performance.now() - start) / 1000;
-      console.log(`Timing: Wait on host to appear in Patch - ${durationSec.toFixed(3)} seconds`);
+      const inventoryDone = performance.now();
+
+      await expect
+        .poll(async () => await isInPatch(page, hostname, true), {
+          message: 'System did not appear in patch in time',
+          timeout: 600_000,
+        })
+        .toBe(true);
+
+      const end = performance.now();
+      const inventoryDuration = (inventoryDone - start) / 1000;
+      const patchDuration = (end - inventoryDone) / 1000;
+      const wholeDuration = (end - start) / 1000;
+      console.log(`Timing: processed_by_inventory_s - ${inventoryDuration.toFixed(3)}`);
+      console.log(`Timing: processed_by_patch_s - ${patchDuration.toFixed(3)}`);
+      console.log(`Timing: processed_by_insights_s - ${wholeDuration.toFixed(3)}`);
     });
 
     await test.step('Verify system is attached to template', async () => {
