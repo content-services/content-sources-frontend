@@ -5,6 +5,7 @@ test.describe('Check RHEL repos have hourly snapshot tasks', () => {
     client,
   }) => {
     const repositoriesApi = new RepositoriesApi(client);
+    const now = Date.now();
 
     await test.step('Get RHEL repositories', async () => {
       const rhelRepos = (
@@ -25,11 +26,11 @@ test.describe('Check RHEL repos have hourly snapshot tasks', () => {
         const timestamp = taskQueuedAt.getTime();
         expect(isNaN(timestamp)).toBeFalsy();
 
-        const sixtyMinutesAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const sixtyMinutesAgo = new Date(now - 60 * 60 * 1000);
         console.log(
-          `Repo: ${repo.name}, Task queued at: ${taskQueuedAt.toISOString()} (${taskQueuedAt.toUTCString()}), Age: ${Math.round((Date.now() - taskQueuedAt.getTime()) / 60000)} minutes`,
+          `Repo: ${repo.name}, Current time: ${new Date(now).toISOString()}, Task queued at: ${taskQueuedAt.toISOString()}, Age: ${Math.round((now - taskQueuedAt.getTime()) / 60000)} minutes`,
         );
-        expect(taskQueuedAt > sixtyMinutesAgo).toBeTruthy();
+        expect(taskQueuedAt >= sixtyMinutesAgo).toBeTruthy();
       }
     });
   });
