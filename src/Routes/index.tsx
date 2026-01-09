@@ -43,6 +43,7 @@ import DeleteSnapshotsModal from 'Pages/Repositories/ContentListTable/components
 import AdminFeaturesTable from 'Pages/Repositories/AdminFeaturesTable/AdminFeaturesTable';
 import PopularRepositoriesTable from 'Pages/Repositories/PopularRepositoriesTable/PopularRepositoriesTable';
 import AssignTemplateModal from '../Pages/Templates/TemplateDetails/components/AssignTemplateModal/AssignTemplateModal';
+import CreateTemplateModal from 'features/createTemplateWorkflow/workflow/ui/CreateTemplateModal';
 
 export default function RepositoriesRoutes() {
   const key = useMemo(() => Math.random(), []);
@@ -168,6 +169,7 @@ export default function RepositoriesRoutes() {
           {rbac?.templateWrite && subscriptions?.red_hat_enterprise_linux ? (
             <>
               <Route key='1' path={ADD_ROUTE} element={<AddOrEditTemplate />} />
+              <Route key='5' path='spike' element={<CreateTemplateModal />} />
               <Route key='2' path={`:templateUUID/${EDIT_ROUTE}`} element={<AddOrEditTemplate />} />
               <Route
                 key='3'
