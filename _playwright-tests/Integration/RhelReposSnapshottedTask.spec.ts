@@ -28,7 +28,7 @@ test.describe('Check RHEL repos have hourly snapshot tasks', () => {
 
         const sixtyMinutesAgo = new Date(now - 60 * 60 * 1000);
         console.log(
-          `Repo: ${repo.name}, Current time: ${new Date(now).toISOString()} (${new Date(now).toUTCString()}), Task queued at: ${taskQueuedAt.toISOString()} (${taskQueuedAt.toUTCString()}), Age: ${Math.round((now - taskQueuedAt.getTime()) / 60000)} minutes`,
+          `Repo: ${repo.name}, Current time: ${new Date(now).toISOString()}, Task queued at: ${taskQueuedAt.toISOString()}, Age: ${Math.round((now - taskQueuedAt.getTime()) / 60000)} minutes`,
         );
         expect(taskQueuedAt >= sixtyMinutesAgo).toBeTruthy();
       }
