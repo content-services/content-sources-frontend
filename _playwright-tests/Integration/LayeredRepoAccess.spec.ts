@@ -13,7 +13,7 @@ const repos = [
 
 test.describe('Test layered repos access is restricted', () => {
   test.use({
-    storageState: '.auth/rhel-only-user.json',
+    storageState: '.auth/RHEL_ONLY_TOKEN.json',
     extraHTTPHeaders: process.env.RHEL_ONLY_TOKEN
       ? { Authorization: process.env.RHEL_ONLY_TOKEN }
       : {},
@@ -61,7 +61,7 @@ test.describe('Test layered repos access is restricted', () => {
 
 test.describe('Test layered repos access is granted', () => {
   test.use({
-    storageState: '.auth/layered-repo-user.json',
+    storageState: '.auth/LAYERED_REPO_TOKEN.json',
     extraHTTPHeaders: process.env.LAYERED_REPO_TOKEN
       ? { Authorization: process.env.LAYERED_REPO_TOKEN }
       : {},

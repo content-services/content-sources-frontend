@@ -59,7 +59,7 @@ export const storeStorageStateAndToken = async (page: Page, fileName: string) =>
   const { cookies } = await page
     .context()
     .storageState({ path: path.join(__dirname, '../../.auth', fileName) });
-  process.env.TOKEN = `Bearer ${cookies.find((cookie) => cookie.name === 'cs_jwt')?.value}`;
+  process.env.ADMIN_TOKEN = `Bearer ${cookies.find((cookie) => cookie.name === 'cs_jwt')?.value}`;
 };
 
 export const logInWithRHELOperatorUser = async (page: Page) =>

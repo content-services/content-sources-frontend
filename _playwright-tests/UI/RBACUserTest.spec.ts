@@ -10,7 +10,7 @@ const url = randomUrl();
 
 test.describe('Create, update, and read a repo as admin user', () => {
   test.skip(!process.env.RBAC, `Skipping as the RBAC environment variable isn't set to true.`);
-  test.use({ storageState: '.auth/admin_user.json' });
+  test.use({ storageState: '.auth/ADMIN_TOKEN.json' });
   test.describe.configure({ mode: 'serial' });
 
   test('Login as admin and manage repo', async ({ page }) => {
@@ -44,7 +44,7 @@ test.describe('Create, update, and read a repo as admin user', () => {
 
   test.describe('Check read-only user can view but not edit the repo', () => {
     test.use({
-      storageState: '.auth/read-only.json',
+      storageState: '.auth/READONLY_TOKEN.json',
       extraHTTPHeaders: process.env.READONLY_TOKEN
         ? { Authorization: process.env.READONLY_TOKEN }
         : {},
@@ -64,7 +64,7 @@ test.describe('Create, update, and read a repo as admin user', () => {
 
   test.describe('Check rhel-operator user can view but not edit the repo', () => {
     test.use({
-      storageState: '.auth/rhel_operator.json',
+      storageState: '.auth/RHEL_OPERATOR_TOKEN.json',
       extraHTTPHeaders: process.env.RHEL_OPERATOR_TOKEN
         ? { Authorization: process.env.RHEL_OPERATOR_TOKEN }
         : {},
