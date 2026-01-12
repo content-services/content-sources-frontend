@@ -22,7 +22,7 @@ let firstCount;
 
 test.describe('Test System With Template', () => {
   test.use({
-    storageState: '.auth/layered-repo-user.json',
+    storageState: '.auth/LAYERED_REPO_TOKEN.json',
     extraHTTPHeaders: process.env.LAYERED_REPO_TOKEN
       ? { Authorization: process.env.LAYERED_REPO_TOKEN }
       : {},

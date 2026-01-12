@@ -15,7 +15,7 @@ import pulpFixtures from './data/pulp_fixtures.json';
 
 test.describe('Pulp Fixture Repository Introspection', () => {
   test.use({
-    storageState: '.auth/stable_sam.json',
+    storageState: '.auth/STABLE_SAM_TOKEN.json',
     extraHTTPHeaders: process.env.STABLE_SAM_TOKEN
       ? { Authorization: process.env.STABLE_SAM_TOKEN }
       : {},

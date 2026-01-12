@@ -31,10 +31,10 @@ export default defineConfig({
     launchOptions: {
       args: ['--use-fake-device-for-media-stream'],
     },
-    ...(process.env.TOKEN
+    ...(process.env.ADMIN_TOKEN
       ? {
           extraHTTPHeaders: {
-            Authorization: process.env.TOKEN,
+            Authorization: process.env.ADMIN_TOKEN,
           },
         }
       : {}),
@@ -62,7 +62,7 @@ export default defineConfig({
             : [/switch-to-preview/, /local-only/],
           use: {
             ...devices['Desktop Chrome'],
-            storageState: `.auth/admin_user.json`,
+            storageState: `.auth/ADMIN_TOKEN.json`,
           },
           testIgnore: ['**/UI/**'],
           testDir: './_playwright-tests/Integration/',
@@ -72,7 +72,7 @@ export default defineConfig({
           name: 'UI',
           use: {
             ...devices['Desktop Chrome'],
-            storageState: '.auth/admin_user.json',
+            storageState: '.auth/ADMIN_TOKEN.json',
           },
           testIgnore: ['**/Integration/**'],
           testDir: './_playwright-tests/UI/',
@@ -85,7 +85,7 @@ export default defineConfig({
             grep: [/switch-to-preview/],
             use: {
               ...devices['Desktop Chrome'],
-              storageState: `.auth/admin_user.json`,
+              storageState: `.auth/ADMIN_TOKEN.json`,
             },
             dependencies: ['setup', 'integration'],
           },
@@ -94,7 +94,7 @@ export default defineConfig({
             grep: [/preview-only/],
             use: {
               ...devices['Desktop Chrome'],
-              storageState: `.auth/admin_user.json`,
+              storageState: `.auth/ADMIN_TOKEN.json`,
             },
             testDir: './_playwright-tests/Integration',
             dependencies: ['Switch to preview'],

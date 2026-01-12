@@ -8,7 +8,7 @@ test.describe('Template use requires a RHEL subscription', () => {
     `Skipping as the INTEGRATION and RBAC environment variables aren't both set to true.`,
   );
   test.use({
-    storageState: '.auth/no_subs_user.json',
+    storageState: '.auth/NO_SUBS_TOKEN.json',
     extraHTTPHeaders: process.env.NO_SUBS_TOKEN ? { Authorization: process.env.NO_SUBS_TOKEN } : {},
   });
 
