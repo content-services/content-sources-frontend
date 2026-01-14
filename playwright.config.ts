@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import { config } from 'dotenv';
 import path from 'path';
-config({ path: path.join(__dirname, './.env') });
+config({ path: path.join(__dirname, './.env'), quiet: true });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
