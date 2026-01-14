@@ -1,182 +1,193 @@
-import { expect, test } from '@playwright/test';
+/**
+ * Authentication Setup for Playwright Tests
+ *
+ * Authenticates users based on environment flags:
+ * - RBAC: enables readonly, rhel_operator users
+ * - INTEGRATION: enables layered_repo, rhel_only, stable_sam users
+ * - AUTH_USERS: override to authenticate specific users (comma-separated)
+ *
+ * Admin is always authenticated last and its state becomes the default.
+ */
+
+import { test } from '@playwright/test';
 import {
   ensureNotInPreview,
   storeStorageStateAndToken,
-  throwIfMissingEnvVariables,
   logout,
-  logInWithReadOnlyUser,
-  logInWithAdminUser,
-  logInWithRHELOperatorUser,
-  logInWithLayeredRepoUser,
-  logInWithRHELOnlyUser,
-  logInWithNoSubsUser,
-  logInWithStableSamUser,
-} from './helpers/loginHelpers';
+  logInWithUsernameAndPassword,
+} from './authHelpers';
 
 import { existsSync, mkdirSync } from 'fs';
-import path from 'path';
+
 const authDir = '.auth';
 if (!existsSync(authDir)) {
   mkdirSync(authDir);
 }
 
+const ADMIN_KEY = 'admin';
+
+type UserConfig = {
+  key: string;
+  tokenEnvVar: string;
+  credentialEnvVars: [string, string]; // [usernameEnvVar, passwordEnvVar]
+  requiredFlags: {
+    rbac?: boolean;
+    integration?: boolean;
+  };
+};
+
+const ALL_USERS: UserConfig[] = [
+  {
+    key: ADMIN_KEY,
+    tokenEnvVar: 'ADMIN_TOKEN',
+    credentialEnvVars: ['ADMIN_USERNAME', 'ADMIN_PASSWORD'],
+    requiredFlags: {},
+  },
+  {
+    key: 'readonly',
+    tokenEnvVar: 'READONLY_TOKEN',
+    credentialEnvVars: ['READONLY_USERNAME', 'READONLY_PASSWORD'],
+    requiredFlags: { rbac: true },
+  },
+  {
+    key: 'rhel_operator',
+    tokenEnvVar: 'RHEL_OPERATOR_TOKEN',
+    credentialEnvVars: ['RHEL_OPERATOR_USERNAME', 'RHEL_OPERATOR_PASSWORD'],
+    requiredFlags: { rbac: true },
+  },
+  {
+    key: 'layered_repo',
+    tokenEnvVar: 'LAYERED_REPO_TOKEN',
+    credentialEnvVars: ['LAYERED_REPO_ACCESS_USERNAME', 'LAYERED_REPO_ACCESS_PASSWORD'],
+    requiredFlags: { integration: true },
+  },
+  {
+    key: 'rhel_only',
+    tokenEnvVar: 'RHEL_ONLY_TOKEN',
+    credentialEnvVars: ['RHEL_ONLY_ACCESS_USERNAME', 'RHEL_ONLY_ACCESS_PASSWORD'],
+    requiredFlags: { integration: true },
+  },
+  {
+    key: 'stable_sam',
+    tokenEnvVar: 'STABLE_SAM_TOKEN',
+    credentialEnvVars: ['STABLE_SAM_USERNAME', 'STABLE_SAM_PASSWORD'],
+    requiredFlags: { integration: true },
+  },
+  {
+    key: 'no_subs',
+    tokenEnvVar: 'NO_SUBS_TOKEN',
+    credentialEnvVars: ['NO_SUBS_USER_USERNAME', 'NO_SUBS_USER_PASSWORD'],
+    requiredFlags: { integration: true, rbac: true },
+  },
+];
+
+/**
+ * Builds the list of users to authenticate based on environment flags.
+ * If AUTH_USERS is set, uses that list instead. Admin is always last.
+ */
+const buildActiveUsers = (): UserConfig[] => {
+  if (process.env.AUTH_USERS) {
+    const requestedKeys = process.env.AUTH_USERS.split(',').map((k) => k.trim());
+    const users = ALL_USERS.filter((u) => requestedKeys.includes(u.key));
+
+    if (requestedKeys.length != users.length) {
+      const missingUsers = requestedKeys.filter((k) => !users.find((u) => u.key === k));
+
+      console.log(`\u001b[48;5;160mUser(s): "${missingUsers.join(', ')}" not found!\x1b[0m`);
+      console.log(
+        `\u001b[48;5;27mAvailable ones are:\x1b[0m ${ALL_USERS.map((u) => u.key).join(', ')}`,
+      );
+
+      throw new Error(`Couldn't find user(s): ${missingUsers.join(', ')}`);
+    }
+
+    const adminIndex = users.findIndex((u) => u.key === ADMIN_KEY);
+    if (adminIndex !== -1 && adminIndex !== users.length - 1) {
+      const [admin] = users.splice(adminIndex, 1);
+      users.push(admin);
+    }
+    return users;
+  }
+
+  const users = ALL_USERS.filter((user) => {
+    const { rbac, integration } = user.requiredFlags;
+
+    if (!rbac && !integration) return false;
+
+    if (rbac && !process.env.RBAC) return false;
+    if (integration && !process.env.INTEGRATION) return false;
+
+    return true;
+  });
+
+  users.push(ALL_USERS.find((u) => u.key === ADMIN_KEY)!);
+
+  return users;
+};
+
+/**
+ * Returns the list of required environment variables based on selected users.
+ * Includes base vars, user credentials, and integration-specific vars.
+ */
+const getRequiredEnvVars = (users: UserConfig[]): string[] => {
+  const baseVars = ['BASE_URL'];
+  const userCredentials = users.flatMap((u) => u.credentialEnvVars);
+
+  const integrationVars = process.env.INTEGRATION
+    ? [
+        'RH_CLIENT_PROXY',
+        'ORG_ID_1',
+        'ACTIVATION_KEY_1',
+        'LAYERED_REPO_ACCESS_ORG_ID',
+        'LAYERED_REPO_ACCESS_ACTIVATION_KEY',
+        ...(process.env.BASE_URL?.includes('foo') ? [] : ['PROXY']),
+      ]
+    : [];
+
+  return [...new Set([...baseVars, ...userCredentials, ...integrationVars])];
+};
+
+/**
+ * Validates that all required environment variables are set.
+ * Throws an error at module load time if any are missing.
+ */
+const validateEnvVars = () => {
+  const wrongProxySettings = process.env.BASE_URL?.includes('foo') && !!process.env.PROXY;
+  if (wrongProxySettings) {
+    throw new Error(
+      '\u001b[48;5;160mYou are trying to test against a locally running frontend while having PROXY set, please unset it.\x1b[0m',
+    );
+  }
+  const required = getRequiredEnvVars(activeUsers);
+  const missing = required.filter((v) => !process.env[v]);
+  if (missing.length > 0) {
+    throw new Error('\u001b[48;5;160mMissing env variables:\x1b[0m ' + missing.join(', '), {});
+  }
+};
+
+const activeUsers = buildActiveUsers();
+
+validateEnvVars();
+
 test.describe('Setup Authentication States', () => {
-  test.describe.configure({ retries: 3 });
+  test.describe.configure({ retries: 2 });
 
-  test('Ensure needed ENV variables exist', async () => {
-    expect(() => throwIfMissingEnvVariables()).not.toThrow();
-  });
+  for (const user of activeUsers) {
+    test(`Authenticate ${user.key} user and save state`, async ({ page }) => {
+      test.setTimeout(60_000);
 
-  test('Authenticate rhel-operator user and save state', async ({ page }) => {
-    test.skip(!process.env.RBAC, `Skipping as the RBAC environment variable isn't set to true.`);
-    test.setTimeout(60_000);
+      await logInWithUsernameAndPassword(
+        page,
+        process.env[user.credentialEnvVars[0]],
+        process.env[user.credentialEnvVars[1]],
+      );
+      await ensureNotInPreview(page);
+      await storeStorageStateAndToken(page, user.tokenEnvVar);
 
-    // Login rhel-operator user
-    await logInWithRHELOperatorUser(page);
-
-    // Save state for rhel-operator user
-    const { cookies } = await page
-      .context()
-      .storageState({ path: path.join(__dirname, '../../.auth', 'RHEL_OPERATOR_TOKEN.json') });
-    const rhelOperatorToken = cookies.find((cookie) => cookie.name === 'cs_jwt')?.value;
-    expect(rhelOperatorToken).toBeDefined();
-
-    process.env.RHEL_OPERATOR_TOKEN = `Bearer ${rhelOperatorToken}`;
-
-    await storeStorageStateAndToken(page, 'RHEL_OPERATOR_TOKEN.json');
-    await logout(page);
-  });
-
-  test('Authenticate read-only user and save state', async ({ page }) => {
-    test.skip(!process.env.RBAC, `Skipping as the RBAC environment variable isn't set to true.`);
-    test.setTimeout(60_000);
-
-    // Login read-only user
-    await logInWithReadOnlyUser(page);
-
-    // Save state for read-only user
-    const { cookies } = await page
-      .context()
-      .storageState({ path: path.join(__dirname, '../../.auth', 'READONLY_TOKEN.json') });
-    const readOnlyToken = cookies.find((cookie) => cookie.name === 'cs_jwt')?.value;
-    expect(readOnlyToken).toBeDefined();
-
-    process.env.READONLY_TOKEN = `Bearer ${readOnlyToken}`;
-
-    await storeStorageStateAndToken(page, 'READONLY_TOKEN.json');
-    await logout(page);
-  });
-
-  test('Authenticate user with additional subscriptions and save state', async ({ page }) => {
-    test.skip(
-      !process.env.INTEGRATION,
-      `Skipping as the INTEGRATION environment variable isn't set to true.`,
-    );
-    test.setTimeout(60_000);
-
-    // Login layered repo user
-    await logInWithLayeredRepoUser(page);
-
-    // Save state for layered repo user
-    const { cookies } = await page
-      .context()
-      .storageState({ path: path.join(__dirname, '../../.auth', 'LAYERED_REPO_TOKEN.json') });
-    const layeredRepoToken = cookies.find((cookie) => cookie.name === 'cs_jwt')?.value;
-    expect(layeredRepoToken).toBeDefined();
-
-    process.env.LAYERED_REPO_TOKEN = `Bearer ${layeredRepoToken}`;
-
-    await storeStorageStateAndToken(page, 'LAYERED_REPO_TOKEN.json');
-    await logout(page);
-  });
-
-  test('Authenticate user with only RHEL subscription and save state', async ({ page }) => {
-    test.skip(
-      !process.env.INTEGRATION,
-      `Skipping as the INTEGRATION environment variable isn't set to true.`,
-    );
-    test.setTimeout(60_000);
-
-    // Login RHEL-only user
-    await logInWithRHELOnlyUser(page);
-
-    // Save state for RHEL-only user
-    const { cookies } = await page
-      .context()
-      .storageState({ path: path.join(__dirname, '../../.auth', 'RHEL_ONLY_TOKEN.json') });
-    const rhelOnlyToken = cookies.find((cookie) => cookie.name === 'cs_jwt')?.value;
-    expect(rhelOnlyToken).toBeDefined();
-
-    process.env.RHEL_ONLY_TOKEN = `Bearer ${rhelOnlyToken}`;
-
-    await storeStorageStateAndToken(page, 'RHEL_ONLY_TOKEN.json');
-    await logout(page);
-  });
-
-  test('Authenticate no-subs user and save state', async ({ page }) => {
-    test.skip(
-      !process.env.RBAC || !process.env.INTEGRATION,
-      `Skipping as the RBAC and INTEGRATION environment variables aren't both set to true.`,
-    );
-    test.setTimeout(60_000);
-
-    // Login no-subs user
-    await logInWithNoSubsUser(page);
-
-    // Save state for no-subs user
-    const { cookies } = await page
-      .context()
-      .storageState({ path: path.join(__dirname, '../../.auth', 'NO_SUBS_TOKEN.json') });
-    const noSubsToken = cookies.find((cookie) => cookie.name === 'cs_jwt')?.value;
-    expect(noSubsToken).toBeDefined();
-
-    process.env.NO_SUBS_TOKEN = `Bearer ${noSubsToken}`;
-
-    await storeStorageStateAndToken(page, 'NO_SUBS_TOKEN.json');
-    await logout(page);
-  });
-
-  test('Authenticate stable_sam user and save state', async ({ page }) => {
-    test.skip(
-      !process.env.INTEGRATION ||
-        !process.env.STABLE_SAM_USERNAME ||
-        !process.env.STABLE_SAM_PASSWORD,
-      'Skipping as INTEGRATION is not set or stable_sam credentials are not configured.',
-    );
-    test.setTimeout(60_000);
-
-    // Login stable_sam user
-    await logInWithStableSamUser(page);
-
-    // Save state for stable_sam user
-    const { cookies } = await page
-      .context()
-      .storageState({ path: path.join(__dirname, '../../.auth', 'STABLE_SAM_TOKEN.json') });
-    const stableSamToken = cookies.find((cookie) => cookie.name === 'cs_jwt')?.value;
-    expect(stableSamToken).toBeDefined();
-
-    process.env.STABLE_SAM_TOKEN = `Bearer ${stableSamToken}`;
-
-    await storeStorageStateAndToken(page, 'STABLE_SAM_TOKEN.json');
-    await logout(page);
-  });
-
-  test('Authenticate Default Admin User and Save State', async ({ page }) => {
-    test.setTimeout(60_000);
-
-    // Login default admin user
-    await logInWithAdminUser(page);
-    await ensureNotInPreview(page);
-
-    const { cookies } = await page
-      .context()
-      .storageState({ path: path.join(__dirname, '../../.auth', 'ADMIN_TOKEN.json') });
-    const adminToken = cookies.find((cookie) => cookie.name === 'cs_jwt')?.value;
-    expect(adminToken).toBeDefined();
-
-    process.env.ADMIN_TOKEN = `Bearer ${adminToken}`;
-
-    // Save state for default admin user
-    await storeStorageStateAndToken(page, 'ADMIN_TOKEN.json');
-  });
+      // Logout unless it's the admin (last user)
+      if (user.key !== ADMIN_KEY) {
+        await logout(page);
+      }
+    });
+  }
 });

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { navigateToRepositories } from '../UI/helpers/navHelpers';
-import { ensureInPreview } from '../helpers/loginHelpers';
+import { ensureInPreview } from '../authHelpers';
 
 test.describe('Switch to preview', { tag: '@switch-to-preview' }, () => {
   test('Click preview button', async ({ page }) => {

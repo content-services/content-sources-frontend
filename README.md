@@ -113,6 +113,8 @@ For running the integration tests you will need to point playwright to stage dir
 
 For running RBAC tests locally you just need to set the RBAC environment variable to `true`. See the `playwright_example.env` file for the `RBAC` flag.
 
+To add new users, edit the `ALL_USERS` array in `_playwright-tests/auth.setup.ts`. To authenticate only specific users, set `AUTH_USERS=admin,readonly` (comma-separated keys).
+
 ### Shared Playwright test utilities
 
 This repo contains a `_playwright-tests/test-utils` git submodule which has a set of shared helpers and fixtures (and API client) across our Playwright testing suites.
