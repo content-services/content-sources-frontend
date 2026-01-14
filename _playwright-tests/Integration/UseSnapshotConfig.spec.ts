@@ -9,7 +9,7 @@ import { runCmd } from './helpers/helpers';
 const repoNamePrefix = 'Snapshot_Config';
 
 test.describe('Use Snapshot Config', () => {
-  test('Use Snapshot Config', async ({ page, client, cleanup }) => {
+  test('Use Snapshot Config', async ({ page, client, cleanup, unusedRepoUrl }) => {
     let repoName = '';
     let fileContent = '';
 
@@ -24,7 +24,7 @@ test.describe('Use Snapshot Config', () => {
     await test.step('Verify "download config file" and "copy to clipboard config" content has same value', async () => {
       await navigateToRepositories(page);
       await closeGenericPopupsIfExist(page);
-      await createCustomRepo(page, repoName);
+      await createCustomRepo(page, repoName, unusedRepoUrl);
       const row = await waitForValidStatus(page, repoName, 60000);
 
       await navigateToSnapshotsOfRepository(page, row);
