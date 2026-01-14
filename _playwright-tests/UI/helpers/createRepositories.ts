@@ -1,19 +1,17 @@
 import { expect, type Page } from '@playwright/test';
-import { randomUrl } from './repoHelpers';
 
 export const bulkCreateRepos = async (
   { request }: Page,
   repoCount: number,
   repoNamePrefix: string,
+  unusedRepoUrl: () => Promise<string>,
 ) => {
   const list: Record<string, string | boolean | number>[] = [];
   for (let count = 1; count <= repoCount; count++) {
     const repoNum = `${count.toString().padStart(2, '0')}`;
-    const randomURL = () =>
-      `https://content-services.github.io/fixtures/yum/centirepos/repo${repoNum}/`;
     list.push({
       name: `${repoNamePrefix}-${repoNum}`,
-      url: randomURL(),
+      url: await unusedRepoUrl(),
       snapshot: false,
     });
   }
@@ -26,14 +24,19 @@ export const bulkCreateRepos = async (
   expect(response.status()).toBe(201);
 };
 
-export const createCustomRepo = async ({ request }: Page, repoName: string) => {
+export const createCustomRepo = async (
+  { request }: Page,
+  repoName: string,
+  unusedRepoUrl: () => Promise<string>,
+) => {
+  const url = await unusedRepoUrl();
   const repoData = {
     distribution_arch: 'aarch64',
     distribution_versions: ['8', '9'],
     name: repoName,
     origin: 'external',
     snapshot: true,
-    url: randomUrl(), // Ensure randomUrl() returns a valid string
+    url,
   };
 
   try {
