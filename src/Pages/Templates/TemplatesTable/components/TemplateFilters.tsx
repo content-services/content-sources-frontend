@@ -301,7 +301,7 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
               ouiaId='create_content_template'
               variant='primary'
               isDisabled={isLoading}
-              onClick={() => navigate('add')}
+              onClick={() => navigate('add', { state: { from: 'table' } })}
             >
               Create template
             </Button>
