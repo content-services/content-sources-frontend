@@ -1,5 +1,5 @@
 import { test, expect } from 'test-utils';
-import { cleanupRepositories, randomName, randomUrl } from 'test-utils/helpers';
+import { cleanupRepositories, randomName } from 'test-utils/helpers';
 import { navigateToRepositories } from './helpers/navHelpers';
 import {
   closeGenericPopupsIfExist,
@@ -9,10 +9,10 @@ import {
 
 const repoNamePrefix = 'Repo-CRUD';
 const repoName = `${repoNamePrefix}-${randomName()}`;
-const url = randomUrl();
 
 test.describe('Custom Repositories CRUD', () => {
-  test('Add, Read, update, delete a repo', async ({ page, client, cleanup }) => {
+  test('Add, Read, update, delete a repo', async ({ page, client, cleanup, unusedRepoUrl }) => {
+    const url = await unusedRepoUrl();
     await cleanup.runAndAdd(() => cleanupRepositories(client, repoNamePrefix));
     await navigateToRepositories(page);
     await closeGenericPopupsIfExist(page);

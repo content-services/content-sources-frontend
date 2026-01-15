@@ -8,10 +8,15 @@ import { bulkCreateRepos } from './helpers/createRepositories';
 const repoNamePrefix = 'custom_repo-pagination';
 
 test.describe('Custom repositories pagination', () => {
-  test('Verify pagination on custom repo page', async ({ page, client, cleanup }) => {
+  test('Verify pagination on custom repo page', async ({
+    page,
+    client,
+    cleanup,
+    unusedRepoUrl,
+  }) => {
     await test.step('Populate the custom repo table', async () => {
       await cleanup.runAndAdd(() => cleanupRepositories(client, repoNamePrefix));
-      await bulkCreateRepos(page, 12, repoNamePrefix);
+      await bulkCreateRepos(page, 12, repoNamePrefix, unusedRepoUrl);
       await navigateToRepositories(page);
       await closeGenericPopupsIfExist(page);
       await page.getByPlaceholder(/^Filter by name.*$/).fill(repoNamePrefix);

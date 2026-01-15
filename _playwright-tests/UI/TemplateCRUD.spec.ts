@@ -8,7 +8,6 @@ import {
   waitForValidStatus,
 } from './helpers/helpers';
 import { createCustomRepo } from './helpers/createRepositories';
-import { randomUrl } from './helpers/repoHelpers';
 
 const templateNamePrefix = 'template_CRUD';
 const repoNamePrefix = 'custom_repo-template';
@@ -21,7 +20,7 @@ const templateName = `${templateNamePrefix}-${randomName()}`;
 const smallRHRepo = 'Red Hat CodeReady Linux Builder for RHEL 9 ARM 64 (RPMs)';
 
 test.describe('Templates CRUD', () => {
-  test('Add, Read, update, delete a template', async ({ page, client, cleanup }) => {
+  test('Add, Read, update, delete a template', async ({ page, client, cleanup, unusedRepoUrl }) => {
     await test.step('Delete any templates and template test repos that exist', async () => {
       await cleanup.runAndAdd(() => cleanupRepositories(client, repoNamePrefix));
       await cleanup.runAndAdd(() => cleanupTemplates(client, templateNamePrefix));
@@ -31,7 +30,7 @@ test.describe('Templates CRUD', () => {
       await closeGenericPopupsIfExist(page);
 
       // Create first repo (aarch64, with snapshot)
-      await createCustomRepo(page, repoName);
+      await createCustomRepo(page, repoName, unusedRepoUrl);
       await waitForValidStatus(page, repoName);
 
       // Create second repo (x86_64, with snapshot)
@@ -41,7 +40,7 @@ test.describe('Templates CRUD', () => {
         name: repoNameX86,
         origin: 'external',
         snapshot: true,
-        url: randomUrl(),
+        url: await unusedRepoUrl(),
       };
       await page.request.post('/api/content-sources/v1/repositories/', {
         data: repoDataX86,
@@ -56,7 +55,7 @@ test.describe('Templates CRUD', () => {
         name: repoNameNoSnaps,
         origin: 'external',
         snapshot: false,
-        url: randomUrl(),
+        url: await unusedRepoUrl(),
       };
       await page.request.post('/api/content-sources/v1/repositories/', {
         data: repoDataNoSnaps,
