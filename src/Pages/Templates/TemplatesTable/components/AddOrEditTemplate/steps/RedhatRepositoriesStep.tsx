@@ -26,7 +26,7 @@ import Hide from 'components/Hide/Hide';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import { Table, TableVariant, Tbody, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
 import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
-import PackageCount from 'Pages/Repositories/ContentListTable/components/PackageCount';
+import PackageCount from 'components/PackageCount/PackageCount';
 import useDebounce from 'Hooks/useDebounce';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
 import TdWithTooltip from 'components/TdWithTooltip/TdWithTooltip';

@@ -62,8 +62,8 @@ test.describe('Associated Template CRUD', () => {
         page.getByText('Enter template details'),
         'should be on the Enter template details tab',
       ).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(`${templateName}`);
-      await page.getByPlaceholder('Description').fill('Template test for associated system CRUD');
+      await page.getByPlaceholder('Enter title').fill(`${templateName}`);
+      await page.getByPlaceholder('Enter detail').fill('Template test for associated system CRUD');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
 
       await page.getByRole('button', { name: 'Create other options' }).click();

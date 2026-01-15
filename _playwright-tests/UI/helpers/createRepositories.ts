@@ -29,7 +29,7 @@ export const bulkCreateRepos = async (
 export const createCustomRepo = async ({ request }: Page, repoName: string) => {
   const repoData = {
     distribution_arch: 'aarch64',
-    distribution_versions: ['8', '9'],
+    distribution_versions: ['9', '10'],
     name: repoName,
     origin: 'external',
     snapshot: true,

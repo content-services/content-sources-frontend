@@ -3,7 +3,7 @@ import { navigateToRepositories, navigateToSnapshotsOfRepository } from './helpe
 import { closeGenericPopupsIfExist, waitForValidStatus } from './helpers/helpers';
 
 test.describe('Red Hat Repositories', () => {
-  const smallRHRepo = 'Red Hat CodeReady Linux Builder for RHEL 9 ARM 64 (RPMs)';
+  const appstreamRHRepoName = 'Red Hat Enterprise Linux 10 for ARM 64 - AppStream (RPMs)';
 
   test.beforeEach(async ({ page }) => {
     await test.step('Navigate to repositories page', async () => {
@@ -18,14 +18,14 @@ test.describe('Red Hat Repositories', () => {
 
   test('Verify snapshotting of Red Hat repositories', async ({ page }) => {
     await test.step('Wait for status to be "Valid"', async () => {
-      await waitForValidStatus(page, smallRHRepo, 210_000);
+      await waitForValidStatus(page, appstreamRHRepoName, 210_000);
     });
 
     await test.step('Check repository snapshots', async () => {
-      const row = page.getByRole('row').filter({ hasText: smallRHRepo });
+      const row = page.getByRole('row').filter({ hasText: appstreamRHRepoName });
       await navigateToSnapshotsOfRepository(page, row);
       await expect(
-        page.getByTestId('snapshot_list_modal').filter({ hasText: smallRHRepo }),
+        page.getByTestId('snapshot_list_modal').filter({ hasText: appstreamRHRepoName }),
       ).toBeVisible();
     });
 
