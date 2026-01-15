@@ -1,19 +1,19 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'test-utils';
 import { deleteAllRepos } from './helpers/deleteRepositories';
-import { randomName, randomUrl } from './helpers/repoHelpers';
+import { randomName } from './helpers/repoHelpers';
 import { navigateToRepositories } from './helpers/navHelpers';
 import { closeGenericPopupsIfExist, waitForValidStatus } from './helpers/helpers';
 
 const repoNamePrefix = 'Repo-RBAC';
 const repoName = `${repoNamePrefix}-${randomName()}`;
-const url = randomUrl();
 
 test.describe('Create, update, and read a repo as admin user', () => {
   test.skip(!process.env.RBAC, `Skipping as the RBAC environment variable isn't set to true.`);
   test.use({ storageState: '.auth/ADMIN_TOKEN.json' });
   test.describe.configure({ mode: 'serial' });
 
-  test('Login as admin and manage repo', async ({ page }) => {
+  test('Login as admin and manage repo', async ({ page, unusedRepoUrl }) => {
+    const url = await unusedRepoUrl();
     await test.step('Create a repository', async () => {
       await navigateToRepositories(page);
       await closeGenericPopupsIfExist(page);
