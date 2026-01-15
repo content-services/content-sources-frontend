@@ -7,9 +7,10 @@ import {
   WizardFooterWrapper,
   WizardHeader,
   WizardStep,
+  useWizardContext,
 } from '@patternfly/react-core';
 
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useCreateTemplateQuery, useEditTemplateQuery } from 'services/Templates/TemplateQueries';
 import { AddTemplateContextProvider, useAddTemplateContext } from './AddTemplateContext';
 import RedhatRepositoriesStep from './steps/RedhatRepositoriesStep';
@@ -23,8 +24,10 @@ import ReviewStep from './steps/ReviewStep';
 import { formatTemplateDate } from 'helpers';
 import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
-import { useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import { AddNavigateButton } from './AddNavigateButton';
+import useRootPath from 'Hooks/useRootPath';
+import { TEMPLATES_ROUTE } from 'Routes/constants';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -37,19 +40,48 @@ export interface Props {
   addRepo: (snapshot: boolean) => void;
 }
 
-const indexMapper = {
-  define_content: 2,
-  redhat_repositories: 3,
-  custom_repositories: 4,
-  set_up_date_step: 5,
-  detail_step: 6,
-  review_step: 7,
+const DEFAULT_STEP_ID = 'define-content';
+
+const stepIdToIndex: Record<string, number> = {
+  'define-content': 2,
+  'redhat-repositories': 3,
+  'custom-repositories': 4,
+  'set-up-date': 5,
+  detail: 6,
+  review: 7,
+};
+
+// Component to sync URL with wizard state (must be inside Wizard)
+const WizardUrlSync = ({ onCancel }: { onCancel: () => void }) => {
+  const { goToStepById, activeStep } = useWizardContext();
+  const [urlSearchParams] = useSearchParams();
+
+  const tabParam = urlSearchParams.get('tab');
+
+  useEffect(() => {
+    if (tabParam && tabParam !== activeStep?.id) {
+      if (stepIdToIndex[tabParam]) {
+        goToStepById(tabParam);
+      } else if (tabParam === 'content') {
+        goToStepById(DEFAULT_STEP_ID);
+      } else {
+        onCancel();
+      }
+    }
+  }, [tabParam, activeStep?.id, goToStepById, onCancel]);
+
+  return null;
 };
 
 const AddOrEditTemplateBase = () => {
   const classes = useStyles();
   const navigate = useNavigate();
+  const location = useLocation();
+  const rootPath = useRootPath();
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
+
+  // Store the original 'from' value on mount (before step navigation changes location.state)
+  const fromRef = useRef(location.state?.from);
 
   const { isEdit, templateRequest, checkIfCurrentStepValid, editUUID } = useAddTemplateContext();
 
@@ -57,15 +89,26 @@ const AddOrEditTemplateBase = () => {
   // If in edit mode and UUID is invalid, it will be an empty string
   if (isEdit && !editUUID) throw new Error('UUID is invalid');
 
-  const initialIndex = useMemo(() => {
-    const tabValue = urlSearchParams.get('tab');
-    if (isEdit && tabValue && indexMapper[tabValue]) return indexMapper[tabValue];
-    return 2;
+  const tabParam = urlSearchParams.get('tab');
+  const initialIndex = tabParam && stepIdToIndex[tabParam] ? stepIdToIndex[tabParam] : 2;
+
+  useEffect(() => {
+    if (!urlSearchParams.get('tab')) {
+      setUrlSearchParams({ tab: DEFAULT_STEP_ID }, { replace: true });
+    }
   }, []);
 
   const { queryClient } = useAddTemplateContext();
 
-  const onCancel = () => navigate(-1);
+  const onCancel = () => {
+    if (fromRef.current === 'table') {
+      navigate(`${rootPath}/${TEMPLATES_ROUTE}`);
+    } else if (isEdit && editUUID) {
+      navigate(`${rootPath}/${TEMPLATES_ROUTE}/${editUUID}`);
+    } else {
+      navigate(`${rootPath}/${TEMPLATES_ROUTE}`);
+    }
+  };
 
   const { mutateAsync: addTemplate, isLoading: isAdding } = useCreateTemplateQuery(queryClient, {
     ...(templateRequest as TemplateRequest),
@@ -101,35 +144,34 @@ const AddOrEditTemplateBase = () => {
       ) : (
         <Wizard
           header={
-            <WizardHeader
-              title={`${isEdit ? 'Edit' : 'Create'} content template`}
-              titleId={`${isEdit ? 'edit' : 'create'}_content_template`}
-              data-ouia-component-id={`${isEdit ? 'edit' : 'create'}_content_template`}
-              description='Prepare for your next patching cycle with a content template.'
-              descriptionId='edit-add-template-modal-wizard-description'
-              onClose={onCancel}
-              closeButtonAriaLabel={`close_${isEdit ? 'edit' : 'create'}_content_template`}
-            />
+            <>
+              <WizardUrlSync onCancel={onCancel} />
+              <WizardHeader
+                title={`${isEdit ? 'Edit' : 'Create'} content template`}
+                titleId={`${isEdit ? 'edit' : 'create'}_content_template`}
+                data-ouia-component-id={`${isEdit ? 'edit' : 'create'}_content_template`}
+                description='Prepare for your next patching cycle with a content template.'
+                descriptionId='edit-add-template-modal-wizard-description'
+                onClose={onCancel}
+                closeButtonAriaLabel={`close_${isEdit ? 'edit' : 'create'}_content_template`}
+              />
+            </>
           }
           onClose={onCancel}
           startIndex={initialIndex}
-          onStepChange={
-            isEdit
-              ? (_, currentStep) => {
-                  setUrlSearchParams((prev) => ({ ...prev, tab: currentStep.id }));
-                }
-              : undefined
-          }
+          onStepChange={(_, currentStep) => {
+            setUrlSearchParams({ tab: String(currentStep.id) });
+          }}
         >
           <WizardStep
             name='Content'
-            id='content_step'
+            id='content'
             isExpandable
             steps={[
               <WizardStep
                 name='Define content'
-                id='define_content'
-                key='define_content_key'
+                id='define-content'
+                key='define-content-key'
                 footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(1) }}
               >
                 <DefineContentStep />
@@ -137,8 +179,8 @@ const AddOrEditTemplateBase = () => {
               <WizardStep
                 isDisabled={checkIfCurrentStepValid(1)}
                 name='Red Hat repositories'
-                id='redhat_repositories'
-                key='redhat_repositories_key'
+                id='redhat-repositories'
+                key='redhat-repositories-key'
                 footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(2) }}
               >
                 <RedhatRepositoriesStep />
@@ -146,8 +188,8 @@ const AddOrEditTemplateBase = () => {
               <WizardStep
                 isDisabled={checkIfCurrentStepValid(2)}
                 name='Other repositories'
-                id='custom_repositories'
-                key='custom_repositories_key'
+                id='custom-repositories'
+                key='custom-repositories-key'
                 footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(3) }}
               >
                 <CustomRepositoriesStep />
@@ -156,7 +198,7 @@ const AddOrEditTemplateBase = () => {
           />
           <WizardStep
             name='Set up date'
-            id='set_up_date_step'
+            id='set-up-date'
             isDisabled={checkIfCurrentStepValid(3)}
             footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(4) }}
           >
@@ -167,14 +209,14 @@ const AddOrEditTemplateBase = () => {
             isDisabled={checkIfCurrentStepValid(4)}
             footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(5) }}
             name='Detail'
-            id='detail_step'
+            id='detail'
           >
             <DetailStep />
           </WizardStep>
           <WizardStep
             isDisabled={checkIfCurrentStepValid(5)}
             name='Review'
-            id='review_step'
+            id='review'
             footer={
               isEdit ? (
                 {

@@ -37,7 +37,7 @@ export default function TemplateActionDropdown() {
   const onSelect = (_, value: string | number | undefined) => {
     switch (value) {
       case 'edit':
-        navigate(`${baseRoute}/${uuid}/${EDIT_ROUTE}`);
+        navigate(`${baseRoute}/${uuid}/${EDIT_ROUTE}`, { state: { from: 'details' } });
         setIsOpen(false);
         break;
       case 'delete':

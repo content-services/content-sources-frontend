@@ -374,7 +374,8 @@ const TemplatesTable = () => {
                                 id: 'actions-column-edit',
                                 className: isMissingRequirements ? classes.disabledButton : '',
                                 title: 'Edit',
-                                onClick: () => navigate(`${uuid}/edit`),
+                                onClick: () =>
+                                  navigate(`${uuid}/edit`, { state: { from: 'table' } }),
                                 isDisabled: isMissingRequirements,
                                 tooltipProps: isMissingRequirements
                                   ? {
@@ -436,7 +437,7 @@ const TemplatesTable = () => {
                     ouiaId='create_content_template'
                     variant='primary'
                     isDisabled={isLoading}
-                    onClick={() => navigate('add')}
+                    onClick={() => navigate('add', { state: { from: 'table' } })}
                   >
                     Create a template
                   </Button>
