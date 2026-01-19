@@ -1,20 +1,15 @@
-import { Page } from '@playwright/test';
-
-// sleep in ms, must await e.g. await sleep(num)
-export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+import { Page, expect } from '@playwright/test';
+import { performance } from 'perf_hooks';
 
 /**
- * Diagnostic helper to check if a system exists in patch and log its details.
- * @param page - Playwright Page object
- * @param hostname - The display name of the system to check
- * @param expectInPatch - Whether we expect the system to be in patch (true) or not (false)
- * @returns Promise<boolean> - true if system state matches expectation, false otherwise
+ * Count matching systems in Patch.
+ * @returns Promise<number> - number of matching systems, -1 on error
  */
 export const isInPatch = async (
   page: Page,
   hostname: string,
-  expectInPatch: boolean = true,
-): Promise<boolean> => {
+  expectedAttachment: boolean = true,
+): Promise<number> => {
   try {
     const response = await page.request.get(
       `/api/patch/v3/systems?search=${encodeURIComponent(hostname)}&limit=100`,
@@ -22,7 +17,7 @@ export const isInPatch = async (
 
     if (response.status() !== 200) {
       console.log(`⚠️  API request failed with status ${response.status()}`);
-      return false;
+      return -1;
     }
 
     const body = await response.json();
@@ -30,55 +25,22 @@ export const isInPatch = async (
       (sys: { attributes: { display_name: string } }) => sys.attributes.display_name === hostname,
     );
 
-    if (system) {
-      // System found
-      if (expectInPatch) {
-        console.log('✅ System found in patch:', {
-          display_name: system.attributes.display_name,
-          id: system.id,
-          template_uuid: system.attributes.template_uuid,
-          template_name: system.attributes.template_name,
-          last_upload: system.attributes.last_upload,
-        });
-      } else {
-        console.log('ℹ️  System still in patch (expected to be removed):', {
-          display_name: system.attributes.display_name,
-          id: system.id,
-          template_uuid: system.attributes.template_uuid,
-          template_name: system.attributes.template_name,
-          last_upload: system.attributes.last_upload,
-        });
-        console.log('   Will poll for removal.');
-      }
-      return true;
-    } else {
-      // System not found
-      if (expectInPatch) {
-        console.log('⚠️  System not found in patch yet. Will poll.');
-        console.log(`   Total systems in response: ${body.data?.length || 0}`);
-      } else {
-        console.log('✅ System already removed from patch');
-      }
-      return false;
-    }
+    if (!system) return 0;
+
+    const hasTemplate = !!system.attributes?.template_uuid;
+    if (hasTemplate === expectedAttachment) return 1;
+    return 0;
   } catch (error) {
     console.log('⚠️  Error checking system in patch:', error);
-    return false;
+    return -1;
   }
 };
 
 /**
- * Diagnostic helper to check if a system exists in Inventory and log its details.
- * @param page - Playwright Page object
- * @param hostname - The display name of the system to check
- * @param expectInInventory - Whether we expect the system to be in inventory (true) or not (false)
- * @returns Promise<boolean> - true if system state matches expectation, false otherwise
+ * Count matching systems in Inventory.
+ * @returns Promise<number> - number of matching systems, -1 on error
  */
-export const isInInventory = async (
-  page: Page,
-  hostname: string,
-  expectInInventory: boolean = true,
-): Promise<boolean> => {
+export const isInInventory = async (page: Page, hostname: string): Promise<number> => {
   try {
     const response = await page.request.get(
       `/api/inventory/v1/hosts?display_name=${encodeURIComponent(hostname)}`,
@@ -86,139 +48,50 @@ export const isInInventory = async (
 
     if (response.status() !== 200) {
       console.log(`⚠️  API request failed with status ${response.status()}`);
-      return false;
+      return -1;
     }
 
     const body = await response.json();
-    const system = body.results;
-
-    if (system && system.length == 1) {
-      // System found
-      if (expectInInventory) {
-        console.log('✅ System found in inventory:', {
-          display_name: system[0].display_name,
-          id: system[0].id,
-          last_upload: system[0].last_check_in,
-        });
-      } else {
-        console.log('ℹ️  System still in invenotry (expected to be removed):', {
-          display_name: system[0].display_name,
-          id: system[0].id,
-          last_upload: system[0].last_check_in,
-        });
-        console.log('   Will poll for removal.');
-      }
-      return true;
-    } else {
-      // System not found
-      if (expectInInventory) {
-        console.log('⚠️  System not found in inventory yet. Will poll.');
-        console.log(`   Total systems in response: ${body.results?.length || 0}`);
-      } else {
-        console.log('✅ System already removed from inventory');
-      }
-      return false;
-    }
+    return body.results?.length ?? 0;
   } catch (error) {
     console.log('⚠️  Error checking system in inventory:', error);
-    return false;
+    return -1;
   }
 };
 
 /**
- * Polls the API to check if a system with the given host name is attached to a template.
- * @param page - Playwright Page object
- * @param hostname - The display name of the system to check
- * @param expectedAttachment - Whether to expect the system to be attached (true) or not attached (false) (default: true)
- * @param delayMs - Delay between polling attempts in milliseconds (default: 10000ms / 10s)
- * @param maxAttempts - Number of times to poll (default: 10)
- * @returns Promise<boolean> - true if system is in the expected state, false otherwise
+ * Wait for host to appear in Inventory and Patch
  */
-export const pollForSystemTemplateAttachment = async (
+export const waitInPatch = async (
   page: Page,
   hostname: string,
   expectedAttachment: boolean = true,
-  delayMs: number = 10_000,
-  maxAttempts: number = 10,
-): Promise<boolean> => {
-  let attempts = 0;
+): Promise<void> => {
+  const start = performance.now();
 
-  while (attempts < maxAttempts) {
-    attempts++;
-    let shouldRetry = false;
+  await expect
+    .poll(async () => await isInInventory(page, hostname), {
+      message: 'System did not appear in inventory in time',
+      timeout: 600_000,
+    })
+    .toBe(1);
 
-    try {
-      // Query the systems API with search filter for the host name
-      const response = await page.request.get(
-        `/api/patch/v3/systems?search=${encodeURIComponent(hostname)}&limit=100`,
-      );
+  const inventoryDone = performance.now();
 
-      if (response.status() !== 200) {
-        console.log(
-          `API request failed with status ${response.status()}, attempt ${attempts}/${maxAttempts}`,
-        );
-        shouldRetry = true;
-      } else {
-        const body = await response.json();
+  await expect
+    .poll(async () => await isInPatch(page, hostname, expectedAttachment), {
+      message: 'System did not appear in patch in time',
+      timeout: 600_000,
+    })
+    .toBe(1);
 
-        if (!body.data || !Array.isArray(body.data)) {
-          console.log(`Invalid response format, attempt ${attempts}/${maxAttempts}`);
-          shouldRetry = true;
-        } else {
-          // Find the system with matching host name
-          const system = body.data.find(
-            (sys: { attributes: { display_name: string } }) =>
-              sys.attributes.display_name === hostname,
-          );
+  const end = performance.now();
 
-          if (!system) {
-            // System not found in patch
-            if (expectedAttachment === false) {
-              // The system is expected to not be attached and so if it's not in patch,
-              // that's a success (system was removed)
-              console.log(`System '${hostname}' not found in patch (as expected - system removed)`);
-              return true;
-            } else {
-              // If we expect the system to be attached but it's not found,
-              // continue polling as it might be slow to appear
-              console.log(
-                `System '${hostname}' not found in patch, attempt ${attempts}/${maxAttempts}`,
-              );
-              shouldRetry = true;
-            }
-          } else {
-            // Check if system has a template_uuid assigned
-            const hasTemplate = !!system.attributes?.template_uuid;
+  const inventoryDuration = (inventoryDone - start) / 1000;
+  const patchDuration = (end - inventoryDone) / 1000;
+  const wholeDuration = (end - start) / 1000;
 
-            // If the system is in the expected state, return early
-            if (hasTemplate === expectedAttachment) {
-              const message = hasTemplate
-                ? `System '${hostname}' is attached to template: ${system.attributes.template_name} (as expected)`
-                : `System '${hostname}' is not attached to any template (as expected)`;
-              console.log(message);
-              return true;
-            } else {
-              const message = hasTemplate
-                ? `System '${hostname}' is attached to template but expected not to be, attempt ${attempts}/${maxAttempts}`
-                : `System '${hostname}' is not attached to template but expected to be, attempt ${attempts}/${maxAttempts}`;
-              console.log(message);
-              shouldRetry = true;
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.log(
-        `Error checking system template attachment: ${error}, attempt ${attempts}/${maxAttempts}`,
-      );
-      shouldRetry = true;
-    }
-
-    // Check if we should retry with delay
-    if (shouldRetry && attempts < maxAttempts) {
-      await sleep(delayMs);
-    }
-  }
-
-  return false;
+  console.log(`Timing: processed_by_inventory_s - ${inventoryDuration.toFixed(3)}`);
+  console.log(`Timing: processed_by_patch_s - ${patchDuration.toFixed(3)}`);
+  console.log(`Timing: processed_by_insights_s - ${wholeDuration.toFixed(3)}`);
 };

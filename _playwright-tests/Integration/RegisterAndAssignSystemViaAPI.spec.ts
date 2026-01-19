@@ -2,7 +2,7 @@ import { test, expect, cleanupTemplates, randomName } from 'test-utils';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
 import { closeGenericPopupsIfExist, waitForValidStatus } from '../UI/helpers/helpers';
 import { RHSMClient, waitForRhcdActive, refreshSubscriptionManager } from './helpers/rhsmClient';
-import { pollForSystemTemplateAttachment } from './helpers/systemHelpers';
+import { waitInPatch } from './helpers/systemHelpers';
 
 const templateNamePrefix = 'use_template_dialog_test';
 const regClient = new RHSMClient(`RHSMClientTest-${randomName()}`);
@@ -100,9 +100,7 @@ test.describe('Register and assign template to systems via API', () => {
     await test.step('Verify system is attached to template', async () => {
       const hostname = await regClient.GetHostname();
 
-      // Poll for system template attachment via API
-      const isAttached = await pollForSystemTemplateAttachment(page, hostname, true, 10_000, 12);
-      expect(isAttached, 'system should be attached to template').toBe(true);
+      await waitInPatch(page, hostname, true);
 
       // Check if system row is visible with extended timeout
       const systemRow = page.getByRole('row').filter({ hasText: hostname });
