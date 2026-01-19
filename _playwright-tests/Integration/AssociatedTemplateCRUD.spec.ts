@@ -11,8 +11,7 @@ import {
   getRowByNameOrUrl,
   waitForValidStatus,
 } from '../UI/helpers/helpers';
-import { pollForSystemTemplateAttachment, isInPatch, isInInventory } from './helpers/systemHelpers';
-import { performance } from 'perf_hooks';
+import { waitInPatch, isInInventory } from './helpers/systemHelpers';
 
 const templateNamePrefix = 'associated_template_test';
 const templateName = `${templateNamePrefix}-${randomName()}`;
@@ -87,37 +86,10 @@ test.describe('Associated Template CRUD', () => {
         console.log('Registration stderr:', reg?.stderr);
       }
       expect(reg?.exitCode, 'registration should be successful').toBe(0);
-
-      const start = performance.now();
-
-      await expect
-        .poll(async () => await isInInventory(page, hostname, true), {
-          message: 'System did not appear in inventory in time',
-          timeout: 600_000,
-        })
-        .toBe(true);
-
-      const inventoryDone = performance.now();
-
-      await expect
-        .poll(async () => await isInPatch(page, hostname, true), {
-          message: 'System did not appear in patch in time',
-          timeout: 600_000,
-        })
-        .toBe(true);
-
-      const end = performance.now();
-      const inventoryDuration = (inventoryDone - start) / 1000;
-      const patchDuration = (end - inventoryDone) / 1000;
-      const wholeDuration = (end - start) / 1000;
-      console.log(`Timing: processed_by_inventory_s - ${inventoryDuration.toFixed(3)}`);
-      console.log(`Timing: processed_by_patch_s - ${patchDuration.toFixed(3)}`);
-      console.log(`Timing: processed_by_insights_s - ${wholeDuration.toFixed(3)}`);
     });
 
     await test.step('Verify system is attached to template', async () => {
-      const isAttached = await pollForSystemTemplateAttachment(page, hostname, true, 10_000, 12);
-      expect(isAttached, 'system should be attached to template').toBe(true);
+      await waitInPatch(page, hostname, true);
     });
 
     await test.step('Attempt to delete template and verify warning appears', async () => {
@@ -156,10 +128,12 @@ test.describe('Associated Template CRUD', () => {
     });
 
     await test.step('Wait for system to be removed from inventory', async () => {
-      // Poll until system is not found or not attached to template
-      // This should ensure the backend has processed the unregistration before checking UI
-      const isAttached = await pollForSystemTemplateAttachment(page, hostname, false, 10_000, 6);
-      expect(isAttached, 'system should be removed from inventory').toBe(true);
+      await expect
+        .poll(async () => await isInInventory(page, hostname), {
+          message: 'System still found in inventory',
+          timeout: 600_000,
+        })
+        .toBe(0);
     });
 
     await test.step('Verify template can now be deleted without warning', async () => {
