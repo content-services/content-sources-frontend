@@ -6,7 +6,7 @@ import {
 } from '../../../../services/Content/ContentApi';
 import type { DataViewFilterOption } from '@patternfly/react-data-view/dist/cjs/DataViewFilters';
 import { REPOSITORY_PARAMS_KEY } from '../../../../services/Content/ContentQueries';
-import { QueryClient } from 'react-query';
+import { QueryClient } from '@tanstack/react-query';
 import useDebounce from '../../../../Hooks/useDebounce';
 import { useDataViewFilters } from '@patternfly/react-data-view';
 

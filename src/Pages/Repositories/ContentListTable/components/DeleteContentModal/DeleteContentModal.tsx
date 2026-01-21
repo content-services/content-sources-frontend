@@ -25,7 +25,7 @@ import {
   useBulkDeleteContentItemMutate,
   useContentListQuery,
 } from 'services/Content/ContentQueries';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useHref, useLocation, useNavigate } from 'react-router-dom';
 import { useContentListOutletContext } from '../../ContentListTable';
 import useRootPath from 'Hooks/useRootPath';

@@ -13,7 +13,7 @@ import {
 
 import { createUseStyles } from 'react-jss';
 import Hide from 'components/Hide/Hide';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import useRootPath from 'Hooks/useRootPath';
 import {

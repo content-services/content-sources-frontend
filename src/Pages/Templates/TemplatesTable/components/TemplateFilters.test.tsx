@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { testRepositoryParamsResponse } from 'testingHelpers';
 import TemplateFilters from './TemplateFilters';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('middleware/AppContext', () => ({

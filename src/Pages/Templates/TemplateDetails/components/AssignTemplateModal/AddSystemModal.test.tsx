@@ -1,6 +1,6 @@
 import { render, waitFor, screen, within } from '@testing-library/react';
 import AddSystemModal from './AddSystemModal';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSystemsListQuery } from 'services/Systems/SystemsQueries';
 import {
   defaultSystemsListItem,

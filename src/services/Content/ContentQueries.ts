@@ -1,6 +1,6 @@
 import { AlertVariant } from '@patternfly/react-core';
 import { useState } from 'react';
-import { QueryClient, useMutation, useQuery, useQueryClient } from 'react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cloneDeep } from 'lodash';
 
 import {
