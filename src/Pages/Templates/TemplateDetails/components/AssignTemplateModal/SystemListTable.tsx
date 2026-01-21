@@ -22,7 +22,7 @@ import { TEMPLATES_ROUTE } from 'Routes/constants';
 import TdWithTooltip from 'components/TdWithTooltip/TdWithTooltip';
 import { useParams } from 'react-router-dom';
 import SystemNameCell from './components/SystemNameCell';
-import { isMinorRelease } from './AddSystemModal';
+import { isMinorRelease } from './SystemListView';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -111,7 +111,18 @@ export default function SystemListTable({
           <Tbody>
             {systemsList.map(
               (
-                { id, attributes: { display_name, tags, os, template_name, template_uuid, rhsm } },
+                {
+                  id,
+                  attributes: {
+                    display_name,
+                    tags,
+                    os,
+                    template_name,
+                    template_uuid,
+                    rhsm,
+                    satellite_managed,
+                  },
+                },
                 rowIndex,
               ) => (
                 <Tr key={id + rowIndex}>
@@ -124,8 +135,9 @@ export default function SystemListTable({
                     }}
                     select={{
                       rowIndex,
-                      // If a system uses a minor release, it cannot be in an active state
-                      isDisabled: template_uuid === uuid || isMinorRelease(rhsm),
+                      // If a system uses a minor release or is satellite-managed, it cannot be in an active state
+                      isDisabled:
+                        template_uuid === uuid || isMinorRelease(rhsm) || satellite_managed,
                       onSelect: () => setSelected(id),
                       isSelected: selected.has(id) || template_uuid === uuid,
                     }}
@@ -136,6 +148,7 @@ export default function SystemListTable({
                       display_name={display_name}
                       rhsm={rhsm}
                       basePath={basePath}
+                      satellite_managed={satellite_managed}
                     />
                   </Td>
                   <Td className={tags.length ? '' : classes.forceDisabled}>

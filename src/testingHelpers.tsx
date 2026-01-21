@@ -462,6 +462,19 @@ export const minorReleaseSystemsListItem: SystemItem = {
   type: 'system',
 };
 
+export const satelliteManagedSystemsListItem: SystemItem = {
+  id: 'eef7503a-8c77-41c7-a0e9-38ad35eca78c',
+  attributes: {
+    ...defaultSystemsListItem.attributes,
+    display_name: '69204.host.example.com',
+    rhsm: '',
+    satellite_managed: true,
+    template_name: '',
+    template_uuid: '',
+  },
+  type: 'system',
+};
+
 export const defaultTemplateSystemsListItem: IDSystemItem = {
   attributes: {
     display_name: 'rhel9.jsherril-lap.example.com',

@@ -125,28 +125,36 @@ const SystemListView = ({
       systemsList.filter((system) => isMinorRelease(system.attributes.rhsm)).map(({ id }) => id),
     [systemsList],
   );
+  const satelliteManagedSystems = useMemo(
+    () => systemsList.filter((system) => system.attributes.satellite_managed).map(({ id }) => id),
+    [systemsList],
+  );
 
   const allSystemsAreMinorReleases = minorReleaseSystems.length === systemsList.length;
+  const allSystemsAreSatelliteManaged = satelliteManagedSystems.length === systemsList.length;
 
   // Informs the parent modal whether it is safe to enable the template "Assign" button
   useEffect(() => {
-    setCanAssignTemplate(selectedSystems.length > 0 && !allSystemsAreMinorReleases);
-  }, [selectedSystems, allSystemsAreMinorReleases]);
+    setCanAssignTemplate(
+      selectedSystems.length > 0 && !allSystemsAreMinorReleases && !allSystemsAreSatelliteManaged,
+    );
+  }, [selectedSystems, allSystemsAreMinorReleases, allSystemsAreSatelliteManaged]);
 
   // A state for when the "Select All" toggle checkbox is checked
   const isPageSelected = useMemo(() => {
-    if (allSystemsAreMinorReleases) return false;
+    if (allSystemsAreMinorReleases || allSystemsAreSatelliteManaged) return false;
 
-    // Get all systems that can actually be selected (not minor releases and not already assigned)
+    // Get all systems that can actually be selected (not minor releases, not satellite-managed, and not already assigned)
     const selectableSystems = systemsList.filter(
-      ({ attributes: { template_uuid, rhsm } }) => template_uuid !== uuid && !isMinorRelease(rhsm),
+      ({ attributes: { template_uuid, rhsm, satellite_managed } }) =>
+        template_uuid !== uuid && !isMinorRelease(rhsm) && !satellite_managed,
     );
 
     if (selectableSystems.length === 0) return false;
 
     // Check if all selectable systems are in the selected list
     return selectableSystems.every(({ id }) => selectedList.has(id));
-  }, [selectedList, systemsList, allSystemsAreMinorReleases, uuid]);
+  }, [selectedList, systemsList, allSystemsAreMinorReleases, allSystemsAreSatelliteManaged, uuid]);
 
   useEffect(() => {
     if (isError) {
@@ -188,9 +196,9 @@ const SystemListView = ({
           ...prev,
           ...systemsList
             .filter(
-              ({ attributes: { template_uuid, rhsm } }) =>
-                // Filter out systems which are minor releases as they cannot be assigned to a template
-                template_uuid !== uuid && !isMinorRelease(rhsm),
+              ({ attributes: { template_uuid, rhsm, satellite_managed } }) =>
+                // Filter out systems which are minor releases or satellite-managed as they cannot be assigned to a template
+                template_uuid !== uuid && !isMinorRelease(rhsm) && !satellite_managed,
             )
             .map(({ id }) => id),
         ]),
