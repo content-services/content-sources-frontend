@@ -250,7 +250,7 @@ const SystemListView = ({
             variant='link'
             icon={isFetching ? <Spinner isInline /> : <SyncAltIcon />}
             isDisabled={isLoading || isFetching}
-            onClick={() => queryClient.invalidateQueries(GET_SYSTEMS_KEY)}
+            onClick={() => queryClient.invalidateQueries({ queryKey: [GET_SYSTEMS_KEY] })}
             className={spacing.py_0}
           >
             Refresh

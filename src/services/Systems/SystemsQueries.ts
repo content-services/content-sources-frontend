@@ -30,7 +30,6 @@ export const useSystemsListQuery = (
     () => getSystemsList(page, limit, searchQuery, filter, sortBy),
     {
       keepPreviousData: true,
-      optimisticResults: true,
       staleTime: 60000,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
@@ -68,7 +67,6 @@ export const useListSystemsByTemplateId = (
     () => listSystemsByTemplateId(id, page, limit, searchQuery, sortBy),
     {
       keepPreviousData: true,
-      optimisticResults: true,
       staleTime: 25_000,
       refetchOnWindowFocus: 'always',
       refetchOnMount: 'always',
@@ -100,8 +98,8 @@ export const useAddTemplateToSystemsQuery = (
         title: `Template successfully added to ${systemUUIDs.length} system${systemUUIDs.length > 1 ? 's' : ''}`,
       });
 
-      queryClient.invalidateQueries(GET_TEMPLATE_SYSTEMS_KEY);
-      queryClient.invalidateQueries(GET_SYSTEMS_KEY);
+      queryClient.invalidateQueries({ queryKey: [GET_TEMPLATE_SYSTEMS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [GET_SYSTEMS_KEY] });
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
@@ -119,8 +117,8 @@ export const useDeleteTemplateFromSystems = (queryClient: QueryClient) => {
   const errorNotifier = useErrorNotification();
   return useMutation(deleteTemplateFromSystems, {
     onSuccess: () => {
-      queryClient.invalidateQueries(GET_SYSTEMS_KEY);
-      queryClient.invalidateQueries(GET_TEMPLATE_SYSTEMS_KEY);
+      queryClient.invalidateQueries({ queryKey: [GET_SYSTEMS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [GET_TEMPLATE_SYSTEMS_KEY] });
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {

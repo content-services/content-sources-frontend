@@ -65,7 +65,7 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
   const [selectedArch, setSelectedArch] = useState<string>('');
 
   const { distribution_arches = [], distribution_versions = [] } =
-    queryClient.getQueryData<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY) || {};
+    queryClient.getQueryData<RepositoryParamsResponse>([REPOSITORY_PARAMS_KEY]) || {};
 
   const hasRHELSubscription = !!subscriptions?.red_hat_enterprise_linux;
   const isMissingRequirements = !rbac?.templateWrite || !hasRHELSubscription;

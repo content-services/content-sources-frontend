@@ -64,13 +64,13 @@ export default function DeleteTemplateModal() {
 
   const onSave = async () => {
     deleteTemplate(uuid).then(() => {
-      queryClient.invalidateQueries(GET_TEMPLATES_KEY);
+      queryClient.invalidateQueries({ queryKey: [GET_TEMPLATES_KEY] });
       onClose();
     });
   };
 
   useEffect(() => {
-    queryClient.invalidateQueries(GET_TEMPLATE_SYSTEMS_KEY);
+    queryClient.invalidateQueries({ queryKey: [GET_TEMPLATE_SYSTEMS_KEY] });
   }, []);
 
   const {
