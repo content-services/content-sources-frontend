@@ -15,7 +15,7 @@ export const randomName = () => (Math.random() + 1).toString(36).substring(2, 6)
 
 export const closeGenericPopupsIfExist = async (page: Page) => {
   const locatorsToCheck = [
-    page.locator(`button[id^="pendo-close-guide-"]`), // This closes the pendo guide pop-up
+    page.locator(`.amplitude-engagement-close`), // This closes the Amplitude guide pop-up
     page.locator(`button[id="truste-consent-button"]`), // This closes the trusted consent pop-up
   ];
 
