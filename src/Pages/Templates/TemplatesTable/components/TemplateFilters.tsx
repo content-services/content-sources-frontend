@@ -17,7 +17,7 @@ import {
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import Hide from 'components/Hide/Hide';
 import { RepositoryParamsResponse } from 'services/Content/ContentApi';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { REPOSITORY_PARAMS_KEY } from 'services/Content/ContentQueries';
 import useDebounce from 'Hooks/useDebounce';
 import { createUseStyles } from 'react-jss';

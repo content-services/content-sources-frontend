@@ -10,7 +10,7 @@ import {
   TagsResponse,
   listTags,
 } from './SystemsApi';
-import { useMutation, useQuery, type QueryClient } from 'react-query';
+import { useMutation, useQuery, type QueryClient } from '@tanstack/react-query';
 import useNotification from 'Hooks/useNotification';
 import { AlertVariant } from '@patternfly/react-core';
 

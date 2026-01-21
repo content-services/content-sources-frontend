@@ -36,7 +36,7 @@ import {
   useSystemsListQuery,
 } from 'services/Systems/SystemsQueries';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import type { TemplateItem } from 'services/Templates/TemplateApi';
 import { FETCH_TEMPLATE_KEY, useFetchTemplate } from 'services/Templates/TemplateQueries';
 import Loader from 'components/Loader';

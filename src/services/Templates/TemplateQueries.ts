@@ -1,4 +1,4 @@
-import { QueryClient, useMutation, useQuery } from 'react-query';
+import { QueryClient, useMutation, useQuery } from '@tanstack/react-query';
 
 import useErrorNotification from 'Hooks/useErrorNotification';
 import {

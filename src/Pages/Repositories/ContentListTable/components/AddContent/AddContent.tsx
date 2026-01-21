@@ -51,7 +51,7 @@ import {
   useValidateContentList,
 } from 'services/Content/ContentQueries';
 import { ContentOrigin, RepositoryParamsResponse } from 'services/Content/ContentApi';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { isEmpty, isEqual } from 'lodash';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
