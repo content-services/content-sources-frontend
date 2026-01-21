@@ -120,8 +120,8 @@ export default function DeleteContentModal() {
     deleteItems(reposToDelete).then(() => {
       onClose();
       clearCheckedRepositories();
-      queryClient.invalidateQueries(CONTENT_LIST_KEY);
-      queryClient.invalidateQueries(GET_TEMPLATES_KEY);
+      queryClient.invalidateQueries({ queryKey: [CONTENT_LIST_KEY] });
+      queryClient.invalidateQueries({ queryKey: [GET_TEMPLATES_KEY] });
     });
   };
 

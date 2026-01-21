@@ -320,7 +320,7 @@ export default function AddSystemModal() {
               className={classes.refreshSystemsList}
               icon={isFetching ? <Spinner isInline /> : <SyncAltIcon />}
               isDisabled={isLoading || isFetching}
-              onClick={() => queryClient.invalidateQueries(GET_SYSTEMS_KEY)}
+              onClick={() => queryClient.invalidateQueries({ queryKey: [GET_SYSTEMS_KEY] })}
             >
               Refresh systems list
             </Button>

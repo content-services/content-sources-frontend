@@ -19,7 +19,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
-jest.mock('react-query');
+jest.mock('@tanstack/react-query');
 
 beforeAll(() => {
   (useQueryClient as jest.Mock).mockImplementation(() => ({

@@ -24,7 +24,7 @@ jest.mock('Hooks/useSafeUUIDParam', () => () => templateUUID);
 
 jest.mock('Hooks/useHasRegisteredSystems');
 
-jest.mock('react-query');
+jest.mock('@tanstack/react-query');
 
 jest.mock('services/Systems/SystemsQueries', () => ({
   useListSystemsByTemplateId: jest.fn(),

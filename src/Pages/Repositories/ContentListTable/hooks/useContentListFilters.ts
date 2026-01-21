@@ -49,7 +49,7 @@ export const useContentListFilters = (queryClient: QueryClient) => {
   });
 
   const { distribution_arches = [], distribution_versions = [] } =
-    queryClient.getQueryData<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY) || {};
+    queryClient.getQueryData<RepositoryParamsResponse>([REPOSITORY_PARAMS_KEY]) || {};
 
   // Create filter options for the UI
   const osFilterOptions: DataViewFilterOption[] = useMemo(
