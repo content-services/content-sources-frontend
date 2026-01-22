@@ -50,7 +50,7 @@
     "dotenv": "^17.2.2",
     "formik": "^2.4.6",
     "github-actions-ctrf": "^0.0.58",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "playwright-ctrf-json-reporter": "^0.0.27",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
