@@ -42,7 +42,13 @@ export async function waitForValidStatus(
   exact?: true,
 ): Promise<Locator> {
   const locator = await getRowByNameOrUrl(pageOrLocator, rowName!);
+  try {
+    await locator.getByText('In progress', { exact }).waitFor({ state: 'visible', timeout: 3_000 });
+  } catch {}
   await expect(locator.getByText('Valid', { exact }), message).toBeVisible({ timeout });
+  // TODO: Look into the syncing of status and kebab menu items, playwright can be too fast and open the kebab
+  //       menu few ms after valid shows up, but the rowAction callback hasn't yet enabled the correct items.
+  await sleep(1000);
   return locator;
 }
 
@@ -69,12 +75,23 @@ export const filterByNameOrUrl = async (locator: Locator | Page, name: string) =
 
 export const clearFilters = async (locator: Locator | Page) => {
   try {
-    await locator.getByRole('button', { name: 'Clear filters' }).waitFor({ timeout: 5000 });
+    await locator.getByRole('button', { name: 'Clear filters' }).waitFor({ timeout: 2_500 });
   } catch {
     return;
   }
 
   await locator.getByRole('button', { name: 'Clear filters' }).click();
+  await expect(locator.getByRole('button', { name: 'Clear filters' })).toBeHidden();
+};
+
+const checkVisibility = async (target: Locator): Promise<boolean> => {
+  try {
+    await target.waitFor({ state: 'visible', timeout: 2_500 });
+  } catch {
+    return false;
+  }
+
+  return true;
 };
 
 /**
@@ -89,10 +106,12 @@ export const getRowByNameOrUrl = async (
 ): Promise<Locator> => {
   // First check if the row is visible, if so don't filter, and just return the target
   const target = locator.getByRole('row').filter({ hasText: name });
-  if (await target.isVisible()) return target;
+  const visible = await checkVisibility(target);
+  if (!forceFilter && visible) return target;
 
   await clearFilters(locator);
-  if (!forceFilter && (await target.isVisible())) return target;
+  const visibleNotFiltered = await checkVisibility(target);
+  if (!forceFilter && visibleNotFiltered) return target;
 
   // Now run the filter
   await filterByNameOrUrl(locator, name);
