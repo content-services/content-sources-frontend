@@ -80,6 +80,30 @@ export const testRepositoryParamsResponse: RepositoryParamsResponse = {
       label: 'aarch64',
     },
   ],
+  extended_release_features: [
+    { name: 'Extended Update Support (EUS)', label: 'RHEL-EUS-x86_64' },
+    { name: 'Update Services for SAP Solutions (E4S)', label: 'RHEL-E4S-x86_64' },
+  ],
+  distribution_minor_versions: [
+    {
+      name: 'el8.6',
+      label: '8.6',
+      major: '8',
+      feature_names: ['RHEL-E4S-x86_64'],
+    },
+    {
+      name: 'el9.4',
+      label: '9.4',
+      major: '9',
+      feature_names: ['RHEL-EUS-x86_64', 'RHEL-E4S-x86_64'],
+    },
+    {
+      name: 'el10.0',
+      label: '10.0',
+      major: '10',
+      feature_names: ['RHEL-EUS-x86_64', 'RHEL-E4S-x86_64'],
+    },
+  ],
 };
 
 export const defaultValidationErrorData: ValidationResponse[] = [
@@ -329,6 +353,8 @@ export const defaultTemplateItem: TemplateItem = {
   description: 'Tatata bala tu!',
   arch: 'aarch64',
   version: '9',
+  extended_release: '',
+  extended_release_version: '',
   date: '2024-01-22T00:00:00-07:00',
   repository_uuids: [
     '31c06bb4-ef1b-42f5-8c91-0ff67e7d8a1b',
@@ -356,6 +382,8 @@ export const defaultTemplateItem2: TemplateItem = {
   description: 'I am not associated with the default repo!',
   arch: 'aarch64',
   version: '9',
+  extended_release: '',
+  extended_release_version: '',
   date: '2024-01-22T00:00:00-07:00',
   repository_uuids: [
     '31c06bb4-ef1b-42f5-8c91-0ff67e7d8a1b',
