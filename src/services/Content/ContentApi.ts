@@ -5,7 +5,8 @@ import { MAX_CHUNK_SIZE } from 'Pages/Repositories/ContentListTable/components/U
 
 export interface ContentItem {
   uuid: string;
-
+  extended_release?: string;
+  extended_release_version?: string;
   name: string;
   package_count: number;
   url: string;
@@ -136,6 +137,8 @@ export type FilterData = Partial<{
   search: string;
   versions: Array<string>;
   arches: Array<string>;
+  extended_release: string;
+  extended_release_version: string;
   statuses: Array<string>;
   uuids: Array<string>;
   urls: Array<string>;
