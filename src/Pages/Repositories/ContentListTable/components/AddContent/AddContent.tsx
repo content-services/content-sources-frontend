@@ -99,7 +99,11 @@ const AddContent = ({ isEdit = false }: Props) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isActionOpen, setIsActionOpen] = useState(false);
 
-  const { data, isLoading: isLoadingInitialContent, isSuccess } = useFetchContent(uuid!, isEdit);
+  const {
+    data,
+    isInitialLoading: isLoadingInitialContent,
+    isSuccess,
+  } = useFetchContent(uuid!, isEdit);
 
   const [values, setValues] = useState(getDefaultValues({}));
   const [changeVerified, setChangeVerified] = useState(false);

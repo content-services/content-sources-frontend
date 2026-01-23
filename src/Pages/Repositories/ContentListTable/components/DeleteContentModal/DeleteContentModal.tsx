@@ -67,7 +67,6 @@ export default function DeleteContentModal() {
   const rootPath = useRootPath();
   const queryClient = useQueryClient();
   const { search } = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
   const maxTemplatesToShow = 3;
   const [expandState, setExpandState] = useState({});
 
@@ -98,6 +97,7 @@ export default function DeleteContentModal() {
   const {
     isError: isRepoError,
     data: repos = { data: [] as ContentItem[], meta: { count: 0, limit: 20, offset: 0 } },
+    isInitialLoading: isRepoLoading,
   } = useContentListQuery(selectedPage, selectedPerPage, repoFilterData, '', [
     ContentOrigin.CUSTOM,
   ]);
@@ -136,17 +136,16 @@ export default function DeleteContentModal() {
   const {
     isError: isTemplateError,
     data: templates = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
+    isInitialLoading: isTemplateLoading,
   } = useTemplateList(page, perPage, '', templateFilterData);
 
   useEffect(() => {
-    if (repos && templates) {
-      setIsLoading(false);
-    }
     if (isRepoError || isTemplateError) {
       onClose();
     }
-  }, [isRepoError, isTemplateError, repos.data, templates.data]);
+  }, [isRepoError, isTemplateError]);
 
+  const isLoading = isRepoLoading || isTemplateLoading;
   const actionTakingPlace = isDeletingItems || isLoading;
 
   const columnHeaders = ['Name', 'URL', 'Associated templates'];
