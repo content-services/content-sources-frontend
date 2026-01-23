@@ -1,4 +1,4 @@
-import {
+import React, {
   createContext,
   ReactNode,
   useCallback,
@@ -11,7 +11,7 @@ import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { QueryClient, useQueryClient } from 'react-query';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
 import { ContentOrigin, NameLabel, DistributionMinorVersion } from 'services/Content/ContentApi';
-import { hardcodeRedHatReposByArchAndVersion } from '../templateHelpers';
+import { hardcodeRedHatReposByArchAndVersion, hasExtendedSupport } from '../templateHelpers';
 import { useNavigate } from 'react-router-dom';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
 import useRootPath from 'Hooks/useRootPath';
@@ -24,6 +24,8 @@ export interface AddOrEditTemplateContextInterface {
   distribution_versions: NameLabel[];
   extended_release_features: NameLabel[];
   distribution_minor_versions: DistributionMinorVersion[];
+  useExtendedSupport: boolean;
+  setUseExtendedSupport: (value: React.SetStateAction<boolean>) => void;
   templateRequest: Partial<TemplateRequest>;
   setTemplateRequest: (value: React.SetStateAction<Partial<TemplateRequest>>) => void;
   selectedRedhatRepos: Set<string>;
@@ -31,22 +33,10 @@ export interface AddOrEditTemplateContextInterface {
   selectedCustomRepos: Set<string>;
   setSelectedCustomRepos: (uuidSet: Set<string>) => void;
   hardcodedRedhatRepositoryUUIDS: Set<string>;
-  checkIfCurrentStepValid: (index: number) => boolean;
+  hasInvalidSteps: (index: number) => boolean;
   isEdit?: boolean;
   editUUID?: string;
 }
-
-// template will need to have attributes to store update stream and minor version
-// this task is not yet being worked on
-
-/*
-Here I will be:
-- Tracking my FE state so that it can be USED WITHIN the Add/Edit wizard
-- Getting Red Hat repos (based on user subscription - eus 9.6). EPEL & custom aren't affected (no extra logic)
-- Pull the ExtendedRelease & ExtendedReleaseVersion from the repos API (safety)
-- Prepare the request object (data) that I will be sending to our API to create a new template - setTemplateRequest
-
- */
 
 export const AddOrEditTemplateContext = createContext({} as AddOrEditTemplateContextInterface);
 
@@ -58,7 +48,12 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
   const rootPath = useRootPath();
 
   if (isError) navigate(rootPath);
-  const [templateRequest, setTemplateRequest] = useState<Partial<TemplateRequest>>({});
+  const [templateRequest, setTemplateRequest] = useState<Partial<TemplateRequest>>({
+    extended_release: '',
+    extended_release_version: '',
+  });
+
+  const [useExtendedSupport, setUseExtendedSupport] = useState(false);
   const [selectedRedhatRepos, setSelectedRedhatRepos] = useState<Set<string>>(new Set());
   const [selectedCustomRepos, setSelectedCustomRepos] = useState<Set<string>>(new Set());
   const [hardcodedRedhatRepositories, setHardcodeRepositories] = useState<string[]>([]);
@@ -66,37 +61,42 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
     new Set(),
   );
 
-  // /api/content-sources/v1.0/repository_parameters/
-  const hasExtendedSupportSubscription = true; // TODO: Get from the Feature Service or our BE
-  // seems like I'd get it from: "feature_name": "RHEL-E4S-x86_64",
+  const {
+    data: {
+      distribution_versions = [],
+      distribution_arches = [],
+      extended_release_features = [],
+      distribution_minor_versions = [],
+    } = {},
+  } = useRepositoryParams();
 
-  // Like I mentioned before, would need to pull this information from the repo_params API
-  // distributionMinorVersions - 9.4
-  // extendedReleaseFeatures - ues, e4s, "none" (object - name, label)
-
-  const stepsValidArray = useMemo(() => {
+  const stepValidationSequence = useMemo(() => {
     const { arch, date, name, version, use_latest, extended_release, extended_release_version } =
       templateRequest;
 
-    return [
-      true,
-      arch && version,
-      // if they selected [] Extended support releases, then:
-      // extended_release & extended_release_version
-      // This data must be present for the step to be valid
-      !!selectedRedhatRepos.size,
-      true,
-      use_latest || isDateValid(date ?? ''),
-      !!name && name.length < 256,
-    ] as boolean[];
-  }, [templateRequest, selectedRedhatRepos.size]);
+    // Valid if: feature is unavailable, unused, or all required fields filled with valid values
+    const isVersioningStepValid =
+      !hasExtendedSupport(extended_release_features) ||
+      !useExtendedSupport ||
+      (extended_release && extended_release_version);
 
-  const checkIfCurrentStepValid = useCallback(
+    return [
+      true, // [0] No step
+      arch && version, // [1] "Define content" step
+      isVersioningStepValid, // [2] "Content versioning" step
+      !!selectedRedhatRepos.size, // [3] "Red Hat repositories" step
+      true, // [4] "Other repositories" step - optional step
+      use_latest || isDateValid(date ?? ''), // [5] "Setup date" step
+      !!name && name.length < 256, // [6] "Detail" step
+    ] as boolean[];
+  }, [templateRequest, selectedRedhatRepos.size, useExtendedSupport, extended_release_features]);
+
+  const hasInvalidSteps = useCallback(
     (stepIndex: number) => {
-      const stepsToCheck = stepsValidArray.slice(0, stepIndex + 1);
+      const stepsToCheck = stepValidationSequence.slice(0, stepIndex + 1);
       return !stepsToCheck.every((step) => step);
     },
-    [selectedRedhatRepos.size, stepsValidArray],
+    [selectedRedhatRepos.size, stepValidationSequence],
   );
 
   const queryClient = useQueryClient();
@@ -188,20 +188,6 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
     }));
   }, [templateRequestDependencies]);
 
-  const {
-    data: {
-      distribution_versions,
-      distribution_arches,
-      extended_release_features,
-      distribution_minor_versions,
-    } = {
-      distribution_versions: [],
-      distribution_arches: [],
-      extended_release_features: [],
-      distribution_minor_versions: [],
-    },
-  } = useRepositoryParams();
-
   return (
     <AddOrEditTemplateContext.Provider
       key={uuid}
@@ -218,9 +204,11 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
         selectedCustomRepos,
         setSelectedCustomRepos,
         hardcodedRedhatRepositoryUUIDS,
-        checkIfCurrentStepValid,
+        hasInvalidSteps,
         isEdit: !!uuid,
         editUUID: uuid,
+        useExtendedSupport,
+        setUseExtendedSupport,
       }}
     >
       {children}
