@@ -10,7 +10,7 @@ import {
 import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { QueryClient, useQueryClient } from 'react-query';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
-import { ContentOrigin, NameLabel } from 'services/Content/ContentApi';
+import { ContentOrigin, NameLabel, DistributionMinorVersion } from 'services/Content/ContentApi';
 import { hardcodeRedHatReposByArchAndVersion } from '../templateHelpers';
 import { useNavigate } from 'react-router-dom';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
@@ -22,6 +22,8 @@ export interface AddOrEditTemplateContextInterface {
   queryClient: QueryClient;
   distribution_arches: NameLabel[];
   distribution_versions: NameLabel[];
+  extended_release_features: NameLabel[];
+  distribution_minor_versions: DistributionMinorVersion[];
   templateRequest: Partial<TemplateRequest>;
   setTemplateRequest: (value: React.SetStateAction<Partial<TemplateRequest>>) => void;
   selectedRedhatRepos: Set<string>;
@@ -43,6 +45,7 @@ Here I will be:
 - Getting Red Hat repos (based on user subscription - eus 9.6). EPEL & custom aren't affected (no extra logic)
 - Pull the ExtendedRelease & ExtendedReleaseVersion from the repos API (safety)
 - Prepare the request object (data) that I will be sending to our API to create a new template - setTemplateRequest
+
  */
 
 export const AddOrEditTemplateContext = createContext({} as AddOrEditTemplateContextInterface);
@@ -63,12 +66,24 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
     new Set(),
   );
 
+  // /api/content-sources/v1.0/repository_parameters/
+  const hasExtendedSupportSubscription = true; // TODO: Get from the Feature Service or our BE
+  // seems like I'd get it from: "feature_name": "RHEL-E4S-x86_64",
+
+  // Like I mentioned before, would need to pull this information from the repo_params API
+  // distributionMinorVersions - 9.4
+  // extendedReleaseFeatures - ues, e4s, "none" (object - name, label)
+
   const stepsValidArray = useMemo(() => {
-    const { arch, date, name, version, use_latest } = templateRequest;
+    const { arch, date, name, version, use_latest, extended_release, extended_release_version } =
+      templateRequest;
 
     return [
       true,
       arch && version,
+      // if they selected [] Extended support releases, then:
+      // extended_release & extended_release_version
+      // This data must be present for the step to be valid
       !!selectedRedhatRepos.size,
       true,
       use_latest || isDateValid(date ?? ''),
@@ -174,9 +189,16 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
   }, [templateRequestDependencies]);
 
   const {
-    data: { distribution_versions, distribution_arches } = {
+    data: {
+      distribution_versions,
+      distribution_arches,
+      extended_release_features,
+      distribution_minor_versions,
+    } = {
       distribution_versions: [],
       distribution_arches: [],
+      extended_release_features: [],
+      distribution_minor_versions: [],
     },
   } = useRepositoryParams();
 
@@ -187,6 +209,8 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
         queryClient,
         distribution_arches,
         distribution_versions,
+        extended_release_features,
+        distribution_minor_versions,
         templateRequest,
         setTemplateRequest,
         selectedRedhatRepos,
