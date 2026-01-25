@@ -109,19 +109,28 @@ export interface PopularRepositoriesResponse {
   meta: Meta;
 }
 
+export type NameLabel = {
+  name: string;
+  label: string;
+};
+
+export type DistributionMinorVersion = {
+  name: string;
+  label: string;
+  major: string;
+  feature_names: string[];
+};
+
 export interface RepositoryParamsResponse {
   distribution_versions: Array<NameLabel>;
   distribution_arches: Array<NameLabel>;
+  extended_release_features: Array<NameLabel>;
+  distribution_minor_versions: Array<DistributionMinorVersion>;
 }
 
 export interface GpgKeyResponse {
   gpg_key: string;
 }
-
-export type NameLabel = {
-  name: string;
-  label: string;
-};
 
 export type FilterData = Partial<{
   search: string;
