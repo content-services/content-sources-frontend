@@ -83,6 +83,7 @@ export const navigateToTemplates = async (page: Page) => {
 
 export const navigateToSnapshotsOfRepository = async (page: Page, row: Locator) => {
   await test.step(`Navigating to snapshots of repository`, async () => {
+    await expect(row.getByRole('button', { name: 'Kebab toggle' })).toBeEnabled();
     await row.getByRole('button', { name: 'Kebab toggle' }).click();
     await page.getByRole('menuitem', { name: 'View all snapshots' }).click();
   });
