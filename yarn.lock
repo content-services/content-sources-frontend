@@ -1316,12 +1316,12 @@
   resolved "https://registry.yarnpkg.com/@pkgr/core/-/core-0.2.9.tgz#d229a7b7f9dac167a156992ef23c7f023653f53b"
   integrity sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==
 
-"@playwright/test@^1.49.1", "@playwright/test@^1.51.1":
-  version "1.57.0"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.57.0.tgz#a14720ffa9ed7ef7edbc1f60784fc6134acbb003"
-  integrity sha512-6TyEnHgd6SArQO8UO2OMTxshln3QMWBtPGrOCgs3wVEmQmwyuNtB10IZMfmYDE0riwNR1cu4q+pPcxMVtaG3TA==
+"@playwright/test@^1.58.0":
+  version "1.58.0"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.58.0.tgz#7e768ebaadd4db5531fee812d876a0641f4fa10a"
+  integrity sha512-fWza+Lpbj6SkQKCrU6si4iu+fD2dD3gxNHFhUPxsfXBPhnv3rRSQVd0NtBUT9Z/RhF/boCBcuUaMUSTRTopjZg==
   dependencies:
-    playwright "1.57.0"
+    playwright "1.58.0"
 
 "@pmmmwh/react-refresh-webpack-plugin@^0.5.15":
   version "0.5.17"
@@ -1427,10 +1427,10 @@
     js-yaml "^4.1.0"
     node-fetch "2.6.7"
 
-"@redhat-cloud-services/frontend-components-config@^6.7.22":
-  version "6.7.22"
-  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components-config/-/frontend-components-config-6.7.22.tgz#7c57b19a0db5082071a30d8ee7790104d7e314c8"
-  integrity sha512-jiZS7bSYUcLEguEa0QmdwvoBNWPCq28cOaHqOKdUjwiRvTk5r8S5Ol4J7up43dHqMNq69ieiMId7WoUGDsUpfA==
+"@redhat-cloud-services/frontend-components-config@^6.7.51":
+  version "6.7.51"
+  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components-config/-/frontend-components-config-6.7.51.tgz#8228df17f1d2769e907d7c998444c83b767d20fd"
+  integrity sha512-gnaRssFBXJALT4UmVtebcahk48iIOwtoO0IOFO7f0q+kNNMtBSGUybHs4QkNLe6u8Ay8PlsS967bwbnRogp9dw==
   dependencies:
     "@pmmmwh/react-refresh-webpack-plugin" "^0.5.15"
     "@redhat-cloud-services/frontend-components-config-utilities" "^4.7.1"
@@ -1475,18 +1475,18 @@
     webpack-dev-server "5.1.0"
     yargs "^17.6.2"
 
-"@redhat-cloud-services/frontend-components-notifications@^6.1.26":
-  version "6.1.26"
-  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components-notifications/-/frontend-components-notifications-6.1.26.tgz#8b82ef65b74dc301c491e93cb8acd069a262a635"
-  integrity sha512-JkW9qAz8GT3ZQvYqlSTG5OpEAhLtp47ruZnq4GUyHSZuPtcdLR7vYuGRvlNc9UbZAaAVXDotLrZMMICArfY29w==
+"@redhat-cloud-services/frontend-components-notifications@^6.1.41":
+  version "6.1.41"
+  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components-notifications/-/frontend-components-notifications-6.1.41.tgz#e16ece38f6e42d489b670201ba232e7f8e86a296"
+  integrity sha512-TupsfiW2LZYnV0ZJd7MN3zdAwnwolyAzqZ7jxpr2Vs46tictWvzcWm1QCaH9uaOEJCCwPmf13TxiWIvwm7PNmg==
   dependencies:
     "@redhat-cloud-services/frontend-components" "^7.0.13"
     "@redhat-cloud-services/frontend-components-utilities" "^7.0.0"
 
-"@redhat-cloud-services/frontend-components-utilities@^7.0.0", "@redhat-cloud-services/frontend-components-utilities@^7.0.21":
-  version "7.0.21"
-  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components-utilities/-/frontend-components-utilities-7.0.21.tgz#37da8e5d396014a16f54ad2b29aac9dd77d958ba"
-  integrity sha512-uxGEdeL2IJxbgjRtBXYIMy1AMnY7tr5gPiUJ7e6BAjs2OiSAZBAWMtCdEmC++0FONoQroRjFXWZCpa+snJNOqA==
+"@redhat-cloud-services/frontend-components-utilities@^7.0.0", "@redhat-cloud-services/frontend-components-utilities@^7.0.36":
+  version "7.0.36"
+  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components-utilities/-/frontend-components-utilities-7.0.36.tgz#e30ab9ba2632b86ce4f06387cea4bd07a112dfd6"
+  integrity sha512-XQnRJ6c7e2MN187WniCBc0G1MvD/c8IZifQMwk7QSRegwKYcfV6aRUYmZTZ9FQHT7pPZr6ZR4hYShZwkSVN1vg==
   dependencies:
     "@redhat-cloud-services/rbac-client" "^4.2.3"
     "@redhat-cloud-services/types" "^3.0.0"
@@ -1498,10 +1498,10 @@
     p-map "^7.0.2"
     react-content-loader "^6.2.0"
 
-"@redhat-cloud-services/frontend-components@^7.0.13", "@redhat-cloud-services/frontend-components@^7.0.25":
-  version "7.0.25"
-  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components/-/frontend-components-7.0.25.tgz#537384a5d2b68828e7b3f0b2341ba8b8e906e673"
-  integrity sha512-djfOHFfEc1Wuz5hcjWypMPnH2L++JqslILZeVFe5/qWanSSJpJPCTKhzdDuOMbCsASCHtEc9nPCdQB/3sCoG1Q==
+"@redhat-cloud-services/frontend-components@^7.0.13", "@redhat-cloud-services/frontend-components@^7.0.40":
+  version "7.0.40"
+  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components/-/frontend-components-7.0.40.tgz#09e01dda93c8eb2a8aa3592928411ea8df6a5025"
+  integrity sha512-EolTFoMHQLW9Rd2H4qJ4NdaOMANlh3tinFIfpTiXBt+Ga7971tldfa7meYm7hNUHARY8kMCk3YTWW5Luzhzn2A==
   dependencies:
     "@patternfly/react-component-groups" "^6.0.0"
     "@redhat-cloud-services/frontend-components-utilities" "^7.0.0"
@@ -1527,17 +1527,17 @@
     "@redhat-cloud-services/javascript-clients-shared" "^2.0.5"
     tslib "^2.6.2"
 
-"@redhat-cloud-services/tsc-transform-imports@^1.0.26", "@redhat-cloud-services/tsc-transform-imports@^1.0.38":
-  version "1.0.38"
-  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/tsc-transform-imports/-/tsc-transform-imports-1.0.38.tgz#80d27e71afcf33e9e2b1e6fc3db6ac00077852bf"
-  integrity sha512-h4l4QPcug5X9mhQOOk3vHV7jX1NfOvuP30L2FEcx7WwNtRogrnrKv1RQWIYacKl0u2cq1NtXnmXsGkfazNd2fw==
+"@redhat-cloud-services/tsc-transform-imports@^1.0.26", "@redhat-cloud-services/tsc-transform-imports@^1.0.53":
+  version "1.0.53"
+  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/tsc-transform-imports/-/tsc-transform-imports-1.0.53.tgz#b9cb99f6e72fb53bb3db3191817212faf706f413"
+  integrity sha512-nFBywEzwTAv2Vbfe/iCUrPUlECj05e7arK1loA7YbLngWxNl8CdQvt26iim+LglqV+5pB2mb+LNcUsFXRGfBNw==
   dependencies:
     glob "10.5.0"
 
-"@redhat-cloud-services/types@^3.0.0", "@redhat-cloud-services/types@^3.3.13":
-  version "3.3.13"
-  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/types/-/types-3.3.13.tgz#c5b84d9d4e77eb558997cce166cb1633c5172237"
-  integrity sha512-evYNAkAA95ALJG2qr13Jx39djCOr+UoXkvfrylvTYAkM5LYO6LAoivJbe8T0Q5MItYue0K6hK2xLipli/pnx3g==
+"@redhat-cloud-services/types@^3.0.0", "@redhat-cloud-services/types@^3.3.28":
+  version "3.3.28"
+  resolved "https://registry.yarnpkg.com/@redhat-cloud-services/types/-/types-3.3.28.tgz#d24ab89275f046f4e9f6295d470d479f786d3d19"
+  integrity sha512-h2fYLkdq/C0T9kzSd+jGs7pHVj+kHv2JnJm7P+05oipkk0K7c9xcENvAZO/bEnq8uNv21EPm/zzKZH5aOIctxA==
 
 "@remix-run/router@1.23.2":
   version "1.23.2"
@@ -1594,10 +1594,10 @@
     "@sentry/types" "7.120.4"
     "@sentry/utils" "7.120.4"
 
-"@sentry/babel-plugin-component-annotate@4.7.0":
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/@sentry/babel-plugin-component-annotate/-/babel-plugin-component-annotate-4.7.0.tgz#46841deb27275b7d235f2fbce42c5156ad6c7ae6"
-  integrity sha512-MkyajDiO17/GaHHFgOmh05ZtOwF5hmm9KRjVgn9PXHIdpz+TFM5mkp1dABmR6Y75TyNU98Z1aOwPOgyaR5etJw==
+"@sentry/babel-plugin-component-annotate@4.8.0":
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/@sentry/babel-plugin-component-annotate/-/babel-plugin-component-annotate-4.8.0.tgz#6705126a7726bd248f93acc79b8f3c8921b1c385"
+  integrity sha512-cy/9Eipkv23MsEJ4IuB4dNlVwS9UqOzI3Eu+QPake5BVFgPYCX0uP0Tr3Z43Ime6Rb+BiDnWC51AJK9i9afHYw==
 
 "@sentry/browser@^7.119.1":
   version "7.120.4"
@@ -1613,13 +1613,13 @@
     "@sentry/types" "7.120.4"
     "@sentry/utils" "7.120.4"
 
-"@sentry/bundler-plugin-core@4.7.0":
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/@sentry/bundler-plugin-core/-/bundler-plugin-core-4.7.0.tgz#00ab83727df34bbbe170f032fa948e6f21f43185"
-  integrity sha512-gFdEtiup/7qYhN3vp1v2f0WL9AG9OorWLtIpfSBYbWjtzklVNg1sizvNyZ8nEiwtnb25LzvvCUbOP1SyP6IodQ==
+"@sentry/bundler-plugin-core@4.8.0":
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/@sentry/bundler-plugin-core/-/bundler-plugin-core-4.8.0.tgz#2e7a4493795a848951e1e074a1b15b650fe0e6b0"
+  integrity sha512-QaXd/NzaZ2vmiA2FNu2nBkgQU+17N3fE+zVOTzG0YK54QDSJMd4n3AeJIEyPhSzkOob+GqtO22nbYf6AATFMAw==
   dependencies:
     "@babel/core" "^7.18.5"
-    "@sentry/babel-plugin-component-annotate" "4.7.0"
+    "@sentry/babel-plugin-component-annotate" "4.8.0"
     "@sentry/cli" "^2.57.0"
     dotenv "^16.3.1"
     find-up "^5.0.0"
@@ -1727,12 +1727,12 @@
   dependencies:
     "@sentry/types" "7.120.4"
 
-"@sentry/webpack-plugin@^4.7.0":
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/@sentry/webpack-plugin/-/webpack-plugin-4.7.0.tgz#6738bf35f0cfaa235c51894643f0b9e110c9a0bb"
-  integrity sha512-SQd+VIWVIpSzFlklIysiTHdRc3qf8g+grRto+1I4c7+/eTAIBDE6PSviKtnryjVVudz5dCrpvR2f0JhkLCts5Q==
+"@sentry/webpack-plugin@^4.8.0":
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/@sentry/webpack-plugin/-/webpack-plugin-4.8.0.tgz#f3c1f5756cb889df4e4e5e69316080160c5680d0"
+  integrity sha512-x4gayRA/J8CEcowrXWA2scaPZx+hd18squORJElHZKC46PGYRKvQfAWQ7qRCX6gtJ2v53x9264n9D8f3b9rp9g==
   dependencies:
-    "@sentry/bundler-plugin-core" "4.7.0"
+    "@sentry/bundler-plugin-core" "4.8.0"
     unplugin "1.0.1"
     uuid "^9.0.0"
 
@@ -2299,10 +2299,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@>=13.7.0", "@types/node@^25.0.9":
-  version "25.0.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.0.9.tgz#81ce3579ddf67cae812a9d49c8a0ab90c82e7782"
-  integrity sha512-/rpCXHlCWeqClNBwUhDcusJxXYDjZTyE8v5oTO7WbL8eij2nKhUeU89/6xgjU7N4/Vh3He0BtyhJdQbDyhiXAw==
+"@types/node@*", "@types/node@>=13.7.0", "@types/node@^25.0.10":
+  version "25.0.10"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.0.10.tgz#4864459c3c9459376b8b75fd051315071c8213e7"
+  integrity sha512-zWW5KPngR/yvakJgGOmZ5vTBemDoSqF3AcV/LrO5u5wTWyEAVVh+IT39G4gtyAkh3CtTZs8aX/yRM82OfzHJRg==
   dependencies:
     undici-types "~7.16.0"
 
@@ -3104,10 +3104,10 @@ axios-retry@^4.5.0:
   dependencies:
     is-retry-allowed "^2.2.0"
 
-axios@^1.12.2, axios@^1.13.2, axios@^1.6.1:
-  version "1.13.2"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.2.tgz#9ada120b7b5ab24509553ec3e40123521117f687"
-  integrity sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==
+axios@^1.12.2, axios@^1.13.2, axios@^1.13.3, axios@^1.6.1:
+  version "1.13.3"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.3.tgz#f123e77356630a22b0163920662556944f2be1a1"
+  integrity sha512-ERT8kdX7DZjtUm7IitEyV7InTHAF42iJuMArIiDIV5YtPanJkgw4hw5Dyg9fh0mihdWNn1GKaeIWErfe56UQ1g==
   dependencies:
     follow-redirects "^1.15.6"
     form-data "^4.0.4"
@@ -3755,7 +3755,6 @@ content-disposition@~0.5.4:
 "content-sources-test-utils@file:./_playwright-tests/test-utils/_playwright-tests/test-utils":
   version "1.0.0"
   dependencies:
-    "@playwright/test" "^1.49.1"
     "@types/pg" "^8.11.11"
     pg "^8.14.1"
 
@@ -4620,10 +4619,10 @@ eslint-config-prettier@^10.1.8:
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-10.1.8.tgz#15734ce4af8c2778cc32f0b01b37b0b5cd1ecb97"
   integrity sha512-82GZUjRS0p/jganf6q1rEO25VSoHH0hKPCTrgillPjdI/3bgBhAE1QzHrHTizjpRvy6pGAvKjDJtk2pF9NDq8w==
 
-eslint-plugin-playwright@^2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-2.5.0.tgz#d6758e7e8dbd858d3384f9111b568b696753d911"
-  integrity sha512-1ckFw7Abdz+l23wtw5Tg4GTK3Y+MgEQQNjEr7FTJP3wwmIOj8DkbJ6G655aPc09c0Kfn/NoGA4xpMZzeSO4NWw==
+eslint-plugin-playwright@^2.5.1:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-2.5.1.tgz#f4bdc721ecaab2dac4690208ebd48ae020513435"
+  integrity sha512-q7oqVQTTfa3VXJQ8E+ln0QttPGrs/XmSO1FjOMzQYBMYF3btih4FIrhEYh34JF184GYDmq3lJ/n7CMa49OHBvA==
   dependencies:
     globals "^16.4.0"
 
@@ -5409,10 +5408,10 @@ globals@^16.4.0:
   resolved "https://registry.yarnpkg.com/globals/-/globals-16.5.0.tgz#ccf1594a437b97653b2be13ed4d8f5c9f850cac1"
   integrity sha512-c/c15i26VrJ4IRt5Z89DnIzCGDn9EcebibhAOjw5ibqEHsE1wLUgkPn9RDmNcUKyU87GeaL633nyJ+pplFR2ZQ==
 
-globals@^17.0.0:
-  version "17.0.0"
-  resolved "https://registry.yarnpkg.com/globals/-/globals-17.0.0.tgz#a4196d9cfeb4d627ba165b4647b1f5853bf90a30"
-  integrity sha512-gv5BeD2EssA793rlFWVPMMCqefTlpusw6/2TbAVMy0FzcG8wKJn4O+NqJ4+XWmmwrayJgw5TzrmWjFgmz1XPqw==
+globals@^17.1.0:
+  version "17.1.0"
+  resolved "https://registry.yarnpkg.com/globals/-/globals-17.1.0.tgz#03448e667caa3914312a7937eef48c4a59dc6859"
+  integrity sha512-8HoIcWI5fCvG5NADj4bDav+er9B9JMj2vyL2pI8D0eismKyUvPLTSs+Ln3wqhwcp306i73iyVnEKx3F6T47TGw==
 
 globalthis@^1.0.4:
   version "1.0.4"
@@ -8207,22 +8206,22 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-playwright-core@1.57.0:
-  version "1.57.0"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.57.0.tgz#3dcc9a865af256fa9f0af0d67fc8dd54eecaebf5"
-  integrity sha512-agTcKlMw/mjBWOnD6kFZttAAGHgi/Nw0CZ2o6JqWSbMlI219lAFLZZCyqByTsvVAJq5XA5H8cA6PrvBRpBWEuQ==
+playwright-core@1.58.0:
+  version "1.58.0"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.58.0.tgz#f0c74217837e5dda1ecfae78e214fe97112c1f97"
+  integrity sha512-aaoB1RWrdNi3//rOeKuMiS65UCcgOVljU46At6eFcOFPFHWtd2weHRRow6z/n+Lec0Lvu0k9ZPKJSjPugikirw==
 
 playwright-ctrf-json-reporter@^0.0.27:
   version "0.0.27"
   resolved "https://registry.yarnpkg.com/playwright-ctrf-json-reporter/-/playwright-ctrf-json-reporter-0.0.27.tgz#3fde61bdf7fc6dd38c747312347f343995a83dba"
   integrity sha512-FZ8KadoHJc7xhf5XM0R9F8XBsTSm4vywa5/fhmeo2nZhN31UmapYwRfxaBsGk6AbsvGmft5G+MVmkBjTJZic/Q==
 
-playwright@1.57.0:
-  version "1.57.0"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.57.0.tgz#74d1dacff5048dc40bf4676940b1901e18ad0f46"
-  integrity sha512-ilYQj1s8sr2ppEJ2YVadYBN0Mb3mdo9J0wQ+UuDhzYqURwSoW4n1Xs5vs7ORwgDGmyEh33tRMeS8KhdkMoLXQw==
+playwright@1.58.0:
+  version "1.58.0"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.58.0.tgz#f0a0d9b6b93d153338951ac7fb9dd8d0ea256e53"
+  integrity sha512-2SVA0sbPktiIY/MCOPX8e86ehA/e+tDNq+e5Y8qjKYti2Z/JG7xnronT/TXTIkKbYGWlCbuucZ6dziEgkoEjQQ==
   dependencies:
-    playwright-core "1.57.0"
+    playwright-core "1.58.0"
   optionalDependencies:
     fsevents "2.3.2"
 
@@ -8345,10 +8344,10 @@ prettier-linter-helpers@^1.0.1:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier@^3.8.0:
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.8.0.tgz#f72cf71505133f40cfa2ef77a2668cdc558fcd69"
-  integrity sha512-yEPsovQfpxYfgWNhCfECjG5AQaO+K3dp6XERmOepyPDVqcJm+bjyCVO3pmU+nAPe0N5dDvekfGezt/EIiRe1TA==
+prettier@^3.8.1:
+  version "3.8.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.8.1.tgz#edf48977cf991558f4fcbd8a3ba6015ba2a3a173"
+  integrity sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==
 
 pretty-error@^4.0.0:
   version "4.0.0"
@@ -9298,10 +9297,19 @@ signal-exit@^4.0.1, signal-exit@^4.1.0:
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-4.1.0.tgz#952188c1cbd546070e2dd20d0f41c0ae0530cb04"
   integrity sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==
 
-sirv@^2.0.3, sirv@^2.0.4:
+sirv@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/sirv/-/sirv-2.0.4.tgz#5dd9a725c578e34e449f332703eb2a74e46a29b0"
   integrity sha512-94Bdh3cC2PKrbgSOUqTiGPWVZeSiXfKOVZNJniWoqrWrRkB1CJzBU3NEbiTsPcYy1lDsANA/THzS+9WBiy5nfQ==
+  dependencies:
+    "@polka/url" "^1.0.0-next.24"
+    mrmime "^2.0.0"
+    totalist "^3.0.0"
+
+sirv@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/sirv/-/sirv-3.0.2.tgz#f775fccf10e22a40832684848d636346f41cd970"
+  integrity sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==
   dependencies:
     "@polka/url" "^1.0.0-next.24"
     mrmime "^2.0.0"
@@ -10333,10 +10341,10 @@ webidl-conversions@^7.0.0:
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-7.0.0.tgz#256b4e1882be7debbf01d05f0aa2039778ea080a"
   integrity sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==
 
-webpack-bundle-analyzer@^5.1.1:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/webpack-bundle-analyzer/-/webpack-bundle-analyzer-5.1.1.tgz#39273f584a234960158fd9a56ca79e739ae06062"
-  integrity sha512-UzoaIA0Aigo5lUvoUkIkSoHtUK5rBJh9e2vW3Eqct0jc/L8hcruBCz/jsXEvB1hDU1G3V94jo2EJqPcFKeSSeQ==
+webpack-bundle-analyzer@^5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/webpack-bundle-analyzer/-/webpack-bundle-analyzer-5.2.0.tgz#9bcf0e7cc8c86632a96bf7092300287dc284c3d7"
+  integrity sha512-Etrauj1wYO/xjiz/Vfd6bW1lG9fEhrJpNmu10tv0X9kv+gyY3qiE09uYepqg1Xd0PxOvllRXwWYWjtQYoO/glQ==
   dependencies:
     "@discoveryjs/json-ext" "0.5.7"
     acorn "^8.0.4"
@@ -10347,8 +10355,8 @@ webpack-bundle-analyzer@^5.1.1:
     html-escaper "^2.0.2"
     opener "^1.5.2"
     picocolors "^1.0.0"
-    sirv "^2.0.3"
-    ws "^7.3.1"
+    sirv "^3.0.2"
+    ws "^8.19.0"
 
 webpack-cli@^5.1.4:
   version "5.1.4"
@@ -10682,12 +10690,7 @@ write-file-atomic@^4.0.2:
     imurmurhash "^0.1.4"
     signal-exit "^3.0.7"
 
-ws@^7.3.1:
-  version "7.5.10"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.10.tgz#58b5c20dc281633f6c19113f39b349bd8bd558d9"
-  integrity sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==
-
-ws@^8.11.0, ws@^8.18.0, ws@^8.18.1, ws@^8.18.3:
+ws@^8.11.0, ws@^8.18.0, ws@^8.18.1, ws@^8.18.3, ws@^8.19.0:
   version "8.19.0"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.19.0.tgz#ddc2bdfa5b9ad860204f5a72a4863a8895fd8c8b"
   integrity sha512-blAT2mjOEIi0ZzruJfIhb3nps74PRWTCz1IjglWEEpQl5XS/UNama6u2/rjFkDDouqr4L67ry+1aGIALViWjDg==
