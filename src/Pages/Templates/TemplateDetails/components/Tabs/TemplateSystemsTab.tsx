@@ -119,7 +119,7 @@ export default function TemplateSystemsTab() {
   const { hasRegisteredSystems, isFetchingRegSystems, isErrorFetchingRegSystems } =
     useHasRegisteredSystems(uuid);
 
-  const { mutateAsync: deleteFromSystems, isLoading: isDeleting } =
+  const { mutateAsync: deleteFromSystems, isPending: isDeleting } =
     useDeleteTemplateFromSystems(queryClient);
 
   const {

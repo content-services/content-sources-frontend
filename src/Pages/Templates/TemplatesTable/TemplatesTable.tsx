@@ -116,7 +116,7 @@ const TemplatesTable = () => {
   );
 
   const {
-    isInitialLoading: isLoading,
+    isLoading,
     error,
     isError,
     isFetching,

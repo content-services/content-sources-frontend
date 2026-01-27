@@ -1,6 +1,6 @@
 import { render, waitFor, screen, within } from '@testing-library/react';
 import AssignTemplateModal from './AssignTemplateModal';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSystemsListQuery } from 'services/Systems/SystemsQueries';
 import {
   defaultSystemsListItem,
@@ -27,7 +27,7 @@ jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
 jest.mock('Hooks/useHasRegisteredSystems');
 
-jest.mock('react-query');
+jest.mock('@tanstack/react-query');
 
 jest.mock('services/Systems/SystemsQueries', () => ({
   useAddTemplateToSystemsQuery: () => ({ mutate: () => undefined, isLoading: false }),

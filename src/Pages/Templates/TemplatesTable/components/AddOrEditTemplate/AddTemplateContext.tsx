@@ -84,7 +84,7 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
     !!hardcodedRedhatRepositories.length,
   );
 
-  const { data: existingRepositoryInformation, isInitialLoading: isLoading } = useContentListQuery(
+  const { data: existingRepositoryInformation, isLoading } = useContentListQuery(
     1,
     10,
     { uuids: editTemplateData?.repository_uuids },
