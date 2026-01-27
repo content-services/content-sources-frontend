@@ -16,6 +16,7 @@ import {
   logout,
   logInWithUsernameAndPassword,
 } from './authHelpers';
+import { closeGenericPopupsIfExist } from './UI/helpers/helpers';
 
 import { existsSync, mkdirSync } from 'fs';
 
@@ -176,6 +177,7 @@ test.describe('Setup Authentication States', () => {
     test(`Authenticate ${user.key} user and save state`, async ({ page }) => {
       test.setTimeout(60_000);
 
+      await closeGenericPopupsIfExist(page);
       await logInWithUsernameAndPassword(
         page,
         process.env[user.credentialEnvVars[0]],
