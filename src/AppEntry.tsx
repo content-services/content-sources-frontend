@@ -1,26 +1,25 @@
+import { AlertVariant } from '@patternfly/react-core';
+import {
+  createStore as createNotificationStore,
+  NotificationsProvider,
+} from '@redhat-cloud-services/frontend-components-notifications';
+import { PortalNotificationConfig } from '@redhat-cloud-services/frontend-components-notifications/Portal';
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider as ReduxProvider } from 'react-redux';
 import * as Redux from 'redux';
 
+import { composeErrorDescription } from 'Hooks/useErrorNotification';
 import App from './App';
-
 import { ContextProvider } from './middleware/AppContext';
 import { createStore, restoreStore } from './store';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 interface AppEntryProps {
   logger?: Redux.Middleware;
 }
 
 export default function AppEntry({ logger }: AppEntryProps) {
+  const notificationsStore = createNotificationStore();
   const store = React.useMemo(() => {
     restoreStore();
     if (logger) {
@@ -33,13 +32,42 @@ export default function AppEntry({ logger }: AppEntryProps) {
     insights?.chrome?.appAction?.('view-list-page');
   }, []);
 
+  const [queryClient] = React.useState(
+    new QueryClient({
+      defaultOptions: {
+        queries: {
+          refetchOnWindowFocus: false,
+        },
+      },
+      queryCache: new QueryCache({
+        onError: (_, query) => {
+          if (query.meta?.title) {
+            const { title, description } = composeErrorDescription(
+              query.meta.title as string,
+              'An error occurred',
+              query.state.error,
+            );
+            notificationsStore.addNotification({
+              title,
+              description,
+              variant: AlertVariant.danger,
+              id: crypto.randomUUID(),
+            } as PortalNotificationConfig);
+          }
+        },
+      }),
+    }),
+  );
+
   return (
     <ReduxProvider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <ContextProvider>
-          <App />
-        </ContextProvider>
-      </QueryClientProvider>
+      <NotificationsProvider store={notificationsStore}>
+        <QueryClientProvider client={queryClient}>
+          <ContextProvider>
+            <App />
+          </ContextProvider>
+        </QueryClientProvider>
+      </NotificationsProvider>
     </ReduxProvider>
   );
 }

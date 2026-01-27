@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
-import { QueryClient, useQueryClient } from 'react-query';
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
 import { ContentOrigin, NameLabel } from 'services/Content/ContentApi';
 import { hardcodeRedHatReposByArchAndVersion } from '../templateHelpers';

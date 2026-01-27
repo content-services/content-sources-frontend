@@ -25,7 +25,7 @@ import {
   useBulkDeleteContentItemMutate,
   useContentListQuery,
 } from 'services/Content/ContentQueries';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useHref, useLocation, useNavigate } from 'react-router-dom';
 import { useContentListOutletContext } from '../../ContentListTable';
 import useRootPath from 'Hooks/useRootPath';
@@ -67,7 +67,6 @@ export default function DeleteContentModal() {
   const rootPath = useRootPath();
   const queryClient = useQueryClient();
   const { search } = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
   const maxTemplatesToShow = 3;
   const [expandState, setExpandState] = useState({});
 
@@ -98,13 +97,14 @@ export default function DeleteContentModal() {
   const {
     isError: isRepoError,
     data: repos = { data: [] as ContentItem[], meta: { count: 0, limit: 20, offset: 0 } },
+    isLoading: isRepoLoading,
   } = useContentListQuery(selectedPage, selectedPerPage, repoFilterData, '', [
     ContentOrigin.CUSTOM,
   ]);
 
   const reposToDelete = new Map(repos.data.map((repo) => [repo.uuid, repo]));
 
-  const { mutateAsync: deleteItems, isLoading: isDeletingItems } = useBulkDeleteContentItemMutate(
+  const { mutateAsync: deleteItems, isPending: isDeletingItems } = useBulkDeleteContentItemMutate(
     queryClient,
     reposToDelete,
     page,
@@ -120,8 +120,8 @@ export default function DeleteContentModal() {
     deleteItems(reposToDelete).then(() => {
       onClose();
       clearCheckedRepositories();
-      queryClient.invalidateQueries(CONTENT_LIST_KEY);
-      queryClient.invalidateQueries(GET_TEMPLATES_KEY);
+      queryClient.invalidateQueries({ queryKey: [CONTENT_LIST_KEY] });
+      queryClient.invalidateQueries({ queryKey: [GET_TEMPLATES_KEY] });
     });
   };
 
@@ -136,17 +136,16 @@ export default function DeleteContentModal() {
   const {
     isError: isTemplateError,
     data: templates = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
+    isLoading: isTemplateLoading,
   } = useTemplateList(page, perPage, '', templateFilterData);
 
   useEffect(() => {
-    if (repos && templates) {
-      setIsLoading(false);
-    }
     if (isRepoError || isTemplateError) {
       onClose();
     }
-  }, [isRepoError, isTemplateError, repos.data, templates.data]);
+  }, [isRepoError, isTemplateError]);
 
+  const isLoading = isRepoLoading || isTemplateLoading;
   const actionTakingPlace = isDeletingItems || isLoading;
 
   const columnHeaders = ['Name', 'URL', 'Associated templates'];

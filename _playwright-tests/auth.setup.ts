@@ -9,7 +9,7 @@
  * Admin is always authenticated last and its state becomes the default.
  */
 
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import {
   ensureNotInPreview,
   storeStorageStateAndToken,
@@ -185,6 +185,7 @@ test.describe('Setup Authentication States', () => {
       );
       await ensureNotInPreview(page);
       await storeStorageStateAndToken(page, user.tokenEnvVar);
+      expect(process.env[user.tokenEnvVar]).toBeDefined();
 
       // Logout unless it's the admin (last user)
       if (user.key !== ADMIN_KEY) {

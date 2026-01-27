@@ -36,7 +36,7 @@ import {
   useSystemsListQuery,
 } from 'services/Systems/SystemsQueries';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import type { TemplateItem } from 'services/Templates/TemplateApi';
 import { FETCH_TEMPLATE_KEY, useFetchTemplate } from 'services/Templates/TemplateQueries';
 import Loader from 'components/Loader';
@@ -163,7 +163,7 @@ export default function AddSystemModal() {
     return selectableSystems.every(({ id }) => selectedList.has(id));
   }, [selectedList, systemsList, allSystemsAreMinorReleases, uuid]);
 
-  const { mutateAsync: addSystems, isLoading: isAdding } = useAddTemplateToSystemsQuery(
+  const { mutateAsync: addSystems, isPending: isAdding } = useAddTemplateToSystemsQuery(
     queryClient,
     uuid,
     selected,
@@ -320,7 +320,7 @@ export default function AddSystemModal() {
               className={classes.refreshSystemsList}
               icon={isFetching ? <Spinner isInline /> : <SyncAltIcon />}
               isDisabled={isLoading || isFetching}
-              onClick={() => queryClient.invalidateQueries(GET_SYSTEMS_KEY)}
+              onClick={() => queryClient.invalidateQueries({ queryKey: [GET_SYSTEMS_KEY] })}
             >
               Refresh systems list
             </Button>
