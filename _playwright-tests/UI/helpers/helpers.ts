@@ -17,12 +17,15 @@ export const closeGenericPopupsIfExist = async (page: Page) => {
   const locatorsToCheck = [
     page.locator(`button[id^="pendo-close-guide-"]`), // This closes the pendo guide pop-up
     page.locator(`button[id="truste-consent-button"]`), // This closes the trusted consent pop-up
+    page
+      .locator('iframe[name="trustarc_cm"]')
+      .contentFrame()
+      .getByRole('button', { name: 'Agree and proceed with' }),
   ];
 
   for (const locator of locatorsToCheck) {
     await page.addLocatorHandler(locator, async () => {
       try {
-        await page.getByRole('dialog').waitFor({ state: 'hidden', timeout: 1000 });
         await locator.first().click({ timeout: 10_000, noWaitAfter: true }); // There can be multiple toast pop-ups
       } catch {
         return;
