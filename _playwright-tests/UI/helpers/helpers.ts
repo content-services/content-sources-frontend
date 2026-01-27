@@ -44,7 +44,9 @@ export async function waitForValidStatus(
   const locator = await getRowByNameOrUrl(pageOrLocator, rowName!);
   try {
     await locator.getByText('In progress', { exact }).waitFor({ state: 'visible', timeout: 3_000 });
-  } catch {}
+  } catch {
+    // Ignore errors.
+  }
   await expect(locator.getByText('Valid', { exact }), message).toBeVisible({ timeout });
   // TODO: Look into the syncing of status and kebab menu items, playwright can be too fast and open the kebab
   //       menu few ms after valid shows up, but the rowAction callback hasn't yet enabled the correct items.
