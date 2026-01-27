@@ -25,6 +25,7 @@ test.describe('Templates CRUD', () => {
       await cleanup.runAndAdd(() => cleanupRepositories(client, repoNamePrefix));
       await cleanup.runAndAdd(() => cleanupTemplates(client, templateNamePrefix));
     });
+
     await test.step('Create repositories', async () => {
       await navigateToRepositories(page);
       await closeGenericPopupsIfExist(page);
@@ -63,6 +64,7 @@ test.describe('Templates CRUD', () => {
       });
       await waitForValidStatus(page, repoNameNoSnaps);
     });
+
     await test.step('Create a template', async () => {
       await navigateToTemplates(page);
       await page.getByRole('button', { name: 'Create template' }).click();
@@ -109,6 +111,7 @@ test.describe('Templates CRUD', () => {
       await page.getByText('Create template only', { exact: true }).click();
       await waitForValidStatus(page, templateName);
     });
+
     await test.step('Read and update values in the template', async () => {
       const rowTemplate = await getRowByNameOrUrl(page, templateName);
       await rowTemplate.getByRole('button', { name: templateName }).click();
@@ -147,6 +150,7 @@ test.describe('Templates CRUD', () => {
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Confirm changes', exact: true }).click();
     });
+
     await test.step('Delete the template', async () => {
       await navigateToTemplates(page);
       const rowTemplate = await waitForValidStatus(page, `${templateName}-edited`);

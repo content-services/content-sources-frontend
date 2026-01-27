@@ -121,6 +121,7 @@ test.describe('Snapshot Repositories', () => {
         ),
       );
     });
+
     await navigateToRepositories(page);
     await closeGenericPopupsIfExist(page);
 

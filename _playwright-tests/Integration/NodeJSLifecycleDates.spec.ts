@@ -5,6 +5,7 @@ test.describe('Check NodeJS Lifecycle Dates', () => {
     const repoUrl = 'https://cdn.redhat.com/content/dist/rhel9/9/aarch64/appstream/os/';
 
     let repositoryRpmSearch: ApiSearchRpmResponse[];
+
     await test.step('Search for nodejs in repository using include_package_sources', async () => {
       repositoryRpmSearch = await new RpmsApi(client).searchRpm({
         apiContentUnitSearchRequest: {
