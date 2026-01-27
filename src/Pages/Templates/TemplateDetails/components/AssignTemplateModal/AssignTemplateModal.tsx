@@ -69,7 +69,7 @@ const AssignTemplateModal = () => {
 
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
 
-  const { mutateAsync: addSystems, isLoading: isAdding } = useAddTemplateToSystemsQuery(
+  const { mutateAsync: addSystems, isPending: isAdding } = useAddTemplateToSystemsQuery(
     queryClient,
     uuid,
     selectedSystems,

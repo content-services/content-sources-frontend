@@ -4,13 +4,10 @@ import {
   getSystemsList,
   listSystemsByTemplateId,
   deleteTemplateFromSystems,
-  type IDSystemsCollectionResponse,
-  type SystemsCollectionResponse,
   type SystemsFilters,
-  TagsResponse,
   listTags,
 } from './SystemsApi';
-import { useMutation, useQuery, type QueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, type QueryClient } from '@tanstack/react-query';
 import useNotification from 'Hooks/useNotification';
 import { AlertVariant } from '@patternfly/react-core';
 
@@ -23,36 +20,29 @@ export const useSystemsListQuery = (
   searchQuery: string,
   filter: SystemsFilters,
   sortBy?: string,
-) => {
-  const errorNotifier = useErrorNotification();
-  return useQuery<SystemsCollectionResponse>(
-    [GET_SYSTEMS_KEY, page, limit, searchQuery, filter, sortBy],
-    () => getSystemsList(page, limit, searchQuery, filter, sortBy),
-    {
-      keepPreviousData: true,
-      staleTime: 60000,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onError: (err: any) => {
-        errorNotifier('Unable to get systems.', 'An error occurred', err, 'systems-list-error');
-      },
+) =>
+  useQuery({
+    queryKey: [GET_SYSTEMS_KEY, page, limit, searchQuery, filter, sortBy],
+    queryFn: () => getSystemsList(page, limit, searchQuery, filter, sortBy),
+    placeholderData: keepPreviousData,
+    staleTime: 60000,
+    meta: {
+      title: 'Unable to get systems.',
+      id: 'systems-list-error',
     },
-  );
-};
+  });
 
-export const useTagsQuery = (page: number, limit: number, search?: string) => {
-  const errorNotifier = useErrorNotification();
-  return useQuery<TagsResponse>(
-    ['TAGS', page, limit, search],
-    () => listTags(page, limit, search),
-    {
-      keepPreviousData: false,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onError: (err: any) => {
-        errorNotifier('Unable to get tags', 'An error occurred', err, 'tags-err');
-      },
+export const useTagsQuery = (page: number, limit: number, search?: string) =>
+  useQuery({
+    queryKey: ['TAGS', page, limit, search],
+    queryFn: () => listTags(page, limit, search),
+    placeholderData: keepPreviousData,
+
+    meta: {
+      title: 'Unable to get tags',
+      id: 'tags-err',
     },
-  );
-};
+  });
 
 export const useListSystemsByTemplateId = (
   id: string,
@@ -60,29 +50,20 @@ export const useListSystemsByTemplateId = (
   limit: number,
   searchQuery: string,
   sortBy?: string,
-) => {
-  const errorNotifier = useErrorNotification();
-  return useQuery<IDSystemsCollectionResponse>(
-    [GET_TEMPLATE_SYSTEMS_KEY, id, page, limit, searchQuery, sortBy],
-    () => listSystemsByTemplateId(id, page, limit, searchQuery, sortBy),
-    {
-      keepPreviousData: true,
-      staleTime: 25_000,
-      refetchOnWindowFocus: 'always',
-      refetchOnMount: 'always',
-      refetchInterval: 20_000,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onError: (err: any) => {
-        errorNotifier(
-          `Unable to find systems with the given template id: ${id}`,
-          'An error occurred',
-          err,
-          'systems-list-error',
-        );
-      },
+) =>
+  useQuery({
+    queryKey: [GET_TEMPLATE_SYSTEMS_KEY, id, page, limit, searchQuery, sortBy],
+    queryFn: () => listSystemsByTemplateId(id, page, limit, searchQuery, sortBy),
+    placeholderData: keepPreviousData,
+    staleTime: 25_000,
+    refetchOnWindowFocus: 'always',
+    refetchOnMount: 'always',
+    refetchInterval: 20_000,
+    meta: {
+      title: `Unable to find systems with the given template id: ${id}`,
+      id: 'systems-list-error',
     },
-  );
-};
+  });
 
 export const useAddTemplateToSystemsQuery = (
   queryClient: QueryClient,
@@ -91,7 +72,9 @@ export const useAddTemplateToSystemsQuery = (
 ) => {
   const errorNotifier = useErrorNotification();
   const { notify } = useNotification();
-  return useMutation(() => addTemplateToSystems(templateId, systemUUIDs), {
+  return useMutation({
+    mutationFn: () => addTemplateToSystems(templateId, systemUUIDs),
+
     onSuccess: () => {
       notify({
         variant: AlertVariant.success,
@@ -101,6 +84,7 @@ export const useAddTemplateToSystemsQuery = (
       queryClient.invalidateQueries({ queryKey: [GET_TEMPLATE_SYSTEMS_KEY] });
       queryClient.invalidateQueries({ queryKey: [GET_SYSTEMS_KEY] });
     },
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
       errorNotifier(
@@ -115,7 +99,8 @@ export const useAddTemplateToSystemsQuery = (
 
 export const useDeleteTemplateFromSystems = (queryClient: QueryClient) => {
   const errorNotifier = useErrorNotification();
-  return useMutation(deleteTemplateFromSystems, {
+  return useMutation({
+    mutationFn: deleteTemplateFromSystems,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [GET_SYSTEMS_KEY] });
       queryClient.invalidateQueries({ queryKey: [GET_TEMPLATE_SYSTEMS_KEY] });

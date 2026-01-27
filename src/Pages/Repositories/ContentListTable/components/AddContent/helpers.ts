@@ -102,7 +102,7 @@ export const mapFormikToAPIValues = ({
   modularityFilteringEnabled,
   origin,
 }: FormikValues): EditContentRequestItem =>
-  (({
+  ({
     uuid,
     name,
     url,
@@ -112,8 +112,8 @@ export const mapFormikToAPIValues = ({
     snapshot,
     metadata_verification: metadataVerification,
     module_hotfixes: !modularityFilteringEnabled,
-    origin
-  }) as EditContentRequestItem);
+    origin,
+  }) as EditContentRequestItem;
 
 const mapNoMetaDataError = (response: ValidationResponse): Partial<ValidationResponse> => {
   if (isEmpty(response)) return {};
