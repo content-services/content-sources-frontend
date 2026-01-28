@@ -48,9 +48,7 @@ export async function waitForValidStatus(
     // Ignore errors.
   }
   await expect(locator.getByText('Valid', { exact }), message).toBeVisible({ timeout });
-  // TODO: Look into the syncing of status and kebab menu items, playwright can be too fast and open the kebab
-  //       menu few ms after valid shows up, but the rowAction callback hasn't yet enabled the correct items.
-  await sleep(1000);
+
   return locator;
 }
 
