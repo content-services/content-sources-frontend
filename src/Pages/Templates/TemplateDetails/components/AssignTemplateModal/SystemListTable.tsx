@@ -22,7 +22,7 @@ import { TEMPLATES_ROUTE } from 'Routes/constants';
 import TdWithTooltip from 'components/TdWithTooltip/TdWithTooltip';
 import { useParams } from 'react-router-dom';
 import SystemNameCell from './components/SystemNameCell';
-import { isMinorRelease } from './SystemListView';
+import { isMinorRelease } from 'Pages/Templates/TemplatesTable/components/templateHelpers';
 
 const useStyles = createUseStyles({
   mainContainer: {

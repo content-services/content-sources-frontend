@@ -33,6 +33,10 @@ import SystemListTable from './SystemListTable';
 import Loader from '../../../../../components/Loader';
 import { createUseStyles } from 'react-jss';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
+import {
+  isMinorRelease,
+  TEMPLATE_SYSTEMS_UPDATE_LIMIT,
+} from 'Pages/Templates/TemplatesTable/components/templateHelpers';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -53,10 +57,6 @@ const useStyles = createUseStyles({
 
 const perPageKey = 'templatesPerPage';
 type FilterType = 'Name' | 'Tags';
-
-export const isMinorRelease = (rhsm: string) =>
-  // Empty string means that the RHEL release version is unset and should be treated as a major release
-  !['', '8', '8.0', '9', '9.0', '10', '10.0'].includes(rhsm);
 
 type Props = {
   selectedSystems: string[];
@@ -136,7 +136,10 @@ const SystemListView = ({
   // Informs the parent modal whether it is safe to enable the template "Assign" button
   useEffect(() => {
     setCanAssignTemplate(
-      selectedSystems.length > 0 && !allSystemsAreMinorReleases && !allSystemsAreSatelliteManaged,
+      selectedSystems.length > 0 &&
+        selectedSystems.length <= TEMPLATE_SYSTEMS_UPDATE_LIMIT &&
+        !allSystemsAreMinorReleases &&
+        !allSystemsAreSatelliteManaged,
     );
   }, [selectedSystems, allSystemsAreMinorReleases, allSystemsAreSatelliteManaged]);
 

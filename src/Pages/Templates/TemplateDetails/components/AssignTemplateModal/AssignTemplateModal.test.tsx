@@ -11,6 +11,9 @@ import {
 } from 'testingHelpers';
 import type { SystemItem } from 'services/Systems/SystemsApi';
 import useHasRegisteredSystems from 'Hooks/useHasRegisteredSystems';
+import React from 'react';
+import { TEMPLATE_SYSTEMS_UPDATE_LIMIT } from 'Pages/Templates/TemplatesTable/components/templateHelpers';
+import userEvent from '@testing-library/user-event';
 
 const bananaUUID = 'banana-uuid';
 
@@ -37,6 +40,35 @@ jest.mock('services/Templates/TemplateQueries', () => ({
   useFetchTemplate: () => ({ data: defaultTemplateItem }),
 }));
 
+// Conditionally mock SystemListView with a set number of systems selected
+let mockSelectedSystemsCount = 0;
+jest.mock('./SystemListView', () => {
+  const actual = jest.requireActual('./SystemListView');
+  const SystemListView = actual.default;
+
+  return {
+    __esModule: true,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    default: (props: any) => {
+      const { setSelectedSystems, setCanAssignTemplate } = props;
+
+      React.useEffect(() => {
+        if (mockSelectedSystemsCount > 0) {
+          setSelectedSystems(
+            Array.from({ length: mockSelectedSystemsCount }, (_, index) => `system-${index}`),
+          );
+          setCanAssignTemplate(
+            mockSelectedSystemsCount > 0 &&
+              mockSelectedSystemsCount <= TEMPLATE_SYSTEMS_UPDATE_LIMIT,
+          );
+        }
+      }, [mockSelectedSystemsCount, setSelectedSystems, setCanAssignTemplate]);
+
+      return <SystemListView {...props} />;
+    },
+  };
+});
+
 beforeAll(() => {
   (useQueryClient as jest.Mock).mockImplementation(() => ({
     getQueryData: () => ({
@@ -46,6 +78,10 @@ beforeAll(() => {
       last_update_task: defaultUpdateTemplateTaskCompleted,
     }),
   }));
+});
+
+afterEach(() => {
+  mockSelectedSystemsCount = 0;
 });
 
 (useHasRegisteredSystems as jest.Mock).mockReturnValue({
@@ -176,5 +212,24 @@ it('prevents selection of satellite-managed systems and shows warning icon', asy
   // Verify the warning icon is in the same row as the satellite-managed system
   expect(
     within(warningIcon.closest('tr')!).getByText('69204.host.example.com'),
+  ).toBeInTheDocument();
+});
+
+it('prevents assigning a template when more than 1000 systems are selected', async () => {
+  // Render the modal with mock SystemListView
+  mockSelectedSystemsCount = TEMPLATE_SYSTEMS_UPDATE_LIMIT + 1;
+
+  render(<AssignTemplateModal />);
+
+  expect(await screen.findByText(`Selected (${mockSelectedSystemsCount})`)).toBeInTheDocument();
+
+  const saveButton = screen.getByRole('button', { name: 'Save' });
+  expect(saveButton).toBeDisabled();
+
+  await userEvent.hover(saveButton);
+  expect(
+    await screen.findByText(
+      `Cannot assign a template to more than ${TEMPLATE_SYSTEMS_UPDATE_LIMIT} systems at a time.`,
+    ),
   ).toBeInTheDocument();
 });
