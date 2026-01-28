@@ -12,9 +12,9 @@ import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import { reduceStringToCharsWithEllipsis } from '../../../../../../helpers';
 import { PATCH_SYSTEMS_ROUTE } from '../../../../../../Routes/constants';
 import type { SystemItem } from '../../../../../../services/Systems/SystemsApi';
-import { isMinorRelease } from '../SystemListView';
 import HelpPopover from '../../../../../../components/HelpPopover';
 import React from 'react';
+import { isMinorRelease } from 'Pages/Templates/TemplatesTable/components/templateHelpers';
 
 type Props = Pick<SystemItem, 'id'> &
   Pick<SystemItem['attributes'], 'display_name' | 'rhsm' | 'satellite_managed'> & {

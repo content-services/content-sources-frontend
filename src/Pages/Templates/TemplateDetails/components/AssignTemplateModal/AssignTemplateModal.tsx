@@ -30,6 +30,7 @@ import ApiView from './ApiView';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import useHasRegisteredSystems from '../../../../../Hooks/useHasRegisteredSystems';
 import Loader from '../../../../../components/Loader';
+import { TEMPLATE_SYSTEMS_UPDATE_LIMIT } from 'Pages/Templates/TemplatesTable/components/templateHelpers';
 
 export const TEMPLATE_DOCS_URL =
   'https://docs.redhat.com/en/documentation/red_hat_lightspeed/1-latest/html/managing_system_content_and_patch_updates_on_rhel_systems/patching-using-content-templates_patch-service-overview#managing-content-templates_patching-using-content-templates';
@@ -255,8 +256,16 @@ const AssignTemplateModal = () => {
       <ModalFooter>
         <Flex gap={{ default: 'gapMd' }}>
           <ConditionalTooltip
-            content='Cannot assign this template to a system yet.'
-            show={!rhsm_environment_created}
+            content={
+              !rhsm_environment_created
+                ? 'Cannot assign this template to a system yet.'
+                : selectedSystems.length > TEMPLATE_SYSTEMS_UPDATE_LIMIT
+                  ? `Cannot assign a template to more than ${TEMPLATE_SYSTEMS_UPDATE_LIMIT} systems at a time.`
+                  : undefined
+            }
+            show={
+              !rhsm_environment_created || selectedSystems.length > TEMPLATE_SYSTEMS_UPDATE_LIMIT
+            }
             setDisabled
           >
             <Button

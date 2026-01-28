@@ -33,6 +33,7 @@ import useDebounce from 'Hooks/useDebounce';
 import useHasRegisteredSystems from 'Hooks/useHasRegisteredSystems';
 import useRootPath from 'Hooks/useRootPath';
 import useSafeUUIDParam from '../../../../../Hooks/useSafeUUIDParam';
+import { TEMPLATE_SYSTEMS_UPDATE_LIMIT } from 'Pages/Templates/TemplatesTable/components/templateHelpers';
 
 const useStyles = createUseStyles({
   description: {
@@ -233,14 +234,20 @@ export default function TemplateSystemsTab() {
               </ConditionalTooltip>
             </FlexItem>
             <ConditionalTooltip
-              content={`You do not have the required ${missingRequirements} to perform this action.`}
-              show={isMissingRequirements}
+              content={
+                isMissingRequirements
+                  ? `You do not have the required ${missingRequirements} to perform this action.`
+                  : selected.length > TEMPLATE_SYSTEMS_UPDATE_LIMIT
+                    ? `Cannot unassign a template from more than ${TEMPLATE_SYSTEMS_UPDATE_LIMIT} systems at a time.`
+                    : undefined
+              }
+              show={isMissingRequirements || selected.length > TEMPLATE_SYSTEMS_UPDATE_LIMIT}
               setDisabled
             >
               <SystemsDeleteKebab
                 deleteFromSystems={deleteFromSystems}
                 deselectAll={deselectAll}
-                isDisabled={!rbac?.templateWrite}
+                isDisabled={!rbac?.templateWrite || selected.length > TEMPLATE_SYSTEMS_UPDATE_LIMIT}
                 selected={selected}
               />
             </ConditionalTooltip>
