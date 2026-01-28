@@ -1,4 +1,12 @@
 import * as Yup from 'yup';
+import { NameLabel } from 'services/Content/ContentApi';
+
+/**
+ * Checks if the user has extended support features enabled.
+ * @param extended_release_features
+ */
+export const hasExtendedSupport = (extended_release_features?: NameLabel[]) =>
+  (extended_release_features?.length ?? 0) > 0;
 
 export const hardcodeRedHatReposByArchAndVersion = (
   arch?: string,

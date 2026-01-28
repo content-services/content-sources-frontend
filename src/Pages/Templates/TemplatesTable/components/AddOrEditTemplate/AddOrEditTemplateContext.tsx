@@ -1,4 +1,4 @@
-import {
+import React, {
   createContext,
   ReactNode,
   useCallback,
@@ -10,18 +10,22 @@ import {
 import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { QueryClient, useQueryClient } from 'react-query';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
-import { ContentOrigin, NameLabel } from 'services/Content/ContentApi';
-import { hardcodeRedHatReposByArchAndVersion } from '../templateHelpers';
+import { ContentOrigin, NameLabel, DistributionMinorVersion } from 'services/Content/ContentApi';
+import { hardcodeRedHatReposByArchAndVersion, hasExtendedSupport } from '../templateHelpers';
 import { useNavigate } from 'react-router-dom';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
 import useRootPath from 'Hooks/useRootPath';
 import { isDateValid } from 'helpers';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
 
-export interface AddTemplateContextInterface {
+export interface AddOrEditTemplateContextInterface {
   queryClient: QueryClient;
   distribution_arches: NameLabel[];
   distribution_versions: NameLabel[];
+  extended_release_features: NameLabel[];
+  distribution_minor_versions: DistributionMinorVersion[];
+  useExtendedSupport: boolean;
+  setUseExtendedSupport: (value: React.SetStateAction<boolean>) => void;
   templateRequest: Partial<TemplateRequest>;
   setTemplateRequest: (value: React.SetStateAction<Partial<TemplateRequest>>) => void;
   selectedRedhatRepos: Set<string>;
@@ -29,14 +33,14 @@ export interface AddTemplateContextInterface {
   selectedCustomRepos: Set<string>;
   setSelectedCustomRepos: (uuidSet: Set<string>) => void;
   hardcodedRedhatRepositoryUUIDS: Set<string>;
-  checkIfCurrentStepValid: (index: number) => boolean;
+  hasInvalidSteps: (index: number) => boolean;
   isEdit?: boolean;
   editUUID?: string;
 }
 
-export const AddTemplateContext = createContext({} as AddTemplateContextInterface);
+export const AddOrEditTemplateContext = createContext({} as AddOrEditTemplateContextInterface);
 
-export const AddTemplateContextProvider = ({ children }: { children: ReactNode }) => {
+export const AddOrEditTemplateContextProvider = ({ children }: { children: ReactNode }) => {
   const uuid = useSafeUUIDParam('templateUUID');
   const { data: editTemplateData, isError } = useFetchTemplate(uuid, !!uuid);
 
@@ -44,7 +48,12 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
   const rootPath = useRootPath();
 
   if (isError) navigate(rootPath);
-  const [templateRequest, setTemplateRequest] = useState<Partial<TemplateRequest>>({});
+  const [templateRequest, setTemplateRequest] = useState<Partial<TemplateRequest>>({
+    extended_release: '',
+    extended_release_version: '',
+  });
+
+  const [useExtendedSupport, setUseExtendedSupport] = useState(false);
   const [selectedRedhatRepos, setSelectedRedhatRepos] = useState<Set<string>>(new Set());
   const [selectedCustomRepos, setSelectedCustomRepos] = useState<Set<string>>(new Set());
   const [hardcodedRedhatRepositories, setHardcodeRepositories] = useState<string[]>([]);
@@ -52,25 +61,60 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
     new Set(),
   );
 
-  const stepsValidArray = useMemo(() => {
-    const { arch, date, name, version, use_latest } = templateRequest;
+  // The context always provides arrays, even if data exist, but some fields are undefined
+  // TODO: Remove the dummy data once the API is properly integrated into the UI
+  const {
+    data: {
+      distribution_versions = [],
+      distribution_arches = [],
+      extended_release_features = [
+        { name: 'Extended Update Support (EUS)', label: 'RHEL-EUS-x86_64' },
+        { name: 'Update Services for SAP Solutions (E4S)', label: 'RHEL-E4S-x86_64' },
+      ],
+      distribution_minor_versions = [
+        {
+          name: 'el8.6',
+          label: '8.6',
+          major: '8',
+          feature_names: ['RHEL-E4S-x86_64'],
+        },
+        {
+          name: 'el9.4',
+          label: '9.4',
+          major: '9',
+          feature_names: ['RHEL-EUS-x86_64', 'RHEL-E4S-x86_64'],
+        },
+      ],
+    } = {},
+  } = useRepositoryParams();
+
+  const stepValidationSequence = useMemo(() => {
+    const { arch, date, name, version, use_latest, extended_release, extended_release_version } =
+      templateRequest;
+
+    // Valid if: feature is unavailable, unused, or all required fields filled
+    const isVersioningStepValid =
+      !hasExtendedSupport(extended_release_features) ||
+      !useExtendedSupport ||
+      (extended_release && extended_release_version);
 
     return [
-      true,
-      arch && version,
-      !!selectedRedhatRepos.size,
-      true,
-      use_latest || isDateValid(date ?? ''),
-      !!name && name.length < 256,
+      true, // [0] No step
+      arch && version, // [1] "Define content" step
+      isVersioningStepValid, // [2] "Content versioning" step
+      !!selectedRedhatRepos.size, // [3] "Red Hat repositories" step
+      true, // [4] "Other repositories" step - optional step
+      use_latest || isDateValid(date ?? ''), // [5] "Setup date" step
+      !!name && name.length < 256, // [6] "Detail" step
     ] as boolean[];
   }, [templateRequest, selectedRedhatRepos.size]);
 
-  const checkIfCurrentStepValid = useCallback(
+  const hasInvalidSteps = useCallback(
     (stepIndex: number) => {
-      const stepsToCheck = stepsValidArray.slice(0, stepIndex + 1);
+      const stepsToCheck = stepValidationSequence.slice(0, stepIndex + 1);
       return !stepsToCheck.every((step) => step);
     },
-    [selectedRedhatRepos.size, stepsValidArray],
+    [selectedRedhatRepos.size, stepValidationSequence],
   );
 
   const queryClient = useQueryClient();
@@ -162,20 +206,15 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
     }));
   }, [templateRequestDependencies]);
 
-  const {
-    data: { distribution_versions, distribution_arches } = {
-      distribution_versions: [],
-      distribution_arches: [],
-    },
-  } = useRepositoryParams();
-
   return (
-    <AddTemplateContext.Provider
+    <AddOrEditTemplateContext.Provider
       key={uuid}
       value={{
         queryClient,
         distribution_arches,
         distribution_versions,
+        extended_release_features,
+        distribution_minor_versions,
         templateRequest,
         setTemplateRequest,
         selectedRedhatRepos,
@@ -183,14 +222,16 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
         selectedCustomRepos,
         setSelectedCustomRepos,
         hardcodedRedhatRepositoryUUIDS,
-        checkIfCurrentStepValid,
+        hasInvalidSteps,
         isEdit: !!uuid,
         editUUID: uuid,
+        useExtendedSupport,
+        setUseExtendedSupport,
       }}
     >
       {children}
-    </AddTemplateContext.Provider>
+    </AddOrEditTemplateContext.Provider>
   );
 };
 
-export const useAddTemplateContext = () => useContext(AddTemplateContext);
+export const useAddOrEditTemplateContext = () => useContext(AddOrEditTemplateContext);

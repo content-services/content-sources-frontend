@@ -5,7 +5,8 @@ import { MAX_CHUNK_SIZE } from 'Pages/Repositories/ContentListTable/components/U
 
 export interface ContentItem {
   uuid: string;
-
+  extended_release?: string;
+  extended_release_version?: string;
   name: string;
   package_count: number;
   url: string;
@@ -109,24 +110,35 @@ export interface PopularRepositoriesResponse {
   meta: Meta;
 }
 
+export type NameLabel = {
+  name: string;
+  label: string;
+};
+
+export type DistributionMinorVersion = {
+  name: string;
+  label: string;
+  major: string;
+  feature_names: string[];
+};
+
 export interface RepositoryParamsResponse {
   distribution_versions: Array<NameLabel>;
   distribution_arches: Array<NameLabel>;
+  extended_release_features: Array<NameLabel>;
+  distribution_minor_versions: Array<DistributionMinorVersion>;
 }
 
 export interface GpgKeyResponse {
   gpg_key: string;
 }
 
-export type NameLabel = {
-  name: string;
-  label: string;
-};
-
 export type FilterData = Partial<{
   search: string;
   versions: Array<string>;
   arches: Array<string>;
+  extended_release: string;
+  extended_release_version: string;
   statuses: Array<string>;
   uuids: Array<string>;
   urls: Array<string>;
