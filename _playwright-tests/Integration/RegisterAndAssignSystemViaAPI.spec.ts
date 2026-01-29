@@ -1,6 +1,10 @@
 import { test, expect, cleanupTemplates, randomName } from 'test-utils';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
-import { closeGenericPopupsIfExist, waitForValidStatus } from '../UI/helpers/helpers';
+import {
+  closeGenericPopupsIfExist,
+  getRowByNameOrUrl,
+  waitForValidStatus,
+} from '../UI/helpers/helpers';
 import { RHSMClient, waitForRhcdActive, refreshSubscriptionManager } from './helpers/rhsmClient';
 import { waitInPatch } from './helpers/systemHelpers';
 
@@ -55,7 +59,8 @@ test.describe('Register and assign template to systems via API', () => {
     const modalPage = page.getByRole('dialog').filter({ hasText: 'Assign template to systems' });
 
     await test.step('Navigate to template details and open dialog', async () => {
-      await page.getByRole('button', { name: templateName }).click();
+      const row = await getRowByNameOrUrl(page, templateName);
+      await row.getByRole('button', { name: templateName }).click();
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(templateName);
       page.getByRole('link', { name: 'Register and assign via API' }).click();
       await expect(modalPage).toBeVisible();
