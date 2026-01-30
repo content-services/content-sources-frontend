@@ -14,6 +14,7 @@ test.describe('Create, update, and read a repo as admin user', () => {
 
   test('Login as admin and manage repo', async ({ page, unusedRepoUrl }) => {
     const url = await unusedRepoUrl();
+
     await test.step('Create a repository', async () => {
       await navigateToRepositories(page);
       await closeGenericPopupsIfExist(page);
