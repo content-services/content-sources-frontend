@@ -26,4 +26,16 @@ module.exports = {
   transformIgnorePatterns: [
     // '<rootDir>/node_modules/(?!@redhat-cloud-services|@openshift|lodash-es|uuid|@patternfly/react-icons)',
   ],
+
+  // Coverage configuration
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.test.{ts,tsx}',
+    '!src/**/*.spec.{ts,tsx}',
+    '!src/**/index.{ts,tsx}',
+    '!src/testingHelpers.tsx',
+    '!src/index.html',
+  ],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html', 'text-summary'],
 };

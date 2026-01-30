@@ -25,6 +25,9 @@ yarn-error.log*
 
 .DS_Store
 coverage
+coverage-e2e
+.nyc_output
+.coverage-certs
 
 #playwright ignores 
 content-sources-backend
@@ -36,3 +39,4 @@ playwright/.cache/
 .env
 .auth
 bin
+dist-coverage

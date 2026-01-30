@@ -17,10 +17,15 @@
     "start:prod": "fec dev-proxy --clouddotEnv=prod",
     "start:verbose": "VERBOSE=true fec dev-proxy",
     "local": "BACKEND_PORT=8000 yarn start",
+    "local:coverage": "COVERAGE=true BACKEND_PORT=8000 fec dev-proxy --config $(pwd)/webpack.dev-coverage.config.js",
     "verify": "yarn build && yarn lint && yarn format:check && yarn test-ci",
     "postinstall": "ts-patch install",
     "test": "TZ=UTC jest --verbose",
+    "test:coverage": "TZ=UTC jest --verbose --coverage",
     "test-ci": "TZ=UTC jest --verbose --no-cache",
+    "test-ci:coverage": "TZ=UTC jest --verbose --no-cache --coverage",
+    "coverage:report": "mkdir -p .nyc_output && nyc report --reporter=html --reporter=text --reporter=lcov",
+    "coverage:clean": "rm -rf .nyc_output coverage-e2e",
     "testAllPreviewFailures": "npm-run-all -p test jestPreview",
     "jestPreview": "jest-preview",
     "jestClear": "jest --clearCache",
@@ -64,6 +69,10 @@
     "yup": "^1.7.1"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.0",
+    "@babel/preset-typescript": "^7.26.0",
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@currents/playwright": "^1.21.0",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
@@ -105,7 +114,10 @@
     "ts-jest": "^29.4.4",
     "ts-patch": "^3.2.1",
     "typescript": "^5.9.2",
-    "webpack-bundle-analyzer": "^5.2.0"
+    "webpack-bundle-analyzer": "^5.2.0",
+    "nyc": "^17.1.0",
+    "babel-plugin-istanbul": "^7.0.0",
+    "@jsdevtools/coverage-istanbul-loader": "^3.0.5"
   },
   "insights": {
     "appname": "content-sources",
