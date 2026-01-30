@@ -3,11 +3,16 @@ import { config } from 'dotenv';
 import path from 'path';
 config({ path: path.join(__dirname, './.env'), quiet: true });
 
+// Coverage setup flag: when true, run globalSetup to prepare coverage
+const enableCoverageSetup = process.env.COVERAGE === 'true';
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
   testDir: './_playwright-tests/',
+  // Run coverage global setup before tests (when COVERAGE=true)
+  globalSetup: enableCoverageSetup ? './_playwright-tests/global-setup.coverage.ts' : undefined,
   fullyParallel: false,
   forbidOnly: false,
   retries: process.env.CI ? 1 : 0,
