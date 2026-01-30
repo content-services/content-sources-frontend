@@ -27,6 +27,7 @@ test.describe('Test System With Template', () => {
       ? { Authorization: process.env.LAYERED_REPO_TOKEN }
       : {},
   });
+
   test('Verify system updates with template', async ({ page, client, cleanup }) => {
     // Increase timeout for CI environment because template update tasks can take longer
     test.setTimeout(900000); // 15 minutes
