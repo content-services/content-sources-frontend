@@ -89,6 +89,21 @@ test.describe('Associated Template CRUD', () => {
       expect(reg?.exitCode, 'registration should be successful').toBe(0);
     });
 
+    await test.step('Verify template uses correct certificate URL', async () => {
+      const repoConfig = await regClient.Exec(['cat', '/etc/yum.repos.d/redhat.repo'], 10000);
+
+      const expectedCertHost =
+        process.env.PROD === 'true' ? 'cert.console.redhat.com' : 'cert.console.stage.redhat.com';
+
+      // Match baseurl with optional spaces around '=' and ignore the path after hostname
+      const baseurlPattern = new RegExp(`^baseurl\\s*=\\s*https://${expectedCertHost}/`, 'm');
+
+      expect(
+        repoConfig?.stdout,
+        `template should configure baseurl with certificate host ${expectedCertHost}`,
+      ).toMatch(baseurlPattern);
+    });
+
     await test.step('Verify system is attached to template', async () => {
       await waitInPatch(page, hostname, true);
     });
