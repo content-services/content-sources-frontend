@@ -142,9 +142,8 @@ test.describe('Snapshot Repositories', () => {
         await test.step(`Edit repository and create snapshot ${i}`, async () => {
           const row = await waitForValidStatus(page, repoName);
 
-          // Open the edit modal
           await row.getByLabel('Kebab toggle').click();
-          await page.getByRole('menuitem', { name: 'Edit' }).click({ timeout: 60000 });
+          await page.getByRole('menuitem', { name: 'Edit' }).click();
 
           await page
             .getByRole('textbox', { name: 'URL', exact: true })

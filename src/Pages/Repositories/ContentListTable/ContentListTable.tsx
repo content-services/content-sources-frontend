@@ -17,7 +17,7 @@ import {
   useTriggerSnapshot,
   useBulkDeleteContentItemMutate,
 } from '../../../services/Content/ContentQueries';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { memo, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   ContentItem,
   ContentOrigin,
@@ -31,6 +31,7 @@ import {
   EmptyStateActions,
   Flex,
   FlexItem,
+  Tooltip,
   TooltipPosition,
 } from '@patternfly/react-core';
 import useArchVersion from 'Hooks/useArchVersion';
@@ -85,6 +86,92 @@ export const perPageKey = 'contentListPerPage';
 
 const hasOrigin = (value: unknown): value is { origin?: ContentOrigin } =>
   typeof value === 'object' && value !== null && 'origin' in value;
+
+interface ContentInformationCellProps {
+  rowData: Pick<ContentItem, 'name' | 'url' | 'last_snapshot' | 'origin'>;
+  snapshotsAccessible: boolean;
+  communityReposEnabled: boolean;
+}
+
+const ContentInformationCell = memo(
+  ({ rowData, snapshotsAccessible, communityReposEnabled }: ContentInformationCellProps) => {
+    const classes = useStyles();
+    const { name, url, last_snapshot, origin } = rowData;
+
+    return (
+      <>
+        {name}
+        <Hide hide={origin !== ContentOrigin.UPLOAD}>
+          <UploadRepositoryLabel />
+        </Hide>
+        <Hide hide={origin !== ContentOrigin.COMMUNITY}>
+          <CommunityRepositoryLabel />
+        </Hide>
+        <Hide
+          hide={!(origin === ContentOrigin.EXTERNAL && isEPELUrl(url)) || !communityReposEnabled}
+        >
+          <CustomEpelWarning />
+        </Hide>
+        <Hide hide={origin === ContentOrigin.UPLOAD}>
+          <UrlWithExternalIcon href={url} />
+        </Hide>
+        <Hide hide={!snapshotsAccessible}>
+          <Flex>
+            <FlexItem className={classes.snapshotInfoText}>
+              {last_snapshot
+                ? `Last snapshot ${dayjs(last_snapshot?.created_at).fromNow()}`
+                : 'No snapshot yet'}
+            </FlexItem>
+            <Hide hide={!last_snapshot}>
+              <FlexItem className={classes.inline}>
+                <FlexItem className={classes.snapshotInfoText}>Changes:</FlexItem>
+                <ChangedArrows
+                  addedCount={last_snapshot?.added_counts?.['rpm.package'] || 0}
+                  removedCount={last_snapshot?.removed_counts?.['rpm.package'] || 0}
+                />
+              </FlexItem>
+            </Hide>
+          </Flex>
+        </Hide>
+      </>
+    );
+  },
+);
+
+ContentInformationCell.displayName = 'ContentInformationCell';
+
+interface ContentListActionRowProps {
+  rowData: ActionRowData;
+  actions: IAction[];
+  showPendingTooltipContent: string | undefined;
+  isRedHatRepository: boolean;
+}
+
+const ContentListActionRow = memo(
+  ({
+    rowData,
+    actions,
+    showPendingTooltipContent,
+    isRedHatRepository,
+  }: ContentListActionRowProps) => {
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const shouldShowTooltip =
+      !isRedHatRepository && rowData?.status === 'Pending' && !!showPendingTooltipContent;
+
+    return (
+      <Hide hide={!actions?.length}>
+        <div ref={triggerRef}>
+          <ActionsColumn items={actions} />
+        </div>
+        {shouldShowTooltip && (
+          <Tooltip content={showPendingTooltipContent} triggerRef={triggerRef} />
+        )}
+      </Hide>
+    );
+  },
+);
+
+ContentListActionRow.displayName = 'ContentListActionRow';
 
 const readOnlyReposTooltipCopy =
   'Red Hat and EPEL repositories are read-only and cannot be manipulated.';
@@ -385,50 +472,9 @@ const ContentListTable = () => {
     }
   };
 
-  const ContentInformationCell = ({
-    rowData: { name, url, last_snapshot, origin },
-  }: {
-    rowData: Pick<ContentItem, 'name' | 'url' | 'last_snapshot' | 'origin'>;
-  }) => (
-    <>
-      {name}
-      <Hide hide={origin !== ContentOrigin.UPLOAD}>
-        <UploadRepositoryLabel />
-      </Hide>
-      <Hide hide={origin !== ContentOrigin.COMMUNITY}>
-        <CommunityRepositoryLabel />
-      </Hide>
-      <Hide
-        hide={
-          !(origin == ContentOrigin.EXTERNAL && isEPELUrl(url)) ||
-          !features?.communityrepos?.enabled
-        }
-      >
-        <CustomEpelWarning />
-      </Hide>
-      <Hide hide={origin === ContentOrigin.UPLOAD}>
-        <UrlWithExternalIcon href={url} />
-      </Hide>
-      <Hide hide={!features?.snapshots?.accessible}>
-        <Flex>
-          <FlexItem className={classes.snapshotInfoText}>
-            {last_snapshot
-              ? `Last snapshot ${dayjs(last_snapshot?.created_at).fromNow()}`
-              : 'No snapshot yet'}
-          </FlexItem>
-          <Hide hide={!last_snapshot}>
-            <FlexItem className={classes.inline}>
-              <FlexItem className={classes.snapshotInfoText}>Changes:</FlexItem>
-              <ChangedArrows
-                addedCount={last_snapshot?.added_counts?.['rpm.package'] || 0}
-                removedCount={last_snapshot?.removed_counts?.['rpm.package'] || 0}
-              />
-            </FlexItem>
-          </Hide>
-        </Flex>
-      </Hide>
-    </>
-  );
+  // Feature flags for memoized components
+  const snapshotsAccessible = features?.snapshots?.accessible ?? false;
+  const communityReposEnabled = features?.communityrepos?.enabled ?? false;
 
   const { mutateAsync: triggerSnapshotMutation } = useTriggerSnapshot(queryClient);
 
@@ -450,10 +496,7 @@ const ContentListTable = () => {
         ? features?.snapshots?.accessible
           ? [
               {
-                isDisabled:
-                  isFetching ||
-                  !rowData.snapshot ||
-                  !(rowData.snapshot && rowData.last_snapshot_uuid),
+                isDisabled: !rowData.snapshot || !(rowData.snapshot && rowData.last_snapshot_uuid),
 
                 ouiaId: 'kebab_view_snapshots',
                 title:
@@ -470,7 +513,7 @@ const ContentListTable = () => {
             ...(rbac?.repoWrite
               ? [
                   {
-                    isDisabled: isFetching || rowData?.status === 'Pending',
+                    isDisabled: rowData?.status === 'Pending',
                     title: 'Edit',
                     ouiaId: 'kebab_edit',
                     onClick: () => {
@@ -480,7 +523,7 @@ const ContentListTable = () => {
                   ...(rowData.origin === ContentOrigin.UPLOAD
                     ? [
                         {
-                          isDisabled: isFetching || rowData?.status === 'Pending',
+                          isDisabled: rowData?.status === 'Pending',
                           title: 'Upload content',
                           ouiaId: 'kebab_upload_content',
                           onClick: () => {
@@ -494,7 +537,7 @@ const ContentListTable = () => {
             ...(features?.snapshots?.accessible
               ? [
                   {
-                    isDisabled: isFetching || !rowData.last_snapshot_uuid,
+                    isDisabled: !rowData.last_snapshot_uuid,
                     title: rowData.last_snapshot_uuid ? 'View all snapshots' : 'No snapshots yet',
                     ouiaId: 'kebab_view_snapshots',
                     onClick: () => {
@@ -506,11 +549,10 @@ const ContentListTable = () => {
                         {
                           id: 'actions-column-snapshot',
                           className:
-                            isFetching || rowData?.status === 'Pending' || !rowData.snapshot
+                            rowData?.status === 'Pending' || !rowData.snapshot
                               ? classes.disabledButton
                               : '',
-                          isDisabled:
-                            isFetching || rowData?.status === 'Pending' || !rowData.snapshot,
+                          isDisabled: rowData?.status === 'Pending' || !rowData.snapshot,
                           title: 'Trigger snapshot',
                           ouiaId: 'kebab_trigger_snapshots',
                           onClick: () => {
@@ -533,7 +575,7 @@ const ContentListTable = () => {
             ...(rbac?.repoWrite && !rowData?.snapshot
               ? [
                   {
-                    isDisabled: isFetching || rowData?.status == 'Pending',
+                    isDisabled: rowData?.status == 'Pending',
                     title: 'Introspect now',
                     ouiaId: 'kebab_introspect_now',
                     onClick: () =>
@@ -552,18 +594,16 @@ const ContentListTable = () => {
                 ]
               : []),
           ],
-    [isFetching, selectedRepositories, isRedHatRepository],
-  );
-
-  const ContentListActionRow = ({ rowData }: { rowData: ActionRowData }) => (
-    <Hide hide={!rowActions(rowData)?.length}>
-      <ConditionalTooltip
-        content={showPendingTooltip(rowData?.last_snapshot_task?.status, rowData.status)}
-        show={!isRedHatRepository && rowData?.status === 'Pending'}
-      >
-        <ActionsColumn items={rowActions(rowData)} />
-      </ConditionalTooltip>
-    </Hide>
+    [
+      isRedHatRepository,
+      features?.snapshots?.accessible,
+      rbac?.repoWrite,
+      navigate,
+      triggerIntrospectionAndSnapshot,
+      introspectRepoForUuid,
+      clearSelectedRepositories,
+      classes.disabledButton,
+    ],
   );
 
   // Format rows for DataView using DataViewTr objects
@@ -585,53 +625,71 @@ const ContentListTable = () => {
       last_snapshot_task,
       package_count,
       status,
-    }: ContentItem) => ({
-      id: uuid, // Used by useDataViewSelection for matching
-      origin: origin, // Used to determine if a repo is deletable
-      row: [
-        { cell: <ContentInformationCell rowData={{ name, url, last_snapshot, origin }} /> },
-        { cell: archesDisplay(distribution_arch) },
-        { cell: versionDisplay(distribution_versions) },
-        { cell: <PackageCount rowData={{ uuid, status, package_count }} /> },
-        {
-          cell:
-            origin !== ContentOrigin.UPLOAD
-              ? lastIntrospectionDisplay(last_introspection_time)
-              : 'N/A',
-        },
-        {
-          cell: (
-            <StatusIcon
-              rowData={{
-                uuid,
-                status,
-                failed_introspections_count,
-                last_introspection_time,
-                last_introspection_error,
-                last_snapshot_task,
-                origin,
-              }}
-              retryHandler={introspectRepoForUuid}
-            />
-          ),
-        },
-        {
-          cell: (
-            <ContentListActionRow
-              rowData={{
-                uuid,
-                origin,
-                status,
-                snapshot,
-                last_snapshot_uuid,
-                last_snapshot_task,
-              }}
-            />
-          ),
-          props: { isActionCell: true },
-        },
-      ],
-    }),
+    }: ContentItem) => {
+      // Pre-compute values for memoized components
+      const actionRowData: ActionRowData = {
+        uuid,
+        origin,
+        status,
+        snapshot,
+        last_snapshot_uuid,
+        last_snapshot_task,
+      };
+      const actions = rowActions(actionRowData);
+      const pendingTooltipContent = showPendingTooltip(last_snapshot_task?.status, status);
+
+      return {
+        id: uuid, // Used by useDataViewSelection for matching
+        origin: origin, // Used to determine if a repo is deletable
+        row: [
+          {
+            cell: (
+              <ContentInformationCell
+                rowData={{ name, url, last_snapshot, origin }}
+                snapshotsAccessible={snapshotsAccessible}
+                communityReposEnabled={communityReposEnabled}
+              />
+            ),
+          },
+          { cell: archesDisplay(distribution_arch) },
+          { cell: versionDisplay(distribution_versions) },
+          { cell: <PackageCount rowData={{ uuid, status, package_count }} /> },
+          {
+            cell:
+              origin !== ContentOrigin.UPLOAD
+                ? lastIntrospectionDisplay(last_introspection_time)
+                : 'N/A',
+          },
+          {
+            cell: (
+              <StatusIcon
+                rowData={{
+                  uuid,
+                  status,
+                  failed_introspections_count,
+                  last_introspection_time,
+                  last_introspection_error,
+                  last_snapshot_task,
+                  origin,
+                }}
+                retryHandler={introspectRepoForUuid}
+              />
+            ),
+          },
+          {
+            cell: (
+              <ContentListActionRow
+                rowData={actionRowData}
+                actions={actions}
+                showPendingTooltipContent={pendingTooltipContent}
+                isRedHatRepository={isRedHatRepository}
+              />
+            ),
+            props: { isActionCell: true },
+          },
+        ],
+      };
+    },
   );
 
   const handleBulkSelect = (value: BulkSelectValue) => {
