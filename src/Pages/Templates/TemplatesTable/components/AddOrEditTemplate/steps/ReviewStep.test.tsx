@@ -11,9 +11,9 @@ jest.mock('../AddOrEditTemplateContext', () => ({
 it('expect Review step to render correctly', () => {
   (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     templateRequest: defaultTemplateItem,
-    selectedRedhatRepos: new Set(['item1', 'item2']),
+    selectedRedHatRepos: new Set(['item1', 'item2']),
     selectedCustomRepos: new Set(['item1']),
-    hardcodedRedhatRepositoryUUIDS: new Set('item1'),
+    redHatCoreRepoUUIDS: new Set('item1'),
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
     extended_release_features: testRepositoryParamsResponse.extended_release_features,

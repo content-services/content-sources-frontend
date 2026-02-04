@@ -49,27 +49,27 @@ export default function RedhatRepositoriesStep() {
   const pathname = path.split('content')[0] + 'content';
 
   const {
-    hardcodedRedhatRepositoryUUIDS,
+    redHatCoreRepoUUIDS,
     templateRequest,
-    selectedRedhatRepos,
-    setSelectedRedhatRepos,
+    selectedRedHatRepos,
+    setSelectedRedHatRepos,
     useExtendedSupport,
   } = useAddOrEditTemplateContext();
 
-  const noAdditionalRepos = selectedRedhatRepos.size - hardcodedRedhatRepositoryUUIDS.size === 0;
+  const noAdditionalRepos = selectedRedHatRepos.size - redHatCoreRepoUUIDS.size === 0;
 
   const [toggled, setToggled] = useState(false);
 
   const setUUIDForList = (uuid: string) => {
-    if (selectedRedhatRepos.has(uuid)) {
-      selectedRedhatRepos.delete(uuid);
+    if (selectedRedHatRepos.has(uuid)) {
+      selectedRedHatRepos.delete(uuid);
       if (noAdditionalRepos) {
         setToggled(false);
       }
     } else {
-      selectedRedhatRepos.add(uuid);
+      selectedRedHatRepos.add(uuid);
     }
-    setSelectedRedhatRepos(new Set(selectedRedhatRepos));
+    setSelectedRedHatRepos(new Set(selectedRedHatRepos));
   };
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -121,7 +121,7 @@ export default function RedhatRepositoriesStep() {
           extended_release: templateRequest.extended_release as string,
           extended_release_version: templateRequest.extended_release_version as string,
         }),
-        uuids: toggled ? [...selectedRedhatRepos] : undefined,
+        uuids: toggled ? [...selectedRedHatRepos] : undefined,
       },
       sortString(),
       [ContentOrigin.REDHAT],
@@ -134,8 +134,7 @@ export default function RedhatRepositoriesStep() {
 
   const countIsZero = count === 0;
   const showLoader = countIsZero && !isLoading;
-  const additionalReposAvailableToSelect =
-    contentList.length - hardcodedRedhatRepositoryUUIDS.size > 0;
+  const additionalReposAvailableToSelect = contentList.length - redHatCoreRepoUUIDS.size > 0;
 
   return (
     <Grid hasGutter>
@@ -257,20 +256,20 @@ export default function RedhatRepositoriesStep() {
                       <TdWithTooltip
                         show={
                           !(rowData.snapshot && rowData.last_snapshot_uuid) ||
-                          hardcodedRedhatRepositoryUUIDS.has(uuid)
+                          redHatCoreRepoUUIDS.has(uuid)
                         }
                         tooltipProps={{
-                          content: hardcodedRedhatRepositoryUUIDS.has(uuid)
+                          content: redHatCoreRepoUUIDS.has(uuid)
                             ? 'This item is pre-selected for the chosen architecture and OS version.'
                             : 'A snapshot is not yet available for this repository.',
                         }}
                         select={{
                           rowIndex,
                           onSelect: () => setUUIDForList(uuid),
-                          isSelected: selectedRedhatRepos.has(uuid),
+                          isSelected: selectedRedHatRepos.has(uuid),
                           isDisabled:
                             !(rowData.snapshot && rowData.last_snapshot_uuid) ||
-                            hardcodedRedhatRepositoryUUIDS.has(uuid),
+                            redHatCoreRepoUUIDS.has(uuid),
                         }}
                       />
                       <Td>

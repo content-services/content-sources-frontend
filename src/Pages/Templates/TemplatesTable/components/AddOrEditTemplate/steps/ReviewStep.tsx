@@ -14,8 +14,8 @@ export default function ReviewStep() {
   const [expanded, setExpanded] = useState(new Set([0]));
   const {
     templateRequest,
-    selectedRedhatRepos,
-    hardcodedRedhatRepositoryUUIDS,
+    selectedRedHatRepos,
+    redHatCoreRepoUUIDS,
     selectedCustomRepos,
     distribution_arches,
     distribution_versions,
@@ -35,9 +35,8 @@ export default function ReviewStep() {
       Content: {
         Architecture: archesDisplay(arch),
         'OS version': versionDisplay(version),
-        'Pre-selected Red Hat repositories': hardcodedRedhatRepositoryUUIDS.size,
-        'Additional Red Hat repositories':
-          selectedRedhatRepos.size - hardcodedRedhatRepositoryUUIDS.size,
+        'Pre-selected Red Hat repositories': redHatCoreRepoUUIDS.size,
+        'Additional Red Hat repositories': selectedRedHatRepos.size - redHatCoreRepoUUIDS.size,
         'Custom repositories': selectedCustomRepos.size,
       },
       Date: {
