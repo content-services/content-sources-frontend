@@ -6,6 +6,15 @@ export const E4S = 'RHEL-E4S-x86_64' as const;
 export const EXTENDED_SUPPORT_FEATURES = [EUS, E4S] as const;
 export const SUPPORTED_EUS_ARCHES = ['x86_64'];
 
+type ExtendedRelease = 'eus' | 'e4s' | 'none'; // Values supported by the API
+
+/**
+ * Converts a feature name to an extended release name.
+ * @param featureName
+ */
+export const featureNameToExtendedRelease = (featureName: string | undefined): ExtendedRelease =>
+  featureName === EUS ? 'eus' : featureName === E4S ? 'e4s' : 'none';
+
 /**
  * Checks if the user has extended support features enabled.
  * @param extended_release_features
