@@ -22,10 +22,7 @@ export const featureNameToExtendedRelease = (featureName: string | undefined): E
 export const hasExtendedSupport = (extended_release_features?: NameLabel[]) =>
   (extended_release_features?.length ?? 0) > 0;
 
-export const hardcodeRedHatReposByArchAndVersion = (
-  arch?: string,
-  version?: string,
-): string[] | undefined => {
+export const getRedHatCoreRepoUrls = (arch?: string, version?: string): string[] | undefined => {
   if (!arch || !version) return;
   switch (true) {
     case arch === 'x86_64' && version === '8':

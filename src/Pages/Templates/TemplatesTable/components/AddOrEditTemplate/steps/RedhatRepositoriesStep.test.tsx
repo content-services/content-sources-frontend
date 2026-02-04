@@ -31,9 +31,9 @@ it('expect RedhatRepositoriesStep to render correctly', () => {
 
   (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     templateRequest: defaultTemplateItem,
-    setSelectedRedhatRepos: () => undefined,
-    selectedRedhatRepos: new Set([defaultTemplateItem.uuid]),
-    hardcodedRedhatRepositoryUUIDS: new Set([defaultTemplateItem.uuid]),
+    setSelectedRedHatRepos: () => undefined,
+    selectedRedHatRepos: new Set([defaultTemplateItem.uuid]),
+    redHatCoreRepoUUIDS: new Set([defaultTemplateItem.uuid]),
   }));
 
   const { getByRole, getByText } = render(<RedhatRepositoriesStep />);

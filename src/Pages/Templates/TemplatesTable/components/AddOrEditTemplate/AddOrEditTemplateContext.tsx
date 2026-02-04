@@ -11,7 +11,7 @@ import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { QueryClient, useQueryClient } from 'react-query';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
 import { ContentOrigin, NameLabel, DistributionMinorVersion } from 'services/Content/ContentApi';
-import { hardcodeRedHatReposByArchAndVersion, hasExtendedSupport } from '../templateHelpers';
+import { getRedHatCoreRepoUrls, hasExtendedSupport } from '../templateHelpers';
 import { useNavigate } from 'react-router-dom';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
 import useRootPath from 'Hooks/useRootPath';
@@ -28,11 +28,11 @@ export interface AddOrEditTemplateContextInterface {
   setUseExtendedSupport: (value: React.SetStateAction<boolean>) => void;
   templateRequest: Partial<TemplateRequest>;
   setTemplateRequest: (value: React.SetStateAction<Partial<TemplateRequest>>) => void;
-  selectedRedhatRepos: Set<string>;
-  setSelectedRedhatRepos: (uuidSet: Set<string>) => void;
+  selectedRedHatRepos: Set<string>;
+  setSelectedRedHatRepos: (uuidSet: Set<string>) => void;
   selectedCustomRepos: Set<string>;
   setSelectedCustomRepos: (uuidSet: Set<string>) => void;
-  hardcodedRedhatRepositoryUUIDS: Set<string>;
+  redHatCoreRepoUUIDS: Set<string>;
   hasInvalidSteps: (index: number) => boolean;
   isEdit?: boolean;
   editUUID?: string;
@@ -46,20 +46,18 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
 
   const navigate = useNavigate();
   const rootPath = useRootPath();
-
   if (isError) navigate(rootPath);
+
   const [templateRequest, setTemplateRequest] = useState<Partial<TemplateRequest>>({
     extended_release: '',
     extended_release_version: '',
   });
 
   const [useExtendedSupport, setUseExtendedSupport] = useState(false);
-  const [selectedRedhatRepos, setSelectedRedhatRepos] = useState<Set<string>>(new Set());
+  const [selectedRedHatRepos, setSelectedRedHatRepos] = useState<Set<string>>(new Set());
   const [selectedCustomRepos, setSelectedCustomRepos] = useState<Set<string>>(new Set());
-  const [hardcodedRedhatRepositories, setHardcodeRepositories] = useState<string[]>([]);
-  const [hardcodedRedhatRepositoryUUIDS, setHardcodeRepositoryUUIDS] = useState<Set<string>>(
-    new Set(),
-  );
+  const [redHatCoreRepos, setRedHatCoreRepos] = useState<string[]>([]);
+  const [redHatCoreRepoUUIDS, setRedHatCoreRepoUUIDS] = useState<Set<string>>(new Set());
 
   const {
     data: {
@@ -84,19 +82,19 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
       true, // [0] No step
       arch && version, // [1] "Define content" step
       isVersioningStepValid, // [2] "Content versioning" step
-      !!selectedRedhatRepos.size, // [3] "Red Hat repositories" step
+      !!selectedRedHatRepos.size, // [3] "Red Hat repositories" step
       true, // [4] "Other repositories" step - optional step
       use_latest || isDateValid(date ?? ''), // [5] "Setup date" step
       !!name && name.length < 256, // [6] "Detail" step
     ] as boolean[];
-  }, [templateRequest, selectedRedhatRepos.size, useExtendedSupport, extended_release_features]);
+  }, [templateRequest, selectedRedHatRepos.size, useExtendedSupport, extended_release_features]);
 
   const hasInvalidSteps = useCallback(
     (stepIndex: number) => {
       const stepsToCheck = stepValidationSequence.slice(0, stepIndex + 1);
       return !stepsToCheck.every((step) => step);
     },
-    [selectedRedhatRepos.size, stepValidationSequence],
+    [selectedRedHatRepos.size, stepValidationSequence],
   );
 
   const queryClient = useQueryClient();
@@ -104,10 +102,10 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
   const { data } = useContentListQuery(
     1,
     10,
-    { urls: hardcodedRedhatRepositories },
+    { urls: redHatCoreRepos },
     '',
     [ContentOrigin.REDHAT],
-    !!hardcodedRedhatRepositories.length,
+    !!redHatCoreRepos.length,
   );
 
   const { data: existingRepositoryInformation, isLoading } = useContentListQuery(
@@ -121,27 +119,21 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
 
   useEffect(() => {
     if (!!templateRequest.arch && !!templateRequest.version) {
-      const result = hardcodeRedHatReposByArchAndVersion(
-        templateRequest.arch,
-        templateRequest.version,
-      );
-      if (result) {
-        setHardcodeRepositories(result);
-      }
+      const urls = getRedHatCoreRepoUrls(templateRequest.arch, templateRequest.version);
+      if (urls) setRedHatCoreRepos(urls);
       if (!uuid) setSelectedCustomRepos(new Set());
     }
   }, [templateRequest.version, templateRequest.arch, uuid]);
 
   useEffect(() => {
     if (data?.data?.length) {
-      const hardcodedItems = data?.data.map((item) => item.uuid);
-
-      setHardcodeRepositoryUUIDS(new Set(hardcodedItems));
-      setSelectedRedhatRepos(
+      const coreRepos = data?.data.map((repo) => repo.uuid);
+      setRedHatCoreRepoUUIDS(new Set(coreRepos));
+      setSelectedRedHatRepos(
         new Set(
-          selectedRedhatRepos.has(hardcodedItems[0])
-            ? [...selectedRedhatRepos, ...hardcodedItems]
-            : hardcodedItems,
+          selectedRedHatRepos.has(coreRepos[0])
+            ? [...selectedRedHatRepos, ...coreRepos]
+            : coreRepos,
         ),
       );
     }
@@ -167,7 +159,7 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
       });
 
       if (redHatReposToAdd.length) {
-        setSelectedRedhatRepos(new Set([...selectedRedhatRepos, ...redHatReposToAdd]));
+        setSelectedRedHatRepos(new Set([...selectedRedHatRepos, ...redHatReposToAdd]));
       }
 
       if (customReposToAdd.length) {
@@ -177,14 +169,14 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
   }, [editTemplateData, isLoading, existingRepositoryInformation]);
 
   const templateRequestDependencies = useMemo(
-    () => [...selectedCustomRepos, ...selectedRedhatRepos],
-    [selectedCustomRepos, selectedRedhatRepos],
+    () => [...selectedCustomRepos, ...selectedRedHatRepos],
+    [selectedCustomRepos, selectedRedHatRepos],
   );
 
   useEffect(() => {
     setTemplateRequest((prev) => ({
       ...prev,
-      repository_uuids: [...selectedRedhatRepos, ...selectedCustomRepos],
+      repository_uuids: [...selectedRedHatRepos, ...selectedCustomRepos],
     }));
   }, [templateRequestDependencies]);
 
@@ -199,11 +191,11 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
         distribution_minor_versions,
         templateRequest,
         setTemplateRequest,
-        selectedRedhatRepos,
-        setSelectedRedhatRepos,
+        selectedRedHatRepos,
+        setSelectedRedHatRepos,
         selectedCustomRepos,
         setSelectedCustomRepos,
-        hardcodedRedhatRepositoryUUIDS,
+        redHatCoreRepoUUIDS,
         hasInvalidSteps,
         isEdit: !!uuid,
         editUUID: uuid,
