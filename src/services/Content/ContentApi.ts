@@ -2,6 +2,7 @@ import axios from 'axios';
 import { objectToUrlParams } from 'helpers';
 import { AdminTask } from '../Admin/AdminTaskApi';
 import { MAX_CHUNK_SIZE } from 'Pages/Repositories/ContentListTable/components/UploadContent/components/helpers';
+import { featureNameToExtendedRelease } from '../../Pages/Templates/TemplatesTable/components/templateHelpers';
 
 export interface ContentItem {
   uuid: string;
@@ -334,6 +335,7 @@ export const getContentList: (
   const statusParam = filterData.statuses?.join(',');
   const urlParam = filterData.urls?.join(',');
   const uuidsParam = filterData.uuids?.join(',');
+  const extendedReleaseParam = featureNameToExtendedRelease(filterData.extended_release);
   const { data } = await axios.get(
     `/api/content-sources/v1/repositories/?${objectToUrlParams({
       origin: contentOrigin.length ? contentOrigin.join(',') : undefined,
@@ -348,6 +350,8 @@ export const getContentList: (
       url: urlParam,
       available_for_arch: filterData.availableForArch,
       available_for_version: filterData.availableForVersion,
+      extended_release: extendedReleaseParam,
+      extended_release_version: filterData.extended_release_version,
     })}`,
   );
   return data;
