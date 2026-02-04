@@ -34,11 +34,7 @@ export const navigateToRepositories = async (page: Page) => {
         await page.route('https://consent.trustarc.com/**', (route) => route.abort());
         await page.route('https://smetrics.redhat.com/**', (route) => route.abort());
 
-        const repositoriesNavLink = page
-          .getByRole('navigation', { name: 'Breadcrumb' })
-          .getByRole('link', { name: 'Repositories' });
-        await repositoriesNavLink.waitFor({ state: 'visible', timeout: 1500 });
-        await repositoriesNavLink.click();
+        await navigateToRepositoriesFunc(page);
       } catch {
         await retry(page, navigateToRepositoriesFunc, 5);
       }
@@ -66,11 +62,7 @@ export const navigateToTemplates = async (page: Page) => {
         await page.route('https://consent.trustarc.com/**', (route) => route.abort());
         await page.route('https://smetrics.redhat.com/**', (route) => route.abort());
 
-        const templatesNavLink = page
-          .getByRole('navigation')
-          .getByRole('link', { name: 'Templates' });
-        await templatesNavLink.waitFor({ state: 'visible', timeout: 1500 });
-        await templatesNavLink.click();
+        await navigateToTemplatesFunc(page);
       } catch {
         await retry(page, navigateToTemplatesFunc, 5);
       }
