@@ -55,7 +55,7 @@ test.describe('Register and assign template to systems via API', () => {
     const modalPage = page.getByRole('dialog').filter({ hasText: 'Assign template to systems' });
 
     await test.step('Navigate to template details and open dialog', async () => {
-      await page.getByRole('button', { name: templateName }).click();
+      await page.getByRole('button', { name: templateName, exact: true }).click();
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(templateName);
       page.getByRole('link', { name: 'Register and assign via API' }).click();
       await expect(modalPage).toBeVisible();
