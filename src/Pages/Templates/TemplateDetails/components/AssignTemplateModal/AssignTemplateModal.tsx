@@ -1,4 +1,4 @@
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import useRootPath from '../../../../../Hooks/useRootPath';
 import React, { useState, useMemo, useEffect } from 'react';
@@ -70,7 +70,7 @@ const AssignTemplateModal = () => {
 
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
 
-  const { mutateAsync: addSystems, isLoading: isAdding } = useAddTemplateToSystemsQuery(
+  const { mutateAsync: addSystems, isPending: isAdding } = useAddTemplateToSystemsQuery(
     queryClient,
     uuid,
     selectedSystems,
