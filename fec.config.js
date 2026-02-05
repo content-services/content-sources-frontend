@@ -6,6 +6,48 @@ const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 const sassPrefix = insights.appname.replace(/-(\w)/g, (_, match) => match.toUpperCase());
 const srcDir = path.resolve(__dirname, './src');
 
+/**
+ * Custom webpack plugin to add Istanbul coverage instrumentation.
+ * Active when COVERAGE=true environment variable is set.
+ */
+class IstanbulCoveragePlugin {
+  apply(compiler) {
+    if (process.env.COVERAGE === 'true') {
+      const options = compiler.options;
+      options.module = options.module || {};
+      options.module.rules = options.module.rules || [];
+
+      // Guard against duplicate rules on incremental multi-run builds
+      const hasIstanbulLoader = options.module.rules.some(
+        (rule) =>
+          rule.use?.loader === '@jsdevtools/coverage-istanbul-loader' ||
+          (typeof rule.use === 'string' && rule.use.includes('istanbul'))
+      );
+
+      if (hasIstanbulLoader) {
+        return; // Already configured
+      }
+
+      console.log('[coverage] Adding Istanbul instrumentation using fec.config.js plugin');
+
+      options.module.rules.push({
+        test: /\.(ts|tsx|js|jsx)$/,
+        include: srcDir,
+        exclude: /node_modules|\.test\.|\.spec\./,
+        enforce: 'post',
+        use: {
+          loader: '@jsdevtools/coverage-istanbul-loader',
+          options: {
+            esModules: true,
+            coverageGlobalScope: 'window',
+            coverageGlobalScopeFunc: false,
+          },
+        },
+      });
+    }
+  }
+}
+
 module.exports = {
   sassPrefix: `.${sassPrefix}`,
   appUrl: '/insights/content',
@@ -14,6 +56,8 @@ module.exports = {
   useProxy: true,
   interceptChromeConfig: false,
   plugins: [
+    // Istanbul coverage plugin (active when COVERAGE=true)
+    new IstanbulCoveragePlugin(),
     ...(process.env.ENABLE_SENTRY
       ? [
           sentryWebpackPlugin({
