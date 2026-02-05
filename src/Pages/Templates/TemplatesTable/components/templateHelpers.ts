@@ -6,8 +6,9 @@ export const E4S = 'RHEL-E4S-x86_64' as const;
 export const EXTENDED_SUPPORT_FEATURES = [EUS, E4S] as const;
 export const SUPPORTED_EUS_ARCHES = ['x86_64'];
 
-const SUPPORTED_MAJOR_VERSIONS = ['8', '9', '10'];
-const SUPPORTED_ARCHES = ['x86_64', 'aarch64'];
+export const SUPPORTED_MAJOR_VERSIONS = ['8', '9', '10'];
+export const SUPPORTED_ARCHES = ['x86_64', 'aarch64'];
+
 const STANDARD_STREAM = 'dist';
 const MAJOR_RELEASE_VERSIONS = ['', '8', '8.0', '9', '9.0', '10', '10.0'];
 
@@ -24,6 +25,17 @@ export const featureNameToExtendedRelease = (featureName: string | undefined): E
  */
 export const hasExtendedSupport = (extended_release_features?: NameLabel[]) =>
   !!extended_release_features?.length;
+
+export const checkStreamAvailability = (
+  version: string,
+  distributionMinorVersions: DistributionMinorVersion[],
+): [boolean, boolean] => {
+  const relevantMinors = distributionMinorVersions.filter(({ major }) => major === version);
+
+  return EXTENDED_SUPPORT_FEATURES.map((feature) =>
+    relevantMinors.some(({ feature_names }) => feature_names?.includes(feature)),
+  ) as [boolean, boolean];
+};
 
 const validateRedHatRepoParams = (
   arch?: string,

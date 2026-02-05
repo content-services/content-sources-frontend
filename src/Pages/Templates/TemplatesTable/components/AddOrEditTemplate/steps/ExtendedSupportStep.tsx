@@ -19,8 +19,7 @@ import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import { createUseStyles } from 'react-jss';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import Hide from '../../../../../../components/Hide/Hide';
-import { useCheckStreamAvailability } from '../../../../../../Hooks/useCheckStreamAvailability';
-import { EUS } from '../../templateHelpers';
+import { EUS, checkStreamAvailability } from '../../templateHelpers';
 
 const useStyles = createUseStyles({
   fullWidth: {
@@ -39,7 +38,10 @@ const ExtendedSupportStep = () => {
     setUseExtendedSupport,
   } = useAddOrEditTemplateContext();
 
-  const [isEusAvailable, isE4sAvailable] = useCheckStreamAvailability();
+  const [isEusAvailable, isE4sAvailable] = checkStreamAvailability(
+    templateRequest.version!,
+    distribution_minor_versions,
+  );
 
   const [isUpdateStreamOpen, setIsUpdateStreamOpen] = useState(false);
   const [isMinorVersionOpen, setIsMinorVersionOpen] = useState(false);
@@ -66,6 +68,15 @@ const ExtendedSupportStep = () => {
         ...prev,
       }));
     }
+  };
+
+  const handleUpdateStreamChange = (newStream: string) => {
+    setTemplateRequest((prev) => ({
+      ...prev,
+      extended_release: newStream,
+      // Wipe a minor version when the update stream changes (each stream has different available versions)
+      ...(prev.extended_release !== newStream && { extended_release_version: '' }),
+    }));
   };
 
   const classes = useStyles();
@@ -123,7 +134,7 @@ const ExtendedSupportStep = () => {
           <FormGroup label='Update stream' isRequired>
             <Dropdown
               onSelect={(_, value: string) => {
-                setTemplateRequest((prev) => ({ ...prev, extended_release: value }));
+                handleUpdateStreamChange(value);
                 setIsUpdateStreamOpen(false);
               }}
               isOpen={isUpdateStreamOpen}

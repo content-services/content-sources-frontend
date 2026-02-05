@@ -15,6 +15,13 @@ import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
+import {
+  SUPPORTED_ARCHES,
+  EUS,
+  E4S,
+  SUPPORTED_MAJOR_VERSIONS,
+  checkStreamAvailability,
+} from '../../templateHelpers';
 
 const useStyles = createUseStyles({
   fullWidth: {
@@ -24,23 +31,59 @@ const useStyles = createUseStyles({
 });
 
 export default function DefineContentStep() {
-  const classes = useStyles();
   const [archOpen, setArchOpen] = useState(false);
   const [versionOpen, setVersionOpen] = useState(false);
+
   const {
     isEdit,
     templateRequest,
     setTemplateRequest,
     distribution_versions,
     distribution_arches,
+    distribution_minor_versions,
   } = useAddOrEditTemplateContext();
 
   const archesDisplay = (arch?: string) =>
     distribution_arches.find(({ label }) => arch === label)?.name || 'Select architecture';
 
   const versionDisplay = (version?: string): string =>
-    // arm64 aarch64
     distribution_versions.find(({ label }) => version === label)?.name || 'Select OS version';
+
+  const reconcileExtendedRelease = (extendedRelease: string | undefined, forVersion: string) => {
+    // If the selected update stream is no longer available for the OS new version, wipe it
+    if (!extendedRelease) return '';
+
+    const [eusAvailable, e4sAvailable] = checkStreamAvailability(
+      forVersion,
+      distribution_minor_versions,
+    );
+
+    // If we selected EUS, but it's no longer available, wipe it
+    if (extendedRelease === EUS && !eusAvailable) return '';
+
+    // If we selected E4S, but it's no longer available, wipe it
+    if (extendedRelease === E4S && !e4sAvailable) return '';
+
+    return extendedRelease;
+  };
+
+  const handleVersionChange = (newVersion: string) => {
+    setTemplateRequest((prev) => {
+      const reconciledExtendedRelease = reconcileExtendedRelease(prev.extended_release, newVersion);
+      const extendedReleaseChanged = prev.extended_release !== reconciledExtendedRelease;
+
+      return {
+        ...prev,
+        version: newVersion,
+        // Only update extended_release if it actually changed
+        ...(extendedReleaseChanged && { extended_release: reconciledExtendedRelease }),
+        // If extended_release changed, also wipe extended_release_version
+        ...(extendedReleaseChanged && { extended_release_version: '' }),
+      };
+    });
+  };
+
+  const classes = useStyles();
 
   return (
     <Grid hasGutter>
@@ -91,7 +134,7 @@ export default function DefineContentStep() {
           >
             <DropdownList>
               {distribution_arches
-                .filter(({ label }) => ['x86_64', 'aarch64'].includes(label))
+                .filter(({ label }) => SUPPORTED_ARCHES.includes(label))
                 .map(({ label, name }) => (
                   <DropdownItem
                     key={label}
@@ -109,12 +152,7 @@ export default function DefineContentStep() {
         <FormGroup label='OS version' isRequired>
           <Dropdown
             onSelect={(_, val) => {
-              setTemplateRequest((prev) => ({
-                ...prev,
-                version: val as string,
-                // With a change in an OS version, reset the minor version selection if it exists
-                ...(prev.extended_release_version !== '' && { extended_release_version: '' }),
-              }));
+              handleVersionChange(val as string);
               setVersionOpen(false);
             }}
             toggle={(toggleRef) => (
@@ -143,7 +181,7 @@ export default function DefineContentStep() {
           >
             <DropdownList>
               {distribution_versions
-                .filter(({ label }) => ['8', '9', '10'].includes(label))
+                .filter(({ label }) => SUPPORTED_MAJOR_VERSIONS.includes(label))
                 .map(({ label, name }) => (
                   <DropdownItem
                     key={label}
