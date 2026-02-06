@@ -13,7 +13,7 @@ import {
   Radio,
   Title,
 } from '@patternfly/react-core';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import { useContentListQuery, useGetSnapshotsByDates } from 'services/Content/ContentQueries';
 import { useEffect, useMemo } from 'react';
 import Hide from 'components/Hide/Hide';
@@ -34,11 +34,11 @@ const useStyles = createUseStyles({
 export default function SetUpDateStep() {
   const classes = useStyles();
 
-  const { templateRequest, setTemplateRequest, selectedRedhatRepos, selectedCustomRepos } =
-    useAddTemplateContext();
+  const { templateRequest, setTemplateRequest, selectedRedHatRepos, selectedCustomRepos } =
+    useAddOrEditTemplateContext();
 
   const { data, mutateAsync } = useGetSnapshotsByDates(
-    [...selectedRedhatRepos, ...selectedCustomRepos],
+    [...selectedRedHatRepos, ...selectedCustomRepos],
     formatTemplateDate(templateRequest?.date || ''),
   );
 
@@ -67,11 +67,11 @@ export default function SetUpDateStep() {
     if (
       templateRequest?.date &&
       dateIsValid &&
-      [...selectedRedhatRepos, ...selectedCustomRepos].length
+      [...selectedRedHatRepos, ...selectedCustomRepos].length
     ) {
       mutateAsync();
     }
-  }, [selectedRedhatRepos.size, selectedCustomRepos.size, templateRequest?.date]);
+  }, [selectedRedHatRepos.size, selectedCustomRepos.size, templateRequest?.date]);
 
   const itemsAfterDate = useMemo(
     () => data?.data?.filter(({ is_after }) => is_after) || [],

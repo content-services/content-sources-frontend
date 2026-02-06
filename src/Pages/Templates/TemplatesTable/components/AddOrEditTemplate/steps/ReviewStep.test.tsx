@@ -1,21 +1,23 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import { defaultTemplateItem, testRepositoryParamsResponse } from 'testingHelpers';
 import ReviewStep from './ReviewStep';
 import { formatDateDDMMMYYYY } from 'helpers';
 
-jest.mock('../AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
+jest.mock('../AddOrEditTemplateContext', () => ({
+  useAddOrEditTemplateContext: jest.fn(),
 }));
 
 it('expect Review step to render correctly', () => {
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     templateRequest: defaultTemplateItem,
-    selectedRedhatRepos: new Set(['item1', 'item2']),
+    selectedRedHatRepos: new Set(['item1', 'item2']),
     selectedCustomRepos: new Set(['item1']),
-    hardcodedRedhatRepositoryUUIDS: new Set('item1'),
+    redHatCoreRepoUUIDS: new Set('item1'),
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
+    extended_release_features: testRepositoryParamsResponse.extended_release_features,
+    distribution_minor_versions: testRepositoryParamsResponse.distribution_minor_versions,
     isEdit: false,
   }));
 

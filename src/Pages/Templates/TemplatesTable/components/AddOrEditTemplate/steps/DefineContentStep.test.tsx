@@ -1,19 +1,21 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import { defaultTemplateItem, testRepositoryParamsResponse } from 'testingHelpers';
 import DefineContentStep from './DefineContentStep';
 
-jest.mock('../AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
+jest.mock('../AddOrEditTemplateContext', () => ({
+  useAddOrEditTemplateContext: jest.fn(),
 }));
 
 it('expect DefineContentStep to render correctly', () => {
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     isEdit: false,
     templateRequest: defaultTemplateItem,
     setTemplateRequest: () => undefined,
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
+    extended_release_features: testRepositoryParamsResponse.extended_release_features,
+    distribution_minor_versions: testRepositoryParamsResponse.distribution_minor_versions,
   }));
 
   const { getByText } = render(<DefineContentStep />);
@@ -30,12 +32,14 @@ it('expect DefineContentStep to render correctly', () => {
 });
 
 it('expect DefineContentStep to render with disabled inputs', () => {
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     isEdit: true,
     templateRequest: defaultTemplateItem,
     setTemplateRequest: () => undefined,
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
+    extended_release_features: testRepositoryParamsResponse.extended_release_features,
+    distribution_minor_versions: testRepositoryParamsResponse.distribution_minor_versions,
   }));
 
   const { getByTestId } = render(<DefineContentStep />);
