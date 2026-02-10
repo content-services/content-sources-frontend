@@ -50,7 +50,12 @@ export default defineConfig<CurrentsFixtures, CurrentsWorkerFixtures>({
         ['html', { outputFolder: 'playwright-report' }],
         [
           'playwright-ctrf-json-reporter',
-          { outputDir: 'playwright-ctrf', outputFile: 'playwright-ctrf.json' },
+          {
+            outputDir: 'playwright-ctrf',
+            outputFile: process.env.INTEGRATION
+              ? 'playwright-ctrf-integration.json'
+              : 'playwright-ctrf-ui.json',
+          },
         ],
         ...(currentsConfig ? [currentsReporter(currentsConfig)] : []),
       ]
