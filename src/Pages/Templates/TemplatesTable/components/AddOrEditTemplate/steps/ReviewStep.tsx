@@ -20,6 +20,7 @@ export default function ReviewStep() {
     distribution_arches,
     distribution_versions,
     isEdit,
+    useExtendedSupport,
   } = useAddOrEditTemplateContext();
 
   const archesDisplay = (arch?: string) =>
@@ -35,7 +36,13 @@ export default function ReviewStep() {
       Content: {
         Architecture: archesDisplay(arch),
         'OS version': versionDisplay(version),
-        'Pre-selected Red Hat repositories': redHatCoreRepoUUIDS.size,
+        ...(useExtendedSupport
+          ? {
+              'Update stream': templateRequest.extended_release,
+              'Minor version': templateRequest.extended_release_version,
+            }
+          : {}),
+        'Core Red Hat repositories': redHatCoreRepoUUIDS.size,
         'Additional Red Hat repositories': selectedRedHatRepos.size - redHatCoreRepoUUIDS.size,
         'Custom repositories': selectedCustomRepos.size,
       },
