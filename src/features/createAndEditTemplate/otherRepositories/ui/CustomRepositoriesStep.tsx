@@ -1,5 +1,6 @@
 import {
   Bullseye,
+  Button,
   Flex,
   FlexItem,
   Grid,
@@ -14,12 +15,12 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@patternfly/react-core';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
 import { createUseStyles } from 'react-jss';
 import { ContentItem, ContentOrigin } from 'services/Content/ContentApi';
 import { useState } from 'react';
-import { useContentListQuery } from 'services/Content/ContentQueries';
-import { SearchIcon } from '@patternfly/react-icons';
+import { CONTENT_LIST_KEY, useContentListQuery } from 'services/Content/ContentQueries';
+import { ExternalLinkAltIcon, SearchIcon, SyncAltIcon } from '@patternfly/react-icons';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import { useHref } from 'react-router-dom';
 import Hide from 'components/Hide/Hide';
@@ -27,11 +28,16 @@ import { SkeletonTable } from '@patternfly/react-component-groups';
 import { Table, TableVariant, Tbody, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
 import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
 import PackageCount from 'components/PackageCount/PackageCount';
+import StatusIcon from 'components/StatusIcon/StatusIcon';
 import useDebounce from 'Hooks/useDebounce';
-import { REPOSITORIES_ROUTE } from 'Routes/constants';
+import { ADD_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
 import TdWithTooltip from 'components/TdWithTooltip/TdWithTooltip';
-import { reduceStringToCharsWithEllipsis } from 'helpers';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
+import { isEPELUrl, reduceStringToCharsWithEllipsis } from 'helpers';
+import UploadRepositoryLabel from 'components/RepositoryLabels/UploadRepositoryLabel';
+import CommunityRepositoryLabel from 'components/RepositoryLabels/CommunityRepositoryLabel';
+import CustomEpelWarning from 'components/RepositoryLabels/CustomEpelWarning';
+import { useAppContext } from 'middleware/AppContext';
 
 const useStyles = createUseStyles({
   topBottomContainers: {
@@ -41,41 +47,41 @@ const useStyles = createUseStyles({
   invisible: {
     opacity: 0,
   },
+  reduceTrailingMargin: {
+    marginRight: '12px!important',
+  },
 });
 
-export default function RedhatRepositoriesStep() {
+export default function CustomRepositoriesStep() {
   const classes = useStyles();
   const path = useHref('content');
   const pathname = path.split('content')[0] + 'content';
 
-  const {
-    hardcodedRedhatRepositoryUUIDS,
-    templateRequest,
-    selectedRedhatRepos,
-    setSelectedRedhatRepos,
-  } = useAddTemplateContext();
-
-  const noAdditionalRepos = selectedRedhatRepos.size - hardcodedRedhatRepositoryUUIDS.size === 0;
+  const { queryClient, templateRequest, selectedCustomRepos, setSelectedCustomRepos } =
+    useAddTemplateContext();
+  const { features } = useAppContext();
 
   const [toggled, setToggled] = useState(false);
 
   const setUUIDForList = (uuid: string) => {
-    if (selectedRedhatRepos.has(uuid)) {
-      selectedRedhatRepos.delete(uuid);
-      if (noAdditionalRepos) {
+    if (selectedCustomRepos.has(uuid)) {
+      selectedCustomRepos.delete(uuid);
+      if (selectedCustomRepos.size === 0) {
         setToggled(false);
       }
     } else {
-      selectedRedhatRepos.add(uuid);
+      selectedCustomRepos.add(uuid);
     }
-    setSelectedRedhatRepos(new Set(selectedRedhatRepos));
+    setSelectedCustomRepos(new Set(selectedCustomRepos));
   };
+
+  const storedPerPage = Number(20);
 
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery);
 
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(20);
+  const [perPage, setPerPage] = useState(storedPerPage);
   const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -85,70 +91,90 @@ export default function RedhatRepositoriesStep() {
     setPage(newPage);
   };
 
-  const columnHeaders = ['Name', /* 'Label',*/ 'Advisories', 'Packages'];
+  const columnHeaders = ['Name', 'Status', 'Packages'];
 
-  const columnSortAttributes = ['name'];
+  const columnSortAttributes = ['name', 'status', 'package_count'];
 
   const sortString = (): string =>
     columnSortAttributes[activeSortIndex] + ':' + activeSortDirection;
 
-  const sortParams = (columnIndex: number): ThProps['sort'] =>
-    columnSortAttributes[columnIndex]
-      ? {
-          sortBy: {
-            index: activeSortIndex,
-            direction: activeSortDirection,
-            defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
-          },
-          onSort: (_event, index, direction) => {
-            setActiveSortIndex(index);
-            setActiveSortDirection(direction);
-          },
-          columnIndex,
-        }
-      : undefined;
+  const sortParams = (columnIndex: number): ThProps['sort'] => ({
+    sortBy: {
+      index: activeSortIndex,
+      direction: activeSortDirection,
+      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
+    },
+    onSort: (_event, index, direction) => {
+      setActiveSortIndex(index);
+      setActiveSortDirection(direction);
+    },
+    columnIndex,
+  });
 
-  const { isLoading, data = { data: [], meta: { count: 0, limit: 20, offset: 0 } } } =
-    useContentListQuery(
-      page,
-      perPage,
-      {
-        search: searchQuery === '' ? searchQuery : debouncedSearch,
-        availableForArch: templateRequest.arch as string,
-        availableForVersion: templateRequest.version as string,
-        uuids: toggled ? [...selectedRedhatRepos] : undefined,
-      },
-      sortString(),
-      [ContentOrigin.REDHAT],
-    );
+  const {
+    isLoading,
+    isFetching,
+    data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
+  } = useContentListQuery(
+    page,
+    perPage,
+    {
+      search: searchQuery === '' ? searchQuery : debouncedSearch,
+      availableForArch: templateRequest.arch as string,
+      availableForVersion: templateRequest.version as string,
+      uuids: toggled ? [...selectedCustomRepos] : undefined,
+    },
+    sortString(),
+    [ContentOrigin.CUSTOM, ContentOrigin.COMMUNITY],
+  );
 
   const {
     data: contentList = [],
     meta: { count = 0 },
   } = data;
-
   const countIsZero = count === 0;
   const showLoader = countIsZero && !isLoading;
-  const additionalReposAvailableToSelect =
-    contentList.length - hardcodedRedhatRepositoryUUIDS.size > 0;
+
+  const isEPELRepository = (repo: ContentItem): boolean => {
+    if (repo.origin === ContentOrigin.COMMUNITY) {
+      return true;
+    }
+
+    return isEPELUrl(repo.url);
+  };
+
+  const isAnyEPELRepoSelected = (): boolean =>
+    contentList.some((repo) => selectedCustomRepos.has(repo.uuid) && isEPELRepository(repo));
 
   return (
-    <Grid hasGutter>
+    <Grid data-ouia-component-id='custom_repositories_step' hasGutter>
       <Flex
         direction={{ default: 'row' }}
         justifyContent={{ default: 'justifyContentSpaceBetween' }}
       >
-        <Title ouiaId='additional_red_hat_repositories' headingLevel='h1'>
-          Additional Red Hat repositories
+        <Title ouiaId='custom_repositories' headingLevel='h1'>
+          Other repositories
         </Title>
+        <Button
+          id='refreshContentList'
+          ouiaId='refresh_content_list'
+          variant='link'
+          icon={isLoading || isFetching ? undefined : <SyncAltIcon />}
+          isLoading={isLoading || isFetching}
+          isDisabled={isLoading || isFetching}
+          onClick={() => queryClient.invalidateQueries(CONTENT_LIST_KEY)}
+        >
+          Refresh repository list
+        </Button>
       </Flex>
       <Flex direction={{ default: 'row' }}>
-        <Content component={ContentVariants.p}>
-          {additionalReposAvailableToSelect
-            ? 'You can select additional Red Hat repositories. '
-            : ''}
-          Core repositories of your OS version have been added.
+        <Content component={ContentVariants.p} className={classes.reduceTrailingMargin}>
+          Select custom or EPEL repositories.
         </Content>
+        <UrlWithExternalIcon
+          href={pathname + '/' + REPOSITORIES_ROUTE}
+          customText='Create and  manage repositories here.'
+        />
       </Flex>
       <Hide hide={(countIsZero && !searchQuery) || isLoading}>
         <Flex className={classes.topBottomContainers}>
@@ -158,9 +184,9 @@ export default function RedhatRepositoriesStep() {
                 <InputGroupItem isFill>
                   <TextInput
                     isDisabled={isLoading}
-                    id='name'
-                    ouiaId='filter_name'
-                    placeholder='Filter by name'
+                    id='name-url'
+                    ouiaId='filter_name_url'
+                    placeholder='Filter by name/url'
                     value={searchQuery}
                     onChange={(_event, value) => setSearchQuery(value)}
                     type='search'
@@ -174,17 +200,17 @@ export default function RedhatRepositoriesStep() {
                 <ToggleGroup aria-label='Default with single selectable'>
                   <ToggleGroupItem
                     text='All'
-                    buttonId='redhat-repositories-toggle-button'
+                    buttonId='custom-repositories-toggle-button'
                     data-ouia-component-id='all-selected-repositories-toggle'
                     isSelected={!toggled}
                     onChange={() => setToggled(false)}
                   />
                   <ToggleGroupItem
                     text='Selected'
-                    buttonId='redhat-repositories-selected-toggle-button'
-                    data-ouia-component-id='redhat-selected-repositories-toggle'
+                    buttonId='custom-repositories-selected-toggle-button'
+                    data-ouia-component-id='custom-selected-repositories-toggle'
                     isSelected={toggled}
-                    isDisabled={noAdditionalRepos}
+                    isDisabled={selectedCustomRepos.size === 0}
                     onChange={() => setToggled(true)}
                   />
                 </ToggleGroup>
@@ -209,12 +235,26 @@ export default function RedhatRepositoriesStep() {
         </Flex>
       </Hide>
       {showLoader ? (
-        <Bullseye data-ouia-component-id='redhat_repositories_table'>
+        <Bullseye data-ouia-component-id='custom_repositories_table'>
           <EmptyTableState
             notFiltered={searchQuery === ''}
             clearFilters={() => setSearchQuery('')}
-            itemName='Red Hat repositories'
-            notFilteredBody='No Red Hat repositories match the version and arch'
+            itemName='custom repositories'
+            notFilteredBody='To get started, create a custom repository'
+            notFilteredButton={
+              <Button
+                id='createContentSourceButton'
+                ouiaId='create_content_source'
+                variant='primary'
+                component='a'
+                target='_blank'
+                href={pathname + '/' + REPOSITORIES_ROUTE + '/' + ADD_ROUTE}
+                icon={<ExternalLinkAltIcon />}
+                iconPosition='end'
+              >
+                Add repositories
+              </Button>
+            }
           />
         </Bullseye>
       ) : (
@@ -230,15 +270,19 @@ export default function RedhatRepositoriesStep() {
           </Hide>
           <Hide hide={countIsZero || isLoading}>
             <Table
-              aria-label='Redhat repositories table'
-              ouiaId='redhat_repositories_table'
+              aria-label='custom repositories table'
+              ouiaId='custom_repositories_table'
               variant='compact'
             >
               <Thead>
                 <Tr>
                   <Th screenReaderText='empty' />
                   {columnHeaders.map((columnHeader, index) => (
-                    <Th key={columnHeader + 'column'} sort={sortParams(index)}>
+                    <Th
+                      width={index === 0 ? 50 : undefined}
+                      key={columnHeader + 'column'}
+                      sort={sortParams(index)}
+                    >
                       {columnHeader}
                     </Th>
                   ))}
@@ -246,41 +290,60 @@ export default function RedhatRepositoriesStep() {
               </Thead>
               <Tbody>
                 {contentList.map((rowData: ContentItem, rowIndex) => {
-                  const { uuid, name, url } = rowData;
+                  const { uuid, name, url, origin } = rowData;
+                  const shouldDisableOtherEPEL =
+                    isEPELRepository(rowData) &&
+                    isAnyEPELRepoSelected() &&
+                    !selectedCustomRepos.has(uuid);
+
                   return (
                     <Tr key={uuid}>
                       <TdWithTooltip
-                        show={
-                          !(rowData.snapshot && rowData.last_snapshot_uuid) ||
-                          hardcodedRedhatRepositoryUUIDS.has(uuid)
-                        }
+                        show={!(rowData.snapshot && rowData.last_snapshot_uuid)}
                         tooltipProps={{
-                          content: hardcodedRedhatRepositoryUUIDS.has(uuid)
-                            ? 'This item is pre-selected for the chosen architecture and OS version.'
-                            : 'A snapshot is not yet available for this repository.',
+                          content: 'Snapshot not yet available for this repository',
                         }}
                         select={{
                           rowIndex,
                           onSelect: () => setUUIDForList(uuid),
-                          isSelected: selectedRedhatRepos.has(uuid),
+                          isSelected: selectedCustomRepos.has(uuid),
                           isDisabled:
                             !(rowData.snapshot && rowData.last_snapshot_uuid) ||
-                            hardcodedRedhatRepositoryUUIDS.has(uuid),
+                            shouldDisableOtherEPEL,
                         }}
                       />
                       <Td>
                         <ConditionalTooltip show={name.length > 60} content={name}>
-                          <>{reduceStringToCharsWithEllipsis(name, 60)}</>
+                          <>
+                            {reduceStringToCharsWithEllipsis(name, 60)}
+                            <Hide hide={origin !== ContentOrigin.UPLOAD}>
+                              <UploadRepositoryLabel />
+                            </Hide>
+                            <Hide hide={origin !== ContentOrigin.COMMUNITY}>
+                              <CommunityRepositoryLabel />
+                            </Hide>
+                            <Hide
+                              hide={
+                                !(origin == ContentOrigin.EXTERNAL && isEPELUrl(url)) ||
+                                !features?.communityrepos?.enabled
+                              }
+                            >
+                              <CustomEpelWarning />
+                            </Hide>
+                          </>
                         </ConditionalTooltip>
-                        <ConditionalTooltip show={url.length > 50} content={url}>
-                          <UrlWithExternalIcon
-                            href={url}
-                            customText={reduceStringToCharsWithEllipsis(url)}
-                          />
-                        </ConditionalTooltip>
+                        <Hide hide={origin === ContentOrigin.UPLOAD}>
+                          <ConditionalTooltip show={url.length > 50} content={url}>
+                            <UrlWithExternalIcon
+                              href={url}
+                              customText={reduceStringToCharsWithEllipsis(url)}
+                            />
+                          </ConditionalTooltip>
+                        </Hide>
                       </Td>
-                      {/* <Td>{rowData.label || '-'}</Td> */}
-                      <Td>{rowData.last_snapshot?.content_counts?.['rpm.advisory'] || '-'}</Td>
+                      <Td>
+                        <StatusIcon rowData={rowData} />
+                      </Td>
                       <Td>
                         <PackageCount
                           rowData={rowData}

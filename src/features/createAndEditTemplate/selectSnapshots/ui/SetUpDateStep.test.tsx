@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { useGetSnapshotsByDates, useContentListQuery } from 'services/Content/ContentQueries';
 import SetUpDateStep from './SetUpDateStep';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
 import { defaultContentItem, defaultSnapshotsByDateResponse } from 'testingHelpers';
 
 jest.mock('services/Content/ContentQueries', () => ({

@@ -11,7 +11,7 @@ import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { QueryClient, useQueryClient } from 'react-query';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
 import { ContentOrigin, NameLabel } from 'services/Content/ContentApi';
-import { hardcodeRedHatReposByArchAndVersion } from '../templateHelpers';
+import { hardcodeRedHatReposByArchAndVersion } from '../core/templateHelpers';
 import { useNavigate } from 'react-router-dom';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
 import useRootPath from 'Hooks/useRootPath';

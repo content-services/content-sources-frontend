@@ -12,20 +12,20 @@ import {
 
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useCreateTemplateQuery, useEditTemplateQuery } from 'services/Templates/TemplateQueries';
-import { AddTemplateContextProvider, useAddTemplateContext } from './AddTemplateContext';
-import RedhatRepositoriesStep from './steps/RedhatRepositoriesStep';
-import CustomRepositoriesStep from './steps/CustomRepositoriesStep';
+import { AddTemplateContextProvider, useAddTemplateContext } from '../store/AddTemplateContext';
+import RedhatRepositoriesStep from '../../redhatRepositories/ui/RedhatRepositoriesStep';
+import CustomRepositoriesStep from '../../otherRepositories/ui/CustomRepositoriesStep';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
 
-import DefineContentStep from './steps/DefineContentStep';
-import SetUpDateStep from './steps/SetUpDateStep';
-import DetailStep from './steps/DetailStep';
-import ReviewStep from './steps/ReviewStep';
+import DefineContentStep from '../../defineContent/ui/DefineContentStep';
+import SetUpDateStep from '../../selectSnapshots/ui/SetUpDateStep';
+import DetailStep from '../../describeTemplate/ui/DetailStep';
+import ReviewStep from '../../reviewTemplateRequest/ui/ReviewStep';
 import { formatTemplateDate } from 'helpers';
 import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
 import { useEffect, useRef } from 'react';
-import { AddNavigateButton } from './AddNavigateButton';
+import { AddNavigateButton } from '../../createTemplate/ui/AddNavigateButton';
 import useRootPath from 'Hooks/useRootPath';
 import { TEMPLATES_ROUTE } from 'Routes/constants';
 

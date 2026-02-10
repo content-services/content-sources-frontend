@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
 import { defaultTemplateItem } from 'testingHelpers';
 import DetailStep from './DetailStep';
 

@@ -11,7 +11,7 @@ import {
   DropdownItem,
   DropdownList,
 } from '@patternfly/react-core';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { useState } from 'react';
 import { createUseStyles } from 'react-jss';

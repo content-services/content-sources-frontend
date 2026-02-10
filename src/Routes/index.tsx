@@ -22,7 +22,7 @@ import {
 } from './constants';
 import { useAppContext } from 'middleware/AppContext';
 import TemplateDetails from 'Pages/Templates/TemplateDetails/TemplateDetails';
-import { AddOrEditTemplate } from 'Pages/Templates/TemplatesTable/components/AddOrEditTemplate/AddOrEditTemplate';
+import { AddOrEditTemplate } from 'features/createAndEditTemplate/workflow/ui/AddOrEditTemplate';
 import TemplatesTable from 'Pages/Templates/TemplatesTable/TemplatesTable';
 import { NoPermissionsPage } from 'components/NoPermissionsPage/NoPermissionsPage';
 import TemplateErrataTab from 'Pages/Templates/TemplateDetails/components/Tabs/TemplateErrataTab';
