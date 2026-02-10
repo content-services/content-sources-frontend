@@ -19,7 +19,9 @@ import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import { createUseStyles } from 'react-jss';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import Hide from '../../../../../../components/Hide/Hide';
-import { EUS, checkStreamAvailability } from '../../templateHelpers';
+import { EUS, getMinorVersionsForCurrentMajor } from '../../templateHelpers';
+import { toRhelDisplayName } from '../../../../../../helpers';
+import useDistributionDetails from '../../../../../../Hooks/useDistributionDetails';
 
 const useStyles = createUseStyles({
   fullWidth: {
@@ -38,16 +40,15 @@ const ExtendedSupportStep = () => {
     setUseExtendedSupport,
   } = useAddOrEditTemplateContext();
 
-  const [isEusAvailable, isE4sAvailable] = checkStreamAvailability(
-    templateRequest.version!,
-    distribution_minor_versions,
-  );
+  const { getStreamName, getMinorVersionName, getStreamAvailability } = useDistributionDetails();
 
+  const [isEusAvailable, isE4sAvailable] = getStreamAvailability(templateRequest.version!);
   const [isUpdateStreamOpen, setIsUpdateStreamOpen] = useState(false);
   const [isMinorVersionOpen, setIsMinorVersionOpen] = useState(false);
 
-  const minorVersionsForCurrentMajor = distribution_minor_versions.filter(
-    ({ major }) => major === templateRequest.version,
+  const minorVersionsForCurrentMajor = getMinorVersionsForCurrentMajor(
+    templateRequest.version,
+    distribution_minor_versions,
   );
 
   const handleLatestReleaseChange = () => {
@@ -150,9 +151,7 @@ const ExtendedSupportStep = () => {
                   onClick={() => setIsUpdateStreamOpen((prev) => !prev)}
                   className={classes.fullWidth}
                 >
-                  {extended_release_features.find(
-                    ({ label }) => label === templateRequest.extended_release,
-                  )?.name || 'Select update stream'}
+                  {getStreamName(templateRequest?.extended_release) || 'Select update stream'}
                 </MenuToggle>
               )}
             >
@@ -193,16 +192,16 @@ const ExtendedSupportStep = () => {
                   onClick={() => setIsMinorVersionOpen((prev) => !prev)}
                   className={classes.fullWidth}
                 >
-                  {minorVersionsForCurrentMajor.find(
-                    (distribution) =>
-                      distribution.label === templateRequest.extended_release_version,
-                  )?.name || 'Select minor version'}
+                  {getMinorVersionName(
+                    templateRequest?.version,
+                    templateRequest?.extended_release_version,
+                  ) || 'Select minor version'}
                 </MenuToggle>
               )}
             >
               <DropdownList>
                 {minorVersionsForCurrentMajor
-                  .filter(({ feature_names }) =>
+                  ?.filter(({ feature_names }) =>
                     feature_names.includes(templateRequest.extended_release!),
                   )
                   .map(({ label, name }) => (
@@ -213,7 +212,7 @@ const ExtendedSupportStep = () => {
                       value={label}
                       component='button'
                     >
-                      {name}
+                      {toRhelDisplayName(name)}
                     </DropdownItem>
                   ))}
               </DropdownList>
@@ -221,8 +220,6 @@ const ExtendedSupportStep = () => {
           </FormGroup>
         </Hide>
       </Form>
-
-      {/* What does this mean? */}
     </Grid>
   );
 };

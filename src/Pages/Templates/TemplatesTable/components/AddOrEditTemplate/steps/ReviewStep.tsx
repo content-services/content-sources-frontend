@@ -9,6 +9,7 @@ import {
 import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import { useMemo, useState } from 'react';
 import { formatDateDDMMMYYYY } from 'helpers';
+import useDistributionDetails from '../../../../../../Hooks/useDistributionDetails';
 
 export default function ReviewStep() {
   const [expanded, setExpanded] = useState(new Set([0]));
@@ -18,28 +19,28 @@ export default function ReviewStep() {
     redHatCoreRepoUUIDS,
     selectedCustomRepos,
     distribution_arches,
-    distribution_versions,
     isEdit,
     useExtendedSupport,
   } = useAddOrEditTemplateContext();
 
+  const { versionDisplay, getStreamName, getMinorVersionName } = useDistributionDetails();
+
   const archesDisplay = (arch?: string) =>
     distribution_arches.find(({ label }) => arch === label)?.name || 'Select architecture';
-
-  const versionDisplay = (version?: string): string =>
-    // arm64 aarch64
-    distribution_versions.find(({ label }) => version === label)?.name || 'Select version';
 
   const reviewTemplate = useMemo(() => {
     const { arch, version, date, name, description } = templateRequest;
     const review = {
       Content: {
         Architecture: archesDisplay(arch),
-        'OS version': versionDisplay(version),
+        'OS version': versionDisplay(version) || 'Select version',
         ...(useExtendedSupport
           ? {
-              'Update stream': templateRequest.extended_release,
-              'Minor version': templateRequest.extended_release_version,
+              'Update stream': getStreamName(templateRequest.extended_release),
+              'Minor version': getMinorVersionName(
+                version,
+                templateRequest.extended_release_version,
+              ),
             }
           : {}),
         'Core Red Hat repositories': redHatCoreRepoUUIDS.size,

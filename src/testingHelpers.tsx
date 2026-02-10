@@ -54,15 +54,15 @@ export const testRepositoryParamsResponse: RepositoryParamsResponse = {
       label: 'any',
     },
     {
-      name: 'el7',
+      name: 'RHEL 7',
       label: '7',
     },
     {
-      name: 'el8',
+      name: 'RHEL 8',
       label: '8',
     },
     {
-      name: 'el9',
+      name: 'RHEL 9',
       label: '9',
     },
   ],
@@ -91,19 +91,19 @@ export const testRepositoryParamsResponse: RepositoryParamsResponse = {
   ],
   distribution_minor_versions: [
     {
-      name: 'el8.6',
+      name: 'RHEL 8.6',
       label: '8.6',
       major: '8',
       feature_names: [E4S],
     },
     {
-      name: 'el9.4',
+      name: 'RHEL 9.4',
       label: '9.4',
       major: '9',
       feature_names: [...EXTENDED_SUPPORT_FEATURES],
     },
     {
-      name: 'el10.0',
+      name: 'RHEL 10.0',
       label: '10.0',
       major: '10',
       feature_names: [...EXTENDED_SUPPORT_FEATURES],

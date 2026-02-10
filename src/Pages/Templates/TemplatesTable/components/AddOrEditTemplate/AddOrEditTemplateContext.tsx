@@ -11,12 +11,13 @@ import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { QueryClient, useQueryClient } from 'react-query';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
 import { ContentOrigin, NameLabel, DistributionMinorVersion } from 'services/Content/ContentApi';
-import { getRedHatCoreRepoUrls, hasExtendedSupport } from '../templateHelpers';
+import { getRedHatCoreRepoUrls } from '../templateHelpers';
 import { useNavigate } from 'react-router-dom';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
 import useRootPath from 'Hooks/useRootPath';
 import { isDateValid } from 'helpers';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
+import useDistributionDetails from '../../../../../Hooks/useDistributionDetails';
 
 export interface AddOrEditTemplateContextInterface {
   queryClient: QueryClient;
@@ -68,13 +69,15 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
     } = {},
   } = useRepositoryParams();
 
+  const { isExtendedSupportAvailable } = useDistributionDetails();
+
   const stepValidationSequence = useMemo(() => {
     const { arch, date, name, version, use_latest, extended_release, extended_release_version } =
       templateRequest;
 
     // Valid if: feature is unavailable, unused, or all required fields filled with valid values
     const isVersioningStepValid =
-      !hasExtendedSupport(extended_release_features) ||
+      !isExtendedSupportAvailable ||
       !useExtendedSupport ||
       (extended_release && extended_release_version);
 

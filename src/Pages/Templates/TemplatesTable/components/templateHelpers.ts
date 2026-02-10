@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { NameLabel, DistributionMinorVersion } from 'services/Content/ContentApi';
+import { DistributionMinorVersion } from 'services/Content/ContentApi';
 
 export const EUS = 'RHEL-EUS-x86_64' as const;
 export const E4S = 'RHEL-E4S-x86_64' as const;
@@ -20,22 +20,10 @@ type ExtendedRelease = 'eus' | 'e4s' | 'none';
 export const featureNameToExtendedRelease = (featureName: string | undefined): ExtendedRelease =>
   featureName === EUS ? 'eus' : featureName === E4S ? 'e4s' : 'none';
 
-/**
- * Checks if the user has extended support features enabled.
- */
-export const hasExtendedSupport = (extended_release_features?: NameLabel[]) =>
-  !!extended_release_features?.length;
-
-export const checkStreamAvailability = (
-  version: string,
-  distributionMinorVersions: DistributionMinorVersion[],
-): [boolean, boolean] => {
-  const relevantMinors = distributionMinorVersions.filter(({ major }) => major === version);
-
-  return EXTENDED_SUPPORT_FEATURES.map((feature) =>
-    relevantMinors.some(({ feature_names }) => feature_names?.includes(feature)),
-  ) as [boolean, boolean];
-};
+export const getMinorVersionsForCurrentMajor = (
+  majorVersion?: string,
+  distributionMinorVersions?: DistributionMinorVersion[],
+) => distributionMinorVersions?.filter(({ major }) => major === majorVersion);
 
 const validateRedHatRepoParams = (
   arch?: string,
@@ -89,7 +77,11 @@ export const getRedHatCoreRepoUrls = (
   ];
 };
 
-export const isMinorRelease = (rhsm: string) => !MAJOR_RELEASE_VERSIONS.includes(rhsm);
+export const checkArchEusSupport = (arch?: string): boolean =>
+  !!(arch && SUPPORTED_EUS_ARCHES.includes(arch));
+
+export const isMinorRelease = (distributionVersion: string) =>
+  !MAJOR_RELEASE_VERSIONS.includes(distributionVersion);
 
 export const TemplateValidationSchema = Yup.object().shape({
   name: Yup.string().max(255, 'Too Long!').required('Required'),

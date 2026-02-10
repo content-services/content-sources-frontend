@@ -1,11 +1,21 @@
 import { render } from '@testing-library/react';
 import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
-import { defaultTemplateItem, testRepositoryParamsResponse } from 'testingHelpers';
+import {
+  defaultTemplateItem,
+  testRepositoryParamsResponse,
+  ReactQueryTestWrapper,
+} from 'testingHelpers';
 import ReviewStep from './ReviewStep';
 import { formatDateDDMMMYYYY } from 'helpers';
+import useDistributionDetails from '../../../../../../Hooks/useDistributionDetails';
 
 jest.mock('../AddOrEditTemplateContext', () => ({
   useAddOrEditTemplateContext: jest.fn(),
+}));
+
+jest.mock('../../../../../../Hooks/useDistributionDetails', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 it('expect Review step to render correctly', () => {
@@ -21,11 +31,21 @@ it('expect Review step to render correctly', () => {
     isEdit: false,
   }));
 
-  const { getByText } = render(<ReviewStep />);
+  const versionDisplay = `RHEL ${defaultTemplateItem.version}`;
+
+  (useDistributionDetails as jest.Mock).mockImplementation(() => ({
+    versionDisplay: () => versionDisplay,
+  }));
+
+  const { getByText } = render(
+    <ReactQueryTestWrapper>
+      <ReviewStep />
+    </ReactQueryTestWrapper>,
+  );
 
   expect(getByText('Create')).toBeInTheDocument();
   expect(getByText(defaultTemplateItem.arch)).toBeInTheDocument();
-  expect(getByText('el' + defaultTemplateItem.version)).toBeInTheDocument();
+  expect(getByText(versionDisplay)).toBeInTheDocument();
   expect(getByText(formatDateDDMMMYYYY(defaultTemplateItem.date))).toBeInTheDocument();
   expect(getByText(defaultTemplateItem.name)).toBeInTheDocument();
 });

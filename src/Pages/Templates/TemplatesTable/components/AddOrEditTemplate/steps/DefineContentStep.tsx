@@ -15,13 +15,9 @@ import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import {
-  SUPPORTED_ARCHES,
-  EUS,
-  E4S,
-  SUPPORTED_MAJOR_VERSIONS,
-  checkStreamAvailability,
-} from '../../templateHelpers';
+import { SUPPORTED_ARCHES, EUS, E4S, SUPPORTED_MAJOR_VERSIONS } from '../../templateHelpers';
+import useDistributionDetails from '../../../../../../Hooks/useDistributionDetails';
+import { toRhelDisplayName } from '../../../../../../helpers';
 
 const useStyles = createUseStyles({
   fullWidth: {
@@ -40,29 +36,24 @@ export default function DefineContentStep() {
     setTemplateRequest,
     distribution_versions,
     distribution_arches,
-    distribution_minor_versions,
   } = useAddOrEditTemplateContext();
+
+  const { versionDisplay, getStreamAvailability } = useDistributionDetails();
 
   const archesDisplay = (arch?: string) =>
     distribution_arches.find(({ label }) => arch === label)?.name || 'Select architecture';
-
-  const versionDisplay = (version?: string): string =>
-    distribution_versions.find(({ label }) => version === label)?.name || 'Select OS version';
 
   const reconcileExtendedRelease = (extendedRelease: string | undefined, forVersion: string) => {
     // If the selected update stream is no longer available for the OS new version, wipe it
     if (!extendedRelease) return '';
 
-    const [eusAvailable, e4sAvailable] = checkStreamAvailability(
-      forVersion,
-      distribution_minor_versions,
-    );
+    const [isEusAvailable, isE4sAvailable] = getStreamAvailability(forVersion);
 
     // If we selected EUS, but it's no longer available, wipe it
-    if (extendedRelease === EUS && !eusAvailable) return '';
+    if (extendedRelease === EUS && !isEusAvailable) return '';
 
     // If we selected E4S, but it's no longer available, wipe it
-    if (extendedRelease === E4S && !e4sAvailable) return '';
+    if (extendedRelease === E4S && !isE4sAvailable) return '';
 
     return extendedRelease;
   };
@@ -151,8 +142,8 @@ export default function DefineContentStep() {
         </FormGroup>
         <FormGroup label='OS version' isRequired>
           <Dropdown
-            onSelect={(_, val) => {
-              handleVersionChange(val as string);
+            onSelect={(_, value) => {
+              handleVersionChange(value as string);
               setVersionOpen(false);
             }}
             toggle={(toggleRef) => (
@@ -172,7 +163,7 @@ export default function DefineContentStep() {
                   onClick={() => setVersionOpen((prev) => !prev)}
                   isExpanded={versionOpen}
                 >
-                  {versionDisplay(templateRequest?.version)}
+                  {versionDisplay(templateRequest?.version) || 'Select OS version'}
                 </MenuToggle>
               </ConditionalTooltip>
             )}
@@ -190,7 +181,7 @@ export default function DefineContentStep() {
                     component='button'
                     data-ouia-component-id={`filter_${label}`}
                   >
-                    {name}
+                    {toRhelDisplayName(name)}
                   </DropdownItem>
                 ))}
             </DropdownList>

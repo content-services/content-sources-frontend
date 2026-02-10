@@ -32,7 +32,8 @@ import useRootPath from 'Hooks/useRootPath';
 import { TEMPLATES_ROUTE } from 'Routes/constants';
 import DefineContentStep from './steps/DefineContentStep';
 import ExtendedSupportStep from './steps/ExtendedSupportStep';
-import { hasExtendedSupport, SUPPORTED_EUS_ARCHES } from '../templateHelpers';
+import useDistributionDetails from '../../../../../Hooks/useDistributionDetails';
+import { checkArchEusSupport } from '../templateHelpers';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -54,13 +55,7 @@ const stepIdToIndex: Record<string, number> = {
 };
 
 // Component to sync URL with wizard state (must be inside Wizard)
-const WizardUrlSync = ({
-  onCancel,
-  isArchSupportedByEUS,
-}: {
-  onCancel: () => void;
-  isArchSupportedByEUS: boolean;
-}) => {
+const WizardUrlSync = ({ onCancel, isEusArch }: { onCancel: () => void; isEusArch: boolean }) => {
   const { goToStepById, activeStep } = useWizardContext();
   const [urlSearchParams] = useSearchParams();
 
@@ -72,7 +67,7 @@ const WizardUrlSync = ({
         goToStepById(tabParam);
       } else if (tabParam === 'define-content') {
         // ARM architecture doesn't support extended support releases, so skip the content versioning step
-        if (!isArchSupportedByEUS) {
+        if (!isEusArch) {
           goToStepById('redhat-repositories');
           return;
         }
@@ -81,7 +76,7 @@ const WizardUrlSync = ({
         onCancel();
       }
     }
-  }, [tabParam, activeStep?.id, goToStepById, onCancel, isArchSupportedByEUS]);
+  }, [tabParam, activeStep?.id, goToStepById, onCancel, isEusArch]);
 
   return null;
 };
@@ -96,18 +91,12 @@ const AddOrEditTemplateBase = () => {
   // Store the original 'from' value on mount (before step navigation changes location.state)
   const fromRef = useRef(location.state?.from);
 
-  const {
-    isEdit,
-    templateRequest,
-    hasInvalidSteps,
-    editUUID,
-    extended_release_features,
-    distribution_minor_versions,
-  } = useAddOrEditTemplateContext();
+  const { isEdit, templateRequest, hasInvalidSteps, editUUID, distribution_minor_versions } =
+    useAddOrEditTemplateContext();
 
-  const isArchSupportedByEUS = !!(
-    templateRequest?.arch && SUPPORTED_EUS_ARCHES.includes(templateRequest.arch)
-  );
+  const { isExtendedSupportAvailable } = useDistributionDetails();
+
+  const isEusArch = checkArchEusSupport(templateRequest?.arch);
 
   const isVersionSupportedByEUS =
     templateRequest?.version &&
@@ -174,7 +163,7 @@ const AddOrEditTemplateBase = () => {
         <Wizard
           header={
             <>
-              <WizardUrlSync onCancel={onCancel} isArchSupportedByEUS={isArchSupportedByEUS} />
+              <WizardUrlSync onCancel={onCancel} isEusArch={isEusArch} />
               <WizardHeader
                 title={`${isEdit ? 'Edit' : 'Create'} content template`}
                 titleId={`${isEdit ? 'edit' : 'create'}_content_template`}
@@ -207,8 +196,8 @@ const AddOrEditTemplateBase = () => {
               </WizardStep>,
               <WizardStep
                 key='content-versioning-key'
-                isDisabled={hasInvalidSteps(1) || !isVersionSupportedByEUS || !isArchSupportedByEUS}
-                isHidden={!hasExtendedSupport(extended_release_features)}
+                isDisabled={hasInvalidSteps(1) || !isVersionSupportedByEUS || !isEusArch}
+                isHidden={!isExtendedSupportAvailable}
                 name='Content versioning'
                 id='content-versioning'
                 footer={{ ...sharedFooterProps, isNextDisabled: hasInvalidSteps(2) }}
