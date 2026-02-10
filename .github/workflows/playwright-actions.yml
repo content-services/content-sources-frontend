@@ -205,8 +205,22 @@ jobs:
         working-directory: content-sources-backend
         run: while [[ "$(curl http://localhost:8000/api/content-sources/v1.0/repositories/ -H "$( ./scripts/header.sh 9999 1111)" | jq '.data | all(.status == "Valid")')" == "false" ]]; do sleep 5; done;
 
-      - name: Run front-end Playwright tests
-        run: CURRENTS_PROJECT_ID=mMVOFH CURRENTS_RECORD_KEY=$CURRENTS_RECORD_KEY CURRENTS_CI_BUILD_ID="${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}" yarn playwright test
+      - name: Run front-end Playwright tests (UI)
+        run: yarn playwright test
+        env:
+          CURRENTS_PROJECT_ID: ${{ secrets.CURRENTS_PROJECT_ID }}
+          CURRENTS_RECORD_KEY: ${{ secrets.CURRENTS_RECORD_KEY }}
+          CURRENTS_CI_BUILD_ID: ${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Run front-end Playwright tests (Integration)
+        run: INTEGRATION=true yarn playwright test
+        env:
+          CURRENTS_PROJECT_ID: ${{ secrets.CURRENTS_PROJECT_ID }}
+          CURRENTS_RECORD_KEY: ${{ secrets.CURRENTS_RECORD_KEY }}
+          CURRENTS_CI_BUILD_ID: ${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Merge CTRF reports
+        run: node .github/scripts/merge-ctrf.js
 
       - name: Publish front-end Test Report
         uses: ctrf-io/github-test-reporter@v1
