@@ -215,12 +215,51 @@ jobs:
         working-directory: content-sources-backend
         run: while [[ "$(curl http://localhost:8000/api/content-sources/v1.0/repositories/ -H "$( ./scripts/header.sh 9999 1111)" | jq '.data | all(.status == "Valid")')" == "false" ]]; do sleep 5; done;
 
-      - name: Run front-end Playwright tests
+      - name: Run front-end Playwright tests (UI)
         run: yarn playwright test
         env:
           CURRENTS_PROJECT_ID: ${{ secrets.CURRENTS_PROJECT_ID }}
           CURRENTS_RECORD_KEY: ${{ secrets.CURRENTS_RECORD_KEY }}
           CURRENTS_CI_BUILD_ID: ${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Set integration test env vars
+        run: |
+          # Pass through from CodeBuild env (same vars as int-repo, see nightly-stage-test-action.yml).
+          # Requires fe-repo CodeBuild project to have these configured.
+          missing=""
+          for var in STAGE_LAYERED_REPO_ACCESS_USERNAME STAGE_STABLE_SAM_USERNAME STAGE_ORG_ID STAGE_ACTIVATION_KEY RH_PROXY_URL; do
+            [ -z "${!var}" ] && missing="$missing $var"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::CodeBuild env vars missing for Integration tests:$missing"
+            echo "Add these to the codebuild-content-services-fe-repo project (mirror int-repo config)."
+            exit 1
+          fi
+          echo "LAYERED_REPO_ACCESS_USERNAME=$STAGE_LAYERED_REPO_ACCESS_USERNAME" >> $GITHUB_ENV
+          echo "LAYERED_REPO_ACCESS_PASSWORD=$STAGE_LAYERED_REPO_ACCESS_PASSWORD" >> $GITHUB_ENV
+          echo "RHEL_ONLY_ACCESS_USERNAME=$STAGE_RHEL_ONLY_ACCESS_USERNAME" >> $GITHUB_ENV
+          echo "RHEL_ONLY_ACCESS_PASSWORD=$STAGE_RHEL_ONLY_ACCESS_PASSWORD" >> $GITHUB_ENV
+          echo "NO_SUBS_USER_USERNAME=$STAGE_NO_SUBS_USER_USERNAME" >> $GITHUB_ENV
+          echo "NO_SUBS_USER_PASSWORD=$STAGE_NO_SUBS_USER_PASSWORD" >> $GITHUB_ENV
+          echo "NO_SUBS_USER_ACTIVATION_KEY=$STAGE_NO_SUBS_USER_ACTIVATION_KEY" >> $GITHUB_ENV
+          echo "NO_SUBS_USER_ORG_ID=$STAGE_NO_SUBS_USER_ORG_ID" >> $GITHUB_ENV
+          echo "ORG_ID_1=$STAGE_ORG_ID" >> $GITHUB_ENV
+          echo "ACTIVATION_KEY_1=$STAGE_ACTIVATION_KEY" >> $GITHUB_ENV
+          echo "LAYERED_REPO_ACCESS_ORG_ID=$STAGE_LAYERED_REPO_ACCESS_ORG_ID" >> $GITHUB_ENV
+          echo "LAYERED_REPO_ACCESS_ACTIVATION_KEY=$STAGE_LAYERED_REPO_ACCESS_ACTIVATION_KEY" >> $GITHUB_ENV
+          echo "STABLE_SAM_USERNAME=$STAGE_STABLE_SAM_USERNAME" >> $GITHUB_ENV
+          echo "STABLE_SAM_PASSWORD=$STAGE_STABLE_SAM_PASSWORD" >> $GITHUB_ENV
+          echo "RH_CLIENT_PROXY=$RH_PROXY_URL" >> $GITHUB_ENV
+
+      - name: Run front-end Playwright tests (Integration)
+        run: INTEGRATION=true yarn playwright test
+        env:
+          CURRENTS_PROJECT_ID: ${{ secrets.CURRENTS_PROJECT_ID }}
+          CURRENTS_RECORD_KEY: ${{ secrets.CURRENTS_RECORD_KEY }}
+          CURRENTS_CI_BUILD_ID: ${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Merge CTRF reports
+        run: node .github/scripts/merge-ctrf.js
 
       - name: Publish front-end Test Report
         uses: ctrf-io/github-test-reporter@v1
