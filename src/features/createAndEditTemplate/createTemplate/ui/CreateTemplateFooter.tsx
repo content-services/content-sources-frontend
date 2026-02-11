@@ -3,13 +3,15 @@ import { AddNavigateButton } from './AddNavigateButton';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { formatTemplateDate } from 'helpers';
 import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import { useQueryClient } from 'react-query';
 
 type CreateTemplateFooterType = {
   onCancel: () => void;
 };
 
 export const CreateTemplateFooter = ({ onCancel }: CreateTemplateFooterType) => {
-  const { queryClient, templateRequest } = useAddTemplateContext();
+  const { templateRequest } = useAddTemplateContext();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: addTemplate, isLoading: isAdding } = useCreateTemplateQuery(queryClient, {
     ...(templateRequest as TemplateRequest),

@@ -33,7 +33,6 @@ it('expect CustomRepositoriesStep to render correctly', () => {
     templateRequest: defaultTemplateItem,
     setSelectedCustomRepos: () => undefined,
     selectedCustomRepos: new Set([defaultTemplateItem.uuid]),
-    queryClient: { invalidateQueries: () => {} },
   }));
 
   const { getByRole, getByText } = render(<CustomRepositoriesStep />);

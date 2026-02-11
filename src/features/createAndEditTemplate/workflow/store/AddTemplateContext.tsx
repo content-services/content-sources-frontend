@@ -1,9 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
-import { QueryClient, useQueryClient } from 'react-query';
 
 export interface AddTemplateContextInterface {
-  queryClient: QueryClient;
   templateRequest: Partial<TemplateRequest>;
   setTemplateRequest: (value: React.SetStateAction<Partial<TemplateRequest>>) => void;
   selectedRedhatRepos: Set<string>;
@@ -24,8 +22,6 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
     new Set(),
   );
 
-  const queryClient = useQueryClient();
-
   const templateRequestDependencies = useMemo(
     () => [...selectedCustomRepos, ...selectedRedhatRepos],
     [selectedCustomRepos, selectedRedhatRepos],
@@ -41,7 +37,6 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
   return (
     <AddTemplateContext.Provider
       value={{
-        queryClient,
         templateRequest,
         setTemplateRequest,
         selectedRedhatRepos,

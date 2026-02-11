@@ -4,7 +4,8 @@ import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
 import { createUseStyles } from 'react-jss';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
 import { CONTENT_LIST_KEY } from 'services/Content/ContentQueries';
-import { useCustomRepositoriesApi } from '../../../../createAndEditTemplate/otherRepositories/store/CustomRepositoriesStore';
+import { useCustomRepositoriesApi } from '../../store/CustomRepositoriesStore';
+import { useQueryClient } from 'react-query';
 
 const useStyles = createUseStyles({
   reduceTrailingMargin: {
@@ -15,7 +16,8 @@ const useStyles = createUseStyles({
 export const TableHeading = () => {
   const classes = useStyles();
 
-  const { isLoading, isFetching, queryClient, pathname } = useCustomRepositoriesApi();
+  const { isLoading, isFetching, pathname } = useCustomRepositoriesApi();
+  const queryClient = useQueryClient();
 
   return (
     <>
