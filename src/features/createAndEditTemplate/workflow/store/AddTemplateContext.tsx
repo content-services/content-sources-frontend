@@ -1,15 +1,6 @@
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { QueryClient, useQueryClient } from 'react-query';
-import { isDateValid } from 'helpers';
 
 export interface AddTemplateContextInterface {
   queryClient: QueryClient;
@@ -21,7 +12,6 @@ export interface AddTemplateContextInterface {
   setSelectedCustomRepos: (uuidSet: Set<string>) => void;
   hardcodedRedhatRepositoryUUIDS: Set<string>;
   setHardcodeRepositoryUUIDS: (uuidSet: Set<string>) => void;
-  checkIfCurrentStepValid: (index: number) => boolean;
 }
 
 export const AddTemplateContext = createContext({} as AddTemplateContextInterface);
@@ -32,27 +22,6 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
   const [selectedCustomRepos, setSelectedCustomRepos] = useState<Set<string>>(new Set());
   const [hardcodedRedhatRepositoryUUIDS, setHardcodeRepositoryUUIDS] = useState<Set<string>>(
     new Set(),
-  );
-
-  const stepsValidArray = useMemo(() => {
-    const { arch, date, name, version, use_latest } = templateRequest;
-
-    return [
-      true,
-      arch && version,
-      !!selectedRedhatRepos.size,
-      true,
-      use_latest || isDateValid(date ?? ''),
-      !!name && name.length < 256,
-    ] as boolean[];
-  }, [templateRequest, selectedRedhatRepos.size]);
-
-  const checkIfCurrentStepValid = useCallback(
-    (stepIndex: number) => {
-      const stepsToCheck = stepsValidArray.slice(0, stepIndex + 1);
-      return !stepsToCheck.every((step) => step);
-    },
-    [selectedRedhatRepos.size, stepsValidArray],
   );
 
   const queryClient = useQueryClient();
@@ -81,7 +50,6 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
         setSelectedCustomRepos,
         setHardcodeRepositoryUUIDS,
         hardcodedRedhatRepositoryUUIDS,
-        checkIfCurrentStepValid,
       }}
     >
       {children}

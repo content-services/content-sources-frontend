@@ -28,6 +28,7 @@ import {
   EditTemplateStore,
   useEditTemplateState,
 } from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
+import { useCheckIsDisabledStep } from '../core/enableStep';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -60,11 +61,12 @@ type TemplateBaseProps = {
 const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBaseProps) => {
   const classes = useStyles();
   const [, setUrlSearchParams] = useSearchParams();
-  const { templateRequest, checkIfCurrentStepValid } = useAddTemplateContext();
 
   const initialIndex = useInitialStep();
   const onCancel = useOnCancelModal();
 
+  const { templateRequest } = useAddTemplateContext();
+  const { checkIfCurrentStepValid } = useCheckIsDisabledStep();
   const { isEditTemplate } = useEditTemplateState();
 
   const sharedFooterProps = {
