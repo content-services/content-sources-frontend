@@ -16,8 +16,9 @@ it('expect Review step to render correctly', () => {
     hardcodedRedhatRepositoryUUIDS: new Set('item1'),
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
-    isEdit: false,
   }));
+
+  //   TODO: get isEditTemplate from EditTemplate store, set to false
 
   const { getByText } = render(<ReviewStep />);
 

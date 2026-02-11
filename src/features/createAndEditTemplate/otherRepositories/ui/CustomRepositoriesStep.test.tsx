@@ -30,7 +30,6 @@ it('expect CustomRepositoriesStep to render correctly', () => {
   }));
 
   (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
-    isEdit: false,
     templateRequest: defaultTemplateItem,
     setSelectedCustomRepos: () => undefined,
     selectedCustomRepos: new Set([defaultTemplateItem.uuid]),

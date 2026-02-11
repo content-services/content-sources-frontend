@@ -9,13 +9,7 @@ import {
 } from 'react';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { QueryClient, useQueryClient } from 'react-query';
-import { useContentListQuery } from 'services/Content/ContentQueries';
-import { ContentOrigin } from 'services/Content/ContentApi';
-import { useNavigate } from 'react-router-dom';
-import { useFetchTemplate } from 'services/Templates/TemplateQueries';
-import useRootPath from 'Hooks/useRootPath';
 import { isDateValid } from 'helpers';
-import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
 
 export interface AddTemplateContextInterface {
   queryClient: QueryClient;
@@ -28,21 +22,11 @@ export interface AddTemplateContextInterface {
   hardcodedRedhatRepositoryUUIDS: Set<string>;
   setHardcodeRepositoryUUIDS: (uuidSet: Set<string>) => void;
   checkIfCurrentStepValid: (index: number) => boolean;
-  isEdit?: boolean;
-  editUUID?: string;
 }
 
 export const AddTemplateContext = createContext({} as AddTemplateContextInterface);
 
 export const AddTemplateContextProvider = ({ children }: { children: ReactNode }) => {
-  const uuid = useSafeUUIDParam('templateUUID');
-  const { data: editTemplateData, isError } = useFetchTemplate(uuid!, !!uuid);
-
-  const navigate = useNavigate();
-  const rootPath = useRootPath();
-
-  if (isError) navigate(rootPath);
-
   const [templateRequest, setTemplateRequest] = useState<Partial<TemplateRequest>>({});
   const [selectedRedhatRepos, setSelectedRedhatRepos] = useState<Set<string>>(new Set());
   const [selectedCustomRepos, setSelectedCustomRepos] = useState<Set<string>>(new Set());
@@ -73,44 +57,6 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
 
   const queryClient = useQueryClient();
 
-  const { data: existingRepositoryInformation, isLoading } = useContentListQuery(
-    1,
-    10,
-    { uuids: editTemplateData?.repository_uuids },
-    '',
-    [ContentOrigin.ALL],
-    !!uuid && !!editTemplateData?.repository_uuids.length,
-  );
-
-  // If editing, we want to load in the current data
-  useEffect(() => {
-    if (uuid && !!editTemplateData && !isLoading && !!existingRepositoryInformation) {
-      const startingState = {
-        ...editTemplateData,
-      };
-
-      setTemplateRequest(startingState);
-      const redHatReposToAdd: string[] = [];
-      const customReposToAdd: string[] = [];
-
-      existingRepositoryInformation?.data.forEach((item) => {
-        if (item.org_id === '-1') {
-          redHatReposToAdd.push(item.uuid);
-        } else {
-          customReposToAdd.push(item.uuid);
-        }
-      });
-
-      if (redHatReposToAdd.length) {
-        setSelectedRedhatRepos(new Set([...selectedRedhatRepos, ...redHatReposToAdd]));
-      }
-
-      if (customReposToAdd.length) {
-        setSelectedCustomRepos(new Set(customReposToAdd));
-      }
-    }
-  }, [editTemplateData, isLoading, existingRepositoryInformation]);
-
   const templateRequestDependencies = useMemo(
     () => [...selectedCustomRepos, ...selectedRedhatRepos],
     [selectedCustomRepos, selectedRedhatRepos],
@@ -125,7 +71,6 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
 
   return (
     <AddTemplateContext.Provider
-      key={uuid}
       value={{
         queryClient,
         templateRequest,
@@ -137,8 +82,6 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
         setHardcodeRepositoryUUIDS,
         hardcodedRedhatRepositoryUUIDS,
         checkIfCurrentStepValid,
-        isEdit: !!uuid,
-        editUUID: uuid,
       }}
     >
       {children}

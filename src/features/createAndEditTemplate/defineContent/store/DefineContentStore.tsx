@@ -4,12 +4,12 @@ import { ContentOrigin, NameLabel } from 'services/Content/ContentApi';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { hardcodeRedHatReposByArchAndVersion } from '../core/templateHelpers';
+import { useEditTemplateState } from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
 
 type DefineContentApiType = {
   distribution_versions: NameLabel[];
   distribution_arches: NameLabel[];
   templateRequest: Partial<TemplateRequest>;
-  isEdit?: boolean;
   archOpen: boolean;
   versionOpen: boolean;
   archesDisplay: (arch?: string) => string;
@@ -21,7 +21,6 @@ type DefineContentApiType = {
 
 const initialData = {
   templateRequest: {},
-  isEdit: undefined,
   distribution_versions: [],
   distribution_arches: [],
   archOpen: false,
@@ -46,15 +45,15 @@ export const DefineContentStore = ({ children }: DefineContentStoreType) => {
   const [hardcodedRedhatRepositories, setHardcodeRepositories] = useState<string[]>([]);
 
   const {
-    isEdit,
     templateRequest,
     setTemplateRequest,
     selectedRedhatRepos,
     setSelectedCustomRepos,
     setSelectedRedhatRepos,
     setHardcodeRepositoryUUIDS,
-    editUUID,
   } = useAddTemplateContext();
+
+  const { uuid } = useEditTemplateState();
 
   // >>>>>>>>
   // get archs and versions to populate dropdowns
@@ -88,9 +87,9 @@ export const DefineContentStore = ({ children }: DefineContentStoreType) => {
       if (result) {
         setHardcodeRepositories(result);
       }
-      if (!editUUID) setSelectedCustomRepos(new Set());
+      if (!uuid) setSelectedCustomRepos(new Set());
     }
-  }, [templateRequest.version, templateRequest.arch, editUUID]);
+  }, [templateRequest.version, templateRequest.arch, uuid]);
 
   // 3. filter out hardcoded uuids
   useEffect(() => {
@@ -122,7 +121,6 @@ export const DefineContentStore = ({ children }: DefineContentStoreType) => {
     templateRequest,
     setTemplateRequest,
     setArchOpen,
-    isEdit,
     archOpen,
     archesDisplay,
     setVersionOpen,

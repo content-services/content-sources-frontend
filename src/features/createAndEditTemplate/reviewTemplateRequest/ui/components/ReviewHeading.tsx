@@ -1,15 +1,16 @@
 import { Content, ContentVariants, Title } from '@patternfly/react-core';
-import { useReviewTemplateApi } from '../../../../createAndEditTemplate/reviewTemplateRequest/store/ReviewTemplateStore';
+import { useEditTemplateState } from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
 
 export const ReviewHeading = () => {
-  const { isEdit } = useReviewTemplateApi();
+  const { isEditTemplate } = useEditTemplateState();
   return (
     <>
       <Title ouiaId='review' headingLevel='h1'>
         Review
       </Title>
       <Content component={ContentVariants.p}>
-        Review the information and then click <b>{isEdit ? 'Confirm changes' : 'Create'}</b>.
+        Review the information and then click <b>{isEditTemplate ? 'Confirm changes' : 'Create'}</b>
+        .
       </Content>
     </>
   );

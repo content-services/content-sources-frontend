@@ -24,6 +24,10 @@ import { RedhatRepositoriesStore } from 'features/createAndEditTemplate/redhatRe
 import { CustomRepositoriesStore } from 'features/createAndEditTemplate/otherRepositories/store/CustomRepositoriesStore';
 import { SetUpDateStore } from 'features/createAndEditTemplate/selectSnapshots/store/SetUpDateStore';
 import { ReviewTemplateStore } from 'features/createAndEditTemplate/reviewTemplateRequest/store/ReviewTemplateStore';
+import {
+  EditTemplateStore,
+  useEditTemplateState,
+} from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -56,10 +60,12 @@ type TemplateBaseProps = {
 const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBaseProps) => {
   const classes = useStyles();
   const [, setUrlSearchParams] = useSearchParams();
-  const { isEdit, templateRequest, checkIfCurrentStepValid } = useAddTemplateContext();
+  const { templateRequest, checkIfCurrentStepValid } = useAddTemplateContext();
 
   const initialIndex = useInitialStep();
   const onCancel = useOnCancelModal();
+
+  const { isEditTemplate } = useEditTemplateState();
 
   const sharedFooterProps = {
     nextButtonProps: { ouiaId: 'wizard-next-btn' },
@@ -72,10 +78,10 @@ const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBa
       {...modalProps}
       variant={ModalVariant.large}
       isOpen
-      onClose={isEdit && isEmpty(templateRequest) ? onCancel : undefined}
+      onClose={isEditTemplate && isEmpty(templateRequest) ? onCancel : undefined}
       disableFocusTrap
     >
-      {isEdit && isEmpty(templateRequest) ? (
+      {isEditTemplate && isEmpty(templateRequest) ? (
         <Bullseye className={classes.minHeightForSpinner}>
           <Spinner size='xl' />
         </Bullseye>
@@ -163,17 +169,19 @@ type TemplateModalProps = {
 export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
   return (
     <AddTemplateContextProvider>
-      <DefineContentStore>
-        <RedhatRepositoriesStore>
-          <CustomRepositoriesStore>
-            <SetUpDateStore>
-              <ReviewTemplateStore>
-                <TemplateModalBase {...templateProps} />
-              </ReviewTemplateStore>
-            </SetUpDateStore>
-          </CustomRepositoriesStore>
-        </RedhatRepositoriesStore>
-      </DefineContentStore>
+      <EditTemplateStore>
+        <DefineContentStore>
+          <RedhatRepositoriesStore>
+            <CustomRepositoriesStore>
+              <SetUpDateStore>
+                <ReviewTemplateStore>
+                  <TemplateModalBase {...templateProps} />
+                </ReviewTemplateStore>
+              </SetUpDateStore>
+            </CustomRepositoriesStore>
+          </RedhatRepositoriesStore>
+        </DefineContentStore>
+      </EditTemplateStore>
     </AddTemplateContextProvider>
   );
 }
