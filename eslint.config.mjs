@@ -91,12 +91,18 @@ export default [
   },
 
   {
-    // Override for Playwright tests
+    // Override for Playwright tests: disable React rules (incompatible with ESLint 10
+    // context API). Test specs are not React components.
     files: ['_playwright-tests/**/*.ts'],
     plugins: {
       playwright: playwright,
     },
     rules: {
+      ...(react?.rules
+        ? Object.fromEntries(
+            Object.keys(react.rules).map((ruleName) => [`react/${ruleName}`, 'off']),
+          )
+        : {}),
       ...playwright.configs.recommended.rules,
       'playwright/no-conditional-in-test': 'off',
       'playwright/no-conditional-expect': 'off',
