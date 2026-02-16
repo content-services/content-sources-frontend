@@ -51,7 +51,7 @@ import {
   useValidateContentList,
 } from 'services/Content/ContentQueries';
 import { ContentOrigin, RepositoryParamsResponse } from 'services/Content/ContentApi';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { isEmpty, isEqual } from 'lodash';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
@@ -110,7 +110,7 @@ const AddContent = ({ isEdit = false }: Props) => {
     }
   }, [isLoadingInitialContent, isSuccess]);
 
-  const { mutateAsync: editContent, isLoading: isEditing } = useEditContentQuery(
+  const { mutateAsync: editContent, isPending: isEditing } = useEditContentQuery(
     mapFormikToAPIValues(values),
   );
 
@@ -141,7 +141,7 @@ const AddContent = ({ isEdit = false }: Props) => {
   const { fetchGpgKey, isLoading: isFetchingGpgKey } = useFetchGpgKey();
 
   const { distribution_arches: distArches = [], distribution_versions: distVersions = [] } =
-    queryClient.getQueryData<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY) || {};
+    queryClient.getQueryData<RepositoryParamsResponse>([REPOSITORY_PARAMS_KEY]) || {};
 
   const { distributionArches, distributionVersions } = useMemo(() => {
     const distributionArches = {};
@@ -172,7 +172,7 @@ const AddContent = ({ isEdit = false }: Props) => {
     }
   };
 
-  const { mutateAsync: addContent, isLoading: isAdding } = useAddContentQuery([
+  const { mutateAsync: addContent, isPending: isAdding } = useAddContentQuery([
     mapFormikToAPIValues(values),
   ]);
 
@@ -213,7 +213,7 @@ const AddContent = ({ isEdit = false }: Props) => {
   const {
     mutateAsync: validateContent,
     data: validationList,
-    isLoading: isValidating,
+    isPending: isValidating,
   } = useValidateContentList();
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import '@redhat-cloud-services/frontend-components-utilities/styles/_all';
 import 'react18-json-view/src/style.css';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
-import { NotificationsProvider } from '@redhat-cloud-services/frontend-components-notifications';
+
 import { Bullseye, Spinner } from '@patternfly/react-core';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -67,9 +67,9 @@ export default function App() {
   }
 
   return (
-    <NotificationsProvider>
+    <>
       <div data-ouia-safe={pageSafe} />
       <Routes />
-    </NotificationsProvider>
+    </>
   );
 }
