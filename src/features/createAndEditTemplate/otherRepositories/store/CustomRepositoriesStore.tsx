@@ -1,173 +1,137 @@
-import { ThProps } from '@patternfly/react-table';
 import { OtherUUID } from 'features/createAndEditTemplate/shared/types/types';
+import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
+import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import { useToggleOtherRepository } from '../core/use-cases/toggleOtherRepository';
 import {
-  useTemplateRequestApi,
-  useTemplateRequestState,
-} from 'features/createAndEditTemplate/workflow/store/TemplateStore';
-import useDebounce from 'Hooks/useDebounce';
-import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
-import { useHref } from 'react-router-dom';
-import { ContentList, ContentOrigin } from 'services/Content/ContentApi';
-import { useContentListQuery } from 'services/Content/ContentQueries';
+  CustomRepositoriesApiType,
+  CustomRepositoriesStateType,
+  DerivedStateType,
+  initialApi,
+  initialDerived,
+  initialPagination,
+  initialSort,
+  initialState,
+  PaginationType,
+  SortTableType,
+} from './typing';
+import { useSortRepositoriesList } from '../ui/useSortRepositoriesTable';
+import { useGetOtherRepositories } from '../api/useGetOtherRepositories';
+import { useRefreshRepositories } from '../core/use-cases/refreshRepositories';
 
 export type ToggleOtherRepository = (uuid: OtherUUID) => void;
 
-type CustomRepositoriesApiType = {
-  pathname: string;
-  contentList: ContentList;
-  page: number;
-  perPage: number;
-  count: number;
-  isLoading: boolean;
-  isFetching: boolean;
-  columnHeaders: string[];
-  countIsZero: boolean;
-  showLoader: boolean;
-  searchQuery: string;
-  toggled: boolean;
-  noOtherReposSelected: boolean;
-  onSetPage: (_, newPage: number) => void;
-  onPerPageSelect: (_, newPerPage: number, newPage: number) => void;
-  sortParams: (columnIndex: number) => ThProps['sort'];
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  toggleSelected: ToggleOtherRepository;
-  setToggled: (is: boolean) => void;
-  isInOtherUUIDs: (uuid: OtherUUID) => boolean;
-};
-
-const initialData = {
-  pathname: '',
-  contentList: [],
-  page: 1,
-  perPage: 20,
-  count: 0,
-  isLoading: false,
-  isFetching: false,
-  columnHeaders: ['Name', 'Status', 'Packages'],
-  countIsZero: false,
-  showLoader: true,
-  searchQuery: '',
-  toggled: false,
-  noOtherReposSelected: true,
-  onSetPage: () => {},
-  onPerPageSelect: () => {},
-  sortParams: () => undefined,
-  setSearchQuery: () => {},
-  toggleSelected: () => {},
-  setToggled: () => {},
-  isInOtherUUIDs: () => false,
-};
-
-const CustomRepositoriesApi = createContext<CustomRepositoriesApiType>(initialData);
+const CustomRepositoriesApi = createContext<CustomRepositoriesApiType>(initialApi);
 export const useCustomRepositoriesApi = () => useContext(CustomRepositoriesApi);
+
+const CustomRepositoriesState = createContext<CustomRepositoriesStateType>(initialState);
+export const useCustomRepositoriesState = () => useContext(CustomRepositoriesState);
+
+const DerivedState = createContext<DerivedStateType>(initialDerived);
+export const useDerivedState = () => useContext(DerivedState);
+
+const Pagination = createContext<PaginationType>(initialPagination);
+export const usePagination = () => useContext(Pagination);
+
+const Sort = createContext<SortTableType>(initialSort);
+export const useSort = () => useContext(Sort);
 
 type CustomRepositoriesStoreType = {
   children: ReactNode;
 };
 export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreType) => {
-  const path = useHref('content');
-  const pathname = path.split('content')[0] + 'content';
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+  const [isSelectedFiltered, setIsSelectedFiltered] = useState(false);
+  const [filterQuery, setFilterQuery] = useState('');
+  const { sortedBy, setSortProps } = useSortRepositoriesList();
 
-  const { setOtherUUIDs } = useTemplateRequestApi();
-  const { selectedArchitecture, selectedOSVersion, otherUUIDs } = useTemplateRequestState();
+  const { hardcodedUUIDs, otherUUIDs } = useTemplateRequestState();
 
-  const [toggled, setToggled] = useState(false);
+  const toggleSelected = useToggleOtherRepository();
+  const refetchOtherRepositories = useRefreshRepositories();
 
-  const toggleSelected = useCallback((clickedUuid: string) => {
-    setOtherUUIDs((previous) => {
-      const isInPrevious = previous.includes(clickedUuid);
-      if (isInPrevious) {
-        return previous.filter((uuid) => uuid !== clickedUuid);
-      } else {
-        return [...previous, clickedUuid];
-      }
-    });
+  // enable only after hardcodedUUIDs are set in top level state
+  const enableQuery = useMemo(() => hardcodedUUIDs!.length !== 0, [hardcodedUUIDs]);
+  // refetch or read on every passed-in parameter state change
+  const { isLoading, isFetching, repositories } = useGetOtherRepositories({
+    page,
+    perPage,
+    sortedBy,
+    filterQuery,
+    isSelectedFiltered,
+    isEnabled: enableQuery,
+  });
+  const {
+    data: repositoriesList,
+    meta: { count },
+  } = repositories;
+
+  // api
+  const customReposApi = useMemo(() => {
+    const turnPage = (newPage: number) => setPage(newPage);
+    const setPagination = (newPerPage: number, newPage: number) => {
+      setPerPage(newPerPage);
+      setPage(newPage);
+    };
+    const filterSelected = (filter) => setIsSelectedFiltered(filter);
+    const filterByName = (value) => setFilterQuery(value);
+    const clearFilterByName = () => setFilterQuery('');
+
+    return {
+      turnPage,
+      setPagination,
+      toggleSelected,
+      filterByName,
+      clearFilterByName,
+      filterSelected,
+      refetchOtherRepositories,
+    };
   }, []);
 
-  const storedPerPage = Number(20);
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearch = useDebounce(searchQuery);
-
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(storedPerPage);
-  const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
-  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
-
-  const onSetPage = (_, newPage: number) => setPage(newPage);
-  const onPerPageSelect = (_, newPerPage: number, newPage: number) => {
-    setPerPage(newPerPage);
-    setPage(newPage);
-  };
-
-  const columnHeaders = ['Name', 'Status', 'Packages'];
-
-  const columnSortAttributes = ['name', 'status', 'package_count'];
-
-  const sortString = (): string =>
-    columnSortAttributes[activeSortIndex] + ':' + activeSortDirection;
-
-  const sortParams = (columnIndex: number): ThProps['sort'] => ({
-    sortBy: {
-      index: activeSortIndex,
-      direction: activeSortDirection,
-      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
-    },
-    onSort: (_event, index, direction) => {
-      setActiveSortIndex(index);
-      setActiveSortDirection(direction);
-    },
-    columnIndex,
-  });
-
-  const {
-    isLoading,
-    isFetching,
-    data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useContentListQuery(
-    page,
-    perPage,
-    {
-      search: searchQuery === '' ? searchQuery : debouncedSearch,
-      availableForArch: selectedArchitecture!,
-      availableForVersion: selectedOSVersion!,
-      uuids: toggled ? [...otherUUIDs!] : undefined,
-    },
-    sortString(),
-    [ContentOrigin.CUSTOM, ContentOrigin.COMMUNITY],
+  // state
+  const reposState = useMemo(
+    () => ({
+      isLoading,
+      isFetching,
+      count,
+      isSelectedFiltered,
+      filterQuery,
+      repositoriesList,
+    }),
+    [
+      isLoading,
+      isFetching,
+      isSelectedFiltered,
+      filterQuery,
+      repositoriesList.map(({ uuid }) => uuid).join('-'),
+      count,
+    ],
   );
+  const paginationState = useMemo(() => ({ page, perPage }), [page, perPage]);
+  const sortingProps = useMemo(() => ({ setSortProps }), [setSortProps]);
 
-  const {
-    data: contentList = [],
-    meta: { count = 0 },
-  } = data;
-  const countIsZero = count === 0;
-  const showLoader = countIsZero && !isLoading;
-  const isInOtherUUIDs = (uuid) => otherUUIDs!.includes(uuid);
-  const noOtherReposSelected = otherUUIDs!.length === 0;
+  // derived state
+  const derivedState = useMemo(() => {
+    const areOtherReposToSelect = repositoriesList.length - otherUUIDs!.length > 0;
+    const noOtherReposSelected = otherUUIDs!.length === 0;
+    const isInOtherUUIDs = (uuid) => otherUUIDs!.includes(uuid);
+    return {
+      areOtherReposToSelect,
+      isSelectedFiltered,
+      noOtherReposSelected,
+      isInOtherUUIDs,
+    };
+  }, [otherUUIDs, repositoriesList.map(({ uuid }) => uuid).join('-'), count]);
 
-  const api = {
-    pathname,
-    page,
-    perPage,
-    count,
-    isLoading,
-    isFetching,
-    contentList,
-    columnHeaders,
-    countIsZero,
-    showLoader,
-    searchQuery,
-    toggled,
-    onSetPage,
-    onPerPageSelect,
-    sortParams,
-    setSearchQuery,
-    toggleSelected,
-    setToggled,
-    isInOtherUUIDs,
-    noOtherReposSelected,
-  };
-
-  return <CustomRepositoriesApi.Provider value={api}>{children}</CustomRepositoriesApi.Provider>;
+  return (
+    <CustomRepositoriesApi.Provider value={customReposApi}>
+      <CustomRepositoriesState.Provider value={reposState}>
+        <DerivedState.Provider value={derivedState}>
+          <Pagination.Provider value={paginationState}>
+            <Sort.Provider value={sortingProps}>{children}</Sort.Provider>
+          </Pagination.Provider>
+        </DerivedState.Provider>
+      </CustomRepositoriesState.Provider>
+    </CustomRepositoriesApi.Provider>
+  );
 };

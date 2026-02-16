@@ -1,32 +1,23 @@
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
-import Hide from 'components/Hide/Hide';
 import PackageCount from 'components/PackageCount/PackageCount';
-import CommunityRepositoryLabel from 'components/RepositoryLabels/CommunityRepositoryLabel';
-import CustomEpelWarning from 'components/RepositoryLabels/CustomEpelWarning';
-import UploadRepositoryLabel from 'components/RepositoryLabels/UploadRepositoryLabel';
 import StatusIcon from 'components/StatusIcon/StatusIcon';
 import TdWithTooltip from 'components/TdWithTooltip/TdWithTooltip';
-import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
-import { isEPELUrl, reduceStringToCharsWithEllipsis } from 'helpers';
-import { useAppContext } from 'middleware/AppContext';
+import { isEPELUrl } from 'helpers';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
-import { ContentItem, ContentOrigin } from 'services/Content/ContentApi';
-import { useCustomRepositoriesApi } from '../../../../createAndEditTemplate/otherRepositories/store/CustomRepositoriesStore';
+import { ContentOrigin } from 'services/Content/ContentApi';
+import {
+  useCustomRepositoriesApi,
+  useCustomRepositoriesState,
+  useDerivedState,
+  useSort,
+} from '../../store/CustomRepositoriesStore';
+import { COLUMN_HEADERS } from '../../core/domain/constants';
+import { FullRepository } from 'features/createAndEditTemplate/shared/types/types.repository';
+import { useHref } from 'react-router-dom';
+import { RepositoryName } from './CustomRepositoryName';
 
 export const CustomRepositoriesTable = () => {
-  const { columnHeaders, contentList, sortParams, isInOtherUUIDs, pathname, toggleSelected } =
-    useCustomRepositoriesApi();
-
-  const { features } = useAppContext();
-
-  const isEPELRepository = (repo: ContentItem): boolean => {
-    if (repo.origin === ContentOrigin.COMMUNITY) {
-      return true;
-    }
-
-    return isEPELUrl(repo.url);
-  };
+  const { repositoriesList } = useCustomRepositoriesState();
 
   return (
     <Table
@@ -34,86 +25,100 @@ export const CustomRepositoriesTable = () => {
       ouiaId='custom_repositories_table'
       variant='compact'
     >
-      <Thead>
-        <Tr>
-          <Th screenReaderText='empty' />
-          {columnHeaders.map((columnHeader, index) => (
-            <Th
-              width={index === 0 ? 50 : undefined}
-              key={columnHeader + 'column'}
-              sort={sortParams(index)}
-            >
-              {columnHeader}
-            </Th>
-          ))}
-        </Tr>
-      </Thead>
+      <CustomRepositoriesTableHeader />
       <Tbody>
-        {contentList.map((rowData: ContentItem, rowIndex) => {
-          const { uuid, name, url, origin } = rowData;
-
-          const isAnyEPELRepoSelected = isInOtherUUIDs(uuid) && isEPELRepository(rowData);
-          const shouldDisableOtherEPEL =
-            isEPELRepository(rowData) && isAnyEPELRepoSelected && !isInOtherUUIDs(rowData.uuid);
-          const noSnapshotAvailable = !(rowData.snapshot && rowData.last_snapshot_uuid);
-
-          return (
-            <Tr key={uuid}>
-              <TdWithTooltip
-                show={!(rowData.snapshot && rowData.last_snapshot_uuid)}
-                tooltipProps={{
-                  content: 'Snapshot not yet available for this repository',
-                }}
-                select={{
-                  rowIndex,
-                  onSelect: () => toggleSelected(uuid),
-                  isSelected: isInOtherUUIDs(uuid),
-                  isDisabled: noSnapshotAvailable || shouldDisableOtherEPEL,
-                }}
-              />
-              <Td>
-                <ConditionalTooltip show={name.length > 60} content={name}>
-                  <>
-                    {reduceStringToCharsWithEllipsis(name, 60)}
-                    <Hide hide={origin !== ContentOrigin.UPLOAD}>
-                      <UploadRepositoryLabel />
-                    </Hide>
-                    <Hide hide={origin !== ContentOrigin.COMMUNITY}>
-                      <CommunityRepositoryLabel />
-                    </Hide>
-                    <Hide
-                      hide={
-                        !(origin == ContentOrigin.EXTERNAL && isEPELUrl(url)) ||
-                        !features?.communityrepos?.enabled
-                      }
-                    >
-                      <CustomEpelWarning />
-                    </Hide>
-                  </>
-                </ConditionalTooltip>
-                <Hide hide={origin === ContentOrigin.UPLOAD}>
-                  <ConditionalTooltip show={url.length > 50} content={url}>
-                    <UrlWithExternalIcon
-                      href={url}
-                      customText={reduceStringToCharsWithEllipsis(url)}
-                    />
-                  </ConditionalTooltip>
-                </Hide>
-              </Td>
-              <Td>
-                <StatusIcon rowData={rowData} />
-              </Td>
-              <Td>
-                <PackageCount
-                  rowData={rowData}
-                  href={pathname + '/' + REPOSITORIES_ROUTE + `/${rowData.uuid}/packages`}
-                  opensNewTab
-                />
-              </Td>
-            </Tr>
-          );
-        })}
+        {repositoriesList.map((repository: FullRepository, rowIndex) => (
+          <Tr key={repository.uuid}>
+            <Checkbox rowData={repository} rowIndex={rowIndex} />
+            <RepositoryName rowData={repository} />
+            <Status rowData={repository} />
+            <Packages rowData={repository} />
+          </Tr>
+        ))}
       </Tbody>
     </Table>
+  );
+};
+
+const CustomRepositoriesTableHeader = () => {
+  const { setSortProps } = useSort();
+
+  return (
+    <Thead>
+      <Tr>
+        <Th screenReaderText='empty' />
+        {COLUMN_HEADERS.map((header, index) => (
+          <Th
+            width={index === 0 ? 50 : undefined}
+            key={header + 'column'}
+            sort={setSortProps(index)}
+          >
+            {header}
+          </Th>
+        ))}
+      </Tr>
+    </Thead>
+  );
+};
+
+type CheckboxProps = {
+  rowData: FullRepository;
+  rowIndex: number;
+};
+
+const Checkbox = ({ rowData, rowIndex }: CheckboxProps) => {
+  const { toggleSelected } = useCustomRepositoriesApi();
+  const { isInOtherUUIDs } = useDerivedState();
+
+  const isEPELRepository = (repo: FullRepository): boolean => {
+    if (repo.origin === ContentOrigin.COMMUNITY) {
+      return true;
+    }
+    return isEPELUrl(repo.url);
+  };
+  const isAnyEPELRepoSelected = isInOtherUUIDs(rowData.uuid) && isEPELRepository(rowData);
+  const shouldDisableOtherEPEL =
+    isEPELRepository(rowData) && isAnyEPELRepoSelected && !isInOtherUUIDs(rowData.uuid);
+  const noSnapshotAvailable = !(rowData.snapshot && rowData.last_snapshot_uuid);
+
+  return (
+    <TdWithTooltip
+      show={noSnapshotAvailable}
+      tooltipProps={{
+        content: 'Snapshot not yet available for this repository',
+      }}
+      select={{
+        rowIndex,
+        onSelect: () => toggleSelected(rowData.uuid),
+        isSelected: isInOtherUUIDs(rowData.uuid),
+        isDisabled: noSnapshotAvailable || shouldDisableOtherEPEL,
+      }}
+    />
+  );
+};
+
+type StatusProps = {
+  rowData: FullRepository;
+};
+
+const Status = ({ rowData }: StatusProps) => (
+  <Td>
+    <StatusIcon rowData={rowData} />
+  </Td>
+);
+
+type PackagesProps = {
+  rowData: FullRepository;
+};
+
+const Packages = ({ rowData }: PackagesProps) => {
+  const path = useHref('content');
+  const pathname = path.split('content')[0] + 'content';
+  const href = pathname + '/' + REPOSITORIES_ROUTE + `/${rowData.uuid}/packages`;
+
+  return (
+    <Td>
+      <PackageCount rowData={rowData} href={href} opensNewTab />
+    </Td>
   );
 };
