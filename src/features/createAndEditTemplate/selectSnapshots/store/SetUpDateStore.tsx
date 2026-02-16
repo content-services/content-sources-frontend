@@ -6,104 +6,130 @@ import {
   useTemplateRequestApi,
   useTemplateRequestState,
 } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
-import { formatTemplateDate, isDateValid } from 'helpers';
-import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo } from 'react';
-import { ContentListResponse, ContentOrigin } from 'services/Content/ContentApi';
-import { useContentListQuery, useGetSnapshotsByDates } from 'services/Content/ContentQueries';
+import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import { useValidateDependencies } from '../core/use-cases/validateDependencies';
+import { SnapshotNotification } from '../core/types';
+import { RepositoryName } from 'features/createAndEditTemplate/shared/types/types.repository';
+import { isDateValid } from 'helpers';
 
 type SetUpDateApiType = {
-  isLoading: boolean;
-  contentData: Partial<ContentListResponse>;
-  hasIsAfter: boolean;
-  dateIsValid: boolean;
-  isLatestSnapshot: UseLatestSnapshot;
-  snapshotDate: UseSnapshotDate;
   toggleLatestSnapshot: (useLatest: UseLatestSnapshot) => void;
   chooseSnapshotDate: (date: UseSnapshotDate) => void;
 };
 
-const initialData = {
-  isLoading: false,
-  contentData: {
-    data: [],
-    meta: { count: 0, limit: 20, offset: 0 },
-  },
-  hasIsAfter: false,
-  dateIsValid: false,
-  snapshotDate: '',
-  isLatestSnapshot: false,
+type SetUpDateStateType = {
+  isLatestSnapshot: UseLatestSnapshot;
+  snapshotDate: UseSnapshotDate;
+};
+
+type NotficationStateType = {
+  repositoryNames: RepositoryName[];
+  isNoIssues: boolean;
+  isFetching: boolean;
+  isHidden: boolean;
+  isAlert: boolean;
+};
+
+const initialApi = {
   toggleLatestSnapshot: () => {},
   chooseSnapshotDate: () => {},
 };
 
-const SetUpDateApi = createContext<SetUpDateApiType>(initialData);
+const initialState = {
+  snapshotDate: '',
+  isLatestSnapshot: false,
+};
+
+const initialNotifications = {
+  repositoryNames: [],
+  isHidden: true,
+  isNoIssues: false,
+  isFetching: false,
+  isAlert: false,
+};
+
+const SetUpDateApi = createContext<SetUpDateApiType>(initialApi);
 export const useSetUpDateApi = () => useContext(SetUpDateApi);
+
+const SetUpDateState = createContext<SetUpDateStateType>(initialState);
+export const useSetUpDateState = () => useContext(SetUpDateState);
+
+const DependencyNotficationState = createContext<NotficationStateType>(initialNotifications);
+export const useDependencyNotificationState = () => useContext(DependencyNotficationState);
 
 type SetUpDateStoreType = {
   children: ReactNode;
 };
 
 export const SetUpDateStore = ({ children }: SetUpDateStoreType) => {
+  const [notification, setNotification] = useState<SnapshotNotification>('hidden');
+  const [repositoryNames, setRepositoryNames] = useState([]);
+
   const { setSnapshotDate, setIsLatestSnapshot } = useTemplateRequestApi();
   const { hardcodedUUIDs, additionalUUIDs, otherUUIDs, snapshotDate, isLatestSnapshot } =
     useTemplateRequestState();
 
-  const toggleLatestSnapshot = useCallback((useLatest) => {
-    setIsLatestSnapshot(useLatest);
-    setSnapshotDate('');
-  }, []);
+  const validateDependencies = useValidateDependencies({
+    saveNotification: setNotification,
+    saveRepositoryNames: setRepositoryNames,
+  });
 
-  const chooseSnapshotDate = useCallback((val) => {
-    const isValid = isDateValid(val);
-    if (isValid) {
-      setSnapshotDate(val);
-    } else {
+  // snapshot api
+  const snapshotApi = useMemo(() => {
+    const toggleLatestSnapshot = (useLatest) => {
+      setIsLatestSnapshot(useLatest);
       setSnapshotDate('');
-    }
+    };
+
+    const chooseSnapshotDate = (val) => {
+      const isValid = isDateValid(val);
+      if (isValid) {
+        setSnapshotDate(val);
+      } else {
+        setSnapshotDate('');
+      }
+    };
+
+    return { toggleLatestSnapshot, chooseSnapshotDate };
   }, []);
 
-  const { data, mutateAsync } = useGetSnapshotsByDates(
-    [...hardcodedUUIDs!, ...additionalUUIDs!, ...otherUUIDs!],
-    formatTemplateDate(snapshotDate!),
-  );
-
-  const dateIsValid = useMemo(() => isDateValid(snapshotDate || ''), [snapshotDate]);
-
-  useEffect(() => {
+  // automatically trigger snapshot dependencies validation
+  useMemo(() => {
     const allUUIDs = [...otherUUIDs!, ...additionalUUIDs!, ...hardcodedUUIDs!];
-    if (snapshotDate && dateIsValid && allUUIDs.length) {
-      mutateAsync();
+    const shouldValidateSnapshots = snapshotDate !== '' && allUUIDs.length !== 0;
+    if (shouldValidateSnapshots) {
+      validateDependencies(snapshotDate!, allUUIDs);
     }
-  }, [hardcodedUUIDs, additionalUUIDs, otherUUIDs, snapshotDate]);
+  }, [snapshotDate!, otherUUIDs, additionalUUIDs, hardcodedUUIDs]);
 
-  const itemsAfterDate = useMemo(
-    () => data?.data?.filter(({ is_after }) => is_after) || [],
-    [data?.data],
+  // if arch or osversion changed, reset previous notification
+  useMemo(() => {
+    if (snapshotDate === '' && isLatestSnapshot === false) {
+      setNotification('hidden');
+      setRepositoryNames([]);
+    }
+  }, [snapshotDate, isLatestSnapshot]);
+
+  const snapshotsState = useMemo(
+    () => ({ snapshotDate: snapshotDate!, isLatestSnapshot: isLatestSnapshot! }),
+    [snapshotDate, isLatestSnapshot],
   );
 
-  const hasIsAfter = itemsAfterDate.length > 0;
+  const notificationState = useMemo(() => {
+    const isHidden = notification === 'hidden';
+    const isFetching = notification === 'fetching';
+    const isNoIssues = notification === 'no issues';
+    const isAlert = notification === 'alert';
+    return { repositoryNames, isNoIssues, isFetching, isHidden, isAlert };
+  }, [notification, repositoryNames]);
 
-  const { isLoading, data: contentData = { data: [], meta: { count: 0, limit: 20, offset: 0 } } } =
-    useContentListQuery(
-      1,
-      100,
-      {
-        uuids: itemsAfterDate.map(({ repository_uuid }) => repository_uuid),
-      },
-      '',
-      [ContentOrigin.ALL],
-    );
-
-  const api = {
-    snapshotDate: snapshotDate!,
-    isLatestSnapshot: isLatestSnapshot!,
-    isLoading,
-    contentData,
-    hasIsAfter,
-    dateIsValid,
-    chooseSnapshotDate,
-    toggleLatestSnapshot,
-  };
-
-  return <SetUpDateApi.Provider value={api}>{children}</SetUpDateApi.Provider>;
+  return (
+    <SetUpDateApi.Provider value={snapshotApi}>
+      <SetUpDateState.Provider value={snapshotsState}>
+        <DependencyNotficationState.Provider value={notificationState}>
+          {children}
+        </DependencyNotficationState.Provider>
+      </SetUpDateState.Provider>
+    </SetUpDateApi.Provider>
+  );
 };
