@@ -1,14 +1,21 @@
 import { Bullseye } from '@patternfly/react-core';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
-import { useRedhatRepositoriesApi } from '../../../../createAndEditTemplate/redhatRepositories/store/RedhatRepositoriesStore';
+import {
+  useRedhatRepositoriesApi,
+  useRedhatRepositoriesState,
+} from '../../store/RedhatRepositoriesStore';
 
 export const EmptyTable = () => {
-  const { searchQuery, setSearchQuery } = useRedhatRepositoriesApi();
+  const { filterQuery } = useRedhatRepositoriesState();
+  const { clearFilterByName } = useRedhatRepositoriesApi();
+
+  const isNoFilterSet = filterQuery === '';
+
   return (
     <Bullseye data-ouia-component-id='redhat_repositories_table'>
       <EmptyTableState
-        notFiltered={searchQuery === ''}
-        clearFilters={() => setSearchQuery('')}
+        notFiltered={isNoFilterSet}
+        clearFilters={clearFilterByName}
         itemName='Red Hat repositories'
         notFilteredBody='No Red Hat repositories match the version and arch'
       />

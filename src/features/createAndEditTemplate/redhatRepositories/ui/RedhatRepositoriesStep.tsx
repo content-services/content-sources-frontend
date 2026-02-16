@@ -1,6 +1,5 @@
 import { Grid } from '@patternfly/react-core';
-import Hide from 'components/Hide/Hide';
-import { useRedhatRepositoriesApi } from '../store/RedhatRepositoriesStore';
+import { useRedhatRepositoriesState } from '../store/RedhatRepositoriesStore';
 import { RedhatRepositoriesTable } from './components/RedhatRepositoriesTable';
 import { TableHeading } from './components/TableHeading';
 import { TableBottomPagination, TableControls } from './components/TableControls';
@@ -9,29 +8,36 @@ import { TableLoadingSkeleton } from './components/TableLoadingSkeleton';
 import { EmptyTable } from './components/EmptyTable';
 
 export default function RedhatRepositoriesStep() {
-  const { countIsZero, searchQuery, isLoading, showLoader } = useRedhatRepositoriesApi();
+  const { isLoading, count } = useRedhatRepositoriesState();
+
+  const noRepositories = count === 0;
+  const isEmpty = noRepositories && !isLoading;
+
+  if (isLoading) {
+    return (
+      <Grid hasGutter>
+        <TableHeading />
+        <TableLoadingSkeleton />
+      </Grid>
+    );
+  }
+
+  if (isEmpty) {
+    return (
+      <Grid hasGutter>
+        <TableHeading />
+        <TableControls />
+        <EmptyTable />
+      </Grid>
+    );
+  }
 
   return (
     <Grid hasGutter>
       <TableHeading />
-      <Hide hide={(countIsZero && !searchQuery) || isLoading}>
-        <TableControls />
-      </Hide>
-      {showLoader ? (
-        <EmptyTable />
-      ) : (
-        <>
-          <Hide hide={!isLoading}>
-            <TableLoadingSkeleton />
-          </Hide>
-          <Hide hide={countIsZero || isLoading}>
-            <RedhatRepositoriesTable />
-            <Hide hide={countIsZero}>
-              <TableBottomPagination />
-            </Hide>
-          </Hide>
-        </>
-      )}
+      <TableControls />
+      <RedhatRepositoriesTable />
+      <TableBottomPagination />
     </Grid>
   );
 }

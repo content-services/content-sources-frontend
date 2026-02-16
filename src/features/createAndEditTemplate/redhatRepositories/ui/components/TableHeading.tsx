@@ -1,8 +1,8 @@
 import { Content, ContentVariants, Flex, Title } from '@patternfly/react-core';
-import { useRedhatRepositoriesApi } from '../../../../createAndEditTemplate/redhatRepositories/store/RedhatRepositoriesStore';
+import { useDerivedState } from '../../store/RedhatRepositoriesStore';
 
 export const TableHeading = () => {
-  const { additionalReposAvailableToSelect } = useRedhatRepositoriesApi();
+  const { areReposAvailableToSelect } = useDerivedState();
   return (
     <>
       <Flex
@@ -15,9 +15,7 @@ export const TableHeading = () => {
       </Flex>
       <Flex direction={{ default: 'row' }}>
         <Content component={ContentVariants.p}>
-          {additionalReposAvailableToSelect
-            ? 'You can select additional Red Hat repositories. '
-            : ''}
+          {areReposAvailableToSelect ? 'You can select additional Red Hat repositories. ' : ''}
           Core repositories of your OS version have been added.
         </Content>
       </Flex>
