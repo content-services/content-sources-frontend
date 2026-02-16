@@ -1,31 +1,31 @@
 import { Content, ExpandableSection, Flex } from '@patternfly/react-core';
-import { useReviewTemplateApi } from '../../../../createAndEditTemplate/reviewTemplateRequest/store/ReviewTemplateStore';
+import { useFormatTemplateReview } from '../../core/use-cases/formatTemplateReview';
+import { TemplateReviewKey } from '../../core/types';
 
 export const ReviewTemplateContent = () => {
-  const { reviewTemplate, setToggle, expanded } = useReviewTemplateApi();
+  const templateReview = useFormatTemplateReview();
 
   return (
     <>
-      {Object.keys(reviewTemplate).map((key, index) => (
+      {(Object.keys(templateReview) as TemplateReviewKey[]).map((key, index) => (
         <ExpandableSection
           key={key}
           isIndented
           toggleText={key}
-          onToggle={() => setToggle(index)}
-          isExpanded={expanded.has(index)}
+          isExpanded={true}
           aria-label={`${key}-expansion`}
           data-ouia-component-id={`${key}_expansion`}
         >
           <Flex direction={{ default: 'row' }}>
             <Flex direction={{ default: 'column' }}>
-              {Object.keys(reviewTemplate[key]).map((title) => (
+              {Object.keys(templateReview[key]).map((title) => (
                 <Content component='p' key={title + '' + index}>
                   {title}
                 </Content>
               ))}
             </Flex>
             <Flex direction={{ default: 'column' }}>
-              {Object.values(reviewTemplate[key]).map((value, index) => (
+              {Object.values(templateReview[key]).map((value, index) => (
                 <Content component='p' key={value + '' + index}>
                   {value}
                 </Content>

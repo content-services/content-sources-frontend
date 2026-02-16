@@ -22,7 +22,6 @@ import { DefineContentStore } from 'features/createAndEditTemplate/defineContent
 import { RedhatRepositoriesStore } from 'features/createAndEditTemplate/redhatRepositories/store/RedhatRepositoriesStore';
 import { CustomRepositoriesStore } from 'features/createAndEditTemplate/otherRepositories/store/CustomRepositoriesStore';
 import { SetUpDateStore } from 'features/createAndEditTemplate/selectSnapshots/store/SetUpDateStore';
-import { ReviewTemplateStore } from 'features/createAndEditTemplate/reviewTemplateRequest/store/ReviewTemplateStore';
 import {
   EditTemplateStore,
   useEditTemplateState,
@@ -180,9 +179,7 @@ export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
           <RedhatRepositoriesStore>
             <CustomRepositoriesStore>
               <SetUpDateStore>
-                <ReviewTemplateStore>
-                  <TemplateModalBase {...templateProps} />
-                </ReviewTemplateStore>
+                <TemplateModalBase {...templateProps} />
               </SetUpDateStore>
             </CustomRepositoriesStore>
           </RedhatRepositoriesStore>
