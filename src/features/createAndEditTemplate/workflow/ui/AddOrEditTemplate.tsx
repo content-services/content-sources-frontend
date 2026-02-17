@@ -24,6 +24,7 @@ import { useInitialStep, WizardUrlSync } from '../core/chooseStep';
 import { DefineContentStore } from 'features/createAndEditTemplate/defineContent/store/DefineContentStore';
 import { RedhatRepositoriesStore } from 'features/createAndEditTemplate/redhatRepositories/store/RedhatRepositoriesStore';
 import { CustomRepositoriesStore } from 'features/createAndEditTemplate/otherRepositories/store/CustomRepositoriesStore';
+import { SetUpDateStore } from 'features/createAndEditTemplate/selectSnapshots/store/SetUpDateStore';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -173,7 +174,9 @@ export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
       <DefineContentStore>
         <RedhatRepositoriesStore>
           <CustomRepositoriesStore>
-            <AddOrEditTemplateBase {...templateProps} />
+            <SetUpDateStore>
+              <AddOrEditTemplateBase {...templateProps} />
+            </SetUpDateStore>
           </CustomRepositoriesStore>
         </RedhatRepositoriesStore>
       </DefineContentStore>
