@@ -89,7 +89,7 @@ export const useTemplateRequestState = () => useContext(TemplateRequestState);
 const TemplateRequestDerivedState = createContext<TemplateRequestDerivedState>(initialDerived);
 export const useTemplateRequestDerivedState = () => useContext(TemplateRequestDerivedState);
 
-export const AddTemplateContextProvider = ({ children }: { children: ReactNode }) => {
+export const TemplateStore = ({ children }: { children: ReactNode }) => {
   const [selectedArchitecture, setArchitecture] =
     useState<FirstEmpty<AllowedArchitecture>>(undefined);
   const [selectedOSVersion, setOSVersion] = useState<FirstEmpty<AllowedOSVersion>>(undefined);

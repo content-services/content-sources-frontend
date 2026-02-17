@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import { isHardcodedRepoFactory, isNullDate, isRedhatRepo } from './templateRepositories';
 import { useFetchTemplateRepositories } from '../../../createAndEditTemplate/editTemplate/api/fetchTemplateRepos';
-import { useTemplateRequestApi } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import { useTemplateRequestApi } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import { formatDateForPicker } from 'helpers';
 
 export const useInitializeEditTemplateState = () => {

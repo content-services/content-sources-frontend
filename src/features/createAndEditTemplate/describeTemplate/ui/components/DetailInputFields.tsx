@@ -3,7 +3,7 @@ import CustomHelperText from 'components/CustomHelperText/CustomHelperText';
 import {
   useTemplateRequestApi,
   useTemplateRequestState,
-} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+} from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import { useState } from 'react';
 import { TemplateValidationSchema } from '../../core/helpers';
 

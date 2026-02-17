@@ -3,7 +3,7 @@ import { OtherUUID } from 'features/createAndEditTemplate/shared/types/types';
 import {
   useTemplateRequestApi,
   useTemplateRequestState,
-} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+} from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import useDebounce from 'Hooks/useDebounce';
 import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
 import { useHref } from 'react-router-dom';

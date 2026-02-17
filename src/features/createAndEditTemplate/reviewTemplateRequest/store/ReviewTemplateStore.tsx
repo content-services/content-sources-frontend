@@ -1,4 +1,4 @@
-import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import { formatDateDDMMMYYYY } from 'helpers';
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 

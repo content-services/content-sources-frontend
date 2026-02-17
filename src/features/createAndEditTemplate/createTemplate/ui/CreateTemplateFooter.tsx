@@ -1,6 +1,6 @@
 import { useCreateTemplateQuery } from 'services/Templates/TemplateQueries';
 import { AddNavigateButton } from './AddNavigateButton';
-import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import { useQueryClient } from 'react-query';
 import { createTemplateRequest } from '../core/createTemplateRequest';
 import { checkTemplateRequestIsFinalized } from 'features/createAndEditTemplate/shared/core/checkTemplateRequestIsFinalized';
