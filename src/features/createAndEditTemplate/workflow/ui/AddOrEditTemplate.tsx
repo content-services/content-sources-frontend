@@ -7,16 +7,14 @@ import {
   WizardHeader,
   WizardStep,
 } from '@patternfly/react-core';
-
 import { useSearchParams } from 'react-router-dom';
 import { AddTemplateContextProvider, useAddTemplateContext } from '../store/AddTemplateContext';
-import RedhatRepositoriesStep from '../../redhatRepositories/ui/RedhatRepositoriesStep';
-import CustomRepositoriesStep from '../../otherRepositories/ui/CustomRepositoriesStep';
-
-import DefineContentStep from '../../defineContent/ui/DefineContentStep';
-import SetUpDateStep from '../../selectSnapshots/ui/SetUpDateStep';
-import DetailStep from '../../describeTemplate/ui/DetailStep';
-import ReviewStep from '../../reviewTemplateRequest/ui/ReviewStep';
+import RedhatRepositoriesStep from 'features/createAndEditTemplate/redhatRepositories/ui/RedhatRepositoriesStep';
+import CustomRepositoriesStep from 'features/createAndEditTemplate/otherRepositories/ui/CustomRepositoriesStep';
+import DefineContentStep from 'features/createAndEditTemplate/defineContent/ui/DefineContentStep';
+import SetUpDateStep from 'features/createAndEditTemplate/selectSnapshots/ui/SetUpDateStep';
+import DetailStep from 'features/createAndEditTemplate/describeTemplate/ui/DetailStep';
+import ReviewStep from 'features/createAndEditTemplate/reviewTemplateRequest/ui/ReviewStep';
 import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
 import { useOnCancelModal } from '../core/cancelModal';
@@ -55,18 +53,13 @@ type TemplateBaseProps = {
   footer: (cancelModal: () => void) => React.JSX.Element;
 };
 
-const AddOrEditTemplateBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBaseProps) => {
+const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBaseProps) => {
   const classes = useStyles();
   const [, setUrlSearchParams] = useSearchParams();
-
-  const { isEdit, templateRequest, checkIfCurrentStepValid, editUUID } = useAddTemplateContext();
+  const { isEdit, templateRequest, checkIfCurrentStepValid } = useAddTemplateContext();
 
   const initialIndex = useInitialStep();
   const onCancel = useOnCancelModal();
-
-  // useSafeUUIDParam in AddTemplateContext already validates the UUID
-  // If in edit mode and UUID is invalid, it will be an empty string
-  if (isEdit && !editUUID) throw new Error('UUID is invalid');
 
   const sharedFooterProps = {
     nextButtonProps: { ouiaId: 'wizard-next-btn' },
@@ -141,7 +134,6 @@ const AddOrEditTemplateBase = ({ modalProps, wizardHeaderProps, footer }: Templa
           >
             <SetUpDateStep />
           </WizardStep>
-          {/* <WizardStep name='Systems (optional)' id='systems' /> */}
           <WizardStep
             isDisabled={checkIfCurrentStepValid(4)}
             footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(5) }}
@@ -168,7 +160,6 @@ type TemplateModalProps = {
   templateProps: TemplateBaseProps;
 };
 
-// Wrap the modal with the provider
 export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
   return (
     <AddTemplateContextProvider>
@@ -177,7 +168,7 @@ export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
           <CustomRepositoriesStore>
             <SetUpDateStore>
               <ReviewTemplateStore>
-                <AddOrEditTemplateBase {...templateProps} />
+                <TemplateModalBase {...templateProps} />
               </ReviewTemplateStore>
             </SetUpDateStore>
           </CustomRepositoriesStore>
