@@ -33,7 +33,7 @@ import useDebounce from 'Hooks/useDebounce';
 import useHasRegisteredSystems from 'Hooks/useHasRegisteredSystems';
 import useRootPath from 'Hooks/useRootPath';
 import useSafeUUIDParam from '../../../../../Hooks/useSafeUUIDParam';
-import { TEMPLATE_SYSTEMS_UPDATE_LIMIT } from 'Pages/Templates/TemplatesTable/components/templateHelpers';
+import { TEMPLATE_SYSTEMS_UPDATE_LIMIT } from 'Pages/Templates/TemplateDetails/templateDetailHelpers';
 
 const useStyles = createUseStyles({
   description: {
