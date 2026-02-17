@@ -22,6 +22,7 @@ import { createUseStyles } from 'react-jss';
 import { useOnCancelModal } from '../core/cancelModal';
 import { useInitialStep, WizardUrlSync } from '../core/chooseStep';
 import { DefineContentStore } from 'features/createAndEditTemplate/defineContent/store/DefineContentStore';
+import { RedhatRepositoriesStore } from 'features/createAndEditTemplate/redhatRepositories/store/RedhatRepositoriesStore';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -169,7 +170,9 @@ export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
   return (
     <AddTemplateContextProvider>
       <DefineContentStore>
-        <AddOrEditTemplateBase {...templateProps} />
+        <RedhatRepositoriesStore>
+          <AddOrEditTemplateBase {...templateProps} />
+        </RedhatRepositoriesStore>
       </DefineContentStore>
     </AddTemplateContextProvider>
   );

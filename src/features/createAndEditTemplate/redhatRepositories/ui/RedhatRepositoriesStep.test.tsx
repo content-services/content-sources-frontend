@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
+import { useAddTemplateContext } from 'features/wip/workflow/store/AddTemplateContext';
 import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 import RedhatRepositoriesStep from './RedhatRepositoriesStep';
@@ -10,7 +10,7 @@ jest.mock('services/Content/ContentQueries', () => ({
 
 jest.mock('@src/components/StatusIcon/StatusIcon', () => () => 'StatusIcon');
 
-jest.mock('../AddTemplateContext', () => ({
+jest.mock('@src/features/wip/workflow/store/AddTemplateContext', () => ({
   useAddTemplateContext: jest.fn(),
 }));
 
