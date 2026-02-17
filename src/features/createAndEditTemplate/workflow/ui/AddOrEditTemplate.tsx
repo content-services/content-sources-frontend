@@ -4,28 +4,23 @@ import {
   ModalVariant,
   Spinner,
   Wizard,
-  WizardFooterWrapper,
   WizardHeader,
   WizardStep,
   useWizardContext,
 } from '@patternfly/react-core';
 
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { useCreateTemplateQuery, useEditTemplateQuery } from 'services/Templates/TemplateQueries';
 import { AddTemplateContextProvider, useAddTemplateContext } from '../store/AddTemplateContext';
 import RedhatRepositoriesStep from '../../redhatRepositories/ui/RedhatRepositoriesStep';
 import CustomRepositoriesStep from '../../otherRepositories/ui/CustomRepositoriesStep';
-import { TemplateRequest } from 'services/Templates/TemplateApi';
 
 import DefineContentStep from '../../defineContent/ui/DefineContentStep';
 import SetUpDateStep from '../../selectSnapshots/ui/SetUpDateStep';
 import DetailStep from '../../describeTemplate/ui/DetailStep';
 import ReviewStep from '../../reviewTemplateRequest/ui/ReviewStep';
-import { formatTemplateDate } from 'helpers';
 import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
 import { useEffect, useRef } from 'react';
-import { AddNavigateButton } from '../../createTemplate/ui/AddNavigateButton';
 import useRootPath from 'Hooks/useRootPath';
 import { TEMPLATES_ROUTE } from 'Routes/constants';
 
@@ -73,7 +68,24 @@ const WizardUrlSync = ({ onCancel }: { onCancel: () => void }) => {
   return null;
 };
 
-const AddOrEditTemplateBase = () => {
+type TemplateBaseProps = {
+  modalProps: {
+    ouiaId: string;
+    'aria-label': string;
+    'aria-describedby': string;
+  };
+  wizardHeaderProps: {
+    title: string;
+    titleId: string;
+    'data-ouia-component-id': string;
+    description: string;
+    descriptionId: string;
+    closeButtonAriaLabel: string;
+  };
+  footer: (cancelModal: () => void) => React.JSX.Element;
+};
+
+const AddOrEditTemplateBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBaseProps) => {
   const classes = useStyles();
   const navigate = useNavigate();
   const location = useLocation();
@@ -98,8 +110,6 @@ const AddOrEditTemplateBase = () => {
     }
   }, []);
 
-  const { queryClient } = useAddTemplateContext();
-
   const onCancel = () => {
     if (fromRef.current === 'table') {
       navigate(`${rootPath}/${TEMPLATES_ROUTE}`);
@@ -110,17 +120,6 @@ const AddOrEditTemplateBase = () => {
     }
   };
 
-  const { mutateAsync: addTemplate, isLoading: isAdding } = useCreateTemplateQuery(queryClient, {
-    ...(templateRequest as TemplateRequest),
-    date: templateRequest.use_latest ? null : formatTemplateDate(templateRequest.date || ''),
-  });
-
-  const { mutateAsync: editTemplate, isLoading: isEditing } = useEditTemplateQuery(queryClient, {
-    uuid: editUUID as string,
-    ...(templateRequest as TemplateRequest),
-    date: templateRequest.use_latest ? null : formatTemplateDate(templateRequest.date || ''),
-  });
-
   const sharedFooterProps = {
     nextButtonProps: { ouiaId: 'wizard-next-btn' },
     backButtonProps: { ouiaId: 'wizard-back-btn' },
@@ -129,9 +128,7 @@ const AddOrEditTemplateBase = () => {
 
   return (
     <Modal
-      ouiaId={`${isEdit ? 'edit' : 'add'}_template_modal`}
-      aria-label={`${isEdit ? 'edit' : 'add'} template modal`}
-      aria-describedby='edit-add-template-modal-wizard-description'
+      {...modalProps}
       variant={ModalVariant.large}
       isOpen
       onClose={isEdit && isEmpty(templateRequest) ? onCancel : undefined}
@@ -146,15 +143,7 @@ const AddOrEditTemplateBase = () => {
           header={
             <>
               <WizardUrlSync onCancel={onCancel} />
-              <WizardHeader
-                title={`${isEdit ? 'Edit' : 'Create'} content template`}
-                titleId={`${isEdit ? 'edit' : 'create'}_content_template`}
-                data-ouia-component-id={`${isEdit ? 'edit' : 'create'}_content_template`}
-                description='Prepare for your next patching cycle with a content template.'
-                descriptionId='edit-add-template-modal-wizard-description'
-                onClose={onCancel}
-                closeButtonAriaLabel={`close_${isEdit ? 'edit' : 'create'}_content_template`}
-              />
+              <WizardHeader {...wizardHeaderProps} onClose={onCancel} />
             </>
           }
           onClose={onCancel}
@@ -217,21 +206,7 @@ const AddOrEditTemplateBase = () => {
             isDisabled={checkIfCurrentStepValid(5)}
             name='Review'
             id='review'
-            footer={
-              isEdit ? (
-                {
-                  ...sharedFooterProps,
-                  nextButtonProps: { ouiaId: 'wizard-edit-btn' },
-                  nextButtonText: 'Confirm changes',
-                  onNext: () => editTemplate().then(() => onCancel()),
-                  isNextDisabled: isEditing,
-                }
-              ) : (
-                <WizardFooterWrapper>
-                  <AddNavigateButton isAdding={isAdding} onClose={onCancel} add={addTemplate} />
-                </WizardFooterWrapper>
-              )
-            }
+            footer={footer(onCancel)}
           >
             <ReviewStep />
           </WizardStep>
@@ -241,11 +216,15 @@ const AddOrEditTemplateBase = () => {
   );
 };
 
+type TemplateModalProps = {
+  templateProps: TemplateBaseProps;
+};
+
 // Wrap the modal with the provider
-export function AddOrEditTemplate() {
+export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
   return (
     <AddTemplateContextProvider>
-      <AddOrEditTemplateBase />
+      <AddOrEditTemplateBase {...templateProps} />
     </AddTemplateContextProvider>
   );
 }
