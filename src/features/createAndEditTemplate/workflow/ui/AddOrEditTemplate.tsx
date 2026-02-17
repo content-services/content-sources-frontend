@@ -65,7 +65,7 @@ const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBa
   const [, setUrlSearchParams] = useSearchParams();
   const initialIndex = useInitialStep();
   const onCancel = useOnCancelModal();
-  const { checkIfCurrentStepValid } = useCheckIsDisabledStep();
+  const { checkIsDisabledStep } = useCheckIsDisabledStep();
 
   const { isEmptyTemplateRequest } = useTemplateRequestDerivedState();
   const { isEditTemplate } = useEditTemplateState();
@@ -111,25 +111,25 @@ const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBa
                 name='Define content'
                 id='define-content'
                 key='define-content-key'
-                footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(1) }}
+                footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(2) }}
               >
                 <DefineContentStep />
               </WizardStep>,
               <WizardStep
-                isDisabled={checkIfCurrentStepValid(1)}
+                isDisabled={checkIsDisabledStep(2)}
                 name='Red Hat repositories'
                 id='redhat-repositories'
                 key='redhat-repositories-key'
-                footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(2) }}
+                footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(3) }}
               >
                 <RedhatRepositoriesStep />
               </WizardStep>,
               <WizardStep
-                isDisabled={checkIfCurrentStepValid(2)}
+                isDisabled={checkIsDisabledStep(3)}
                 name='Other repositories'
                 id='custom-repositories'
                 key='custom-repositories-key'
-                footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(3) }}
+                footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(4) }}
               >
                 <CustomRepositoriesStep />
               </WizardStep>,
@@ -138,21 +138,21 @@ const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBa
           <WizardStep
             name='Set up date'
             id='set-up-date'
-            isDisabled={checkIfCurrentStepValid(3)}
-            footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(4) }}
+            isDisabled={checkIsDisabledStep(4)}
+            footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(5) }}
           >
             <SetUpDateStep />
           </WizardStep>
           <WizardStep
-            isDisabled={checkIfCurrentStepValid(4)}
-            footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(5) }}
+            isDisabled={checkIsDisabledStep(5)}
+            footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(6) }}
             name='Detail'
             id='detail'
           >
             <DetailStep />
           </WizardStep>
           <WizardStep
-            isDisabled={checkIfCurrentStepValid(5)}
+            isDisabled={checkIsDisabledStep(6)}
             name='Review'
             id='review'
             footer={footer(onCancel)}
