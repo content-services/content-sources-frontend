@@ -7,27 +7,37 @@ import {
   useWizardContext,
   WizardFooterWrapper,
 } from '@patternfly/react-core';
-import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
-import { formatTemplateDate } from 'helpers';
-import { TemplateRequest } from 'services/Templates/TemplateApi';
+import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
 import { useEditTemplateQuery } from 'services/Templates/TemplateQueries';
 import { useEditTemplateState } from '../store/EditTemplateStore';
 import { useQueryClient } from 'react-query';
+import { editTemplateToSend } from '../core/editTemplateToSend';
+import { useMemo } from 'react';
+import { checkTemplateRequestIsFinalized } from 'features/createAndEditTemplate/shared/core/checkTemplateRequestIsFinalized';
 
 type EditTemplateFooterProps = {
   cancelModal: () => void;
 };
 
 export const EditTemplateFooter = ({ cancelModal }: EditTemplateFooterProps) => {
-  const { templateRequest } = useAddTemplateContext();
+  const templateRequest = useTemplateRequestState();
   const { uuid } = useEditTemplateState();
+
   const queryClient = useQueryClient();
 
-  const { mutateAsync: editTemplate, isLoading } = useEditTemplateQuery(queryClient, {
-    uuid,
-    ...(templateRequest as TemplateRequest),
-    date: templateRequest.use_latest ? null : formatTemplateDate(templateRequest.date || ''),
-  });
+  const templateRequestToSend = useMemo(() => {
+    const { isFinalized, template } = checkTemplateRequestIsFinalized(templateRequest);
+    if (!isFinalized) {
+      throw new Error('Template Request has missing properties');
+    }
+    const templateWithUUID = { ...template, uuid };
+    return editTemplateToSend(templateWithUUID);
+  }, [templateRequest, uuid]);
+
+  const { mutateAsync: editTemplate, isLoading } = useEditTemplateQuery(
+    queryClient,
+    templateRequestToSend,
+  );
 
   const { goToPrevStep } = useWizardContext();
 

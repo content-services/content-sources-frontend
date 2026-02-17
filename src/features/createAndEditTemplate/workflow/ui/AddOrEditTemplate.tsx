@@ -8,14 +8,16 @@ import {
   WizardStep,
 } from '@patternfly/react-core';
 import { useSearchParams } from 'react-router-dom';
-import { AddTemplateContextProvider, useAddTemplateContext } from '../store/AddTemplateContext';
+import {
+  AddTemplateContextProvider,
+  useTemplateRequestDerivedState,
+} from '../store/AddTemplateContext';
 import RedhatRepositoriesStep from 'features/createAndEditTemplate/redhatRepositories/ui/RedhatRepositoriesStep';
 import CustomRepositoriesStep from 'features/createAndEditTemplate/otherRepositories/ui/CustomRepositoriesStep';
 import DefineContentStep from 'features/createAndEditTemplate/defineContent/ui/DefineContentStep';
 import SetUpDateStep from 'features/createAndEditTemplate/selectSnapshots/ui/SetUpDateStep';
 import DetailStep from 'features/createAndEditTemplate/describeTemplate/ui/DetailStep';
 import ReviewStep from 'features/createAndEditTemplate/reviewTemplateRequest/ui/ReviewStep';
-import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
 import { useOnCancelModal } from '../core/cancelModal';
 import { useInitialStep, WizardUrlSync } from '../core/chooseStep';
@@ -61,12 +63,11 @@ type TemplateBaseProps = {
 const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBaseProps) => {
   const classes = useStyles();
   const [, setUrlSearchParams] = useSearchParams();
-
   const initialIndex = useInitialStep();
   const onCancel = useOnCancelModal();
-
-  const { templateRequest } = useAddTemplateContext();
   const { checkIfCurrentStepValid } = useCheckIsDisabledStep();
+
+  const { isEmptyTemplateRequest } = useTemplateRequestDerivedState();
   const { isEditTemplate } = useEditTemplateState();
 
   const sharedFooterProps = {
@@ -80,10 +81,10 @@ const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBa
       {...modalProps}
       variant={ModalVariant.large}
       isOpen
-      onClose={isEditTemplate && isEmpty(templateRequest) ? onCancel : undefined}
+      onClose={isEmptyTemplateRequest && isEditTemplate ? onCancel : undefined}
       disableFocusTrap
     >
-      {isEditTemplate && isEmpty(templateRequest) ? (
+      {isEmptyTemplateRequest && isEditTemplate ? (
         <Bullseye className={classes.minHeightForSpinner}>
           <Spinner size='xl' />
         </Bullseye>

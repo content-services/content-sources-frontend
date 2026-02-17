@@ -1,31 +1,38 @@
 import { useCallback, useMemo } from 'react';
-import { useAddTemplateContext } from '../store/AddTemplateContext';
+import { useTemplateRequestState } from '../store/AddTemplateContext';
 import { isDateValid } from 'helpers';
 
 type CheckIfCurrentStepValid = (index: number) => boolean;
 
 export const useCheckIsDisabledStep = () => {
-  const { templateRequest, selectedRedhatRepos } = useAddTemplateContext();
+  const templateRequest = useTemplateRequestState();
 
   const stepsValidArray = useMemo(() => {
-    const { arch, date, name, version, use_latest } = templateRequest;
+    const {
+      selectedArchitecture,
+      selectedOSVersion,
+      hardcodedUUIDs,
+      snapshotDate,
+      isLatestSnapshot,
+      title,
+    } = templateRequest;
 
     return [
       true,
-      arch && version,
-      !!selectedRedhatRepos.size,
-      true,
-      use_latest || isDateValid(date ?? ''),
-      !!name && name.length < 256,
+      selectedArchitecture && selectedOSVersion,
+      !!hardcodedUUIDs!.length,
+      !!hardcodedUUIDs!.length,
+      isLatestSnapshot || isDateValid(snapshotDate ?? ''),
+      !!title,
     ] as boolean[];
-  }, [templateRequest, selectedRedhatRepos.size]);
+  }, [templateRequest]);
 
   const checkIfCurrentStepValid: CheckIfCurrentStepValid = useCallback(
     (stepIndex: number) => {
       const stepsToCheck = stepsValidArray.slice(0, stepIndex + 1);
       return !stepsToCheck.every((step) => step);
     },
-    [selectedRedhatRepos.size, stepsValidArray],
+    [stepsValidArray],
   );
 
   return { checkIfCurrentStepValid };

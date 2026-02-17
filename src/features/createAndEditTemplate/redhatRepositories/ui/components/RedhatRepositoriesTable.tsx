@@ -14,9 +14,9 @@ export const RedhatRepositoriesTable = () => {
     columnHeaders,
     contentList,
     sortParams,
-    hardcodedRedhatRepositoryUUIDS,
-    setUUIDForList,
-    selectedRedhatRepos,
+    toggleSelected,
+    isInHardcodedUUIDs,
+    isInRedhatUUIDs,
   } = useRedhatRepositoriesApi();
 
   const path = useHref('content');
@@ -41,25 +41,22 @@ export const RedhatRepositoriesTable = () => {
       <Tbody>
         {contentList.map((rowData: ContentItem, rowIndex) => {
           const { uuid, name, url } = rowData;
+          const isHardcodedRedhatRepo = (rowData) =>
+            !(rowData.snapshot && rowData.last_snapshot_uuid) || isInHardcodedUUIDs(rowData.uuid);
           return (
             <Tr key={uuid}>
               <TdWithTooltip
-                show={
-                  !(rowData.snapshot && rowData.last_snapshot_uuid) ||
-                  hardcodedRedhatRepositoryUUIDS.has(uuid)
-                }
+                show={isHardcodedRedhatRepo(rowData)}
                 tooltipProps={{
-                  content: hardcodedRedhatRepositoryUUIDS.has(uuid)
+                  content: isInHardcodedUUIDs(rowData.uuid)
                     ? 'This item is pre-selected for the chosen architecture and OS version.'
                     : 'A snapshot is not yet available for this repository.',
                 }}
                 select={{
                   rowIndex,
-                  onSelect: () => setUUIDForList(uuid),
-                  isSelected: selectedRedhatRepos.has(uuid),
-                  isDisabled:
-                    !(rowData.snapshot && rowData.last_snapshot_uuid) ||
-                    hardcodedRedhatRepositoryUUIDS.has(uuid),
+                  onSelect: () => toggleSelected(uuid),
+                  isSelected: isInRedhatUUIDs(rowData.uuid),
+                  isDisabled: isHardcodedRedhatRepo(rowData),
                 }}
               />
               <Td>

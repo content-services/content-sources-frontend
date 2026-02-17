@@ -1,5 +1,4 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from 'features/wip/workflow/store/AddTemplateContext';
 import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 import CustomRepositoriesStep from './CustomRepositoriesStep';

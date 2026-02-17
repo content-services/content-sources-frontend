@@ -15,7 +15,7 @@ import { ContentItem, ContentOrigin } from 'services/Content/ContentApi';
 import { useCustomRepositoriesApi } from '../../../../createAndEditTemplate/otherRepositories/store/CustomRepositoriesStore';
 
 export const CustomRepositoriesTable = () => {
-  const { columnHeaders, contentList, sortParams, setUUIDForList, selectedCustomRepos, pathname } =
+  const { columnHeaders, contentList, sortParams, isInOtherUUIDs, pathname, toggleSelected } =
     useCustomRepositoriesApi();
 
   const { features } = useAppContext();
@@ -27,9 +27,6 @@ export const CustomRepositoriesTable = () => {
 
     return isEPELUrl(repo.url);
   };
-
-  const isAnyEPELRepoSelected = (): boolean =>
-    contentList.some((repo) => selectedCustomRepos.has(repo.uuid) && isEPELRepository(repo));
 
   return (
     <Table
@@ -54,8 +51,11 @@ export const CustomRepositoriesTable = () => {
       <Tbody>
         {contentList.map((rowData: ContentItem, rowIndex) => {
           const { uuid, name, url, origin } = rowData;
+
+          const isAnyEPELRepoSelected = isInOtherUUIDs(uuid) && isEPELRepository(rowData);
           const shouldDisableOtherEPEL =
-            isEPELRepository(rowData) && isAnyEPELRepoSelected() && !selectedCustomRepos.has(uuid);
+            isEPELRepository(rowData) && isAnyEPELRepoSelected && !isInOtherUUIDs(rowData.uuid);
+          const noSnapshotAvailable = !(rowData.snapshot && rowData.last_snapshot_uuid);
 
           return (
             <Tr key={uuid}>
@@ -66,10 +66,9 @@ export const CustomRepositoriesTable = () => {
                 }}
                 select={{
                   rowIndex,
-                  onSelect: () => setUUIDForList(uuid),
-                  isSelected: selectedCustomRepos.has(uuid),
-                  isDisabled:
-                    !(rowData.snapshot && rowData.last_snapshot_uuid) || shouldDisableOtherEPEL,
+                  onSelect: () => toggleSelected(uuid),
+                  isSelected: isInOtherUUIDs(uuid),
+                  isDisabled: noSnapshotAvailable || shouldDisableOtherEPEL,
                 }}
               />
               <Td>

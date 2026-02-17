@@ -1,13 +1,21 @@
 import { ThProps } from '@patternfly/react-table';
-import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import {
+  AdditionalUUID,
+  HardcodedUUID,
+  RedhatUUID,
+} from 'features/createAndEditTemplate/shared/types/types';
+import {
+  useTemplateRequestApi,
+  useTemplateRequestState,
+} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
 import useDebounce from 'Hooks/useDebounce';
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
 import { ContentList, ContentOrigin } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 
 type RedhatRepositoriesApiType = {
-  hardcodedRedhatRepositoryUUIDS: Set<string>;
-  selectedRedhatRepos: Set<string>;
+  hardcodedUUIDs: HardcodedUUID[];
+  additionalUUIDs: AdditionalUUID[];
   contentList: ContentList;
   page: number;
   perPage: number;
@@ -24,13 +32,15 @@ type RedhatRepositoriesApiType = {
   onPerPageSelect: (_, newPerPage: number, newPage: number) => void;
   sortParams: (columnIndex: number) => ThProps['sort'];
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  setUUIDForList: (uuid: string) => void;
   setToggled: (is: boolean) => void;
+  toggleSelected: ToggleAdditionalRepository;
+  isInHardcodedUUIDs: (uuid: HardcodedUUID) => boolean;
+  isInRedhatUUIDs: (uuid: RedhatUUID) => boolean;
 };
 
 const initialData = {
-  hardcodedRedhatRepositoryUUIDS: new Set<string>(),
-  selectedRedhatRepos: new Set<string>(),
+  hardcodedUUIDs: [],
+  additionalUUIDs: [],
   contentList: [],
   page: 1,
   perPage: 20,
@@ -47,8 +57,10 @@ const initialData = {
   onPerPageSelect: () => {},
   sortParams: () => undefined,
   setSearchQuery: () => {},
-  setUUIDForList: () => {},
   setToggled: () => {},
+  toggleSelected: () => {},
+  isInHardcodedUUIDs: () => false,
+  isInRedhatUUIDs: () => false,
 };
 const RedhatRepositoriesApi = createContext<RedhatRepositoriesApiType>(initialData);
 export const useRedhatRepositoriesApi = () => useContext(RedhatRepositoriesApi);
@@ -57,29 +69,25 @@ type RedhatRepositoriesStoreType = {
   children: ReactNode;
 };
 
-export const RedhatRepositoriesStore = ({ children }: RedhatRepositoriesStoreType) => {
-  const {
-    hardcodedRedhatRepositoryUUIDS,
-    templateRequest,
-    selectedRedhatRepos,
-    setSelectedRedhatRepos,
-  } = useAddTemplateContext();
+export type ToggleAdditionalRepository = (uuid: AdditionalUUID) => void;
 
-  const noAdditionalRepos = selectedRedhatRepos.size - hardcodedRedhatRepositoryUUIDS.size === 0;
+export const RedhatRepositoriesStore = ({ children }: RedhatRepositoriesStoreType) => {
+  const { setAdditionalUUIDs } = useTemplateRequestApi();
+  const { selectedArchitecture, selectedOSVersion, hardcodedUUIDs, additionalUUIDs } =
+    useTemplateRequestState();
 
   const [toggled, setToggled] = useState(false);
 
-  const setUUIDForList = (uuid: string) => {
-    if (selectedRedhatRepos.has(uuid)) {
-      selectedRedhatRepos.delete(uuid);
-      if (noAdditionalRepos) {
-        setToggled(false);
+  const toggleSelected: ToggleAdditionalRepository = useCallback((clickedUuid) => {
+    setAdditionalUUIDs((previous) => {
+      const isInPrevious = previous.includes(clickedUuid);
+      if (isInPrevious) {
+        return previous.filter((uuid) => uuid !== clickedUuid);
+      } else {
+        return [...previous, clickedUuid];
       }
-    } else {
-      selectedRedhatRepos.add(uuid);
-    }
-    setSelectedRedhatRepos(new Set(selectedRedhatRepos));
-  };
+    });
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery);
@@ -124,9 +132,9 @@ export const RedhatRepositoriesStore = ({ children }: RedhatRepositoriesStoreTyp
       perPage,
       {
         search: searchQuery === '' ? searchQuery : debouncedSearch,
-        availableForArch: templateRequest.arch as string,
-        availableForVersion: templateRequest.version as string,
-        uuids: toggled ? [...selectedRedhatRepos] : undefined,
+        availableForArch: selectedArchitecture!,
+        availableForVersion: selectedOSVersion!,
+        uuids: toggled ? [...hardcodedUUIDs!, ...additionalUUIDs!] : undefined,
       },
       sortString(),
       [ContentOrigin.REDHAT],
@@ -137,14 +145,20 @@ export const RedhatRepositoriesStore = ({ children }: RedhatRepositoriesStoreTyp
     meta: { count = 0 },
   } = data;
 
+  const noAdditionalRepos = additionalUUIDs!.length === 0;
   const countIsZero = count === 0;
   const showLoader = countIsZero && !isLoading;
-  const additionalReposAvailableToSelect =
-    contentList.length - hardcodedRedhatRepositoryUUIDS.size > 0;
+  const additionalReposAvailableToSelect = contentList.length - hardcodedUUIDs!.length > 0;
+
+  const redHatRepos = [...hardcodedUUIDs!, ...additionalUUIDs!];
+  const isInRedhatUUIDs = (uuid) => redHatRepos.includes(uuid);
+  const isInHardcodedUUIDs = (uuid) => hardcodedUUIDs!.includes(uuid);
 
   const api = {
-    hardcodedRedhatRepositoryUUIDS,
-    selectedRedhatRepos,
+    hardcodedUUIDs: hardcodedUUIDs!,
+    additionalUUIDs: additionalUUIDs!,
+    isInRedhatUUIDs,
+    isInHardcodedUUIDs,
     page,
     perPage,
     count,
@@ -161,7 +175,7 @@ export const RedhatRepositoriesStore = ({ children }: RedhatRepositoriesStoreTyp
     onPerPageSelect,
     sortParams,
     setSearchQuery,
-    setUUIDForList,
+    toggleSelected,
     setToggled,
   };
 

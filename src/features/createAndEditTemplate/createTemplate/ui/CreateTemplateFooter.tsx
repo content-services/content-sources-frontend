@@ -1,22 +1,32 @@
 import { useCreateTemplateQuery } from 'services/Templates/TemplateQueries';
 import { AddNavigateButton } from './AddNavigateButton';
-import { TemplateRequest } from 'services/Templates/TemplateApi';
-import { formatTemplateDate } from 'helpers';
-import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
 import { useQueryClient } from 'react-query';
+import { createTemplateRequest } from '../core/createTemplateRequest';
+import { checkTemplateRequestIsFinalized } from 'features/createAndEditTemplate/shared/core/checkTemplateRequestIsFinalized';
+import { useMemo } from 'react';
 
 type CreateTemplateFooterType = {
   onCancel: () => void;
 };
 
 export const CreateTemplateFooter = ({ onCancel }: CreateTemplateFooterType) => {
-  const { templateRequest } = useAddTemplateContext();
+  const templateRequest = useTemplateRequestState();
+
   const queryClient = useQueryClient();
 
-  const { mutateAsync: addTemplate, isLoading: isAdding } = useCreateTemplateQuery(queryClient, {
-    ...(templateRequest as TemplateRequest),
-    date: templateRequest.use_latest ? null : formatTemplateDate(templateRequest.date || ''),
-  });
+  const templateRequestToSend = useMemo(() => {
+    const { isFinalized, template } = checkTemplateRequestIsFinalized(templateRequest);
+    if (!isFinalized) {
+      throw new Error('Template Request has missing properties');
+    }
+    return createTemplateRequest(template);
+  }, [templateRequest]);
+
+  const { mutateAsync: addTemplate, isLoading: isAdding } = useCreateTemplateQuery(
+    queryClient,
+    templateRequestToSend,
+  );
 
   return <AddNavigateButton isAdding={isAdding} onClose={onCancel} add={addTemplate} />;
 };

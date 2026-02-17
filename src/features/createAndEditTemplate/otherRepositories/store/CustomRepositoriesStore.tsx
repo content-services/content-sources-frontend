@@ -1,13 +1,18 @@
 import { ThProps } from '@patternfly/react-table';
-import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import { OtherUUID } from 'features/createAndEditTemplate/shared/types/types';
+import {
+  useTemplateRequestApi,
+  useTemplateRequestState,
+} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
 import useDebounce from 'Hooks/useDebounce';
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
 import { useHref } from 'react-router-dom';
 import { ContentList, ContentOrigin } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 
+export type ToggleOtherRepository = (uuid: OtherUUID) => void;
+
 type CustomRepositoriesApiType = {
-  selectedCustomRepos: Set<string>;
   pathname: string;
   contentList: ContentList;
   page: number;
@@ -20,16 +25,17 @@ type CustomRepositoriesApiType = {
   showLoader: boolean;
   searchQuery: string;
   toggled: boolean;
+  noOtherReposSelected: boolean;
   onSetPage: (_, newPage: number) => void;
   onPerPageSelect: (_, newPerPage: number, newPage: number) => void;
   sortParams: (columnIndex: number) => ThProps['sort'];
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  setUUIDForList: (uuid: string) => void;
+  toggleSelected: ToggleOtherRepository;
   setToggled: (is: boolean) => void;
+  isInOtherUUIDs: (uuid: OtherUUID) => boolean;
 };
 
 const initialData = {
-  selectedCustomRepos: new Set<string>(),
   pathname: '',
   contentList: [],
   page: 1,
@@ -42,12 +48,14 @@ const initialData = {
   showLoader: true,
   searchQuery: '',
   toggled: false,
+  noOtherReposSelected: true,
   onSetPage: () => {},
   onPerPageSelect: () => {},
   sortParams: () => undefined,
   setSearchQuery: () => {},
-  setUUIDForList: () => {},
+  toggleSelected: () => {},
   setToggled: () => {},
+  isInOtherUUIDs: () => false,
 };
 
 const CustomRepositoriesApi = createContext<CustomRepositoriesApiType>(initialData);
@@ -60,21 +68,21 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
   const path = useHref('content');
   const pathname = path.split('content')[0] + 'content';
 
-  const { templateRequest, selectedCustomRepos, setSelectedCustomRepos } = useAddTemplateContext();
+  const { setOtherUUIDs } = useTemplateRequestApi();
+  const { selectedArchitecture, selectedOSVersion, otherUUIDs } = useTemplateRequestState();
 
   const [toggled, setToggled] = useState(false);
 
-  const setUUIDForList = (uuid: string) => {
-    if (selectedCustomRepos.has(uuid)) {
-      selectedCustomRepos.delete(uuid);
-      if (selectedCustomRepos.size === 0) {
-        setToggled(false);
+  const toggleSelected = useCallback((clickedUuid: string) => {
+    setOtherUUIDs((previous) => {
+      const isInPrevious = previous.includes(clickedUuid);
+      if (isInPrevious) {
+        return previous.filter((uuid) => uuid !== clickedUuid);
+      } else {
+        return [...previous, clickedUuid];
       }
-    } else {
-      selectedCustomRepos.add(uuid);
-    }
-    setSelectedCustomRepos(new Set(selectedCustomRepos));
-  };
+    });
+  }, []);
 
   const storedPerPage = Number(20);
 
@@ -121,9 +129,9 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
     perPage,
     {
       search: searchQuery === '' ? searchQuery : debouncedSearch,
-      availableForArch: templateRequest.arch as string,
-      availableForVersion: templateRequest.version as string,
-      uuids: toggled ? [...selectedCustomRepos] : undefined,
+      availableForArch: selectedArchitecture!,
+      availableForVersion: selectedOSVersion!,
+      uuids: toggled ? [...otherUUIDs!] : undefined,
     },
     sortString(),
     [ContentOrigin.CUSTOM, ContentOrigin.COMMUNITY],
@@ -135,9 +143,10 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
   } = data;
   const countIsZero = count === 0;
   const showLoader = countIsZero && !isLoading;
+  const isInOtherUUIDs = (uuid) => otherUUIDs!.includes(uuid);
+  const noOtherReposSelected = otherUUIDs!.length === 0;
 
   const api = {
-    selectedCustomRepos,
     pathname,
     page,
     perPage,
@@ -154,8 +163,10 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
     onPerPageSelect,
     sortParams,
     setSearchQuery,
-    setUUIDForList,
+    toggleSelected,
     setToggled,
+    isInOtherUUIDs,
+    noOtherReposSelected,
   };
 
   return <CustomRepositoriesApi.Provider value={api}>{children}</CustomRepositoriesApi.Provider>;

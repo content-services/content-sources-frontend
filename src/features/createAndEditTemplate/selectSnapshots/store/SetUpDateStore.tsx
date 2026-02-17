@@ -1,21 +1,28 @@
-import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
-import { formatDateForPicker, formatTemplateDate, isDateValid } from 'helpers';
-import { createContext, ReactNode, useContext, useEffect, useMemo } from 'react';
+import {
+  UseLatestSnapshot,
+  UseSnapshotDate,
+} from 'features/createAndEditTemplate/shared/types/types';
+import {
+  useTemplateRequestApi,
+  useTemplateRequestState,
+} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import { formatTemplateDate, isDateValid } from 'helpers';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo } from 'react';
 import { ContentListResponse, ContentOrigin } from 'services/Content/ContentApi';
 import { useContentListQuery, useGetSnapshotsByDates } from 'services/Content/ContentQueries';
-import { TemplateRequest } from 'services/Templates/TemplateApi';
 
 type SetUpDateApiType = {
-  templateRequest: Partial<TemplateRequest>;
   isLoading: boolean;
   contentData: Partial<ContentListResponse>;
   hasIsAfter: boolean;
   dateIsValid: boolean;
-  setTemplateRequest: (value: React.SetStateAction<Partial<TemplateRequest>>) => void;
+  isLatestSnapshot: UseLatestSnapshot;
+  snapshotDate: UseSnapshotDate;
+  toggleLatestSnapshot: (useLatest: UseLatestSnapshot) => void;
+  chooseSnapshotDate: (date: UseSnapshotDate) => void;
 };
 
 const initialData = {
-  templateRequest: {},
   isLoading: false,
   contentData: {
     data: [],
@@ -23,7 +30,10 @@ const initialData = {
   },
   hasIsAfter: false,
   dateIsValid: false,
-  setTemplateRequest: () => {},
+  snapshotDate: '',
+  isLatestSnapshot: false,
+  toggleLatestSnapshot: () => {},
+  chooseSnapshotDate: () => {},
 };
 
 const SetUpDateApi = createContext<SetUpDateApiType>(initialData);
@@ -34,35 +44,37 @@ type SetUpDateStoreType = {
 };
 
 export const SetUpDateStore = ({ children }: SetUpDateStoreType) => {
-  const { templateRequest, setTemplateRequest, selectedRedhatRepos, selectedCustomRepos } =
-    useAddTemplateContext();
+  const { setSnapshotDate, setIsLatestSnapshot } = useTemplateRequestApi();
+  const { hardcodedUUIDs, additionalUUIDs, otherUUIDs, snapshotDate, isLatestSnapshot } =
+    useTemplateRequestState();
+
+  const toggleLatestSnapshot = useCallback((useLatest) => {
+    setIsLatestSnapshot(useLatest);
+    setSnapshotDate('');
+  }, []);
+
+  const chooseSnapshotDate = useCallback((val) => {
+    const isValid = isDateValid(val);
+    if (isValid) {
+      setSnapshotDate(val);
+    } else {
+      setSnapshotDate('');
+    }
+  }, []);
 
   const { data, mutateAsync } = useGetSnapshotsByDates(
-    [...selectedRedhatRepos, ...selectedCustomRepos],
-    formatTemplateDate(templateRequest?.date || ''),
+    [...hardcodedUUIDs!, ...additionalUUIDs!, ...otherUUIDs!],
+    formatTemplateDate(snapshotDate!),
   );
 
-  useEffect(() => {
-    setTemplateRequest({
-      ...templateRequest,
-      date: templateRequest.date ? formatDateForPicker(templateRequest.date) : '',
-    });
-  }, [templateRequest.date]);
-
-  const dateIsValid = useMemo(
-    () => isDateValid(templateRequest?.date || ''),
-    [templateRequest?.date],
-  );
+  const dateIsValid = useMemo(() => isDateValid(snapshotDate || ''), [snapshotDate]);
 
   useEffect(() => {
-    if (
-      templateRequest?.date &&
-      dateIsValid &&
-      [...selectedRedhatRepos, ...selectedCustomRepos].length
-    ) {
+    const allUUIDs = [...otherUUIDs!, ...additionalUUIDs!, ...hardcodedUUIDs!];
+    if (snapshotDate && dateIsValid && allUUIDs.length) {
       mutateAsync();
     }
-  }, [selectedRedhatRepos.size, selectedCustomRepos.size, templateRequest?.date]);
+  }, [hardcodedUUIDs, additionalUUIDs, otherUUIDs, snapshotDate]);
 
   const itemsAfterDate = useMemo(
     () => data?.data?.filter(({ is_after }) => is_after) || [],
@@ -83,12 +95,14 @@ export const SetUpDateStore = ({ children }: SetUpDateStoreType) => {
     );
 
   const api = {
-    templateRequest,
+    snapshotDate: snapshotDate!,
+    isLatestSnapshot: isLatestSnapshot!,
     isLoading,
     contentData,
     hasIsAfter,
     dateIsValid,
-    setTemplateRequest,
+    chooseSnapshotDate,
+    toggleLatestSnapshot,
   };
 
   return <SetUpDateApi.Provider value={api}>{children}</SetUpDateApi.Provider>;

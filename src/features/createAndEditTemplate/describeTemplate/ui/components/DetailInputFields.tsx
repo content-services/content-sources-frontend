@@ -1,15 +1,21 @@
 import { Form, FormGroup, TextArea, TextInput } from '@patternfly/react-core';
 import CustomHelperText from 'components/CustomHelperText/CustomHelperText';
-import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import {
+  useTemplateRequestApi,
+  useTemplateRequestState,
+} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
 import { useState } from 'react';
 import { TemplateValidationSchema } from '../../core/helpers';
 
 export const DetailInputFields = () => {
-  const { templateRequest, setTemplateRequest } = useAddTemplateContext();
+  const { title, detail } = useTemplateRequestState();
+  const { setTitle, setDetail } = useTemplateRequestApi();
   const [errors, setErrors] = useState({ name: '', description: '' });
 
   const setFieldValues = (value: string, field: 'name' | 'description') => {
-    setTemplateRequest((prev) => ({ ...prev, [field]: value }));
+    if (field === 'name') setTitle(value);
+    if (field === 'description') setDetail(value);
+
     try {
       TemplateValidationSchema.validateSyncAt(field, { [field]: value });
       if (errors[field]) setErrors({ ...errors, [field]: '' });
@@ -30,7 +36,7 @@ export const DetailInputFields = () => {
           type='text'
           validated={errors.name ? 'error' : 'default'}
           onChange={(_event, value) => setFieldValues(value, 'name')}
-          value={templateRequest?.name || ''}
+          value={title}
           placeholder='Enter name'
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
@@ -49,7 +55,7 @@ export const DetailInputFields = () => {
           type='text'
           validated={errors.description ? 'error' : 'default'}
           onChange={(_event, value) => setFieldValues(value, 'description')}
-          value={templateRequest?.description || ''}
+          value={detail}
           placeholder='Enter description'
         />
         <CustomHelperText hide={!errors.description} textValue={errors.description} />

@@ -15,10 +15,10 @@ const useStyles = createUseStyles({
 export const DependencyNotification = () => {
   const classes = useStyles();
 
-  const { templateRequest, isLoading, contentData, hasIsAfter, dateIsValid } = useSetUpDateApi();
+  const { isLoading, contentData, hasIsAfter, dateIsValid, isLatestSnapshot } = useSetUpDateApi();
 
   return (
-    <Hide hide={templateRequest.use_latest || !hasIsAfter || !dateIsValid}>
+    <Hide hide={isLatestSnapshot || !hasIsAfter || !dateIsValid}>
       <FormAlert>
         <Alert
           variant='warning'
