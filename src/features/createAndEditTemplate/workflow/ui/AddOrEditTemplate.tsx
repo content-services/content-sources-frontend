@@ -25,6 +25,7 @@ import { DefineContentStore } from 'features/createAndEditTemplate/defineContent
 import { RedhatRepositoriesStore } from 'features/createAndEditTemplate/redhatRepositories/store/RedhatRepositoriesStore';
 import { CustomRepositoriesStore } from 'features/createAndEditTemplate/otherRepositories/store/CustomRepositoriesStore';
 import { SetUpDateStore } from 'features/createAndEditTemplate/selectSnapshots/store/SetUpDateStore';
+import { ReviewTemplateStore } from 'features/createAndEditTemplate/reviewTemplateRequest/store/ReviewTemplateStore';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -175,7 +176,9 @@ export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
         <RedhatRepositoriesStore>
           <CustomRepositoriesStore>
             <SetUpDateStore>
-              <AddOrEditTemplateBase {...templateProps} />
+              <ReviewTemplateStore>
+                <AddOrEditTemplateBase {...templateProps} />
+              </ReviewTemplateStore>
             </SetUpDateStore>
           </CustomRepositoriesStore>
         </RedhatRepositoriesStore>
