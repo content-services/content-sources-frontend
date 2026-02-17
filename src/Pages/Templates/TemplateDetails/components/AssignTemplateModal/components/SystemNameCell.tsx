@@ -14,7 +14,7 @@ import { PATCH_SYSTEMS_ROUTE } from '../../../../../../Routes/constants';
 import type { SystemItem } from '../../../../../../services/Systems/SystemsApi';
 import HelpPopover from '../../../../../../components/HelpPopover';
 import React from 'react';
-import { isMinorRelease } from 'Pages/Templates/TemplatesTable/components/templateHelpers';
+import { isMinorRelease } from 'Pages/Templates/TemplateDetails/templateDetailHelpers';
 
 type Props = Pick<SystemItem, 'id'> &
   Pick<SystemItem['attributes'], 'display_name' | 'rhsm' | 'satellite_managed'> & {
