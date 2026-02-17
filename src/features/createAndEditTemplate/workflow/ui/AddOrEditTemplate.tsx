@@ -73,91 +73,97 @@ const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBa
     cancelButtonProps: { ouiaId: 'wizard-cancel-btn' },
   };
 
-  return (
-    <Modal
-      {...modalProps}
-      variant={ModalVariant.large}
-      isOpen
-      onClose={isEmptyTemplateRequest && isEditTemplate ? onCancel : undefined}
-      disableFocusTrap
-    >
-      {isEmptyTemplateRequest && isEditTemplate ? (
+  const isEditTemplateLoading = isEmptyTemplateRequest && isEditTemplate;
+
+  if (isEditTemplateLoading) {
+    return (
+      <Modal
+        {...modalProps}
+        variant={ModalVariant.large}
+        isOpen
+        onClose={onCancel}
+        disableFocusTrap
+      >
         <Bullseye className={classes.minHeightForSpinner}>
           <Spinner size='xl' />
         </Bullseye>
-      ) : (
-        <Wizard
-          header={
-            <>
-              <WizardUrlSync onCancel={onCancel} />
-              <WizardHeader {...wizardHeaderProps} onClose={onCancel} />
-            </>
-          }
-          onClose={onCancel}
-          startIndex={initialIndex}
-          onStepChange={(_, currentStep) => {
-            setUrlSearchParams({ tab: String(currentStep.id) });
-          }}
+      </Modal>
+    );
+  }
+
+  return (
+    <Modal {...modalProps} variant={ModalVariant.large} isOpen onClose={undefined} disableFocusTrap>
+      <Wizard
+        header={
+          <>
+            <WizardUrlSync onCancel={onCancel} />
+            <WizardHeader {...wizardHeaderProps} onClose={onCancel} />
+          </>
+        }
+        onClose={onCancel}
+        startIndex={initialIndex}
+        onStepChange={(_, currentStep) => {
+          setUrlSearchParams({ tab: String(currentStep.id) });
+        }}
+      >
+        <WizardStep
+          name='Content'
+          id='content'
+          isExpandable
+          steps={[
+            <WizardStep
+              name='Define content'
+              id='define-content'
+              key='define-content-key'
+              footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(2) }}
+            >
+              <DefineContentStep />
+            </WizardStep>,
+            <WizardStep
+              isDisabled={checkIsDisabledStep(2)}
+              name='Red Hat repositories'
+              id='redhat-repositories'
+              key='redhat-repositories-key'
+              footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(3) }}
+            >
+              <RedhatRepositoriesStep />
+            </WizardStep>,
+            <WizardStep
+              isDisabled={checkIsDisabledStep(3)}
+              name='Other repositories'
+              id='custom-repositories'
+              key='custom-repositories-key'
+              footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(4) }}
+            >
+              <CustomRepositoriesStep />
+            </WizardStep>,
+          ]}
+        />
+        <WizardStep
+          name='Set up date'
+          id='set-up-date'
+          isDisabled={checkIsDisabledStep(4)}
+          footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(5) }}
         >
-          <WizardStep
-            name='Content'
-            id='content'
-            isExpandable
-            steps={[
-              <WizardStep
-                name='Define content'
-                id='define-content'
-                key='define-content-key'
-                footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(2) }}
-              >
-                <DefineContentStep />
-              </WizardStep>,
-              <WizardStep
-                isDisabled={checkIsDisabledStep(2)}
-                name='Red Hat repositories'
-                id='redhat-repositories'
-                key='redhat-repositories-key'
-                footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(3) }}
-              >
-                <RedhatRepositoriesStep />
-              </WizardStep>,
-              <WizardStep
-                isDisabled={checkIsDisabledStep(3)}
-                name='Other repositories'
-                id='custom-repositories'
-                key='custom-repositories-key'
-                footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(4) }}
-              >
-                <CustomRepositoriesStep />
-              </WizardStep>,
-            ]}
-          />
-          <WizardStep
-            name='Set up date'
-            id='set-up-date'
-            isDisabled={checkIsDisabledStep(4)}
-            footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(5) }}
-          >
-            <SetUpDateStep />
-          </WizardStep>
-          <WizardStep
-            isDisabled={checkIsDisabledStep(5)}
-            footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(6) }}
-            name='Detail'
-            id='detail'
-          >
-            <DetailStep />
-          </WizardStep>
-          <WizardStep
-            isDisabled={checkIsDisabledStep(6)}
-            name='Review'
-            id='review'
-            footer={footer(onCancel)}
-          >
-            <ReviewStep />
-          </WizardStep>
-        </Wizard>
-      )}
+          <SetUpDateStep />
+        </WizardStep>
+        <WizardStep
+          isDisabled={checkIsDisabledStep(5)}
+          footer={{ ...sharedFooterProps, isNextDisabled: checkIsDisabledStep(6) }}
+          name='Detail'
+          id='detail'
+        >
+          <DetailStep />
+        </WizardStep>
+        <WizardStep
+          isDisabled={checkIsDisabledStep(6)}
+          name='Review'
+          id='review'
+          footer={footer(onCancel)}
+        >
+          <ReviewStep />
+        </WizardStep>
+      </Wizard>
     </Modal>
   );
 };
