@@ -8,7 +8,7 @@ jest.mock('services/Content/ContentQueries', () => ({
   useContentListQuery: jest.fn(),
 }));
 
-jest.mock('Pages/Repositories/ContentListTable/components/StatusIcon', () => () => 'StatusIcon');
+jest.mock('@src/components/StatusIcon/StatusIcon', () => () => 'StatusIcon');
 
 jest.mock('../AddTemplateContext', () => ({
   useAddTemplateContext: jest.fn(),
