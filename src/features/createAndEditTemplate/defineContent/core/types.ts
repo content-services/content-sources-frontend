@@ -5,24 +5,24 @@ import {
   OSVersion,
 } from 'features/createAndEditTemplate/shared/types/types';
 
-export type RepositoryVersionsLists = {
+export type SystemConfigurationsLists = {
   architectures: Architecture[];
   osVersions: OSVersion[];
 };
 
-export type SelectedRepositoryVersion = {
+export type SelectedSystemConfiguration = {
   architecture: AllowedArchitecture;
   osVersion: AllowedOSVersion;
 };
 
 export type VisibleListCategory = 'architecture' | 'osVersion';
 
-export type VersionDescriptors = {
+export type SystemDescriptors = {
   name: string;
   label: string;
 };
 
-export type RepositoryVersionResponse = {
-  distribution_versions: Array<VersionDescriptors>;
-  distribution_arches: Array<VersionDescriptors>;
+export type SystemConfigurationsResponse = {
+  distribution_versions: Array<SystemDescriptors>;
+  distribution_arches: Array<SystemDescriptors>;
 };

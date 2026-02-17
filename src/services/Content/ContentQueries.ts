@@ -54,6 +54,7 @@ import {
   TEMPLATE_SNAPSHOTS_KEY,
   TEMPLATES_FOR_SNAPSHOTS,
 } from '../Templates/TemplateQueries';
+import { FetchSystemConfigurations } from 'features/createAndEditTemplate/defineContent/core/ports';
 
 export const CONTENT_LIST_KEY = 'CONTENT_LIST_KEY';
 export const POPULAR_REPOSITORIES_LIST_KEY = 'POPULAR_REPOSITORIES_LIST_KEY';
@@ -561,7 +562,7 @@ export const useGetSnapshotsByDates = (uuids: string[], date: string) => {
   });
 };
 
-export const useRepositoryParams = () =>
+export const useRepositoryParams: FetchSystemConfigurations = () =>
   useQuery<RepositoryParamsResponse>(REPOSITORY_PARAMS_KEY, getRepositoryParams, {
     keepPreviousData: true,
     staleTime: Infinity,

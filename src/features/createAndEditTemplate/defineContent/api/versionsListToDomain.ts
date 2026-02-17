@@ -6,9 +6,9 @@ import {
   Architecture,
   OSVersion,
 } from 'features/createAndEditTemplate/shared/types/types';
-import { RepositoryVersionResponse, RepositoryVersionsLists } from './types';
+import { SystemConfigurationsResponse, SystemConfigurationsLists } from '../core/types';
 
-type ToDomain = (raw: RepositoryVersionResponse | undefined) => RepositoryVersionsLists;
+type ToDomain = (raw: SystemConfigurationsResponse | undefined) => SystemConfigurationsLists;
 
 export const toDomain: ToDomain = (raw) => {
   if (!raw) {

@@ -2,129 +2,115 @@ import {
   useTemplateRequestApi,
   useTemplateRequestState,
 } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
-import { ContentOrigin } from 'services/Content/ContentApi';
-import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
+import { createContext, ReactNode, useContext, useLayoutEffect, useMemo } from 'react';
 import { useEditTemplateState } from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
-import { lookupUrls } from 'features/createAndEditTemplate/shared/core/lookupUrls';
-import { filterHardcodedUUIDs } from '../core/filterHardcodedUUIDs';
 import {
   AllowedArchitecture,
   AllowedOSVersion,
   Architecture,
   FirstEmpty,
-  HardcodedRepositoryUrls,
   OSVersion,
 } from 'features/createAndEditTemplate/shared/types/types';
-import { toDomain } from '../core/versionsListToDomain';
-
-export type SelectArchitecture = (architecture: AllowedArchitecture) => void;
-export type SelectOSVersion = (version: AllowedOSVersion) => void;
+import { useChooseHardcodedUUIDs } from '../core/use-cases/chooseHardcodedUUIDs';
+import { useInitializeSystemsLists } from '../core/use-cases/initializeSystemsLists';
+import { SelectArchitecture, SelectOSVersion } from '../core/ports';
 
 type DefineContentApiType = {
-  architectures: Architecture[];
-  osVersions: OSVersion[];
-  selectedArchitecture: FirstEmpty<AllowedArchitecture>;
-  selectedOSVersion: FirstEmpty<AllowedOSVersion>;
   onSelectArchitecture: SelectArchitecture;
   onSelectOSVersion: SelectOSVersion;
+};
+
+const initialApi = {
+  onSelectArchitecture: () => {},
+  onSelectOSVersion: () => {},
+};
+
+type DefineContentStateType = {
+  selectedArchitecture: FirstEmpty<AllowedArchitecture>;
+  selectedOSVersion: FirstEmpty<AllowedOSVersion>;
   isArchitectureItemSelected: (item: AllowedArchitecture) => boolean;
   isOSVersionItemSelected: (item: AllowedOSVersion) => boolean;
 };
 
-const initialData = {
-  architectures: [],
-  osVersions: [],
+const initialState = {
   selectedArchitecture: undefined,
   selectedOSVersion: undefined,
-  setVersionOpen: () => {},
-  setArchOpen: () => {},
-  onSelectArchitecture: () => {},
-  onSelectOSVersion: () => {},
   isArchitectureItemSelected: () => false,
   isOSVersionItemSelected: () => false,
 };
 
-const DefineContentApi = createContext<DefineContentApiType>(initialData);
+export type SystemConfigurationsLists = {
+  architectures: Architecture[];
+  osVersions: OSVersion[];
+};
+
+export const initialSystemsLists = {
+  architectures: [],
+  osVersions: [],
+};
+
+const SystemConfigurationsLists = createContext<SystemConfigurationsLists>(initialSystemsLists);
+export const useSystemLists = () => useContext(SystemConfigurationsLists);
+
+const DefineContentApi = createContext<DefineContentApiType>(initialApi);
 export const useDefineContentApi = () => useContext(DefineContentApi);
+
+const DefineContentState = createContext<DefineContentStateType>(initialState);
+export const useDefineContentState = () => useContext(DefineContentState);
 
 type DefineContentStoreType = {
   children: ReactNode;
 };
 
 export const DefineContentStore = ({ children }: DefineContentStoreType) => {
-  const [hardcodedRedhatRepositories, setHardcodeRepositories] = useState<HardcodedRepositoryUrls>([
-    '',
-    '',
-  ]);
-
-  const { setHardcodedUUIDs, setOtherUUIDs, setArchitecture, setOSVersion } =
-    useTemplateRequestApi();
+  const { setArchitecture, setOSVersion, resetTemplateRequestContent } = useTemplateRequestApi();
   const { selectedArchitecture, selectedOSVersion } = useTemplateRequestState();
+  const { isEditTemplate } = useEditTemplateState();
 
-  const { uuid } = useEditTemplateState();
+  const systemsLists = useInitializeSystemsLists();
+  const chooseHardcodedRedhatRepositories = useChooseHardcodedUUIDs();
 
-  // >>>>>>>>
-  // get archs and versions to populate dropdowns
-  const { data: lists } = useRepositoryParams();
+  const defineContentApi = useMemo(() => {
+    const onSelectArchitecture: SelectArchitecture = (type) => {
+      setArchitecture(type);
+    };
+    const onSelectOSVersion: SelectOSVersion = (type) => {
+      setOSVersion(type);
+    };
+    return { onSelectArchitecture, onSelectOSVersion };
+  }, []);
 
-  const systemsLists = useMemo(() => toDomain(lists), [lists]);
-  // <<<<<<<<
+  const defineContentState = useMemo(() => {
+    const isArchitectureItemSelected = (item) => item === selectedArchitecture;
+    const isOSVersionItemSelected = (item) => item === selectedOSVersion;
+    return {
+      selectedArchitecture,
+      selectedOSVersion,
+      isArchitectureItemSelected,
+      isOSVersionItemSelected,
+    };
+  }, [selectedArchitecture, selectedOSVersion]);
 
-  const onSelectArchitecture = (type) => {
-    setArchitecture(type);
-  };
-  const onSelectOSVersion = (type) => {
-    setOSVersion(type);
-  };
+  // automatically retrigger on arch or osversion change
+  useLayoutEffect(() => {
+    const isContentFilled = !!selectedArchitecture && !!selectedOSVersion;
 
-  const isArchitectureItemSelected = (item) => item === selectedArchitecture;
-  const isOSVersionItemSelected = (item) => item === selectedOSVersion;
-
-  // >>>>>>>>
-  // 2. fetch those hardcoded repositories
-  const { data } = useContentListQuery(
-    1,
-    10,
-    { urls: hardcodedRedhatRepositories },
-    '',
-    [ContentOrigin.REDHAT],
-    !!hardcodedRedhatRepositories.length,
-  );
-
-  // 1. when a user selects arch and os
-  // get urls of harcoded repos
-  useEffect(() => {
-    if (!!selectedArchitecture && !!selectedOSVersion) {
-      const hardcodedUrls = lookupUrls({
+    if (isContentFilled && !isEditTemplate) {
+      resetTemplateRequestContent();
+      chooseHardcodedRedhatRepositories({
         architecture: selectedArchitecture,
         osVersion: selectedOSVersion,
       });
-      if (hardcodedUrls) {
-        setHardcodeRepositories(hardcodedUrls);
-      }
-      if (!uuid) setOtherUUIDs([]);
     }
-  }, [selectedArchitecture, selectedOSVersion, uuid]);
+  }, [selectedArchitecture, selectedOSVersion, isEditTemplate]);
 
-  // 3. filter out hardcoded uuids
-  useEffect(() => {
-    if (data?.data?.length) {
-      const uuids = filterHardcodedUUIDs(data.data, hardcodedRedhatRepositories);
-      setHardcodedUUIDs(uuids);
-    }
-  }, [data?.data]);
-  // <<<<<<<<
-
-  const api = {
-    selectedArchitecture,
-    selectedOSVersion,
-    onSelectArchitecture,
-    onSelectOSVersion,
-    isArchitectureItemSelected,
-    isOSVersionItemSelected,
-    ...systemsLists,
-  };
-
-  return <DefineContentApi.Provider value={api}>{children}</DefineContentApi.Provider>;
+  return (
+    <SystemConfigurationsLists.Provider value={systemsLists}>
+      <DefineContentApi.Provider value={defineContentApi}>
+        <DefineContentState.Provider value={defineContentState}>
+          {children}
+        </DefineContentState.Provider>
+      </DefineContentApi.Provider>
+    </SystemConfigurationsLists.Provider>
+  );
 };
