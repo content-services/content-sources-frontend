@@ -1,10 +1,10 @@
+import { formatTemplateDate } from 'features/createAndEditTemplate/shared/core/formatTemplateDate';
 import {
   TemplateRequestFinalized,
   TemplateRequestToSend,
   TemplateRequestWithDate,
   TemplateRequestWithLatestSnapshot,
 } from 'features/createAndEditTemplate/shared/types/types.compound';
-import { formatTemplateDate } from '../../shared/core/formatTemplateDate';
 
 type CreateTemplate = (templateRequest: TemplateRequestFinalized) => TemplateRequestToSend;
 
