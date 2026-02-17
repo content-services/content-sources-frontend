@@ -1,5 +1,3 @@
-import * as Yup from 'yup';
-
 export const hardcodeRedHatReposByArchAndVersion = (
   arch?: string,
   version?: string,
@@ -41,8 +39,3 @@ export const hardcodeRedHatReposByArchAndVersion = (
       return;
   }
 };
-
-export const TemplateValidationSchema = Yup.object().shape({
-  name: Yup.string().max(255, 'Too Long!').required('Required'),
-  description: Yup.string().max(255, 'Too Long!'),
-});
