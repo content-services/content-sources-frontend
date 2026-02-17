@@ -9,7 +9,7 @@ import {
   useWizardContext,
 } from '@patternfly/react-core';
 
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { AddTemplateContextProvider, useAddTemplateContext } from '../store/AddTemplateContext';
 import RedhatRepositoriesStep from '../../redhatRepositories/ui/RedhatRepositoriesStep';
 import CustomRepositoriesStep from '../../otherRepositories/ui/CustomRepositoriesStep';
@@ -20,9 +20,8 @@ import DetailStep from '../../describeTemplate/ui/DetailStep';
 import ReviewStep from '../../reviewTemplateRequest/ui/ReviewStep';
 import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
-import { useEffect, useRef } from 'react';
-import useRootPath from 'Hooks/useRootPath';
-import { TEMPLATES_ROUTE } from 'Routes/constants';
+import { useEffect } from 'react';
+import { useOnCancelModal } from '../core/cancelModal';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -87,15 +86,11 @@ type TemplateBaseProps = {
 
 const AddOrEditTemplateBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBaseProps) => {
   const classes = useStyles();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const rootPath = useRootPath();
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
 
-  // Store the original 'from' value on mount (before step navigation changes location.state)
-  const fromRef = useRef(location.state?.from);
-
   const { isEdit, templateRequest, checkIfCurrentStepValid, editUUID } = useAddTemplateContext();
+
+  const onCancel = useOnCancelModal();
 
   // useSafeUUIDParam in AddTemplateContext already validates the UUID
   // If in edit mode and UUID is invalid, it will be an empty string
@@ -109,16 +104,6 @@ const AddOrEditTemplateBase = ({ modalProps, wizardHeaderProps, footer }: Templa
       setUrlSearchParams({ tab: DEFAULT_STEP_ID }, { replace: true });
     }
   }, []);
-
-  const onCancel = () => {
-    if (fromRef.current === 'table') {
-      navigate(`${rootPath}/${TEMPLATES_ROUTE}`);
-    } else if (isEdit && editUUID) {
-      navigate(`${rootPath}/${TEMPLATES_ROUTE}/${editUUID}`);
-    } else {
-      navigate(`${rootPath}/${TEMPLATES_ROUTE}`);
-    }
-  };
 
   const sharedFooterProps = {
     nextButtonProps: { ouiaId: 'wizard-next-btn' },
