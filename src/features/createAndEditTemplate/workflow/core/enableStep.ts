@@ -1,39 +1,54 @@
-import { useCallback, useMemo } from 'react';
-import { useTemplateRequestState } from '../store/AddTemplateContext';
-import { isDateValid } from 'helpers';
+import { useCallback } from 'react';
+import { useTemplateRequestState } from '../store/TemplateStore';
 
-type CheckIfCurrentStepValid = (index: number) => boolean;
+type Step = number;
+type IsStepDisabled = boolean;
+
+const checkIsEnabledDefineContent = () => true;
+
+const checkAreEnabledAdditionalRepos = (templateRequest) => {
+  const { selectedArchitecture, selectedOSVersion } = templateRequest;
+  return !!selectedArchitecture && !!selectedOSVersion;
+};
+
+const checkAreEnabledOtherRepos = (templateRequest) => {
+  const { hardcodedUUIDs } = templateRequest;
+  return !!hardcodedUUIDs.length;
+};
+
+const checkAreEnabledRepositorySnapshots = (templateRequest) => {
+  const { hardcodedUUIDs } = templateRequest;
+  return !!hardcodedUUIDs.length;
+};
+
+const checkIsEnabledTemplateDescription = (templateRequest) => {
+  const { isLatestSnapshot, snapshotDate } = templateRequest;
+  return isLatestSnapshot || !!snapshotDate;
+};
+
+const checkIsEnabledTemplateReview = (templateRequest) => {
+  const { isLatestSnapshot, snapshotDate, title } = templateRequest;
+  return (isLatestSnapshot || !!snapshotDate) && !!title;
+};
+
+const STEPS = {
+  '1': checkIsEnabledDefineContent,
+  '2': checkAreEnabledAdditionalRepos,
+  '3': checkAreEnabledOtherRepos,
+  '4': checkAreEnabledRepositorySnapshots,
+  '5': checkIsEnabledTemplateDescription,
+  '6': checkIsEnabledTemplateReview,
+};
+
+export type CheckIfStepIsDisabled = (step: Step) => IsStepDisabled;
 
 export const useCheckIsDisabledStep = () => {
   const templateRequest = useTemplateRequestState();
 
-  const stepsValidArray = useMemo(() => {
-    const {
-      selectedArchitecture,
-      selectedOSVersion,
-      hardcodedUUIDs,
-      snapshotDate,
-      isLatestSnapshot,
-      title,
-    } = templateRequest;
-
-    return [
-      true,
-      selectedArchitecture && selectedOSVersion,
-      !!hardcodedUUIDs!.length,
-      !!hardcodedUUIDs!.length,
-      isLatestSnapshot || isDateValid(snapshotDate ?? ''),
-      !!title,
-    ] as boolean[];
-  }, [templateRequest]);
-
-  const checkIfCurrentStepValid: CheckIfCurrentStepValid = useCallback(
-    (stepIndex: number) => {
-      const stepsToCheck = stepsValidArray.slice(0, stepIndex + 1);
-      return !stepsToCheck.every((step) => step);
-    },
-    [stepsValidArray],
+  const checkIsDisabledStep: CheckIfStepIsDisabled = useCallback(
+    (step) => !STEPS[step](templateRequest),
+    [templateRequest],
   );
 
-  return { checkIfCurrentStepValid };
+  return { checkIsDisabledStep };
 };
