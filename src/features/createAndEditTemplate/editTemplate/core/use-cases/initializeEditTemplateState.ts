@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 
-import { isHardcodedRepoFactory, isNullDate, isRedhatRepo } from './templateRepositories';
-import { useFetchTemplateRepositories } from '../../../createAndEditTemplate/editTemplate/api/fetchTemplateRepos';
+import { useFetchTemplateRepositories } from '../../api/fetchTemplateRepos';
 import { useTemplateRequestApi } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
+
 import { formatDateForPicker } from 'helpers';
+import { isHardcodedRepoFactory, isNullDate, isRedhatRepo } from '../domain/templateRepositories';
 
 export const useInitializeEditTemplateState = () => {
   const fetchTemplateRepos = useFetchTemplateRepositories();
@@ -22,10 +23,11 @@ export const useInitializeEditTemplateState = () => {
   const initializeEditTemplateState = useCallback(async (template) => {
     // extract template template
     const { arch, version, repository_uuids, date, use_latest, name, description } = template;
-    const isHardcodedRepo = isHardcodedRepoFactory(arch, version);
 
-    // fetch all repositories
+    // fetch all repositories relevant for the template
     const repositories = await fetchTemplateRepos(repository_uuids);
+
+    const isHardcodedRepo = isHardcodedRepoFactory(arch, version);
 
     // set repository uuid into its respective type
     repositories.map((repository) => {

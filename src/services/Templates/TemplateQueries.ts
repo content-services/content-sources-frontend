@@ -8,16 +8,12 @@ import {
   getTemplates,
   TemplateCollectionResponse,
   deleteTemplateItem,
-  EditTemplateRequest,
-  EditTemplate,
   type SnapshotRpmCollectionResponse,
   getTemplatePackages,
   getTemplateErrata,
   getTemplateSnapshots,
   getTemplatesForSnapshots,
 } from './TemplateApi';
-import useNotification from 'Hooks/useNotification';
-import { AlertVariant } from '@patternfly/react-core';
 import { ErrataResponse, SnapshotListResponse } from 'services/Content/ContentApi';
 
 export const FETCH_TEMPLATE_KEY = 'FETCH_TEMPLATE_KEY';
@@ -30,34 +26,9 @@ export const TEMPLATES_FOR_SNAPSHOTS = 'TEMPLATES_BY_SNAPSHOTS_KEY';
 const TEMPLATE_LIST_POLLING_TIME = 15000; // 15 seconds
 const TEMPLATE_FETCH_POLLING_TIME = 5000; // 5 seconds
 
-export const useEditTemplateQuery = (queryClient: QueryClient, request: EditTemplateRequest) => {
-  const errorNotifier = useErrorNotification();
-  const { notify } = useNotification();
-  return useMutation(() => EditTemplate(request), {
-    onSuccess: () => {
-      notify({
-        variant: AlertVariant.success,
-        title: `Successfully edited template '${request.name}'`,
-      });
-
-      queryClient.invalidateQueries(GET_TEMPLATES_KEY);
-      queryClient.invalidateQueries(FETCH_TEMPLATE_KEY);
-      queryClient.invalidateQueries(GET_TEMPLATE_PACKAGES_KEY);
-      queryClient.invalidateQueries(TEMPLATE_ERRATA_KEY);
-      queryClient.invalidateQueries(TEMPLATES_FOR_SNAPSHOTS);
-      queryClient.invalidateQueries(TEMPLATE_SNAPSHOTS_KEY);
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (err: any) => {
-      errorNotifier(
-        `Error editing template '${request.name}'`,
-        'An error occurred',
-        err,
-        'edit-template-error',
-      );
-    },
-  });
-};
+// --
+// useEditTemplateMutation in src/features/createAndEditTemplate/editTemplate/api/
+// --
 
 export const useFetchTemplate = (
   uuid: string,

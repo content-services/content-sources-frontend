@@ -1,10 +1,7 @@
-import useRootPath from 'Hooks/useRootPath';
-import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
 import { createContext, ReactNode, useContext, useLayoutEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useFetchTemplate } from 'services/Templates/TemplateQueries';
-import { useInitializeEditTemplateState } from '../core/initializeEditTemplateState';
+import { useInitializeEditTemplateState } from '../core/use-cases/initializeEditTemplateState';
 import { TemplateUUID } from 'features/createAndEditTemplate/shared/types/types';
+import { useGetTemplate } from '../api/useGetTemplate';
 
 type EditTemplateState = {
   uuid: TemplateUUID;
@@ -24,30 +21,20 @@ const EditTemplateState = createContext<EditTemplateState>(initialEditTemplateSt
 export const useEditTemplateState = () => useContext(EditTemplateState);
 
 export const EditTemplateStore = ({ children }: EditTemplateStoreType) => {
-  const navigate = useNavigate();
-  const rootPath = useRootPath();
-
-  // extract uuid
-  const uuid = useSafeUUIDParam('templateUUID');
-
-  // getTemplate
-  const { data: editTemplateData, isError } = useFetchTemplate(uuid!, !!uuid);
-
+  const { template, uuid } = useGetTemplate();
   const { initializeEditTemplateState } = useInitializeEditTemplateState();
 
-  // populate template request
+  // populate TemplateStore
   useLayoutEffect(() => {
-    if (editTemplateData !== undefined) {
-      initializeEditTemplateState(editTemplateData);
+    if (template !== undefined) {
+      initializeEditTemplateState(template);
     }
-  }, [editTemplateData]);
+  }, [template]);
 
   const templateUUID = useMemo(() => {
     const isEditTemplate = uuid !== '';
     return { uuid, isEditTemplate };
   }, [uuid]);
-
-  if (isError) navigate(rootPath);
 
   return <EditTemplateState.Provider value={templateUUID}>{children}</EditTemplateState.Provider>;
 };

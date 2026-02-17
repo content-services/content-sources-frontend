@@ -7,38 +7,14 @@ import {
   useWizardContext,
   WizardFooterWrapper,
 } from '@patternfly/react-core';
-import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
-import { useEditTemplateQuery } from 'services/Templates/TemplateQueries';
-import { useEditTemplateState } from '../store/EditTemplateStore';
-import { useQueryClient } from 'react-query';
-import { editTemplateToSend } from '../core/editTemplateToSend';
-import { useMemo } from 'react';
-import { checkTemplateRequestIsFinalized } from 'features/createAndEditTemplate/shared/core/checkTemplateRequestIsFinalized';
+import { useConfirmEditTemplate } from '../core/use-cases/confirmEditTemplate';
 
 type EditTemplateFooterProps = {
   cancelModal: () => void;
 };
 
 export const EditTemplateFooter = ({ cancelModal }: EditTemplateFooterProps) => {
-  const templateRequest = useTemplateRequestState();
-  const { uuid } = useEditTemplateState();
-
-  const queryClient = useQueryClient();
-
-  const templateRequestToSend = useMemo(() => {
-    const { isFinalized, template } = checkTemplateRequestIsFinalized(templateRequest);
-    if (!isFinalized) {
-      throw new Error('Template Request has missing properties');
-    }
-    const templateWithUUID = { ...template, uuid };
-    return editTemplateToSend(templateWithUUID);
-  }, [templateRequest, uuid]);
-
-  const { mutateAsync: editTemplate, isLoading } = useEditTemplateQuery(
-    queryClient,
-    templateRequestToSend,
-  );
-
+  const { editTemplate, isLoading } = useConfirmEditTemplate();
   const { goToPrevStep } = useWizardContext();
 
   return (

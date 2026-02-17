@@ -10,6 +10,7 @@ import {
 import { objectToUrlParams } from 'helpers';
 import { AdminTask } from 'services/Admin/AdminTaskApi';
 import { FullTemplate } from 'features/createAndEditTemplate/shared/types/types.template.full';
+import { MutateEditTemplate } from 'features/createAndEditTemplate/editTemplate/core/ports';
 
 export interface TemplateRequest {
   arch: string;
@@ -177,7 +178,7 @@ export const getTemplatesForSnapshots: (
   return data;
 };
 
-export const EditTemplate: (request: EditTemplateRequest) => Promise<void> = async (request) => {
+export const editTemplate: MutateEditTemplate = async (request) => {
   const { data } = await axios.put(`/api/content-sources/v1.0/templates/${request.uuid}`, request);
   return data;
 };
