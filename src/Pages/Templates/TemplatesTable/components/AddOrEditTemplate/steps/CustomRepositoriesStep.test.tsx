@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 import CustomRepositoriesStep from './CustomRepositoriesStep';
@@ -10,8 +10,8 @@ jest.mock('services/Content/ContentQueries', () => ({
 
 jest.mock('Pages/Repositories/ContentListTable/components/StatusIcon', () => () => 'StatusIcon');
 
-jest.mock('../AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
+jest.mock('../AddOrEditTemplateContext', () => ({
+  useAddOrEditTemplateContext: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -29,7 +29,7 @@ it('expect CustomRepositoriesStep to render correctly', () => {
     },
   }));
 
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     isEdit: false,
     templateRequest: defaultTemplateItem,
     setSelectedCustomRepos: () => undefined,

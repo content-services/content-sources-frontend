@@ -1,52 +1,76 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../AddTemplateContext';
-import { defaultTemplateItem, testRepositoryParamsResponse } from 'testingHelpers';
+import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
+import {
+  defaultTemplateItem,
+  testRepositoryParamsResponse,
+  ReactQueryTestWrapper,
+} from 'testingHelpers';
 import DefineContentStep from './DefineContentStep';
+import useDistributionDetails from '../../../../../../Hooks/useDistributionDetails';
 
-jest.mock('../AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
+jest.mock('../AddOrEditTemplateContext', () => ({
+  useAddOrEditTemplateContext: jest.fn(),
+}));
+
+jest.mock('../../../../../../Hooks/useDistributionDetails', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 it('expect DefineContentStep to render correctly', () => {
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     isEdit: false,
     templateRequest: defaultTemplateItem,
     setTemplateRequest: () => undefined,
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
+    extended_release_features: testRepositoryParamsResponse.extended_release_features,
+    distribution_minor_versions: testRepositoryParamsResponse.distribution_minor_versions,
   }));
 
-  const { getByText } = render(<DefineContentStep />);
+  const versionDisplay = `RHEL ${defaultTemplateItem.version}`;
 
-  const archTextBox = getByText(defaultTemplateItem.arch);
+  (useDistributionDetails as jest.Mock).mockImplementation(() => ({
+    versionDisplay: () => versionDisplay,
+  }));
 
-  expect(archTextBox).toBeInTheDocument();
-  expect(archTextBox).not.toHaveAttribute('disabled');
+  const { getByText } = render(
+    <ReactQueryTestWrapper>
+      <DefineContentStep />
+    </ReactQueryTestWrapper>,
+  );
 
-  const versionTextBox = getByText('el' + defaultTemplateItem.version);
+  const archMenuToggle = getByText(defaultTemplateItem.arch);
+  expect(archMenuToggle).toBeInTheDocument();
+  expect(archMenuToggle).not.toHaveAttribute('disabled');
 
-  expect(versionTextBox).toBeInTheDocument();
-  expect(versionTextBox).not.toHaveAttribute('disabled');
+  const versionMenuToggle = getByText(versionDisplay);
+  expect(versionMenuToggle).toBeInTheDocument();
+  expect(versionMenuToggle).not.toHaveAttribute('disabled');
 });
 
 it('expect DefineContentStep to render with disabled inputs', () => {
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     isEdit: true,
     templateRequest: defaultTemplateItem,
     setTemplateRequest: () => undefined,
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
+    extended_release_features: testRepositoryParamsResponse.extended_release_features,
+    distribution_minor_versions: testRepositoryParamsResponse.distribution_minor_versions,
   }));
 
-  const { getByTestId } = render(<DefineContentStep />);
+  const { getByTestId } = render(
+    <ReactQueryTestWrapper>
+      <DefineContentStep />
+    </ReactQueryTestWrapper>,
+  );
 
-  const archTextBox = getByTestId('restrict_to_architecture');
+  const archMenuToggle = getByTestId('restrict_to_architecture');
+  expect(archMenuToggle).toBeInTheDocument();
+  expect(archMenuToggle).toHaveAttribute('disabled');
 
-  expect(archTextBox).toBeInTheDocument();
-  expect(archTextBox).toHaveAttribute('disabled');
-
-  const versionTextBox = getByTestId('restrict_to_os_version');
-
-  expect(versionTextBox).toBeInTheDocument();
-  expect(versionTextBox).toHaveAttribute('disabled');
+  const versionMenuToggle = getByTestId('restrict_to_os_version');
+  expect(versionMenuToggle).toBeInTheDocument();
+  expect(versionMenuToggle).toHaveAttribute('disabled');
 });

@@ -34,7 +34,7 @@ import {
   Tooltip,
   TooltipPosition,
 } from '@patternfly/react-core';
-import useArchVersion from 'Hooks/useArchVersion';
+import useDistributionDetails from '../../../Hooks/useDistributionDetails';
 import dayjs from 'dayjs';
 import { useSearchParams, useNavigate, Outlet, useOutletContext } from 'react-router-dom';
 import Hide from 'components/Hide/Hide';
@@ -190,7 +190,7 @@ const ContentListTable = () => {
     versionDisplay,
     isError: repositoryParamsIsError,
     error: repositoryParamsError,
-  } = useArchVersion();
+  } = useDistributionDetails();
 
   // Column configuration combining display names and sort attributes
   // Selection is handled by DataView selection system, not individual columns

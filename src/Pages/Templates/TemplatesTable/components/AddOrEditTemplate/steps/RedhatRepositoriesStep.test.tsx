@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 import RedhatRepositoriesStep from './RedhatRepositoriesStep';
@@ -10,8 +10,8 @@ jest.mock('services/Content/ContentQueries', () => ({
 
 jest.mock('Pages/Repositories/ContentListTable/components/StatusIcon', () => () => 'StatusIcon');
 
-jest.mock('../AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
+jest.mock('../AddOrEditTemplateContext', () => ({
+  useAddOrEditTemplateContext: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -29,11 +29,11 @@ it('expect RedhatRepositoriesStep to render correctly', () => {
     },
   }));
 
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     templateRequest: defaultTemplateItem,
-    setSelectedRedhatRepos: () => undefined,
-    selectedRedhatRepos: new Set([defaultTemplateItem.uuid]),
-    hardcodedRedhatRepositoryUUIDS: new Set([defaultTemplateItem.uuid]),
+    setSelectedRedHatRepos: () => undefined,
+    selectedRedHatRepos: new Set([defaultTemplateItem.uuid]),
+    redHatCoreRepoUUIDS: new Set([defaultTemplateItem.uuid]),
   }));
 
   const { getByRole, getByText } = render(<RedhatRepositoriesStep />);

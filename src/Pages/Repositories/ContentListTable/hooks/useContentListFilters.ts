@@ -9,6 +9,7 @@ import { REPOSITORY_PARAMS_KEY } from '../../../../services/Content/ContentQueri
 import { QueryClient } from 'react-query';
 import useDebounce from '../../../../Hooks/useDebounce';
 import { useDataViewFilters } from '@patternfly/react-data-view';
+import { toRhelDisplayName } from '../../../../helpers';
 
 // Mapping from display names to backend API values
 const StatusDisplayMap = {
@@ -57,7 +58,7 @@ export const useContentListFilters = (queryClient: QueryClient) => {
       distribution_versions.map(
         (nameLabel: NameLabel) =>
           ({
-            label: nameLabel.name,
+            label: toRhelDisplayName(nameLabel.name),
             value: nameLabel.label,
             ['data-ouia-component-id']: `filter_${nameLabel.name}`,
           }) as unknown as DataViewFilterOption,

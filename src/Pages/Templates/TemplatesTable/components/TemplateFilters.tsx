@@ -26,6 +26,7 @@ import { useAppContext } from 'middleware/AppContext';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { useNavigate } from 'react-router-dom';
 import { TemplateFilterData } from 'services/Templates/TemplateApi';
+import { toRhelDisplayName } from '../../../../helpers';
 
 interface Props {
   isLoading?: boolean;
@@ -165,7 +166,7 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
                 isDisabled={isLoading}
                 isExpanded={isActionOpen}
               >
-                {selectedVersion || 'Filter by OS version'}
+                {selectedVersion ? toRhelDisplayName(selectedVersion) : 'Filter by OS version'}
               </MenuToggle>
             )}
             onOpenChange={(isOpen) => setActionOpen(isOpen)}
@@ -180,7 +181,7 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
                   component='button'
                   data-ouia-component-id={`filter_${version}`}
                 >
-                  {version}
+                  {toRhelDisplayName(version)}
                 </DropdownItem>
               ))}
             </DropdownList>
@@ -328,7 +329,7 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
           {selectedVersion ? (
             <LabelGroup categoryName='OS version'>
               <Label variant='outline' key={selectedVersion} onClose={() => setSelectedVersion('')}>
-                {selectedVersion}
+                {toRhelDisplayName(selectedVersion)}
               </Label>
             </LabelGroup>
           ) : (

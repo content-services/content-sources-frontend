@@ -11,10 +11,13 @@ import {
   DropdownItem,
   DropdownList,
 } from '@patternfly/react-core';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
+import { SUPPORTED_ARCHES, EUS, E4S, SUPPORTED_MAJOR_VERSIONS } from '../../templateHelpers';
+import useDistributionDetails from '../../../../../../Hooks/useDistributionDetails';
+import { toRhelDisplayName } from '../../../../../../helpers';
 
 const useStyles = createUseStyles({
   fullWidth: {
@@ -24,23 +27,54 @@ const useStyles = createUseStyles({
 });
 
 export default function DefineContentStep() {
-  const classes = useStyles();
   const [archOpen, setArchOpen] = useState(false);
   const [versionOpen, setVersionOpen] = useState(false);
+
   const {
     isEdit,
     templateRequest,
     setTemplateRequest,
     distribution_versions,
     distribution_arches,
-  } = useAddTemplateContext();
+  } = useAddOrEditTemplateContext();
+
+  const { versionDisplay, getStreamAvailability } = useDistributionDetails();
 
   const archesDisplay = (arch?: string) =>
     distribution_arches.find(({ label }) => arch === label)?.name || 'Select architecture';
 
-  const versionDisplay = (version?: string): string =>
-    // arm64 aarch64
-    distribution_versions.find(({ label }) => version === label)?.name || 'Select OS version';
+  const reconcileExtendedRelease = (extendedRelease: string | undefined, forVersion: string) => {
+    // If the selected update stream is no longer available for the OS new version, wipe it
+    if (!extendedRelease) return '';
+
+    const [isEusAvailable, isE4sAvailable] = getStreamAvailability(forVersion);
+
+    // If we selected EUS, but it's no longer available, wipe it
+    if (extendedRelease === EUS && !isEusAvailable) return '';
+
+    // If we selected E4S, but it's no longer available, wipe it
+    if (extendedRelease === E4S && !isE4sAvailable) return '';
+
+    return extendedRelease;
+  };
+
+  const handleVersionChange = (newVersion: string) => {
+    setTemplateRequest((prev) => {
+      const reconciledExtendedRelease = reconcileExtendedRelease(prev.extended_release, newVersion);
+      const extendedReleaseChanged = prev.extended_release !== reconciledExtendedRelease;
+
+      return {
+        ...prev,
+        version: newVersion,
+        // Only update extended_release if it actually changed
+        ...(extendedReleaseChanged && { extended_release: reconciledExtendedRelease }),
+        // If extended_release changed, also wipe extended_release_version
+        ...(extendedReleaseChanged && { extended_release_version: '' }),
+      };
+    });
+  };
+
+  const classes = useStyles();
 
   return (
     <Grid hasGutter>
@@ -91,7 +125,7 @@ export default function DefineContentStep() {
           >
             <DropdownList>
               {distribution_arches
-                .filter(({ label }) => ['x86_64', 'aarch64'].includes(label))
+                .filter(({ label }) => SUPPORTED_ARCHES.includes(label))
                 .map(({ label, name }) => (
                   <DropdownItem
                     key={label}
@@ -108,8 +142,8 @@ export default function DefineContentStep() {
         </FormGroup>
         <FormGroup label='OS version' isRequired>
           <Dropdown
-            onSelect={(_, val) => {
-              setTemplateRequest((prev) => ({ ...prev, version: val as string }));
+            onSelect={(_, value) => {
+              handleVersionChange(value as string);
               setVersionOpen(false);
             }}
             toggle={(toggleRef) => (
@@ -129,7 +163,7 @@ export default function DefineContentStep() {
                   onClick={() => setVersionOpen((prev) => !prev)}
                   isExpanded={versionOpen}
                 >
-                  {versionDisplay(templateRequest?.version)}
+                  {versionDisplay(templateRequest?.version) || 'Select OS version'}
                 </MenuToggle>
               </ConditionalTooltip>
             )}
@@ -138,7 +172,7 @@ export default function DefineContentStep() {
           >
             <DropdownList>
               {distribution_versions
-                .filter(({ label }) => ['8', '9', '10'].includes(label))
+                .filter(({ label }) => SUPPORTED_MAJOR_VERSIONS.includes(label))
                 .map(({ label, name }) => (
                   <DropdownItem
                     key={label}
@@ -147,7 +181,7 @@ export default function DefineContentStep() {
                     component='button'
                     data-ouia-component-id={`filter_${label}`}
                   >
-                    {name}
+                    {toRhelDisplayName(name)}
                   </DropdownItem>
                 ))}
             </DropdownList>

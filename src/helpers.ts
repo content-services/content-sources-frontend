@@ -76,3 +76,15 @@ export const isEPELUrl = (repoUrl) => {
   ];
   return epelUrls.includes(repoUrl);
 };
+
+/**
+ * Converts standard internal labels (e.g., "el9") to user-friendly names (e.g., "RHEL 9").
+ * Returns the original string if it doesn't match the expected "el[Number]" format.
+ */
+export const toRhelDisplayName = (name: string): string => {
+  if (/^el\d+(\.\d+)*$/.test(name)) {
+    return `RHEL ${name.slice(2)}`;
+  }
+
+  return name;
+};

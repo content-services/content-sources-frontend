@@ -6,38 +6,45 @@ import {
   ContentVariants,
   Title,
 } from '@patternfly/react-core';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import { useMemo, useState } from 'react';
 import { formatDateDDMMMYYYY } from 'helpers';
+import useDistributionDetails from '../../../../../../Hooks/useDistributionDetails';
 
 export default function ReviewStep() {
   const [expanded, setExpanded] = useState(new Set([0]));
   const {
     templateRequest,
-    selectedRedhatRepos,
-    hardcodedRedhatRepositoryUUIDS,
+    selectedRedHatRepos,
+    redHatCoreRepoUUIDS,
     selectedCustomRepos,
     distribution_arches,
-    distribution_versions,
     isEdit,
-  } = useAddTemplateContext();
+    useExtendedSupport,
+  } = useAddOrEditTemplateContext();
+
+  const { versionDisplay, getStreamName, getMinorVersionName } = useDistributionDetails();
 
   const archesDisplay = (arch?: string) =>
     distribution_arches.find(({ label }) => arch === label)?.name || 'Select architecture';
-
-  const versionDisplay = (version?: string): string =>
-    // arm64 aarch64
-    distribution_versions.find(({ label }) => version === label)?.name || 'Select version';
 
   const reviewTemplate = useMemo(() => {
     const { arch, version, date, name, description } = templateRequest;
     const review = {
       Content: {
         Architecture: archesDisplay(arch),
-        'OS version': versionDisplay(version),
-        'Pre-selected Red Hat repositories': hardcodedRedhatRepositoryUUIDS.size,
-        'Additional Red Hat repositories':
-          selectedRedhatRepos.size - hardcodedRedhatRepositoryUUIDS.size,
+        'OS version': versionDisplay(version) || 'Select version',
+        ...(useExtendedSupport
+          ? {
+              'Update stream': getStreamName(templateRequest.extended_release),
+              'Minor version': getMinorVersionName(
+                version,
+                templateRequest.extended_release_version,
+              ),
+            }
+          : {}),
+        'Core Red Hat repositories': redHatCoreRepoUUIDS.size,
+        'Additional Red Hat repositories': selectedRedHatRepos.size - redHatCoreRepoUUIDS.size,
         'Custom repositories': selectedCustomRepos.size,
       },
       Date: {

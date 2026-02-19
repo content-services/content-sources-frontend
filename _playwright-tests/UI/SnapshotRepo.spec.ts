@@ -165,7 +165,7 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('button', { name: 'filter architecture' }).click();
       await page.getByRole('menuitem', { name: 'aarch64' }).click();
       await page.getByRole('button', { name: 'filter OS version' }).click();
-      await page.getByRole('menuitem', { name: 'el9' }).click();
+      await page.getByRole('menuitem', { name: 'RHEL 9' }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       const modalPage = page.getByTestId('add_template_modal');
       const rowRHELRepo = await getRowByNameOrUrl(modalPage, smallRHRepo);

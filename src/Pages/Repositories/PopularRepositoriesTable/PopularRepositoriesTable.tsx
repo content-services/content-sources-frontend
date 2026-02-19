@@ -49,7 +49,7 @@ import { AddRepo } from './components/AddRepo';
 
 import { DELETE_ROUTE } from 'Routes/constants';
 import { Outlet, useNavigate, useOutletContext } from 'react-router-dom';
-import useArchVersion from 'Hooks/useArchVersion';
+import useDistributionDetails from '../../../Hooks/useDistributionDetails';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 
 const useStyles = createUseStyles({
@@ -114,7 +114,7 @@ const PopularRepositoriesTable = () => {
     isLoading: repositoryParamsLoading,
     isError: repositoryParamsIsError,
     error: repositoryParamsError,
-  } = useArchVersion();
+  } = useDistributionDetails();
 
   const onDropdownToggle = () => {
     setIsActionOpen((prev) => !prev);

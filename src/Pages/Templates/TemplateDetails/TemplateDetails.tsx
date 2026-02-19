@@ -18,7 +18,7 @@ import { createUseStyles } from 'react-jss';
 import { TEMPLATES_ROUTE } from 'Routes/constants';
 import useRootPath from 'Hooks/useRootPath';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
-import useArchVersion from 'Hooks/useArchVersion';
+import useDistributionDetails from '../../../Hooks/useDistributionDetails';
 import DetailItem from './components/DetaiItem';
 import Hide from 'components/Hide/Hide';
 import { formatDateDDMMMYYYY } from 'helpers';
@@ -73,7 +73,7 @@ export default function TemplateDetails() {
     error: repositoryParamsError,
     archesDisplay,
     versionDisplay,
-  } = useArchVersion();
+  } = useDistributionDetails();
 
   // Error is caught in the wrapper component
   if (isError) throw error;
@@ -105,7 +105,7 @@ export default function TemplateDetails() {
               <Title headingLevel='h1'>{data?.name}</Title>
               <LabelGroup className={classes.labelGroup}>
                 <Label isCompact color='blue'>
-                  {data?.version ? versionDisplay([data?.version]) : ''}
+                  {versionDisplay(data?.version)}
                 </Label>
                 <Label isCompact color='blue'>
                   {archesDisplay(data?.arch)}
