@@ -36,7 +36,7 @@ import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import {
   isMinorRelease,
   TEMPLATE_SYSTEMS_UPDATE_LIMIT,
-} from 'Pages/Templates/TemplatesTable/components/templateHelpers';
+} from 'Pages/Templates/TemplateDetails/templateDetailHelpers';
 
 const useStyles = createUseStyles({
   topContainer: {

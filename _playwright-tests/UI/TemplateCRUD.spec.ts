@@ -17,7 +17,8 @@ const repoNameX86 = `${repoNamePrefix}-x86_64-${randomName()}`;
 const repoNameNoSnaps = `${repoNamePrefix}-introspect-only-${randomName()}`;
 const templateName = `${templateNamePrefix}-${randomName()}`;
 
-const smallRHRepo = 'Red Hat CodeReady Linux Builder for RHEL 9 ARM 64 (RPMs)';
+const appstreamRepoName = 'Red Hat Enterprise Linux 10 for ARM 64 - AppStream (RPMs)';
+const baseOSRepoName = 'Red Hat Enterprise Linux 10 for ARM 64 - BaseOS (RPMs)';
 
 test.describe('Templates CRUD', () => {
   test('Add, Read, update, delete a template', async ({ page, client, cleanup, unusedRepoUrl }) => {
@@ -37,7 +38,7 @@ test.describe('Templates CRUD', () => {
       // Create second repo (x86_64, with snapshot)
       const repoDataX86 = {
         distribution_arch: 'x86_64',
-        distribution_versions: ['8', '9'],
+        distribution_versions: ['9', '10'],
         name: repoNameX86,
         origin: 'external',
         snapshot: true,
@@ -52,7 +53,7 @@ test.describe('Templates CRUD', () => {
       // Create third repo ( Any arch, introspect only, no snapshots )
       const repoDataNoSnaps = {
         distribution_arch: '',
-        distribution_versions: ['8', '9'],
+        distribution_versions: ['9', '10'],
         name: repoNameNoSnaps,
         origin: 'external',
         snapshot: false,
@@ -68,26 +69,49 @@ test.describe('Templates CRUD', () => {
     await test.step('Create a template', async () => {
       await navigateToTemplates(page);
       await page.getByRole('button', { name: 'Create template' }).click();
+
+      // step 1
+      // Select Repo Version
       await page.getByRole('button', { name: 'filter architecture' }).click();
       await page.getByRole('menuitem', { name: 'aarch64' }).click();
       await page.getByRole('button', { name: 'filter OS version' }).click();
-      await page.getByRole('menuitem', { name: 'el9' }).click();
+      await page.getByRole('menuitem', { name: 'el10' }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+      // step 2
+      // Select Additional Repos
+      // No additional repos required to select
+
       const modalPage = page.getByTestId('add_template_modal');
-      const rowRHELRepo = await getRowByNameOrUrl(modalPage, smallRHRepo);
-      await rowRHELRepo.getByLabel('Select row').click();
+
+      // appstream repo preselected, its checkbox disabled
+      const appstreamRepo = await getRowByNameOrUrl(modalPage, appstreamRepoName);
+      const appstreamRepoCheckbox = appstreamRepo.getByLabel('Select row');
+      await expect(appstreamRepoCheckbox).toBeDisabled();
+      await expect(appstreamRepoCheckbox).toBeChecked();
+
+      // baseOS repo preselected, its checkbox disabled
+      const baseOSRepo = await getRowByNameOrUrl(modalPage, baseOSRepoName);
+      const baseOSRepoCheckbox = baseOSRepo.getByLabel('Select row');
+      await expect(baseOSRepoCheckbox).toBeDisabled();
+      await expect(baseOSRepoCheckbox).toBeChecked();
+
       await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+      // step 3
+      // Select custom repo
       // Select first custom repo (aarch64)
-      const rowRepo = await getRowByNameOrUrl(modalPage, repoName);
-      await rowRepo.getByLabel('Select row').click();
+      const customRepo = await getRowByNameOrUrl(modalPage, repoName);
+      await customRepo.getByLabel('Select row').click();
 
       // Verify repo without snapshots appears but checkbox is disabled
-      const rowNoSnaps = await getRowByNameOrUrl(modalPage, repoNameNoSnaps);
-      await expect(rowNoSnaps).toBeVisible();
-      const noSnapsCheckbox = rowNoSnaps.getByLabel('Select row');
-      await expect(noSnapsCheckbox).toBeDisabled();
+      const noSnapsRepo = await getRowByNameOrUrl(modalPage, repoNameNoSnaps);
+      await expect(noSnapsRepo).toBeVisible();
+      const noSnapsRepoCheckbox = noSnapsRepo.getByLabel('Select row');
+      await expect(noSnapsRepoCheckbox).toBeDisabled();
+
       // Verify warning message appears on hover
-      await noSnapsCheckbox.hover();
+      await noSnapsRepoCheckbox.hover();
       await expect(page.getByText('Snapshot not yet available for this repository')).toBeVisible();
 
       // Verify x86 repo cannot be added due to architecture mismatch (should not appear)
@@ -100,13 +124,23 @@ test.describe('Templates CRUD', () => {
       await expect(modalPage.getByText(repoNameX86)).toBeHidden();
 
       await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+      // step 4
+      // Select snapshot
       await page.getByText('Use the latest content', { exact: true }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+      // step 5
+      // Fill in template description
       await expect(page.getByText('Enter template details')).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(`${templateName}`);
-      await page.getByPlaceholder('Enter name').press('Enter');
-      await page.getByPlaceholder('Description').fill('Template test');
+      await page.getByPlaceholder('Enter title').fill(`${templateName}`);
+      await page.getByPlaceholder('Enter title').press('Enter');
+      await page.getByPlaceholder('Enter detail').fill('Template test');
+      await page.getByPlaceholder('Enter detail').press('Enter');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+      // step 6
+      // Template review and template creation
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();
       await waitForValidStatus(page, templateName);
@@ -121,7 +155,7 @@ test.describe('Templates CRUD', () => {
       await page.getByRole('button', { name: 'Actions' }).click();
       await page.getByRole('menuitem', { name: 'Edit' }).click();
       await expect(
-        page.getByRole('heading', { name: 'Define template content', exact: true }),
+        page.getByRole('heading', { name: 'Define Template Content', exact: true }),
       ).toBeVisible();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await expect(
@@ -143,10 +177,10 @@ test.describe('Templates CRUD', () => {
       await expect(page.getByRole('heading', { name: 'Set up date', exact: true })).toBeVisible();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await expect(page.getByText('Enter template details')).toBeVisible();
-      await expect(page.getByPlaceholder('Enter name')).toHaveValue(`${templateName}`);
-      await expect(page.getByPlaceholder('Description')).toHaveValue('Template test');
-      await page.getByPlaceholder('Enter name').fill(`${templateName}-edited`);
-      await page.getByPlaceholder('Description').fill('Template test edited');
+      await expect(page.getByPlaceholder('Enter title')).toHaveValue(`${templateName}`);
+      await expect(page.getByPlaceholder('Enter detail')).toHaveValue('Template test');
+      await page.getByPlaceholder('Enter title').fill(`${templateName}-edited`);
+      await page.getByPlaceholder('Enter detail').fill('Template test edited');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Confirm changes', exact: true }).click();
     });
