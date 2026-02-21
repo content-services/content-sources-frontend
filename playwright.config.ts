@@ -22,7 +22,12 @@ export default defineConfig({
         ['html', { outputFolder: 'playwright-report' }],
         [
           'playwright-ctrf-json-reporter',
-          { outputDir: 'playwright-ctrf', outputFile: 'playwright-ctrf.json' },
+          {
+            outputDir: 'playwright-ctrf',
+            outputFile: process.env.INTEGRATION
+              ? 'playwright-ctrf-integration.json'
+              : 'playwright-ctrf-ui.json',
+          },
         ],
         ['@currents/playwright'],
       ]
