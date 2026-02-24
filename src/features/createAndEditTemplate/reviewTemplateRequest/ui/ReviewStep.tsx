@@ -6,7 +6,7 @@ import {
   ContentVariants,
   Title,
 } from '@patternfly/react-core';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
 import { useMemo, useState } from 'react';
 import { formatDateDDMMMYYYY } from 'helpers';
 

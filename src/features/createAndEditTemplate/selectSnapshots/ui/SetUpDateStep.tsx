@@ -13,7 +13,7 @@ import {
   Radio,
   Title,
 } from '@patternfly/react-core';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
 import { useContentListQuery, useGetSnapshotsByDates } from 'services/Content/ContentQueries';
 import { useEffect, useMemo } from 'react';
 import Hide from 'components/Hide/Hide';

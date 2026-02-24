@@ -1,8 +1,8 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
 import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
 import { useContentListQuery } from 'services/Content/ContentQueries';
-import CustomRepositoriesStep from './CustomRepositoriesStep';
+import RedhatRepositoriesStep from './RedhatRepositoriesStep';
 
 jest.mock('services/Content/ContentQueries', () => ({
   useContentListQuery: jest.fn(),
@@ -10,7 +10,7 @@ jest.mock('services/Content/ContentQueries', () => ({
 
 jest.mock('@src/components/StatusIcon/StatusIcon', () => () => 'StatusIcon');
 
-jest.mock('../AddTemplateContext', () => ({
+jest.mock('../../workflow/store/AddTemplateContext', () => ({
   useAddTemplateContext: jest.fn(),
 }));
 
@@ -20,7 +20,7 @@ jest.mock('react-router-dom', () => ({
   useHref: () => 'insights/content/templates',
 }));
 
-it('expect CustomRepositoriesStep to render correctly', () => {
+it('expect RedhatRepositoriesStep to render correctly', () => {
   (useContentListQuery as jest.Mock).mockImplementation(() => ({
     data: {
       data: [defaultContentItem],
@@ -30,19 +30,17 @@ it('expect CustomRepositoriesStep to render correctly', () => {
   }));
 
   (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
-    isEdit: false,
     templateRequest: defaultTemplateItem,
-    setSelectedCustomRepos: () => undefined,
-    selectedCustomRepos: new Set([defaultTemplateItem.uuid]),
-    queryClient: { invalidateQueries: () => {} },
+    setSelectedRedhatRepos: () => undefined,
+    selectedRedhatRepos: new Set([defaultTemplateItem.uuid]),
+    hardcodedRedhatRepositoryUUIDS: new Set([defaultTemplateItem.uuid]),
   }));
 
-  const { getByRole, getByText } = render(<CustomRepositoriesStep />);
+  const { getByRole, getByText } = render(<RedhatRepositoriesStep />);
 
   const firstCheckboxInList = getByRole('checkbox', { name: 'Select row 0' });
 
   expect(firstCheckboxInList).toBeInTheDocument();
-  expect(firstCheckboxInList).toBeDisabled();
 
   expect(getByText(defaultContentItem.name)).toBeInTheDocument();
   expect(getByText(defaultContentItem.package_count + '')).toBeInTheDocument();

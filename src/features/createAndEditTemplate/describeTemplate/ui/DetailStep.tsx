@@ -8,9 +8,9 @@ import {
   ContentVariants,
   Title,
 } from '@patternfly/react-core';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
 import { useState } from 'react';
-import { TemplateValidationSchema } from '../../templateHelpers';
+import { TemplateValidationSchema } from '../../workflow/core/templateHelpers';
 import CustomHelperText from 'components/CustomHelperText/CustomHelperText';
 
 export default function DetailStep() {
