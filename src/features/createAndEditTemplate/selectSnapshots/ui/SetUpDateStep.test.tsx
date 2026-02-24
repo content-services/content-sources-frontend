@@ -1,16 +1,10 @@
 import { render } from '@testing-library/react';
-import { useGetSnapshotsByDates, useContentListQuery } from 'services/Content/ContentQueries';
+import { useSetUpDateApi } from '../store/SetUpDateStore';
 import SetUpDateStep from './SetUpDateStep';
-import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
-import { defaultContentItem, defaultSnapshotsByDateResponse } from 'testingHelpers';
+import { defaultContentItem } from 'testingHelpers';
 
-jest.mock('services/Content/ContentQueries', () => ({
-  useGetSnapshotsByDates: jest.fn(),
-  useContentListQuery: jest.fn(),
-}));
-
-jest.mock('../../workflow/store/AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
+jest.mock('@src/features/createAndEditTemplate/selectSnapshots/store/SetUpDateStore', () => ({
+  useSetUpDateApi: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -28,25 +22,19 @@ jest.mock('dayjs', () => () => ({
 }));
 
 it('expect Set snapshot date step to render dates', () => {
-  (useGetSnapshotsByDates as jest.Mock).mockImplementation(() => ({
-    data: defaultSnapshotsByDateResponse,
-    mutateAsync: () => undefined,
-  }));
-
-  (useContentListQuery as jest.Mock).mockImplementation(() => ({
-    data: {
-      data: [defaultContentItem],
-      meta: { limit: 10, offset: 0, count: 1 },
-      isLoading: false,
-    },
-  }));
-
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  const mockSetUpDateApi = {
     templateRequest: { date: '2024-01-22' },
-    setTemplateRequest: () => undefined,
-    selectedRedhatRepos: new Set(),
-    selectedCustomRepos: new Set(),
-  }));
+    isLoading: false,
+    contentData: {
+      data: [defaultContentItem],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+    hasIsAfter: false,
+    dateIsValid: false,
+    setTemplateRequest: () => {},
+  };
+
+  (useSetUpDateApi as jest.Mock).mockImplementation(() => mockSetUpDateApi);
 
   const { queryByText, getByRole } = render(<SetUpDateStep />);
   expect(queryByText('Select date for snapshotted repositories')).toBeInTheDocument();
@@ -57,25 +45,19 @@ it('expect Set snapshot date step to render dates', () => {
 });
 
 it('expect Set snapshot date step to render use latest', () => {
-  (useGetSnapshotsByDates as jest.Mock).mockImplementation(() => ({
-    data: defaultSnapshotsByDateResponse,
-    mutateAsync: () => undefined,
-  }));
-
-  (useContentListQuery as jest.Mock).mockImplementation(() => ({
-    data: {
-      data: [defaultContentItem],
-      meta: { limit: 10, offset: 0, count: 1 },
-      isLoading: false,
-    },
-  }));
-
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  const mockSetUpDateApi = {
     templateRequest: { date: '', use_latest: true },
-    setTemplateRequest: () => undefined,
-    selectedRedhatRepos: new Set(),
-    selectedCustomRepos: new Set(),
-  }));
+    isLoading: false,
+    contentData: {
+      data: [defaultContentItem],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+    hasIsAfter: false,
+    dateIsValid: false,
+    setTemplateRequest: () => {},
+  };
+
+  (useSetUpDateApi as jest.Mock).mockImplementation(() => mockSetUpDateApi);
 
   const { queryByText } = render(<SetUpDateStep />);
 
