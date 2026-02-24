@@ -1,17 +1,28 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import {
+  useTemplateRequestApi,
+  useTemplateRequestState,
+} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
 import { defaultTemplateItem } from 'testingHelpers';
 import DetailStep from './DetailStep';
 
 jest.mock('@src/features/createAndEditTemplate/workflow/store/AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
+  useTemplateRequestApi: jest.fn(),
+  useTemplateRequestState: jest.fn(),
 }));
 
 it('expect DetailStep to render correctly', () => {
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
-    templateRequest: defaultTemplateItem,
-    setTemplateRequest: () => undefined,
-  }));
+  const mockTemplateRequestApi = {
+    setTitle: () => {},
+    setDetail: () => {},
+  };
+  const mockTemplateRequestState = {
+    title: defaultTemplateItem.name,
+    detail: defaultTemplateItem.description,
+  };
+
+  (useTemplateRequestApi as jest.Mock).mockImplementation(() => mockTemplateRequestApi);
+  (useTemplateRequestState as jest.Mock).mockImplementation(() => mockTemplateRequestState);
 
   const { getByPlaceholderText } = render(<DetailStep />);
 
