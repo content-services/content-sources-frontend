@@ -1,3 +1,4 @@
+import { useDefineContentApi } from 'features/createAndEditTemplate/defineContent/store/DefineContentStore';
 import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
 import { formatDateDDMMMYYYY } from 'helpers';
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
@@ -29,10 +30,12 @@ export const ReviewTemplateStore = ({ children }: ReviewTemplateStoreType) => {
     selectedRedhatRepos,
     hardcodedRedhatRepositoryUUIDS,
     selectedCustomRepos,
-    distribution_arches,
-    distribution_versions,
     isEdit,
   } = useAddTemplateContext();
+
+  // TODO: temporary reading from defineContent step
+  // change it to read already selected arch and version from the top level context
+  const { distribution_arches, distribution_versions } = useDefineContentApi();
 
   const archesDisplay = (arch?: string) =>
     distribution_arches.find(({ label }) => arch === label)?.name || 'Select architecture';
