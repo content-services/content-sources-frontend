@@ -7,7 +7,7 @@ import {
   useWizardContext,
   WizardFooterWrapper,
 } from '@patternfly/react-core';
-import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import { useEditTemplateQuery } from 'services/Templates/TemplateQueries';
 import { useEditTemplateState } from '../store/EditTemplateStore';
 import { useQueryClient } from 'react-query';

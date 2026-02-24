@@ -9,10 +9,7 @@ import {
 } from '@patternfly/react-core';
 
 import { useSearchParams } from 'react-router-dom';
-import {
-  AddTemplateContextProvider,
-  useTemplateRequestDerivedState,
-} from '../store/AddTemplateContext';
+import { useTemplateRequestDerivedState, TemplateStore } from '../store/TemplateStore';
 import RedhatRepositoriesStep from 'features/createAndEditTemplate/redhatRepositories/ui/RedhatRepositoriesStep';
 import CustomRepositoriesStep from 'features/createAndEditTemplate/otherRepositories/ui/CustomRepositoriesStep';
 import DefineContentStep from 'features/createAndEditTemplate/defineContent/ui/DefineContentStep';
@@ -173,7 +170,7 @@ type TemplateModalProps = {
 
 export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
   return (
-    <AddTemplateContextProvider>
+    <TemplateStore>
       <EditTemplateStore>
         <DefineContentStore>
           <RedhatRepositoriesStore>
@@ -187,6 +184,6 @@ export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
           </RedhatRepositoriesStore>
         </DefineContentStore>
       </EditTemplateStore>
-    </AddTemplateContextProvider>
+    </TemplateStore>
   );
 }

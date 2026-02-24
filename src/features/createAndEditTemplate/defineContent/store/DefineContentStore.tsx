@@ -1,7 +1,7 @@
 import {
   useTemplateRequestApi,
   useTemplateRequestState,
-} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+} from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';

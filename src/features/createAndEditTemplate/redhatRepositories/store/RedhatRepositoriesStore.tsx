@@ -7,7 +7,7 @@ import {
 import {
   useTemplateRequestApi,
   useTemplateRequestState,
-} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+} from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import useDebounce from 'Hooks/useDebounce';
 import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
 import { ContentList, ContentOrigin } from 'services/Content/ContentApi';

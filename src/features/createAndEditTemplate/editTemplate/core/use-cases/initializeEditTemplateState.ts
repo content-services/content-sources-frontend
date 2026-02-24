@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 import { useFetchTemplateRepositories } from '../../api/fetchTemplateRepos';
-import { useTemplateRequestApi } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+import { useTemplateRequestApi } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 
 import { formatDateForPicker } from 'helpers';
 import { isHardcodedRepoFactory, isNullDate, isRedhatRepo } from '../domain/templateRepositories';

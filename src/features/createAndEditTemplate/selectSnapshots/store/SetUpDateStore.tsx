@@ -5,7 +5,7 @@ import {
 import {
   useTemplateRequestApi,
   useTemplateRequestState,
-} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+} from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import { formatTemplateDate, isDateValid } from 'helpers';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo } from 'react';
 import { ContentListResponse, ContentOrigin } from 'services/Content/ContentApi';

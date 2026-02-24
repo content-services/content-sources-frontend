@@ -2,11 +2,11 @@ import { render } from '@testing-library/react';
 import {
   useTemplateRequestApi,
   useTemplateRequestState,
-} from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
+} from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import { defaultTemplateItem } from 'testingHelpers';
 import DetailStep from './DetailStep';
 
-jest.mock('@src/features/createAndEditTemplate/workflow/store/AddTemplateContext', () => ({
+jest.mock('@src/features/createAndEditTemplate/workflow/store/TemplateStore', () => ({
   useTemplateRequestApi: jest.fn(),
   useTemplateRequestState: jest.fn(),
 }));
