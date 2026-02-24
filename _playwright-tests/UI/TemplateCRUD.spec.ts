@@ -133,9 +133,10 @@ test.describe('Templates CRUD', () => {
       // step 5
       // Fill in template description
       await expect(page.getByText('Enter template details')).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(`${templateName}`);
-      await page.getByPlaceholder('Enter name').press('Enter');
-      await page.getByPlaceholder('Description').fill('Template test');
+      await page.getByPlaceholder('Enter title').fill(`${templateName}`);
+      await page.getByPlaceholder('Enter title').press('Enter');
+      await page.getByPlaceholder('Enter detail').fill('Template test');
+      await page.getByPlaceholder('Enter detail').press('Enter');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
 
       // step 6
@@ -176,10 +177,10 @@ test.describe('Templates CRUD', () => {
       await expect(page.getByRole('heading', { name: 'Set up date', exact: true })).toBeVisible();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await expect(page.getByText('Enter template details')).toBeVisible();
-      await expect(page.getByPlaceholder('Enter name')).toHaveValue(`${templateName}`);
-      await expect(page.getByPlaceholder('Description')).toHaveValue('Template test');
-      await page.getByPlaceholder('Enter name').fill(`${templateName}-edited`);
-      await page.getByPlaceholder('Description').fill('Template test edited');
+      await expect(page.getByPlaceholder('Enter title')).toHaveValue(`${templateName}`);
+      await expect(page.getByPlaceholder('Enter detail')).toHaveValue('Template test');
+      await page.getByPlaceholder('Enter title').fill(`${templateName}-edited`);
+      await page.getByPlaceholder('Enter detail').fill('Template test edited');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Confirm changes', exact: true }).click();
     });

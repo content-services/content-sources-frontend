@@ -187,8 +187,8 @@ test.describe('Snapshot Repositories', () => {
       await page.getByRole('radio', { name: 'Use the latest content' }).check();
       await page.getByRole('button', { name: 'Next' }).click();
 
-      await page.getByPlaceholder('Enter name').fill(`${templateName}`);
-      await page.getByPlaceholder('Description').fill('Template test');
+      await page.getByPlaceholder('Enter title').fill(`${templateName}`);
+      await page.getByPlaceholder('Enter detail').fill('Template test');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
 
       // step 6 - create template

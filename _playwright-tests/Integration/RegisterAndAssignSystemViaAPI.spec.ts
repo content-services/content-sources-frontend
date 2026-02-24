@@ -46,8 +46,8 @@ test.describe('Register and assign template to systems via API', () => {
       await page.getByRole('button', { name: 'Next', exact: true }).click();
 
       await expect(page.getByText('Enter template details')).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(templateName);
-      await page.getByPlaceholder('Description').fill('Template for use template dialog test');
+      await page.getByPlaceholder('Enter title').fill(templateName);
+      await page.getByPlaceholder('Enter detail').fill('Template for use template dialog test');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
 
       await page.getByRole('button', { name: 'Create other options' }).click();

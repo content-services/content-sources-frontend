@@ -1,33 +1,43 @@
 import { render } from '@testing-library/react';
-import {
-  useTemplateRequestApi,
-  useTemplateRequestState,
-} from 'features/createAndEditTemplate/workflow/store/TemplateStore';
+import { useValidateTitle } from '../core/use-cases/validateTitle';
+import { useValidateDetail } from '../core/use-cases/validateDetail';
 import { defaultTemplateItem } from 'testingHelpers';
 import DetailStep from './DetailStep';
 
-jest.mock('@src/features/createAndEditTemplate/workflow/store/TemplateStore', () => ({
-  useTemplateRequestApi: jest.fn(),
-  useTemplateRequestState: jest.fn(),
-}));
+jest.mock(
+  '@src/features/createAndEditTemplate/describeTemplate/core/use-cases/validateDetail',
+  () => ({
+    useValidateDetail: jest.fn(),
+  }),
+);
+
+jest.mock(
+  '@src/features/createAndEditTemplate/describeTemplate/core/use-cases/validateTitle',
+  () => ({
+    useValidateTitle: jest.fn(),
+  }),
+);
 
 it('expect DetailStep to render correctly', () => {
-  const mockTemplateRequestApi = {
-    setTitle: () => {},
-    setDetail: () => {},
-  };
-  const mockTemplateRequestState = {
-    title: defaultTemplateItem.name,
-    detail: defaultTemplateItem.description,
+  const mockTitle = {
+    validateTitle: () => {},
+    isValidated: true,
+    error: '',
+    text: defaultTemplateItem.name,
   };
 
-  (useTemplateRequestApi as jest.Mock).mockImplementation(() => mockTemplateRequestApi);
-  (useTemplateRequestState as jest.Mock).mockImplementation(() => mockTemplateRequestState);
+  const mockDetail = {
+    validateTitle: () => {},
+    isValidated: true,
+    error: '',
+    text: defaultTemplateItem.description,
+  };
+
+  (useValidateTitle as jest.Mock).mockImplementation(() => mockTitle);
+  (useValidateDetail as jest.Mock).mockImplementation(() => mockDetail);
 
   const { getByPlaceholderText } = render(<DetailStep />);
 
-  expect(getByPlaceholderText('Enter name')).toHaveAttribute('value', defaultTemplateItem.name);
-  expect(getByPlaceholderText('Enter description')).toHaveTextContent(
-    defaultTemplateItem.description,
-  );
+  expect(getByPlaceholderText('Enter title')).toHaveAttribute('value', defaultTemplateItem.name);
+  expect(getByPlaceholderText('Enter detail')).toHaveTextContent(defaultTemplateItem.description);
 });
