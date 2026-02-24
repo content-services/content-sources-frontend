@@ -1,14 +1,14 @@
 import { render } from '@testing-library/react';
-import { useReviewTemplateApi } from '../store/ReviewTemplateStore';
+import { useFormatTemplateReview } from '../core/use-cases/formatTemplateReview';
 import { defaultTemplateItem } from 'testingHelpers';
 import ReviewStep from './ReviewStep';
 import { formatDateDDMMMYYYY } from 'helpers';
 import { useEditTemplateState } from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
 
 jest.mock(
-  '@src/features/createAndEditTemplate/reviewTemplateRequest/store/ReviewTemplateStore',
+  '@src/features/createAndEditTemplate/reviewTemplateRequest/core/use-cases/formatTemplateReview',
   () => ({
-    useReviewTemplateApi: jest.fn(),
+    useFormatTemplateReview: jest.fn(),
   }),
 );
 
@@ -28,31 +28,27 @@ it('expect Review step to render correctly', () => {
     title: defaultTemplateItem.name,
     detail: defaultTemplateItem.description,
   };
-  const mockReviewTemplateApi = {
-    reviewTemplate: {
-      Content: {
-        Architecture: templateRequest.selectedArchitecture,
-        'OS version': `el${templateRequest.selectedOSVersion}`,
-        'Number of Pre-selected Red Hat repositories': templateRequest.hardcodedUUIDs.length,
-        'Number of Additional Red Hat repositories': templateRequest.additionalUUIDs.length,
-        'Number of Custom or EPEL repositories': templateRequest.otherUUIDs.length,
-      },
-      'Repository Version': {
-        'Snapshots from': templateRequest.snapshotDate,
-      },
-      'Template Description': {
-        Title: templateRequest.title,
-        Detail: templateRequest.detail,
-      },
+  const mockFormatTemplateReview = {
+    Content: {
+      Architecture: templateRequest.selectedArchitecture,
+      'OS version': `el${templateRequest.selectedOSVersion}`,
+      'Number of Pre-selected Red Hat repositories': templateRequest.hardcodedUUIDs.length,
+      'Number of Additional Red Hat repositories': templateRequest.additionalUUIDs.length,
+      'Number of Custom or EPEL repositories': templateRequest.otherUUIDs.length,
     },
-    setToggle: () => {},
-    expanded: new Set([0]),
+    'Repository Version': {
+      'Snapshots from': templateRequest.snapshotDate,
+    },
+    'Template Description': {
+      Title: templateRequest.title,
+      Detail: templateRequest.detail,
+    },
   };
   const mockEditTemplateState = {
     isEditTemplate: false,
   };
 
-  (useReviewTemplateApi as jest.Mock).mockImplementation(() => mockReviewTemplateApi);
+  (useFormatTemplateReview as jest.Mock).mockImplementation(() => mockFormatTemplateReview);
   (useEditTemplateState as jest.Mock).mockImplementation(() => mockEditTemplateState);
 
   const { getByText } = render(<ReviewStep />);
