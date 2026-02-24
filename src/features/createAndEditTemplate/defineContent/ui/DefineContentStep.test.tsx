@@ -2,14 +2,18 @@ import { render } from '@testing-library/react';
 import { useDefineContentApi } from '../store/DefineContentStore';
 import { defaultTemplateItem, testRepositoryParamsResponse } from 'testingHelpers';
 import DefineContentStep from './DefineContentStep';
+import { useEditTemplateState } from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
 
 jest.mock('@src/features/createAndEditTemplate/defineContent/store/DefineContentStore', () => ({
   useDefineContentApi: jest.fn(),
 }));
 
+jest.mock('@src/features/createAndEditTemplate/editTemplate/store/EditTemplateStore', () => ({
+  useEditTemplateState: jest.fn(),
+}));
+
 it('expect DefineContentStep to render correctly', () => {
   const mockDefineContentApi = {
-    isEdit: false,
     templateRequest: defaultTemplateItem,
     setTemplateRequest: () => undefined,
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
@@ -17,7 +21,11 @@ it('expect DefineContentStep to render correctly', () => {
     archesDisplay: () => undefined,
     versionDisplay: () => undefined,
   };
+  const mockEditTemplateState = {
+    isEditTemplate: false,
+  };
   (useDefineContentApi as jest.Mock).mockImplementation(() => mockDefineContentApi);
+  (useEditTemplateState as jest.Mock).mockImplementation(() => mockEditTemplateState);
 
   const { getByText } = render(<DefineContentStep />);
 
@@ -34,7 +42,6 @@ it('expect DefineContentStep to render correctly', () => {
 
 it('expect DefineContentStep to render with disabled inputs', () => {
   const mockDefineContentApi = {
-    isEdit: true,
     templateRequest: defaultTemplateItem,
     setTemplateRequest: () => undefined,
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
@@ -42,7 +49,11 @@ it('expect DefineContentStep to render with disabled inputs', () => {
     archesDisplay: () => undefined,
     versionDisplay: () => undefined,
   };
+  const mockEditTemplateState = {
+    isEditTemplate: true,
+  };
   (useDefineContentApi as jest.Mock).mockImplementation(() => mockDefineContentApi);
+  (useEditTemplateState as jest.Mock).mockImplementation(() => mockEditTemplateState);
 
   const { getByTestId } = render(<DefineContentStep />);
 

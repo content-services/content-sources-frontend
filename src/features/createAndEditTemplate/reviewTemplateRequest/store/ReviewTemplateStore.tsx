@@ -7,12 +7,10 @@ type ReviewTemplateApiType = {
   reviewTemplate: Record<string, { [key: string]: string | number | undefined }>;
   setToggle: React.Dispatch<number>;
   expanded: Set<number>;
-  isEdit?: boolean;
 };
 const initialData = {
   reviewTemplate: {},
   setToggle: () => {},
-  isEdit: undefined,
   expanded: new Set([0]),
 };
 
@@ -30,7 +28,6 @@ export const ReviewTemplateStore = ({ children }: ReviewTemplateStoreType) => {
     selectedRedhatRepos,
     hardcodedRedhatRepositoryUUIDS,
     selectedCustomRepos,
-    isEdit,
   } = useAddTemplateContext();
 
   // TODO: temporary reading from defineContent step
@@ -78,7 +75,7 @@ export const ReviewTemplateStore = ({ children }: ReviewTemplateStoreType) => {
     setExpanded(new Set(expanded));
   };
 
-  const api = { reviewTemplate, setToggle, expanded, isEdit };
+  const api = { reviewTemplate, setToggle, expanded };
 
   return <ReviewTemplateApi.Provider value={api}>{children}</ReviewTemplateApi.Provider>;
 };

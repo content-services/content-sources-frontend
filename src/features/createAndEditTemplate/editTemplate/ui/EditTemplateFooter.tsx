@@ -11,16 +11,18 @@ import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/s
 import { formatTemplateDate } from 'helpers';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
 import { useEditTemplateQuery } from 'services/Templates/TemplateQueries';
+import { useEditTemplateState } from '../store/EditTemplateStore';
 
 type EditTemplateFooterProps = {
   cancelModal: () => void;
 };
 
 export const EditTemplateFooter = ({ cancelModal }: EditTemplateFooterProps) => {
-  const { templateRequest, editUUID, queryClient } = useAddTemplateContext();
+  const { templateRequest, queryClient } = useAddTemplateContext();
+  const { uuid } = useEditTemplateState();
 
   const { mutateAsync: editTemplate, isLoading } = useEditTemplateQuery(queryClient, {
-    uuid: editUUID as string,
+    uuid,
     ...(templateRequest as TemplateRequest),
     date: templateRequest.use_latest ? null : formatTemplateDate(templateRequest.date || ''),
   });

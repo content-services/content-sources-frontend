@@ -3,6 +3,7 @@ import { useReviewTemplateApi } from '../store/ReviewTemplateStore';
 import { defaultTemplateItem } from 'testingHelpers';
 import ReviewStep from './ReviewStep';
 import { formatDateDDMMMYYYY } from 'helpers';
+import { useEditTemplateState } from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
 
 jest.mock(
   '@src/features/createAndEditTemplate/reviewTemplateRequest/store/ReviewTemplateStore',
@@ -10,6 +11,10 @@ jest.mock(
     useReviewTemplateApi: jest.fn(),
   }),
 );
+
+jest.mock('@src/features/createAndEditTemplate/editTemplate/store/EditTemplateStore', () => ({
+  useEditTemplateState: jest.fn(),
+}));
 
 it('expect Review step to render correctly', () => {
   const templateRequest = {
@@ -41,11 +46,14 @@ it('expect Review step to render correctly', () => {
       },
     },
     setToggle: () => {},
-    isEdit: false,
     expanded: new Set([0]),
+  };
+  const mockEditTemplateState = {
+    isEditTemplate: false,
   };
 
   (useReviewTemplateApi as jest.Mock).mockImplementation(() => mockReviewTemplateApi);
+  (useEditTemplateState as jest.Mock).mockImplementation(() => mockEditTemplateState);
 
   const { getByText } = render(<ReviewStep />);
 

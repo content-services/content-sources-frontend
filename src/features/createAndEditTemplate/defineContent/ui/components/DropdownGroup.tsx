@@ -9,6 +9,7 @@ import {
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { createUseStyles } from 'react-jss';
 import { useDefineContentApi } from '../../store/DefineContentStore';
+import { useEditTemplateState } from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
 
 const useStyles = createUseStyles({
   fullWidth: {
@@ -19,6 +20,7 @@ const useStyles = createUseStyles({
 
 export const DropdownGroup = () => {
   const classes = useStyles();
+  const { isEditTemplate } = useEditTemplateState();
 
   const {
     distribution_versions,
@@ -26,7 +28,6 @@ export const DropdownGroup = () => {
     templateRequest,
     setTemplateRequest,
     setArchOpen,
-    isEdit,
     archOpen,
     archesDisplay,
     setVersionOpen,
@@ -46,7 +47,7 @@ export const DropdownGroup = () => {
             <ConditionalTooltip
               position='top-start'
               content='Architecture cannot be changed after creation.'
-              show={!!isEdit}
+              show={isEditTemplate}
               setDisabled
             >
               <MenuToggle
@@ -93,7 +94,7 @@ export const DropdownGroup = () => {
             <ConditionalTooltip
               position='top-start'
               content='OS version cannot be changed after creation.'
-              show={!!isEdit}
+              show={isEditTemplate}
               setDisabled
             >
               <MenuToggle
