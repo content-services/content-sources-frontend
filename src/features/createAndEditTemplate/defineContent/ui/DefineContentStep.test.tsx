@@ -1,20 +1,23 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
+import { useDefineContentApi } from '../store/DefineContentStore';
 import { defaultTemplateItem, testRepositoryParamsResponse } from 'testingHelpers';
 import DefineContentStep from './DefineContentStep';
 
-jest.mock('../../workflow/store/AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
+jest.mock('@src/features/createAndEditTemplate/defineContent/store/DefineContentStore', () => ({
+  useDefineContentApi: jest.fn(),
 }));
 
 it('expect DefineContentStep to render correctly', () => {
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  const mockDefineContentApi = {
     isEdit: false,
     templateRequest: defaultTemplateItem,
     setTemplateRequest: () => undefined,
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
-  }));
+    archesDisplay: () => undefined,
+    versionDisplay: () => undefined,
+  };
+  (useDefineContentApi as jest.Mock).mockImplementation(() => mockDefineContentApi);
 
   const { getByText } = render(<DefineContentStep />);
 
@@ -30,13 +33,16 @@ it('expect DefineContentStep to render correctly', () => {
 });
 
 it('expect DefineContentStep to render with disabled inputs', () => {
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  const mockDefineContentApi = {
     isEdit: true,
     templateRequest: defaultTemplateItem,
     setTemplateRequest: () => undefined,
     distribution_arches: testRepositoryParamsResponse.distribution_arches,
     distribution_versions: testRepositoryParamsResponse.distribution_versions,
-  }));
+    archesDisplay: () => undefined,
+    versionDisplay: () => undefined,
+  };
+  (useDefineContentApi as jest.Mock).mockImplementation(() => mockDefineContentApi);
 
   const { getByTestId } = render(<DefineContentStep />);
 

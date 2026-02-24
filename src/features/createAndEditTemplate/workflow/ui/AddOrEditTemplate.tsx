@@ -21,6 +21,7 @@ import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
 import { useOnCancelModal } from '../core/cancelModal';
 import { useInitialStep, WizardUrlSync } from '../core/chooseStep';
+import { DefineContentStore } from 'features/createAndEditTemplate/defineContent/store/DefineContentStore';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -167,7 +168,9 @@ type TemplateModalProps = {
 export function AddOrEditTemplate({ templateProps }: TemplateModalProps) {
   return (
     <AddTemplateContextProvider>
-      <AddOrEditTemplateBase {...templateProps} />
+      <DefineContentStore>
+        <AddOrEditTemplateBase {...templateProps} />
+      </DefineContentStore>
     </AddTemplateContextProvider>
   );
 }
