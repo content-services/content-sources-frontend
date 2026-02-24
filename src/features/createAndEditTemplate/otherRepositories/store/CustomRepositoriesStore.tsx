@@ -2,7 +2,6 @@ import { ThProps } from '@patternfly/react-table';
 import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
 import useDebounce from 'Hooks/useDebounce';
 import { createContext, ReactNode, useContext, useState } from 'react';
-import { QueryClient } from 'react-query';
 import { useHref } from 'react-router-dom';
 import { ContentList, ContentOrigin } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
@@ -21,7 +20,6 @@ type CustomRepositoriesApiType = {
   showLoader: boolean;
   searchQuery: string;
   toggled: boolean;
-  queryClient?: QueryClient;
   onSetPage: (_, newPage: number) => void;
   onPerPageSelect: (_, newPerPage: number, newPage: number) => void;
   sortParams: (columnIndex: number) => ThProps['sort'];
@@ -44,7 +42,6 @@ const initialData = {
   showLoader: true,
   searchQuery: '',
   toggled: false,
-  queryClient: undefined,
   onSetPage: () => {},
   onPerPageSelect: () => {},
   sortParams: () => undefined,
@@ -63,8 +60,7 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
   const path = useHref('content');
   const pathname = path.split('content')[0] + 'content';
 
-  const { queryClient, templateRequest, selectedCustomRepos, setSelectedCustomRepos } =
-    useAddTemplateContext();
+  const { templateRequest, selectedCustomRepos, setSelectedCustomRepos } = useAddTemplateContext();
 
   const [toggled, setToggled] = useState(false);
 
@@ -154,7 +150,6 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
     showLoader,
     searchQuery,
     toggled,
-    queryClient,
     onSetPage,
     onPerPageSelect,
     sortParams,

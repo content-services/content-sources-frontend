@@ -2,6 +2,7 @@ import { render } from '@testing-library/react';
 import { useCustomRepositoriesApi } from '../store/CustomRepositoriesStore';
 import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
 import CustomRepositoriesStep from './CustomRepositoriesStep';
+import { useQueryClient } from 'react-query';
 
 jest.mock(
   '@src/features/createAndEditTemplate/otherRepositories/store/CustomRepositoriesStore',
@@ -14,6 +15,11 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
   Outlet: () => <></>,
   useHref: () => 'insights/content/templates',
+}));
+
+jest.mock('react-query', () => ({
+  ...jest.requireActual('react-query'),
+  useQueryClient: jest.fn(),
 }));
 
 it('expect CustomRepositoriesStep to render correctly', () => {
@@ -38,7 +44,12 @@ it('expect CustomRepositoriesStep to render correctly', () => {
     setToggled: () => {},
   };
 
+  const mockUseQueryClient = {
+    invalidateQueries: () => {},
+  };
+
   (useCustomRepositoriesApi as jest.Mock).mockImplementation(() => mockRedhatRepositoriesApi);
+  (useQueryClient as jest.Mock).mockImplementation(() => mockUseQueryClient);
 
   const { getByRole, getByText } = render(<CustomRepositoriesStep />);
 
