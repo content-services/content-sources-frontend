@@ -3,7 +3,7 @@ import { createContext, ReactNode, useContext, useEffect, useState } from 'react
 import { ContentOrigin, NameLabel } from 'services/Content/ContentApi';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
-import { hardcodeRedHatReposByArchAndVersion } from '../core/templateHelpers';
+import { hardcodeRedHatReposByArchAndVersion } from '../core/repositoryURLs';
 
 type DefineContentApiType = {
   distribution_versions: NameLabel[];

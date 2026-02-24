@@ -1,4 +1,4 @@
-import { hardcodeRedHatReposByArchAndVersion } from './templateHelpers';
+import { hardcodeRedHatReposByArchAndVersion } from './repositoryURLs';
 
 it('Test hardcodeRedHatReposByArchAndVersion', () => {
   let result = hardcodeRedHatReposByArchAndVersion('x86_64', '8') as string[];
