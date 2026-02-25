@@ -1,6 +1,6 @@
-import { HardcodedRepositoryUrls } from 'features/createAndEditTemplate/shared/types/types';
+import { HardcodedRepositoryUrls } from '../types/types';
 import { REPOSITORY_URLS } from './repositoryURLs';
-import { SelectedSystemConfiguration } from './types';
+import { SelectedSystemConfiguration } from 'features/createAndEditTemplate/defineContent/core/types';
 
 type LookupHardcodedRedhatRepoUrls = (type: SelectedSystemConfiguration) => HardcodedRepositoryUrls;
 

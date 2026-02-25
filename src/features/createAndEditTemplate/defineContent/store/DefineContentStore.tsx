@@ -3,7 +3,7 @@ import { createContext, ReactNode, useContext, useEffect, useState } from 'react
 import { ContentOrigin, NameLabel } from 'services/Content/ContentApi';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
-import { lookupUrls } from '../core/lookupUrls';
+import { lookupUrls } from 'features/createAndEditTemplate/shared/core/lookupUrls';
 import { useEditTemplateState } from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
 
 type DefineContentApiType = {
