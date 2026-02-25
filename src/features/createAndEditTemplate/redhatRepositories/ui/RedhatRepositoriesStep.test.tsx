@@ -1,18 +1,14 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
+import { useRedhatRepositoriesApi } from '../store/RedhatRepositoriesStore';
 import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
-import { useContentListQuery } from 'services/Content/ContentQueries';
 import RedhatRepositoriesStep from './RedhatRepositoriesStep';
 
-jest.mock('services/Content/ContentQueries', () => ({
-  useContentListQuery: jest.fn(),
-}));
-
-jest.mock('@src/components/StatusIcon/StatusIcon', () => () => 'StatusIcon');
-
-jest.mock('../../workflow/store/AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
-}));
+jest.mock(
+  '@src/features/createAndEditTemplate/redhatRepositories/store/RedhatRepositoriesStore',
+  () => ({
+    useRedhatRepositoriesApi: jest.fn(),
+  }),
+);
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
@@ -21,20 +17,28 @@ jest.mock('react-router-dom', () => ({
 }));
 
 it('expect RedhatRepositoriesStep to render correctly', () => {
-  (useContentListQuery as jest.Mock).mockImplementation(() => ({
-    data: {
-      data: [defaultContentItem],
-      meta: { limit: 10, offset: 0, count: 1 },
-      isLoading: false,
-    },
-  }));
-
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
-    templateRequest: defaultTemplateItem,
-    setSelectedRedhatRepos: () => undefined,
+  const mockRedhatRepositoriesApi = {
     selectedRedhatRepos: new Set([defaultTemplateItem.uuid]),
     hardcodedRedhatRepositoryUUIDS: new Set([defaultTemplateItem.uuid]),
-  }));
+    contentList: [defaultContentItem],
+    columnHeaders: ['Name', 'Advisories', 'Packages'],
+    page: 1,
+    perPage: 20,
+    count: 1,
+    isLoading: false,
+    additionalReposAvailableToSelect: false,
+    noAdditionalRepos: true,
+    searchQuery: '',
+    toggled: false,
+    showLoader: false,
+    onSetPage: () => {},
+    onPerPageSelect: () => {},
+    sortParams: () => undefined,
+    setSearchQuery: () => {},
+    setUUIDForList: () => {},
+    setToggled: () => {},
+  };
+  (useRedhatRepositoriesApi as jest.Mock).mockImplementation(() => mockRedhatRepositoriesApi);
 
   const { getByRole, getByText } = render(<RedhatRepositoriesStep />);
 
