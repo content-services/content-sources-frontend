@@ -1,23 +1,51 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
-import { defaultTemplateItem, testRepositoryParamsResponse } from 'testingHelpers';
+import { useReviewTemplateApi } from '../store/ReviewTemplateStore';
+import { defaultTemplateItem } from 'testingHelpers';
 import ReviewStep from './ReviewStep';
 import { formatDateDDMMMYYYY } from 'helpers';
 
-jest.mock('../../workflow/store/AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
-}));
+jest.mock(
+  '@src/features/createAndEditTemplate/reviewTemplateRequest/store/ReviewTemplateStore',
+  () => ({
+    useReviewTemplateApi: jest.fn(),
+  }),
+);
 
 it('expect Review step to render correctly', () => {
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
-    templateRequest: defaultTemplateItem,
-    selectedRedhatRepos: new Set(['item1', 'item2']),
-    selectedCustomRepos: new Set(['item1']),
-    hardcodedRedhatRepositoryUUIDS: new Set('item1'),
-    distribution_arches: testRepositoryParamsResponse.distribution_arches,
-    distribution_versions: testRepositoryParamsResponse.distribution_versions,
+  const templateRequest = {
+    selectedArchitecture: defaultTemplateItem.arch,
+    selectedOSVersion: defaultTemplateItem.version,
+    hardcodedUUIDs: defaultTemplateItem.repository_uuids.slice(0, 2),
+    additionalUUIDs: defaultTemplateItem.repository_uuids.slice(2),
+    otherUUIDs: [],
+    isLatestSnapshot: defaultTemplateItem.use_latest,
+    snapshotDate: formatDateDDMMMYYYY(defaultTemplateItem.date),
+    title: defaultTemplateItem.name,
+    detail: defaultTemplateItem.description,
+  };
+  const mockReviewTemplateApi = {
+    reviewTemplate: {
+      Content: {
+        Architecture: templateRequest.selectedArchitecture,
+        'OS version': `el${templateRequest.selectedOSVersion}`,
+        'Number of Pre-selected Red Hat repositories': templateRequest.hardcodedUUIDs.length,
+        'Number of Additional Red Hat repositories': templateRequest.additionalUUIDs.length,
+        'Number of Custom or EPEL repositories': templateRequest.otherUUIDs.length,
+      },
+      'Repository Version': {
+        'Snapshots from': templateRequest.snapshotDate,
+      },
+      'Template Description': {
+        Title: templateRequest.title,
+        Detail: templateRequest.detail,
+      },
+    },
+    setToggle: () => {},
     isEdit: false,
-  }));
+    expanded: new Set([0]),
+  };
+
+  (useReviewTemplateApi as jest.Mock).mockImplementation(() => mockReviewTemplateApi);
 
   const { getByText } = render(<ReviewStep />);
 
