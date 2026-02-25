@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
+import { useAddTemplateContext } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
 import { defaultTemplateItem } from 'testingHelpers';
 import DetailStep from './DetailStep';
 
-jest.mock('../../workflow/store/AddTemplateContext', () => ({
+jest.mock('@src/features/createAndEditTemplate/workflow/store/AddTemplateContext', () => ({
   useAddTemplateContext: jest.fn(),
 }));
 
