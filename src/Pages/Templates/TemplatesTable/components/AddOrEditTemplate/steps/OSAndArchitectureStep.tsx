@@ -144,18 +144,25 @@ export default function OSAndArchitectureStep() {
               isOpen={isReleaseStreamOpen}
               onOpenChange={(isOpen) => setIsReleaseStreamOpen(isOpen)}
               toggle={(toggleRef) => (
-                <MenuToggle
-                  ref={toggleRef}
-                  isFullWidth
-                  aria-label='Release stream toggle'
-                  id='release-stream-toggle'
-                  ouiaId='select-release-stream'
-                  isExpanded={isReleaseStreamOpen}
-                  onClick={() => setIsReleaseStreamOpen((prev) => !prev)}
-                  className={classes.fullWidth}
+                <ConditionalTooltip
+                  position='top-start'
+                  content='Release stream cannot be changed after creation.'
+                  show={!!isEdit}
+                  setDisabled
                 >
-                  {getStreamName(templateRequest.extended_release) || STANDARD_STREAM.name}
-                </MenuToggle>
+                  <MenuToggle
+                    ref={toggleRef}
+                    isFullWidth
+                    aria-label='Release stream toggle'
+                    id='release-stream-toggle'
+                    ouiaId='select-release-stream'
+                    isExpanded={isReleaseStreamOpen}
+                    onClick={() => setIsReleaseStreamOpen((prev) => !prev)}
+                    className={classes.fullWidth}
+                  >
+                    {getStreamName(templateRequest.extended_release) || STANDARD_STREAM.name}
+                  </MenuToggle>
+                </ConditionalTooltip>
               )}
             >
               <DropdownList>
