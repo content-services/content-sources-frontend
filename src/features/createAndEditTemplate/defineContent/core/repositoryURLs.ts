@@ -1,41 +1,28 @@
-export const hardcodeRedHatReposByArchAndVersion = (
-  arch?: string,
-  version?: string,
-): string[] | undefined => {
-  if (!arch || !version) return;
-  switch (true) {
-    case arch === 'x86_64' && version === '8':
-      return [
-        'https://cdn.redhat.com/content/dist/rhel8/8/x86_64/appstream/os',
-        'https://cdn.redhat.com/content/dist/rhel8/8/x86_64/baseos/os',
-      ];
-    case arch === 'x86_64' && version === '9':
-      return [
-        'https://cdn.redhat.com/content/dist/rhel9/9/x86_64/appstream/os',
-        'https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os',
-      ];
-    case arch === 'x86_64' && version === '10':
-      return [
-        'https://cdn.redhat.com/content/dist/rhel10/10/x86_64/appstream/os',
-        'https://cdn.redhat.com/content/dist/rhel10/10/x86_64/baseos/os',
-      ];
-    case arch === 'aarch64' && version === '8':
-      return [
-        'https://cdn.redhat.com/content/dist/rhel8/8/aarch64/appstream/os',
-        'https://cdn.redhat.com/content/dist/rhel8/8/aarch64/baseos/os',
-      ];
-    case arch === 'aarch64' && version === '9':
-      return [
-        'https://cdn.redhat.com/content/dist/rhel9/9/aarch64/appstream/os',
-        'https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os',
-      ];
-    case arch === 'aarch64' && version === '10':
-      return [
-        'https://cdn.redhat.com/content/dist/rhel10/10/aarch64/appstream/os',
-        'https://cdn.redhat.com/content/dist/rhel10/10/aarch64/baseos/os',
-      ];
+import { UrlsForArchitectureAndVersion } from 'features/createAndEditTemplate/shared/types/types';
 
-    default:
-      return;
-  }
+export const REPOSITORY_URLS: UrlsForArchitectureAndVersion = {
+  'x86_64-8': [
+    'https://cdn.redhat.com/content/dist/rhel8/8/x86_64/appstream/os/',
+    'https://cdn.redhat.com/content/dist/rhel8/8/x86_64/baseos/os/',
+  ],
+  'x86_64-9': [
+    'https://cdn.redhat.com/content/dist/rhel9/9/x86_64/appstream/os/',
+    'https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/',
+  ],
+  'x86_64-10': [
+    'https://cdn.redhat.com/content/dist/rhel10/10/x86_64/appstream/os/',
+    'https://cdn.redhat.com/content/dist/rhel10/10/x86_64/baseos/os/',
+  ],
+  'aarch64-8': [
+    'https://cdn.redhat.com/content/dist/rhel8/8/aarch64/appstream/os/',
+    'https://cdn.redhat.com/content/dist/rhel8/8/aarch64/baseos/os/',
+  ],
+  'aarch64-9': [
+    'https://cdn.redhat.com/content/dist/rhel9/9/aarch64/appstream/os/',
+    'https://cdn.redhat.com/content/dist/rhel9/9/aarch64/baseos/os/',
+  ],
+  'aarch64-10': [
+    'https://cdn.redhat.com/content/dist/rhel10/10/aarch64/appstream/os/',
+    'https://cdn.redhat.com/content/dist/rhel10/10/aarch64/baseos/os/',
+  ],
 };

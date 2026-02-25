@@ -3,7 +3,7 @@ import { createContext, ReactNode, useContext, useEffect, useState } from 'react
 import { ContentOrigin, NameLabel } from 'services/Content/ContentApi';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
-import { hardcodeRedHatReposByArchAndVersion } from '../core/repositoryURLs';
+import { lookupUrls } from '../core/lookupUrls';
 
 type DefineContentApiType = {
   distribution_versions: NameLabel[];
@@ -81,10 +81,10 @@ export const DefineContentStore = ({ children }: DefineContentStoreType) => {
   // get urls of harcoded repos
   useEffect(() => {
     if (!!templateRequest.arch && !!templateRequest.version) {
-      const result = hardcodeRedHatReposByArchAndVersion(
-        templateRequest.arch,
-        templateRequest.version,
-      );
+      const result = lookupUrls({
+        architecture: templateRequest.arch,
+        osVersion: templateRequest.version,
+      });
       if (result) {
         setHardcodeRepositories(result);
       }
