@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { useDefineContentApi } from '../store/DefineContentStore';
-import { defaultTemplateItem, testRepositoryParamsResponse } from 'testingHelpers';
+import { defaultTemplateItem } from 'testingHelpers';
 import DefineContentStep from './DefineContentStep';
 import { useEditTemplateState } from 'features/createAndEditTemplate/editTemplate/store/EditTemplateStore';
 
@@ -14,12 +14,12 @@ jest.mock('@src/features/createAndEditTemplate/editTemplate/store/EditTemplateSt
 
 it('expect DefineContentStep to render correctly', () => {
   const mockDefineContentApi = {
-    templateRequest: defaultTemplateItem,
-    setTemplateRequest: () => undefined,
-    distribution_arches: testRepositoryParamsResponse.distribution_arches,
-    distribution_versions: testRepositoryParamsResponse.distribution_versions,
-    archesDisplay: () => undefined,
-    versionDisplay: () => undefined,
+    architectures: [{ descriptor: 'aarch64', displayName: 'aarch64' }],
+    osVersions: [{ descriptor: '9', displayName: 'el9' }],
+    selectedArchitecture: 'aarch64',
+    selectedOSVersion: '9',
+    onSelectArchitecture: () => {},
+    onSelectOSVersion: () => {},
   };
   const mockEditTemplateState = {
     isEditTemplate: false,
@@ -42,12 +42,12 @@ it('expect DefineContentStep to render correctly', () => {
 
 it('expect DefineContentStep to render with disabled inputs', () => {
   const mockDefineContentApi = {
-    templateRequest: defaultTemplateItem,
-    setTemplateRequest: () => undefined,
-    distribution_arches: testRepositoryParamsResponse.distribution_arches,
-    distribution_versions: testRepositoryParamsResponse.distribution_versions,
-    archesDisplay: () => undefined,
-    versionDisplay: () => undefined,
+    architectures: [{ descriptor: 'aarch64', displayName: 'aarch64' }],
+    osVersions: [{ descriptor: '9', displayName: 'el9' }],
+    selectedArchitecture: 'aarch64',
+    selectedOSVersion: '9',
+    onSelectArchitecture: () => {},
+    onSelectOSVersion: () => {},
   };
   const mockEditTemplateState = {
     isEditTemplate: true,
