@@ -14,6 +14,7 @@ import {
 } from 'features/createAndEditTemplate/shared/types/types';
 import { TemplateRequestInProgress } from 'features/createAndEditTemplate/shared/types/types.compound';
 import { initalTemplateApi, initialTemplateRequestState, TemplateRequestApiType } from './typing';
+import { useInitializeNewStore } from './temporary';
 
 const TemplateRequestApi = createContext<TemplateRequestApiType>(initalTemplateApi);
 export const useTemplateRequestApi = () => useContext(TemplateRequestApi);
@@ -53,6 +54,8 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
   const [isLatestSnapshot, setIsLatestSnapshot] = useState<UseLatestSnapshot>(false);
   const [title, setTitle] = useState<TemplateTitle>('');
   const [detail, setDetail] = useState<TemplateDetail>('');
+
+  const { temporary } = useInitializeNewStore();
 
   // To be deleted once all state in the new storage is set
   const templateRequestDependencies = useMemo(
@@ -115,6 +118,11 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
     title,
     detail,
   ]);
+
+  // temporary set data in new store when data in the old changes
+  useMemo(async () => {
+    await temporary(templateRequest, { ...templateRequestApi });
+  }, [templateRequest]);
 
   return (
     <AddTemplateContext.Provider
