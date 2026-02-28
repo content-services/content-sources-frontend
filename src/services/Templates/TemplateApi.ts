@@ -9,6 +9,7 @@ import {
 } from '../Content/ContentApi';
 import { objectToUrlParams } from 'helpers';
 import { AdminTask } from 'services/Admin/AdminTaskApi';
+import { FullTemplate } from 'features/createAndEditTemplate/shared/types/types.template.full';
 
 export interface TemplateRequest {
   arch: string;
@@ -191,7 +192,7 @@ export const deleteTemplateItem: (uuid: string) => Promise<void> = async (uuid: 
   return data;
 };
 
-export const createTemplate: (request: TemplateRequest) => Promise<TemplateItem> = async (
+export const createTemplate: (request: TemplateRequest) => Promise<FullTemplate> = async (
   request,
 ) => {
   const { data } = await axios.post('/api/content-sources/v1.0/templates/', request);

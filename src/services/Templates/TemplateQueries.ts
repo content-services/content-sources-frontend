@@ -7,8 +7,6 @@ import {
   fetchTemplate,
   getTemplates,
   TemplateCollectionResponse,
-  createTemplate,
-  TemplateRequest,
   deleteTemplateItem,
   EditTemplateRequest,
   EditTemplate,
@@ -211,30 +209,9 @@ export const useTemplateList = (
   );
 };
 
-export const useCreateTemplateQuery = (queryClient: QueryClient, request: TemplateRequest) => {
-  const errorNotifier = useErrorNotification();
-  const { notify } = useNotification();
-  return useMutation<TemplateItem>(() => createTemplate(request), {
-    onSuccess: () => {
-      notify({
-        variant: AlertVariant.success,
-        title: `Content Template "${request?.name}" created`,
-      });
-
-      queryClient.invalidateQueries(GET_TEMPLATES_KEY);
-      queryClient.invalidateQueries(FETCH_TEMPLATE_KEY);
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (err: any) => {
-      errorNotifier(
-        'Error creating content template',
-        'An error occurred',
-        err,
-        'create-template-error',
-      );
-    },
-  });
-};
+// --
+// useCreateTemplateMutation in src/features/createAndEditTemplate/createTemplate/api/
+// --
 
 export const useDeleteTemplateItemMutate = (queryClient: QueryClient) => {
   // Below MUST match the "useTemplateList" key found above or updates will fail.
