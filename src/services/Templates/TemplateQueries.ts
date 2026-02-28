@@ -3,22 +3,19 @@ import { QueryClient, useMutation, useQuery } from 'react-query';
 import useErrorNotification from 'Hooks/useErrorNotification';
 import {
   TemplateFilterData,
-  TemplateItem,
   fetchTemplate,
   getTemplates,
   TemplateCollectionResponse,
   deleteTemplateItem,
-  EditTemplateRequest,
-  EditTemplate,
   type SnapshotRpmCollectionResponse,
   getTemplatePackages,
   getTemplateErrata,
   getTemplateSnapshots,
   getTemplatesForSnapshots,
 } from './TemplateApi';
-import useNotification from 'Hooks/useNotification';
-import { AlertVariant } from '@patternfly/react-core';
 import { ErrataResponse, SnapshotListResponse } from 'services/Content/ContentApi';
+import { FetchTemplate } from 'features/createAndEditTemplate/editTemplate/core/ports';
+import { FullTemplate } from 'features/createAndEditTemplate/shared/types/types.template.full';
 
 export const FETCH_TEMPLATE_KEY = 'FETCH_TEMPLATE_KEY';
 export const GET_TEMPLATES_KEY = 'GET_TEMPLATES_KEY';
@@ -30,42 +27,17 @@ export const TEMPLATES_FOR_SNAPSHOTS = 'TEMPLATES_BY_SNAPSHOTS_KEY';
 const TEMPLATE_LIST_POLLING_TIME = 15000; // 15 seconds
 const TEMPLATE_FETCH_POLLING_TIME = 5000; // 5 seconds
 
-export const useEditTemplateQuery = (queryClient: QueryClient, request: EditTemplateRequest) => {
-  const errorNotifier = useErrorNotification();
-  const { notify } = useNotification();
-  return useMutation(() => EditTemplate(request), {
-    onSuccess: () => {
-      notify({
-        variant: AlertVariant.success,
-        title: `Successfully edited template '${request.name}'`,
-      });
+// --
+// useEditTemplateMutation in src/features/createAndEditTemplate/editTemplate/api/
+// --
 
-      queryClient.invalidateQueries(GET_TEMPLATES_KEY);
-      queryClient.invalidateQueries(FETCH_TEMPLATE_KEY);
-      queryClient.invalidateQueries(GET_TEMPLATE_PACKAGES_KEY);
-      queryClient.invalidateQueries(TEMPLATE_ERRATA_KEY);
-      queryClient.invalidateQueries(TEMPLATES_FOR_SNAPSHOTS);
-      queryClient.invalidateQueries(TEMPLATE_SNAPSHOTS_KEY);
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (err: any) => {
-      errorNotifier(
-        `Error editing template '${request.name}'`,
-        'An error occurred',
-        err,
-        'edit-template-error',
-      );
-    },
-  });
-};
-
-export const useFetchTemplate = (
+export const useFetchTemplate: FetchTemplate = (
   uuid: string,
   enabled: boolean = true,
   polling: boolean = false,
 ) => {
   const errorNotifier = useErrorNotification();
-  return useQuery<TemplateItem>([FETCH_TEMPLATE_KEY, uuid], () => fetchTemplate(uuid), {
+  return useQuery<FullTemplate>([FETCH_TEMPLATE_KEY, uuid], () => fetchTemplate(uuid), {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) =>
       errorNotifier(

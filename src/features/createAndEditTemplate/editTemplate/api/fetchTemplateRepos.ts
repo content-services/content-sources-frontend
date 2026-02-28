@@ -3,6 +3,7 @@ import useErrorNotification from 'Hooks/useErrorNotification';
 import { useQueryClient } from 'react-query';
 import { ContentOrigin, getContentList } from 'services/Content/ContentApi';
 import { CONTENT_LIST_KEY } from 'services/Content/ContentQueries';
+import { FetchTemplateRepositories } from '../core/ports';
 
 const PAGE = 1;
 const LIMIT = 10;
@@ -13,7 +14,7 @@ export const useFetchTemplateRepositories = () => {
   const queryClient = useQueryClient();
   const errorNotifier = useErrorNotification();
 
-  const fetch = async (uuids) => {
+  const fetch: FetchTemplateRepositories = async (uuids) => {
     const queryKey = [CONTENT_LIST_KEY, uuids.join('-')];
 
     const formattedFilterData = {
