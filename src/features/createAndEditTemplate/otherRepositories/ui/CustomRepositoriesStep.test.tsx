@@ -1,18 +1,14 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../../workflow/store/AddTemplateContext';
+import { useCustomRepositoriesApi } from '../store/CustomRepositoriesStore';
 import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
-import { useContentListQuery } from 'services/Content/ContentQueries';
 import CustomRepositoriesStep from './CustomRepositoriesStep';
 
-jest.mock('services/Content/ContentQueries', () => ({
-  useContentListQuery: jest.fn(),
-}));
-
-jest.mock('@src/components/StatusIcon/StatusIcon', () => () => 'StatusIcon');
-
-jest.mock('../../workflow/store/AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
-}));
+jest.mock(
+  '@src/features/createAndEditTemplate/otherRepositories/store/CustomRepositoriesStore',
+  () => ({
+    useCustomRepositoriesApi: jest.fn(),
+  }),
+);
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
@@ -21,21 +17,28 @@ jest.mock('react-router-dom', () => ({
 }));
 
 it('expect CustomRepositoriesStep to render correctly', () => {
-  (useContentListQuery as jest.Mock).mockImplementation(() => ({
-    data: {
-      data: [defaultContentItem],
-      meta: { limit: 10, offset: 0, count: 1 },
-      isLoading: false,
-    },
-  }));
-
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
-    isEdit: false,
-    templateRequest: defaultTemplateItem,
-    setSelectedCustomRepos: () => undefined,
+  const mockRedhatRepositoriesApi = {
     selectedCustomRepos: new Set([defaultTemplateItem.uuid]),
-    queryClient: { invalidateQueries: () => {} },
-  }));
+    contentList: [defaultContentItem],
+    pathname: '',
+    columnHeaders: ['Name', 'Status', 'Packages'],
+    page: 1,
+    perPage: 20,
+    count: 1,
+    isLoading: false,
+    isFetching: false,
+    searchQuery: '',
+    toggled: false,
+    showLoader: false,
+    onSetPage: () => {},
+    onPerPageSelect: () => {},
+    sortParams: () => undefined,
+    setSearchQuery: () => {},
+    setUUIDForList: () => {},
+    setToggled: () => {},
+  };
+
+  (useCustomRepositoriesApi as jest.Mock).mockImplementation(() => mockRedhatRepositoriesApi);
 
   const { getByRole, getByText } = render(<CustomRepositoriesStep />);
 
