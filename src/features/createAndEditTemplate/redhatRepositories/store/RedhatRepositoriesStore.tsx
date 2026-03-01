@@ -3,16 +3,14 @@ import {
   HardcodedUUID,
   RedhatUUID,
 } from 'features/createAndEditTemplate/shared/types/types';
-import {
-  useTemplateRequestApi,
-  useTemplateRequestState,
-} from 'features/createAndEditTemplate/workflow/store/TemplateStore';
+import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import useDebounce from 'Hooks/useDebounce';
-import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
+import { createContext, ReactNode, useContext, useState } from 'react';
 import { ContentList, ContentOrigin } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 import { useSortRepositoriesList } from '../ui/useSortRepositoriesTable';
 import { SortRepositoryTableProps } from '../core/types';
+import { useToggleSelectedRepository } from '../core/use-cases/toggleSelectedRepository';
 
 type RedhatRepositoriesApiType = {
   hardcodedUUIDs: HardcodedUUID[];
@@ -83,26 +81,14 @@ type RedhatRepositoriesStoreType = {
 export type ToggleAdditionalRepository = (uuid: AdditionalUUID) => void;
 
 export const RedhatRepositoriesStore = ({ children }: RedhatRepositoriesStoreType) => {
-  const { setAdditionalUUIDs } = useTemplateRequestApi();
   const { selectedArchitecture, selectedOSVersion, hardcodedUUIDs, additionalUUIDs } =
     useTemplateRequestState();
 
+  const toggleSelected = useToggleSelectedRepository();
+
   const [toggled, setToggled] = useState(false);
-
-  const toggleSelected: ToggleAdditionalRepository = useCallback((clickedUuid) => {
-    setAdditionalUUIDs((previous) => {
-      const isInPrevious = previous.includes(clickedUuid);
-      if (isInPrevious) {
-        return previous.filter((uuid) => uuid !== clickedUuid);
-      } else {
-        return [...previous, clickedUuid];
-      }
-    });
-  }, []);
-
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery);
-
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const { sortedBy, setSortProps } = useSortRepositoriesList();
