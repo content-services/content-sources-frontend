@@ -2,17 +2,17 @@ import { OtherUUID } from 'features/createAndEditTemplate/shared/types/types';
 import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import useDebounce from 'Hooks/useDebounce';
 import { createContext, ReactNode, useContext, useState } from 'react';
-import { useHref } from 'react-router-dom';
 import { ContentList, ContentOrigin } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 import { useSortRepositoriesList } from '../ui/useSortRepositoriesTable';
 import { SortRepositoryTableProps } from '../core/types';
 import { useToggleOtherRepository } from '../core/use-cases/toggleOtherRepository';
+import { RefreshRepositories } from '../core/ports';
+import { useRefreshRepositories } from '../core/use-cases/refreshRepositories';
 
 export type ToggleOtherRepository = (uuid: OtherUUID) => void;
 
 type CustomRepositoriesApiType = {
-  pathname: string;
   contentList: ContentList;
   page: number;
   perPage: number;
@@ -32,6 +32,7 @@ type CustomRepositoriesApiType = {
   toggleSelected: ToggleOtherRepository;
   setToggled: (is: boolean) => void;
   isInOtherUUIDs: (uuid: OtherUUID) => boolean;
+  refetchOtherRepositories: RefreshRepositories;
 };
 
 const sortBy = {
@@ -41,7 +42,6 @@ const sortBy = {
 };
 
 const initialData = {
-  pathname: '',
   contentList: [],
   page: 1,
   perPage: 20,
@@ -65,6 +65,7 @@ const initialData = {
   toggleSelected: () => {},
   setToggled: () => {},
   isInOtherUUIDs: () => false,
+  refetchOtherRepositories: () => {},
 };
 
 const CustomRepositoriesApi = createContext<CustomRepositoriesApiType>(initialData);
@@ -74,12 +75,10 @@ type CustomRepositoriesStoreType = {
   children: ReactNode;
 };
 export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreType) => {
-  const path = useHref('content');
-  const pathname = path.split('content')[0] + 'content';
-
   const { selectedArchitecture, selectedOSVersion, otherUUIDs } = useTemplateRequestState();
 
   const toggleSelected = useToggleOtherRepository();
+  const refetchOtherRepositories = useRefreshRepositories();
 
   const [toggled, setToggled] = useState(false);
 
@@ -127,7 +126,6 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
   const noOtherReposSelected = otherUUIDs.length === 0;
 
   const api = {
-    pathname,
     page,
     perPage,
     count,
@@ -147,6 +145,7 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
     setToggled,
     isInOtherUUIDs,
     noOtherReposSelected,
+    refetchOtherRepositories,
   };
 
   return <CustomRepositoriesApi.Provider value={api}>{children}</CustomRepositoriesApi.Provider>;
