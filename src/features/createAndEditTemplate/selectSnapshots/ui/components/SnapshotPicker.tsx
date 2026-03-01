@@ -1,11 +1,11 @@
 import { DatePicker, Flex, FlexItem, Form, FormGroup, Radio } from '@patternfly/react-core';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import Hide from 'components/Hide/Hide';
-import { useSetUpDateApi } from '../../store/SetUpDateStore';
+import { useSetUpDateApi, useSetUpDateState } from '../../store/SetUpDateStore';
 
 export const SnapshotPicker = () => {
-  const { toggleLatestSnapshot, chooseSnapshotDate, isLatestSnapshot, snapshotDate } =
-    useSetUpDateApi();
+  const { toggleLatestSnapshot, chooseSnapshotDate } = useSetUpDateApi();
+  const { isLatestSnapshot, snapshotDate } = useSetUpDateState();
 
   const dateValidators = [
     (date: Date) => {

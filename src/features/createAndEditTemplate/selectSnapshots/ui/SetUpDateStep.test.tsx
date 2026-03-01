@@ -1,10 +1,15 @@
 import { render } from '@testing-library/react';
-import { useSetUpDateApi } from '../store/SetUpDateStore';
+import {
+  useSetUpDateApi,
+  useSetUpDateState,
+  useDependencyNotificationState,
+} from '../store/SetUpDateStore';
 import SetUpDateStep from './SetUpDateStep';
-import { defaultContentItem } from 'testingHelpers';
 
 jest.mock('@src/features/createAndEditTemplate/selectSnapshots/store/SetUpDateStore', () => ({
   useSetUpDateApi: jest.fn(),
+  useSetUpDateState: jest.fn(),
+  useDependencyNotificationState: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -23,20 +28,27 @@ jest.mock('dayjs', () => () => ({
 
 it('expect Set snapshot date step to render dates', () => {
   const mockSetUpDateApi = {
-    snapshotDate: '2024-01-22',
-    isLatestSnapshot: false,
-    isLoading: false,
-    contentData: {
-      data: [defaultContentItem],
-      meta: { count: 1, limit: 20, offset: 0 },
-    },
-    hasIsAfter: false,
-    dateIsValid: false,
     toggleLatestSnapshot: () => {},
     chooseSnapshotDate: () => {},
   };
 
+  const mockSetUpDateState = {
+    snapshotDate: '2024-01-22',
+    isLatestSnapshot: false,
+  };
+  const mockDependencyNotificationState = {
+    repositoryNames: [],
+    isNoIssues: true,
+    isHidden: false,
+    isFetching: false,
+    isAlert: false,
+  };
+
   (useSetUpDateApi as jest.Mock).mockImplementation(() => mockSetUpDateApi);
+  (useSetUpDateState as jest.Mock).mockImplementation(() => mockSetUpDateState);
+  (useDependencyNotificationState as jest.Mock).mockImplementation(
+    () => mockDependencyNotificationState,
+  );
 
   const { queryByText, getByRole } = render(<SetUpDateStep />);
   expect(queryByText('Select date for snapshotted repositories')).toBeInTheDocument();
@@ -48,20 +60,27 @@ it('expect Set snapshot date step to render dates', () => {
 
 it('expect Set snapshot date step to render use latest', () => {
   const mockSetUpDateApi = {
-    snapshotDate: '',
-    isLatestSnapshot: true,
-    isLoading: false,
-    contentData: {
-      data: [defaultContentItem],
-      meta: { count: 1, limit: 20, offset: 0 },
-    },
-    hasIsAfter: false,
-    dateIsValid: false,
     toggleLatestSnapshot: () => {},
     chooseSnapshotDate: () => {},
   };
 
+  const mockSetUpDateState = {
+    snapshotDate: '',
+    isLatestSnapshot: true,
+  };
+  const mockDependencyNotificationState = {
+    repositoryNames: [],
+    isNoIssues: false,
+    isHidden: true,
+    isFetching: false,
+    isAlert: false,
+  };
+
   (useSetUpDateApi as jest.Mock).mockImplementation(() => mockSetUpDateApi);
+  (useSetUpDateState as jest.Mock).mockImplementation(() => mockSetUpDateState);
+  (useDependencyNotificationState as jest.Mock).mockImplementation(
+    () => mockDependencyNotificationState,
+  );
 
   const { queryByText } = render(<SetUpDateStep />);
 
