@@ -1,15 +1,13 @@
 import { OtherUUID } from 'features/createAndEditTemplate/shared/types/types';
-import {
-  useTemplateRequestApi,
-  useTemplateRequestState,
-} from 'features/createAndEditTemplate/workflow/store/TemplateStore';
+import { useTemplateRequestState } from 'features/createAndEditTemplate/workflow/store/TemplateStore';
 import useDebounce from 'Hooks/useDebounce';
-import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
+import { createContext, ReactNode, useContext, useState } from 'react';
 import { useHref } from 'react-router-dom';
 import { ContentList, ContentOrigin } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 import { useSortRepositoriesList } from '../ui/useSortRepositoriesTable';
 import { SortRepositoryTableProps } from '../core/types';
+import { useToggleOtherRepository } from '../core/use-cases/toggleOtherRepository';
 
 export type ToggleOtherRepository = (uuid: OtherUUID) => void;
 
@@ -79,21 +77,11 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
   const path = useHref('content');
   const pathname = path.split('content')[0] + 'content';
 
-  const { setOtherUUIDs } = useTemplateRequestApi();
   const { selectedArchitecture, selectedOSVersion, otherUUIDs } = useTemplateRequestState();
 
-  const [toggled, setToggled] = useState(false);
+  const toggleSelected = useToggleOtherRepository();
 
-  const toggleSelected = useCallback((clickedUuid: string) => {
-    setOtherUUIDs((previous) => {
-      const isInPrevious = previous.includes(clickedUuid);
-      if (isInPrevious) {
-        return previous.filter((uuid) => uuid !== clickedUuid);
-      } else {
-        return [...previous, clickedUuid];
-      }
-    });
-  }, []);
+  const [toggled, setToggled] = useState(false);
 
   const storedPerPage = Number(20);
 
