@@ -1,4 +1,3 @@
-import { ThProps } from '@patternfly/react-table';
 import { OtherUUID } from 'features/createAndEditTemplate/shared/types/types';
 import {
   useTemplateRequestApi,
@@ -9,6 +8,8 @@ import { createContext, ReactNode, useCallback, useContext, useState } from 'rea
 import { useHref } from 'react-router-dom';
 import { ContentList, ContentOrigin } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
+import { useSortRepositoriesList } from '../ui/useSortRepositoriesTable';
+import { SortRepositoryTableProps } from '../core/types';
 
 export type ToggleOtherRepository = (uuid: OtherUUID) => void;
 
@@ -28,11 +29,17 @@ type CustomRepositoriesApiType = {
   noOtherReposSelected: boolean;
   onSetPage: (_, newPage: number) => void;
   onPerPageSelect: (_, newPerPage: number, newPage: number) => void;
-  sortParams: (columnIndex: number) => ThProps['sort'];
+  setSortProps: SortRepositoryTableProps;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   toggleSelected: ToggleOtherRepository;
   setToggled: (is: boolean) => void;
   isInOtherUUIDs: (uuid: OtherUUID) => boolean;
+};
+
+const sortBy = {
+  index: 0,
+  direction: 'asc' as const,
+  defaultDirection: 'asc' as const,
 };
 
 const initialData = {
@@ -51,7 +58,11 @@ const initialData = {
   noOtherReposSelected: true,
   onSetPage: () => {},
   onPerPageSelect: () => {},
-  sortParams: () => undefined,
+  setSortProps: (index) => ({
+    onSort: () => {},
+    sortBy: sortBy,
+    columnIndex: index,
+  }),
   setSearchQuery: () => {},
   toggleSelected: () => {},
   setToggled: () => {},
@@ -91,8 +102,7 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
-  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
+  const { sortedBy, setSortProps } = useSortRepositoriesList();
 
   const onSetPage = (_, newPage: number) => setPage(newPage);
   const onPerPageSelect = (_, newPerPage: number, newPage: number) => {
@@ -101,24 +111,6 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
   };
 
   const columnHeaders = ['Name', 'Status', 'Packages'];
-
-  const columnSortAttributes = ['name', 'status', 'package_count'];
-
-  const sortString = (): string =>
-    columnSortAttributes[activeSortIndex] + ':' + activeSortDirection;
-
-  const sortParams = (columnIndex: number): ThProps['sort'] => ({
-    sortBy: {
-      index: activeSortIndex,
-      direction: activeSortDirection,
-      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
-    },
-    onSort: (_event, index, direction) => {
-      setActiveSortIndex(index);
-      setActiveSortDirection(direction);
-    },
-    columnIndex,
-  });
 
   const {
     isLoading,
@@ -133,7 +125,7 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
       availableForVersion: selectedOSVersion!,
       uuids: toggled ? [...otherUUIDs] : undefined,
     },
-    sortString(),
+    sortedBy,
     [ContentOrigin.CUSTOM, ContentOrigin.COMMUNITY],
   );
 
@@ -161,7 +153,7 @@ export const CustomRepositoriesStore = ({ children }: CustomRepositoriesStoreTyp
     toggled,
     onSetPage,
     onPerPageSelect,
-    sortParams,
+    setSortProps,
     setSearchQuery,
     toggleSelected,
     setToggled,

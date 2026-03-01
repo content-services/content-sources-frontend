@@ -13,7 +13,7 @@ export const RedhatRepositoriesTable = () => {
   const {
     columnHeaders,
     contentList,
-    sortParams,
+    setSortProps,
     toggleSelected,
     isInHardcodedUUIDs,
     isInRedhatUUIDs,
@@ -32,7 +32,7 @@ export const RedhatRepositoriesTable = () => {
         <Tr>
           <Th screenReaderText='empty' />
           {columnHeaders.map((columnHeader, index) => (
-            <Th key={columnHeader + 'column'} sort={sortParams(index)}>
+            <Th key={columnHeader + 'column'} sort={setSortProps(index)}>
               {columnHeader}
             </Th>
           ))}

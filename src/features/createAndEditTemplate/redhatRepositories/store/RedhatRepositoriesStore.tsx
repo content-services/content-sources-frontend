@@ -1,4 +1,3 @@
-import { ThProps } from '@patternfly/react-table';
 import {
   AdditionalUUID,
   HardcodedUUID,
@@ -12,6 +11,8 @@ import useDebounce from 'Hooks/useDebounce';
 import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
 import { ContentList, ContentOrigin } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
+import { useSortRepositoriesList } from '../ui/useSortRepositoriesTable';
+import { SortRepositoryTableProps } from '../core/types';
 
 type RedhatRepositoriesApiType = {
   hardcodedUUIDs: HardcodedUUID[];
@@ -30,12 +31,18 @@ type RedhatRepositoriesApiType = {
   toggled: boolean;
   onSetPage: (_, newPage: number) => void;
   onPerPageSelect: (_, newPerPage: number, newPage: number) => void;
-  sortParams: (columnIndex: number) => ThProps['sort'];
+  setSortProps: SortRepositoryTableProps;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   setToggled: (is: boolean) => void;
   toggleSelected: ToggleAdditionalRepository;
   isInHardcodedUUIDs: (uuid: HardcodedUUID) => boolean;
   isInRedhatUUIDs: (uuid: RedhatUUID) => boolean;
+};
+
+const sortBy = {
+  index: 0,
+  direction: 'asc' as const,
+  defaultDirection: 'asc' as const,
 };
 
 const initialData = {
@@ -55,7 +62,11 @@ const initialData = {
   toggled: false,
   onSetPage: () => {},
   onPerPageSelect: () => {},
-  sortParams: () => undefined,
+  setSortProps: (index) => ({
+    onSort: () => {},
+    sortBy: sortBy,
+    columnIndex: index,
+  }),
   setSearchQuery: () => {},
   setToggled: () => {},
   toggleSelected: () => {},
@@ -94,8 +105,7 @@ export const RedhatRepositoriesStore = ({ children }: RedhatRepositoriesStoreTyp
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
-  const [activeSortIndex, setActiveSortIndex] = useState<number>(0);
-  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
+  const { sortedBy, setSortProps } = useSortRepositoriesList();
 
   const onSetPage = (_, newPage: number) => setPage(newPage);
   const onPerPageSelect = (_, newPerPage: number, newPage: number) => {
@@ -104,27 +114,6 @@ export const RedhatRepositoriesStore = ({ children }: RedhatRepositoriesStoreTyp
   };
 
   const columnHeaders = ['Name', /* 'Label',*/ 'Advisories', 'Packages'];
-
-  const columnSortAttributes = ['name'];
-
-  const sortString = (): string =>
-    columnSortAttributes[activeSortIndex] + ':' + activeSortDirection;
-
-  const sortParams = (columnIndex: number): ThProps['sort'] =>
-    columnSortAttributes[columnIndex]
-      ? {
-          sortBy: {
-            index: activeSortIndex,
-            direction: activeSortDirection,
-            defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
-          },
-          onSort: (_event, index, direction) => {
-            setActiveSortIndex(index);
-            setActiveSortDirection(direction);
-          },
-          columnIndex,
-        }
-      : undefined;
 
   const { isLoading, data = { data: [], meta: { count: 0, limit: 20, offset: 0 } } } =
     useContentListQuery(
@@ -136,7 +125,7 @@ export const RedhatRepositoriesStore = ({ children }: RedhatRepositoriesStoreTyp
         availableForVersion: selectedOSVersion!,
         uuids: toggled ? [...hardcodedUUIDs, ...additionalUUIDs] : undefined,
       },
-      sortString(),
+      sortedBy,
       [ContentOrigin.REDHAT],
     );
 
@@ -173,7 +162,7 @@ export const RedhatRepositoriesStore = ({ children }: RedhatRepositoriesStoreTyp
     toggled,
     onSetPage,
     onPerPageSelect,
-    sortParams,
+    setSortProps,
     setSearchQuery,
     toggleSelected,
     setToggled,

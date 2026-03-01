@@ -15,7 +15,7 @@ import { ContentItem, ContentOrigin } from 'services/Content/ContentApi';
 import { useCustomRepositoriesApi } from '../../store/CustomRepositoriesStore';
 
 export const CustomRepositoriesTable = () => {
-  const { columnHeaders, contentList, sortParams, isInOtherUUIDs, pathname, toggleSelected } =
+  const { columnHeaders, contentList, setSortProps, isInOtherUUIDs, pathname, toggleSelected } =
     useCustomRepositoriesApi();
 
   const { features } = useAppContext();
@@ -41,7 +41,7 @@ export const CustomRepositoriesTable = () => {
             <Th
               width={index === 0 ? 50 : undefined}
               key={columnHeader + 'column'}
-              sort={sortParams(index)}
+              sort={setSortProps(index)}
             >
               {columnHeader}
             </Th>
