@@ -4,7 +4,8 @@ import Hide from 'components/Hide/Hide';
 import { useSetUpDateApi } from '../../store/SetUpDateStore';
 
 export const SnapshotPicker = () => {
-  const { templateRequest, setTemplateRequest } = useSetUpDateApi();
+  const { toggleLatestSnapshot, chooseSnapshotDate, isLatestSnapshot, snapshotDate } =
+    useSetUpDateApi();
 
   const dateValidators = [
     (date: Date) => {
@@ -26,12 +27,8 @@ export const SnapshotPicker = () => {
               name='use-latest-snapshot'
               label='Use the latest content'
               description='Always use the latest content from repositories. Snapshots might be updated daily.'
-              isChecked={templateRequest.use_latest}
-              onChange={() => {
-                if (!templateRequest.use_latest) {
-                  setTemplateRequest((prev) => ({ ...prev, use_latest: true, date: '' }));
-                }
-              }}
+              isChecked={isLatestSnapshot}
+              onChange={() => toggleLatestSnapshot(true)}
             />
           </FlexItem>
           <FlexItem>
@@ -41,20 +38,16 @@ export const SnapshotPicker = () => {
               name='use-snapshot-date'
               label='Use up to a specific date'
               description='Includes repository changes up to this date.'
-              isChecked={!templateRequest.use_latest}
-              onChange={() => {
-                if (templateRequest.use_latest) {
-                  setTemplateRequest((prev) => ({ ...prev, use_latest: false, date: '' }));
-                }
-              }}
+              isChecked={!isLatestSnapshot}
+              onChange={() => toggleLatestSnapshot(false)}
               className={spacing.mbSm}
             />
-            <Hide hide={templateRequest.use_latest ?? false}>
+            <Hide hide={isLatestSnapshot ?? false}>
               <DatePicker
                 id='use-snapshot-date-picker'
-                value={templateRequest.date ?? ''}
-                required={!templateRequest.use_latest}
-                requiredDateOptions={{ isRequired: !templateRequest.use_latest }}
+                value={snapshotDate ?? ''}
+                required={!isLatestSnapshot}
+                requiredDateOptions={{ isRequired: !isLatestSnapshot }}
                 style={{ paddingLeft: '20px' }}
                 validators={dateValidators}
                 popoverProps={{
@@ -62,9 +55,7 @@ export const SnapshotPicker = () => {
                   enableFlip: true,
                   flipBehavior: ['right', 'right-start', 'right-end', 'top-start', 'top'],
                 }}
-                onChange={(_, val) => {
-                  setTemplateRequest((prev) => ({ ...prev, date: val }));
-                }}
+                onChange={(_, val) => chooseSnapshotDate(val)}
               />
             </Hide>
           </FlexItem>

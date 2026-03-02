@@ -23,7 +23,8 @@ jest.mock('dayjs', () => () => ({
 
 it('expect Set snapshot date step to render dates', () => {
   const mockSetUpDateApi = {
-    templateRequest: { date: '2024-01-22' },
+    snapshotDate: '2024-01-22',
+    isLatestSnapshot: false,
     isLoading: false,
     contentData: {
       data: [defaultContentItem],
@@ -31,7 +32,8 @@ it('expect Set snapshot date step to render dates', () => {
     },
     hasIsAfter: false,
     dateIsValid: false,
-    setTemplateRequest: () => {},
+    toggleLatestSnapshot: () => {},
+    chooseSnapshotDate: () => {},
   };
 
   (useSetUpDateApi as jest.Mock).mockImplementation(() => mockSetUpDateApi);
@@ -46,7 +48,8 @@ it('expect Set snapshot date step to render dates', () => {
 
 it('expect Set snapshot date step to render use latest', () => {
   const mockSetUpDateApi = {
-    templateRequest: { date: '', use_latest: true },
+    snapshotDate: '',
+    isLatestSnapshot: true,
     isLoading: false,
     contentData: {
       data: [defaultContentItem],
@@ -54,7 +57,8 @@ it('expect Set snapshot date step to render use latest', () => {
     },
     hasIsAfter: false,
     dateIsValid: false,
-    setTemplateRequest: () => {},
+    toggleLatestSnapshot: () => {},
+    chooseSnapshotDate: () => {},
   };
 
   (useSetUpDateApi as jest.Mock).mockImplementation(() => mockSetUpDateApi);
