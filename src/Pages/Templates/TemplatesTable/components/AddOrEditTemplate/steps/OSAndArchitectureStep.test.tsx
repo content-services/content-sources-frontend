@@ -4,6 +4,8 @@ import {
   defaultTemplateItem,
   testRepositoryParamsResponse,
   ReactQueryTestWrapper,
+  defaultEUSupportTemplateItem,
+  testEUSRepositoryParamsResponse,
 } from 'testingHelpers';
 import OSAndArchitectureStep from './OSAndArchitectureStep';
 import useDistributionDetails from '../../../../../../Hooks/useDistributionDetails';
@@ -27,7 +29,7 @@ beforeEach(() => {
   }));
 });
 
-it('expect OSAndArchitectureStep to render correctly', () => {
+it('renders enabled arch and version selectors when creating a standard template', () => {
   (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     isEdit: false,
     templateRequest: defaultTemplateItem,
@@ -53,7 +55,7 @@ it('expect OSAndArchitectureStep to render correctly', () => {
   expect(versionMenuToggle).not.toHaveAttribute('disabled');
 });
 
-it('expect OSAndArchitectureStep to render with disabled inputs', () => {
+it('disables arch and version selectors when editing an existing template', () => {
   (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     isEdit: true,
     templateRequest: defaultTemplateItem,
@@ -77,4 +79,37 @@ it('expect OSAndArchitectureStep to render with disabled inputs', () => {
   const versionMenuToggle = getByTestId('restrict_to_os_version');
   expect(versionMenuToggle).toBeInTheDocument();
   expect(versionMenuToggle).toHaveAttribute('disabled');
+});
+
+it('renders release stream and minor version when creating an EUS template', () => {
+  const versionName = `el${defaultEUSupportTemplateItem.extended_release_version}`;
+  const streamName = 'Extended Update Support (EUS)';
+
+  (useDistributionDetails as jest.Mock).mockImplementation(() => ({
+    getMinorVersionName: () => versionName,
+    getArchName: () => defaultEUSupportTemplateItem.arch,
+    getStreamName: () => streamName,
+    isExtendedSupportAvailable: true,
+  }));
+
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
+    isEdit: false,
+    templateRequest: defaultEUSupportTemplateItem,
+    setTemplateRequest: () => undefined,
+    distribution_arches: testEUSRepositoryParamsResponse.distribution_arches,
+    distribution_versions: testEUSRepositoryParamsResponse.distribution_versions,
+    extended_release_features: testEUSRepositoryParamsResponse.extended_release_features,
+    distribution_minor_versions: testEUSRepositoryParamsResponse.distribution_minor_versions,
+  }));
+
+  const { getByText } = render(
+    <ReactQueryTestWrapper>
+      <OSAndArchitectureStep />
+    </ReactQueryTestWrapper>,
+  );
+
+  expect(getByText('Release stream')).toBeInTheDocument();
+  expect(getByText(streamName)).toBeInTheDocument();
+  expect(getByText(versionName)).toBeInTheDocument();
+  expect(getByText(defaultEUSupportTemplateItem.arch)).toBeInTheDocument();
 });
