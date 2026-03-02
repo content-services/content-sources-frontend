@@ -9,14 +9,16 @@ import {
 } from '@patternfly/react-core';
 
 import { useSearchParams } from 'react-router-dom';
-import { AddTemplateContextProvider, useAddTemplateContext } from '../store/AddTemplateContext';
+import {
+  AddTemplateContextProvider,
+  useTemplateRequestDerivedState,
+} from '../store/AddTemplateContext';
 import RedhatRepositoriesStep from 'features/createAndEditTemplate/redhatRepositories/ui/RedhatRepositoriesStep';
 import CustomRepositoriesStep from 'features/createAndEditTemplate/otherRepositories/ui/CustomRepositoriesStep';
 import DefineContentStep from 'features/createAndEditTemplate/defineContent/ui/DefineContentStep';
 import SetUpDateStep from 'features/createAndEditTemplate/selectSnapshots/ui/SetUpDateStep';
 import DetailStep from 'features/createAndEditTemplate/describeTemplate/ui/DetailStep';
 import ReviewStep from 'features/createAndEditTemplate/reviewTemplateRequest/ui/ReviewStep';
-import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
 import { useOnCancelModal } from '../core/cancelModal';
 import { useInitialStep, WizardUrlSync } from '../core/chooseStep';
@@ -66,7 +68,7 @@ const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBa
   const initialIndex = useInitialStep();
   const onCancel = useOnCancelModal();
 
-  const { templateRequest } = useAddTemplateContext();
+  const { isEmptyTemplateRequest } = useTemplateRequestDerivedState();
   const { checkIfCurrentStepValid } = useCheckIsDisabledStep();
   const { isEditTemplate } = useEditTemplateState();
 
@@ -81,10 +83,10 @@ const TemplateModalBase = ({ modalProps, wizardHeaderProps, footer }: TemplateBa
       {...modalProps}
       variant={ModalVariant.large}
       isOpen
-      onClose={isEditTemplate && isEmpty(templateRequest) ? onCancel : undefined}
+      onClose={isEditTemplate && isEmptyTemplateRequest ? onCancel : undefined}
       disableFocusTrap
     >
-      {isEditTemplate && isEmpty(templateRequest) ? (
+      {isEditTemplate && isEmptyTemplateRequest ? (
         <Bullseye className={classes.minHeightForSpinner}>
           <Spinner size='xl' />
         </Bullseye>

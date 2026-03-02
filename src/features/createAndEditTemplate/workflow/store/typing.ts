@@ -62,3 +62,11 @@ export type TemplateRequestApiType = {
   setDetail: SaveDetail;
   resetTemplateRequestContent: ResetTemplateRequestContent;
 };
+
+// derived state
+export type TemplateRequestDerivedStateType = {
+  isEmptyTemplateRequest: boolean;
+};
+export const initialDerived = {
+  isEmptyTemplateRequest: true,
+};

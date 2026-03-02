@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { every, isEmpty } from 'lodash';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
 import {
   AdditionalUUID,
@@ -13,7 +14,13 @@ import {
   UseSnapshotDate,
 } from 'features/createAndEditTemplate/shared/types/types';
 import { TemplateRequestInProgress } from 'features/createAndEditTemplate/shared/types/types.compound';
-import { initalTemplateApi, initialTemplateRequestState, TemplateRequestApiType } from './typing';
+import {
+  initalTemplateApi,
+  initialDerived,
+  initialTemplateRequestState,
+  TemplateRequestApiType,
+  TemplateRequestDerivedStateType,
+} from './typing';
 import { useInitializeNewStore } from './temporary';
 
 const TemplateRequestApi = createContext<TemplateRequestApiType>(initalTemplateApi);
@@ -21,6 +28,9 @@ export const useTemplateRequestApi = () => useContext(TemplateRequestApi);
 
 const TemplateRequestState = createContext<TemplateRequestInProgress>(initialTemplateRequestState);
 export const useTemplateRequestState = () => useContext(TemplateRequestState);
+
+const TemplateRequestDerivedState = createContext<TemplateRequestDerivedStateType>(initialDerived);
+export const useTemplateRequestDerivedState = () => useContext(TemplateRequestDerivedState);
 
 export interface AddTemplateContextInterface {
   templateRequest: Partial<TemplateRequest>;
@@ -124,6 +134,11 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
     await temporary(templateRequest, { ...templateRequestApi });
   }, [templateRequest]);
 
+  const derivedState = useMemo(() => {
+    const isEmptyTemplateRequest = every(templateRequestState, isEmpty);
+    return { isEmptyTemplateRequest };
+  }, [templateRequestState]);
+
   return (
     <AddTemplateContext.Provider
       value={{
@@ -139,7 +154,9 @@ export const AddTemplateContextProvider = ({ children }: { children: ReactNode }
     >
       <TemplateRequestApi.Provider value={templateRequestApi}>
         <TemplateRequestState.Provider value={templateRequestState}>
-          {children}
+          <TemplateRequestDerivedState.Provider value={derivedState}>
+            {children}
+          </TemplateRequestDerivedState.Provider>
         </TemplateRequestState.Provider>
       </TemplateRequestApi.Provider>
     </AddTemplateContext.Provider>
