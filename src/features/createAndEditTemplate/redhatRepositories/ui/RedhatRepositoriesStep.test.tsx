@@ -1,12 +1,22 @@
 import { render } from '@testing-library/react';
-import { useRedhatRepositoriesApi } from '../store/RedhatRepositoriesStore';
-import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
+import {
+  useDerivedState,
+  usePagination,
+  useRedhatRepositoriesApi,
+  useRedhatRepositoriesState,
+  useSort,
+} from '../store/RedhatRepositoriesStore';
+import { defaultContentItem } from 'testingHelpers';
 import RedhatRepositoriesStep from './RedhatRepositoriesStep';
 
 jest.mock(
   '@src/features/createAndEditTemplate/redhatRepositories/store/RedhatRepositoriesStore',
   () => ({
     useRedhatRepositoriesApi: jest.fn(),
+    useRedhatRepositoriesState: jest.fn(),
+    useDerivedState: jest.fn(),
+    usePagination: jest.fn(),
+    useSort: jest.fn(),
   }),
 );
 
@@ -18,29 +28,37 @@ jest.mock('react-router-dom', () => ({
 
 it('expect RedhatRepositoriesStep to render correctly', () => {
   const mockRedhatRepositoriesApi = {
-    hardcodedUUIDs: [defaultTemplateItem.uuid],
-    additionalUUIDs: [],
-    contentList: [defaultContentItem],
-    columnHeaders: ['Name', 'Advisories', 'Packages'],
-    page: 1,
-    perPage: 20,
-    count: 1,
-    isLoading: false,
-    additionalReposAvailableToSelect: false,
-    noAdditionalRepos: true,
-    searchQuery: '',
-    toggled: false,
-    showLoader: false,
-    onSetPage: () => {},
-    onPerPageSelect: () => {},
-    sortParams: () => undefined,
-    setSearchQuery: () => {},
-    setToggled: () => {},
-    toggleSelected: () => {},
-    isInHardcodedUUIDs: () => true,
-    isInRedhatUUIDs: () => true,
+    filterByName: () => {},
+    filterSelected: () => {},
+    turnPage: () => {},
+    setPagination: () => {},
+    toggleChecked: () => {},
+    clearFilterByName: () => {},
   };
+  const RedhatRepositoriesState = {
+    isLoading: false,
+    count: 1,
+    filterQuery: '',
+    isSelectedFiltered: false,
+    repositoriesList: [defaultContentItem],
+  };
+
+  const hardcodedUUIDs = [defaultContentItem.uuid];
+  const redHatRepos = [defaultContentItem.uuid];
+  const mockDerivedState = {
+    areAdditionalReposToSelect: true,
+    noAdditionalReposSelected: true,
+    isInHardcodedUUIDs: (uuid) => hardcodedUUIDs.includes(uuid),
+    isInRedhatUUIDs: (uuid) => redHatRepos.includes(uuid),
+  };
+  const mockPaginationState = { page: 1, perPage: 20 };
+  const mockSort = { setSortProps: () => {} };
+
   (useRedhatRepositoriesApi as jest.Mock).mockImplementation(() => mockRedhatRepositoriesApi);
+  (useRedhatRepositoriesState as jest.Mock).mockImplementation(() => RedhatRepositoriesState);
+  (useDerivedState as jest.Mock).mockImplementation(() => mockDerivedState);
+  (usePagination as jest.Mock).mockImplementation(() => mockPaginationState);
+  (useSort as jest.Mock).mockImplementation(() => mockSort);
 
   const { getByRole, getByText } = render(<RedhatRepositoriesStep />);
 
