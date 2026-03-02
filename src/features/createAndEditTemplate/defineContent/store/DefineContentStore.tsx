@@ -1,5 +1,4 @@
 import {
-  useAddTemplateContext,
   useTemplateRequestApi,
   useTemplateRequestState,
 } from 'features/createAndEditTemplate/workflow/store/AddTemplateContext';
@@ -59,14 +58,6 @@ export const DefineContentStore = ({ children }: DefineContentStoreType) => {
     '',
   ]);
 
-  const {
-    setTemplateRequest,
-    selectedRedhatRepos,
-    setSelectedCustomRepos,
-    setSelectedRedhatRepos,
-    setHardcodeRepositoryUUIDS,
-  } = useAddTemplateContext();
-
   const { setHardcodedUUIDs, setOtherUUIDs, setArchitecture, setOSVersion } =
     useTemplateRequestApi();
   const { selectedArchitecture, selectedOSVersion } = useTemplateRequestState();
@@ -82,15 +73,9 @@ export const DefineContentStore = ({ children }: DefineContentStoreType) => {
 
   const onSelectArchitecture = (type) => {
     setArchitecture(type);
-
-    // temporary
-    setTemplateRequest((prev) => ({ ...prev, arch: type }));
   };
   const onSelectOSVersion = (type) => {
     setOSVersion(type);
-
-    // temporary
-    setTemplateRequest((prev) => ({ ...prev, version: type }));
   };
 
   const isArchitectureItemSelected = (item) => item === selectedArchitecture;
@@ -120,9 +105,6 @@ export const DefineContentStore = ({ children }: DefineContentStoreType) => {
       }
       if (!uuid) {
         setOtherUUIDs([]);
-
-        // temporary
-        setSelectedCustomRepos(new Set());
       }
     }
   }, [selectedArchitecture, selectedOSVersion, uuid]);
@@ -132,17 +114,6 @@ export const DefineContentStore = ({ children }: DefineContentStoreType) => {
     if (data?.data?.length) {
       const uuids = filterHardcodedUUIDs(data.data, hardcodedRedhatRepositories);
       setHardcodedUUIDs(uuids);
-
-      // temporary
-      const hardcodedItems = data?.data.map((item) => item.uuid);
-      setHardcodeRepositoryUUIDS(new Set(hardcodedItems));
-      setSelectedRedhatRepos(
-        new Set(
-          selectedRedhatRepos.has(hardcodedItems[0])
-            ? [...selectedRedhatRepos, ...hardcodedItems]
-            : hardcodedItems,
-        ),
-      );
     }
   }, [data?.data]);
   // <<<<<<<<

@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { useCustomRepositoriesApi } from '../store/CustomRepositoriesStore';
-import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
+import { defaultContentItem } from 'testingHelpers';
 import CustomRepositoriesStep from './CustomRepositoriesStep';
 import { useQueryClient } from 'react-query';
 
@@ -24,7 +24,6 @@ jest.mock('react-query', () => ({
 
 it('expect CustomRepositoriesStep to render correctly', () => {
   const mockRedhatRepositoriesApi = {
-    selectedCustomRepos: new Set([defaultTemplateItem.uuid]),
     contentList: [defaultContentItem],
     pathname: '',
     columnHeaders: ['Name', 'Status', 'Packages'],
@@ -36,12 +35,14 @@ it('expect CustomRepositoriesStep to render correctly', () => {
     searchQuery: '',
     toggled: false,
     showLoader: false,
+    noOtherReposSelected: true,
     onSetPage: () => {},
     onPerPageSelect: () => {},
     sortParams: () => undefined,
     setSearchQuery: () => {},
-    setUUIDForList: () => {},
+    toggleSelected: () => {},
     setToggled: () => {},
+    isInOtherUUIDs: () => {},
   };
 
   const mockUseQueryClient = {

@@ -36,7 +36,7 @@ export const TableControls = () => {
     page,
     onSetPage,
     onPerPageSelect,
-    selectedCustomRepos,
+    noOtherReposSelected,
   } = useCustomRepositoriesApi();
 
   return (
@@ -73,7 +73,7 @@ export const TableControls = () => {
                 buttonId='custom-repositories-selected-toggle-button'
                 data-ouia-component-id='custom-selected-repositories-toggle'
                 isSelected={toggled}
-                isDisabled={selectedCustomRepos.size === 0}
+                isDisabled={noOtherReposSelected}
                 onChange={() => setToggled(true)}
               />
             </ToggleGroup>

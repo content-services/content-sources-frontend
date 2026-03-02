@@ -18,8 +18,8 @@ jest.mock('react-router-dom', () => ({
 
 it('expect RedhatRepositoriesStep to render correctly', () => {
   const mockRedhatRepositoriesApi = {
-    selectedRedhatRepos: new Set([defaultTemplateItem.uuid]),
-    hardcodedRedhatRepositoryUUIDS: new Set([defaultTemplateItem.uuid]),
+    hardcodedUUIDs: [defaultTemplateItem.uuid],
+    additionalUUIDs: [],
     contentList: [defaultContentItem],
     columnHeaders: ['Name', 'Advisories', 'Packages'],
     page: 1,
@@ -35,8 +35,10 @@ it('expect RedhatRepositoriesStep to render correctly', () => {
     onPerPageSelect: () => {},
     sortParams: () => undefined,
     setSearchQuery: () => {},
-    setUUIDForList: () => {},
     setToggled: () => {},
+    toggleSelected: () => {},
+    isInHardcodedUUIDs: () => true,
+    isInRedhatUUIDs: () => true,
   };
   (useRedhatRepositoriesApi as jest.Mock).mockImplementation(() => mockRedhatRepositoriesApi);
 
