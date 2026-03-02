@@ -1,13 +1,22 @@
 import { render } from '@testing-library/react';
-import { useCustomRepositoriesApi } from '../store/CustomRepositoriesStore';
+import {
+  useCustomRepositoriesApi,
+  useCustomRepositoriesState,
+  useDerivedState,
+  usePagination,
+  useSort,
+} from '../store/CustomRepositoriesStore';
 import { defaultContentItem } from 'testingHelpers';
 import CustomRepositoriesStep from './CustomRepositoriesStep';
-import { useQueryClient } from 'react-query';
 
 jest.mock(
   '@src/features/createAndEditTemplate/otherRepositories/store/CustomRepositoriesStore',
   () => ({
     useCustomRepositoriesApi: jest.fn(),
+    useCustomRepositoriesState: jest.fn(),
+    useDerivedState: jest.fn(),
+    usePagination: jest.fn(),
+    useSort: jest.fn(),
   }),
 );
 
@@ -17,40 +26,38 @@ jest.mock('react-router-dom', () => ({
   useHref: () => 'insights/content/templates',
 }));
 
-jest.mock('react-query', () => ({
-  ...jest.requireActual('react-query'),
-  useQueryClient: jest.fn(),
-}));
-
 it('expect CustomRepositoriesStep to render correctly', () => {
   const mockRedhatRepositoriesApi = {
-    contentList: [defaultContentItem],
-    pathname: '',
-    columnHeaders: ['Name', 'Status', 'Packages'],
-    page: 1,
-    perPage: 20,
-    count: 1,
+    toggleSelected: () => {},
+    turnPage: () => {},
+    setPagination: () => {},
+    filterByName: () => {},
+    filterSelected: () => {},
+    clearFilterByName: () => {},
+    refetchOtherRepositories: () => {},
+  };
+
+  const mockCustomRepositoriesState = {
     isLoading: false,
     isFetching: false,
-    searchQuery: '',
-    toggled: false,
-    showLoader: false,
-    noOtherReposSelected: true,
-    onSetPage: () => {},
-    onPerPageSelect: () => {},
-    sortParams: () => undefined,
-    setSearchQuery: () => {},
-    toggleSelected: () => {},
-    setToggled: () => {},
+    count: 1,
+    repositoriesList: [defaultContentItem],
+    filterQuery: '',
+  };
+  const mockDerivedState = {
+    isSelectedFiltered: false,
     isInOtherUUIDs: () => {},
+    areOtherReposToSelect: true,
+    noOtherReposSelected: true,
   };
-
-  const mockUseQueryClient = {
-    invalidateQueries: () => {},
-  };
+  const mockPaginationState = { page: 1, perPage: 20 };
+  const mockSort = { setSortProps: () => {} };
 
   (useCustomRepositoriesApi as jest.Mock).mockImplementation(() => mockRedhatRepositoriesApi);
-  (useQueryClient as jest.Mock).mockImplementation(() => mockUseQueryClient);
+  (useCustomRepositoriesState as jest.Mock).mockImplementation(() => mockCustomRepositoriesState);
+  (useDerivedState as jest.Mock).mockImplementation(() => mockDerivedState);
+  (usePagination as jest.Mock).mockImplementation(() => mockPaginationState);
+  (useSort as jest.Mock).mockImplementation(() => mockSort);
 
   const { getByRole, getByText } = render(<CustomRepositoriesStep />);
 

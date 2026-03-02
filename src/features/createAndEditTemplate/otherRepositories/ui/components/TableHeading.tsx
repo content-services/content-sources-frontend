@@ -3,7 +3,10 @@ import { SyncAltIcon } from '@patternfly/react-icons';
 import { useHref } from 'react-router-dom';
 import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
-import { useCustomRepositoriesApi } from '../../store/CustomRepositoriesStore';
+import {
+  useCustomRepositoriesApi,
+  useCustomRepositoriesState,
+} from '../../store/CustomRepositoriesStore';
 
 export const TableHeading = () => {
   const path = useHref('content');
@@ -30,7 +33,8 @@ export const TableHeading = () => {
 };
 
 const RefreshListButton = () => {
-  const { refetchOtherRepositories, isLoading, isFetching } = useCustomRepositoriesApi();
+  const { refetchOtherRepositories } = useCustomRepositoriesApi();
+  const { isLoading, isFetching } = useCustomRepositoriesState();
 
   const isQueryInProgress = isLoading || isFetching;
   const showLoadingIcon = isQueryInProgress ? undefined : <SyncAltIcon />;
