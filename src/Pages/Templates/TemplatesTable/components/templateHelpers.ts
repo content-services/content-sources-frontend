@@ -50,9 +50,9 @@ export const getRedHatCoreRepoUrls = (
   majorVersion?: string,
   releaseStream?: string,
   minorVersion?: string,
-): string[] | undefined => {
+): string[] => {
   const areParamsValid = validateRedHatRepoParams(arch, majorVersion, releaseStream, minorVersion);
-  if (!areParamsValid) return;
+  if (!areParamsValid) return [];
 
   const stream = releaseStream || STANDARD_STREAM_PATH;
   const versionNumber = stream === STANDARD_STREAM_PATH ? majorVersion : minorVersion;
@@ -81,6 +81,13 @@ export const canAssignSystemToTemplate = (
 /** Extracts the abbreviation from parentheses, e.g., "Extended Update Support (EUS)" to "EUS". */
 export const abbreviateStreamName = (streamName: string) =>
   streamName.match(/\(([^)]+)\)/)?.[1] ?? '';
+
+export const isMinorVersionOfMajor = (minorVersion?: string, majorVersion?: string) => {
+  if (minorVersion && majorVersion) {
+    return minorVersion.split('.')[0] === majorVersion;
+  }
+  return false;
+};
 
 export const TemplateValidationSchema = Yup.object().shape({
   name: Yup.string().max(255, 'Too Long!').required('Required'),

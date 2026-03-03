@@ -19,27 +19,48 @@ jest.mock('../../../../../../Hooks/useDistributionDetails', () => ({
   default: jest.fn(),
 }));
 
-const versionName = `el${defaultTemplateItem.version}`;
+const standardVersionName = `el${defaultTemplateItem.version}`;
+
+const defaultStandardContext = {
+  isEdit: false,
+  templateRequest: defaultTemplateItem,
+  setTemplateRequest: () => undefined,
+  distribution_arches: testRepositoryParamsResponse.distribution_arches,
+  distribution_versions: testRepositoryParamsResponse.distribution_versions,
+  extended_release_features: testRepositoryParamsResponse.extended_release_features,
+  distribution_minor_versions: testRepositoryParamsResponse.distribution_minor_versions,
+};
+
+const eusStreamName = 'Extended Update Support (EUS)';
+
+const defaultEUSContext = {
+  isEdit: false,
+  templateRequest: defaultEUSupportTemplateItem,
+  setTemplateRequest: () => undefined,
+  distribution_arches: testEUSRepositoryParamsResponse.distribution_arches,
+  distribution_versions: testEUSRepositoryParamsResponse.distribution_versions,
+  extended_release_features: testEUSRepositoryParamsResponse.extended_release_features,
+  distribution_minor_versions: testEUSRepositoryParamsResponse.distribution_minor_versions,
+};
+
+const defaultEUSDistributionDetails = {
+  getMinorVersionName: () => `el${defaultEUSupportTemplateItem.extended_release_version}`,
+  getArchName: () => defaultEUSupportTemplateItem.arch,
+  getStreamName: () => eusStreamName,
+  isExtendedSupportAvailable: true,
+};
 
 beforeEach(() => {
   (useDistributionDetails as jest.Mock).mockImplementation(() => ({
-    getVersionName: () => versionName,
+    getVersionName: () => standardVersionName,
     getArchName: () => defaultTemplateItem.arch,
     isExtendedSupportAvailable: false,
   }));
+
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => defaultStandardContext);
 });
 
 it('renders enabled arch and version selectors when creating a standard template', () => {
-  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
-    isEdit: false,
-    templateRequest: defaultTemplateItem,
-    setTemplateRequest: () => undefined,
-    distribution_arches: testRepositoryParamsResponse.distribution_arches,
-    distribution_versions: testRepositoryParamsResponse.distribution_versions,
-    extended_release_features: testRepositoryParamsResponse.extended_release_features,
-    distribution_minor_versions: testRepositoryParamsResponse.distribution_minor_versions,
-  }));
-
   const { getByText } = render(
     <ReactQueryTestWrapper>
       <OSAndArchitectureStep />
@@ -48,22 +69,17 @@ it('renders enabled arch and version selectors when creating a standard template
 
   const archMenuToggle = getByText(defaultTemplateItem.arch);
   expect(archMenuToggle).toBeInTheDocument();
-  expect(archMenuToggle).not.toHaveAttribute('disabled');
+  expect(archMenuToggle).toBeEnabled();
 
-  const versionMenuToggle = getByText(versionName);
+  const versionMenuToggle = getByText(standardVersionName);
   expect(versionMenuToggle).toBeInTheDocument();
-  expect(versionMenuToggle).not.toHaveAttribute('disabled');
+  expect(versionMenuToggle).toBeEnabled();
 });
 
-it('disables arch and version selectors when editing an existing template', () => {
+it('disables arch and version selectors when editing an existing standard template', () => {
   (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
+    ...defaultStandardContext,
     isEdit: true,
-    templateRequest: defaultTemplateItem,
-    setTemplateRequest: () => undefined,
-    distribution_arches: testRepositoryParamsResponse.distribution_arches,
-    distribution_versions: testRepositoryParamsResponse.distribution_versions,
-    extended_release_features: testRepositoryParamsResponse.extended_release_features,
-    distribution_minor_versions: testRepositoryParamsResponse.distribution_minor_versions,
   }));
 
   const { getByTestId } = render(
@@ -74,33 +90,16 @@ it('disables arch and version selectors when editing an existing template', () =
 
   const archMenuToggle = getByTestId('restrict_to_architecture');
   expect(archMenuToggle).toBeInTheDocument();
-  expect(archMenuToggle).toHaveAttribute('disabled');
+  expect(archMenuToggle).toBeDisabled();
 
   const versionMenuToggle = getByTestId('restrict_to_os_version');
   expect(versionMenuToggle).toBeInTheDocument();
-  expect(versionMenuToggle).toHaveAttribute('disabled');
+  expect(versionMenuToggle).toBeDisabled();
 });
 
 it('renders release stream and minor version when creating an EUS template', () => {
-  const versionName = `el${defaultEUSupportTemplateItem.extended_release_version}`;
-  const streamName = 'Extended Update Support (EUS)';
-
-  (useDistributionDetails as jest.Mock).mockImplementation(() => ({
-    getMinorVersionName: () => versionName,
-    getArchName: () => defaultEUSupportTemplateItem.arch,
-    getStreamName: () => streamName,
-    isExtendedSupportAvailable: true,
-  }));
-
-  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
-    isEdit: false,
-    templateRequest: defaultEUSupportTemplateItem,
-    setTemplateRequest: () => undefined,
-    distribution_arches: testEUSRepositoryParamsResponse.distribution_arches,
-    distribution_versions: testEUSRepositoryParamsResponse.distribution_versions,
-    extended_release_features: testEUSRepositoryParamsResponse.extended_release_features,
-    distribution_minor_versions: testEUSRepositoryParamsResponse.distribution_minor_versions,
-  }));
+  (useDistributionDetails as jest.Mock).mockImplementation(() => defaultEUSDistributionDetails);
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => defaultEUSContext);
 
   const { getByText } = render(
     <ReactQueryTestWrapper>
@@ -109,7 +108,27 @@ it('renders release stream and minor version when creating an EUS template', () 
   );
 
   expect(getByText('Release stream')).toBeInTheDocument();
-  expect(getByText(streamName)).toBeInTheDocument();
-  expect(getByText(versionName)).toBeInTheDocument();
+  expect(getByText(eusStreamName)).toBeInTheDocument();
+  expect(
+    getByText(`el${defaultEUSupportTemplateItem.extended_release_version}`),
+  ).toBeInTheDocument();
   expect(getByText(defaultEUSupportTemplateItem.arch)).toBeInTheDocument();
+});
+
+it('keeps the version selector enabled when editing an EUS template', () => {
+  (useDistributionDetails as jest.Mock).mockImplementation(() => defaultEUSDistributionDetails);
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
+    ...defaultEUSContext,
+    isEdit: true,
+  }));
+
+  const { getByTestId } = render(
+    <ReactQueryTestWrapper>
+      <OSAndArchitectureStep />
+    </ReactQueryTestWrapper>,
+  );
+
+  const versionMenuToggle = getByTestId('restrict_to_os_version');
+  expect(versionMenuToggle).toBeInTheDocument();
+  expect(versionMenuToggle).toBeEnabled();
 });
