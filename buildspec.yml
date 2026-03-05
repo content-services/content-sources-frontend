@@ -24,6 +24,7 @@ phases:
       - echo Entered the post_build phase...
       - echo Build completed on `date`
 cache:
+  key: fe-$(codebuild-hash-files yarn.lock)
   paths:
     - "/root/.cache/ms-playwright"
     - "/root/.docker"
