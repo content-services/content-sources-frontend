@@ -1,8 +1,9 @@
 import { render } from '@testing-library/react';
-import { useAddTemplateContext } from '../AddTemplateContext';
+import { useAddOrEditTemplateContext } from '../AddOrEditTemplateContext';
 import { defaultContentItem, defaultTemplateItem } from 'testingHelpers';
 import { useContentListQuery } from 'services/Content/ContentQueries';
-import RedhatRepositoriesStep from './RedhatRepositoriesStep';
+import RedHatRepositoriesStep from './RedHatRepositoriesStep';
+import useDistributionDetails from '../../../../../../Hooks/useDistributionDetails';
 
 jest.mock('services/Content/ContentQueries', () => ({
   useContentListQuery: jest.fn(),
@@ -10,14 +11,19 @@ jest.mock('services/Content/ContentQueries', () => ({
 
 jest.mock('Pages/Repositories/ContentListTable/components/StatusIcon', () => () => 'StatusIcon');
 
-jest.mock('../AddTemplateContext', () => ({
-  useAddTemplateContext: jest.fn(),
+jest.mock('../AddOrEditTemplateContext', () => ({
+  useAddOrEditTemplateContext: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
   Outlet: () => <></>,
   useHref: () => 'insights/content/templates',
+}));
+
+jest.mock('../../../../../../Hooks/useDistributionDetails', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 it('expect RedhatRepositoriesStep to render correctly', () => {
@@ -29,14 +35,18 @@ it('expect RedhatRepositoriesStep to render correctly', () => {
     },
   }));
 
-  (useAddTemplateContext as jest.Mock).mockImplementation(() => ({
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
     templateRequest: defaultTemplateItem,
-    setSelectedRedhatRepos: () => undefined,
-    selectedRedhatRepos: new Set([defaultTemplateItem.uuid]),
-    hardcodedRedhatRepositoryUUIDS: new Set([defaultTemplateItem.uuid]),
+    setSelectedRedHatRepos: () => undefined,
+    selectedRedHatRepos: new Set([defaultTemplateItem.uuid]),
+    redHatCoreRepos: new Set([defaultTemplateItem.uuid]),
   }));
 
-  const { getByRole, getByText } = render(<RedhatRepositoriesStep />);
+  (useDistributionDetails as jest.Mock).mockImplementation(() => ({
+    isExtendedSupportAvailable: false,
+  }));
+
+  const { getByRole, getByText } = render(<RedHatRepositoriesStep />);
 
   const firstCheckboxInList = getByRole('checkbox', { name: 'Select row 0' });
 

@@ -12,12 +12,14 @@ import {
 
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useCreateTemplateQuery, useEditTemplateQuery } from 'services/Templates/TemplateQueries';
-import { AddTemplateContextProvider, useAddTemplateContext } from './AddTemplateContext';
-import RedhatRepositoriesStep from './steps/RedhatRepositoriesStep';
+import {
+  AddOrEditTemplateContextProvider,
+  useAddOrEditTemplateContext,
+} from './AddOrEditTemplateContext';
+import RedHatRepositoriesStep from './steps/RedHatRepositoriesStep';
 import CustomRepositoriesStep from './steps/CustomRepositoriesStep';
 import { TemplateRequest } from 'services/Templates/TemplateApi';
 
-import DefineContentStep from './steps/DefineContentStep';
 import SetUpDateStep from './steps/SetUpDateStep';
 import DetailStep from './steps/DetailStep';
 import ReviewStep from './steps/ReviewStep';
@@ -25,9 +27,10 @@ import { formatTemplateDate } from 'helpers';
 import { isEmpty } from 'lodash';
 import { createUseStyles } from 'react-jss';
 import { useEffect, useRef } from 'react';
-import { AddNavigateButton } from './AddNavigateButton';
+import { AddTemplateButton } from './AddTemplateButton';
 import useRootPath from 'Hooks/useRootPath';
 import { TEMPLATES_ROUTE } from 'Routes/constants';
+import OSAndArchitectureStep from './steps/OSAndArchitectureStep';
 
 const useStyles = createUseStyles({
   minHeightForSpinner: {
@@ -35,15 +38,11 @@ const useStyles = createUseStyles({
   },
 });
 
-export interface Props {
-  isDisabled: boolean;
-  addRepo: (snapshot: boolean) => void;
-}
-
-const DEFAULT_STEP_ID = 'define-content';
+const DEFAULT_STEP_ID = 'os-and-architecture';
+const DEFAULT_STEP_INDEX = 2;
 
 const stepIdToIndex: Record<string, number> = {
-  'define-content': 2,
+  [DEFAULT_STEP_ID]: DEFAULT_STEP_INDEX,
   'redhat-repositories': 3,
   'custom-repositories': 4,
   'set-up-date': 5,
@@ -51,7 +50,7 @@ const stepIdToIndex: Record<string, number> = {
   review: 7,
 };
 
-// Component to sync URL with wizard state (must be inside Wizard)
+/** Component to sync URL with wizard state (must be inside Wizard). */
 const WizardUrlSync = ({ onCancel }: { onCancel: () => void }) => {
   const { goToStepById, activeStep } = useWizardContext();
   const [urlSearchParams] = useSearchParams();
@@ -62,7 +61,7 @@ const WizardUrlSync = ({ onCancel }: { onCancel: () => void }) => {
     if (tabParam && tabParam !== activeStep?.id) {
       if (stepIdToIndex[tabParam]) {
         goToStepById(tabParam);
-      } else if (tabParam === 'content') {
+      } else if (tabParam === 'os-and-architecture') {
         goToStepById(DEFAULT_STEP_ID);
       } else {
         onCancel();
@@ -83,14 +82,15 @@ const AddOrEditTemplateBase = () => {
   // Store the original 'from' value on mount (before step navigation changes location.state)
   const fromRef = useRef(location.state?.from);
 
-  const { isEdit, templateRequest, checkIfCurrentStepValid, editUUID } = useAddTemplateContext();
+  const { isEdit, templateRequest, hasInvalidSteps, editUUID } = useAddOrEditTemplateContext();
 
-  // useSafeUUIDParam in AddTemplateContext already validates the UUID
+  // useSafeUUIDParam in AddOrEditTemplateContext already validates the UUID
   // If in edit mode and UUID is invalid, it will be an empty string
   if (isEdit && !editUUID) throw new Error('UUID is invalid');
 
   const tabParam = urlSearchParams.get('tab');
-  const initialIndex = tabParam && stepIdToIndex[tabParam] ? stepIdToIndex[tabParam] : 2;
+  const initialIndex =
+    tabParam && stepIdToIndex[tabParam] ? stepIdToIndex[tabParam] : DEFAULT_STEP_INDEX;
 
   useEffect(() => {
     if (!urlSearchParams.get('tab')) {
@@ -98,7 +98,7 @@ const AddOrEditTemplateBase = () => {
     }
   }, []);
 
-  const { queryClient } = useAddTemplateContext();
+  const { queryClient } = useAddOrEditTemplateContext();
 
   const onCancel = () => {
     if (fromRef.current === 'table') {
@@ -169,28 +169,28 @@ const AddOrEditTemplateBase = () => {
             isExpandable
             steps={[
               <WizardStep
-                name='Define content'
-                id='define-content'
-                key='define-content-key'
-                footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(1) }}
+                name='OS and architecture'
+                id='os-and-architecture'
+                key='os-and-architecture-key'
+                footer={{ ...sharedFooterProps, isNextDisabled: hasInvalidSteps(1) }}
               >
-                <DefineContentStep />
+                <OSAndArchitectureStep />
               </WizardStep>,
               <WizardStep
-                isDisabled={checkIfCurrentStepValid(1)}
+                isDisabled={hasInvalidSteps(1)}
                 name='Red Hat repositories'
                 id='redhat-repositories'
                 key='redhat-repositories-key'
-                footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(2) }}
+                footer={{ ...sharedFooterProps, isNextDisabled: hasInvalidSteps(2) }}
               >
-                <RedhatRepositoriesStep />
+                <RedHatRepositoriesStep />
               </WizardStep>,
               <WizardStep
-                isDisabled={checkIfCurrentStepValid(2)}
+                isDisabled={hasInvalidSteps(2)}
                 name='Other repositories'
                 id='custom-repositories'
                 key='custom-repositories-key'
-                footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(3) }}
+                footer={{ ...sharedFooterProps, isNextDisabled: hasInvalidSteps(3) }}
               >
                 <CustomRepositoriesStep />
               </WizardStep>,
@@ -199,22 +199,22 @@ const AddOrEditTemplateBase = () => {
           <WizardStep
             name='Set up date'
             id='set-up-date'
-            isDisabled={checkIfCurrentStepValid(3)}
-            footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(4) }}
+            isDisabled={hasInvalidSteps(3)}
+            footer={{ ...sharedFooterProps, isNextDisabled: hasInvalidSteps(4) }}
           >
             <SetUpDateStep />
           </WizardStep>
           {/* <WizardStep name='Systems (optional)' id='systems' /> */}
           <WizardStep
-            isDisabled={checkIfCurrentStepValid(4)}
-            footer={{ ...sharedFooterProps, isNextDisabled: checkIfCurrentStepValid(5) }}
+            isDisabled={hasInvalidSteps(4)}
+            footer={{ ...sharedFooterProps, isNextDisabled: hasInvalidSteps(5) }}
             name='Detail'
             id='detail'
           >
             <DetailStep />
           </WizardStep>
           <WizardStep
-            isDisabled={checkIfCurrentStepValid(5)}
+            isDisabled={hasInvalidSteps(5)}
             name='Review'
             id='review'
             footer={
@@ -228,7 +228,7 @@ const AddOrEditTemplateBase = () => {
                 }
               ) : (
                 <WizardFooterWrapper>
-                  <AddNavigateButton isAdding={isAdding} onClose={onCancel} add={addTemplate} />
+                  <AddTemplateButton isAdding={isAdding} onClose={onCancel} add={addTemplate} />
                 </WizardFooterWrapper>
               )
             }
@@ -242,10 +242,10 @@ const AddOrEditTemplateBase = () => {
 };
 
 // Wrap the modal with the provider
-export function AddOrEditTemplate() {
+export function AddOrEditTemplateModal() {
   return (
-    <AddTemplateContextProvider>
+    <AddOrEditTemplateContextProvider>
       <AddOrEditTemplateBase />
-    </AddTemplateContextProvider>
+    </AddOrEditTemplateContextProvider>
   );
 }

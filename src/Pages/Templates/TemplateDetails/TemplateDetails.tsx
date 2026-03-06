@@ -18,13 +18,14 @@ import { createUseStyles } from 'react-jss';
 import { TEMPLATES_ROUTE } from 'Routes/constants';
 import useRootPath from 'Hooks/useRootPath';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
-import useArchVersion from 'Hooks/useArchVersion';
+import useDistributionDetails from '../../../Hooks/useDistributionDetails';
 import DetailItem from './components/DetaiItem';
 import Hide from 'components/Hide/Hide';
 import { formatDateDDMMMYYYY } from 'helpers';
 import Loader from 'components/Loader';
 import TemplateActionDropdown from './components/TemplateActionDropdown';
 import TemplateDetailsTabs from './components/TemplateDetailsTabs';
+import { abbreviateStreamName } from '../TemplatesTable/components/templateHelpers';
 
 const useStyles = createUseStyles({
   fullHeight: {
@@ -65,15 +66,17 @@ export default function TemplateDetails() {
   const rootPath = useRootPath();
   const navigate = useNavigate();
 
-  const { data, isError, error, isLoading } = useFetchTemplate(templateUUID as string);
+  const { data: template, isError, error, isLoading } = useFetchTemplate(templateUUID as string);
 
   const {
     isError: repositoryParamsIsError,
     isLoading: archVersionLoading,
     error: repositoryParamsError,
-    archesDisplay,
-    versionDisplay,
-  } = useArchVersion();
+    getArchName,
+    getVersionName,
+    getMinorVersionName,
+    getStreamName,
+  } = useDistributionDetails();
 
   // Error is caught in the wrapper component
   if (isError) throw error;
@@ -94,7 +97,7 @@ export default function TemplateDetails() {
               <BreadcrumbItem component='button' onClick={navigateToTemplateList}>
                 Templates
               </BreadcrumbItem>
-              <BreadcrumbItem disabled>{data?.name}</BreadcrumbItem>
+              <BreadcrumbItem disabled>{template?.name}</BreadcrumbItem>
             </Breadcrumb>
           </StackItem>
           <StackItem className={classes.titleWrapper}>
@@ -102,13 +105,20 @@ export default function TemplateDetails() {
               direction={{ default: 'row' }}
               justifyContent={{ default: 'justifyContentCenter' }}
             >
-              <Title headingLevel='h1'>{data?.name}</Title>
+              <Title headingLevel='h1'>{template?.name}</Title>
               <LabelGroup className={classes.labelGroup}>
                 <Label isCompact color='blue'>
-                  {data?.version ? versionDisplay([data?.version]) : ''}
+                  {template?.extended_release && template?.extended_release_version
+                    ? getMinorVersionName(template?.extended_release_version)
+                    : getVersionName(template?.version)}
                 </Label>
+                {template?.extended_release ? (
+                  <Label isCompact color='blue'>
+                    {abbreviateStreamName(getStreamName(template?.extended_release))}
+                  </Label>
+                ) : null}
                 <Label isCompact color='blue'>
-                  {archesDisplay(data?.arch)}
+                  {getArchName(template?.arch)}
                 </Label>
               </LabelGroup>
             </Flex>
@@ -126,30 +136,34 @@ export default function TemplateDetails() {
               flexWrap={{ default: 'wrap' }}
               className={classes.detailItems}
             >
-              <DetailItem title='Description:' value={data?.description} />
+              <DetailItem title='Description:' value={template?.description} />
               <DetailItem
                 title='Snapshot date'
                 value={
-                  data?.use_latest
+                  template?.use_latest
                     ? 'Using latest content from repositories'
-                    : data?.date
-                      ? formatDateDDMMMYYYY(data.date)
+                    : template?.date
+                      ? formatDateDDMMMYYYY(template.date)
                       : ''
                 }
               />
-              <DetailItem title='Created by:' value={data?.created_by} />
+              <DetailItem title='Created by:' value={template?.created_by} />
               <DetailItem
                 title='Created:'
-                value={data?.created_at ? formatDateDDMMMYYYY(data.created_at) : ''}
+                value={template?.created_at ? formatDateDDMMMYYYY(template.created_at) : ''}
               />
-              <DetailItem title='Last edited by:' value={data?.last_updated_by} />
+              <DetailItem title='Last edited by:' value={template?.last_updated_by} />
               <DetailItem
                 title='Last edited:'
-                value={data?.updated_at ? formatDateDDMMMYYYY(data.updated_at) : ''}
+                value={template?.updated_at ? formatDateDDMMMYYYY(template.updated_at) : ''}
               />
             </Flex>
           </StackItem>
-          <Hide hide={!(data?.to_be_deleted_snapshots && data.to_be_deleted_snapshots.length > 0)}>
+          <Hide
+            hide={
+              !(template?.to_be_deleted_snapshots && template.to_be_deleted_snapshots.length > 0)
+            }
+          >
             <StackItem className={classes.alertMargin}>
               <Alert
                 variant='warning'

@@ -16,6 +16,11 @@ import {
 import { AdminTask } from 'services/Admin/AdminTaskApi';
 import { TemplateItem } from 'services/Templates/TemplateApi';
 import type { IDSystemItem, SystemItem } from 'services/Systems/SystemsApi';
+import {
+  EXTENDED_SUPPORT_FEATURES,
+  E4S,
+  EUS,
+} from './Pages/Templates/TemplatesTable/components/templateHelpers';
 
 const queryClient = new QueryClient({
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -78,6 +83,36 @@ export const testRepositoryParamsResponse: RepositoryParamsResponse = {
     {
       name: 'aarch64',
       label: 'aarch64',
+    },
+  ],
+  extended_release_features: [],
+  distribution_minor_versions: [],
+};
+
+export const testEUSRepositoryParamsResponse: RepositoryParamsResponse = {
+  ...testRepositoryParamsResponse,
+  extended_release_features: [
+    { name: 'Extended Update Support (EUS)', label: EUS },
+    { name: 'Update Services for SAP Solutions (E4S)', label: E4S },
+  ],
+  distribution_minor_versions: [
+    {
+      name: 'el8.6',
+      label: '8.6',
+      major: '8',
+      feature_names: [E4S],
+    },
+    {
+      name: 'el9.4',
+      label: '9.4',
+      major: '9',
+      feature_names: [...EXTENDED_SUPPORT_FEATURES],
+    },
+    {
+      name: 'el10.0',
+      label: '10.0',
+      major: '10',
+      feature_names: [...EXTENDED_SUPPORT_FEATURES],
     },
   ],
 };
@@ -324,9 +359,9 @@ export const defaultContentItemWithSnapshot: ContentItem = {
 
 export const defaultTemplateItem: TemplateItem = {
   uuid: '50412eda-7df5-4fac-8556-278f45e2ef9b',
-  name: 'Billybob!',
+  name: 'Standard Template',
   org_id: '16758779',
-  description: 'Tatata bala tu!',
+  description: 'Standard template description',
   arch: 'aarch64',
   version: '9',
   date: '2024-01-22T00:00:00-07:00',
@@ -348,6 +383,21 @@ export const defaultTemplateItem: TemplateItem = {
   rhsm_environment_created: true,
 };
 
+export const defaultEUSupportTemplateItem: TemplateItem = {
+  ...defaultTemplateItem,
+  uuid: '60412aca-7df5-4fac-8556-278f45e2ef9a',
+  name: 'EUS Template',
+  description: 'EUS template description',
+  arch: 'x86_64',
+  extended_release: 'RHEL-EUS-x86_64',
+  extended_release_version: '9.6',
+  repository_uuids: [
+    '71c06bb4-ef1b-42f5-8c91-0ff67e7d8a1b',
+    '72b8d2b1-e4d6-4d8a-be12-1104601fb96e',
+    '053603c7-6ef0-4abe-8542-feacb8f7d575', // EPEL 9 Everything x86_64
+  ],
+};
+
 // Template used for testing delete modal where repo is not in any templates
 export const defaultTemplateItem2: TemplateItem = {
   uuid: '60412eda-7df5-4fac-8556-278f45e2ef9a',
@@ -356,6 +406,8 @@ export const defaultTemplateItem2: TemplateItem = {
   description: 'I am not associated with the default repo!',
   arch: 'aarch64',
   version: '9',
+  extended_release: '',
+  extended_release_version: '',
   date: '2024-01-22T00:00:00-07:00',
   repository_uuids: [
     '31c06bb4-ef1b-42f5-8c91-0ff67e7d8a1b',
