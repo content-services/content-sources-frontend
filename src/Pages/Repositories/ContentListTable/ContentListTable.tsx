@@ -46,14 +46,14 @@ import {
 } from '@patternfly/react-component-groups/dist/dynamic/BulkSelect';
 import flex from '@patternfly/react-styles/css/utilities/Flex/flex';
 import { useQueryClient } from 'react-query';
-import StatusIcon from './components/StatusIcon';
+import StatusIcon from '../../../components/StatusIcon/StatusIcon';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { SkeletonTableBody } from '@patternfly/react-component-groups';
 import UploadRepositoryLabel from 'components/RepositoryLabels/UploadRepositoryLabel';
 import UrlWithExternalIcon from '../../../components/UrlWithLinkIcon/UrlWithLinkIcon';
 import ChangedArrows from './components/SnapshotListModal/components/ChangedArrows';
 import { createUseStyles } from 'react-jss';
-import PackageCount from './components/PackageCount';
+import PackageCount from '../../../components/PackageCount/PackageCount';
 import DeleteKebab from '../../../components/DeleteKebab/DeleteKebab';
 import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
 import { useContentListFilters, FilterLabelsMap } from './hooks/useContentListFilters';
