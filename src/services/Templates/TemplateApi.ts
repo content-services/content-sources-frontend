@@ -9,6 +9,8 @@ import {
 } from '../Content/ContentApi';
 import { objectToUrlParams } from 'helpers';
 import { AdminTask } from 'services/Admin/AdminTaskApi';
+import { FullTemplate } from 'features/createAndEditTemplate/shared/types/types.template.full';
+import { MutateEditTemplate } from 'features/createAndEditTemplate/editTemplate/core/ports';
 
 export interface TemplateRequest {
   arch: string;
@@ -176,12 +178,12 @@ export const getTemplatesForSnapshots: (
   return data;
 };
 
-export const EditTemplate: (request: EditTemplateRequest) => Promise<void> = async (request) => {
+export const editTemplate: MutateEditTemplate = async (request) => {
   const { data } = await axios.put(`/api/content-sources/v1.0/templates/${request.uuid}`, request);
   return data;
 };
 
-export const fetchTemplate: (uuid: string) => Promise<TemplateItem> = async (uuid: string) => {
+export const fetchTemplate: (uuid: string) => Promise<FullTemplate> = async (uuid: string) => {
   const { data } = await axios.get(`/api/content-sources/v1/templates/${uuid}`);
   return data;
 };
@@ -191,7 +193,7 @@ export const deleteTemplateItem: (uuid: string) => Promise<void> = async (uuid: 
   return data;
 };
 
-export const createTemplate: (request: TemplateRequest) => Promise<TemplateItem> = async (
+export const createTemplate: (request: TemplateRequest) => Promise<FullTemplate> = async (
   request,
 ) => {
   const { data } = await axios.post('/api/content-sources/v1.0/templates/', request);

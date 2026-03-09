@@ -105,8 +105,8 @@ test.describe('Install Upload Repo Content', () => {
       await page.getByText('Use the latest content', { exact: true }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await expect(page.getByText('Enter template details')).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(`${templateName}`);
-      await page.getByPlaceholder('Description').fill('Template test for upload repository');
+      await page.getByPlaceholder('Enter title').fill(`${templateName}`);
+      await page.getByPlaceholder('Enter detail').fill('Template test for upload repository');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();

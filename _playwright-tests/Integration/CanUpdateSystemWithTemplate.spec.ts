@@ -66,8 +66,8 @@ test.describe('Test System With Template', () => {
       await page.getByPlaceholder('YYYY-MM-DD', { exact: true }).fill('2021-05-17'); // Older than any snapshot date
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await expect(page.getByText('Enter template details')).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(`${templateName}`);
-      await page.getByPlaceholder('Description').fill('Template test');
+      await page.getByPlaceholder('Enter title').fill(`${templateName}`);
+      await page.getByPlaceholder('Enter detail').fill('Template test');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Create other options' }).click();
       await page.getByText('Create template only', { exact: true }).click();
@@ -126,9 +126,9 @@ test.describe('Test System With Template', () => {
       await page.getByText('Use the latest content', { exact: true }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await expect(page.getByText('Enter template details')).toBeVisible();
-      await expect(page.getByPlaceholder('Enter name')).toHaveValue(`${templateName}`);
-      await expect(page.getByPlaceholder('Description')).toHaveValue('Template test');
-      await page.getByPlaceholder('Description').fill('Template test edited');
+      await expect(page.getByPlaceholder('Enter title')).toHaveValue(`${templateName}`);
+      await expect(page.getByPlaceholder('Enter detail')).toHaveValue('Template test');
+      await page.getByPlaceholder('Enter detail').fill('Template test edited');
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByRole('button', { name: 'Confirm changes', exact: true }).click();
 
