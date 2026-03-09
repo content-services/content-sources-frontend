@@ -15,7 +15,7 @@ jobs:
       - instance-size:large
       - buildspec-override:true
     env:
-      COVERAGE: ${{ vars.COVERAGE || 'false' }}
+      COVERAGE: ${{ vars.COVERAGE || 'true' }}
 
     steps:
       - name: Checkout code
@@ -202,3 +202,18 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 10
+
+      - name: Generate E2E coverage report
+        if: env.COVERAGE == 'true'
+        run: yarn coverage:report
+
+      # Skip upload on fork PRs; secrets (CODECOV_TOKEN, CURRENTS_*) are not available to forks
+      - name: Upload Playwright E2E Coverage
+        if: env.COVERAGE == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage-e2e/
+          flags: e2e
+          name: playwright-tests
+          fail_ci_if_error: false
