@@ -1,10 +1,17 @@
 coverage:
-  parsers:
-    javascript:
-      enable_partials: yes
   status:
     project:
       default:
-        target: "70%"
+        target: 70%
+        threshold: 1% # so small dips don't stop the build
     patch:
-      enabled: false
+      default:
+        target: auto # "Auto" requires the new code to match the existing project %
+        threshold: 0%
+  parsers:
+    javascript:
+      enable_partials: yes
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
