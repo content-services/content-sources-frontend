@@ -24,6 +24,7 @@ import {
   StackItem,
   Switch,
   TextInput,
+  Tooltip,
 } from '@patternfly/react-core';
 
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
@@ -356,7 +357,7 @@ const AddContent = ({ isEdit = false }: Props) => {
       <ModalHeader
         title={isEdit ? 'Edit custom repository' : 'Add custom repositories'}
         labelId='add-edit-custom-repository-modal-title'
-        description={`${isEdit ? 'Edit' : 'Add'} by completing the form. Default values may be provided`}
+        description={`${isEdit ? 'Edit' : 'Add'} by completing the form. Default values provided.`}
         descriptorId='add-edit-custom-repository-modal-description'
         help={
           <Popover
@@ -399,34 +400,48 @@ const AddContent = ({ isEdit = false }: Props) => {
             <FormGroup label='Repository type' fieldId='repositoryType' hasNoPaddingTop>
               <Flex direction={{ default: 'column' }} gap={{ default: 'gap' }}>
                 <Hide hide={isEdit && contentOrigin === ContentOrigin.UPLOAD}>
-                  <Radio
-                    isChecked={values.snapshot && values.origin === ContentOrigin.EXTERNAL}
-                    id='snapshot_radio'
-                    label='Snapshotting'
-                    description={
-                      values.snapshot && values.origin === ContentOrigin.EXTERNAL
-                        ? 'Enable snapshotting for an external repository, allowing you to build images and use templates with historical snapshots'
-                        : ''
-                    }
-                    name='snapshot-radio'
-                    onClick={() =>
-                      setValues({ ...values, snapshot: true, origin: ContentOrigin.EXTERNAL })
-                    }
-                  />
-                  <Radio
-                    isChecked={!values.snapshot && values.origin === ContentOrigin.EXTERNAL}
-                    id='introspect_radio'
-                    label='Introspect only'
-                    description={
-                      !values.snapshot && values.origin === ContentOrigin.EXTERNAL
-                        ? 'Enable only introspection for an external repository, snapshots will not be taken.'
-                        : ''
-                    }
-                    name='introspect-radio'
-                    onClick={() =>
-                      setValues({ ...values, snapshot: false, origin: ContentOrigin.EXTERNAL })
-                    }
-                  />
+                  <Tooltip
+                    content='The remote repository will be checked for updates and metadata and packages will be downloaded. Snapshots can be taken.'
+                    position='top-start'
+                  >
+                    <span>
+                      <Radio
+                        isChecked={values.snapshot && values.origin === ContentOrigin.EXTERNAL}
+                        id='snapshot_radio'
+                        label='Snapshotting'
+                        description={
+                          values.snapshot && values.origin === ContentOrigin.EXTERNAL
+                            ? 'Enable snapshotting for an external repository, enabling you to build images and use templates with historical snapshots.'
+                            : ''
+                        }
+                        name='snapshot-radio'
+                        onClick={() =>
+                          setValues({ ...values, snapshot: true, origin: ContentOrigin.EXTERNAL })
+                        }
+                      />
+                    </span>
+                  </Tooltip>
+                  <Tooltip
+                    content='The remote repository will be checked for updates and metadata will be downloaded but not packages. No snapshots can be taken.'
+                    position='top-start'
+                  >
+                    <span>
+                      <Radio
+                        isChecked={!values.snapshot && values.origin === ContentOrigin.EXTERNAL}
+                        id='introspect_radio'
+                        label='Introspect only'
+                        description={
+                          !values.snapshot && values.origin === ContentOrigin.EXTERNAL
+                            ? 'Enable only introspection for an external repository, snapshots will not be taken.'
+                            : ''
+                        }
+                        name='introspect-radio'
+                        onClick={() =>
+                          setValues({ ...values, snapshot: false, origin: ContentOrigin.EXTERNAL })
+                        }
+                      />
+                    </span>
+                  </Tooltip>
                 </Hide>
                 <Hide hide={isEdit && contentOrigin === ContentOrigin.EXTERNAL}>
                   <ConditionalTooltip
@@ -443,7 +458,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                       label='Upload'
                       description={
                         isUploadRepo
-                          ? 'Create a repository to upload custom content to. Snapshots will be taken after every new upload, allowing you to build images with uploaded content.'
+                          ? 'Create a repository to upload custom content to. Snapshots will be taken after every new upload, enabling you to build images with uploaded content.'
                           : ''
                       }
                       name='upload-radio'
