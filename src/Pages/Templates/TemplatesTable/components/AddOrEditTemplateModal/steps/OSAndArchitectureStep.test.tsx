@@ -27,8 +27,9 @@ const defaultStandardContext = {
   setTemplateRequest: () => undefined,
   distribution_arches: testRepositoryParamsResponse.distribution_arches,
   distribution_versions: testRepositoryParamsResponse.distribution_versions,
-  extended_release_features: testRepositoryParamsResponse.extended_release_features,
+  extended_release_streams: testRepositoryParamsResponse.extended_release_streams,
   distribution_minor_versions: testRepositoryParamsResponse.distribution_minor_versions,
+  isExtendedSupportAvailable: false,
 };
 
 const eusStreamName = 'Extended Update Support (EUS)';
@@ -39,22 +40,28 @@ const defaultEUSContext = {
   setTemplateRequest: () => undefined,
   distribution_arches: testEUSRepositoryParamsResponse.distribution_arches,
   distribution_versions: testEUSRepositoryParamsResponse.distribution_versions,
-  extended_release_features: testEUSRepositoryParamsResponse.extended_release_features,
+  extended_release_streams: testEUSRepositoryParamsResponse.extended_release_streams,
   distribution_minor_versions: testEUSRepositoryParamsResponse.distribution_minor_versions,
+  isExtendedSupportAvailable: true,
 };
 
 const defaultEUSDistributionDetails = {
   getMinorVersionName: () => `el${defaultEUSupportTemplateItem.extended_release_version}`,
   getArchName: () => defaultEUSupportTemplateItem.arch,
   getStreamName: () => eusStreamName,
-  isExtendedSupportAvailable: true,
+  getVersionName: () => '',
+  getStreamAvailability: () => [],
+  extendedReleaseStreams: testEUSRepositoryParamsResponse.extended_release_streams,
 };
 
 beforeEach(() => {
   (useDistributionDetails as jest.Mock).mockImplementation(() => ({
     getVersionName: () => standardVersionName,
     getArchName: () => defaultTemplateItem.arch,
-    isExtendedSupportAvailable: false,
+    getMinorVersionName: () => '',
+    getStreamName: () => '',
+    getStreamAvailability: () => [],
+    extendedReleaseStreams: [],
   }));
 
   (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => defaultStandardContext);
@@ -131,4 +138,30 @@ it('keeps the version selector enabled when editing an EUS template', () => {
   const versionMenuToggle = getByTestId('restrict_to_os_version');
   expect(versionMenuToggle).toBeInTheDocument();
   expect(versionMenuToggle).toBeEnabled();
+});
+
+it('hides release stream selection when extended support is available but no streams are entitled', () => {
+  (useDistributionDetails as jest.Mock).mockImplementation(() => ({
+    getVersionName: () => standardVersionName,
+    getArchName: () => defaultTemplateItem.arch,
+    getMinorVersionName: () => '',
+    getStreamName: () => '',
+    getStreamAvailability: () => [],
+    extendedReleaseStreams: [],
+  }));
+
+  (useAddOrEditTemplateContext as jest.Mock).mockImplementation(() => ({
+    ...defaultStandardContext,
+    isExtendedSupportAvailable: true,
+    extended_release_streams: [], // No entitled streams
+  }));
+
+  const { queryByText } = render(
+    <ReactQueryTestWrapper>
+      <OSAndArchitectureStep />
+    </ReactQueryTestWrapper>,
+  );
+
+  // Release stream selection should be hidden
+  expect(queryByText('Release stream')).not.toBeInTheDocument();
 });
