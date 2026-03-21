@@ -3,7 +3,7 @@
  *
  * Authenticates users based on environment flags:
  * - RBAC: enables readonly, rhel_operator users
- * - INTEGRATION: enables layered_repo, rhel_only, stable_sam users
+ * - INTEGRATION: enables layered_repo, rhel_only, stable_sam, eus_repo users
  * - AUTH_USERS: override to authenticate specific users (comma-separated)
  *
  * Admin is always authenticated last and its state becomes the default.
@@ -80,6 +80,12 @@ const ALL_USERS: UserConfig[] = [
     credentialEnvVars: ['NO_SUBS_USER_USERNAME', 'NO_SUBS_USER_PASSWORD'],
     requiredFlags: { integration: true, rbac: true },
   },
+  {
+    key: 'eus_repo',
+    tokenEnvVar: 'EUS_REPO_TOKEN',
+    credentialEnvVars: ['EUS_ACCESS_USERNAME', 'EUS_ACCESS_PASSWORD'],
+    requiredFlags: { integration: true },
+  },
 ];
 
 /**
@@ -141,6 +147,8 @@ const getRequiredEnvVars = (users: UserConfig[]): string[] => {
         'ACTIVATION_KEY_1',
         'LAYERED_REPO_ACCESS_ORG_ID',
         'LAYERED_REPO_ACCESS_ACTIVATION_KEY',
+        'EUS_ACCESS_ORG_ID',
+        'EUS_ACCESS_ACTIVATION_KEY',
         ...(process.env.BASE_URL?.includes('foo') ? [] : ['PROXY']),
       ]
     : [];

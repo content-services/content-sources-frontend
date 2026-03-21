@@ -1,7 +1,7 @@
 import { Page } from '@playwright/test';
 import { expect } from 'test-utils';
 import { RHSMClient, OSVersion } from './rhsmClient';
-import { RELEASE_STREAM_NAMES } from '../../testConstants';
+import { RELEASE_STREAMS } from '../../testConstants';
 
 /**
  * Creates a template via the UI creation modal.
@@ -21,8 +21,9 @@ import { RELEASE_STREAM_NAMES } from '../../testConstants';
  * @param page - Playwright page object
  * @param templateName - Unique name for the template
  * @param templateDescription - Optional description (default: 'Template creation test')
- * @param osVersion - OS version to select. Use minor versions (e.g., 'RHEL 9.6') to enable EUS mode (default: 'RHEL 9')
+ * @param osVersion - OS version to select (e.g., '9' or '9.6') (default: '9')
  * @param arch - CPU architecture to select (default: 'x86_64')
+ * @param stream - Extended support stream (eus/e4s/eeus). If omitted, template uses Standard stream
  * @param withSystemAssignment - If true, opens the system assignment modal instead of creating template only (default: false)
  */
 export const createTemplateViaUI = async ({
@@ -31,6 +32,7 @@ export const createTemplateViaUI = async ({
   templateDescription = 'Template creation test',
   osVersion = '9',
   arch = 'x86_64',
+  stream,
   withSystemAssignment = false,
 }: {
   page: Page;
@@ -38,17 +40,18 @@ export const createTemplateViaUI = async ({
   templateDescription?: string;
   osVersion?: string;
   arch?: string;
+  stream?: 'eus' | 'e4s' | 'eeus';
   withSystemAssignment?: boolean;
 }) => {
   const nextButton = page.getByRole('button', { name: 'Next', exact: true });
 
   await page.getByRole('button', { name: 'Create template' }).click();
 
-  // Toggle to EUS mode if a minor OS version (containing a decimal) is provided, e.g., RHEL 9.6
-  if (osVersion.includes('.')) {
+  // Select an extended support stream if specified
+  if (stream) {
     await page.getByRole('button', { name: 'Release stream toggle' }).click();
     await expect(page.getByRole('menu')).toBeVisible();
-    await page.getByRole('menuitem', { name: RELEASE_STREAM_NAMES.EUS }).click();
+    await page.getByRole('menuitem', { name: RELEASE_STREAMS[stream] }).click();
   }
 
   await page.getByRole('button', { name: 'filter OS version' }).click();
