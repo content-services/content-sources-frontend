@@ -75,3 +75,10 @@ export const RHSM_RHCD_WAIT = {
   maxAttempts: 60,
   delayMs: 2_000,
 } as const;
+
+/** Release stream map of short names to human-readable names */
+export const RELEASE_STREAMS = {
+  eus: 'Extended Update Support (EUS)',
+  e4s: 'Update Services for SAP Solutions (E4S)',
+  eeus: 'Enhanced Extended Update Support (EEUS)',
+} as const;
