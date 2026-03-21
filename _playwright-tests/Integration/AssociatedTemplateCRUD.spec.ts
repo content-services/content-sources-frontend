@@ -21,12 +21,16 @@ import {
   getRowByNameOrUrl,
   waitForValidStatus,
 } from '../UI/helpers/helpers';
-
-const templateNamePrefix = 'associated_template_test';
-const templateName = `${templateNamePrefix}-${randomName()}`;
-const regClient = new RHSMClient(`AssociatedTemplateCRUDTest-${randomName()}`);
+import { createTemplateViaUI, setupSystemWithTemplate } from './helpers/templateActions';
 
 test.describe('Associated Template CRUD', () => {
+  // Variables at describe scope to ensure randomName() is called per test suite run for better test isolation
+  const templateNamePrefix = 'associated_template_test';
+  const templateName = `${templateNamePrefix}-${randomName()}`;
+  const regClient = new RHSMClient(`AssociatedTemplateCRUDTest-${randomName()}`);
+
+  let hostname: string;
+
   test('Warn against template deletion when associated to a system and not warn after unregistration', async ({
     page,
     client,
@@ -34,8 +38,6 @@ test.describe('Associated Template CRUD', () => {
   }) => {
     // Increase timeout for CI environment because template validation can take up to 11 minutes
     test.setTimeout(900000); // 15 minutes
-
-    let hostname: string;
 
     await test.step('Set up cleanup for templates and RHSM client', async () => {
       await cleanup.runAndAdd(async () => {
@@ -50,57 +52,18 @@ test.describe('Associated Template CRUD', () => {
     await test.step('Navigate to templates and create a new template', async () => {
       await navigateToTemplates(page);
       await closeGenericPopupsIfExist(page);
-      await page.getByRole('button', { name: 'Create template' }).click();
-      await page.getByRole('button', { name: 'filter OS version' }).click();
-      await page.getByRole('menuitem', { name: 'RHEL 9' }).click();
-      await page.getByRole('button', { name: 'filter architecture' }).click();
-      await page.getByRole('menuitem', { name: 'x86_64' }).click();
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
 
-      await expect(
-        page.getByRole('heading', { name: 'Additional Red Hat repositories', exact: true }),
-        'should be on the RHEL repo tab',
-      ).toBeVisible();
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
+      await createTemplateViaUI({
+        page,
+        templateName,
+        templateDescription: 'Template test for associated system CRUD',
+      });
 
-      await expect(
-        page.getByRole('heading', { name: 'Other repositories', exact: true }),
-        'should be on the Other repositories tab',
-      ).toBeVisible();
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
-
-      await page.getByText('Use the latest content', { exact: true }).click();
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
-
-      await expect(
-        page.getByText('Enter template details'),
-        'should be on the Enter template details tab',
-      ).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(`${templateName}`);
-      await page.getByPlaceholder('Description').fill('Template test for associated system CRUD');
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
-
-      await page.getByRole('button', { name: 'Create other options' }).click();
-      await page.getByText('Create template only', { exact: true }).click();
-      await waitForValidStatus(page, templateName, 660000, 'repo should show Valid status');
+      await waitForValidStatus(page, templateName, 660000, 'template should show Valid status');
     });
 
-    await test.step('Register system with template using RHSM client', async () => {
-      await regClient.Boot('rhel9');
-
-      hostname = await regClient.GetHostname();
-      console.log('System hostname:', hostname);
-
-      const reg = await regClient.RegisterRHC(
-        process.env.ACTIVATION_KEY_1,
-        process.env.ORG_ID_1,
-        templateName,
-      );
-      if (reg?.exitCode != 0) {
-        console.log('Registration stdout:', reg?.stdout);
-        console.log('Registration stderr:', reg?.stderr);
-      }
-      expect(reg?.exitCode, 'registration should be successful').toBe(0);
+    await test.step('Boot and register system with template via RHC', async () => {
+      hostname = await setupSystemWithTemplate({ regClient, templateName });
     });
 
     await test.step('Verify template uses correct certificate URL', async () => {
