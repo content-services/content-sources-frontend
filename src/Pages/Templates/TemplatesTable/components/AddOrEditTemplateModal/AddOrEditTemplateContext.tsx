@@ -22,7 +22,6 @@ import { useFetchTemplate } from 'services/Templates/TemplateQueries';
 import useRootPath from 'Hooks/useRootPath';
 import { isDateValid } from 'helpers';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
-import useDistributionDetails from '../../../../../Hooks/useDistributionDetails';
 import { getRedHatCoreRepoUrls, isExtendedSupportTemplate } from '../../helpers';
 import { STANDARD_STREAM } from '../../constants';
 import { useAppContext } from 'middleware/AppContext';
@@ -75,15 +74,27 @@ export const AddOrEditTemplateContextProvider = ({ children }: { children: React
       distribution_versions = [],
       distribution_arches = [],
       distribution_minor_versions = [],
+      extended_release_streams: extendedReleaseStreamsRaw = [],
     } = {},
   } = useRepositoryParams();
+
+  // Filter streams to only include those with at least one entitled architecture
+  const extended_release_streams = useMemo(
+    () =>
+      extendedReleaseStreamsRaw.filter((stream) =>
+        stream.architectures?.some((arch) => arch.entitled),
+      ),
+    [extendedReleaseStreamsRaw],
+  );
 
   const { arch, version, extended_release, extended_release_version } = templateRequest;
 
   const { features } = useAppContext();
-  const { extendedReleaseStreams: extended_release_streams } = useDistributionDetails();
-  const isExtendedSupportAvailable =
-    (features?.extendedreleaserepos?.enabled && features.extendedreleaserepos?.accessible) ?? false;
+  const isExtendedSupportAvailable = !!(
+    features?.extendedreleaserepos?.enabled &&
+    features.extendedreleaserepos?.accessible &&
+    extended_release_streams.length > 0
+  );
 
   const usesExtendedSupportStream =
     isExtendedSupportAvailable &&

@@ -41,8 +41,6 @@ it('renders template details for a standard template', () => {
     getArchName: () => defaultTemplateItem.arch,
     getMinorVersionName: () => '',
     getStreamName: () => '',
-    getStreamAvailability: () => [],
-    extendedReleaseStreams: [],
   }));
 
   const { getByText } = render(
@@ -80,8 +78,6 @@ it('renders release stream and minor version for an EUS template', () => {
     getArchName: () => defaultEUSupportTemplateItem.arch,
     getStreamName: () => streamName,
     getVersionName: () => '',
-    getStreamAvailability: () => [],
-    extendedReleaseStreams: testEUSRepositoryParamsResponse.extended_release_streams,
   }));
 
   const { getByText } = render(

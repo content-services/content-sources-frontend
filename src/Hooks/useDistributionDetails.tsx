@@ -14,15 +14,6 @@ export default function useDistributionDetails() {
     } = {},
   } = useRepositoryParams();
 
-  // Filter streams to only include those with at least one entitled architecture
-  const extendedReleaseStreams = useMemo(
-    () =>
-      extendedReleaseStreamsRaw.filter((stream) =>
-        stream.architectures?.some((arch) => arch.entitled),
-      ),
-    [extendedReleaseStreamsRaw],
-  );
-
   const labelToName: Record<string, string> = useMemo(() => {
     const result: Record<string, string> = {};
     distArches.forEach(({ name, label }) => {
@@ -70,18 +61,6 @@ export default function useDistributionDetails() {
     [extendedReleaseStreamsRaw],
   );
 
-  const getStreamAvailability = useCallback(
-    (majorVersion: string) => {
-      const relevantMinors = distMinorVersions.filter(({ major }) => major === majorVersion);
-      return extendedReleaseStreams.map(({ label }) =>
-        relevantMinors.some(({ extended_release_streams }) =>
-          extended_release_streams?.includes(label),
-        ),
-      );
-    },
-    [distMinorVersions, extendedReleaseStreams],
-  );
-
   return {
     isLoading,
     error,
@@ -90,7 +69,5 @@ export default function useDistributionDetails() {
     getVersionName,
     getMinorVersionName,
     getStreamName,
-    getStreamAvailability,
-    extendedReleaseStreams,
   };
 }

@@ -115,7 +115,7 @@ export default function OSAndArchitectureStep() {
       </Content>
 
       <Form>
-        <Hide hide={!isExtendedSupportAvailable || extended_release_streams.length === 0}>
+        <Hide hide={!isExtendedSupportAvailable}>
           <FormGroup
             label='Release stream'
             isRequired
