@@ -18,6 +18,7 @@ import {
   waitForValidStatus,
 } from '../UI/helpers/helpers';
 import { RHSMClient, waitForRhcdActive, refreshSubscriptionManager } from './helpers/rhsmClient';
+import { createTemplateViaUI, setupSystemWithTemplate } from './helpers/templateActions';
 import { createApiConfigWithDynamicToken } from './helpers/apiHelpers';
 
 const templateNamePrefix = 'use_template_dialog_test';
@@ -44,33 +45,12 @@ test.describe('Register and assign template to systems via API', () => {
 
     await test.step('Create template via UI', async () => {
       await navigateToTemplates(page);
-      await page.getByRole('button', { name: 'Create template' }).click();
-      await page.getByRole('button', { name: 'filter OS version' }).click();
-      await page.getByRole('menuitem', { name: 'RHEL 9' }).click();
-      await page.getByRole('button', { name: 'filter architecture' }).click();
-      await page.getByRole('menuitem', { name: 'x86_64' }).click();
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
 
-      await expect(
-        page.getByRole('heading', { name: 'Additional Red Hat repositories', exact: true }),
-      ).toBeVisible();
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
-
-      await expect(
-        page.getByRole('heading', { name: 'Other repositories', exact: true }),
-      ).toBeVisible();
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
-
-      await page.getByText('Use the latest content', { exact: true }).click();
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
-
-      await expect(page.getByText('Enter template details')).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(templateName);
-      await page.getByPlaceholder('Description').fill('Template for use template dialog test');
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
-
-      await page.getByRole('button', { name: 'Create other options' }).click();
-      await page.getByText('Create template only', { exact: true }).click();
+      await createTemplateViaUI({
+        page,
+        templateName,
+        templateDescription: 'Template for use template dialog test',
+      });
 
       await waitForValidStatus(page, templateName);
     });
@@ -98,10 +78,6 @@ test.describe('Register and assign template to systems via API', () => {
     });
 
     await test.step('Boot RHEL container and run commands', async () => {
-      await regClient.Boot('rhel9');
-      const activationKey = process.env.ACTIVATION_KEY_1 || '';
-      const orgId = process.env.ORG_ID_1 || '';
-
       // Extract template ID from the rhc connect command
       const templateMatch = rhcConnectCmd.match(/--content-template[=\s]+"?([^"\s]+)"?/);
       const templateId = templateMatch ? templateMatch[1] : undefined;
@@ -110,12 +86,10 @@ test.describe('Register and assign template to systems via API', () => {
         throw new Error(`Could not extract template ID from command: ${rhcConnectCmd}`);
       }
 
-      const reg = await regClient.RegisterRHC(activationKey, orgId, templateId);
-      if (reg?.exitCode != 0) {
-        console.log('Registration stdout:', reg?.stdout);
-        console.log('Registration stderr:', reg?.stderr);
-      }
-      expect(reg?.exitCode, 'Expect registering to be successful').toBe(0);
+      await setupSystemWithTemplate({
+        regClient,
+        templateName: templateId,
+      });
 
       await waitForRhcdActive(regClient, RHSM_RHCD_WAIT.maxAttempts, RHSM_RHCD_WAIT.delayMs);
       await refreshSubscriptionManager(regClient);
@@ -126,7 +100,7 @@ test.describe('Register and assign template to systems via API', () => {
 
       await waitInPatch(page, hostname, true);
 
-      // Check if system row is visible with extended timeout
+      // Check if system row is visible with an extended timeout
       const systemRow = page.getByRole('row').filter({ hasText: hostname });
       await expect(systemRow).toBeVisible({
         timeout: SYSTEM_ATTACHMENT_VISIBILITY_TIMEOUT_MS,

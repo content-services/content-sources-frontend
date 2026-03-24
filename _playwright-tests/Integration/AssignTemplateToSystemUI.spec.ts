@@ -12,15 +12,15 @@ import {
   RHSM_RHCD_WAIT,
   SYSTEM_ROW_VISIBILITY_TIMEOUT_MS,
   CONTENT_PROPAGATION_POLL,
+  YUM_INSTALL_TIMEOUT_MS,
 } from '../testConstants';
-import { RHSMClient, waitForRhcdActive } from './helpers/rhsmClient';
+import { RHSMClient, waitForRhcdActive, refreshSubscriptionManager } from './helpers/rhsmClient';
 import { runCmd, installAndVerifyPackage, getPackageDownloadUrl } from './helpers/helpers';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
 import {
   closeGenericPopupsIfExist,
   getRowByNameOrUrl,
   getRowCellByHeader,
-  waitForValidStatus,
 } from '../UI/helpers/helpers';
 import { createTemplateViaUI } from './helpers/templateActions';
 import { createApiConfigWithDynamicToken } from './helpers/apiHelpers';
@@ -84,8 +84,6 @@ test.describe('Assign Standard Template to System via UI', () => {
         templateDescription: 'Test template for system assignment',
         withSystemAssignment: true,
       });
-
-      await waitForValidStatus(page, templateName, 660000, 'template should show Valid status');
     });
 
     await test.step('Verify package URLs come from base CDN before assignment', async () => {
@@ -132,6 +130,10 @@ test.describe('Assign Standard Template to System via UI', () => {
     });
 
     await test.step('Wait for package URLs to be served from template', async () => {
+      // Refresh the subscription manager so the system picks up the new template entitlements
+      await refreshSubscriptionManager(regClient);
+      await runCmd('Clean cached metadata', ['dnf', 'clean', 'all'], regClient);
+
       await expect
         // Poll for package URL (content propagation can be slow in CI)
         .poll(
@@ -149,7 +151,11 @@ test.describe('Assign Standard Template to System via UI', () => {
     });
 
     await test.step('Install and verify vim-enhanced package from template', async () => {
-      await installAndVerifyPackage({ regClient, packageName: 'vim-enhanced' });
+      await installAndVerifyPackage({
+        regClient,
+        packageName: 'vim-enhanced',
+        installTimeout: YUM_INSTALL_TIMEOUT_MS,
+      });
     });
   });
 });

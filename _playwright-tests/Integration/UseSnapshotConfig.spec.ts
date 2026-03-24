@@ -4,7 +4,8 @@ import { cleanupRepositories, ensureValidToken, randomName, test, expect } from 
 import { createCustomRepo } from '../UI/helpers/createRepositories';
 import { refreshSubscriptionManager, RHSMClient, waitForRhcdActive } from './helpers/rhsmClient';
 import fs from 'fs';
-import { runCmd } from './helpers/helpers';
+import { runCmd, installAndVerifyPackage } from './helpers/helpers';
+import { YUM_INSTALL_TIMEOUT_MS } from '../testConstants';
 import { createApiConfigWithDynamicToken } from './helpers/apiHelpers';
 
 const repoNamePrefix = 'Snapshot_Config';
@@ -108,9 +109,12 @@ test.describe('Use Snapshot Config', () => {
       // verify the repo from snapshot config is listed
       const repolist = await runCmd('Verify repository is listed', ['dnf', 'repolist'], regClient);
       expect(repolist?.stdout?.toString().trim()).toContain(repoName);
-      // install a package from the config
-      await runCmd('Install tree package', ['yum', 'install', '-y', 'tree'], regClient, 120000);
-      await runCmd('Tree package should be installed', ['rpm', '-q', 'tree'], regClient);
+
+      await installAndVerifyPackage({
+        regClient,
+        packageName: 'tree',
+        installTimeout: YUM_INSTALL_TIMEOUT_MS,
+      });
     });
   });
 });
