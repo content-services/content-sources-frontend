@@ -231,8 +231,18 @@ test.describe('Snapshot Repositories', () => {
       await page.getByTestId('remove_snapshots_bulk').click();
       await expect(page.getByText('Delete snapshots?')).toBeVisible();
 
+      // Ensure the bulk-delete request is in progress before polling tasks; otherwise
+      // waitForLastTaskStatus can match the prior single-delete task and return early.
+      await Promise.all([
+        page.waitForResponse(
+          (resp) =>
+            resp.url().includes('/snapshots/bulk_delete') &&
+            resp.request().method() === 'POST' &&
+            resp.ok(),
+        ),
+        page.getByText('Delete', { exact: true }).click(),
+      ]);
       await waitForLastTaskStatus(client, 'delete-snapshots', 'completed');
-      await page.getByText('Delete', { exact: true }).click();
 
       await expect(page.getByRole('button', { name: '1 - 1 of 1' }).first()).toBeVisible({
         timeout: SNAPSHOT_DIALOG_TIMEOUT_MS,
