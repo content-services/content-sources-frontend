@@ -17,8 +17,7 @@ import {
   YUM_INSTALL_QUICK_TIMEOUT_MS,
 } from '../testConstants';
 import { RHSMClient, refreshSubscriptionManager } from './helpers/rhsmClient';
-import { runCmd } from './helpers/helpers';
-import { createApiConfigWithDynamicToken } from './helpers/apiHelpers';
+import { runCmd, installAndVerifyPackage } from './helpers/helpers';
 import { navigateToRepositories, navigateToTemplates } from '../UI/helpers/navHelpers';
 import {
   closeGenericPopupsIfExist,
@@ -26,6 +25,8 @@ import {
   closeNotificationPopup,
   waitForValidStatus,
 } from '../UI/helpers/helpers';
+import { setupSystemWithTemplate } from './helpers/templateActions';
+import { createApiConfigWithDynamicToken } from './helpers/apiHelpers';
 
 const uploadRepoNamePrefix = 'Upload_Repo';
 
@@ -131,38 +132,21 @@ test.describe('Install Upload Repo Content', () => {
     });
 
     await test.step('Register system with template using RHSM client', async () => {
-      await regClient.Boot('rhel9');
-
-      const reg = await regClient.RegisterRHC(
-        process.env.ACTIVATION_KEY_1,
-        process.env.ORG_ID_1,
+      await setupSystemWithTemplate({
+        regClient,
         templateName,
-      );
-      if (reg?.exitCode != 0) {
-        console.log('Registration stdout:', reg?.stdout);
-        console.log('Registration stderr:', reg?.stderr);
-      }
-      expect(reg?.exitCode, 'Expect registering to be successful').toBe(0);
+      });
 
       await refreshSubscriptionManager(regClient);
       await runCmd('Clean cached metadata', ['dnf', 'clean', 'all'], regClient);
     });
 
     await test.step('Install from the template and verify the upload repository content is installed', async () => {
-      await runCmd(
-        'bear package should not be installed',
-        ['rpm', '-q', 'bear'],
+      await installAndVerifyPackage({
         regClient,
-        YUM_INSTALL_QUICK_TIMEOUT_MS,
-        1,
-      );
-      await runCmd(
-        'Install bear package',
-        ['yum', 'install', '-y', 'bear'],
-        regClient,
-        YUM_INSTALL_QUICK_TIMEOUT_MS,
-      );
-      await runCmd('bear package should be installed', ['rpm', '-q', 'bear'], regClient);
+        packageName: 'bear',
+      });
+
       const dnfVerifyRepo = await runCmd(
         'Verify that bear was installed from the upload repo',
         ['sh', '-c', "dnf info bear | grep '^From repo' | cut -d ':' -f2-"],

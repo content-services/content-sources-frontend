@@ -17,7 +17,7 @@ import {
   YUM_INSTALL_TIMEOUT_MS,
 } from '../testConstants';
 import { RHSMClient, refreshSubscriptionManager, waitForRhcdActive } from './helpers/rhsmClient';
-import { runCmd } from './helpers/helpers';
+import { runCmd, installAndVerifyPackage } from './helpers/helpers';
 import { createApiConfigWithDynamicToken } from './helpers/apiHelpers';
 import { navigateToTemplates } from '../UI/helpers/navHelpers';
 import {
@@ -25,6 +25,7 @@ import {
   getRowByNameOrUrl,
   waitForValidStatus,
 } from '../UI/helpers/helpers';
+import { setupSystemWithTemplate } from './helpers/templateActions';
 
 const templateNamePrefix = 'integration_test_template';
 const templateName = `${templateNamePrefix}-${randomName()}`;
@@ -93,20 +94,12 @@ test.describe('Test System With Template', () => {
     });
 
     await test.step('Create RHSM client and register the template', async () => {
-      // Start the rhel9 container
-      await regClient.Boot('rhel9');
-
-      // Register, overriding the default key and org
-      const reg = await regClient.RegisterRHC(
-        process.env.LAYERED_REPO_ACCESS_ACTIVATION_KEY,
-        process.env.LAYERED_REPO_ACCESS_ORG_ID,
+      await setupSystemWithTemplate({
+        regClient,
         templateName,
-      );
-      if (reg?.exitCode != 0) {
-        console.log(reg?.stdout);
-        console.log(reg?.stderr);
-      }
-      expect(reg?.exitCode, 'Expect registering to be successful').toBe(0);
+        activationKey: process.env.LAYERED_REPO_ACCESS_ACTIVATION_KEY,
+        orgId: process.env.LAYERED_REPO_ACCESS_ORG_ID,
+      });
 
       await waitForRhcdActive(regClient);
 
@@ -212,32 +205,17 @@ test.describe('Test System With Template', () => {
         )
         .toBeGreaterThan(firstCountNumber);
 
-      await runCmd(
-        'vim-enhanced should not be installed',
-        ['rpm', '-q', 'vim-enhanced'],
+      await installAndVerifyPackage({
         regClient,
-        YUM_INSTALL_QUICK_TIMEOUT_MS,
-        1,
-      );
+        packageName: 'vim-enhanced',
+      });
 
-      await runCmd(
-        'Install vim-enhanced',
-        ['yum', 'install', '-y', 'vim-enhanced'],
+      await installAndVerifyPackage({
         regClient,
-        YUM_INSTALL_QUICK_TIMEOUT_MS,
-      );
-
-      await runCmd('vim-enhanced should be installed', ['rpm', '-q', 'vim-enhanced'], regClient);
-
-      // booth is small but the transaction pulls many HA deps (~119 packages, ~24 MiB download).
-      await runCmd(
-        'Install booth from the HA layered repo',
-        ['yum', 'install', '-y', 'booth'],
-        regClient,
-        YUM_INSTALL_TIMEOUT_MS,
-      );
-
-      await runCmd('booth should be installed', ['rpm', '-q', 'booth'], regClient);
+        packageName: 'booth',
+        // booth is small, but the transaction pulls many HA deps (~119 packages, ~24 MiB download).
+        installTimeout: YUM_INSTALL_TIMEOUT_MS,
+      });
 
       const dnfVerifyRepo = await runCmd(
         'Verify that booth was installed from the HA repo',
@@ -245,6 +223,7 @@ test.describe('Test System With Template', () => {
         regClient,
         YUM_INSTALL_QUICK_TIMEOUT_MS,
       );
+
       expect(dnfVerifyRepo?.stdout?.toString().trim()).toBe(
         'rhel-9-for-x86_64-highavailability-rpms',
       );
