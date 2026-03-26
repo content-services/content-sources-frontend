@@ -214,6 +214,9 @@ test.describe('Snapshot Repositories', () => {
       await expect(page.getByRole('button', { name: '1 - 3 of 3' }).first()).toBeVisible({
         timeout: SNAPSHOT_DIALOG_TIMEOUT_MS,
       });
+      // The list can update before the delete-snapshots task finishes; bulk delete then
+      // fails with "Delete already in progress" if we do not wait here.
+      await waitForLastTaskStatus(client, 'delete-snapshots', 'completed');
       await page.getByText('Close').click();
     });
 
@@ -231,14 +234,11 @@ test.describe('Snapshot Repositories', () => {
       await page.getByTestId('remove_snapshots_bulk').click();
       await expect(page.getByText('Delete snapshots?')).toBeVisible();
 
-      // Ensure the bulk-delete request is in progress before polling tasks; otherwise
-      // waitForLastTaskStatus can match the prior single-delete task and return early.
+      // Ensure the bulk-delete POST has been sent before polling tasks; otherwise
+      // waitForLastTaskStatus can match the already-completed single-delete task and return early.
       await Promise.all([
-        page.waitForResponse(
-          (resp) =>
-            resp.url().includes('/snapshots/bulk_delete') &&
-            resp.request().method() === 'POST' &&
-            resp.ok(),
+        page.waitForRequest(
+          (req) => req.url().includes('/snapshots/bulk_delete') && req.method() === 'POST',
         ),
         page.getByText('Delete', { exact: true }).click(),
       ]);
