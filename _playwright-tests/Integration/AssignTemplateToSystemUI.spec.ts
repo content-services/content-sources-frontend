@@ -9,8 +9,10 @@ import {
 import {
   CONTENT_PROPAGATION_POLL,
   DNF_COMMAND_TIMEOUT_MS,
+  MEDIUM_EXEC_TIMEOUT_MS,
   MODAL_VISIBILITY_TIMEOUT_MS,
   RHSM_RHCD_WAIT,
+  SHORT_EXEC_TIMEOUT_MS,
   SYSTEM_ROW_VISIBILITY_TIMEOUT_MS,
   YUM_INSTALL_TIMEOUT_MS,
 } from '../testConstants';
@@ -139,6 +141,12 @@ test.describe('Assign Template to System via UI', () => {
     });
 
     await test.step('Verify the host can install packages from the template', async () => {
+      console.log(
+        '[AssignTemplateToSystemUI DEBUG] verify step hostname=%s templateName=%s',
+        hostname,
+        templateName,
+      );
+
       await refreshSubscriptionManager(regClient);
       await runCmd('Clean cached metadata', ['dnf', 'clean', 'all'], regClient);
 
@@ -150,21 +158,68 @@ test.describe('Assign Template to System via UI', () => {
         1,
       );
 
-      // Poll for template URL (content propagation can be slow in CI)
+      let templateRepoqueryPoll = 0;
+
+      // Poll for template URL (content propagation can be slow in CI; empty output or undefined Exec retries)
       await expect
         .poll(
           async () => {
+            templateRepoqueryPoll++;
+            const prefix = `[AssignTemplateToSystemUI] repoquery vim-enhanced poll #${templateRepoqueryPoll}`;
+
             const res = await regClient.Exec(
               ['dnf', 'repoquery', '--quiet', '--location', 'vim-enhanced'],
               DNF_COMMAND_TIMEOUT_MS,
             );
+
+            if (res === undefined) {
+              console.log(`${prefix}: Exec returned undefined (docker exec or container missing)`);
+            } else {
+              console.log(
+                `${prefix}: exitCode=${res.exitCode} stdoutLen=${(res.stdout ?? '').length} stderrLen=${(res.stderr ?? '').length}`,
+              );
+              if (res.stdout) console.log(`${prefix} stdout:`, res.stdout);
+              if (res.stderr) console.log(`${prefix} stderr:`, res.stderr);
+            }
+
             const output = [res?.stdout, res?.stderr].filter(Boolean).join('\n');
-            console.log('Package download URL from template:', output);
+            console.log(`${prefix} combined for assertion:`, JSON.stringify(output));
+
+            // One-shot client state on first poll (CI debug: distinguish empty exec vs wrong CDN path)
+            if (templateRepoqueryPoll === 1) {
+              const subConsumed = await regClient.Exec(
+                ['subscription-manager', 'list', '--consumed'],
+                SHORT_EXEC_TIMEOUT_MS,
+              );
+              console.log(
+                '[AssignTemplateToSystemUI DEBUG] first-poll subscription-manager list --consumed',
+                'exitCode=',
+                subConsumed?.exitCode,
+              );
+              console.log('[AssignTemplateToSystemUI DEBUG] stdout:', subConsumed?.stdout ?? '');
+              console.log('[AssignTemplateToSystemUI DEBUG] stderr:', subConsumed?.stderr ?? '');
+
+              const repolist = await regClient.Exec(['dnf', 'repolist'], MEDIUM_EXEC_TIMEOUT_MS);
+              console.log(
+                '[AssignTemplateToSystemUI DEBUG] first-poll dnf repolist exitCode=',
+                repolist?.exitCode,
+              );
+              console.log('[AssignTemplateToSystemUI DEBUG] stdout:', repolist?.stdout ?? '');
+              console.log('[AssignTemplateToSystemUI DEBUG] stderr:', repolist?.stderr ?? '');
+            }
+
+            if (res === undefined) {
+              console.warn(
+                '[AssignTemplateToSystemUI] dnf repoquery returned no Exec result; retrying poll',
+              );
+            }
             return output;
           },
           {
             timeout: CONTENT_PROPAGATION_POLL.timeout,
             intervals: [...CONTENT_PROPAGATION_POLL.intervals],
+            message:
+              'dnf repoquery vim-enhanced should return a /templates/ CDN URL after template assignment',
           },
         )
         .toContain('/templates/');
