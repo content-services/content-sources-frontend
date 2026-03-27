@@ -1,0 +1,94 @@
+# Uploads Istanbul coverage from fork PR runs to Currents.dev. Fork PR workflows cannot use
+# repository secrets; the UI project tests job stores .nyc_output and this workflow runs in the
+# base repo context with secrets after that workflow completes.
+name: Upload E2E coverage to Currents
+on:
+  workflow_run:
+    workflows:
+      - UI project tests
+    types:
+      - completed
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: currents-coverage-upload-${{ github.event.workflow_run.id }}
+  cancel-in-progress: true
+
+jobs:
+  upload-currents-e2e-coverage:
+    if: >
+      github.event.workflow_run.conclusion != 'cancelled' &&
+      github.event.workflow_run.head_repository.full_name != github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for deferred Currents coverage artifact
+        id: artifact
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = ${{ github.event.workflow_run.id }};
+            const { data } = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+              per_page: 100,
+            });
+            const found = data.artifacts.some((a) => a.name === 'playwright-currents-coverage');
+            core.setOutput('found', found ? 'true' : 'false');
+
+      - name: Checkout repository at workflow head
+        if: steps.artifact.outputs.found == 'true'
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          submodules: recursive
+
+      - name: Set up Node.js
+        if: steps.artifact.outputs.found == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+
+      - name: Install dependencies
+        if: steps.artifact.outputs.found == 'true'
+        run: yarn install --frozen-lockfile
+
+      - name: Install Playwright browser
+        if: steps.artifact.outputs.found == 'true'
+        run: yarn playwright install chromium --only-shell
+
+      - name: Download NYC coverage artifact from triggering workflow
+        if: steps.artifact.outputs.found == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-currents-coverage
+          path: .nyc_output
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Upload coverage to Currents
+        if: steps.artifact.outputs.found == 'true'
+        env:
+          COVERAGE: 'false'
+          CI: 'true'
+          CURRENTS_PROJECT_ID: ${{ secrets.CURRENTS_PROJECT_ID }}
+          CURRENTS_RECORD_KEY: ${{ secrets.CURRENTS_RECORD_KEY }}
+          CURRENTS_CI_BUILD_ID: ${{ github.repository }}-${{ github.event.workflow_run.id }}-${{ github.event.workflow_run.run_attempt }}
+        run: |
+          if [ ! -d .nyc_output ] || [ -z "$(find .nyc_output -type f 2>/dev/null | head -1)" ]; then
+            echo "No coverage files in .nyc_output; skipping Currents upload."
+            exit 0
+          fi
+          npx pwc \
+            --key "$CURRENTS_RECORD_KEY" \
+            --project-id "$CURRENTS_PROJECT_ID" \
+            --ci-build-id "$CURRENTS_CI_BUILD_ID" \
+            --pwc-coverage-dir .nyc_output \
+            --pwc-coverage UI \
+            --pwc-console-output none \
+            -- --pass-with-no-tests --grep '__CURRENTS_DEFERRED_UPLOAD_NO_MATCH__'
