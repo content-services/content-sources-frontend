@@ -56,13 +56,15 @@ test.describe('Install Upload Repo Content', () => {
 
     await test.step('Create upload repository', async () => {
       await page.getByRole('button', { name: 'Add repositories' }).first().click();
-      await expect(page.getByRole('dialog', { name: 'Add custom repositories' })).toBeVisible();
-      await page.getByPlaceholder('Enter name').fill(uploadRepoName);
-      await page.getByLabel('Upload', { exact: true }).check();
-      await page.getByRole('button', { name: 'filter architecture' }).click();
-      await page.getByRole('menuitem', { name: 'x86_64' }).click();
-      await page.getByRole('button', { name: 'filter OS version' }).click();
-      await page.getByRole('menuitem', { name: 'RHEL 9' }).click();
+      const addRepoModal = page.getByRole('dialog', { name: 'Add custom repositories' });
+      await expect(addRepoModal).toBeVisible();
+      await addRepoModal.getByPlaceholder('Enter name').fill(uploadRepoName);
+      await addRepoModal.getByLabel('Upload', { exact: true }).check();
+      // Scope to the dialog: toolbar filters also use `filter architecture` and `filter OS version`.
+      await addRepoModal.getByRole('button', { name: 'filter architecture' }).click();
+      await addRepoModal.getByRole('menuitem', { name: 'x86_64', includeHidden: true }).click();
+      await addRepoModal.getByRole('button', { name: 'filter OS version' }).click();
+      await addRepoModal.getByRole('menuitem', { name: 'RHEL 9', includeHidden: true }).click();
       const [, bulkCreateResponse] = await Promise.all([
         page.getByRole('button', { name: 'Save and upload content' }).click(),
         page.waitForResponse(
@@ -103,10 +105,13 @@ test.describe('Install Upload Repo Content', () => {
       await navigateToTemplates(page);
       await expect(page.getByRole('button', { name: 'Create template' })).toBeVisible();
       await page.getByRole('button', { name: 'Create template' }).click();
-      await page.getByRole('button', { name: 'filter OS version' }).click();
-      await page.getByRole('menuitem', { name: 'RHEL 9' }).click();
-      await page.getByRole('button', { name: 'filter architecture' }).click();
-      await page.getByRole('menuitem', { name: 'x86_64' }).click();
+      const templateWizardModal = page.getByRole('dialog', { name: 'add template modal' });
+      await expect(templateWizardModal).toBeVisible();
+      // Scope to this dialog so we do not hit the templates table filters (same button names).
+      await templateWizardModal.getByRole('button', { name: 'filter OS version' }).click();
+      await page.getByRole('menuitem', { name: 'RHEL 9', includeHidden: true }).click();
+      await templateWizardModal.getByRole('button', { name: 'filter architecture' }).click();
+      await page.getByRole('menuitem', { name: 'x86_64', includeHidden: true }).click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await expect(
         page.getByRole('heading', { name: 'Additional Red Hat repositories', exact: true }),
@@ -115,8 +120,7 @@ test.describe('Install Upload Repo Content', () => {
       await expect(
         page.getByRole('heading', { name: 'Other repositories', exact: true }),
       ).toBeVisible();
-      const modalPage = page.getByTestId('add_template_modal');
-      const rowUploadRepo = await waitForValidStatus(modalPage, uploadRepoName);
+      const rowUploadRepo = await waitForValidStatus(templateWizardModal, uploadRepoName);
       await rowUploadRepo.getByLabel('Select row').click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
       await page.getByText('Use the latest content', { exact: true }).click();
