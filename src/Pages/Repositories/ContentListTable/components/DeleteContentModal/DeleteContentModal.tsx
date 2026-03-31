@@ -127,10 +127,12 @@ export default function DeleteContentModal() {
 
   const templateFilterData: TemplateFilterData = {
     arch: '',
-    version: '',
+    version: [],
     search: '',
+    extended_release_version: [],
     repository_uuids: uuids.join(','),
     snapshot_uuids: '',
+    extended_release: [],
   };
 
   const {
