@@ -2185,10 +2185,10 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.29.tgz#5a40109a1ab5f84d6fd8fc928b19f367cbe7e7b1"
   integrity sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==
 
-"@project-kessel/react-kessel-access-check@^0.4.2":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@project-kessel/react-kessel-access-check/-/react-kessel-access-check-0.4.4.tgz#bb745c7cf59b5d7acd30ca3df67c98bc2ccc9a89"
-  integrity sha512-zZYN+opZGWPt2WXcoRIedomrTZprHTO/iGpsGjFVsMBW3ch9SMirOc6W15I1USWUUFaYDoZ/NAF+ucrvHz9fNw==
+"@project-kessel/react-kessel-access-check@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@project-kessel/react-kessel-access-check/-/react-kessel-access-check-0.5.0.tgz#d7da22c8b3952184c431929eb4a670ba46f9907a"
+  integrity sha512-yOQEsX/Z53PSFuiemdGkKNKCRXRVb3Tzo/z8JpmC1uMGm7cT9ny49VqJokRHVuqCLGPH3IqbBd1USD1I2vi1Ew==
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
@@ -2304,7 +2304,11 @@
     webpack-dev-server "5.1.0"
     yargs "^17.6.2"
 
+<<<<<<< HEAD
 "@redhat-cloud-services/frontend-components-notifications@^6.3.1":
+=======
+"@redhat-cloud-services/frontend-components-notifications@^6.5.0":
+>>>>>>> 96d73a2f (Build: Bump the npm group across 1 directory with 10 updates)
   version "6.5.0"
   resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components-notifications/-/frontend-components-notifications-6.5.0.tgz#080d3ec6d60693262821c1220069e72d71241a3e"
   integrity sha512-bM2Kljon4+rYXcYcH2K0Wd6rmo90MLHADJdII1a7g33oQLQLJAIfWrGqwe+oSI/wvCxjGRD66tjRG3HvMkmU8Q==
@@ -2312,7 +2316,11 @@
     "@redhat-cloud-services/frontend-components" "^7.0.13"
     "@redhat-cloud-services/frontend-components-utilities" "^7.0.0"
 
+<<<<<<< HEAD
 "@redhat-cloud-services/frontend-components-utilities@^7.0.0", "@redhat-cloud-services/frontend-components-utilities@^7.1.1":
+=======
+"@redhat-cloud-services/frontend-components-utilities@^7.0.0", "@redhat-cloud-services/frontend-components-utilities@^7.2.0":
+>>>>>>> 96d73a2f (Build: Bump the npm group across 1 directory with 10 updates)
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components-utilities/-/frontend-components-utilities-7.2.0.tgz#933a2f21a778fa18bccb70c8cea3844790b103a5"
   integrity sha512-3WjCgkRGG1vLmxdy71fErrusBDVWwAF1hNVGKs5uDimazzA52ogqMB7nmjzPkmCY75kQNnkRBNuzO76Xol8MDQ==
@@ -2327,7 +2335,11 @@
     p-map "^7.0.2"
     react-content-loader "^6.2.0"
 
+<<<<<<< HEAD
 "@redhat-cloud-services/frontend-components@^7.0.13", "@redhat-cloud-services/frontend-components@^7.1.1":
+=======
+"@redhat-cloud-services/frontend-components@^7.0.13", "@redhat-cloud-services/frontend-components@^7.3.0":
+>>>>>>> 96d73a2f (Build: Bump the npm group across 1 directory with 10 updates)
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/@redhat-cloud-services/frontend-components/-/frontend-components-7.3.0.tgz#3b288ed39bfa98ad5bf3f5fb6a087ab596c62552"
   integrity sha512-kURKbJnyC78MYtBzCIShABUBWPiRb2WLuI19AAQskVeOuJ6f4YuD/7wfVASRBlyA2sRTRge92NOC+UfdY5M8dQ==
@@ -3314,7 +3326,11 @@
   dependencies:
     "@types/yargs-parser" "*"
 
+<<<<<<< HEAD
 "@typescript-eslint/eslint-plugin@^8.57.1":
+=======
+"@typescript-eslint/eslint-plugin@^8.58.0":
+>>>>>>> 96d73a2f (Build: Bump the npm group across 1 directory with 10 updates)
   version "8.58.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-8.58.0.tgz#ad40e492f1931f46da1bd888e52b9e56df9063aa"
   integrity sha512-RLkVSiNuUP1C2ROIWfqX+YcUfLaSnxGE/8M+Y57lopVwg9VTYYfhuz15Yf1IzCKgZj6/rIbYTmJCUSqr76r0Wg==
@@ -3328,7 +3344,11 @@
     natural-compare "^1.4.0"
     ts-api-utils "^2.5.0"
 
+<<<<<<< HEAD
 "@typescript-eslint/parser@^8.57.1":
+=======
+"@typescript-eslint/parser@^8.58.0":
+>>>>>>> 96d73a2f (Build: Bump the npm group across 1 directory with 10 updates)
   version "8.58.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-8.58.0.tgz#da04ece1967b6c2fe8f10c3473dabf3825795ef7"
   integrity sha512-rLoGZIf9afaRBYsPUMtvkDWykwXwUPL60HebR4JgTI8mxfFe2cQTu3AGitANp4b9B2QlVru6WzjgB2IzJKiCSA==
@@ -3970,7 +3990,11 @@ axios@1.13.6:
     form-data "^4.0.5"
     proxy-from-env "^1.1.0"
 
+<<<<<<< HEAD
 axios@^1.12.2, axios@^1.13.6, axios@^1.6.1:
+=======
+axios@^1.12.2, axios@^1.14.0, axios@^1.6.1:
+>>>>>>> 96d73a2f (Build: Bump the npm group across 1 directory with 10 updates)
   version "1.14.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.14.0.tgz#7c29f4cf2ea91ef05018d5aa5399bf23ed3120eb"
   integrity sha512-3Y8yrqLSwjuzpXuZ0oIYZ/XGgLwUIBU3uLvbcpb0pidD9ctpShJd43KSlEEkVQg6DS0G9NKyzOvBfUtDKEyHvQ==
@@ -9726,7 +9750,11 @@ react-router@6.30.3:
   dependencies:
     "@remix-run/router" "1.23.2"
 
+<<<<<<< HEAD
 react18-json-view@^0.2.8:
+=======
+react18-json-view@^0.2.10:
+>>>>>>> 96d73a2f (Build: Bump the npm group across 1 directory with 10 updates)
   version "0.2.10"
   resolved "https://registry.yarnpkg.com/react18-json-view/-/react18-json-view-0.2.10.tgz#d15508c2f227ce60575217c98534fb98039f59e7"
   integrity sha512-rYEbaCG/U4THY1qp1xY14/Kbnp9yY3W6Qm3Rmu+jlCIdxzMS5EcD+wI97kCKRoN3CuJyJU8hqkax5xWfl8A4EA==
@@ -11159,10 +11187,15 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typescript@^5.4.5, typescript@^5.9.2:
+typescript@^5.4.5:
   version "5.9.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.9.3.tgz#5b4f59e15310ab17a216f5d6cf53ee476ede670f"
   integrity sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==
+
+typescript@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-6.0.2.tgz#0b1bfb15f68c64b97032f3d78abbf98bdbba501f"
+  integrity sha512-bGdAIrZ0wiGDo5l8c++HWtbaNCWTS4UTv7RaTH/ThVIgjkveJt83m74bBHMJkuCbslY8ixgLBVZJIOiQlQTjfQ==
 
 uglify-js@^3.1.4:
   version "3.19.3"
@@ -11448,7 +11481,11 @@ webidl-conversions@^7.0.0:
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-7.0.0.tgz#256b4e1882be7debbf01d05f0aa2039778ea080a"
   integrity sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==
 
+<<<<<<< HEAD
 webpack-bundle-analyzer@^5.2.0:
+=======
+webpack-bundle-analyzer@^5.3.0:
+>>>>>>> 96d73a2f (Build: Bump the npm group across 1 directory with 10 updates)
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/webpack-bundle-analyzer/-/webpack-bundle-analyzer-5.3.0.tgz#ca289e08f2f5e39964a9988c38ff3090559392bf"
   integrity sha512-PEhAoqiJ+47d0uLMx/+zo5XOvaU+Vk6N2ZLht7H3n09QLy/fhyvqGNwjdRUHJDgMN8crBR2ZwVHkIswT3Xuawg==
