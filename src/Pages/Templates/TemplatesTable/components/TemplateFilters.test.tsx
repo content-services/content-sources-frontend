@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { testRepositoryParamsResponse } from 'testingHelpers';
+import { testEUSRepositoryParamsResponse } from 'testingHelpers';
 import TemplateFilters from './TemplateFilters';
 import { useQueryClient } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
@@ -16,7 +16,7 @@ jest.mock('@tanstack/react-query');
 
 beforeAll(() => {
   (useQueryClient as jest.Mock).mockImplementation(() => ({
-    getQueryData: () => testRepositoryParamsResponse,
+    getQueryData: () => testEUSRepositoryParamsResponse,
   }));
 });
 
@@ -27,10 +27,12 @@ it('Render loading state (disabled)', async () => {
       setFilterData={() => null}
       filterData={{
         search: '',
-        version: '',
+        version: [],
+        extended_release_version: [],
         arch: '',
         repository_uuids: '',
         snapshot_uuids: '',
+        extended_release: [],
       }}
     />,
   );
@@ -39,16 +41,18 @@ it('Render loading state (disabled)', async () => {
   expect(filterInput).toHaveAttribute('disabled');
 });
 
-it('Select a filter of each type and ensure chips are present ContentListFilters', async () => {
-  const { queryByText, getByRole, getByLabelText, queryAllByText, getByText } = render(
+it('Select a filter of each type and ensure chips are present', async () => {
+  const { queryByText, getByRole, getByLabelText, queryAllByText } = render(
     <TemplateFilters
       setFilterData={() => null}
       filterData={{
         search: '',
-        version: '',
+        version: [],
+        extended_release_version: [],
         arch: '',
         repository_uuids: '',
         snapshot_uuids: '',
+        extended_release: [],
       }}
     />,
   );
@@ -63,19 +67,35 @@ it('Select a filter of each type and ensure chips are present ContentListFilters
 
   await userEvent.click(optionMenu);
 
-  // Select a Version item
-  const versionOption = getByText('OS version')?.closest('button') as Element;
-
+  // Select major and minor version items
+  const versionOption = getByRole('menuitem', { name: 'OS version' });
   expect(versionOption).toBeInTheDocument();
   await userEvent.click(versionOption);
 
-  const versionSelector = getByLabelText('filter OS version') as Element;
-  expect(versionSelector).toBeInTheDocument();
+  const versionSelector = getByRole('button', { name: 'filter OS version' }) as Element;
   await userEvent.click(versionSelector);
 
-  const versionItem = getByRole('menuitem', { name: 'RHEL 7' }) as Element;
-  expect(versionItem).toBeInTheDocument();
-  await userEvent.click(versionItem);
+  const majorVersionItem = queryByText('RHEL 8') as Element;
+  expect(majorVersionItem).toBeInTheDocument();
+  await userEvent.click(majorVersionItem);
+
+  const minorVersionItem = queryByText('RHEL 9.4') as Element;
+  expect(minorVersionItem).toBeInTheDocument();
+  await userEvent.click(minorVersionItem);
+
+  await userEvent.click(optionMenu);
+
+  // Select a release stream item
+  const streamOption = getByRole('menuitem', { name: 'Release stream' });
+  expect(streamOption).toBeInTheDocument();
+  await userEvent.click(streamOption);
+
+  const streamSelector = getByRole('button', { name: 'filter stream' }) as Element;
+  await userEvent.click(streamSelector);
+
+  const streamItem = queryByText('Standard') as Element;
+  expect(streamItem).toBeInTheDocument();
+  await userEvent.click(streamItem);
 
   await userEvent.click(optionMenu);
 
@@ -93,7 +113,9 @@ it('Select a filter of each type and ensure chips are present ContentListFilters
   await userEvent.click(archItem);
 
   // Check all the chips are there
-  expect(queryByText('RHEL 7')).toBeInTheDocument();
-  expect(queryAllByText('aarch64')).toHaveLength(3);
   expect(queryByText('EPEL')).toBeInTheDocument();
+  expect(queryByText('RHEL 8')).toBeInTheDocument();
+  expect(queryByText('RHEL 9.4')).toBeInTheDocument();
+  expect(queryByText('Standard')).toBeInTheDocument();
+  expect(queryAllByText('aarch64')).toHaveLength(3); // aarch64 displayed in the filter dropdown, the filter label, and the filter chip
 });

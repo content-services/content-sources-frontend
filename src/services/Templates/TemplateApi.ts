@@ -64,10 +64,12 @@ export interface SnapshotRpmCollectionResponse {
 
 export type TemplateFilterData = {
   arch: string;
-  version: string;
+  version: string[];
+  extended_release_version: string[];
   search: string;
   repository_uuids: string;
   snapshot_uuids: string;
+  extended_release: string[];
 };
 
 export const getTemplates: (
@@ -79,18 +81,31 @@ export const getTemplates: (
   page,
   limit,
   sortBy,
-  { search, arch, version, repository_uuids, snapshot_uuids },
+  {
+    search,
+    arch,
+    version,
+    extended_release_version,
+    repository_uuids,
+    snapshot_uuids,
+    extended_release,
+  },
 ) => {
+  const streamParam = extended_release?.join(',').toLowerCase();
+  const minorVersionParam = extended_release_version?.join(',');
+  const majorVersionParam = version?.join(',');
   const { data } = await axios.get(
     `/api/content-sources/v1/templates/?${objectToUrlParams({
       offset: ((page - 1) * limit).toString(),
       limit: limit?.toString(),
       search,
       arch,
-      version,
+      version: majorVersionParam,
+      extended_release_version: minorVersionParam,
       sort_by: sortBy,
       repository_uuids: repository_uuids,
       snapshot_uuids: snapshot_uuids,
+      extended_release: streamParam,
     })}`,
   );
   return data;

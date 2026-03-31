@@ -12,11 +12,13 @@ import {
   MenuToggle,
   DropdownList,
   DropdownItem,
+  TreeView,
+  TreeViewDataItem,
 } from '@patternfly/react-core';
 
 import { FilterIcon, SearchIcon } from '@patternfly/react-icons';
 import Hide from 'components/Hide/Hide';
-import { RepositoryParamsResponse } from 'services/Content/ContentApi';
+import { NameLabel, RepositoryParamsResponse } from 'services/Content/ContentApi';
 import { useQueryClient } from '@tanstack/react-query';
 import { REPOSITORY_PARAMS_KEY } from 'services/Content/ContentQueries';
 import useDebounce from 'Hooks/useDebounce';
@@ -26,6 +28,8 @@ import { useAppContext } from 'middleware/AppContext';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { useNavigate } from 'react-router-dom';
 import { TemplateFilterData } from 'services/Templates/TemplateApi';
+import { STANDARD_STREAM } from '../constants';
+
 interface Props {
   isLoading?: boolean;
   setFilterData: (filterData: TemplateFilterData) => void;
@@ -46,7 +50,7 @@ const useStyles = createUseStyles({
   },
 });
 
-export type Filters = 'Name' | 'OS version' | 'Architecture';
+export type Filters = 'Name' | 'OS version' | 'Architecture' | 'Release stream';
 
 const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
   const classes = useStyles();
@@ -55,16 +59,22 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
   const navigate = useNavigate();
   const [isActionOpen, setActionOpen] = useState(false);
   const [typeFilterOpen, setTypeFilterOpen] = useState(false);
-  const filters = ['Name', 'OS version', 'Architecture'];
+  const filters = ['Name', 'OS version', 'Architecture', 'Release stream'];
   const [filterType, setFilterType] = useState<Filters>('Name');
   const [versionNamesLabels, setVersionNamesLabels] = useState({});
   const [archNamesLabels, setArchNamesLabels] = useState({});
+  const [streamNamesLabels, setStreamNamesLabels] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedVersion, setSelectedVersion] = useState<string>('');
   const [selectedArch, setSelectedArch] = useState<string>('');
+  const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
+  const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
 
-  const { distribution_arches = [], distribution_versions = [] } =
-    queryClient.getQueryData<RepositoryParamsResponse>([REPOSITORY_PARAMS_KEY]) || {};
+  const {
+    distribution_arches = [],
+    distribution_versions = [],
+    distribution_minor_versions = [],
+    extended_release_streams = [],
+  } = queryClient.getQueryData<RepositoryParamsResponse>([REPOSITORY_PARAMS_KEY]) || {};
 
   const hasRHELSubscription = !!subscriptions?.red_hat_enterprise_linux;
   const isMissingRequirements = !rbac?.templateWrite || !hasRHELSubscription;
@@ -73,30 +83,63 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
 
   const clearFilters = () => {
     setSearchQuery('');
-    setSelectedVersion('');
     setSelectedArch('');
-    setFilterData({ search: '', version: '', arch: '', repository_uuids: '', snapshot_uuids: '' });
+    setSelectedStreams([]);
+    setSelectedVersions([]);
+    setFilterData({
+      search: '',
+      version: [],
+      extended_release_version: [],
+      arch: '',
+      repository_uuids: '',
+      snapshot_uuids: '',
+      extended_release: [],
+    });
   };
 
   useEffect(() => {
     // If the filters get cleared at the top level, sense that and clear them here.
-    if (!filterData.arch && !filterData.version && !filterData.search) {
+    if (
+      !filterData.arch &&
+      filterData.version.length === 0 &&
+      !filterData.search &&
+      filterData.extended_release.length === 0
+    ) {
       clearFilters();
     }
-  }, [filterData.arch, filterData.version, filterData.search]);
+  }, [
+    filterData.arch,
+    filterData.version.length,
+    filterData.search,
+    filterData.extended_release.length,
+  ]);
 
   const {
     searchQuery: debouncedSearchQuery,
-    selectedVersion: debouncedSelectedVersion,
     selectedArch: debouncedSelectedArch,
+    selectedStreams: debouncedSelectedStreams,
+    selectedVersions: debouncedSelectedVersions,
   } = useDebounce({
     searchQuery,
-    selectedVersion,
     selectedArch,
+    selectedStreams,
+    selectedVersions,
   });
 
-  const getLabels = (type: 'arch' | 'version', name: string): string => {
-    const namesLabels = type === 'arch' ? distribution_arches : distribution_versions;
+  const getLabels = (type: 'arch' | 'version' | 'extended_release', name: string): string => {
+    if (type === 'extended_release' && name === STANDARD_STREAM.name) {
+      return 'none';
+    }
+
+    let namesLabels: NameLabel[];
+    if (type === 'arch') {
+      namesLabels = distribution_arches;
+    } else if (type === 'version') {
+      namesLabels = [...distribution_versions, ...distribution_minor_versions];
+    } else {
+      namesLabels = extended_release_streams;
+    }
+
     const found = namesLabels.find((v) => v.name === name);
     if (found) {
       return found.label;
@@ -107,28 +150,135 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
   useEffect(() => {
     setFilterData({
       search: debouncedSearchQuery,
-      version: getLabels('version', debouncedSelectedVersion),
+      version: debouncedSelectedVersions.map((version) => getLabels('version', version)),
       arch: getLabels('arch', debouncedSelectedArch),
+      extended_release_version: [],
       repository_uuids: '',
       snapshot_uuids: '',
+      extended_release: debouncedSelectedStreams.map((stream) =>
+        getLabels('extended_release', stream),
+      ),
     });
-  }, [debouncedSearchQuery, debouncedSelectedVersion, debouncedSelectedArch]);
+  }, [
+    debouncedSearchQuery,
+    debouncedSelectedArch,
+    debouncedSelectedStreams,
+    debouncedSelectedVersions,
+  ]);
 
   useEffect(() => {
-    if (
-      isEmpty(versionNamesLabels) &&
-      isEmpty(archNamesLabels) &&
-      distribution_arches.length !== 0 &&
-      distribution_versions.length !== 0
-    ) {
+    if (isEmpty(archNamesLabels) && distribution_arches.length !== 0) {
       const arches = {};
-      const versions = {};
       distribution_arches.forEach((arch) => (arches[arch.name] = arch.label));
-      distribution_versions.forEach((version) => (versions[version.name] = version.label));
-      setVersionNamesLabels(versions);
       setArchNamesLabels(arches);
     }
-  }, [distribution_arches, distribution_versions]);
+
+    if (
+      isEmpty(versionNamesLabels) &&
+      (distribution_versions.length !== 0 || distribution_minor_versions.length !== 0)
+    ) {
+      const versions = {};
+      distribution_versions.forEach((major) => {
+        versions[major.name] = major.label;
+      });
+      distribution_minor_versions.forEach((minor) => {
+        versions[minor.name] = minor.label;
+      });
+      setVersionNamesLabels(versions);
+    }
+
+    if (isEmpty(streamNamesLabels) && extended_release_streams.length !== 0) {
+      const streams = {};
+      extended_release_streams.forEach((stream) => (streams[stream.name] = stream.label));
+      streams[STANDARD_STREAM.name] = STANDARD_STREAM.label;
+      setStreamNamesLabels(streams);
+    }
+  }, [
+    distribution_arches,
+    distribution_versions,
+    distribution_minor_versions,
+    extended_release_streams,
+    archNamesLabels,
+    streamNamesLabels,
+    versionNamesLabels,
+  ]);
+
+  const versionGroups = useMemo(
+    () =>
+      distribution_versions
+        .filter((major) => major.name !== 'Any' && major.name !== 'RHEL 7')
+        .reverse()
+        .map((major) => ({
+          majorName: major.name,
+          group: `${major.name}.x`,
+          minors: distribution_minor_versions
+            .filter((minor) => minor.major === major.label)
+            .map((minor) => ({
+              minorName: minor.name,
+            })),
+        })),
+    [distribution_versions, distribution_minor_versions],
+  );
+
+  const versionTree = useMemo<TreeViewDataItem[]>(
+    () =>
+      versionGroups.flatMap((group) => [
+        {
+          id: group.majorName,
+          name: group.majorName,
+          checkProps: {
+            checked: selectedVersions.includes(group.majorName),
+          },
+        },
+        {
+          id: group.group,
+          name: group.group,
+          checkProps: {
+            checked:
+              group.minors.length > 0 &&
+              group.minors.every((minor) => selectedVersions.includes(minor.minorName)),
+          },
+          children: group.minors.map((minor) => ({
+            id: minor.minorName,
+            name: minor.minorName,
+            checkProps: {
+              checked: selectedVersions.includes(minor.minorName),
+            },
+          })),
+          defaultExpanded: true,
+        },
+      ]),
+    [versionGroups, selectedVersions],
+  );
+
+  const onVersionCheck = (event: React.ChangeEvent, item: TreeViewDataItem) => {
+    const checked = (event?.target as HTMLInputElement).checked;
+    const itemID = item.id as string; // RHEL 8, RHEL 8.x, RHEL 8.8 etc
+
+    // if selected item is a parent (e.g. RHEL 8.x), either add or remove all minors in its group
+    const group = versionGroups.find((g) => g.group === itemID);
+    if (group) {
+      const minors = group.minors.map((minor) => minor.minorName);
+      setSelectedVersions((prev) => {
+        if (checked) {
+          return [...new Set([...prev, ...minors])];
+        }
+        return prev.filter((value) => !minors.includes(value));
+      });
+      return;
+    }
+
+    // otherwise just add or remove item
+    setSelectedVersions((prev) => {
+      if (checked) {
+        if (prev.includes(itemID)) {
+          return prev;
+        }
+        return [...new Set([...prev, itemID])];
+      }
+      return prev.filter((item) => item !== itemID);
+    });
+  };
 
   const Filter = useMemo(() => {
     switch (filterType) {
@@ -150,10 +300,6 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
       case 'OS version':
         return (
           <Dropdown
-            onSelect={(_, val) => {
-              setSelectedVersion(val as string);
-              setActionOpen(false);
-            }}
             toggle={(toggleRef) => (
               <MenuToggle
                 ref={toggleRef}
@@ -164,27 +310,16 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
                 isDisabled={isLoading}
                 isExpanded={isActionOpen}
               >
-                {selectedVersion || 'Filter by OS version'}
+                Filter by OS version
               </MenuToggle>
             )}
             onOpenChange={(isOpen) => setActionOpen(isOpen)}
             isOpen={isActionOpen}
           >
-            <DropdownList>
-              {Object.keys(versionNamesLabels).map((version) => (
-                <DropdownItem
-                  key={version}
-                  value={version}
-                  isSelected={selectedVersion === version}
-                  component='button'
-                  data-ouia-component-id={`filter_${version}`}
-                >
-                  {version}
-                </DropdownItem>
-              ))}
-            </DropdownList>
+            <TreeView data={versionTree} onCheck={onVersionCheck} hasCheckboxes />
           </Dropdown>
         );
+
       case 'Architecture':
         return (
           <Dropdown
@@ -223,6 +358,48 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
             </DropdownList>
           </Dropdown>
         );
+      case 'Release stream':
+        return (
+          <Dropdown
+            onSelect={(_, val) => {
+              setSelectedStreams((prev) =>
+                prev.includes(val as string)
+                  ? prev.filter((item) => item !== (val as string))
+                  : [...new Set([...prev, val as string])],
+              );
+            }}
+            toggle={(toggleRef) => (
+              <MenuToggle
+                ref={toggleRef}
+                aria-label='filter stream'
+                id='streamSelect'
+                ouiaId='filter_by_stream'
+                onClick={() => setActionOpen((prev) => !prev)}
+                isDisabled={isLoading}
+                isExpanded={isActionOpen}
+              >
+                Filter by release stream
+              </MenuToggle>
+            )}
+            onOpenChange={(isOpen) => setActionOpen(isOpen)}
+            isOpen={isActionOpen}
+          >
+            <DropdownList>
+              {Object.keys(streamNamesLabels).map((stream) => (
+                <DropdownItem
+                  key={`stream_${stream}`}
+                  value={stream}
+                  isSelected={selectedStreams.includes(stream)}
+                  component='button'
+                  data-ouia-component-id={`filter_${stream}`}
+                  hasCheckbox
+                >
+                  {stream}
+                </DropdownItem>
+              ))}
+            </DropdownList>
+          </Dropdown>
+        );
       default:
         return <></>;
     }
@@ -230,11 +407,13 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
     filterType,
     isLoading,
     searchQuery,
-    versionNamesLabels,
-    selectedVersion,
     archNamesLabels,
     selectedArch,
     isActionOpen,
+    selectedStreams,
+    streamNamesLabels,
+    selectedVersions,
+    versionGroups,
   ]);
 
   return (
@@ -322,38 +501,78 @@ const Filters = ({ isLoading, setFilterData, filterData }: Props) => {
         </ConditionalTooltip> */}
         </FlexItem>
       </Flex>
-      <Hide hide={!(selectedVersion || selectedArch || searchQuery)}>
+      <Hide
+        hide={
+          !(
+            selectedArch ||
+            searchQuery ||
+            selectedStreams?.length > 0 ||
+            selectedVersions?.length > 0
+          )
+        }
+      >
         <FlexItem className={classes.chipsContainer}>
-          {selectedVersion ? (
-            <LabelGroup categoryName='OS version'>
-              <Label variant='outline' key={selectedVersion} onClose={() => setSelectedVersion('')}>
-                {selectedVersion}
-              </Label>
-            </LabelGroup>
-          ) : (
-            <></>
-          )}
-          {selectedArch ? (
-            <LabelGroup categoryName='Architecture'>
-              <Label variant='outline' key={selectedArch} onClose={() => setSelectedArch('')}>
-                {selectedArch}
-              </Label>
-            </LabelGroup>
-          ) : (
-            <></>
-          )}
-          {searchQuery && (
-            <LabelGroup categoryName='Name'>
-              <Label variant='outline' key='name_chip' onClose={() => setSearchQuery('')}>
-                {searchQuery}
-              </Label>
-            </LabelGroup>
-          )}
-          {((debouncedSearchQuery && searchQuery) || !!selectedVersion || !!selectedArch) && (
-            <Button className={classes.clearFilters} onClick={clearFilters} variant='link' isInline>
-              Clear filters
-            </Button>
-          )}
+          <Flex gap={{ default: 'gapSm' }} flexWrap={{ default: 'wrap' }}>
+            {selectedVersions.length > 0 && (
+              <LabelGroup categoryName='OS version'>
+                {selectedVersions.map((version) => (
+                  <Label
+                    variant='filled'
+                    key={version}
+                    onClose={() => {
+                      setSelectedVersions((prev) => prev.filter((item) => item !== version));
+                    }}
+                  >
+                    {version}
+                  </Label>
+                ))}
+              </LabelGroup>
+            )}
+            {selectedArch ? (
+              <LabelGroup categoryName='Architecture'>
+                <Label variant='filled' key={selectedArch} onClose={() => setSelectedArch('')}>
+                  {selectedArch}
+                </Label>
+              </LabelGroup>
+            ) : (
+              <></>
+            )}
+            {searchQuery && (
+              <LabelGroup categoryName='Name'>
+                <Label variant='filled' key='name_chip' onClose={() => setSearchQuery('')}>
+                  {searchQuery}
+                </Label>
+              </LabelGroup>
+            )}
+            {selectedStreams.length > 0 && (
+              <LabelGroup categoryName='Release stream'>
+                {selectedStreams.map((stream) => (
+                  <Label
+                    variant='filled'
+                    key={stream}
+                    onClose={() => {
+                      setSelectedStreams((prev) => prev.filter((item) => item !== stream));
+                    }}
+                  >
+                    {stream}
+                  </Label>
+                ))}
+              </LabelGroup>
+            )}
+            {((debouncedSearchQuery && searchQuery) ||
+              selectedVersions?.length > 0 ||
+              !!selectedArch ||
+              selectedStreams?.length > 0) && (
+              <Button
+                className={classes.clearFilters}
+                onClick={clearFilters}
+                variant='link'
+                isInline
+              >
+                Clear filters
+              </Button>
+            )}
+          </Flex>
         </FlexItem>
       </Hide>
     </Flex>

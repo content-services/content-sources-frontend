@@ -4,6 +4,7 @@ import {
   FlexItem,
   Grid,
   Icon,
+  Label,
   Pagination,
   PaginationVariant,
   Spinner,
@@ -45,6 +46,7 @@ import { ExclamationTriangleIcon, ExternalLinkSquareAltIcon } from '@patternfly/
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { useFlag } from '@unleash/proxy-client-react';
 import { TEMPLATES_DOCS_URL } from './constants';
+import { abbreviateStreamName } from './helpers';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -91,10 +93,12 @@ const TemplatesTable = () => {
 
   const defaultValues: TemplateFilterData = {
     arch: '',
-    version: '',
+    version: [],
+    extended_release_version: [],
     search: '',
     repository_uuids: '',
     snapshot_uuids: '',
+    extended_release: [],
   };
 
   const [filterData, setFilterData] = useState<TemplateFilterData>(defaultValues);
@@ -102,9 +106,13 @@ const TemplatesTable = () => {
   const clearFilters = () => setFilterData(defaultValues);
 
   const notFiltered =
-    filterData.arch === '' && filterData.version === '' && filterData.search === '';
+    filterData.arch === '' &&
+    filterData.version.length === 0 &&
+    filterData.extended_release_version.length === 0 &&
+    filterData.search === '' &&
+    filterData.extended_release.length === 0;
 
-  const columnSortAttributes = ['name', '', 'arch', 'version', '', ''];
+  const columnSortAttributes = ['name', '', 'arch', 'version', '', '', ''];
 
   const sortString = useMemo(
     () =>
@@ -189,6 +197,8 @@ const TemplatesTable = () => {
     isError: repositoryParamsIsError,
     getArchName,
     getVersionName,
+    getStreamName,
+    getMinorVersionName,
   } = useDistributionDetails();
 
   const actionTakingPlace = isLoading || isFetching || repositoryParamsLoading;
@@ -313,6 +323,8 @@ const TemplatesTable = () => {
                       last_update_snapshot_error,
                       last_update_task,
                       to_be_deleted_snapshots,
+                      extended_release,
+                      extended_release_version,
                     }: TemplateItem,
                     index,
                   ) => (
@@ -327,6 +339,11 @@ const TemplatesTable = () => {
                               {name}
                             </Button>
                           </FlexItem>
+                          {extended_release ? (
+                            <Label isCompact color='blue'>
+                              {abbreviateStreamName(getStreamName(extended_release))}
+                            </Label>
+                          ) : null}
                           <Hide
                             hide={!(to_be_deleted_snapshots && to_be_deleted_snapshots.length > 0)}
                           >
@@ -348,7 +365,11 @@ const TemplatesTable = () => {
                       </Td>
                       <Td>{description}</Td>
                       <Td>{getArchName(arch)}</Td>
-                      <Td>{getVersionName(version)}</Td>
+                      <Td>
+                        {extended_release && extended_release_version
+                          ? getMinorVersionName(extended_release_version)
+                          : getVersionName(version)}
+                      </Td>
                       <Td>
                         <ConditionalTooltip
                           show={!use_latest}
