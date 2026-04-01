@@ -1,5 +1,5 @@
 import { killContainer, runCommand, startNewContainer } from '../containers';
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('Container example', async ({}) => {
   await startNewContainer('my_container', 'quay.io/jlsherri/client-rhel9:latest');

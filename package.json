@@ -18,6 +18,7 @@
     "start:verbose": "VERBOSE=true fec dev-proxy",
     "local": "BACKEND_PORT=8000 yarn start",
     "local:coverage": "COVERAGE=true BACKEND_PORT=8000 fec dev-proxy --config $(pwd)/webpack.dev-coverage.config.js",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.playwright.json",
     "verify": "yarn build && yarn lint && yarn format:check && yarn test-ci",
     "postinstall": "ts-patch install",
     "test": "TZ=UTC jest --verbose",

@@ -1,29 +1,31 @@
 {
   "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "./src",
     "baseUrl": "src",
-    "module": "CommonJS",
+    "module": "ESNext",
     "target": "ESNext",
     "isolatedModules": true,
     "allowJs": true,
     "checkJs": false,
     "jsx": "react-jsx",
-    "outDir": "./build",
     "removeComments": true,
     "pretty": true,
     "skipLibCheck": true,
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "noImplicitAny": false,
     "resolveJsonModule": true,
     "sourceMap": true,
     "types": ["node", "jest", "@testing-library/jest-dom"],
+    "ignoreDeprecations": "6.0",
     "paths": {
       "test-utils": ["../_playwright-tests/test-utils/_playwright-tests/test-utils/src/index.ts"],
       "test-utils/*": ["../_playwright-tests/test-utils/_playwright-tests/test-utils/src/*"]
     }
   },
-  "include": ["src", "_playwright-tests/**/*.ts"],
+  "include": ["src"],
   "exclude": [
     "cache",
     "auth",

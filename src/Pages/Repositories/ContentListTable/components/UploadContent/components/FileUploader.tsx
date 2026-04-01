@@ -5,8 +5,8 @@ import {
   MultipleFileUploadStatus,
   Progress,
   Tooltip,
-  type DropEvent,
 } from '@patternfly/react-core';
+import type { DropEvent } from '@patternfly/react-core/dist/esm/helpers/typeUtils';
 import UploadStatusItem from './UploadStatusItem';
 import StatusIcon from 'Pages/Repositories/AdminTaskTable/components/StatusIcon';
 import {
