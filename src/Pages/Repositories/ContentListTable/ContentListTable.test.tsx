@@ -55,14 +55,20 @@ const renderContentListTable = () =>
     </ReactQueryTestWrapper>,
   );
 
-it('shows empty state when there are no repositories', () => {
+it('shows empty state when there are no repositories', async () => {
   (useRepositoryParams as jest.Mock).mockImplementation(() => ({ isLoading: false }));
-  (useContentListQuery as jest.Mock).mockImplementation(() => ({ isLoading: false }));
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    isError: false,
+    data: { data: [], meta: { count: 0, limit: 20, offset: 0 } },
+  }));
 
-  const { queryByText } = renderContentListTable();
+  renderContentListTable();
 
-  expect(queryByText('No repositories')).toBeInTheDocument();
-  expect(queryByText('To get started, create a custom repository.')).toBeInTheDocument();
+  expect(await screen.findByText('No repositories')).toBeInTheDocument();
+  expect(
+    await screen.findByText('To get started, create a custom repository.'),
+  ).toBeInTheDocument();
 });
 
 it('Render a loading state', () => {
@@ -93,28 +99,30 @@ it('Render with a single row', async () => {
     },
   }));
 
-  const { queryByText, getByRole, queryByRole } = renderContentListTable();
+  renderContentListTable();
 
-  await waitFor(() => expect(queryByText('AwesomeNamewwyylse12')).toBeInTheDocument());
-  await waitFor(() =>
-    expect(queryByText('https://google.ca/wwyylse12/x86_64/el7')).toBeInTheDocument(),
-  );
+  expect(await screen.findByText('AwesomeNamewwyylse12')).toBeInTheDocument();
+  expect(await screen.findByText('https://google.ca/wwyylse12/x86_64/el7')).toBeInTheDocument();
 
   expect(
-    queryByText(defaultContentItemWithSnapshot.last_snapshot?.added_counts['rpm.package'] || 0),
+    screen.getByText(
+      defaultContentItemWithSnapshot.last_snapshot?.added_counts['rpm.package'] || 0,
+    ),
   ).toBeInTheDocument();
   expect(
-    queryByText(defaultContentItemWithSnapshot.last_snapshot?.removed_counts['rpm.package'] || 0),
+    screen.getByText(
+      defaultContentItemWithSnapshot.last_snapshot?.removed_counts['rpm.package'] || 0,
+    ),
   ).toBeInTheDocument();
 
   const user = userEvent.setup();
-  const kebabButton = getByRole('button', { name: 'Kebab toggle' });
+  const kebabButton = screen.getByRole('button', { name: 'Kebab toggle' });
   await user.click(kebabButton);
 
-  await waitFor(() => expect(getByRole('menuitem', { name: 'Edit' })).toBeInTheDocument());
-  expect(getByRole('menuitem', { name: 'Trigger snapshot' })).toBeInTheDocument();
-  expect(queryByRole('menuitem', { name: 'Introspect now' })).not.toBeInTheDocument();
-  expect(getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+  expect(await screen.findByRole('menuitem', { name: 'Edit' })).toBeInTheDocument();
+  expect(await screen.findByRole('menuitem', { name: 'Trigger snapshot' })).toBeInTheDocument();
+  expect(screen.queryByRole('menuitem', { name: 'Introspect now' })).not.toBeInTheDocument();
+  expect(await screen.findByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
 });
 
 it('disables EPEL checkboxes when Custom and EPEL tabs are active', async () => {
