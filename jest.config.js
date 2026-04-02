@@ -6,7 +6,17 @@ module.exports = {
   reporters: ['default', 'jest-junit'],
   testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.(t)s$': 'ts-jest',
+    // Match .tsx as well as .ts (the old `(t)s` pattern only matched `.ts`).
+    // ts-jest forces moduleResolution node10 for CJS emit; TS 6 errors on that (TS5107) until ts-jest updates.
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.json',
+        diagnostics: {
+          ignoreCodes: [5107],
+        },
+      },
+    ],
     '^.+\\.(css|scss|sass|less)$': 'jest-preview/transforms/css',
     '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)': 'jest-preview/transforms/file',
   },

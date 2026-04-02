@@ -94,6 +94,12 @@ export default [
     // Override for Playwright tests: disable React rules (incompatible with ESLint 10
     // context API). Test specs are not React components.
     files: ['_playwright-tests/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.playwright.json',
+        tsconfigRootDir: __dirname,
+      },
+    },
     plugins: {
       playwright: playwright,
     },

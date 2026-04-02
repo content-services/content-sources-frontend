@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { DropEvent } from '@patternfly/react-core/dist/esm/helpers/typeUtils';
 import {
   MultipleFileUpload,
   MultipleFileUploadMain,
   MultipleFileUploadStatus,
   Progress,
   Tooltip,
-  type DropEvent,
 } from '@patternfly/react-core';
 import UploadStatusItem from './UploadStatusItem';
 import StatusIcon from 'Pages/Repositories/AdminTaskTable/components/StatusIcon';
