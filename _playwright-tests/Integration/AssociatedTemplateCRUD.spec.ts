@@ -9,6 +9,8 @@ import {
   getTemplateSystemsCount,
   getTemplateUuidByName,
   INVENTORY_PATCH_POLL_TIMEOUT_MS,
+  resolvePatchSystemIdsForHostname,
+  expectHostnameAbsentFromPatchTemplate,
 } from 'test-utils';
 import { CONTENT_PROPAGATION_POLL } from '../testConstants';
 import { RHSMClient } from './helpers/rhsmClient';
@@ -144,6 +146,31 @@ test.describe('Associated Template CRUD', () => {
 
         await modal.getByRole('button', { name: 'Cancel' }).click();
       });
+    });
+
+    await test.step('Remove system from template in Patch before unregister', async () => {
+      const templateUuid = await getTemplateUuidByName(client, templateName);
+      expect(templateUuid, 'template UUID should be resolvable').toBeTruthy();
+
+      // [HMS-10435] [QE] Use patch API to remove system in Integration/AssociatedTemplateCRUD
+      // Unassign from template while the system is still registered, then unregister. (workaround for HMS-10394)
+      const systemIds = await resolvePatchSystemIdsForHostname(page, templateUuid!, hostname);
+      expect(
+        systemIds.length,
+        'system should still be listed on the template in Patch',
+      ).toBeGreaterThan(0);
+
+      const removeRes = await page.request.delete('/api/patch/v3/templates/systems', {
+        data: { systems: systemIds },
+      });
+      if (!removeRes.ok()) {
+        const errBody = await removeRes.text();
+        throw new Error(
+          `expected remove systems from template to succeed (templateUuid=${templateUuid}, systemIds=${JSON.stringify(systemIds)}), got ${removeRes.status()}: ${errBody}`,
+        );
+      }
+
+      await expectHostnameAbsentFromPatchTemplate(page, templateUuid!, hostname);
     });
 
     await test.step('Unregister the system', async () => {
