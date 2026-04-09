@@ -1,11 +1,6 @@
----
-globs: **/*.spec.ts
-alwaysApply: false
----
+# Playwright Testing Rules
 
-# Playwright Test Rules
-
-Apply these rules to TypeScript test files (`**/*spec.ts`) in the `_playwright-tests` folder (excluding the test-utils submodule).
+Apply these rules to TypeScript test files (`**/*.spec.ts`) in the `_playwright-tests` folder (excluding the `test-utils` submodule).
 
 ## General Guidelines
 
