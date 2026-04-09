@@ -356,7 +356,7 @@ const AddContent = ({ isEdit = false }: Props) => {
       <ModalHeader
         title={isEdit ? 'Edit custom repository' : 'Add custom repositories'}
         labelId='add-edit-custom-repository-modal-title'
-        description={`${isEdit ? 'Edit' : 'Add'} by completing the form. Default values may be provided`}
+        description={`${isEdit ? 'Edit' : 'Add'} by completing the form. Default values provided`}
         descriptorId='add-edit-custom-repository-modal-description'
         help={
           <Popover
@@ -405,7 +405,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                     label='Snapshotting'
                     description={
                       values.snapshot && values.origin === ContentOrigin.EXTERNAL
-                        ? 'Enable snapshotting for an external repository, allowing you to build images and use templates with historical snapshots'
+                        ? 'Enable snapshotting for an external repository. The remote repository will be checked for updates and packages will be downloaded, enabling you to build images and use templates with historical snapshots.'
                         : ''
                     }
                     name='snapshot-radio'
@@ -419,7 +419,8 @@ const AddContent = ({ isEdit = false }: Props) => {
                     label='Introspect only'
                     description={
                       !values.snapshot && values.origin === ContentOrigin.EXTERNAL
-                        ? 'Enable only introspection for an external repository, snapshots will not be taken.'
+                        ? 'Enable only introspection for an external repository. The remote repository will be checked for updates but no packages will be downloaded.\n' +
+                          +'You can build images with the latest packages from the repository but no snapshots will be taken.'
                         : ''
                     }
                     name='introspect-radio'
@@ -443,7 +444,7 @@ const AddContent = ({ isEdit = false }: Props) => {
                       label='Upload'
                       description={
                         isUploadRepo
-                          ? 'Create a repository to upload custom content to. Snapshots will be taken after every new upload, allowing you to build images with uploaded content.'
+                          ? 'Create a repository to upload custom content to. Snapshots will be taken after every new upload, enabling you to build images with uploaded content.'
                           : ''
                       }
                       name='upload-radio'
