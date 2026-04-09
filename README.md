@@ -12,6 +12,7 @@ Frontend for content sources service. [What is it?](https://github.com/content-s
   - [Shared Playwright test utilities](#shared-playwright-test-utilities)
 - [PR checks and linking front-end/back-end PRs for testing](#pr-checks-and-linking-front-endback-end-prs-for-testing)
 - [Deploying](#deploying)
+- [AI Coding Assistants](#ai-coding-assistants)
 <!--toc:end-->
 
 ## Initial etc/hosts setup
@@ -174,3 +175,12 @@ If a backend PR is linked, the front-end and back-end PR's in question will both
     - `prod-beta` (deployed by pushing to `prod-beta` on this repo)
     - `prod-stable` (deployed by pushing to `prod-stable` on this repo)
 - Travis uploads results to RedHatInsight's [codecov](https://codecov.io) account. To change the account, modify CODECOV_TOKEN on <https://travis-ci.com/>.
+
+## AI Coding Assistants
+
+This project includes guidance for AI coding assistants (Claude Code, Cursor, etc.):
+
+- **`AGENTS.md`** - Main entry point with project context, setup requirements, and workflows
+- **`docs/rules/`** - Topic-specific detailed rules (testing, etc.)
+
+**For maintainers**: See [docs/rules/README.md](docs/rules/README.md) for how to add or modify AI assistant rules.
