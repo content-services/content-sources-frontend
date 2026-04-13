@@ -1,7 +1,7 @@
 name: 'E2E tests: Stage'
 on:
   pull_request:
-    types: [opened, reopened, synchronize, labeled, unlabeled]
+    types: [ opened, reopened, synchronize, labeled, unlabeled ]
 
   schedule:
     - cron: '0 0 * * *' # This cron expression runs the action every 24 hours at midnight UTC
@@ -30,7 +30,7 @@ jobs:
         uses: ./.github/actions/sparse-checkout-utils
 
       - name: Cache - node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
@@ -137,7 +137,7 @@ jobs:
         if: ${{ !cancelled() }}
 
       - name: Store report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           name: playwright-report

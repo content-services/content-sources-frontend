@@ -32,7 +32,7 @@ jobs:
         run: git submodule update
 
       - name: Cache - node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
@@ -79,7 +79,7 @@ jobs:
         if: ${{ !cancelled() }}
 
       - name: Store report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
