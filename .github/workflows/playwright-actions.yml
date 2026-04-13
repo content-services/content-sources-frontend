@@ -237,6 +237,11 @@ jobs:
           path: playwright-report/
           retention-days: 10
 
+      - name: Debug Codecov env (remove before merge)
+        run: |
+          test -n "${CODECOV_TOKEN:-}" && echo "CODECOV_TOKEN is set" || echo "CODECOV_TOKEN is missing"
+          test -n "${COVERAGE:-}" && echo "COVERAGE is enabled" || echo "COVERAGE is not enabled"
+
       - name: Generate E2E coverage report
         if: env.COVERAGE == 'true'
         run: yarn coverage:report
