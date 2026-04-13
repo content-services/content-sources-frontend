@@ -1,12 +1,12 @@
 name: UI project tests
 on:
   pull_request:
-    types: [opened, reopened, synchronize, labeled, unlabeled]
+    types: [ opened, reopened, synchronize, labeled, unlabeled ]
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
   issue_comment:
-    types: [created]
+    types: [ created ]
 
 permissions:
   contents: read
@@ -175,6 +175,15 @@ jobs:
 
       - name: Update /etc/hosts
         run: sudo npm run patch:hosts
+
+      # Authenticate to Docker Hub to avoid rate limiting on image pulls (optional)
+      - name: Log into Docker Hub
+        run: |
+          if [ -z "$DOCKER_PULL_USER" ] || [ -z "$DOCKER_PULL_TOKEN" ]; then
+            echo "Docker Hub credentials not available - proceeding with unauthenticated pulls"
+            exit 0
+          fi
+          echo "$DOCKER_PULL_TOKEN" | docker login -u "$DOCKER_PULL_USER" --password-stdin
 
       - name: Run front-end and back-end setup in parallel
         run: |
