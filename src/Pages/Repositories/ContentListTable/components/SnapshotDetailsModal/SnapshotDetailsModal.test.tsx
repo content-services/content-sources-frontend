@@ -44,10 +44,10 @@ describe('SnapshotDetailsModal', () => {
     });
   });
 
-  const clickModalClose = async (user: ReturnType<typeof userEvent.setup>) => {
+  const clickModalHeaderClose = async (user: ReturnType<typeof userEvent.setup>) => {
     const dialog = screen.getByRole('dialog');
-    const [headerClose] = within(dialog).getAllByRole('button', { name: 'Close' });
-    await user.click(headerClose);
+    // Footer uses aria-label "Close snapshot detail"; PatternFly header close stays "Close".
+    await user.click(within(dialog).getByRole('button', { name: 'Close' }));
   };
 
   it('navigates back to repositories on close without origin query by default', async () => {
@@ -55,7 +55,7 @@ describe('SnapshotDetailsModal', () => {
 
     render(<SnapshotDetailsModal />);
 
-    await clickModalClose(user);
+    await clickModalHeaderClose(user);
 
     expect(mockNavigate).toHaveBeenCalledWith('/app/repositories');
   });
@@ -68,7 +68,7 @@ describe('SnapshotDetailsModal', () => {
 
     render(<SnapshotDetailsModal />);
 
-    await clickModalClose(user);
+    await clickModalHeaderClose(user);
 
     expect(mockNavigate).toHaveBeenCalledWith('/app/repositories?origin=red_hat');
   });
@@ -89,7 +89,9 @@ describe('SnapshotDetailsModal', () => {
     render(<SnapshotDetailsModal />);
 
     await waitFor(() => {
-      expect(screen.getByText('Errata tab body')).toBeInTheDocument();
+      expect(
+        screen.getByRole('tabpanel', { name: 'Snapshot errata detail tab' }),
+      ).toBeInTheDocument();
     });
   });
 

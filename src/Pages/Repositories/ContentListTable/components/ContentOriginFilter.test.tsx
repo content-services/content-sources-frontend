@@ -43,7 +43,7 @@ describe('ContentOriginFilter', () => {
       />,
     );
 
-    await user.click(screen.getByText('Custom'));
+    await user.click(screen.getByRole('button', { name: 'Custom' }));
 
     expect(setContentOrigin).toHaveBeenCalled();
     const updater = setContentOrigin.mock.calls[0][0] as (prev: ContentOrigin[]) => ContentOrigin[];
@@ -63,7 +63,7 @@ describe('ContentOriginFilter', () => {
       />,
     );
 
-    await user.click(screen.getByText('Custom'));
+    await user.click(screen.getByRole('button', { name: 'Custom' }));
 
     const updater = setContentOrigin.mock.calls[0][0] as (prev: ContentOrigin[]) => ContentOrigin[];
     expect(updater([ContentOrigin.EXTERNAL, ContentOrigin.UPLOAD, ContentOrigin.REDHAT])).toEqual([
@@ -79,7 +79,7 @@ describe('ContentOriginFilter', () => {
       <ContentOriginFilter contentOrigin={[]} setContentOrigin={setContentOrigin} />,
     );
 
-    await user.click(screen.getByText('Red Hat'));
+    await user.click(screen.getByRole('button', { name: 'Red Hat' }));
 
     let updater = setContentOrigin.mock.calls[0][0] as (prev: ContentOrigin[]) => ContentOrigin[];
     expect(updater([])).toEqual([ContentOrigin.REDHAT]);
@@ -93,7 +93,7 @@ describe('ContentOriginFilter', () => {
       />,
     );
 
-    await user.click(screen.getByText('Red Hat'));
+    await user.click(screen.getByRole('button', { name: 'Red Hat' }));
 
     updater = setContentOrigin.mock.calls[0][0] as (prev: ContentOrigin[]) => ContentOrigin[];
     expect(updater([ContentOrigin.REDHAT])).toEqual([]);
@@ -109,7 +109,7 @@ describe('ContentOriginFilter', () => {
 
     render(<ContentOriginFilter contentOrigin={[]} setContentOrigin={setContentOrigin} />);
 
-    await user.click(screen.getByText('EPEL'));
+    await user.click(screen.getByRole('button', { name: 'EPEL' }));
 
     const addCommunity = setContentOrigin.mock.calls[0][0] as (
       prev: ContentOrigin[],

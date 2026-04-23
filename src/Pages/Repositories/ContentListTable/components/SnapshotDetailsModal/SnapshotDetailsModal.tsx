@@ -118,7 +118,12 @@ export default function SnapshotDetailsModal() {
         </Stack>
       </InnerScrollContainer>
       <ModalFooter>
-        <Button key='close' variant='secondary' onClick={onClose}>
+        <Button
+          key='close'
+          variant='secondary'
+          onClick={onClose}
+          aria-label='Close snapshot detail'
+        >
           Close
         </Button>
       </ModalFooter>
