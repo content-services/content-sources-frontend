@@ -57,7 +57,7 @@ const RepoConfig = ({ repoUUID, snapUUID, latest }: Props) => {
             </Icon>
           }
           ouiaId='repo_config_file_copy_button'
-          label='repo_config_file_copy_button'
+          aria-label='Copy repository config'
           variant='link'
           className={classes.link}
           onClick={() => copyConfigFile()}
@@ -72,7 +72,7 @@ const RepoConfig = ({ repoUUID, snapUUID, latest }: Props) => {
             </Icon>
           }
           ouiaId='repo_config_file_download_button'
-          label='repo_config_file_download_button'
+          aria-label='Download repository config'
           variant='link'
           className={classes.link}
           onClick={() => downloadConfigFile()}
