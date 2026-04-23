@@ -47,10 +47,9 @@ test.describe('Use Snapshot Config', () => {
       const snapshotsTable = snapshotsModal.getByRole('grid', { name: 'snapshot list table' });
       const firstSnapshotRow = snapshotsTable.locator('tbody tr').first();
 
-      // Find the copy button within the first row's config column
-      const copy_to_clipboard_button = firstSnapshotRow
-        .getByRole('button')
-        .and(firstSnapshotRow.locator('[label="repo_config_file_copy_button"]'));
+      const copy_to_clipboard_button = firstSnapshotRow.getByRole('button', {
+        name: 'Copy repository config',
+      });
       await copy_to_clipboard_button.click();
 
       let clipboardText = '';
@@ -61,10 +60,9 @@ test.describe('Use Snapshot Config', () => {
         })
         .not.toBe('');
 
-      // Find the download button within the first row's config column
-      const download_button = firstSnapshotRow
-        .getByRole('button')
-        .and(firstSnapshotRow.locator('[label="repo_config_file_download_button"]'));
+      const download_button = firstSnapshotRow.getByRole('button', {
+        name: 'Download repository config',
+      });
       const [download] = await Promise.all([
         page.waitForEvent('download'), // Wait for the download event
         download_button.click(),
