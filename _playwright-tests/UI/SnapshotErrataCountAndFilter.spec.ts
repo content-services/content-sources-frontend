@@ -216,7 +216,7 @@ test.describe('Snapshot Errata Count and Filter', () => {
       const snapshotDetailModal = page.getByRole('dialog', { name: 'Snapshot detail' });
       await snapshotDetailModal
         .getByRole('contentinfo')
-        .getByRole('button', { name: 'Close' })
+        .getByRole('button', { name: 'Close snapshot detail' })
         .click();
       await expect(snapshotDetailModal).toBeHidden();
     });
