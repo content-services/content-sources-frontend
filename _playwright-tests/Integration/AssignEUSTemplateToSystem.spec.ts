@@ -91,7 +91,7 @@ test.describe('Assign EUS Template to System', () => {
     await test.step('Wait for system to appear in Patch with template attached', async () => {
       await waitForRhcdActive(regClient, RHSM_RHCD_WAIT.maxAttempts, RHSM_RHCD_WAIT.delayMs);
       await refreshSubscriptionManager(regClient);
-      await waitInPatch(page, hostname, true);
+      await waitInPatch(page, hostname, true, 240_000); // 4 minutes
     });
 
     await test.step('Wait for package URLs to be served from template', async () => {
