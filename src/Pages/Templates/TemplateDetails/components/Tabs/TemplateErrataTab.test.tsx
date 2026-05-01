@@ -58,6 +58,6 @@ it('expect TemplateErrataTab to render blank state', async () => {
 
   expect(queryByText('No advisories')).toBeInTheDocument();
   expect(
-    queryByText('You may need to add repositories that contain advisories.'),
+    queryByText('None of the added repositories contain advisories.'),
   ).toBeInTheDocument();
 });
