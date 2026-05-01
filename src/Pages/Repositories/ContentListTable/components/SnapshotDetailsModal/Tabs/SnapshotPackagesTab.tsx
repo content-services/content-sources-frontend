@@ -1,81 +1,60 @@
+import { Pagination, OnSetPage, OnPerPageSelect } from '@patternfly/react-core';
 import {
-  Grid,
-  InputGroup,
-  InputGroupItem,
-  TextInput,
-  Pagination,
-  Flex,
-  FlexItem,
-  PaginationVariant,
-} from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
-import Hide from 'components/Hide/Hide';
+  DataView,
+  DataViewState,
+  DataViewTable,
+  DataViewToolbar,
+  DataViewTextFilter,
+  useDataViewFilters,
+} from '@patternfly/react-data-view';
+import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
+import { SkeletonTableBody } from '@patternfly/react-component-groups';
+import EmptyTableDataView from 'components/EmptyTableDataView/EmptyTableDataView';
 import { ContentOrigin } from 'services/Content/ContentApi';
-import { createUseStyles } from 'react-jss';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useDebounce from 'Hooks/useDebounce';
 import useRootPath from 'Hooks/useRootPath';
 import { useAppContext } from 'middleware/AppContext';
 import { useGetSnapshotPackagesQuery } from 'services/Content/ContentQueries';
-import PackagesTable from 'components/SharedTables/PackagesTable';
+import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 
-const useStyles = createUseStyles({
-  mainContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-  },
-  topContainer: {
-    justifyContent: 'space-between',
-    padding: '16px 24px 16px 0',
-    height: 'fit-content',
-  },
-  bottomContainer: {
-    justifyContent: 'space-between',
-  },
-});
+interface SnapshotPackagesFilters {
+  search: string;
+}
 
+const initialFilters: SnapshotPackagesFilters = { search: '' };
 const perPageKey = 'snapshotPackagePerPage';
+const columnHeaders = ['Name', 'Version', 'Release', 'Architecture'];
 
 export function SnapshotPackagesTab() {
-  const classes = useStyles();
   const { contentOrigin } = useAppContext();
-
   const { snapshotUUID = '' } = useParams();
   const rootPath = useRootPath();
   const navigate = useNavigate();
+
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [searchQuery, setSearchQuery] = useState('');
 
-  const debouncedSearchQuery = useDebounce(searchQuery, !searchQuery ? 0 : 500);
+  const { filters, onSetFilters, clearAllFilters } = useDataViewFilters<SnapshotPackagesFilters>({
+    initialFilters,
+  });
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearchQuery]);
+  const debouncedSearch = useDebounce(filters.search, !filters.search ? 0 : 500);
 
   const {
     isLoading,
     isFetching,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetSnapshotPackagesQuery(snapshotUUID, page, perPage, debouncedSearchQuery);
+  } = useGetSnapshotPackagesQuery(snapshotUUID, page, perPage, debouncedSearch);
 
   useEffect(() => {
     if (isError) {
       onClose();
     }
   }, [isError]);
-
-  const onSetPage = (_, newPage) => setPage(newPage);
-
-  const onPerPageSelect = (_, newPerPage, newPage) => {
-    setPerPage(newPerPage);
-    setPage(newPage);
-    localStorage.setItem(perPageKey, newPerPage.toString());
-  };
 
   const onClose = () =>
     navigate(
@@ -92,59 +71,102 @@ export function SnapshotPackagesTab() {
 
   const fetchingOrLoading = isFetching || isLoading;
 
-  const loadingOrZeroCount = fetchingOrLoading || !count;
+  const [activeState, setActiveState] = useState<DataViewState | undefined>(DataViewState.loading);
+
+  useEffect(() => {
+    if (fetchingOrLoading) {
+      setActiveState(DataViewState.loading);
+    } else {
+      setActiveState(count === 0 ? DataViewState.empty : undefined);
+    }
+  }, [count, fetchingOrLoading]);
+
+  const onSetPage: OnSetPage = (_event, newPage) => setPage(newPage);
+
+  const onPerPageSelect: OnPerPageSelect = (_event, newPerPage, newPage) => {
+    setPerPage(newPerPage);
+    setPage(newPage);
+    localStorage.setItem(perPageKey, newPerPage.toString());
+  };
+
+  const clearAllFiltersAndResetPage = useCallback(() => {
+    clearAllFilters();
+    setPage(1);
+  }, [clearAllFilters]);
+
+  const rows = useMemo(
+    () => packagesList.map((pkg) => [pkg.name, pkg.version, pkg.release, pkg.arch]),
+    [packagesList],
+  );
+
+  const paginationProps = {
+    itemCount: count,
+    perPage,
+    page,
+    onSetPage,
+    onPerPageSelect,
+  };
+
   return (
-    <Grid className={classes.mainContainer}>
-      <InputGroup className={classes.topContainer}>
-        <InputGroupItem>
-          <TextInput
-            id='search'
-            ouiaId='name_search'
-            placeholder='Filter by name'
-            value={searchQuery}
-            type='search'
-            customIcon={<SearchIcon />}
-            onChange={(_event, value) => setSearchQuery(value)}
-          />
-        </InputGroupItem>
-        <Hide hide={isLoading}>
+    <DataView activeState={activeState}>
+      <DataViewToolbar
+        className={spacing.ptMd}
+        clearAllFilters={clearAllFiltersAndResetPage}
+        filters={
+          <DataViewFilters
+            onChange={(_key, newValues) => {
+              onSetFilters(newValues);
+              setPage(1);
+            }}
+            values={filters}
+          >
+            <DataViewTextFilter
+              filterId='search'
+              ouiaId='name_search_snapshot_packages'
+              title='Name'
+              placeholder='Filter by name'
+            />
+          </DataViewFilters>
+        }
+        pagination={
           <Pagination
             id='top-pagination-id'
             widgetId='topPaginationWidgetId'
-            itemCount={count}
-            perPage={perPage}
-            page={page}
-            onSetPage={onSetPage}
+            {...paginationProps}
             isCompact
-            onPerPageSelect={onPerPageSelect}
           />
-        </Hide>
-      </InputGroup>
-      <PackagesTable
-        packagesList={packagesList}
-        isFetchingOrLoading={fetchingOrLoading}
-        isLoadingOrZeroCount={loadingOrZeroCount}
-        clearSearch={() => setSearchQuery('')}
-        perPage={perPage}
-        search={debouncedSearchQuery}
+        }
       />
-      <Flex className={classes.bottomContainer}>
-        <FlexItem />
-        <FlexItem>
-          <Hide hide={isLoading}>
-            <Pagination
-              id='bottom-pagination-id'
-              widgetId='bottomPaginationWidgetId'
-              itemCount={count}
-              perPage={perPage}
-              page={page}
-              onSetPage={onSetPage}
-              variant={PaginationVariant.bottom}
-              onPerPageSelect={onPerPageSelect}
+      <DataViewTable
+        aria-label='snapshot packages table'
+        ouiaId='snapshot_packages_table'
+        variant='compact'
+        columns={columnHeaders}
+        rows={rows}
+        bodyStates={{
+          empty: (
+            <EmptyTableDataView
+              ouiaId='snapshot_packages_table'
+              itemName='packages'
+              variant={filters.search ? 'filtered' : 'zero'}
+              colSpan={columnHeaders.length}
+              onClearFilters={clearAllFiltersAndResetPage}
+              zeroBody='No packages found in this snapshot.'
             />
-          </Hide>
-        </FlexItem>
-      </Flex>
-    </Grid>
+          ),
+          loading: <SkeletonTableBody rowsCount={perPage} columnsCount={columnHeaders.length} />,
+        }}
+      />
+      <DataViewToolbar
+        pagination={
+          <Pagination
+            id='bottom-pagination-id'
+            widgetId='bottomPaginationWidgetId'
+            {...paginationProps}
+            variant='bottom'
+          />
+        }
+      />
+    </DataView>
   );
 }
