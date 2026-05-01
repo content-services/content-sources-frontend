@@ -1,79 +1,96 @@
+import { Pagination, OnSetPage, OnPerPageSelect } from '@patternfly/react-core';
 import {
-  Grid,
-  InputGroup,
-  Pagination,
-  Flex,
-  FlexItem,
-  PaginationVariant,
-} from '@patternfly/react-core';
-import Hide from 'components/Hide/Hide';
+  DataView,
+  DataViewState,
+  DataViewToolbar,
+  DataViewTextFilter,
+  DataViewCheckboxFilter,
+  useDataViewFilters,
+  useDataViewSort,
+} from '@patternfly/react-data-view';
+import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
+import type { DataViewFilterOption } from '@patternfly/react-data-view/dist/cjs/DataViewFilters';
 import { ContentOrigin } from 'services/Content/ContentApi';
-import { createUseStyles } from 'react-jss';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import useDebounce from 'Hooks/useDebounce';
 import useRootPath from 'Hooks/useRootPath';
 import { useAppContext } from 'middleware/AppContext';
 import { useGetSnapshotErrataQuery } from 'services/Content/ContentQueries';
 import AdvisoriesTable from 'components/SharedTables/AdvisoriesTable';
-import SnapshotErrataFilters from './SnapshotErrataFilters';
 import { ThProps } from '@patternfly/react-table';
+import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 
-const useStyles = createUseStyles({
-  mainContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-  },
-  topContainer: {
-    justifyContent: 'space-between',
-    padding: '16px 24px 16px 0',
-    height: 'fit-content',
-    display: 'flex',
-    flexDirection: 'row',
-  },
-  bottomContainer: {
-    justifyContent: 'space-between',
-  },
-  alignTop: {
-    alignItems: 'baseline',
-  },
-});
+interface SnapshotErrataFilters {
+  search: string;
+  type: string[];
+  severity: string[];
+}
 
+const initialFilters: SnapshotErrataFilters = { search: '', type: [], severity: [] };
 const perPageKey = 'snapshotErrataPerPage';
-const defaultFilterState = { search: '', type: [] as string[], severity: [] as string[] };
+
+const typeFilterOptions: DataViewFilterOption[] = [
+  { label: 'Security', value: 'Security' },
+  { label: 'Bugfix', value: 'Bugfix' },
+  { label: 'Enhancement', value: 'Enhancement' },
+  { label: 'Other', value: 'Other' },
+];
+
+const severityFilterOptions: DataViewFilterOption[] = [
+  { label: 'Critical', value: 'Critical' },
+  { label: 'Important', value: 'Important' },
+  { label: 'Moderate', value: 'Moderate' },
+  { label: 'Low', value: 'Low' },
+  { label: 'None', value: 'None' },
+];
+
+const columns = [
+  { name: 'Name', sortAttribute: 'name' },
+  { name: 'Synopsis', sortAttribute: 'synopsis' },
+  { name: 'Type', sortAttribute: 'type' },
+  { name: 'Severity', sortAttribute: 'severity' },
+  { name: 'Publish date', sortAttribute: 'issued_date' },
+];
 
 export function SnapshotErrataTab() {
-  const classes = useStyles();
   const { contentOrigin } = useAppContext();
-
   const { snapshotUUID = '' } = useParams();
   const rootPath = useRootPath();
   const navigate = useNavigate();
+
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
-  const [filterData, setFilterData] = useState(defaultFilterState);
-  const [activeSortIndex, setActiveSortIndex] = useState<number>(-1);
-  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const hasFilters = useMemo(
-    () => !!(filterData.search || filterData.severity.length || filterData.type.length),
-    [filterData],
+  const { filters, onSetFilters, clearAllFilters } = useDataViewFilters<SnapshotErrataFilters>(
+    { initialFilters },
   );
 
-  useEffect(() => {
-    setPage(1);
-  }, [filterData]);
-
-  const columnSortAttributes = ['name', 'synopsis', 'type', 'severity', 'issued_date'];
-
-  const sortString = useMemo(
-    () =>
-      activeSortIndex === -1
-        ? ''
-        : columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
-    [activeSortIndex, activeSortDirection],
+  const debouncedFilters = useDebounce(
+    filters,
+    !filters.search && !filters.type.length && !filters.severity.length ? 0 : 500,
   );
+
+  const { sortBy, direction, onSort } = useDataViewSort({
+    defaultDirection: 'asc',
+  });
+
+  const sortString = useMemo(() => {
+    if (!sortBy || !direction) return '';
+    const column = columns.find((col) => col.name === sortBy);
+    if (!column?.sortAttribute) return '';
+    return `${column.sortAttribute}:${direction}`;
+  }, [sortBy, direction]);
+
+  const getSortParams = (columnIndex: number): ThProps['sort'] => {
+    const activeSortIndex = sortBy ? columns.findIndex((col) => col.name === sortBy) : -1;
+    return {
+      sortBy: { index: activeSortIndex, direction, defaultDirection: 'asc' },
+      onSort: (_event, index, dir) => onSort(_event, columns[index].name, dir),
+      columnIndex,
+    };
+  };
 
   const {
     isLoading,
@@ -84,9 +101,9 @@ export function SnapshotErrataTab() {
     snapshotUUID,
     page,
     perPage,
-    filterData.search,
-    filterData.type,
-    filterData.severity,
+    debouncedFilters.search,
+    debouncedFilters.type,
+    debouncedFilters.severity,
     sortString,
   );
 
@@ -95,14 +112,6 @@ export function SnapshotErrataTab() {
       onClose();
     }
   }, [isError]);
-
-  const onSetPage = (_, newPage) => setPage(newPage);
-
-  const onPerPageSelect = (_, newPerPage, newPage) => {
-    setPerPage(newPerPage);
-    setPage(newPage);
-    localStorage.setItem(perPageKey, newPerPage.toString());
-  };
 
   const onClose = () =>
     navigate(
@@ -119,67 +128,103 @@ export function SnapshotErrataTab() {
 
   const fetchingOrLoading = isFetching || isLoading;
 
-  const loadingOrZeroCount = fetchingOrLoading || !count;
+  const [activeState, setActiveState] = useState<DataViewState | undefined>(DataViewState.loading);
 
-  const sortParams = (columnIndex: number): ThProps['sort'] => ({
-    sortBy: {
-      index: activeSortIndex,
-      direction: activeSortDirection,
-      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
-    },
-    onSort: (_event, index, direction) => {
-      setActiveSortIndex(index);
-      setActiveSortDirection(direction);
-    },
-    columnIndex,
-  });
+  useEffect(() => {
+    if (fetchingOrLoading) {
+      setActiveState(DataViewState.loading);
+    } else {
+      setActiveState(count === 0 ? DataViewState.empty : undefined);
+    }
+  }, [count, fetchingOrLoading]);
+
+  const isFiltered = useMemo(
+    () => !!(filters.search || filters.type.length || filters.severity.length),
+    [filters],
+  );
+
+  const onSetPage: OnSetPage = (_event, newPage) => setPage(newPage);
+
+  const onPerPageSelect: OnPerPageSelect = (_event, newPerPage, newPage) => {
+    setPerPage(newPerPage);
+    setPage(newPage);
+    localStorage.setItem(perPageKey, newPerPage.toString());
+  };
+
+  const clearAllFiltersAndResetPage = useCallback(() => {
+    clearAllFilters();
+    setPage(1);
+  }, [clearAllFilters]);
+
+  const paginationProps = {
+    itemCount: count,
+    perPage,
+    page,
+    onSetPage,
+    onPerPageSelect,
+  };
 
   return (
-    <Grid className={classes.mainContainer}>
-      <InputGroup className={classes.topContainer}>
-        <SnapshotErrataFilters
-          isLoading={isLoading}
-          filterData={filterData}
-          setFilterData={setFilterData}
-        />
-        <Pagination
-          className={classes.alignTop}
-          id='top-pagination-id'
-          widgetId='topPaginationWidgetId'
-          itemCount={count}
-          perPage={perPage}
-          page={page}
-          onSetPage={onSetPage}
-          isCompact
-          onPerPageSelect={onPerPageSelect}
-        />
-      </InputGroup>
-      <AdvisoriesTable
-        hasFilters={hasFilters}
-        errataList={errataList}
-        isFetchingOrLoading={fetchingOrLoading}
-        isLoadingOrZeroCount={loadingOrZeroCount}
-        clearSearch={() => setFilterData(defaultFilterState)}
-        perPage={perPage}
-        sortParams={sortParams}
-      />
-      <Flex className={classes.bottomContainer}>
-        <FlexItem />
-        <FlexItem>
-          <Hide hide={isLoading}>
-            <Pagination
-              id='bottom-pagination-id'
-              widgetId='bottomPaginationWidgetId'
-              itemCount={count}
-              perPage={perPage}
-              page={page}
-              onSetPage={onSetPage}
-              variant={PaginationVariant.bottom}
-              onPerPageSelect={onPerPageSelect}
+    <DataView activeState={activeState}>
+      <DataViewToolbar
+        className={spacing.ptMd}
+        clearAllFilters={clearAllFiltersAndResetPage}
+        filters={
+          <DataViewFilters
+            onChange={(_key, newValues) => {
+              onSetFilters(newValues);
+              setPage(1);
+            }}
+            values={filters}
+          >
+            <DataViewTextFilter
+              filterId='search'
+              ouiaId='name_search_snapshot_errata'
+              title='Name/Synopsis'
+              placeholder='Filter by name/synopsis'
             />
-          </Hide>
-        </FlexItem>
-      </Flex>
-    </Grid>
+            <DataViewCheckboxFilter
+              filterId='type'
+              ouiaId='filter_type_snapshot_errata'
+              title='Type'
+              placeholder='Filter by type'
+              options={typeFilterOptions}
+            />
+            <DataViewCheckboxFilter
+              filterId='severity'
+              ouiaId='filter_severity_snapshot_errata'
+              title='Severity'
+              placeholder='Filter by severity'
+              options={severityFilterOptions}
+            />
+          </DataViewFilters>
+        }
+        pagination={
+          <Pagination
+            id='top-pagination-id'
+            widgetId='topPaginationWidgetId'
+            {...paginationProps}
+            isCompact
+          />
+        }
+      />
+      <AdvisoriesTable
+        hasFilters={isFiltered}
+        errataList={errataList}
+        clearSearch={clearAllFiltersAndResetPage}
+        perPage={perPage}
+        sortParams={getSortParams}
+      />
+      <DataViewToolbar
+        pagination={
+          <Pagination
+            id='bottom-pagination-id'
+            widgetId='bottomPaginationWidgetId'
+            {...paginationProps}
+            variant='bottom'
+          />
+        }
+      />
+    </DataView>
   );
 }
