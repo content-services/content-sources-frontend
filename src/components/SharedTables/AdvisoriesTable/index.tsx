@@ -1,23 +1,29 @@
-import { DataViewTable, DataViewTh, DataViewTrObject } from '@patternfly/react-data-view';
+import { Pagination } from '@patternfly/react-core';
+import {
+  DataView,
+  DataViewState,
+  DataViewTable,
+  DataViewTh,
+  DataViewTrObject,
+  DataViewToolbar,
+  DataViewTextFilter,
+  DataViewCheckboxFilter,
+} from '@patternfly/react-data-view';
+import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
 import { BaseCellProps, ThProps } from '@patternfly/react-table';
 import { SkeletonTableBody } from '@patternfly/react-component-groups';
 import { ErrataItem } from 'services/Content/ContentApi';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { formatDateDDMMMYYYY, reduceStringToCharsWithEllipsis } from 'helpers';
-import SeverityCell from './components/SeverityCell';
+import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import EmptyTableDataView from 'components/EmptyTableDataView/EmptyTableDataView';
 import ErrataTypeCell from './components/ErrataTypeCell';
 import ErrataExpandedContent from './components/ErrataExpandedContent';
-
-interface Props {
-  errataList: ErrataItem[];
-  clearSearch: () => void;
-  perPage: number;
-  sortParams: (columnIndex: number) => ThProps['sort'];
-  hasFilters: boolean;
-}
+import SeverityCell from './components/SeverityCell';
+import { typeFilterOptions, severityFilterOptions } from './constants';
+import type useAdvisoriesTableState from './useAdvisoriesTableState';
 
 const columnHeaders = [
   { name: 'Name', width: 15 },
@@ -40,18 +46,45 @@ const adjustSortForExpandColumn = (sort: ThProps['sort']): ThProps['sort'] => {
   };
 };
 
+interface Props extends ReturnType<typeof useAdvisoriesTableState> {
+  errataList: ErrataItem[];
+  count: number;
+  isFetching: boolean;
+  isLoading: boolean;
+  ouiaIdPrefix: string;
+}
+
 export default function AdvisoriesTable({
   errataList,
-  clearSearch,
+  count,
+  isFetching,
+  isLoading,
+  ouiaIdPrefix,
+  filters,
+  handleFilterChange,
+  clearAllFiltersAndResetPage,
+  isFiltered,
   perPage,
-  sortParams,
-  hasFilters,
+  getSortParams,
+  paginationProps,
 }: Props) {
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
   useDeepCompareEffect(() => {
     if (!isEmpty(expandedRows)) setExpandedRows({});
   }, [errataList]);
+
+  const fetchingOrLoading = isFetching || isLoading;
+
+  const [activeState, setActiveState] = useState<DataViewState | undefined>(DataViewState.loading);
+
+  useEffect(() => {
+    if (fetchingOrLoading) {
+      setActiveState(DataViewState.loading);
+    } else {
+      setActiveState(count === 0 ? DataViewState.empty : undefined);
+    }
+  }, [count, fetchingOrLoading]);
 
   const dataViewColumns: DataViewTh[] = useMemo(
     () => [
@@ -62,12 +95,12 @@ export default function AdvisoriesTable({
           ...(width && { width: width as BaseCellProps['width'] }),
           ...(name !== 'Name' &&
             name !== 'Synopsis' && {
-              sort: adjustSortForExpandColumn(sortParams(index)),
+              sort: adjustSortForExpandColumn(getSortParams(index)),
             }),
         },
       })),
     ],
-    [sortParams],
+    [getSortParams],
   );
 
   const deduped = useMemo(
@@ -143,25 +176,75 @@ export default function AdvisoriesTable({
   const totalColumns = columnHeaders.length + 1;
 
   return (
-    <DataViewTable
-      aria-label='errata table'
-      ouiaId='errata_table'
-      variant='compact'
-      columns={dataViewColumns}
-      rows={rows}
-      bodyStates={{
-        empty: (
-          <EmptyTableDataView
-            ouiaId='errata_table'
-            itemName='advisories'
-            variant={hasFilters ? 'filtered' : 'zero'}
-            colSpan={totalColumns}
-            onClearFilters={clearSearch}
-            zeroBody='None of the added repositories contain advisories.'
+    <DataView activeState={activeState}>
+      <DataViewToolbar
+        className={spacing.ptMd}
+        clearAllFilters={clearAllFiltersAndResetPage}
+        filters={
+          <DataViewFilters onChange={handleFilterChange} values={filters}>
+            <DataViewTextFilter
+              filterId='search'
+              ouiaId={`name_search_${ouiaIdPrefix}`}
+              title='Name/Synopsis'
+              placeholder='Filter by name/synopsis'
+            />
+            <DataViewCheckboxFilter
+              filterId='type'
+              ouiaId={`filter_type_${ouiaIdPrefix}`}
+              title='Type'
+              placeholder='Filter by type'
+              options={typeFilterOptions}
+            />
+            <DataViewCheckboxFilter
+              filterId='severity'
+              ouiaId={`filter_severity_${ouiaIdPrefix}`}
+              title='Severity'
+              placeholder='Filter by severity'
+              options={severityFilterOptions}
+            />
+          </DataViewFilters>
+        }
+        pagination={
+          <Pagination
+            id='top-pagination-id'
+            widgetId='topPaginationWidgetId'
+            itemCount={count}
+            {...paginationProps}
+            isCompact
           />
-        ),
-        loading: <SkeletonTableBody rowsCount={perPage} columnsCount={totalColumns} />,
-      }}
-    />
+        }
+      />
+      <DataViewTable
+        aria-label='errata table'
+        ouiaId='errata_table'
+        variant='compact'
+        columns={dataViewColumns}
+        rows={rows}
+        bodyStates={{
+          empty: (
+            <EmptyTableDataView
+              ouiaId='errata_table'
+              itemName='advisories'
+              variant={isFiltered ? 'filtered' : 'zero'}
+              colSpan={totalColumns}
+              onClearFilters={clearAllFiltersAndResetPage}
+              zeroBody='None of the added repositories contain advisories.'
+            />
+          ),
+          loading: <SkeletonTableBody rowsCount={perPage} columnsCount={totalColumns} />,
+        }}
+      />
+      <DataViewToolbar
+        pagination={
+          <Pagination
+            id='bottom-pagination-id'
+            widgetId='bottomPaginationWidgetId'
+            itemCount={count}
+            {...paginationProps}
+            variant='bottom'
+          />
+        }
+      />
+    </DataView>
   );
 }

@@ -1,73 +1,12 @@
-import {
-  Flex,
-  FlexItem,
-  Grid,
-  InputGroup,
-  Pagination,
-  PaginationVariant,
-} from '@patternfly/react-core';
-
-import { useEffect, useMemo, useState } from 'react';
-import { createUseStyles } from 'react-jss';
 import { useParams } from 'react-router-dom';
-import AdvisoriesTable from 'components/SharedTables/AdvisoriesTable';
 import { useFetchTemplateErrataQuery } from 'services/Templates/TemplateQueries';
-import type { ThProps } from '@patternfly/react-table';
-import SnapshotErrataFilters from 'Pages/Repositories/ContentListTable/components/SnapshotDetailsModal/Tabs/SnapshotErrataFilters';
-import Loader from 'components/Loader';
-
-const useStyles = createUseStyles({
-  description: {
-    paddingTop: '12px', // 4px on the title bottom padding makes this the "standard" 16 total padding
-    paddingBottom: '8px',
-  },
-  mainContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexFlow: 'column nowrap',
-  },
-  topContainer: {
-    justifyContent: 'space-between',
-    padding: '16px 24px',
-    height: 'fit-content',
-  },
-  topContainerWithFilterHeight: { extend: 'topContainer', minHeight: '128px' },
-  bottomContainer: {
-    justifyContent: 'space-between',
-  },
-});
-
-const perPageKey = 'TemplateAdvisoriesPerPage';
-const defaultFilterState = { search: '', type: [] as string[], severity: [] as string[] };
+import useAdvisoriesTableState from 'components/SharedTables/AdvisoriesTable/useAdvisoriesTableState';
+import AdvisoriesTable from 'components/SharedTables/AdvisoriesTable';
 
 export default function TemplateErrataTab() {
-  const classes = useStyles();
-  const { templateUUID: uuid } = useParams();
-  const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(storedPerPage);
-  const [filterData, setFilterData] = useState(defaultFilterState);
-  const [activeSortIndex, setActiveSortIndex] = useState<number>(-1);
-  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
+  const { templateUUID = '' } = useParams();
 
-  const hasFilters = useMemo(
-    () => !!(filterData.search || filterData.severity.length || filterData.type.length),
-    [filterData],
-  );
-
-  useEffect(() => {
-    setPage(1);
-  }, [filterData]);
-
-  const columnSortAttributes = ['name', 'synopsis', 'type', 'severity', 'issued_date'];
-
-  const sortString = useMemo(
-    () =>
-      activeSortIndex === -1
-        ? ''
-        : columnSortAttributes[activeSortIndex] + ':' + activeSortDirection,
-    [activeSortIndex, activeSortDirection],
-  );
+  const tableState = useAdvisoriesTableState('TemplateAdvisoriesPerPage');
 
   const {
     isLoading,
@@ -76,98 +15,32 @@ export default function TemplateErrataTab() {
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
   } = useFetchTemplateErrataQuery(
-    uuid as string,
-    page,
-    perPage,
-    filterData.search,
-    filterData.type,
-    filterData.severity,
-    sortString,
+    templateUUID,
+    tableState.page,
+    tableState.perPage,
+    tableState.debouncedFilters.search,
+    tableState.debouncedFilters.type,
+    tableState.debouncedFilters.severity,
+    tableState.sortString,
   );
 
-  const onSetPage = (_, newPage) => setPage(newPage);
-
-  const onPerPageSelect = (_, newPerPage, newPage) => {
-    setPerPage(newPerPage);
-    setPage(newPage);
-    localStorage.setItem(perPageKey, newPerPage.toString());
-  };
+  if (isError) {
+    throw error;
+  }
 
   const {
     data: errataList = [],
     meta: { count = 0 },
   } = data;
 
-  const fetchingOrLoading = isFetching || isLoading;
-
-  const loadingOrZeroCount = fetchingOrLoading || !count;
-
-  const sortParams = (columnIndex: number): ThProps['sort'] => ({
-    sortBy: {
-      index: activeSortIndex,
-      direction: activeSortDirection,
-      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
-    },
-    onSort: (_event, index, direction) => {
-      setActiveSortIndex(index);
-      setActiveSortDirection(direction);
-    },
-    columnIndex,
-  });
-
-  if (isLoading) {
-    return <Loader />;
-  }
-
-  if (isError) {
-    throw error;
-  }
-
   return (
-    <Grid className={classes.mainContainer}>
-      <InputGroup
-        className={hasFilters ? classes.topContainerWithFilterHeight : classes.topContainer}
-      >
-        <SnapshotErrataFilters
-          isLoading={isLoading}
-          filterData={filterData}
-          setFilterData={setFilterData}
-        />
-        <Pagination
-          id='top-pagination-id'
-          widgetId='topPaginationWidgetId'
-          itemCount={count}
-          perPage={perPage}
-          page={page}
-          onSetPage={onSetPage}
-          isCompact
-          onPerPageSelect={onPerPageSelect}
-        />
-      </InputGroup>
-      <AdvisoriesTable
-        hasFilters={hasFilters}
-        errataList={errataList}
-        isFetchingOrLoading={fetchingOrLoading}
-        isLoadingOrZeroCount={loadingOrZeroCount}
-        clearSearch={() => setFilterData(defaultFilterState)}
-        perPage={perPage}
-        sortParams={sortParams}
-      />
-      <Flex className={classes.bottomContainer}>
-        <FlexItem />
-        <FlexItem>
-          <Pagination
-            id='bottom-pagination-id'
-            widgetId='bottomPaginationWidgetId'
-            itemCount={count}
-            perPage={perPage}
-            page={page}
-            onSetPage={onSetPage}
-            variant={PaginationVariant.bottom}
-            onPerPageSelect={onPerPageSelect}
-          />
-        </FlexItem>
-      </Flex>
-    </Grid>
+    <AdvisoriesTable
+      errataList={errataList}
+      count={count}
+      isFetching={isFetching}
+      isLoading={isLoading}
+      ouiaIdPrefix='template_errata'
+      {...tableState}
+    />
   );
 }
