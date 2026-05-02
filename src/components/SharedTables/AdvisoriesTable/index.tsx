@@ -1,14 +1,13 @@
 import { Pagination } from '@patternfly/react-core';
+import { DataView, DataViewState } from '@patternfly/react-data-view/dist/dynamic/DataView';
 import {
-  DataView,
-  DataViewState,
   DataViewTable,
   DataViewTh,
   DataViewTrObject,
-  DataViewToolbar,
-  DataViewTextFilter,
-  DataViewCheckboxFilter,
-} from '@patternfly/react-data-view';
+} from '@patternfly/react-data-view/dist/dynamic/DataViewTable';
+import { DataViewToolbar } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
+import { DataViewTextFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewTextFilter';
+import { DataViewCheckboxFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewCheckboxFilter';
 import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
 import { BaseCellProps, ThProps } from '@patternfly/react-table';
 import { SkeletonTableBody } from '@patternfly/react-component-groups';

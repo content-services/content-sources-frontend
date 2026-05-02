@@ -1,13 +1,10 @@
 import { Pagination, OnSetPage, OnPerPageSelect } from '@patternfly/react-core';
-import {
-  DataView,
-  DataViewState,
-  DataViewTable,
-  DataViewToolbar,
-  DataViewTextFilter,
-  useDataViewFilters,
-} from '@patternfly/react-data-view';
+import { DataView, DataViewState } from '@patternfly/react-data-view/dist/dynamic/DataView';
+import { DataViewTable } from '@patternfly/react-data-view/dist/dynamic/DataViewTable';
+import { DataViewToolbar } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
+import { DataViewTextFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewTextFilter';
 import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
+import { useDataViewFilters } from '@patternfly/react-data-view/dist/dynamic/Hooks';
 import { SkeletonTableBody } from '@patternfly/react-component-groups';
 import EmptyTableDataView from 'components/EmptyTableDataView/EmptyTableDataView';
 import { ContentOrigin } from 'services/Content/ContentApi';

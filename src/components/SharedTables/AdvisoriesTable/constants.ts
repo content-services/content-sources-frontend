@@ -1,4 +1,4 @@
-import type { DataViewFilterOption } from '@patternfly/react-data-view/dist/cjs/DataViewFilters';
+import type { DataViewFilterOption } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
 
 export interface ErrataFilters {
   search: string;

@@ -1,5 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
-import { useDataViewFilters, useDataViewSort } from '@patternfly/react-data-view';
+import {
+  useDataViewFilters,
+  useDataViewSort,
+} from '@patternfly/react-data-view/dist/dynamic/Hooks';
 import type { OnSetPage, OnPerPageSelect } from '@patternfly/react-core';
 import type { ThProps } from '@patternfly/react-table';
 import useDebounce from 'Hooks/useDebounce';
