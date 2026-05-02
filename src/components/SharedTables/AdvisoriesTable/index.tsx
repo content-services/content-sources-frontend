@@ -185,8 +185,8 @@ export default function AdvisoriesTable({
             <DataViewTextFilter
               filterId='search'
               ouiaId={`name_search_${ouiaIdPrefix}`}
-              title='Name/Synopsis'
-              placeholder='Filter by name/synopsis'
+              title='Name'
+              placeholder='Filter by name or synopsis'
             />
             <DataViewCheckboxFilter
               filterId='type'
