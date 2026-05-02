@@ -63,6 +63,7 @@ export default function AdvisoriesTable({
   filters,
   handleFilterChange,
   clearAllFiltersAndResetPage,
+  filtersActiveAttributeResetKey,
   isFiltered,
   perPage,
   getSortParams,
@@ -183,6 +184,7 @@ export default function AdvisoriesTable({
         filters={
           <DataViewFilters onChange={handleFilterChange} values={filters}>
             <DataViewTextFilter
+              key={`search-${filtersActiveAttributeResetKey}`}
               filterId='search'
               ouiaId={`name_search_${ouiaIdPrefix}`}
               title='Name'

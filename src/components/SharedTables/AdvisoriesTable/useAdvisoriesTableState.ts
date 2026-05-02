@@ -57,8 +57,11 @@ export default function useAdvisoriesTableState(perPageKey: string) {
     localStorage.setItem(perPageKey, newPerPage.toString());
   };
 
+  const [filtersActiveAttributeResetKey, setFiltersActiveAttributeResetKey] = useState(0);
+
   const clearAllFiltersAndResetPage = useCallback(() => {
     clearAllFilters();
+    setFiltersActiveAttributeResetKey((current) => current + 1);
     setPage(1);
   }, [clearAllFilters]);
 
@@ -86,6 +89,7 @@ export default function useAdvisoriesTableState(perPageKey: string) {
     getSortParams,
     isFiltered,
     clearAllFiltersAndResetPage,
+    filtersActiveAttributeResetKey,
     handleFilterChange,
     paginationProps,
   };
