@@ -1,9 +1,10 @@
-import { Content, Flex, FlexItem, Grid, Stack } from '@patternfly/react-core';
+import { Content, Flex, FlexItem } from '@patternfly/react-core';
 import { ExpandableRowContent } from '@patternfly/react-table';
 import text from '@patternfly/react-styles/css/utilities/Text/text';
 import { formatDateDDMMMYYYY, formatDescription } from 'helpers';
 import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
 import RebootStatus from './RebootStatus';
+import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 
 interface Props {
   errataId: string;
@@ -20,35 +21,32 @@ export default function ErrataExpandedContent({
 }: Props) {
   return (
     <ExpandableRowContent>
-      <Stack hasGutter>
-        <Flex direction={{ default: 'row' }}>
-          <FlexItem>
-            <span className={text.fontWeightBold}>Updated date</span>
-            <Content component='p'>
-              {updatedDate ? formatDateDDMMMYYYY(updatedDate) : 'N/A'}
-            </Content>
-          </FlexItem>
-        </Flex>
+      <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }} className={spacing.pyLg}>
+        <FlexItem>
+          <span className={text.fontWeightBold}>Updated date</span>
+          <Content component='p'>{updatedDate ? formatDateDDMMMYYYY(updatedDate) : 'N/A'}</Content>
+        </FlexItem>
 
-        <Grid>
+        <FlexItem>
           <span className={text.fontWeightBold}>Description</span>
           <Content component='p' style={{ whiteSpace: 'pre-line' }}>
             {formatDescription(description)}
           </Content>
-        </Grid>
+        </FlexItem>
 
-        <Grid>
-          <span className={text.fontWeightBold}>Reboot</span>
+        <FlexItem>
           <RebootStatus rebootSuggested={rebootSuggested} />
-        </Grid>
+        </FlexItem>
 
         {errataId.startsWith('RH') ? (
-          <UrlWithExternalIcon
-            href={`https://access.redhat.com/errata/${errataId}`}
-            customText='View packages and errata at access.redhat.com'
-          />
+          <FlexItem>
+            <UrlWithExternalIcon
+              href={`https://access.redhat.com/errata/${errataId}`}
+              customText='View packages and errata at access.redhat.com'
+            />
+          </FlexItem>
         ) : null}
-      </Stack>
+      </Flex>
     </ExpandableRowContent>
   );
 }
