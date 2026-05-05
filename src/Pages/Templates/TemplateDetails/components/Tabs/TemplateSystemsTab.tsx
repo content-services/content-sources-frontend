@@ -108,13 +108,17 @@ export default function TemplateSystemsTab() {
     [activeSortIndex, activeSortDirection],
   );
 
-  const { hasCompatibleSystems, isFetchingCompatibility, isCompatibilityError } =
-    useCompatibleSystems(uuid);
+  const {
+    hasCompatibleSystems,
+    isFetchingCompatibility,
+    isCompatibilityError,
+    compatibilityError,
+  } = useCompatibleSystems(uuid);
 
   const {
-    isLoading,
-    error,
-    isError,
+    isTemplateSystemsLoading,
+    templateSystemsError,
+    isTemplateSystemsError,
     data = { data: [], meta: { total_items: 0, limit: 20, offset: 0 } },
   } = useListSystemsByTemplateId(uuid, page, perPage, debouncedSearchQuery, sortString);
 
@@ -125,6 +129,13 @@ export default function TemplateSystemsTab() {
     data: systemsList = [],
     meta: { total_items = 0 },
   } = data;
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(total_items / perPage));
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [page, perPage, setPage, total_items]);
 
   const allSelected = useMemo(
     () => systemsList.every(({ inventory_id }) => selectedList.has(inventory_id)),
@@ -166,9 +177,7 @@ export default function TemplateSystemsTab() {
     localStorage.setItem(perPageKey, newPerPage.toString());
   };
 
-  const loadingOrDeleting = isLoading || isDeleting;
-
-  const errorState = isError || isCompatibilityError;
+  const loadingOrDeleting = isTemplateSystemsLoading || isDeleting;
 
   const sortParams = (columnIndex: number): ThProps['sort'] | undefined =>
     columnSortAttributes[columnIndex]
@@ -191,12 +200,12 @@ export default function TemplateSystemsTab() {
   const missingRequirements =
     rbac?.templateWrite && !hasRHELSubscription ? 'subscription (RHEL)' : 'permission';
 
-  if (isLoading || isFetchingCompatibility) {
+  if (isTemplateSystemsLoading || isFetchingCompatibility) {
     return <Loader />;
   }
 
-  if (errorState) {
-    throw error;
+  if (isTemplateSystemsError || isCompatibilityError) {
+    throw templateSystemsError ?? compatibilityError;
   }
 
   return (
@@ -286,7 +295,7 @@ export default function TemplateSystemsTab() {
                       id='addSystemsButton'
                       ouiaId='add_systems'
                       variant='primary'
-                      isDisabled={isLoading}
+                      isDisabled={isTemplateSystemsLoading}
                       onClick={() => {
                         const method = hasCompatibleSystems
                           ? '' // If there are some registered systems, open the system list view
