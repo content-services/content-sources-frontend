@@ -1,0 +1,59 @@
+name: Jira Ticket Linker
+
+on:
+  pull_request_target:
+    types: [opened, edited]
+
+jobs:
+  add-jira-link:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Link Jira Ticket
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const branchName = context.payload.pull_request.head.ref;
+            const body = context.payload.pull_request.body || "";
+            
+            // Regex to catch HMS- or RHINENG- followed by numbers
+            const jiraRegex = /((?:HMS|RHINENG)-\d+)/gi;
+            const titleMatches = title.match(jiraRegex) || [];
+            const branchMatches = branchName.match(jiraRegex) || [];
+            const allMatches = [...titleMatches, ...branchMatches];
+
+            if (allMatches.length > 0) {
+              const uniqueTickets = [...new Set(allMatches.map(t => t.toUpperCase()))];
+              
+              const startMarker = "<!-- JIRA_LINKS_START -->";
+              const endMarker = "<!-- JIRA_LINKS_END -->";
+              
+              let linksSection = `${startMarker}\n\n---\n### 🔗 Jira Reference\n`;
+              uniqueTickets.forEach(ticket => {
+                linksSection += `* [${ticket}](https://redhat.atlassian.net/browse/${ticket})\n`;
+              });
+              linksSection += `\n${endMarker}`;
+
+              let newBody = body;
+              
+              if (body.includes(startMarker) && body.includes(endMarker)) {
+                // Surgical replacement: only swap the content between the markers
+                const replaceRegex = new RegExp(`${startMarker}[\\s\\S]*${endMarker}`);
+                newBody = body.replace(replaceRegex, linksSection);
+              } else {
+                // First time adding it: append to the bottom of your description
+                newBody = body.trim() ? `${body.trim()}\n\n${linksSection}` : linksSection;
+              }
+
+              // Only send the update to GitHub if the body actually changed
+              if (newBody !== body) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: newBody
+                });
+              }
+            }
