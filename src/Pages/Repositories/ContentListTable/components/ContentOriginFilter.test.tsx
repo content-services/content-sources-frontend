@@ -10,7 +10,6 @@ jest.mock('middleware/AppContext', () => ({
 
 const defaultFeatures = {
   snapshots: { accessible: true },
-  communityrepos: { enabled: false },
 };
 
 describe('ContentOriginFilter', () => {
@@ -99,13 +98,9 @@ describe('ContentOriginFilter', () => {
     expect(updater([ContentOrigin.REDHAT])).toEqual([]);
   });
 
-  it('toggles EPEL when community repositories are enabled', async () => {
+  it('toggles EPEL origin', async () => {
     const user = userEvent.setup();
     const setContentOrigin = jest.fn();
-
-    (useAppContext as jest.Mock).mockReturnValue({
-      features: { ...defaultFeatures, communityrepos: { enabled: true } },
-    });
 
     render(<ContentOriginFilter contentOrigin={[]} setContentOrigin={setContentOrigin} />);
 
