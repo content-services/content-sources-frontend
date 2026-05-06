@@ -540,6 +540,15 @@ const ContentListTable = () => {
     activeState === DataViewState.loading ||
     areNoSelectableRows;
 
+  const deleteRepoText = useMemo(() => {
+    const numberOfReposChecked = pageSelectionCount;
+    const text =
+      numberOfReposChecked <= 1
+        ? 'Delete repository'
+        : `Delete ${numberOfReposChecked} repositories`;
+    return text;
+  }, [pageSelectionCount]);
+
   return (
     <>
       <DataView
@@ -699,8 +708,8 @@ const ContentListTable = () => {
                       (isCommunityAndCustom && areNoSelectableRows)
                     }
                     atLeastOneRepoChecked={pageSelectionCount > 0}
-                    numberOfReposChecked={pageSelectionCount}
-                    toggleOuiaId='repositories-kebab-toggle'
+                    text={deleteRepoText}
+                    toggleOuiaId='custom_repositories_kebab_toggle'
                   />
                 </ConditionalTooltip>
               </FlexItem>

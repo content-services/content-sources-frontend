@@ -186,6 +186,15 @@ const PopularRepositoriesTable = () => {
     [checkedRepositoriesToAdd],
   );
 
+  const deleteRepoText = useMemo(() => {
+    const numberOfReposChecked = checkedRepositoriesToDelete.size;
+    const text =
+      numberOfReposChecked <= 1
+        ? 'Delete repository'
+        : `Delete ${numberOfReposChecked} repositories`;
+    return text;
+  }, [checkedRepositoriesToDelete]);
+
   const areAllReposSelected = useMemo(
     () =>
       data.data.every((repo) => {
@@ -399,9 +408,9 @@ const PopularRepositoriesTable = () => {
                   >
                     <DeleteKebab
                       atLeastOneRepoChecked={atLeastOneRepoToDeleteChecked}
-                      numberOfReposChecked={checkedRepositoriesToDelete.size}
                       toggleOuiaId='popular_repositories_kebab_toggle'
                       isDisabled={!rbac?.repoWrite}
+                      text={deleteRepoText}
                     />
                   </ConditionalTooltip>
                 </FlexItem>
