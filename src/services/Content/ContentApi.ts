@@ -188,6 +188,20 @@ export interface PackageItem {
   version: string;
 }
 
+export type PackageItemWithUUID = PackageItem & {
+  uuid: string;
+};
+
+export function hasPackageUUID(pkg: PackageItem | PackageItemWithUUID): pkg is PackageItemWithUUID {
+  return (
+    typeof pkg === 'object' &&
+    pkg !== null &&
+    'uuid' in pkg &&
+    typeof (pkg as PackageItemWithUUID).uuid === 'string' &&
+    (pkg as PackageItemWithUUID).uuid.length > 0
+  );
+}
+
 export interface ErrataItem {
   id: string;
   errata_id: string;
@@ -201,6 +215,12 @@ export interface ErrataItem {
   reboot_suggested: boolean;
   cves: string[];
 }
+
+export type PackagesWithUUIDResponse = {
+  data: PackageItemWithUUID[];
+  links: Links;
+  meta: Meta;
+};
 
 export type PackagesResponse = {
   data: PackageItem[];
@@ -460,7 +480,7 @@ export const getPackages: (
   limit: number,
   search: string,
   sortBy?: string,
-) => Promise<PackagesResponse> = async (
+) => Promise<PackagesWithUUIDResponse> = async (
   uuid: string,
   page: number,
   limit: number,
