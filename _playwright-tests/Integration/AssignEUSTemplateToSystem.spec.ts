@@ -5,6 +5,7 @@ import {
   expect,
   waitInPatch,
   ensureValidToken,
+  isInInventory,
 } from 'test-utils';
 
 import { RHSMClient, waitForRhcdActive, refreshSubscriptionManager } from './helpers/rhsmClient';
@@ -91,10 +92,19 @@ test.describe('Assign EUS Template to System', () => {
       hostname = await setupSystemWithTemplate({ regClient, templateName, activationKey, orgId });
     });
 
+    await test.step('Wait for system to be in inventory', async () => {
+      await expect
+        .poll(async () => await isInInventory(page, hostname), {
+          message: 'System not found in inventory',
+          timeout: 4 * 60 * 1000, // 4 minutes
+        })
+        .toBeTruthy();
+    });
+
     await test.step('Wait for system to appear in Patch with template attached', async () => {
       await waitForRhcdActive(regClient, RHSM_RHCD_WAIT.maxAttempts, RHSM_RHCD_WAIT.delayMs);
       await refreshSubscriptionManager(regClient);
-      await waitInPatch(page, hostname, true, 8 * 60 * 1000); // 8 minutes
+      await waitInPatch(page, hostname, true, 12 * 60 * 1000); // 12 minutes
     });
 
     await test.step('Wait for package URLs to be served from template', async () => {
