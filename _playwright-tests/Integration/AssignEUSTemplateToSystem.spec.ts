@@ -5,7 +5,7 @@ import {
   expect,
   waitInPatch,
   ensureValidToken,
-  isInInventory,
+  getTemplateUuidByName,
 } from 'test-utils';
 
 import { RHSMClient, waitForRhcdActive, refreshSubscriptionManager } from './helpers/rhsmClient';
@@ -33,6 +33,8 @@ test.describe('Assign EUS Template to System', () => {
   const regClient = new RHSMClient(`AssignEUSTemplateTest-${randomName()}`);
 
   let hostname: string;
+  /** Same identifier RegisterAndAssignSystemViaAPI passes to `rhc connect --content-template` (UUID, not display name). */
+  let contentTemplateArg: string;
 
   test('Create EUS template and assign it to a RHEL 9.6 system', async ({
     page,
@@ -41,8 +43,6 @@ test.describe('Assign EUS Template to System', () => {
   }) => {
     // Increase timeout for CI environment because template validation can take up to 11 minutes
     test.setTimeout(900000); // 15 minutes
-
-    void client; // Pull in fixture so Undici fetch dispatcher is configured for dynamic API cleanup
 
     await test.step('Set up cleanup for templates and RHSM client', async () => {
       await cleanup.runAndAdd(async () => {
@@ -86,22 +86,26 @@ test.describe('Assign EUS Template to System', () => {
       });
 
       await waitForValidStatus(page, templateName, 660000, 'template should show Valid status');
+
+      const templateUuid = await getTemplateUuidByName(client, templateName);
+      if (templateUuid == null) {
+        throw new Error('template UUID should be resolvable for RHC registration');
+      }
+      contentTemplateArg = templateUuid;
     });
 
     await test.step('Boot RHEL 9.6 system and register with EUS template', async () => {
-      hostname = await setupSystemWithTemplate({ regClient, templateName, activationKey, orgId });
-    });
-
-    await test.step('Wait for system to be in inventory', async () => {
-      await expect
-        .poll(async () => await isInInventory(page, hostname), {
-          message: 'System not found in inventory',
-          timeout: 4 * 60 * 1000, // 4 minutes
-        })
-        .toBeTruthy();
+      hostname = await setupSystemWithTemplate({
+        regClient,
+        templateName: contentTemplateArg,
+        activationKey,
+        orgId,
+      });
     });
 
     await test.step('Wait for system to appear in Patch with template attached', async () => {
+      // Like CanUpdateSystemWithTemplate and RegisterAndAssignSystemViaAPI: rhcd and subscription-manager
+      // refresh run right after registration; waitInPatch then polls inventory and Patch.
       await waitForRhcdActive(regClient, RHSM_RHCD_WAIT.maxAttempts, RHSM_RHCD_WAIT.delayMs);
       await refreshSubscriptionManager(regClient);
       await waitInPatch(page, hostname, true, 12 * 60 * 1000); // 12 minutes
