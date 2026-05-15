@@ -94,6 +94,7 @@ test.describe('Assign EUS Template to System', () => {
     await test.step('Wait for system to appear in Patch with template attached', async () => {
       await waitForRhcdActive(regClient, RHSM_RHCD_WAIT.maxAttempts, RHSM_RHCD_WAIT.delayMs);
       await refreshSubscriptionManager(regClient);
+      await ensureValidToken(page, 'EUS_REPO_TOKEN.json', 9);
       await waitInPatch(page, hostname, true, 8 * 60 * 1000); // 8 minutes
     });
 
@@ -116,6 +117,7 @@ test.describe('Assign EUS Template to System', () => {
     });
 
     await test.step('Install and verify tree package from template', async () => {
+      await ensureValidToken(page, 'EUS_REPO_TOKEN.json', 6);
       await installAndVerifyPackage({ regClient, packageName: 'tree' });
     });
   });
