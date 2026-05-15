@@ -116,6 +116,8 @@ test.describe('Assign EUS Template to System', () => {
     await test.step('Wait for system to appear in Patch with template attached', async () => {
       await waitForRhcdActive(regClient, RHSM_RHCD_WAIT.maxAttempts, RHSM_RHCD_WAIT.delayMs);
       await refreshSubscriptionManager(regClient);
+      await ensureValidToken(page, 'EUS_REPO_TOKEN.json', 8);
+      logEusTokenExpiryAfterEnsure('after boot step, before Patch wait');
       await waitInPatch(page, hostname, true, 8 * 60 * 1000); // 8 minutes
     });
 
