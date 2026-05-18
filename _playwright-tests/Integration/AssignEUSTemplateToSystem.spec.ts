@@ -6,6 +6,7 @@ import {
   waitInPatch,
   ensureValidToken,
   getStoredTokenExpiry,
+  isInInventory,
 } from 'test-utils';
 
 import { RHSMClient, waitForRhcdActive, refreshSubscriptionManager } from './helpers/rhsmClient';
@@ -115,6 +116,10 @@ test.describe('Assign EUS Template to System', () => {
 
     await test.step('Wait for system to appear in Patch with template attached', async () => {
       await waitForRhcdActive(regClient, RHSM_RHCD_WAIT.maxAttempts, RHSM_RHCD_WAIT.delayMs);
+      const inventoryCount = await isInInventory(page, hostname);
+      console.log(
+        `[AssignEUSTemplateToSystem][before sub-man refresh] isInInventory('${hostname}'): ${inventoryCount}`,
+      );
       await refreshSubscriptionManager(regClient);
       await ensureValidToken(page, 'EUS_REPO_TOKEN.json', 14);
       logEusTokenExpiryAfterEnsure('after sub-man refresh, before waitInPatch');
