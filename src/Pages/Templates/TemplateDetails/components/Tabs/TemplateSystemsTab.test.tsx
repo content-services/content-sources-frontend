@@ -45,9 +45,9 @@ jest.mock('middleware/AppContext');
 });
 
 (useListSystemsByTemplateId as jest.Mock).mockImplementation(() => ({
-  isLoading: false,
-  isFetching: false,
-  isError: false,
+  isTemplateSystemsLoading: false,
+  isTemplateSystemsFetching: false,
+  isTemplateSystemsError: false,
   data: {
     data: new Array(15).fill(defaultTemplateSystemsListItem).map((item: IDSystemItem, index) => ({
       ...item,
@@ -105,9 +105,9 @@ it('renders system list as read-only with disabled checkboxes when user lacks wr
 
 it("shows empty state with register action when there are no registered systems that match the template's requirements", async () => {
   (useListSystemsByTemplateId as jest.Mock).mockImplementation(() => ({
-    isLoading: false,
-    isFetching: false,
-    isError: false,
+    isTemplateSystemsLoading: false,
+    isTemplateSystemsFetching: false,
+    isTemplateSystemsError: false,
   }));
 
   (useCompatibleSystems as jest.Mock).mockReturnValue({
@@ -129,9 +129,9 @@ it("shows empty state with register action when there are no registered systems 
 
 it('shows empty state with both assign and register actions when compatible, registered systems are present', async () => {
   (useListSystemsByTemplateId as jest.Mock).mockImplementation(() => ({
-    isLoading: false,
-    isFetching: false,
-    isError: false,
+    isTemplateSystemsLoading: false,
+    isTemplateSystemsFetching: false,
+    isTemplateSystemsError: false,
   }));
 
   (useCompatibleSystems as jest.Mock).mockReturnValue({
