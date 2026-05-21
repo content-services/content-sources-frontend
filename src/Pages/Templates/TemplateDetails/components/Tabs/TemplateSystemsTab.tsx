@@ -55,7 +55,7 @@ const useStyles = createUseStyles({
     justifyContent: 'space-between',
   },
   // Needed to fix styling when "Add repositories" button is disabled
-  ctions: {
+  actions: {
     display: 'flex',
     flexDirection: 'row',
   },
@@ -224,7 +224,7 @@ export default function TemplateSystemsTab() {
                 customIcon={<SearchIcon />}
               />
             </InputGroupItem>
-            <FlexItem className={classes.ctions}>
+            <FlexItem className={classes.actions}>
               <ConditionalTooltip
                 content={`You do not have the required ${missingRequirements} to perform this action.`}
                 show={isMissingRequirements}
