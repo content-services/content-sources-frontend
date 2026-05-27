@@ -63,6 +63,21 @@ const useStyles = createUseStyles({
 
 const perPageKey = 'TemplateSystemsPerPage';
 
+export const calculatePageAfterSystemsDelete = (
+  currentPage: number,
+  perPage: number,
+  totalItems: number,
+  deletedItemsCount: number,
+) => {
+  if (deletedItemsCount <= 0) {
+    return currentPage;
+  }
+
+  const nextTotalItems = Math.max(0, totalItems - deletedItemsCount);
+  const maxPage = Math.max(1, Math.ceil(nextTotalItems / perPage));
+  return Math.min(currentPage, maxPage);
+};
+
 export default function TemplateSystemsTab() {
   const classes = useStyles();
   const queryClient = useQueryClient();
@@ -130,13 +145,6 @@ export default function TemplateSystemsTab() {
     meta: { total_items = 0 },
   } = data;
 
-  useEffect(() => {
-    const maxPage = Math.max(1, Math.ceil(total_items / perPage));
-    if (page > maxPage) {
-      setPage(maxPage);
-    }
-  }, [page, perPage, setPage, total_items]);
-
   const allSelected = useMemo(
     () => systemsList.every(({ inventory_id }) => selectedList.has(inventory_id)),
     [selectedList, systemsList],
@@ -167,8 +175,16 @@ export default function TemplateSystemsTab() {
     }
   };
 
-  const deselectAll = () => {
-    setSelected([]);
+  const handleDeleteSystems = async (items: string[]) => {
+    const nextPage = calculatePageAfterSystemsDelete(page, perPage, total_items, items.length);
+    const deletedSystems = new Set(items);
+
+    if (nextPage !== page) {
+      setPage(nextPage);
+    }
+
+    await deleteFromSystems(items);
+    setSelected((prev) => prev.filter((selectedId) => !deletedSystems.has(selectedId)));
   };
 
   const onPerPageSelect = (_, newPerPage, newPage) => {
@@ -253,8 +269,7 @@ export default function TemplateSystemsTab() {
               setDisabled
             >
               <SystemsDeleteKebab
-                deleteFromSystems={deleteFromSystems}
-                deselectAll={deselectAll}
+                deleteFromSystems={handleDeleteSystems}
                 isDisabled={!rbac?.templateWrite || selected.length > TEMPLATE_SYSTEMS_UPDATE_LIMIT}
                 selected={selected}
               />
@@ -337,7 +352,7 @@ export default function TemplateSystemsTab() {
           allSelected={allSelected}
           perPage={perPage}
           selectAllToggle={selectAllToggle}
-          deleteFromSystems={deleteFromSystems}
+          deleteFromSystems={handleDeleteSystems}
           isLoadingOrDeleting={loadingOrDeleting}
           systemsList={systemsList}
           sortParams={sortParams}

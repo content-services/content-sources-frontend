@@ -151,33 +151,6 @@ const emptyTemplateSystemsResponse = (limit: number, offset = 0): IDSystemsColle
   },
 });
 
-/** Patch 400 when offset is past the list (JSON:API errors or legacy `{ error: string }`). */
-const isInvalidOffsetPatchAxiosError = (err: unknown): boolean => {
-  if (!axios.isAxiosError(err) || err.response?.status !== 400) {
-    return false;
-  }
-
-  const data = err.response.data as
-    | {
-        error?: string;
-        errors?: Array<{ code?: string; source?: { pointer?: string; parameter?: string } }>;
-      }
-    | undefined;
-
-  const firstError = data?.errors?.[0];
-  // Backend currently returns { error: "Invalid offset" } for this case.
-  const isLegacyInvalidOffsetMessage = data?.error === 'Invalid offset';
-  const isInvalidOffsetCode = firstError?.code === 'INVALID_OFFSET';
-  const isOffsetParameter =
-    firstError?.source?.parameter === 'offset' || firstError?.source?.pointer === '/meta/offset';
-
-  return Boolean(isLegacyInvalidOffsetMessage || isInvalidOffsetCode || isOffsetParameter);
-};
-
-/** Invalid offset on page > 1 after the list shrinks (e.g. bulk unassign). */
-const isRecoverableTemplateSystemsPaginationError = (err: unknown, page: number): boolean =>
-  page > 1 && isInvalidOffsetPatchAxiosError(err);
-
 export const getSystemsList: (
   page: number,
   limit: number,
@@ -223,39 +196,20 @@ export const listSystemsByTemplateId: (
   search: string,
   sortBy?: string,
 ) => Promise<IDSystemsCollectionResponse> = async (templateId, page, limit, search, sortBy) => {
-  const requestPage = async (pageNum: number): Promise<IDSystemsCollectionResponse> => {
-    try {
-      const { data } = await axios.get<IDSystemsCollectionResponse>(
-        `${patchApiVersionUrl}/templates/${templateId}/systems?${objectToUrlParams({
-          offset: ((pageNum - 1) * limit).toString(),
-          limit: limit?.toString(),
-          search,
-          sort: sortBy,
-        })}`,
-      );
-      return data;
-    } catch (err) {
-      // The Patch API returns 404 when no systems are assigned to the template
-      if (axios.isAxiosError(err) && err.response?.status === 404) {
-        return emptyTemplateSystemsResponse(limit, (pageNum - 1) * limit);
-      }
-      throw err;
-    }
-  };
-
   try {
-    return await requestPage(page);
+    const { data } = await axios.get<IDSystemsCollectionResponse>(
+      `${patchApiVersionUrl}/templates/${templateId}/systems?${objectToUrlParams({
+        offset: ((page - 1) * limit).toString(),
+        limit: limit?.toString(),
+        search,
+        sort: sortBy,
+      })}`,
+    );
+    return data;
   } catch (err) {
-    // After bulk unassign, the UI can still be on a page whose offset is past the new total
-    if (isRecoverableTemplateSystemsPaginationError(err, page)) {
-      const firstPage = await requestPage(1);
-      const total = firstPage.meta?.total_items ?? 0;
-      const maxPage = Math.max(1, Math.ceil(total / limit));
-      const targetPage = Math.min(page, maxPage);
-      if (targetPage <= 1) {
-        return firstPage;
-      }
-      return requestPage(targetPage);
+    // The Patch API returns 404 when no systems are assigned to the template
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
+      return emptyTemplateSystemsResponse(limit, (page - 1) * limit);
     }
     throw err;
   }
