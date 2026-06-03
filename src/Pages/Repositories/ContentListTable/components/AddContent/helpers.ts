@@ -90,6 +90,10 @@ export const isValidURL = (val: string) => {
   return val.match(regex);
 };
 
+/** True when value is a URL whose content is still being fetched. */
+export const isPendingUrlFetch = (value: string, urlBeingFetched: string | null): boolean =>
+  !!value && !!isValidURL(value) && value === urlBeingFetched;
+
 export const mapFormikToAPIValues = ({
   uuid,
   name,
