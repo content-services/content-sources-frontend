@@ -27,13 +27,14 @@ import {
 } from '@patternfly/react-core';
 
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import Hide from 'components/Hide/Hide';
 import {
   failedFileUpload,
   type FileRejection,
   getDefaultValues,
+  isPendingUrlFetch,
   isValidURL,
   mapContentItemToDefaultFormikValues,
   mapFormikToAPIValues,
@@ -216,28 +217,51 @@ const AddContent = ({ isEdit = false }: Props) => {
     isPending: isValidating,
   } = useValidateContentList();
 
+  const gpgKeyUrlBeingFetchedRef = useRef<string | null>(null);
+  const [gpgKeyUrlFetchSettled, setGpgKeyUrlFetchSettled] = useState(0);
+
   useEffect(() => {
-    (async () => {
-      if (isValidURL(debouncedValues.gpgKey)) {
-        const result = await fetchGpgKey(debouncedValues.gpgKey);
-        // If successful
-        if (result !== debouncedValues.gpgKey) {
-          updateVariable({
-            gpgKey: result,
-            ...(values.gpgKey === '' && !!result
-              ? {
-                  metadataVerification: !!validationList?.url?.metadata_signature_present,
-                }
-              : {}),
-          });
-          return;
-        }
+    const gpgKey = debouncedValues.gpgKey;
+    if (!gpgKey || !isValidURL(gpgKey)) {
+      gpgKeyUrlBeingFetchedRef.current = null;
+      return;
+    }
+
+    const requestedUrl = gpgKey;
+    gpgKeyUrlBeingFetchedRef.current = requestedUrl;
+    let cancelled = false;
+
+    void (async () => {
+      const result = await fetchGpgKey(requestedUrl);
+      if (cancelled) return;
+
+      if (gpgKeyUrlBeingFetchedRef.current === requestedUrl) {
+        gpgKeyUrlBeingFetchedRef.current = null;
+      }
+      if (result !== requestedUrl) {
+        updateVariable({
+          gpgKey: result,
+          ...(values.gpgKey === '' && !!result
+            ? {
+                metadataVerification: !!validationList?.url?.metadata_signature_present,
+              }
+            : {}),
+        });
+      } else {
+        setGpgKeyUrlFetchSettled((version) => version + 1);
       }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [debouncedValues.gpgKey]);
 
   useDeepCompareEffect(() => {
     if (isFetchingGpgKey || isLoadingInitialContent || isEmpty(debouncedValues)) return;
+    if (isPendingUrlFetch(debouncedValues.gpgKey, gpgKeyUrlBeingFetchedRef.current)) {
+      return;
+    }
     (async () => {
       // We wait for the gpg_key to finish returning before validating
       const { uuid, name, url, gpgKey, metadataVerification } = debouncedValues;
@@ -269,7 +293,7 @@ const AddContent = ({ isEdit = false }: Props) => {
       setErrors(mappedErrorData);
       setChangeVerified(true);
     })();
-  }, [debouncedValues]);
+  }, [debouncedValues, gpgKeyUrlFetchSettled]);
 
   const updateGpgKey = async (value: string) => {
     // It's not a valid url, so we allow the user to continue
