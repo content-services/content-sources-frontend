@@ -46,6 +46,10 @@ test.describe('Test GPG keys', () => {
       ).toBeVisible();
       await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
       await page.getByPlaceholder('Paste GPG key or URL here').fill(packages_key);
+      await expect(page.getByRole('textbox', { name: 'gpgkey_file_to_upload' })).toContainText(
+        '-----BEGIN PGP PUBLIC KEY BLOCK-----',
+      );
+      await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeEnabled();
       await page.getByRole('button', { name: 'Save', exact: true }).click();
     });
 
