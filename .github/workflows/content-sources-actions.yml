@@ -1,7 +1,7 @@
 name: Build & Unit Tests
 on:
   pull_request:
-    branches: [ main, prod-beta, prod-stable ]
+    branches: [main, prod-beta, prod-stable]
     paths-ignore:
       - '**.md'
       - '.github/workflows/playwright-actions.yml'
@@ -15,7 +15,49 @@ permissions:
   pull-requests: write
 
 jobs:
+  malware-scan:
+    runs-on: ubuntu-latest
+    name: malware-scan
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: recursive
+
+      - name: Set up sparse checkout
+        uses: ./.github/actions/sparse-checkout-utils
+
+      - name: Supply chain malware scan
+        working-directory: .github/
+        env:
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          chmod +x workflowScripts/malware-pr-check.py
+          python3 workflowScripts/malware-pr-check.py
+
+  vulnerability-review:
+    runs-on: ubuntu-latest
+    name: vulnerability-review
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: recursive
+
+      - name: Set up sparse checkout
+        uses: ./.github/actions/sparse-checkout-utils
+
+      - name: Known vulnerability review
+        uses: actions/dependency-review-action@v5
+        with:
+          comment-summary-in-pr: on-failure
+          vulnerability-check: true
+          license-check: false
+
   lint:
+    needs: [malware-scan, vulnerability-review]
     runs-on: ubuntu-latest
     name: lint
     steps:
@@ -51,6 +93,7 @@ jobs:
         run: yarn lint
 
   format:
+    needs: [malware-scan, vulnerability-review]
     runs-on: ubuntu-latest
     name: format
     steps:
@@ -86,6 +129,7 @@ jobs:
         run: yarn format:check
 
   build-check:
+    needs: [malware-scan, vulnerability-review]
     runs-on: ubuntu-latest
     name: build-check
     steps:
@@ -120,31 +164,8 @@ jobs:
       - name: Build the application
         run: yarn build
 
-  malicious-package-check:
-    name: malicious-package-check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          submodules: recursive
-
-      - name: Set up sparse checkout
-        uses: ./.github/actions/sparse-checkout-utils
-
-      - name: Generate list of additional malicious packages
-        working-directory: .github/
-        run: |
-          chmod +x workflowScripts/malware-to-purl.py
-          python3 workflowScripts/malware-to-purl.py
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          config-file: .github/dependency-review-config.yml
-
   unit-test:
+    needs: [malware-scan, vulnerability-review]
     name: unit-test
     runs-on: ubuntu-latest
     steps:
