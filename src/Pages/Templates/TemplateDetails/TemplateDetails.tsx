@@ -13,10 +13,8 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
 import { createUseStyles } from 'react-jss';
-import { TEMPLATES_ROUTE } from 'Routes/constants';
-import useRootPath from 'Hooks/useRootPath';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
 import useDistributionDetails from '../../../Hooks/useDistributionDetails';
 import DetailItem from './components/DetaiItem';
@@ -26,6 +24,7 @@ import Loader from 'components/Loader';
 import TemplateActionDropdown from './components/TemplateActionDropdown';
 import TemplateDetailsTabs from './components/TemplateDetailsTabs';
 import { abbreviateStreamName } from '../TemplatesTable/helpers';
+import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
 const useStyles = createUseStyles({
   fullHeight: {
@@ -63,8 +62,7 @@ export default function TemplateDetails() {
   const classes = useStyles();
   const { templateUUID } = useParams();
 
-  const rootPath = useRootPath();
-  const navigate = useNavigate();
+  const navigateToTemplateList = useNavigateTo('templates');
 
   const { data: template, isError, error, isLoading } = useFetchTemplate(templateUUID as string);
 
@@ -81,8 +79,6 @@ export default function TemplateDetails() {
   // Error is caught in the wrapper component
   if (isError) throw error;
   if (repositoryParamsIsError) throw repositoryParamsError;
-
-  const navigateToTemplateList = () => navigate(rootPath + `/${TEMPLATES_ROUTE}`);
 
   if (isLoading || archVersionLoading) {
     return <Loader />;

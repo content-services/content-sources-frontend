@@ -33,6 +33,7 @@ import { useFetchTemplatesForSnapshots } from 'services/Templates/TemplateQuerie
 import { formatDateDDMMMYYYY, modalTableSurfaceStyles } from 'helpers';
 import ChangedArrows from '../components/ChangedArrows';
 import { SnapshotDetailTab } from '../../SnapshotDetailsModal/SnapshotDetailsModal';
+import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
 const useStyles = createUseStyles({
   modalTableScope: modalTableSurfaceStyles,
@@ -57,6 +58,7 @@ const useStyles = createUseStyles({
 export default function DeleteSnapshotsModal() {
   const classes = useStyles();
   const navigate = useNavigate();
+  const onClose = useNavigateTo('repositorySnapshots');
   const queryClient = useQueryClient();
   const rootPath = useRootPath();
   const path = useHref('content');
@@ -84,8 +86,6 @@ export default function DeleteSnapshotsModal() {
 
   const { mutateAsync: deleteSnapshots, isPending: isDeletingSnapshots } =
     useBulkDeleteSnapshotsMutate(queryClient, uuid, snapshotsToDelete);
-
-  const onClose = () => navigate(`${rootPath}/${REPOSITORIES_ROUTE}/${uuid}/snapshots`);
 
   const onSave = async () => {
     deleteSnapshots(snapshotsToDelete).then(() => {

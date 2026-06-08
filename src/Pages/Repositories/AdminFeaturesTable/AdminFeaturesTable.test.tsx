@@ -38,7 +38,7 @@ jest.mock('react-router-dom', () => ({
   Outlet: () => <></>,
 }));
 
-jest.mock('Hooks/useRootPath', () => () => 'BasePath');
+jest.mock('Hooks/navigation/useNavigateTo', () => ({ useNavigateTo: jest.fn() }));
 jest.mock('Hooks/useDebounce', () => (val) => val);
 
 it('AdminFeaturesTable to render, select item, and copy', async () => {

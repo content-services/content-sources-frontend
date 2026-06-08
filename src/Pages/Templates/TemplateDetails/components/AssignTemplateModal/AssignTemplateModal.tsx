@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import useRootPath from '../../../../../Hooks/useRootPath';
+import { useParams, useSearchParams } from 'react-router-dom';
 import React, { useState, useMemo, useEffect } from 'react';
 import useNotification from '../../../../../Hooks/useNotification';
 import { useFetchTemplate } from '../../../../../services/Templates/TemplateQueries';
@@ -16,7 +15,6 @@ import {
   ModalFooter,
   ModalBody,
 } from '@patternfly/react-core';
-import { TEMPLATES_ROUTE, SYSTEMS_ROUTE } from '../../../../../Routes/constants';
 import ConditionalTooltip from '../../../../../components/ConditionalTooltip/ConditionalTooltip';
 import HelpPopover from '../../../../../components/HelpPopover';
 import text from '@patternfly/react-styles/css/utilities/Text/text';
@@ -36,6 +34,7 @@ import {
 } from 'Pages/Templates/TemplatesTable/constants';
 import { modalTableSurfaceStyles } from 'helpers';
 import { createUseStyles } from 'react-jss';
+import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
 const useStyles = createUseStyles({
   modalTableScope: modalTableSurfaceStyles,
@@ -46,8 +45,6 @@ const AssignTemplateModal = () => {
   const queryClient = useQueryClient();
   const { notify } = useNotification();
 
-  const rootPath = useRootPath();
-  const navigate = useNavigate();
   const { templateUUID: uuid = '' } = useParams();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -131,7 +128,7 @@ const AssignTemplateModal = () => {
     }
   }, [last_update_task]);
 
-  const onClose = () => navigate(`${rootPath}/${TEMPLATES_ROUTE}/${uuid}/${SYSTEMS_ROUTE}`);
+  const onClose = useNavigateTo('systems');
 
   const isSystemListMethod = assignmentMethod === AssignmentMethods.SystemList;
 

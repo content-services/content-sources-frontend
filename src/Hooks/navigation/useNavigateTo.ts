@@ -19,9 +19,10 @@ export const useNavigateTo = (destinationKey: DestinationKey) => {
   const navigate = useNavigate();
   const rootPath = useRootPath();
   const repoUUID = useSafeUUIDParam('repoUUID');
+  const templateUUID = useSafeUUIDParam('templateUUID');
 
   return useCallback(() => {
     const path = navigationPaths[destinationKey];
-    return navigate(path({ rootPath, repoUUID, contentOrigin }));
-  }, [contentOrigin, rootPath, repoUUID]);
+    return navigate(path({ rootPath, repoUUID, templateUUID, contentOrigin }));
+  }, [contentOrigin, rootPath, repoUUID, templateUUID]);
 };

@@ -11,17 +11,14 @@ import {
   TabTitleText,
 } from '@patternfly/react-core';
 import { InnerScrollContainer } from '@patternfly/react-table';
-import { ContentOrigin } from 'services/Content/ContentApi';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import useRootPath from 'Hooks/useRootPath';
-import { useAppContext } from 'middleware/AppContext';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { SnapshotPackagesTab } from './Tabs/SnapshotPackagesTab';
 import { createUseStyles } from 'react-jss';
 import { SnapshotSelector } from './SnapshotSelector';
-import { REPOSITORIES_ROUTE } from 'Routes/constants';
 import { SnapshotErrataTab } from './Tabs/SnapshotErrataTab';
 import { modalTableSurfaceStyles } from 'helpers';
+import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
 const useStyles = createUseStyles({
   modalTableScope: modalTableSurfaceStyles,
@@ -42,12 +39,9 @@ export enum SnapshotDetailTab {
 }
 
 export default function SnapshotDetailsModal() {
-  const { contentOrigin } = useAppContext();
   const classes = useStyles();
-  const { repoUUID, snapshotUUID } = useParams();
+  const { snapshotUUID } = useParams();
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
-  const rootPath = useRootPath();
-  const navigate = useNavigate();
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
 
   useEffect(() => {
@@ -64,15 +58,8 @@ export default function SnapshotDetailsModal() {
     setActiveTabKey(tabIndex);
   };
 
-  const onClose = () =>
-    navigate(
-      `${rootPath}/${REPOSITORIES_ROUTE}` +
-        (contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT
-          ? `?origin=${contentOrigin}`
-          : ''),
-    );
-
-  const onBackClick = () => navigate(rootPath + `/${REPOSITORIES_ROUTE}/${repoUUID}/snapshots`);
+  const onClose = useNavigateTo('repositories');
+  const onBackClick = useNavigateTo('repositorySnapshots');
 
   return (
     <Modal

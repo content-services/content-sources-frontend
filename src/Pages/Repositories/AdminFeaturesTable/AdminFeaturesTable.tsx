@@ -15,15 +15,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import Hide from 'components/Hide/Hide';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
-import { useNavigate } from 'react-router-dom';
 import useDebounce from 'Hooks/useDebounce';
-import useRootPath from 'Hooks/useRootPath';
-import { ADMIN_TASKS_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
 import { useAdminFeatureListQuery, useFetchAdminFeatureQuery } from 'services/Admin/AdminQueries';
 import type { AdminFeature } from 'services/Admin/AdminApi';
 import { createUseStyles } from 'react-jss';
 import { CopyIcon } from '@patternfly/react-icons';
 import JsonView from 'react18-json-view';
+import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
 const useStyles = createUseStyles({
   '@keyframes flashAnimation': {
@@ -65,8 +63,7 @@ const useStyles = createUseStyles({
 
 const AdminFeaturesTable = () => {
   const classes = useStyles();
-  const navigate = useNavigate();
-  const rootPath = useRootPath();
+  const onClose = useNavigateTo('adminTasks');
   const [isFeatureOpen, setIsFeatureOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const storedFeature = sessionStorage.getItem('feature');
@@ -83,8 +80,6 @@ const AdminFeaturesTable = () => {
     checkedFeatures.clear();
     setCheckedFeatures(new Set(checkedFeatures));
   }, [feature]);
-
-  const onClose = () => navigate(`${rootPath}/${REPOSITORIES_ROUTE}/${ADMIN_TASKS_ROUTE}`);
 
   const { isLoading, isFetching, data, isError } = useAdminFeatureListQuery();
 
