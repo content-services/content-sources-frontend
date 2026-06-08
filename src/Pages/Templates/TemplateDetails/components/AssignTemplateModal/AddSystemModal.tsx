@@ -40,13 +40,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { TemplateItem } from 'services/Templates/TemplateApi';
 import { FETCH_TEMPLATE_KEY, useFetchTemplate } from 'services/Templates/TemplateQueries';
 import Loader from 'components/Loader';
-import { PATCH_SYSTEMS_ROUTE, SYSTEMS_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
+import { PATCH_SYSTEMS_ROUTE } from 'Routes/constants';
 import SystemListTable from './SystemListTable';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import useNotification from 'Hooks/useNotification';
 import TagsFilter from 'components/TagsFilter/TagsFilter';
 import { isVersionLockedSystem } from '../../../TemplatesTable/helpers';
 import { modalTableSurfaceStyles } from 'helpers';
+import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
 const useStyles = createUseStyles({
   modalTableScope: modalTableSurfaceStyles,
@@ -230,7 +231,7 @@ export default function AddSystemModal() {
     localStorage.setItem(perPageKey, newPerPage.toString());
   };
 
-  const onClose = () => navigate(`${rootPath}/${TEMPLATES_ROUTE}/${uuid}/${SYSTEMS_ROUTE}`);
+  const onClose = useNavigateTo('systems');
 
   const handleSelectItem = (id: string) => {
     if (selectedList.has(id)) {

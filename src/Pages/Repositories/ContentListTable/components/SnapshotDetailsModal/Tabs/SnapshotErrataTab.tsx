@@ -7,16 +7,14 @@ import {
   PaginationVariant,
 } from '@patternfly/react-core';
 import Hide from 'components/Hide/Hide';
-import { ContentOrigin } from 'services/Content/ContentApi';
 import { createUseStyles } from 'react-jss';
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import useRootPath from 'Hooks/useRootPath';
-import { useAppContext } from 'middleware/AppContext';
+import { useParams } from 'react-router-dom';
 import { useGetSnapshotErrataQuery } from 'services/Content/ContentQueries';
 import AdvisoriesTable from 'components/SharedTables/AdvisoriesTable';
 import SnapshotErrataFilters from './SnapshotErrataFilters';
 import { ThProps } from '@patternfly/react-table';
+import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -44,11 +42,9 @@ const defaultFilterState = { search: '', type: [] as string[], severity: [] as s
 
 export function SnapshotErrataTab() {
   const classes = useStyles();
-  const { contentOrigin } = useAppContext();
 
   const { snapshotUUID = '' } = useParams();
-  const rootPath = useRootPath();
-  const navigate = useNavigate();
+  const onClose = useNavigateTo('root');
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
@@ -103,14 +99,6 @@ export function SnapshotErrataTab() {
     setPage(newPage);
     localStorage.setItem(perPageKey, newPerPage.toString());
   };
-
-  const onClose = () =>
-    navigate(
-      rootPath +
-        (contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT
-          ? `?origin=${contentOrigin}`
-          : ''),
-    );
 
   const {
     data: errataList = [],

@@ -1,8 +1,21 @@
 import { ContentOrigin } from 'services/Content/ContentApi';
 
-import { PACKAGES_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
+import {
+  ADMIN_TASKS_ROUTE,
+  PACKAGES_ROUTE,
+  REPOSITORIES_ROUTE,
+  SYSTEMS_ROUTE,
+  TEMPLATES_ROUTE,
+} from 'Routes/constants';
 
-export type DestinationKey = 'repositories' | 'packagesLatest' | 'root';
+export type DestinationKey =
+  | 'repositories'
+  | 'templates'
+  | 'packagesLatest'
+  | 'root'
+  | 'adminTasks'
+  | 'repositorySnapshots'
+  | 'systems';
 
 type NavigationPaths = Record<DestinationKey, BuildDestinationPath>;
 type BuildDestinationPath = (params: DestinationParams) => string;
@@ -10,6 +23,7 @@ type DestinationParams = {
   contentOrigin: ContentOrigin[];
   rootPath: string;
   repoUUID: string;
+  templateUUID: string;
 };
 
 /**
@@ -27,11 +41,17 @@ export const navigationPaths: NavigationPaths = {
     (contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT
       ? `?origin=${contentOrigin}`
       : ''),
-  packagesLatest: ({ rootPath, repoUUID }) =>
-    `${rootPath}/${REPOSITORIES_ROUTE}/${repoUUID}/${PACKAGES_ROUTE}`,
   repositories: ({ rootPath, contentOrigin }) =>
     `${rootPath}/${REPOSITORIES_ROUTE}` +
     (contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT
       ? `?origin=${contentOrigin}`
       : ''),
+  packagesLatest: ({ rootPath, repoUUID }) =>
+    `${rootPath}/${REPOSITORIES_ROUTE}/${repoUUID}/${PACKAGES_ROUTE}`,
+  adminTasks: ({ rootPath }) => `${rootPath}/${REPOSITORIES_ROUTE}/${ADMIN_TASKS_ROUTE}`,
+  repositorySnapshots: ({ rootPath, repoUUID }) =>
+    `${rootPath}/${REPOSITORIES_ROUTE}/${repoUUID}/snapshots`,
+  templates: ({ rootPath }) => `${rootPath}/${TEMPLATES_ROUTE}`,
+  systems: ({ rootPath, templateUUID }) =>
+    `${rootPath}/${TEMPLATES_ROUTE}/${templateUUID}/${SYSTEMS_ROUTE}`,
 };

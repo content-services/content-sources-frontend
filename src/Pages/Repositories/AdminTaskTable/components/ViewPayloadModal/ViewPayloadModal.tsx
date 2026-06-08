@@ -17,9 +17,8 @@ import AdminTaskInfo from './components/AdminTaskInfo';
 import ReactJson from 'react18-json-view';
 import Hide from 'components/Hide/Hide';
 import { useFetchAdminTaskQuery } from 'services/Admin/AdminTaskQueries';
-import { useNavigate, useParams } from 'react-router-dom';
-import useRootPath from 'Hooks/useRootPath';
-import { ADMIN_TASKS_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
+import { useParams } from 'react-router-dom';
+import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
 const useStyles = createUseStyles({
   jsonView: {
@@ -36,10 +35,8 @@ export interface TabData {
 const ViewPayloadModal = () => {
   const { taskUUID: uuid } = useParams();
   const classes = useStyles();
-  const navigate = useNavigate();
-  const rootPath = useRootPath();
 
-  const onClose = () => navigate(`${rootPath}/${REPOSITORIES_ROUTE}/${ADMIN_TASKS_ROUTE}`);
+  const onClose = useNavigateTo('adminTasks');
 
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
   const detailRef = createRef<HTMLElement>();

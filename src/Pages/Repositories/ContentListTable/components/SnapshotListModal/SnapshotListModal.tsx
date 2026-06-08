@@ -39,6 +39,7 @@ import { SnapshotDetailTab } from '../SnapshotDetailsModal/SnapshotDetailsModal'
 import { formatDateDDMMMYYYY, modalTableSurfaceStyles } from 'helpers';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import LatestRepoConfig from './components/LatestRepoConfig';
+import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
 const useStyles = createUseStyles({
   modalTableScope: modalTableSurfaceStyles,
@@ -66,8 +67,9 @@ const SnapshotListModal = () => {
   const classes = useStyles();
   const rootPath = useRootPath();
   const { repoUUID: uuid = '' } = useParams();
-  const { contentOrigin, rbac } = useAppContext();
+  const { rbac } = useAppContext();
   const navigate = useNavigate();
+  const onClose = useNavigateTo('repositories');
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(storedPerPage);
@@ -127,14 +129,6 @@ const SnapshotListModal = () => {
       columnIndex,
     };
   };
-
-  const onClose = () =>
-    navigate(
-      `${rootPath}/${REPOSITORIES_ROUTE}` +
-        (contentOrigin.length === 1 && contentOrigin[0] === ContentOrigin.REDHAT
-          ? `?origin=${contentOrigin}`
-          : ''),
-    );
 
   const onSelectSnapshot = (uuid: string, value: boolean) => {
     const newSet = new Set<string>(checkedSnapshots);

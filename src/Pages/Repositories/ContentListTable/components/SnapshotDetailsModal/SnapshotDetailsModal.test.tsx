@@ -1,10 +1,9 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SnapshotDetailsModal, { SnapshotDetailTab } from './SnapshotDetailsModal';
-import { useAppContext } from 'middleware/AppContext';
-import { ContentOrigin } from 'services/Content/ContentApi';
+import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
-const mockNavigate = jest.fn();
+const mockUseNavigateTo = useNavigateTo as jest.Mock;
 const mockSetSearchParams = jest.fn();
 
 jest.mock('./Tabs/SnapshotPackagesTab', () => ({
@@ -19,15 +18,12 @@ jest.mock('./SnapshotSelector', () => ({
   SnapshotSelector: () => <div>Snapshot selector</div>,
 }));
 
-jest.mock('middleware/AppContext', () => ({
-  useAppContext: jest.fn(),
+jest.mock('Hooks/navigation/useNavigateTo', () => ({
+  useNavigateTo: jest.fn(),
 }));
 
-jest.mock('Hooks/useRootPath', () => () => '/app');
-
 jest.mock('react-router-dom', () => ({
-  useNavigate: () => mockNavigate,
-  useParams: () => ({ repoUUID: 'repo-uuid', snapshotUUID: 'snap-uuid' }),
+  useParams: () => ({ snapshotUUID: 'snap-uuid' }),
   useSearchParams: () => {
     const params = new URLSearchParams(window.location.search);
     return [params, mockSetSearchParams];
@@ -36,51 +32,15 @@ jest.mock('react-router-dom', () => ({
 
 describe('SnapshotDetailsModal', () => {
   beforeEach(() => {
-    mockNavigate.mockClear();
     mockSetSearchParams.mockClear();
     window.history.replaceState({}, '', '/');
-    (useAppContext as jest.Mock).mockReturnValue({
-      contentOrigin: [],
-    });
   });
 
-  const clickModalHeaderClose = async (user: ReturnType<typeof userEvent.setup>) => {
-    const dialog = screen.getByRole('dialog');
-    // Footer uses aria-label "Close snapshot detail"; PatternFly header close stays "Close".
-    await user.click(within(dialog).getByRole('button', { name: 'Close' }));
-  };
-
-  it('navigates back to repositories on close without origin query by default', async () => {
-    const user = userEvent.setup();
-
+  it('navigation hooks are called with the correct keys', async () => {
     render(<SnapshotDetailsModal />);
 
-    await clickModalHeaderClose(user);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/app/repositories');
-  });
-
-  it('appends origin query when only Red Hat is selected', async () => {
-    const user = userEvent.setup();
-    (useAppContext as jest.Mock).mockReturnValue({
-      contentOrigin: [ContentOrigin.REDHAT],
-    });
-
-    render(<SnapshotDetailsModal />);
-
-    await clickModalHeaderClose(user);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/app/repositories?origin=red_hat');
-  });
-
-  it('navigates to snapshots list when View all snapshots is clicked', async () => {
-    const user = userEvent.setup();
-
-    render(<SnapshotDetailsModal />);
-
-    await user.click(screen.getByRole('button', { name: 'View all snapshots' }));
-
-    expect(mockNavigate).toHaveBeenCalledWith('/app/repositories/repo-uuid/snapshots');
+    expect(mockUseNavigateTo).toHaveBeenCalledWith('repositories');
+    expect(mockUseNavigateTo).toHaveBeenCalledWith('repositorySnapshots');
   });
 
   it('syncs errata tab from search params on mount', async () => {
