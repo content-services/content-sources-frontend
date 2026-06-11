@@ -5,6 +5,7 @@ Topic-specific rules for AI coding assistants. Files here are automatically pick
 ## Current Rules
 
 - **[testing.md](testing.md)**: Playwright testing conventions and best practices
+- **[github-actions.md](github-actions.md)**: GitHub Actions, secrets, and forked pull requests
 
 ## Adding New Rules
 
