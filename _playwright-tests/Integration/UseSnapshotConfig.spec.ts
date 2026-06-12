@@ -20,13 +20,13 @@ test.describe('Use Snapshot Config', () => {
     repoName = `${repoNamePrefix}_${randomName()}`;
 
     await test.step('Set up cleanup', async () => {
+      cleanup.add(() => regClient.Destroy('rhc'));
       await cleanup.runAndAdd(async () => {
         await ensureValidToken(page, 'ADMIN_TOKEN.json', 5);
         const apiBasePath = process.env.BASE_URL + '/api/content-sources/v1';
         const cleanupClient = createApiConfigWithDynamicToken('ADMIN_TOKEN', apiBasePath);
         await cleanupRepositories(cleanupClient, repoNamePrefix);
       });
-      await cleanup.runAndAdd(() => regClient.Destroy('rhc'));
     });
 
     await test.step('Verify "download config file" and "copy to clipboard config" content has same value', async () => {

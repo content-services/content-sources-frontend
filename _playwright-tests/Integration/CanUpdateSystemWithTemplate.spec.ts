@@ -49,13 +49,13 @@ test.describe('Test System With Template', () => {
     const HARepo = 'Red Hat Enterprise Linux 9 for x86_64 - High Availability';
 
     await test.step('Add cleanup, delete any templates and template test repos that exist', async () => {
+      cleanup.add(() => regClient.Destroy('rhc'));
       await cleanup.runAndAdd(async () => {
         await ensureValidToken(page, 'LAYERED_REPO_TOKEN.json', 5);
         const apiBasePath = process.env.BASE_URL + '/api/content-sources/v1';
         const cleanupClient = createApiConfigWithDynamicToken('LAYERED_REPO_TOKEN', apiBasePath);
         await cleanupTemplates(cleanupClient, templateNamePrefix);
       });
-      cleanup.add(() => regClient.Destroy('rhc'));
     });
 
     await test.step('Navigate to templates', async () => {

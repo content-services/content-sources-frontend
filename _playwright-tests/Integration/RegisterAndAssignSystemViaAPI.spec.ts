@@ -32,13 +32,13 @@ test.describe('Register and assign template to systems via API', () => {
     const templateName = `${templateNamePrefix}-${randomName()}`;
 
     await test.step('Set up cleanup for repositories, templates, and RHSM client', async () => {
+      cleanup.add(() => regClient.Destroy('rhc'));
       await cleanup.runAndAdd(async () => {
         await ensureValidToken(page, 'ADMIN_TOKEN.json', 5);
         const apiBasePath = process.env.BASE_URL + '/api/content-sources/v1';
         const cleanupClient = createApiConfigWithDynamicToken('ADMIN_TOKEN', apiBasePath);
         await cleanupTemplates(cleanupClient, templateNamePrefix);
       });
-      cleanup.add(() => regClient.Destroy('rhc'));
     });
 
     await closeGenericPopupsIfExist(page);

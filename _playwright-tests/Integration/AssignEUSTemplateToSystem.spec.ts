@@ -44,13 +44,13 @@ test.describe('Assign EUS Template to System', () => {
     void client; // Pull in fixture so Undici fetch dispatcher is configured for dynamic API cleanup
 
     await test.step('Set up cleanup for templates and RHSM client', async () => {
+      cleanup.add(() => regClient.Destroy('rhc'));
       await cleanup.runAndAdd(async () => {
         await ensureValidToken(page, 'EUS_REPO_TOKEN.json', 5);
         const apiBasePath = process.env.BASE_URL + '/api/content-sources/v1';
         const cleanupClient = createApiConfigWithDynamicToken('EUS_REPO_TOKEN', apiBasePath);
         await cleanupTemplates(cleanupClient, templateNamePrefix);
       });
-      cleanup.add(() => regClient.Destroy('rhc'));
     });
 
     await test.step('Verify user has access to EUS, E4S, and EEUS entitlements', async () => {

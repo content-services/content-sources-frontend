@@ -43,13 +43,13 @@ test.describe('Assign Standard Template to System via UI', () => {
     void client; // Pull in fixture so Undici fetch dispatcher is configured for dynamic API cleanup
 
     await test.step('Set up cleanup for templates and RHSM client', async () => {
+      cleanup.add(() => regClient.Destroy('rhc'));
       await cleanup.runAndAdd(async () => {
         await ensureValidToken(page, 'ADMIN_TOKEN.json', 5);
         const apiBasePath = process.env.BASE_URL + '/api/content-sources/v1';
         const cleanupClient = createApiConfigWithDynamicToken('ADMIN_TOKEN', apiBasePath);
         await cleanupTemplates(cleanupClient, templateNamePrefix);
       });
-      cleanup.add(() => regClient.Destroy('rhc'));
     });
 
     await test.step('Boot RHEL 9 system and register without template', async () => {
