@@ -226,7 +226,7 @@ export default function TemplateSystemsTab() {
 
   return (
     <Grid className={classes.mainContainer}>
-      <Hide hide={!total_items}>
+      <Hide hide={!total_items && !debouncedSearchQuery}>
         <InputGroup className={classes.topContainer}>
           <Flex gap={{ default: 'gapMd' }}>
             <InputGroupItem>

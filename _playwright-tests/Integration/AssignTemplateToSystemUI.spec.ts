@@ -129,6 +129,17 @@ test.describe('Assign Standard Template to System via UI', () => {
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(templateName);
     });
 
+    await test.step('Verify filter bar remains visible when search yields no matching systems', async () => {
+      const searchInput = page.getByPlaceholder('Filter by name');
+      await searchInput.fill('nonexistent-system-xyz');
+
+      await expect(page.getByText('No associated systems match the filter criteria')).toBeVisible();
+      await expect(searchInput).toBeVisible();
+
+      await page.getByRole('button', { name: 'Clear all filters' }).click();
+      await expect(page.getByText(hostname)).toBeVisible();
+    });
+
     await test.step('Wait for package URLs to be served from template', async () => {
       // Refresh the subscription manager so the system picks up the new template entitlements
       await refreshSubscriptionManager(regClient);
