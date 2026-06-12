@@ -9,7 +9,7 @@ Apply these rules to TypeScript test files (`**/*.spec.ts`) in the `_playwright-
 - Use clear, descriptive and distinct test names and group related tests in `describe` blocks
 - Use `test.step()` to break down complex tests into readable steps
 
-## Selector Preferences (in order)
+## Selector Preferences (in order of preference)
 
 1. **Role-based selectors**: `page.getByRole('button', { name: 'Submit' })`
 2. **Text content**: `page.getByText('Welcome', { exact: true })`
@@ -24,9 +24,17 @@ Apply these rules to TypeScript test files (`**/*.spec.ts`) in the `_playwright-
 
 ## Code Structure
 
-- Only create helpers/fixtures for truly generic, reusable functionality
-- Avoid page objects - tests should read like articles
+- Avoid page objects; tests should read like articles
 - Use test steps and white spaces for separation
+
+### Helpers and fixtures
+
+- Only create helpers and fixtures for truly generic, reusable functionality
+- Check for existing helpers and fixtures before creating new ones
+- Consider if existing code could be extended to provide the new function
+- UI/helpers and Integration/helpers contain frontend repo helpers
+- test-utils is for helpers and fixtures compatible with both backend and frontend
+- test-utils is a submodule and changes must be made in the backend repo
 
 ## Anti-patterns to Avoid
 
@@ -34,3 +42,7 @@ Apply these rules to TypeScript test files (`**/*.spec.ts`) in the `_playwright-
 - Fragile XPath selectors
 - Tests that depend on other test state
 - Over-abstraction that hurts test readability
+
+## Linking a backend PR for Playwright testing
+
+To run Playwright CI against a specific backend branch, use `#testwith` followed by the URL of the backend PR in the **frontend** PR description.
