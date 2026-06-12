@@ -120,9 +120,9 @@ jobs:
       - name: Build the application
         run: yarn build
 
-  malicious-package-check:
-    name: malicious-package-check
+  dependency-guardrails:
     runs-on: ubuntu-latest
+    name: dependency-security-check
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -133,17 +133,21 @@ jobs:
       - name: Set up sparse checkout
         uses: ./.github/actions/sparse-checkout-utils
 
-      - name: Generate list of additional malicious packages
+      - name: Supply chain malware scan
         working-directory: .github/
+        env:
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
-          chmod +x workflowScripts/malware-to-purl.py
-          python3 workflowScripts/malware-to-purl.py
+          chmod +x workflowScripts/malware-pr-check.py
+          python3 workflowScripts/malware-pr-check.py
 
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
+      - name: Known vulnerability review
+        uses: actions/dependency-review-action@v5
         with:
-          config-file: .github/dependency-review-config.yml
-
+          comment-summary-in-pr: on-failure
+          vulnerability-check: true
+          license-check: false
+  
   unit-test:
     name: unit-test
     runs-on: ubuntu-latest
