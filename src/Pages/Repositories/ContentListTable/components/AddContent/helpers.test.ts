@@ -4,6 +4,7 @@ import {
   FormikValues,
   REGEX_URL,
   failedFileUpload,
+  isPendingUrlFetch,
   isValidURL,
   mapFormikToAPIValues,
   mapValidationData,
@@ -21,6 +22,14 @@ it('isValidURL', () => {
   expect(isValidURL('https://www.google.com')).toBeTruthy();
   expect(isValidURL('BANANA!')).toBeFalsy();
   expect(isValidURL('http://e.ca')).toBeTruthy();
+});
+
+it('isPendingUrlFetch', () => {
+  const gpgUrl = 'http://example.com/RPM-GPG-KEY';
+  expect(isPendingUrlFetch(gpgUrl, gpgUrl)).toBe(true);
+  expect(isPendingUrlFetch(gpgUrl, null)).toBe(false);
+  expect(isPendingUrlFetch('-----BEGIN PGP PUBLIC KEY BLOCK-----', gpgUrl)).toBe(false);
+  expect(isPendingUrlFetch('', gpgUrl)).toBe(false);
 });
 
 it('mapFormikToAPIValues', () => {
