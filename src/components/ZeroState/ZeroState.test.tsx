@@ -2,32 +2,36 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ZeroState } from './ZeroState';
 import { useAppContext } from 'middleware/AppContext';
-import { useHref, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ReactNode } from 'react';
 
 jest.mock('middleware/AppContext', () => ({
   useAppContext: jest.fn(),
 }));
 
+jest.mock('Hooks/useRootPath', () => () => '/insights/content');
+
 const navigateMock = jest.fn();
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
-  useHref: jest.fn(),
 }));
 
 jest.mock('@redhat-cloud-services/frontend-components/AsyncComponent', () => {
   function MockAsyncComponent({
+    customTitle,
     customText,
     customSection,
     customButton,
   }: {
+    customTitle: ReactNode;
     customText: ReactNode;
     customSection: ReactNode;
     customButton: ReactNode;
   }) {
     return (
       <div>
+        <div>{customTitle}</div>
         <div>{customText}</div>
         <div>{customSection}</div>
         <div>{customButton}</div>
@@ -37,42 +41,74 @@ jest.mock('@redhat-cloud-services/frontend-components/AsyncComponent', () => {
   return MockAsyncComponent;
 });
 
+const defaultContext = {
+  setZeroState: jest.fn(),
+};
+
 describe('ZeroState', () => {
   beforeEach(() => {
     (useNavigate as jest.Mock).mockReturnValue(navigateMock);
-    (useHref as jest.Mock).mockReturnValue('/insights/content/repositories');
     navigateMock.mockReset();
+    (useAppContext as jest.Mock).mockReturnValue(defaultContext);
   });
 
-  it('shows the Red Hat repository card and navigates from buttons', async () => {
-    const setZeroState = jest.fn();
+  it('shows both cards with correct content', () => {
+    render(<ZeroState />);
+
+    expect(screen.getByText('Start using content templates now')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Get started by creating a content template to manage updates for your RHEL systems or adding external repositories.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText('About content templates')).toBeInTheDocument();
+    expect(screen.getByText('About repositories')).toBeInTheDocument();
+    expect(screen.getByText(/Content templates use repository snapshots/i)).toBeInTheDocument();
+    expect(screen.getByText(/Standard Operating Environment \(SOE\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Repositories provide the content sources/i)).toBeInTheDocument();
+  });
+
+  it('navigates to browse repositories from the repositories card', async () => {
     const user = userEvent.setup();
-    (useAppContext as jest.Mock).mockReturnValue({
-      setZeroState,
-      isLightspeedEnabled: false,
-    });
 
     render(<ZeroState />);
 
-    expect(screen.getByText(/Get started with Insights/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Browse Red Hat repositories' })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Browse Red Hat repositories' }));
-    await user.click(screen.getByRole('button', { name: 'Add repositories now' }));
-
-    expect(setZeroState).toHaveBeenCalledWith(false);
+    await user.click(screen.getByRole('button', { name: 'Browse available repositories' }));
+    expect(defaultContext.setZeroState).toHaveBeenCalledWith(false);
     expect(navigateMock).toHaveBeenCalledWith('/insights/content/repositories?origin=red_hat');
   });
 
-  it('uses lightspeed copy when enabled', () => {
-    const setZeroState = jest.fn();
-    (useAppContext as jest.Mock).mockReturnValue({
-      setZeroState,
-      isLightspeedEnabled: true,
-    });
+  it('navigates to templates list from CTA button', async () => {
+    const user = userEvent.setup();
 
     render(<ZeroState />);
 
-    expect(screen.getByText(/Get started with Red Hat Lightspeed/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Browse Red Hat repositories' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Create template' }));
+    expect(defaultContext.setZeroState).toHaveBeenCalledWith(false);
+    expect(navigateMock).toHaveBeenCalledWith('/insights/content/templates');
+  });
+
+  it('navigates to repositories list from CTA button', async () => {
+    const user = userEvent.setup();
+
+    render(<ZeroState />);
+
+    await user.click(screen.getByRole('button', { name: 'Add repositories' }));
+    expect(defaultContext.setZeroState).toHaveBeenCalledWith(false);
+    expect(navigateMock).toHaveBeenCalledWith('/insights/content/repositories');
+  });
+
+  it('renders learn more links', () => {
+    render(<ZeroState />);
+
+    const learnMoreLinks = screen.getAllByRole('link');
+    expect(learnMoreLinks).toHaveLength(2);
+    expect(
+      screen.getByText('Learn more about managing system content and patch updates'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Learn more about repositories' })).toHaveAttribute(
+      'href',
+      'https://docs.redhat.com/en/documentation/red_hat_lightspeed/1-latest/html/deploying_and_managing_rhel_systems_in_hybrid_clouds/assembly_managing-repositories-in-red-hat-hybrid-cloud-console_host-management-services',
+    );
   });
 });
