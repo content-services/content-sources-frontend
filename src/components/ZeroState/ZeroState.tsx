@@ -13,22 +13,27 @@ import {
   Content,
   Title,
 } from '@patternfly/react-core';
+import { ExternalLinkSquareAltIcon } from '@patternfly/react-icons';
 import AsyncComponent from '@redhat-cloud-services/frontend-components/AsyncComponent';
 import ErrorState from '@redhat-cloud-services/frontend-components/ErrorState';
 import { createUseStyles } from 'react-jss';
 
+import useRootPath from 'Hooks/useRootPath';
 import { useAppContext } from 'middleware/AppContext';
-import { useHref, useNavigate } from 'react-router-dom';
-import { REPOSITORIES_ROUTE } from 'Routes/constants';
+import { useNavigate } from 'react-router-dom';
+import { REPOSITORIES_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
+
+const CONTENT_DOCS_URL =
+  'https://docs.redhat.com/en/documentation/red_hat_lightspeed/1-latest/html/managing_system_content_and_patch_updates_on_rhel_systems/index';
+
+const REPOSITORIES_DOCS_URL =
+  'https://docs.redhat.com/en/documentation/red_hat_lightspeed/1-latest/html/deploying_and_managing_rhel_systems_in_hybrid_clouds/assembly_managing-repositories-in-red-hat-hybrid-cloud-console_host-management-services';
 
 const useStyles = createUseStyles({
   contentZerostate: {
     minHeight: '100%',
     '& .bannerBefore': { maxHeight: '320px!important' },
     '& .bannerRight': { justifyContent: 'space-evenly!important' },
-  },
-  textContent: {
-    minHeight: '40px',
   },
   removeBottomPadding: {
     paddingBottom: '0',
@@ -38,24 +43,18 @@ const useStyles = createUseStyles({
 export const ZeroState = () => {
   const classes = useStyles();
   const navigate = useNavigate();
-  const { setZeroState, isLightspeedEnabled } = useAppContext();
-  const path = useHref('content');
-  const pathname = path.split('content')[0] + 'content';
+  const rootPath = useRootPath();
+  const { setZeroState } = useAppContext();
 
-  const handleMainButtonClick = () => {
+  const openTemplatesList = () => {
     setZeroState(false);
+    navigate(`${rootPath}/${TEMPLATES_ROUTE}`);
   };
 
-  const repoList = [
-    {
-      title: 'Red Hat repositories',
-      description: 'Browse available Red Hat repositories to create RHEL images.',
-      onClick: () => {
-        setZeroState(false);
-        navigate(`${pathname}/${REPOSITORIES_ROUTE}?origin=red_hat`);
-      },
-    },
-  ];
+  const openRepositoriesList = () => {
+    setZeroState(false);
+    navigate(`${rootPath}/${REPOSITORIES_ROUTE}`);
+  };
 
   return (
     <>
@@ -75,38 +74,146 @@ export const ZeroState = () => {
             ErrorComponent={<ErrorState />}
             app='Content_management'
             ouiaId='get_started_from_zerostate_description'
-            customText={`Get started with ${isLightspeedEnabled ? 'Red Hat Lightspeed' : 'Insights'} by adding repositories`}
+            customTitle='Start using content templates now'
+            customText='Get started by creating a content template to manage updates for your RHEL systems or adding external repositories.'
             customSection={
               <PageSection hasBodyWrapper={false} className={classes.removeBottomPadding}>
-                <Flex direction={{ default: 'row' }} gap={{ default: 'gap' }}>
-                  {repoList.map(({ title, description, onClick }) => (
-                    <FlexItem flex={{ default: 'flex_1' }} key={title}>
-                      <Card>
-                        <CardTitle>
-                          <Title headingLevel='h3'>{title}</Title>
-                        </CardTitle>
-                        <CardBody>
-                          <Content className={classes.textContent}>
-                            <Content component='p'>{description}</Content>
-                          </Content>
-                          <Button onClick={onClick} variant='secondary' size='lg'>
-                            Browse {title}
-                          </Button>
-                        </CardBody>
-                      </Card>
-                    </FlexItem>
-                  ))}
+                <Flex
+                  direction={{ default: 'row' }}
+                  gap={{ default: 'gapLg' }}
+                  alignItems={{ default: 'alignItemsStretch' }}
+                >
+                  <FlexItem flex={{ default: 'flex_1' }}>
+                    <Card isFullHeight>
+                      <CardTitle>
+                        <Title headingLevel='h3'>About content templates</Title>
+                      </CardTitle>
+                      <CardBody>
+                        <Flex
+                          direction={{ default: 'column' }}
+                          gap={{ default: 'gapMd' }}
+                          style={{ height: '100%' }}
+                        >
+                          <FlexItem flex={{ default: 'flex_1' }}>
+                            <Content>
+                              <Content component='p'>
+                                Content templates use repository snapshots to control which
+                                advisories and package versions are applied when patching your RHEL
+                                systems.
+                              </Content>
+                              <Content component='p'>
+                                Use templates to define a Standard Operating Environment (SOE) by
+                                pinning repositories to a specific point in time. This ensures a
+                                consistent baseline of tested packages and advisories across your
+                                systems.
+                              </Content>
+                            </Content>
+                          </FlexItem>
+                          <FlexItem>
+                            <Flex
+                              direction={{ default: 'column' }}
+                              alignItems={{ default: 'alignItemsFlexStart' }}
+                              gap={{ default: 'gapMd' }}
+                            >
+                              <Button
+                                variant='link'
+                                isInline
+                                component='a'
+                                href={CONTENT_DOCS_URL}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                icon={<ExternalLinkSquareAltIcon />}
+                                iconPosition='end'
+                              >
+                                Learn more about managing system content and patch updates
+                              </Button>
+                            </Flex>
+                          </FlexItem>
+                        </Flex>
+                      </CardBody>
+                    </Card>
+                  </FlexItem>
+                  <FlexItem flex={{ default: 'flex_1' }}>
+                    <Card isFullHeight>
+                      <CardTitle>
+                        <Title headingLevel='h3'>About repositories</Title>
+                      </CardTitle>
+                      <CardBody>
+                        <Flex
+                          direction={{ default: 'column' }}
+                          gap={{ default: 'gapMd' }}
+                          style={{ height: '100%' }}
+                        >
+                          <FlexItem flex={{ default: 'flex_1' }}>
+                            <Content>
+                              <Content component='p'>
+                                Repositories provide the content sources that templates use to
+                                define what packages and advisories are available to your systems.
+                              </Content>
+                              <Content component='p'>
+                                You can use official Red Hat content, add external sources, or
+                                upload custom RPMs.
+                              </Content>
+                            </Content>
+                          </FlexItem>
+                          <FlexItem>
+                            <Flex
+                              direction={{ default: 'column' }}
+                              alignItems={{ default: 'alignItemsFlexStart' }}
+                              gap={{ default: 'gapMd' }}
+                            >
+                              <Button
+                                onClick={() => {
+                                  setZeroState(false);
+                                  navigate(`${rootPath}/${REPOSITORIES_ROUTE}?origin=red_hat`);
+                                }}
+                                variant='secondary'
+                              >
+                                Browse available repositories
+                              </Button>
+                              <Button
+                                variant='link'
+                                isInline
+                                component='a'
+                                href={REPOSITORIES_DOCS_URL}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                icon={<ExternalLinkSquareAltIcon />}
+                                iconPosition='end'
+                              >
+                                Learn more about repositories
+                              </Button>
+                            </Flex>
+                          </FlexItem>
+                        </Flex>
+                      </CardBody>
+                    </Card>
+                  </FlexItem>
                 </Flex>
               </PageSection>
             }
             customButton={
-              <Button
-                id='get-started-repositories-button'
-                ouiaId='get_started_repositories_button'
-                onClick={() => handleMainButtonClick()}
+              <Flex
+                direction={{ default: 'column' }}
+                alignItems={{ default: 'alignItemsCenter' }}
+                gap={{ default: 'gapSm' }}
               >
-                Add repositories now
-              </Button>
+                <Button
+                  id='create-template-button'
+                  ouiaId='create_template_button'
+                  onClick={openTemplatesList}
+                >
+                  Create template
+                </Button>
+                <Button
+                  id='add-repositories-button'
+                  ouiaId='add_repositories_button'
+                  variant='link'
+                  onClick={openRepositoriesList}
+                >
+                  Add repositories
+                </Button>
+              </Flex>
             }
           />
         </Grid>

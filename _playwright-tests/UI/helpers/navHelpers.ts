@@ -10,7 +10,7 @@ import { retry } from './helpers';
 const navigateToRepositoriesFunc = async (page: Page) => {
   await page.goto('/insights/content/repositories', { timeout: PAGE_NAVIGATION_TIMEOUT_MS });
 
-  const zeroState = page.getByText('Start using Content management now');
+  const zeroState = page.getByText('Start using content templates now');
 
   const repositoriesListPage = page.getByText('View all repositories within your organization.');
 
@@ -26,8 +26,9 @@ const navigateToRepositoriesFunc = async (page: Page) => {
     );
   }
 
-  if (await zeroState.isVisible()) {
-    await page.getByRole('button', { name: 'Add repositories now' }).click();
+  if (await isZeroStateVisible(page)) {
+    await page.getByRole('button', { name: /Add repositories/i }).click();
+    await repositoriesListPage.waitFor({ state: 'visible', timeout: PAGE_READY_TIMEOUT_MS });
   }
 };
 
@@ -55,8 +56,12 @@ const navigateToTemplatesFunc = async (page: Page) => {
 
   const templateText = page.getByText('View all content templates within your organization.');
 
-  // Wait for either list page or zerostate
-  await templateText.waitFor({ state: 'visible', timeout: PAGE_READY_TIMEOUT_MS });
+  await waitForListPageOrZeroState(page, templateText, 'templates list');
+
+  if (await isZeroStateVisible(page)) {
+    await page.getByRole('button', { name: /Create template/i }).click();
+    await templateText.waitFor({ state: 'visible', timeout: PAGE_READY_TIMEOUT_MS });
+  }
 };
 
 export const navigateToTemplates = async (page: Page) => {

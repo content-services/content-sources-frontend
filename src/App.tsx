@@ -12,8 +12,10 @@ import { useAppContext } from './middleware/AppContext';
 import { ContentOrigin, FilterData } from './services/Content/ContentApi';
 import { useContentListQuery } from './services/Content/ContentQueries';
 import { perPageKey } from './Pages/Repositories/ContentListTable/ContentListTable';
-import { CONTENT_ROUTE, REPOSITORIES_ROUTE } from './Routes/constants';
+import { CONTENT_ROUTE, REPOSITORIES_ROUTE, TEMPLATES_ROUTE } from './Routes/constants';
 import usePageSafe from 'Hooks/usePageSafe';
+import { TemplateFilterData } from './services/Templates/TemplateApi';
+import { useTemplateList } from './services/Templates/TemplateQueries';
 
 export default function App() {
   const { rbac, isFetchingPermissions, zeroState, setZeroState } = useAppContext();
@@ -23,7 +25,10 @@ export default function App() {
   const { hideGlobalFilter } = useChrome();
 
   const isDefaultRoute = useMemo(
-    () => [REPOSITORIES_ROUTE, '', CONTENT_ROUTE].includes(last(pathname.split('/')) || ''),
+    () =>
+      [REPOSITORIES_ROUTE, '', CONTENT_ROUTE, TEMPLATES_ROUTE].includes(
+        last(pathname.split('/')) || '',
+      ),
     [pathname],
   );
 
@@ -34,6 +39,19 @@ export default function App() {
     statuses: [],
   });
 
+  const [templateFilterData] = useState<TemplateFilterData>({
+    search: '',
+    arch: '',
+    version: [],
+    extended_release_version: [],
+    restrict_to_major: false,
+    repository_uuids: '',
+    snapshot_uuids: '',
+    extended_release: [],
+  });
+
+  const enableZeroStateCheck = isDefaultRoute && zeroState;
+
   const { data = { data: [], meta: { count: 0, limit: 20, offset: 0 } }, isLoading } =
     useContentListQuery(
       1,
@@ -41,23 +59,27 @@ export default function App() {
       filterData,
       '',
       [ContentOrigin.EXTERNAL, ContentOrigin.UPLOAD],
-      isDefaultRoute && zeroState, // We only check if the route is correct and zerostate is true (defaults to true)
+      enableZeroStateCheck,
     );
+
+  const {
+    data: templateData = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
+    isLoading: isLoadingTemplates,
+  } = useTemplateList(1, 1, '', templateFilterData, false, enableZeroStateCheck);
 
   // Hide Insights' global filter bar
   useEffect(() => {
     hideGlobalFilter(true);
   }, [hideGlobalFilter]);
 
-  // Check for user's custom repositories to determine whether we need to show zero state
+  // Check for user's custom repositories and templates to determine whether we need to show zero state
   useEffect(() => {
-    // Zero state may be true AND a user may have repositories if they have signed in via a different machine for the first time
-    if ((zeroState && data.data.length > 0) || (zeroState && !isDefaultRoute)) {
+    if (zeroState && (data.data.length > 0 || templateData.meta.count > 0 || !isDefaultRoute)) {
       setZeroState(false);
     }
-  }, [data.data.length, zeroState]);
+  }, [data.data.length, templateData.meta.count, zeroState, isDefaultRoute, setZeroState]);
 
-  if (!rbac || isFetchingPermissions || isLoading) {
+  if (!rbac || isFetchingPermissions || isLoading || isLoadingTemplates) {
     return (
       <Bullseye>
         <div data-ouia-safe={false} />

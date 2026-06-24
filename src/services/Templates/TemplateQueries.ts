@@ -150,6 +150,7 @@ export const useTemplateList = (
   sortBy: string,
   filterData: TemplateFilterData,
   polling: boolean = false,
+  enabled: boolean = true,
 ) =>
   useQuery({
     // Below MUST match the "templateListKeyArray" seen below (once written) in the useDeleteTemplate.
@@ -162,6 +163,7 @@ export const useTemplateList = (
     refetchInterval: polling ? TEMPLATE_LIST_POLLING_TIME : undefined,
     placeholderData: keepPreviousData,
     staleTime: 20000,
+    enabled,
   });
 
 export const useTemplateNameAvailability = (name: string, excludeUuid?: string) => {

@@ -51,7 +51,14 @@ export default function RepositoriesRoutes() {
   return (
     <ErrorPage>
       <Routes key={key}>
-        {zeroState ? <Route index path={REPOSITORIES_ROUTE} element={<ZeroState />} /> : <></>}
+        {zeroState ? (
+          <>
+            <Route index path={REPOSITORIES_ROUTE} element={<ZeroState />} />
+            <Route path={TEMPLATES_ROUTE} element={<ZeroState />} />
+          </>
+        ) : (
+          <></>
+        )}
         <Route path={REPOSITORIES_ROUTE} element={<RepositoryLayout />}>
           <Route path='' element={<ContentListTable />}>
             {rbac?.repoWrite ? (
