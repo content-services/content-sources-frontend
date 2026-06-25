@@ -14,9 +14,9 @@ test.describe('Templates', () => {
     await navigateToTemplates(page);
     await closeGenericPopupsIfExist(page);
 
-    const AddButton = page.locator('[data-ouia-component-id="create_content_template"]');
-
-    await expect(AddButton.first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: 'Create template' })).toBeEnabled({
+      timeout: 10000,
+    });
   });
 
   test('Copying templates', async ({ page, client, cleanup, unusedRepoUrl }) => {
