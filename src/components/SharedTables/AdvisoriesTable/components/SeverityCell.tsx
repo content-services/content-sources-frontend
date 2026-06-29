@@ -11,10 +11,10 @@ import {
   t_global_color_severity_moderate_100,
   t_global_color_severity_minor_100,
   t_global_color_severity_none_100,
-  t_global_spacer_sm,
 } from '@patternfly/react-tokens';
 import { useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
+import { Flex, FlexItem } from '@patternfly/react-core';
 
 const useStyles = (severity: string) => {
   let color: string = t_global_color_severity_none_100.value;
@@ -34,19 +34,14 @@ const useStyles = (severity: string) => {
       break;
   }
 
-  return createUseStyles({
-    icon: {
-      fill: color,
-      marginRight: t_global_spacer_sm.var,
-    },
-  });
+  return createUseStyles({ icon: { fill: color } });
 };
 
 interface Props {
   severity: string;
 }
 
-export default function SeverityIcon({ severity }: Props) {
+export default function SeverityCell({ severity }: Props) {
   const loweredSeverity = severity?.toLowerCase();
   const classes = useStyles(loweredSeverity)();
 
@@ -67,9 +62,11 @@ export default function SeverityIcon({ severity }: Props) {
   }, [loweredSeverity]);
 
   return (
-    <>
-      <Icon className={classes.icon} />
-      {severity}
-    </>
+    <Flex gap={{ default: 'gapSm' }}>
+      <FlexItem>
+        <Icon className={classes.icon} />
+      </FlexItem>
+      <FlexItem>{severity}</FlexItem>
+    </Flex>
   );
 }

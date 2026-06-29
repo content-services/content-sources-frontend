@@ -14,23 +14,18 @@ import { ErrataItem } from 'services/Content/ContentApi';
 import Hide from '../../Hide/Hide';
 import { Flex, FlexItem, Grid, Stack, Content } from '@patternfly/react-core';
 import { SkeletonTable } from '@patternfly/react-component-groups';
-import {
-  t_global_color_status_danger_default,
-  t_global_color_status_success_default,
-} from '@patternfly/react-tokens';
+
 import { createUseStyles } from 'react-jss';
 import useDeepCompareEffect from 'Hooks/useDeepCompareEffect';
 import React, { useEffect, useState } from 'react';
-import { capitalize, isEmpty } from 'lodash';
-import { OffIcon, OnIcon } from '@patternfly/react-icons';
+import { isEmpty } from 'lodash';
 import { formatDateDDMMMYYYY, formatDescription, reduceStringToCharsWithEllipsis } from 'helpers';
-import ErrataTypeIcon from '../../ErrataTypeIcon/ErrataTypeIcon';
-import SeverityWithIcon from '../../SeverityWithIcon/SeverityWithIcon';
 import UrlWithExternalIcon from '../../UrlWithLinkIcon/UrlWithLinkIcon';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
-
-const red = t_global_color_status_danger_default.var;
-const green = t_global_color_status_success_default.var;
+import ErrataTypeCell from './components/ErrataTypeCell';
+import SeverityCell from './components/SeverityCell';
+import RebootStatus from './components/RebootStatus';
+import { columnsConfig } from './constants';
 
 const useStyles = createUseStyles({
   mainContainer: {
@@ -41,9 +36,6 @@ const useStyles = createUseStyles({
   expansionBox: {
     padding: '16px 0',
   },
-  rightMargin: { marginRight: '6px' },
-  red: { extend: 'rightMargin', color: red },
-  green: { extend: 'rightMargin', color: green },
   retainSpaces: { whiteSpace: 'pre-line' },
 });
 
@@ -79,21 +71,13 @@ export default function AdvisoriesTable({
     setPrev(errataList.length || 10);
   }, [errataList.length]);
 
-  const columnHeaders = [
-    { name: 'Name', width: 15 },
-    { name: 'Synopsis' },
-    { name: 'Type', width: 15 },
-    { name: 'Severity', width: 10 },
-    { name: 'Publish date', width: 15 },
-  ];
-
   return (
     <>
       <Hide hide={!isFetchingOrLoading}>
         <Grid className={classes.mainContainer}>
           <SkeletonTable
             rows={prevLength}
-            columnsCount={columnHeaders.length}
+            columnsCount={columnsConfig.length}
             variant={TableVariant.compact}
           />
         </Grid>
@@ -104,7 +88,7 @@ export default function AdvisoriesTable({
             <Thead>
               <Tr>
                 <Th screenReaderText='empty' />
-                {columnHeaders.map(({ name, width }, index) =>
+                {columnsConfig.map(({ name, width }, index) =>
                   name === 'Name' || name === 'Synopsis' ? (
                     <Th width={width as BaseCellProps['width']} key={index + name + '_header'}>
                       {name}
@@ -150,13 +134,10 @@ export default function AdvisoriesTable({
                   <Td>{errata_id}</Td>
                   <Td>{reduceStringToCharsWithEllipsis(summary, 70)}</Td>
                   <Td>
-                    <div>
-                      <ErrataTypeIcon type={type} iconProps={{ className: classes.rightMargin }} />
-                      {capitalize(type)}
-                    </div>
+                    <ErrataTypeCell type={type} />
                   </Td>
                   <Td>
-                    <SeverityWithIcon severity={severity} />
+                    <SeverityCell severity={severity} />
                   </Td>
                   <Td>{formatDateDDMMMYYYY(issued_date)}</Td>
                 </Tr>
@@ -180,17 +161,7 @@ export default function AdvisoriesTable({
                               {formatDescription(description)}
                             </Content>
                           </Grid>
-                          <Grid>
-                            <strong>Reboot</strong>
-                            <div>
-                              {reboot_suggested ? (
-                                <OffIcon className={classes.red} />
-                              ) : (
-                                <OnIcon className={classes.green} />
-                              )}
-                              {`Reboot is ${reboot_suggested ? '' : 'not '}required`}
-                            </div>
-                          </Grid>
+                          <RebootStatus rebootSuggested={reboot_suggested} />
                           <Grid>
                             <div>
                               {errata_id.startsWith('RH') ? (
