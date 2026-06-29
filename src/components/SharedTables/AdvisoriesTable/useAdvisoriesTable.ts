@@ -6,10 +6,10 @@ import {
 import type { ThProps } from '@patternfly/react-table';
 import useDebounce from 'Hooks/useDebounce';
 import { type ErrataFilters, initialErrataFilters, columnsConfig } from './constants';
-import { useTablePaginationLocalStorage } from '../../Tables/Generic/hooks/useTablePaginationLocalStorage';
+import { usePaginationLocalStorage } from 'Hooks/tables/usePaginationLocalStorage';
 
 export default function useAdvisoriesTable({ paginationKey }: { paginationKey: string }) {
-  const { page, perPage, onPerPageSelect, onSetPage, setPage } = useTablePaginationLocalStorage({
+  const { page, perPage, onPerPageSelect, onSetPage, setPage } = usePaginationLocalStorage({
     key: paginationKey,
   });
 

@@ -5,7 +5,7 @@ import { PackageWithUUID } from 'services/Content/ContentApi';
 import { useGetPackagesQuery } from 'services/Content/ContentQueries';
 import { Outlet, useOutletContext } from 'react-router-dom';
 import PackagesTableWithToolbars from 'components/Tables/Packages/PackagesTableWithToolbars';
-import { useTablePaginationLocalStorage } from 'components/Tables/Generic/hooks/useTablePaginationLocalStorage';
+import { usePaginationLocalStorage } from 'Hooks/tables/usePaginationLocalStorage';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
 import { usePackageTableFilters } from 'components/Tables/Packages/hooks/usePackageTableFilters';
@@ -28,7 +28,7 @@ export default function PackageModal() {
   const selection = useDataViewSelection({ matchOption: (a, b) => a.id === b.id });
   const { onSelect, selected } = selection;
 
-  const paginationData = useTablePaginationLocalStorage({ key: perPageKey });
+  const paginationData = usePaginationLocalStorage({ key: perPageKey });
   const { page, perPage } = paginationData;
 
   const {
