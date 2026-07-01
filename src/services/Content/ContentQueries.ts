@@ -22,6 +22,7 @@ import {
   EditContentListItem,
   getGpgKey,
   getPackages,
+  getRepositoryPackages,
   getPopularRepositories,
   PopularRepositoriesResponse,
   CreateContentRequestResponse,
@@ -65,6 +66,7 @@ export const POPULAR_REPOSITORIES_LIST_KEY = 'POPULAR_REPOSITORIES_LIST_KEY';
 export const REPOSITORY_PARAMS_KEY = 'REPOSITORY_PARAMS_KEY';
 export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
 export const PACKAGES_KEY = 'PACKAGES_KEY';
+export const REPOSITORY_PACKAGES_KEY = 'REPOSITORY_PACKAGES_KEY';
 export const SNAPSHOT_PACKAGES_KEY = 'SNAPSHOT_PACKAGES_KEY';
 export const SNAPSHOT_ERRATA_KEY = 'SNAPSHOT_ERRATA_KEY';
 export const LIST_SNAPSHOTS_KEY = 'LIST_SNAPSHOTS_KEY';
@@ -662,6 +664,24 @@ export const useGetPackagesQuery = (
     meta: {
       title: 'Unable to find packages with the given UUID.',
       id: 'packages-list-error',
+    },
+  });
+
+export const useRepositoryPackagesQuery = (
+  uuid: string,
+  page: number,
+  limit: number,
+  enabled = true,
+) =>
+  useQuery({
+    queryKey: [REPOSITORY_PACKAGES_KEY, uuid, page, limit],
+    queryFn: () => getRepositoryPackages(uuid, page, limit),
+    placeholderData: keepPreviousData,
+    staleTime: 60000,
+    enabled: enabled && !!uuid,
+    meta: {
+      title: 'Unable to find packages for the repository.',
+      id: 'repository-packages-list-error',
     },
   });
 

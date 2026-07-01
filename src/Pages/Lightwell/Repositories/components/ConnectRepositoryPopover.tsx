@@ -64,6 +64,7 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
             hoverTip='Copy'
             clickTip='Copied'
             variant={snippet.urlOnly ? ClipboardCopyVariant.inline : ClipboardCopyVariant.expansion}
+            isExpanded={!snippet.urlOnly}
           >
             {snippet.code}
           </ClipboardCopy>

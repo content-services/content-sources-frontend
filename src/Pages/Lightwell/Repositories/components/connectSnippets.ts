@@ -46,6 +46,19 @@ const getMavenSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[]
         },
       ],
     },
+    {
+      eventKey: 'artifactory',
+      title: 'Artifactory',
+      snippets: [
+        {
+          label: 'Configure as a remote repository in Artifactory:',
+          code: published_distribution_url ? published_distribution_url : '',
+          urlOnly: true,
+          description:
+            'Set the remote URL to this endpoint. Artifactory will proxy and cache packages automatically.',
+        },
+      ],
+    },
   ];
 };
 

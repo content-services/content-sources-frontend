@@ -1,3 +1,4 @@
+import { capitalize } from 'lodash';
 import { CONTENT_TYPE_PARAMETERS, REPOSITORY_DESCRIPTIONS } from './constants';
 
 const getContentTypeParameters = (contentType?: string) => {
@@ -20,3 +21,20 @@ export const getRepositoryDescription = (contentType?: string): string | undefin
   if (!normalized) return undefined;
   return REPOSITORY_DESCRIPTIONS[normalized];
 };
+
+export const formatRepositoryName = (
+  ecosystem?: string,
+  securityLevel?: string,
+  fallbackName?: string,
+) => {
+  const ecosystemLabel = ecosystem?.trim();
+  const securityLabel = securityLevel?.trim();
+
+  if (ecosystemLabel && securityLabel) {
+    return `${capitalize(ecosystemLabel)} ${capitalize(securityLabel)}`;
+  }
+
+  return fallbackName?.trim() || '—';
+};
+
+export const displayValue = (value?: string) => (value?.trim() ? value : '—');

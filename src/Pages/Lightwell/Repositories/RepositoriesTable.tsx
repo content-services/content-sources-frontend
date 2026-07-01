@@ -26,12 +26,14 @@ import Hide from 'components/Hide/Hide';
 import { FilterData } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 
-import { LIGHTWELL_FEATURE_NAME, lightwellPerPageKey } from '../constants';
+import { LIGHTWELL_FEATURE_NAME, LIGHTWELL_USE_MOCK, lightwellReposPerPageKey } from '../constants';
 import { getMockLightwellRepositoryList } from '../mockRepositories';
 import {
   getEcosystemFromContentType,
   formatEcosystemDisplay,
   getRepositoryDescription,
+  formatRepositoryName,
+  displayValue,
 } from '../helpers';
 import ConnectRepositoryPopover from './components/ConnectRepositoryPopover';
 import { capitalize } from 'lodash';
@@ -55,34 +57,17 @@ const columns = [
   { name: 'Builds', sortAttribute: null },
 ] as const;
 
-const displayValue = (value?: string) => (value?.trim() ? value : '—');
-
-const formatRepositoryName = (
-  ecosystem?: string,
-  securityLevel?: string,
-  fallbackName?: string,
-) => {
-  const ecosystemLabel = ecosystem?.trim();
-  const securityLabel = securityLevel?.trim();
-
-  if (ecosystemLabel && securityLabel) {
-    return `${capitalize(ecosystemLabel)} ${capitalize(securityLabel)}`;
-  }
-
-  return fallbackName?.trim() || '—';
-};
-
 const RepositoriesTable = () => {
   const classes = useStyles();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const storedPerPage = Number(localStorage.getItem(lightwellPerPageKey)) || 20;
+  const storedPerPage = Number(localStorage.getItem(lightwellReposPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
   const filters: FilterData = {
     feature_name: LIGHTWELL_FEATURE_NAME,
   };
 
-  const useMock = false;
+  const useMock = LIGHTWELL_USE_MOCK;
 
   const mockQuery = useQuery({
     queryKey: ['lightwell-repositories-mock', page, perPage, filters],
@@ -111,7 +96,7 @@ const RepositoriesTable = () => {
   const onSetPage = (_, newPage: number) => setPage(newPage);
 
   const onPerPageSelect = (_, newPerPage: number, newPage: number) => {
-    localStorage.setItem(lightwellPerPageKey, newPerPage.toString());
+    localStorage.setItem(lightwellReposPerPageKey, newPerPage.toString());
     setPerPage(newPerPage);
     setPage(newPage);
   };
@@ -207,7 +192,7 @@ const RepositoriesTable = () => {
                                     ouiaId={`lightwell-repo-${uuid}`}
                                     onClick={() => navigate(uuid)}
                                   >
-                                    {formatRepositoryName(ecosystem, security_level, name)}
+                                    {formatRepositoryName(ecosystem, security_level)}
                                   </Button>
                                 </FlexItem>
                                 <FlexItem>
@@ -241,11 +226,11 @@ const RepositoriesTable = () => {
                               {displayValue(formatEcosystemDisplay(content_type))}
                             </Td>
                             <Td className={spacing.pMd} dataLabel={columns[2].name}>
-                              {security_level?.trim() === 'validated' ? (
+                              {security_level === 'validated' ? (
                                 <Label variant='outline' color='purple'>
                                   {capitalize(security_level)}
                                 </Label>
-                              ) : security_level?.trim() === 'remediated' ? (
+                              ) : security_level === 'remediated' ? (
                                 <Label color='purple'>{capitalize(security_level)}</Label>
                               ) : (
                                 '—'
