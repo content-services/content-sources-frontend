@@ -1,6 +1,10 @@
 export const LIGHTWELL_FEATURE_NAME = 'lightwell-network';
 
-export const lightwellPerPageKey = 'lightwellRepositoriesPerPage';
+export const LIGHTWELL_USE_MOCK = false;
+
+export const lightwellReposPerPageKey = 'lightwellRepositoriesPerPage';
+
+export const lightwellPkgsPerPageKey = 'lightwellPackagesPerPage';
 
 export const CONTENT_TYPE_PARAMETERS: Record<string, { ecosystem: string; label: string }> = {
   maven: { ecosystem: 'Java', label: 'Maven' },

@@ -4,10 +4,11 @@ const mockRepositories = [
   {
     uuid: '11111111-1111-4111-8111-111111111111',
     name: 'lightwell/java/validated',
-    url: 'https://example.com/lightwell/java/validated',
+    published_distribution_url:
+      'https://packages.stage.redhat.com/api/pulp-content/lightwell/java/validated/',
     description:
       'Maven artifacts with Red Hat backported fixes for known vulnerabilities in pinned versions.',
-    security_level: 'Validated',
+    security_level: 'validated',
     content_type: 'maven',
     package_count: 1284,
     last_introspection_status: 'Valid',
@@ -16,10 +17,11 @@ const mockRepositories = [
   {
     uuid: '22222222-2222-4222-8222-222222222222',
     name: 'lightwell/java/remediated',
-    url: 'https://example.com/lightwell/java/remediated',
+    published_distribution_url:
+      'https://packages.stage.redhat.com/api/pulp-content/lightwell/java/remediated/',
     description:
       'Maven artifacts with Red Hat backported fixes for known vulnerabilities in pinned versions.',
-    security_level: 'Remediated',
+    security_level: 'remediated',
     content_type: 'maven',
     package_count: 892,
     last_introspection_status: 'Valid',
@@ -28,10 +30,11 @@ const mockRepositories = [
   {
     uuid: '33333333-3333-4333-8333-333333333333',
     name: 'lightwell/python/remediated',
-    url: 'https://example.com/lightwell/python/remediated',
+    published_distribution_url:
+      'https://packages.stage.redhat.com/api/pulp-content/lightwell/python/remediated/',
     description:
       'Python wheels with Red Hat backported fixes for known vulnerabilities in pinned versions.',
-    security_level: 'Remediated',
+    security_level: 'remediated',
     content_type: 'pypi',
     package_count: 456,
     last_introspection_status: 'Valid',
@@ -40,10 +43,11 @@ const mockRepositories = [
   {
     uuid: '44444444-4444-4444-8444-444444444444',
     name: 'lightwell/python/validated',
-    url: 'https://example.com/lightwell/python/validated',
+    published_distribution_url:
+      'https://packages.stage.redhat.com/api/pulp-content/lightwell/python/validated/',
     description:
       'Python wheels with Red Hat backported fixes for known vulnerabilities in pinned versions.',
-    security_level: 'Validated',
+    security_level: 'validated',
     content_type: 'pypi',
     package_count: 1045,
     last_introspection_status: 'Valid',

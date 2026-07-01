@@ -230,6 +230,26 @@ export type PackagesWithUUIDResponse = {
   meta: Meta;
 };
 
+export interface RepositoryPackageReleaseInfo {
+  version: string;
+  release: string;
+  created_at: string;
+}
+
+export interface RepositoryPackageItem {
+  group: string;
+  name: string;
+  versions: string[];
+  latest_releases: RepositoryPackageReleaseInfo[];
+}
+
+export type RepositoryPackagesResponse = {
+  results: RepositoryPackageItem[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
 export type ErrataResponse = {
   data: ErrataItem[];
   links: Links;
@@ -496,6 +516,20 @@ export const getPackages: (
       limit: limit?.toString(),
       search,
       sort_by: sortBy,
+    })}`,
+  );
+  return data;
+};
+
+export const getRepositoryPackages: (
+  uuid: string,
+  page: number,
+  limit: number,
+) => Promise<RepositoryPackagesResponse> = async (uuid, page, limit) => {
+  const { data } = await axios.get(
+    `/api/content-sources/v1/repositories/${uuid}/packages?${objectToUrlParams({
+      offset: ((page - 1) * limit).toString(),
+      limit: limit.toString(),
     })}`,
   );
   return data;
