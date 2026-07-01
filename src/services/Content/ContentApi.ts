@@ -28,6 +28,12 @@ export interface ContentItem {
   origin?: ContentOrigin;
   last_snapshot_task?: AdminTask;
   last_introspection_status: string;
+  content_type?: string;
+  description?: string;
+  ecosystem?: string;
+  security_level?: string;
+  builds?: number;
+  published_distribution_url?: string;
 }
 
 export interface PopularRepository {
@@ -156,6 +162,7 @@ export type FilterData = Partial<{
   urls: Array<string>;
   availableForArch: string;
   availableForVersion: string;
+  feature_name: string;
 }>;
 
 export type ValidateItem = {
@@ -381,6 +388,7 @@ export const getContentList: (
       available_for_version: filterData.availableForVersion,
       extended_release: extendedReleaseParam,
       extended_release_version: filterData.extended_release_version,
+      feature_name: filterData.feature_name,
     })}`,
   );
   return data;
