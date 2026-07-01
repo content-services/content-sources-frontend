@@ -22,9 +22,16 @@ interface HeaderProps {
   ouiaId: string;
   paragraph: string;
   aboutData?: Omit<HelpPopoverProps, 'children'>;
+  showOpenSourceBadge?: boolean;
 }
 
-export default function Header({ title, ouiaId, paragraph, aboutData }: HeaderProps) {
+export default function Header({
+  title,
+  ouiaId,
+  paragraph,
+  aboutData,
+  showOpenSourceBadge,
+}: HeaderProps) {
   return (
     <PageHeader>
       <Flex className={`${spacing.mXs} ${spacing.pbSm}`} direction={{ default: 'column' }}>
@@ -43,9 +50,11 @@ export default function Header({ title, ouiaId, paragraph, aboutData }: HeaderPr
                   />
                 </HelpPopover>
               ) : null}
-              <span style={{ verticalAlign: '2px' }}>
-                <OpenSourceBadge repositoriesURL='https://github.com/content-services/content-sources-frontend' />
-              </span>
+              {showOpenSourceBadge !== false ? (
+                <span style={{ verticalAlign: '2px' }}>
+                  <OpenSourceBadge repositoriesURL='https://github.com/content-services/content-sources-frontend' />
+                </span>
+              ) : null}
             </>
           }
         />
