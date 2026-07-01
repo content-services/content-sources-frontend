@@ -5,6 +5,17 @@ const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 
 const sassPrefix = insights.appname.replace(/-(\w)/g, (_, match) => match.toUpperCase());
 const srcDir = path.resolve(__dirname, './src');
+const useLightwellEntry = process.env.LIGHTWELL_ENTRY === 'true';
+const rootAppEntry = path.resolve(
+  __dirname,
+  useLightwellEntry ? './src/LightwellAppEntry.tsx' : './src/AppEntry.tsx',
+);
+
+if (useLightwellEntry) {
+  console.log(
+    '[fec] LIGHTWELL_ENTRY enabled — ./RootApp resolves to LightwellAppEntry (local dev only)',
+  );
+}
 
 /**
  * Custom webpack plugin to add Istanbul coverage instrumentation.
@@ -106,7 +117,7 @@ module.exports = {
   ],
   moduleFederation: {
     exposes: {
-      './RootApp': path.resolve(__dirname, './src/AppEntry.tsx'),
+      './RootApp': rootAppEntry,
       './LightwellApp': path.resolve(__dirname, './src/LightwellAppEntry.tsx'),
     },
     exclude: ['react-router-dom'],
