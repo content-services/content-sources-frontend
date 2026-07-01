@@ -107,6 +107,7 @@ module.exports = {
   moduleFederation: {
     exposes: {
       './RootApp': path.resolve(__dirname, './src/AppEntry.tsx'),
+      './LightwellApp': path.resolve(__dirname, './src/LightwellAppEntry.tsx'),
     },
     exclude: ['react-router-dom'],
     shared: [
