@@ -28,10 +28,8 @@ import ApiView from './ApiView';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import useCompatibleSystems from '../../../../../Hooks/useCompatibleSystems';
 import Loader from '../../../../../components/Loader';
-import {
-  TEMPLATE_SYSTEMS_UPDATE_LIMIT,
-  TEMPLATES_DOCS_URL,
-} from 'Pages/Templates/TemplatesTable/constants';
+import { TEMPLATES_DOCS_URL } from 'constants/docs';
+import { TEMPLATE_SYSTEMS_UPDATE_LIMIT } from 'Pages/Templates/TemplatesTable/constants';
 import { modalTableSurfaceStyles } from 'helpers';
 import { createUseStyles } from 'react-jss';
 import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';

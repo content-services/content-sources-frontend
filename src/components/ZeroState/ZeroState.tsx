@@ -21,13 +21,8 @@ import { createUseStyles } from 'react-jss';
 import useRootPath from 'Hooks/useRootPath';
 import { useAppContext } from 'middleware/AppContext';
 import { useNavigate } from 'react-router-dom';
+import { CONTENT_DOCS_URL, REPOSITORIES_DOCS_URL } from 'constants/docs';
 import { REPOSITORIES_ROUTE, TEMPLATES_ROUTE } from 'Routes/constants';
-
-const CONTENT_DOCS_URL =
-  'https://docs.redhat.com/en/documentation/red_hat_lightspeed/1-latest/html/managing_system_content_and_patch_updates_on_rhel_systems/index';
-
-const REPOSITORIES_DOCS_URL =
-  'https://docs.redhat.com/en/documentation/red_hat_lightspeed/1-latest/html/deploying_and_managing_rhel_systems_in_hybrid_clouds/assembly_managing-repositories-in-red-hat-hybrid-cloud-console_host-management-services';
 
 const useStyles = createUseStyles({
   contentZerostate: {
