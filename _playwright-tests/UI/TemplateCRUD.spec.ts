@@ -1,4 +1,5 @@
 import { test, expect } from 'test-utils';
+import { docsRedhatUrlMatcher, USING_CONTENT_TEMPLATES_PAGE } from 'constants/docs';
 import { cleanupRepositories, cleanupTemplates, randomName } from 'test-utils/helpers';
 
 import { navigateToRepositories, navigateToTemplates } from './helpers/navHelpers';
@@ -57,9 +58,7 @@ test.describe('Templates CRUD', () => {
 
       await page.getByRole('link', { name: 'Learn more about content templates' }).click();
       const docsPage = await pagePromise;
-      await expect(docsPage).toHaveURL(
-        /^https:\/\/docs\.redhat\.com\/en\/documentation\/red_hat_lightspeed\/.*using-content-templates-to-apply-system-patches.*$/,
-      );
+      await expect(docsPage).toHaveURL(docsRedhatUrlMatcher(USING_CONTENT_TEMPLATES_PAGE));
       await expect(docsPage.getByText(/^.*Using content templates.*$/).first()).toBeVisible();
       await expect(
         docsPage.getByText('A content template is a set of repository snapshots').first(),

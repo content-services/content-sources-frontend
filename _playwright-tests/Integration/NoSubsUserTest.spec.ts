@@ -1,4 +1,9 @@
 import { test, expect, cleanupRepositories, randomName } from 'test-utils';
+import {
+  docsRedhatUrlMatcher,
+  MANAGING_CONTENT_AND_PATCH_GUIDE,
+  USING_CONTENT_TEMPLATES_PAGE,
+} from 'constants/docs';
 import { closeGenericPopupsIfExist, waitForValidStatus } from '../UI/helpers/helpers';
 import { getZeroStateTitleLocator } from '../UI/helpers/navHelpers';
 import { PAGE_NAVIGATION_TIMEOUT_MS, PAGE_READY_TIMEOUT_MS } from '../testConstants';
@@ -68,9 +73,7 @@ test.describe('No-subs user content management', () => {
         .click();
 
       const docsPage = await pagePromise;
-      await expect(docsPage).toHaveURL(
-        /^https:\/\/docs\.redhat\.com\/en\/documentation\/red_hat_lightspeed\/.*managing_system_content_and_patch_updates_on_rhel_systems.*$/,
-      );
+      await expect(docsPage).toHaveURL(docsRedhatUrlMatcher(MANAGING_CONTENT_AND_PATCH_GUIDE));
       await expect(
         docsPage.getByText(/Managing system content and patch updates/i).first(),
       ).toBeVisible();
@@ -167,9 +170,7 @@ test.describe('No-subs user content management', () => {
 
       await page.getByRole('link', { name: 'Learn more about content templates' }).click();
       const docsPage = await pagePromise;
-      await expect(docsPage).toHaveURL(
-        /^https:\/\/docs\.redhat\.com\/en\/documentation\/red_hat_lightspeed\/.*using-content-templates-to-apply-system-patches.*$/,
-      );
+      await expect(docsPage).toHaveURL(docsRedhatUrlMatcher(USING_CONTENT_TEMPLATES_PAGE));
       await expect(docsPage.getByText(/^.*Using content templates.*$/).first()).toBeVisible();
       await expect(
         docsPage.getByText('A content template is a set of repository snapshots').first(),
