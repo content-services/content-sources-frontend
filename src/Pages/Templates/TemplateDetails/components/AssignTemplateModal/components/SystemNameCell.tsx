@@ -6,7 +6,7 @@ import type { SystemItem } from '../../../../../../services/Systems/SystemsApi';
 import HelpPopover from '../../../../../../components/HelpPopover';
 import React from 'react';
 import { isVersionLockedSystem } from '../../../../TemplatesTable/helpers';
-import { TEMPLATES_DOCS_URL } from '../../../../TemplatesTable/constants';
+import { TEMPLATES_DOCS_URL } from 'constants/docs';
 
 type Props = Pick<SystemItem, 'id'> &
   Pick<SystemItem['attributes'], 'display_name' | 'rhsm' | 'satellite_managed'> & {

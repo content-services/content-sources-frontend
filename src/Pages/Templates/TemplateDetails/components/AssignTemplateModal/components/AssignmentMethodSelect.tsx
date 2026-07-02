@@ -2,7 +2,7 @@ import React, { useRef, useMemo } from 'react';
 import { SimpleSelectOption, SimpleSelect } from '@patternfly/react-templates';
 import { Form, FormGroup, FormGroupLabelHelp, List, ListItem } from '@patternfly/react-core';
 import HelpPopover from '../../../../../../components/HelpPopover';
-import { TEMPLATES_DOCS_URL } from '../../../../TemplatesTable/constants';
+import { TEMPLATES_DOCS_URL } from 'constants/docs';
 
 export const AssignmentMethods = {
   SystemList: 'list',

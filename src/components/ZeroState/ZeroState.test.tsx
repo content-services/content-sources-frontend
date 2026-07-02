@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { CONTENT_DOCS_URL, REPOSITORIES_DOCS_URL } from 'constants/docs';
 import { ZeroState } from './ZeroState';
 import { useAppContext } from 'middleware/AppContext';
 import { useNavigate } from 'react-router-dom';
@@ -106,9 +107,14 @@ describe('ZeroState', () => {
     expect(
       screen.getByText('Learn more about managing system content and patch updates'),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', {
+        name: 'Learn more about managing system content and patch updates',
+      }),
+    ).toHaveAttribute('href', CONTENT_DOCS_URL);
     expect(screen.getByRole('link', { name: 'Learn more about repositories' })).toHaveAttribute(
       'href',
-      'https://docs.redhat.com/en/documentation/red_hat_lightspeed/1-latest/html/deploying_and_managing_rhel_systems_in_hybrid_clouds/assembly_managing-repositories-in-red-hat-hybrid-cloud-console_host-management-services',
+      REPOSITORIES_DOCS_URL,
     );
   });
 });

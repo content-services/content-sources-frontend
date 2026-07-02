@@ -51,7 +51,7 @@ import StatusIcon from './components/StatusIcon';
 import { ExclamationTriangleIcon, ExternalLinkSquareAltIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { useFlag } from '@unleash/proxy-client-react';
-import { TEMPLATES_DOCS_URL } from './constants';
+import { TEMPLATES_DOCS_URL } from 'constants/docs';
 import { abbreviateStreamName } from './helpers';
 
 const useStyles = createUseStyles({
