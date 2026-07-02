@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import { useGetSnapshotErrataQuery } from 'services/Content/ContentQueries';
 import { SnapshotErrataTab } from './SnapshotErrataTab';
@@ -24,7 +24,7 @@ jest.mock('middleware/AppContext', () => ({
   }),
 }));
 
-it('Render 1 item in errata list', () => {
+it('displays errata details when expanding an advisory row', () => {
   (useGetSnapshotErrataQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     isFetching: false,
@@ -42,5 +42,7 @@ it('Render 1 item in errata list', () => {
   expect(queryByText(defaultErrataItem.errata_id)).toBeInTheDocument();
   expect(queryByText(capitalize(defaultErrataItem.type))).toBeInTheDocument();
   expect(queryByText(defaultErrataItem.severity)).toBeInTheDocument();
-  expect(queryByText('Reboot is not required')).toBeInTheDocument();
+  expect(screen.getByRole('group', { name: 'Reboot status' })).toHaveTextContent(
+    'System reboot is not required',
+  );
 });

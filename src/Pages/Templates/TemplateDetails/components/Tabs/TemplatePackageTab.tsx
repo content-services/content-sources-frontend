@@ -1,6 +1,6 @@
 import PackagesTableWithToolbars from 'components/Tables/Packages/PackagesTableWithToolbars';
 import { useFetchTemplatePackages } from 'services/Templates/TemplateQueries';
-import { useTablePaginationLocalStorage } from 'components/Tables/Generic/hooks/useTablePaginationLocalStorage';
+import { usePaginationLocalStorage } from 'Hooks/tables/usePaginationLocalStorage';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
 import { usePackageTableFilters } from 'components/Tables/Packages/hooks/usePackageTableFilters';
@@ -13,7 +13,7 @@ export default function TemplatePackageTab() {
   const filterData = usePackageTableFilters();
   const { debouncedSearch } = filterData;
 
-  const paginationData = useTablePaginationLocalStorage({ key: perPageKey });
+  const paginationData = usePaginationLocalStorage({ key: perPageKey });
   const { page, perPage } = paginationData;
 
   const {
