@@ -12,3 +12,5 @@ export const REPOSITORY_DESCRIPTIONS: Record<string, string> = {
     'Maven artifacts with Red Hat backported fixes for known vulnerabilities in pinned versions.',
   pypi: 'Python wheels with Red Hat backported fixes for known vulnerabilities in pinned versions.',
 };
+
+export const LIGHTWELL_PROJECT_URL = 'https://www.redhat.com/en/lightwell#follow-our-progress';
