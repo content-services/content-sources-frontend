@@ -24,9 +24,7 @@ it('shows empty state when there are no repositories', async () => {
 
   renderRepositoriesTable();
 
-  expect(
-    await screen.findByText('No Lightwell repositories are available yet.'),
-  ).toBeInTheDocument();
+  expect(await screen.findByText('Lightwell members only')).toBeInTheDocument();
 });
 
 it('renders with a single row', async () => {

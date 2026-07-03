@@ -20,7 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import { createUseStyles } from 'react-jss';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 
-import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
+import EmptyTableState from './components/EmptyTableState';
 import Header from 'components/Header/Header';
 import Hide from 'components/Hide/Hide';
 import { FilterData } from 'services/Content/ContentApi';
@@ -281,12 +281,7 @@ const RepositoriesTable = () => {
           </Hide>
           <Hide hide={!countIsZero || isLoading}>
             <Stack>
-              <EmptyTableState
-                notFiltered={true}
-                clearFilters={() => {}}
-                itemName='repositories'
-                notFilteredBody='No Lightwell repositories are available yet.'
-              />
+              <EmptyTableState />
             </Stack>
           </Hide>
         </Grid>
