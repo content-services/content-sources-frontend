@@ -4,6 +4,7 @@ export interface ConnectCodeSnippet {
   label: string;
   code: string;
   urlOnly?: boolean;
+  description?: string;
 }
 
 export interface ConnectSnippetTab {
@@ -57,7 +58,7 @@ const getPythonSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[
       title: 'pip',
       snippets: [
         {
-          label: 'pip install',
+          label: 'Install directly:',
           code: `pip install --index-url ${published_distribution_url} <package>`,
         },
       ],
@@ -67,7 +68,7 @@ const getPythonSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[
       title: 'pip.conf',
       snippets: [
         {
-          label: 'pip.conf',
+          label: 'Add to your pip.conf for permanent use:',
           code: `[global] index-url = ${published_distribution_url}`,
         },
       ],
@@ -80,6 +81,8 @@ const getPythonSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[
           label: 'Configure as a remote repository in Artifactory:',
           code: published_distribution_url ? published_distribution_url : '',
           urlOnly: true,
+          description:
+            'Set the remote URL to this endpoint. Artifactory will proxy and cache packages automatically.',
         },
       ],
     },

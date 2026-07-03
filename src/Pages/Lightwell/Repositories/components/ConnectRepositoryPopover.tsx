@@ -22,6 +22,10 @@ const useStyles = createUseStyles({
   popoverBody: {
     minWidth: '32rem',
     maxWidth: '40rem',
+    '& .pf-v6-c-clipboard-copy__expandable-content': {
+      '--pf-v6-c-clipboard-copy__expandable-content--BorderColor':
+        'var(--pf-t--global--border--color--control--default)',
+    },
   },
 });
 
@@ -51,17 +55,23 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
     <Stack hasGutter>
       {tab.snippets.map((snippet) => (
         <StackItem key={snippet.label}>
-          <Content component='small' className={spacing.mMd}>
+          <Content component='small' style={{ textAlign: 'left' }}>
             {snippet.label}
           </Content>
           <ClipboardCopy
             isReadOnly
+            isCode
             hoverTip='Copy'
             clickTip='Copied'
             variant={snippet.urlOnly ? ClipboardCopyVariant.inline : ClipboardCopyVariant.expansion}
           >
             {snippet.code}
           </ClipboardCopy>
+          {snippet.description && (
+            <Content component='small' className={spacing.mtSm} style={{ textAlign: 'left' }}>
+              {snippet.description}
+            </Content>
+          )}
         </StackItem>
       ))}
     </Stack>
@@ -93,6 +103,7 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
           aria-label={tab.title}
           ref={tabRefs[tab.eventKey]}
           hidden={index > 0}
+          className={spacing.ptMd}
         >
           {renderTabPanel(tab)}
         </TabContent>
