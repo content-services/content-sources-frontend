@@ -2,7 +2,7 @@ import { capitalize } from 'lodash';
 import { CONTENT_TYPE_PARAMETERS, REPOSITORY_DESCRIPTIONS } from './constants';
 
 const getContentTypeParameters = (contentType?: string) => {
-  const normalized = contentType?.trim().toLowerCase();
+  const normalized = contentType?.toLowerCase();
   if (!normalized) return undefined;
   return CONTENT_TYPE_PARAMETERS[normalized];
 };
@@ -17,24 +17,24 @@ export const formatEcosystemDisplay = (contentType?: string): string | undefined
 };
 
 export const getRepositoryDescription = (contentType?: string): string | undefined => {
-  const normalized = contentType?.trim().toLowerCase();
+  const normalized = contentType?.toLowerCase();
   if (!normalized) return undefined;
   return REPOSITORY_DESCRIPTIONS[normalized];
 };
 
 export const formatRepositoryName = (
-  ecosystem?: string,
+  contentType?: string,
   securityLevel?: string,
   fallbackName?: string,
 ) => {
-  const ecosystemLabel = ecosystem?.trim();
-  const securityLabel = securityLevel?.trim();
+  const ecosystem = getEcosystemFromContentType(contentType);
 
-  if (ecosystemLabel && securityLabel) {
-    return `${capitalize(ecosystemLabel)} ${capitalize(securityLabel)}`;
+  if (ecosystem && securityLevel) {
+    return `${capitalize(ecosystem)} ${capitalize(securityLevel)}`;
   }
 
-  return fallbackName?.trim() || '—';
+  return fallbackName || '—';
 };
 
-export const displayValue = (value?: string) => (value?.trim() ? value : '—');
+export const stripLightwellVersionSuffix = (version: string): string =>
+  version.replace(/\.rhlw-.*$/, '');

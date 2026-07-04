@@ -7,6 +7,7 @@ import {
   Flex,
   FlexItem,
   Grid,
+  Icon,
   Label,
   Pagination,
   PaginationVariant,
@@ -22,27 +23,35 @@ import { CopyIcon, CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icon
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { createUseStyles } from 'react-jss';
-import { useMemo, useState, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Table, TableVariant, Tr, Td, Thead, Th, Tbody } from '@patternfly/react-table';
-
-import { useFetchContent, useRepositoryPackagesQuery } from 'services/Content/ContentQueries';
-import { RepositoryPackageItem } from 'services/Content/ContentApi';
-import { getMockLightwellPackages, LightwellPackage } from '../mockPackages';
+import { useState, type ReactNode } from 'react';
 import {
-  displayValue,
+  Table,
+  TableVariant,
+  Tr,
+  Td,
+  Thead,
+  Th,
+  Tbody,
+  type BaseCellProps,
+} from '@patternfly/react-table';
+
+import {
+  useLightwellRepositoryPackagesQuery,
+  useFetchContent,
+} from 'services/Content/ContentQueries';
+import { RepositoryPackageItem } from 'services/Content/ContentApi';
+import {
   formatRepositoryName,
-  getEcosystemFromContentType,
   getRepositoryDescription,
+  stripLightwellVersionSuffix,
 } from '../helpers';
 import Hide from 'components/Hide/Hide';
-import { LIGHTWELL_USE_MOCK, lightwellPkgsPerPageKey } from '../constants';
-import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
+import { lightwellPkgsPerPageKey } from '../constants';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Loader from 'components/Loader';
-import { getMockLightwellRepository } from '../mockRepositories';
+import { useLightwellNavigate } from '../../../Hooks/useLightwellNavigate';
 import ConnectRepositoryPopover from '../Repositories/components/ConnectRepositoryPopover';
-import { useQuery } from '@tanstack/react-query';
+import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -65,22 +74,15 @@ const useStyles = createUseStyles({
   },
 });
 
-type PackageColumn = {
-  id: 'package' | 'versions' | 'latestReleases' | 'namespace' | 'lastUpdated';
+type MappedPackage = {
+  group_id: string;
   name: string;
-  remediatedOnly?: boolean;
-  javaOnly?: boolean;
+  versions: string[];
+  latest_releases: string[];
+  last_updated: string;
 };
 
-const columns: PackageColumn[] = [
-  { id: 'package', name: 'Package' },
-  { id: 'versions', name: 'Versions' },
-  { id: 'latestReleases', name: 'Latest releases', remediatedOnly: true },
-  { id: 'namespace', name: 'Namespace', javaOnly: true },
-  { id: 'lastUpdated', name: 'Last updated' },
-];
-
-const mapRepositoryPackage = (pkg: RepositoryPackageItem): LightwellPackage => {
+const mapRepositoryPackage = (pkg: RepositoryPackageItem): MappedPackage => {
   const latestCreatedAt = pkg.latest_releases
     .map((release) => release.created_at)
     .sort()
@@ -89,7 +91,7 @@ const mapRepositoryPackage = (pkg: RepositoryPackageItem): LightwellPackage => {
   return {
     group_id: pkg.group,
     name: pkg.name,
-    versions: pkg.versions,
+    versions: pkg.versions.map(stripLightwellVersionSuffix),
     latest_releases: pkg.latest_releases.map((release) => release.release),
     last_updated: latestCreatedAt?.split('T')[0] ?? '—',
   };
@@ -142,16 +144,61 @@ const StackedItemsCell = ({
   );
 };
 
-const PackagesList = () => {
+const PackagesTable = () => {
   const classes = useStyles();
   const repoUUID = useSafeUUIDParam('repoUUID');
-  const navigate = useNavigate();
-  const useMock = LIGHTWELL_USE_MOCK;
+  const { goToRepositories, goToPackageDetails } = useLightwellNavigate();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const storedPerPage = Number(localStorage.getItem(lightwellPkgsPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
   const [expandedPackages, setExpandedPackages] = useState<Set<string>>(new Set());
+
+  const {
+    data: repository,
+    isLoading: isRepositoryLoading,
+    isError: isRepositoryError,
+    error: repositoryError,
+  } = useFetchContent(repoUUID, !!repoUUID);
+
+  const {
+    data: packagesData,
+    isLoading: isLoadingPackages,
+    isFetching: isFetchingPackages,
+    isError: isPackagesError,
+    error: packagesError,
+  } = useLightwellRepositoryPackagesQuery(repoUUID, page, perPage, search, !!repoUUID);
+
+  const results = packagesData?.results ?? [];
+  const packages = results.map(mapRepositoryPackage);
+  const packageCount = packagesData?.total ?? 0;
+
+  const countIsZero = packageCount === 0;
+  const showPagination = packages.length > 0;
+
+  if (isRepositoryLoading || !repository) {
+    return <Loader />;
+  }
+
+  if (!repoUUID || isRepositoryError) throw repositoryError;
+  if (isPackagesError) throw packagesError;
+
+  const onSetPage = (_, newPage: number) => setPage(newPage);
+
+  const onPerPageSelect = (_, newPerPage: number, newPage: number) => {
+    localStorage.setItem(lightwellPkgsPerPageKey, newPerPage.toString());
+    setPerPage(newPerPage);
+    setPage(newPage);
+  };
+
+  const paginationProps = {
+    isDisabled: isLoadingPackages || isFetchingPackages,
+    itemCount: packageCount,
+    perPage,
+    page,
+    onSetPage,
+    onPerPageSelect,
+  };
 
   const togglePackageExpanded = (packageKey: string) => {
     setExpandedPackages((prev) => {
@@ -165,86 +212,23 @@ const PackagesList = () => {
     });
   };
 
-  const mockRepositoryQuery = useQuery({
-    queryKey: ['lightwell-repository-mock', repoUUID],
-    queryFn: () => {
-      const mockRepository = getMockLightwellRepository(repoUUID);
-      if (!mockRepository) {
-        throw new Error('Lightwell repository not found');
-      }
-      return mockRepository;
-    },
-    staleTime: 20000,
-    enabled: useMock && !!repoUUID,
-  });
-
-  const apiRepositoryQuery = useFetchContent(repoUUID, !!repoUUID && !useMock);
-  const packagesQuery = useRepositoryPackagesQuery(repoUUID, page, perPage, !useMock && !!repoUUID);
-
-  const {
-    data: repository,
-    isLoading: isRepositoryLoading,
-    isError,
-    error,
-  } = useMock ? mockRepositoryQuery : apiRepositoryQuery;
-
-  const { packages, packageCount } = useMemo(() => {
-    if (useMock) {
-      const mockPackages = getMockLightwellPackages(repoUUID, search);
-      const offset = (page - 1) * perPage;
-      return {
-        packages: mockPackages.slice(offset, offset + perPage),
-        packageCount: mockPackages.length,
-      };
-    }
-
-    const results = packagesQuery.data?.results ?? [];
-    return {
-      packages: results.map(mapRepositoryPackage),
-      packageCount: packagesQuery.data?.total ?? 0,
-    };
-  }, [useMock, repoUUID, search, page, perPage, packagesQuery.data]);
-
-  const isLoadingPackages = useMock ? false : packagesQuery.isLoading || packagesQuery.isFetching;
-  const countIsZero = packageCount === 0;
-
-  if (isError) throw error;
-  if (!useMock && packagesQuery.isError) throw packagesQuery.error;
-
-  if (isRepositoryLoading || !repository) {
-    return <Loader />;
-  }
-
-  const onSetPage = (_, newPage: number) => setPage(newPage);
-
-  const onPerPageSelect = (_, newPerPage: number, newPage: number) => {
-    localStorage.setItem(lightwellPkgsPerPageKey, newPerPage.toString());
-    setPerPage(newPerPage);
-    setPage(newPage);
-  };
-
-  const paginationProps = {
-    isDisabled: isLoadingPackages,
-    itemCount: packageCount,
-    perPage,
-    page,
-    onSetPage,
-    onPerPageSelect,
-  };
-
-  const ecosystem = getEcosystemFromContentType(repository.content_type);
-  const repositoryName = formatRepositoryName(ecosystem, repository.security_level);
+  const repositoryName = formatRepositoryName(
+    repository.content_type,
+    repository.security_level,
+    repository.name,
+  );
   const isRemediatedRepository = repository.security_level === 'remediated';
   const isJavaRepository = repository.content_type === 'maven';
-  const visibleColumns = columns.filter((column) => {
-    if (column.remediatedOnly && !isRemediatedRepository) {
-      return false;
-    }
-    if (column.javaOnly && !isJavaRepository) {
-      return false;
-    }
-    return true;
-  });
+
+  const columnHeaders: { title: string; width?: BaseCellProps['width'] }[] = [
+    { title: 'Package', width: 25 },
+    { title: 'Version', width: 15 },
+    ...(isRemediatedRepository
+      ? [{ title: 'Latest release', width: 20 as BaseCellProps['width'] }]
+      : []),
+    ...(isJavaRepository ? [{ title: 'Namespace', width: 20 as BaseCellProps['width'] }] : []),
+    { title: 'Last updated', width: 15 },
+  ];
 
   return (
     <>
@@ -252,7 +236,7 @@ const PackagesList = () => {
         <Stack>
           <StackItem>
             <Breadcrumb ouiaId='lightwell-packages-breadcrumb'>
-              <BreadcrumbItem component='button' onClick={() => navigate('..')}>
+              <BreadcrumbItem component='button' onClick={goToRepositories}>
                 Lightwell
               </BreadcrumbItem>
               <BreadcrumbItem disabled>{repositoryName}</BreadcrumbItem>
@@ -266,7 +250,9 @@ const PackagesList = () => {
             >
               <Flex alignItems={{ default: 'alignItemsCenter' }} gap={{ default: 'gapSm' }}>
                 <FlexItem>
-                  {repository?.content_type === 'maven' ? <JavaIcon /> : <PythonIcon />}
+                  <Icon size='xl'>
+                    {repository?.content_type === 'maven' ? <JavaIcon /> : <PythonIcon />}
+                  </Icon>
                 </FlexItem>
                 <FlexItem>
                   <Title headingLevel='h1' ouiaId='lightwell-packages-header'>
@@ -279,10 +265,10 @@ const PackagesList = () => {
                     icon={<CopyIcon />}
                     isCompact
                     onClick={() =>
-                      navigator.clipboard.writeText(repository?.published_distribution_url || '')
+                      navigator.clipboard.writeText(repository.published_distribution_url || '')
                     }
                   >
-                    {repository?.published_distribution_url}
+                    {repository.published_distribution_url}
                   </Label>
                 </FlexItem>
               </Flex>
@@ -295,20 +281,20 @@ const PackagesList = () => {
                     content_type: repository.content_type,
                   }}
                 >
-                  <Button variant='secondary' icon={<CodeIcon />}>
+                  <Button size='sm' variant='secondary' icon={<CodeIcon />}>
                     Connect
                   </Button>
                 </ConnectRepositoryPopover>
               </FlexItem>
             </Flex>
-            <Content className={`${spacing.pySm}`}>
-              {displayValue(getRepositoryDescription(repository?.content_type))}
+            <Content className={spacing.pySm}>
+              {getRepositoryDescription(repository.content_type)}
             </Content>
           </StackItem>
         </Stack>
       </Grid>
 
-      <Grid className={`${spacing.pxLg}`}>
+      <Grid className={spacing.pxLg}>
         <Toolbar ouiaId='lightwell-packages-toolbar'>
           <ToolbarContent>
             <ToolbarItem className={classes.filterToolbarItem}>
@@ -317,12 +303,18 @@ const PackagesList = () => {
                 aria-label='Filter by name or namespace'
                 placeholder='Filter by name or namespace'
                 value={search}
-                onChange={(_event, value) => setSearch(value)}
-                onClear={() => setSearch('')}
+                onChange={(_event, value) => {
+                  setSearch(value);
+                  setPage(1);
+                }}
+                onClear={() => {
+                  setSearch('');
+                  setPage(1);
+                }}
               />
             </ToolbarItem>
             <ToolbarItem variant='pagination' align={{ default: 'alignEnd' }}>
-              <Hide hide={countIsZero || packageCount < 10}>
+              <Hide hide={!showPagination}>
                 <Pagination
                   id='lightwell-top-pagination'
                   widgetId='lightwellTopPaginationWidgetId'
@@ -337,7 +329,7 @@ const PackagesList = () => {
         <Hide hide={!isLoadingPackages}>
           <SkeletonTable
             rows={perPage}
-            columnsCount={visibleColumns.length}
+            columnsCount={columnHeaders.length}
             variant={TableVariant.compact}
           />
         </Hide>
@@ -349,12 +341,14 @@ const PackagesList = () => {
                 <Table
                   aria-label='Lightwell packages table'
                   ouiaId='lightwell-packages-table'
-                  variant={TableVariant.compact}
+                  isStriped
                 >
                   <Thead>
                     <Tr>
-                      {visibleColumns.map((column) => (
-                        <Th key={column.id}>{column.name}</Th>
+                      {columnHeaders.map(({ title, width }) => (
+                        <Th key={title + 'column'} width={width} modifier='wrap'>
+                          {title}
+                        </Th>
                       ))}
                     </Tr>
                   </Thead>
@@ -364,11 +358,26 @@ const PackagesList = () => {
                       const packageKey = `${group_id}-${name}`;
                       const isCollapsed = !expandedPackages.has(packageKey);
 
+                      const renderVersionLabel = (version: string) => (
+                        <Label
+                          isCompact
+                          icon={<CopyIcon />}
+                          onClick={() =>
+                            navigator.clipboard.writeText(`${group_id}:${name}:${version}`)
+                          }
+                          aria-label={`Copy ${version}`}
+                        >
+                          {version}
+                        </Label>
+                      );
+
                       const renderReleaseLabel = (release: string) => (
                         <Label
                           isCompact
                           icon={<CopyIcon />}
-                          onClick={() => navigator.clipboard.writeText(release)}
+                          onClick={() =>
+                            navigator.clipboard.writeText(`${group_id}:${name}:${release}`)
+                          }
                           aria-label={`Copy ${release}`}
                         >
                           {release}
@@ -377,46 +386,49 @@ const PackagesList = () => {
 
                       return (
                         <Tr key={packageKey}>
-                          {visibleColumns.map((column) => (
-                            <Td key={column.id} dataLabel={column.name} className={spacing.pMd}>
-                              {column.id === 'package' && (
-                                <Button
-                                  variant='link'
-                                  isInline
-                                  ouiaId={`lightwell-package-${name}`}
-                                  onClick={() => navigate('#')}
-                                >
-                                  {name}
-                                </Button>
-                              )}
-                              {column.id === 'versions' && (
-                                <StackedItemsCell
-                                  items={versions}
-                                  packageKey={packageKey}
-                                  isCollapsed={isCollapsed}
-                                  onToggle={togglePackageExpanded}
-                                  showToggle
-                                />
-                              )}
-                              {column.id === 'latestReleases' && (
-                                <StackedItemsCell
-                                  items={latest_releases}
-                                  packageKey={packageKey}
-                                  isCollapsed={isCollapsed}
-                                  onToggle={togglePackageExpanded}
-                                  renderItem={renderReleaseLabel}
-                                />
-                              )}
-                              {column.id === 'namespace' && group_id}
-                              {column.id === 'lastUpdated' && last_updated}
+                          <Td>
+                            <Button
+                              variant='link'
+                              isInline
+                              ouiaId={`lightwell-package-${name}`}
+                              onClick={() => goToPackageDetails(repoUUID, name)}
+                            >
+                              {name}
+                            </Button>
+                          </Td>
+                          <Td>
+                            <StackedItemsCell
+                              items={versions}
+                              packageKey={packageKey}
+                              isCollapsed={isCollapsed}
+                              onToggle={togglePackageExpanded}
+                              showToggle
+                              renderItem={
+                                repository.security_level === 'validated'
+                                  ? renderVersionLabel
+                                  : undefined
+                              }
+                            />
+                          </Td>
+                          {isRemediatedRepository ? (
+                            <Td>
+                              <StackedItemsCell
+                                items={latest_releases}
+                                packageKey={packageKey}
+                                isCollapsed={isCollapsed}
+                                onToggle={togglePackageExpanded}
+                                renderItem={renderReleaseLabel}
+                              />
                             </Td>
-                          ))}
+                          ) : null}
+                          {isJavaRepository ? <Td>{group_id}</Td> : null}
+                          <Td>{last_updated}</Td>
                         </Tr>
                       );
                     })}
                   </Tbody>
                 </Table>
-                <Hide hide={countIsZero || packageCount < 10}>
+                <Hide hide={!showPagination}>
                   <Flex className={classes.bottomContainer}>
                     <FlexItem />
                     <FlexItem>
@@ -448,4 +460,4 @@ const PackagesList = () => {
   );
 };
 
-export default PackagesList;
+export default PackagesTable;

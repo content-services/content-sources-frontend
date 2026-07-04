@@ -32,8 +32,8 @@ export interface ContentItem {
   description?: string;
   ecosystem?: string;
   security_level?: string;
-  builds?: number;
   published_distribution_url?: string;
+  build_count?: number;
 }
 
 export interface PopularRepository {
@@ -521,15 +521,17 @@ export const getPackages: (
   return data;
 };
 
-export const getRepositoryPackages: (
+export const getLightwellRepositoryPackages: (
   uuid: string,
   page: number,
   limit: number,
-) => Promise<RepositoryPackagesResponse> = async (uuid, page, limit) => {
+  search?: string,
+) => Promise<RepositoryPackagesResponse> = async (uuid, page, limit, search = '') => {
   const { data } = await axios.get(
     `/api/content-sources/v1/repositories/${uuid}/packages?${objectToUrlParams({
       offset: ((page - 1) * limit).toString(),
       limit: limit.toString(),
+      search,
     })}`,
   );
   return data;

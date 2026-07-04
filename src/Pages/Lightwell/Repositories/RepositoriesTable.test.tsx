@@ -10,6 +10,13 @@ jest.mock('services/Content/ContentQueries', () => ({
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
+  useMatch: () => ({ pathnameBase: '/lightwell' }),
+}));
+
+jest.mock('../../../Hooks/useLightwellNavigate', () => ({
+  useLightwellNavigate: () => ({
+    goToRepositoryPackages: jest.fn(),
+  }),
 }));
 
 const renderRepositoriesTable = () =>
@@ -27,7 +34,7 @@ it('shows empty state when there are no repositories', async () => {
   expect(await screen.findByText('Lightwell members only')).toBeInTheDocument();
 });
 
-it('renders with a single row', async () => {
+it('renders with a single repository', async () => {
   (useContentListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     data: {
@@ -45,7 +52,6 @@ it('renders with a single row', async () => {
     ),
   ).toBeInTheDocument();
   expect(await screen.findByText('Java (Maven)')).toBeInTheDocument();
-  expect(
-    await screen.findByText(defaultLightwellContentItem.package_count.toLocaleString()),
-  ).toBeInTheDocument();
+  expect(await screen.findByText('1')).toBeInTheDocument();
+  expect(await screen.findByText('3')).toBeInTheDocument();
 });

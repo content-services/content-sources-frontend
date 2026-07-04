@@ -10,9 +10,8 @@ const mockRepositories = [
       'Maven artifacts with Red Hat backported fixes for known vulnerabilities in pinned versions.',
     security_level: 'validated',
     content_type: 'maven',
-    package_count: 1284,
-    last_introspection_status: 'Valid',
-    builds: 12,
+    package_count: 10,
+    build_count: 24,
   },
   {
     uuid: '22222222-2222-4222-8222-222222222222',
@@ -23,9 +22,8 @@ const mockRepositories = [
       'Maven artifacts with Red Hat backported fixes for known vulnerabilities in pinned versions.',
     security_level: 'remediated',
     content_type: 'maven',
-    package_count: 892,
-    last_introspection_status: 'Valid',
-    builds: 122,
+    package_count: 11,
+    build_count: 28,
   },
   {
     uuid: '33333333-3333-4333-8333-333333333333',
@@ -35,10 +33,9 @@ const mockRepositories = [
     description:
       'Python wheels with Red Hat backported fixes for known vulnerabilities in pinned versions.',
     security_level: 'remediated',
-    content_type: 'pypi',
-    package_count: 456,
-    last_introspection_status: 'Valid',
-    builds: 59,
+    content_type: 'python',
+    package_count: 13,
+    build_count: 31,
   },
   {
     uuid: '44444444-4444-4444-8444-444444444444',
@@ -48,10 +45,9 @@ const mockRepositories = [
     description:
       'Python wheels with Red Hat backported fixes for known vulnerabilities in pinned versions.',
     security_level: 'validated',
-    content_type: 'pypi',
-    package_count: 1045,
-    last_introspection_status: 'Valid',
-    builds: 234,
+    content_type: 'python',
+    package_count: 10,
+    build_count: 22,
   },
 ] as ContentItem[];
 

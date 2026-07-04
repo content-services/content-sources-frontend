@@ -103,7 +103,7 @@ const getPythonSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[
 };
 
 export const getConnectSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[] => {
-  const contentType = repository.content_type?.trim().toLowerCase();
+  const contentType = repository.content_type;
 
   if (contentType === 'maven') {
     return getMavenSnippetTabs(repository);

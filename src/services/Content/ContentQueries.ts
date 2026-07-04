@@ -22,7 +22,6 @@ import {
   EditContentListItem,
   getGpgKey,
   getPackages,
-  getRepositoryPackages,
   getPopularRepositories,
   PopularRepositoriesResponse,
   CreateContentRequestResponse,
@@ -49,6 +48,7 @@ import {
   getLatestRepoConfigFile,
   PopularRepository,
   bulkRemoveRepositoryRpms,
+  getLightwellRepositoryPackages,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../Admin/AdminTaskQueries';
 import useErrorNotification from 'Hooks/useErrorNotification';
@@ -66,7 +66,7 @@ export const POPULAR_REPOSITORIES_LIST_KEY = 'POPULAR_REPOSITORIES_LIST_KEY';
 export const REPOSITORY_PARAMS_KEY = 'REPOSITORY_PARAMS_KEY';
 export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
 export const PACKAGES_KEY = 'PACKAGES_KEY';
-export const REPOSITORY_PACKAGES_KEY = 'REPOSITORY_PACKAGES_KEY';
+export const LIGHTWELL_REPOSITORY_PACKAGES_KEY = 'LIGHTWELL_REPOSITORY_PACKAGES_KEY';
 export const SNAPSHOT_PACKAGES_KEY = 'SNAPSHOT_PACKAGES_KEY';
 export const SNAPSHOT_ERRATA_KEY = 'SNAPSHOT_ERRATA_KEY';
 export const LIST_SNAPSHOTS_KEY = 'LIST_SNAPSHOTS_KEY';
@@ -667,21 +667,22 @@ export const useGetPackagesQuery = (
     },
   });
 
-export const useRepositoryPackagesQuery = (
+export const useLightwellRepositoryPackagesQuery = (
   uuid: string,
   page: number,
   limit: number,
+  search = '',
   enabled = true,
 ) =>
   useQuery({
-    queryKey: [REPOSITORY_PACKAGES_KEY, uuid, page, limit],
-    queryFn: () => getRepositoryPackages(uuid, page, limit),
+    queryKey: [LIGHTWELL_REPOSITORY_PACKAGES_KEY, uuid, page, limit, search],
+    queryFn: () => getLightwellRepositoryPackages(uuid, page, limit, search),
     placeholderData: keepPreviousData,
     staleTime: 60000,
     enabled: enabled && !!uuid,
     meta: {
       title: 'Unable to find packages for the repository.',
-      id: 'repository-packages-list-error',
+      id: 'lightwell-repository-packages-list-error',
     },
   });
 

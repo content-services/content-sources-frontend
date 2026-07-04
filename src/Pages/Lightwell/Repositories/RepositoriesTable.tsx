@@ -5,6 +5,7 @@ import {
   Flex,
   FlexItem,
   Grid,
+  Icon,
   Label,
   PageSection,
   Pagination,
@@ -13,10 +14,17 @@ import {
 } from '@patternfly/react-core';
 import { CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import { SkeletonTable } from '@patternfly/react-component-groups';
-import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import {
+  Table,
+  TableVariant,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  type BaseCellProps,
+} from '@patternfly/react-table';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { createUseStyles } from 'react-jss';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 
@@ -26,15 +34,9 @@ import Hide from 'components/Hide/Hide';
 import { FilterData } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 
-import { LIGHTWELL_FEATURE_NAME, LIGHTWELL_USE_MOCK, lightwellReposPerPageKey } from '../constants';
-import { getMockLightwellRepositoryList } from '../mockRepositories';
-import {
-  getEcosystemFromContentType,
-  formatEcosystemDisplay,
-  getRepositoryDescription,
-  formatRepositoryName,
-  displayValue,
-} from '../helpers';
+import { LIGHTWELL_FEATURE_NAME, lightwellReposPerPageKey } from '../constants';
+import { formatEcosystemDisplay, getRepositoryDescription, formatRepositoryName } from '../helpers';
+import { useLightwellNavigate } from '../../../Hooks/useLightwellNavigate';
 import ConnectRepositoryPopover from './components/ConnectRepositoryPopover';
 import { capitalize } from 'lodash';
 
@@ -49,17 +51,9 @@ const useStyles = createUseStyles({
   },
 });
 
-const columns = [
-  { name: 'Repository', sortAttribute: 'name' },
-  { name: 'Ecosystem', sortAttribute: 'content_type' },
-  { name: 'Security level', sortAttribute: 'security_level' },
-  { name: 'Packages', sortAttribute: null },
-  { name: 'Builds', sortAttribute: null },
-] as const;
-
 const RepositoriesTable = () => {
   const classes = useStyles();
-  const navigate = useNavigate();
+  const { goToRepositoryPackages } = useLightwellNavigate();
   const [page, setPage] = useState(1);
   const storedPerPage = Number(localStorage.getItem(lightwellReposPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
@@ -67,24 +61,12 @@ const RepositoriesTable = () => {
     feature_name: LIGHTWELL_FEATURE_NAME,
   };
 
-  const useMock = LIGHTWELL_USE_MOCK;
-
-  const mockQuery = useQuery({
-    queryKey: ['lightwell-repositories-mock', page, perPage, filters],
-    queryFn: () => getMockLightwellRepositoryList(page, perPage, filters),
-    placeholderData: keepPreviousData,
-    staleTime: 20000,
-    enabled: useMock,
-  });
-
-  const apiQuery = useContentListQuery(page, perPage, filters, '', [], !useMock);
-
   const {
     isLoading,
     isError,
     error,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useMock ? mockQuery : apiQuery;
+  } = useContentListQuery(page, perPage, filters, '', []);
 
   const {
     data: repositories = [],
@@ -92,6 +74,14 @@ const RepositoriesTable = () => {
   } = data;
 
   if (isError) throw error;
+
+  const columnHeaders: { title: string; width?: BaseCellProps['width'] }[] = [
+    { title: 'Repository' },
+    { title: 'Ecosystem', width: 15 },
+    { title: 'Security level', width: 15 },
+    { title: 'Packages', width: 10 },
+    { title: 'Builds', width: 10 },
+  ];
 
   const onSetPage = (_, newPage: number) => setPage(newPage);
 
@@ -127,7 +117,6 @@ const RepositoriesTable = () => {
               className={classes.topContainer}
               data-ouia-component-id='lightwell-repositories-toolbar'
             >
-              <FlexItem></FlexItem>
               <FlexItem>
                 <Pagination
                   id='lightwell-top-pagination'
@@ -142,7 +131,7 @@ const RepositoriesTable = () => {
             <Stack>
               <SkeletonTable
                 rows={perPage}
-                columnsCount={columns.length}
+                columnsCount={columnHeaders.length}
                 variant={TableVariant.compact}
               />
             </Stack>
@@ -154,12 +143,14 @@ const RepositoriesTable = () => {
                   <Table
                     aria-label='Lightwell repositories table'
                     ouiaId='lightwell-repositories-table'
-                    variant={TableVariant.compact}
+                    isStriped
                   >
                     <Thead>
                       <Tr>
-                        {columns.map((column) => (
-                          <Th key={column.name}>{column.name}</Th>
+                        {columnHeaders.map(({ title, width }) => (
+                          <Th key={title + 'column'} width={width} modifier='wrap'>
+                            {title}
+                          </Th>
                         ))}
                       </Tr>
                     </Thead>
@@ -172,32 +163,32 @@ const RepositoriesTable = () => {
                           published_distribution_url,
                           security_level,
                           package_count,
-                          builds,
+                          build_count,
                         } = repo;
-                        const ecosystem = getEcosystemFromContentType(content_type);
 
                         return (
                           <Tr key={uuid}>
-                            <Td dataLabel={columns[0].name} className={spacing.pMd}>
-                              <Flex direction={{ default: 'column' }} gap={{ default: 'gapSm' }}>
-                                <FlexItem>
-                                  {content_type === 'maven' ? (
-                                    <JavaIcon className={spacing.mrSm} />
-                                  ) : (
-                                    <PythonIcon className={spacing.mrSm} />
-                                  )}
+                            <Td>
+                              <Flex direction={{ default: 'column' }} gap={{ default: 'gapXs' }}>
+                                <Flex
+                                  alignItems={{ default: 'alignItemsCenter' }}
+                                  gap={{ default: 'gapSm' }}
+                                >
+                                  <Icon size='xl'>
+                                    {content_type === 'maven' ? <JavaIcon /> : <PythonIcon />}
+                                  </Icon>
                                   <Button
                                     variant='link'
                                     isInline
                                     ouiaId={`lightwell-repo-${uuid}`}
-                                    onClick={() => navigate(uuid)}
+                                    onClick={() => goToRepositoryPackages(uuid)}
                                   >
-                                    {formatRepositoryName(ecosystem, security_level)}
+                                    {formatRepositoryName(content_type, security_level, name)}
                                   </Button>
-                                </FlexItem>
+                                </Flex>
                                 <FlexItem>
                                   <Content component='small'>
-                                    {displayValue(getRepositoryDescription(content_type))}
+                                    {getRepositoryDescription(content_type)}
                                   </Content>
                                 </FlexItem>
                                 <FlexItem>
@@ -222,10 +213,8 @@ const RepositoriesTable = () => {
                                 </FlexItem>
                               </Flex>
                             </Td>
-                            <Td className={spacing.pMd} dataLabel={columns[1].name}>
-                              {displayValue(formatEcosystemDisplay(content_type))}
-                            </Td>
-                            <Td className={spacing.pMd} dataLabel={columns[2].name}>
+                            <Td>{formatEcosystemDisplay(content_type)}</Td>
+                            <Td>
                               {security_level === 'validated' ? (
                                 <Label variant='outline' color='purple'>
                                   {capitalize(security_level)}
@@ -236,12 +225,8 @@ const RepositoriesTable = () => {
                                 '—'
                               )}
                             </Td>
-                            <Td className={spacing.pMd} dataLabel={columns[3].name}>
-                              {package_count.toLocaleString()}
-                            </Td>
-                            <Td className={spacing.pMd} dataLabel={columns[4].name}>
-                              {builds ? builds.toLocaleString() : 0}
-                            </Td>
+                            <Td>{package_count}</Td>
+                            <Td>{build_count ?? '0'}</Td>
                           </Tr>
                         );
                       })}
