@@ -34,11 +34,18 @@ import Hide from 'components/Hide/Hide';
 import { FilterData } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 
-import { LIGHTWELL_FEATURE_NAME, lightwellReposPerPageKey } from '../constants';
-import { formatEcosystemDisplay, getRepositoryDescription, formatRepositoryName } from '../helpers';
-import { useLightwellNavigate } from '../../../Hooks/useLightwellNavigate';
+import { LIGHTWELL_FEATURE_NAME, LIGHTWELL_USE_MOCK, lightwellReposPerPageKey } from '../constants';
+import { getMockLightwellRepositoryList } from '../mockRepositories';
+import {
+  formatEcosystemDisplay,
+  getRepositoryDescription,
+  formatRepositoryName,
+  getRepositoryPathSlug,
+} from '../helpers';
 import ConnectRepositoryPopover from './components/ConnectRepositoryPopover';
 import { capitalize } from 'lodash';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -53,7 +60,7 @@ const useStyles = createUseStyles({
 
 const RepositoriesTable = () => {
   const classes = useStyles();
-  const { goToRepositoryPackages } = useLightwellNavigate();
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const storedPerPage = Number(localStorage.getItem(lightwellReposPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
@@ -61,12 +68,26 @@ const RepositoriesTable = () => {
     feature_name: LIGHTWELL_FEATURE_NAME,
   };
 
+  // Set to true in constants.ts to use mock repositories and packages
+  const useMock = LIGHTWELL_USE_MOCK;
+
+  const mockRepositoryListQuery = useQuery({
+    queryKey: ['lightwell-repositories-mock', page, perPage, filters],
+    queryFn: () => getMockLightwellRepositoryList(page, perPage, filters),
+    placeholderData: keepPreviousData,
+    staleTime: 20000,
+    enabled: useMock,
+  });
+
+  // Fetch repositories with the lightwell-network feature
+  const apiRepositoryListQuery = useContentListQuery(page, perPage, filters, '', [], !useMock);
+
   const {
     isLoading,
     isError,
     error,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useContentListQuery(page, perPage, filters, '', []);
+  } = useMock ? mockRepositoryListQuery : apiRepositoryListQuery;
 
   const {
     data: repositories = [],
@@ -181,7 +202,9 @@ const RepositoriesTable = () => {
                                     variant='link'
                                     isInline
                                     ouiaId={`lightwell-repo-${uuid}`}
-                                    onClick={() => goToRepositoryPackages(uuid)}
+                                    onClick={() =>
+                                      navigate(getRepositoryPathSlug(content_type, security_level))
+                                    }
                                   >
                                     {formatRepositoryName(content_type, security_level, name)}
                                   </Button>

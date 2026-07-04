@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 
 import PackagesTable from './PackagesTable';
 import {
+  useContentListQuery,
   useFetchContent,
   useLightwellRepositoryPackagesQuery,
 } from 'services/Content/ContentQueries';
@@ -11,8 +12,10 @@ import {
   defaultLightwellRepositoryPackageResponse,
   ReactQueryTestWrapper,
 } from 'testingHelpers';
+import { getRepositoryPathSlug } from '../helpers';
 
 jest.mock('services/Content/ContentQueries', () => ({
+  useContentListQuery: jest.fn(),
   useFetchContent: jest.fn(),
   useLightwellRepositoryPackagesQuery: jest.fn(),
 }));
@@ -20,16 +23,16 @@ jest.mock('services/Content/ContentQueries', () => ({
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
   useParams: () => ({
-    repoUUID: defaultLightwellContentItem.uuid,
+    repoName: getRepositoryPathSlug(
+      defaultLightwellContentItem.content_type,
+      defaultLightwellContentItem.security_level,
+    ),
   }),
-  useMatch: () => ({ pathnameBase: '/lightwell' }),
 }));
 
-jest.mock('../../../Hooks/useLightwellNavigate', () => ({
-  useLightwellNavigate: () => ({
-    goToRepositories: jest.fn(),
-    goToPackageDetails: jest.fn(),
-  }),
+jest.mock('../constants', () => ({
+  ...jest.requireActual('../constants'),
+  LIGHTWELL_USE_MOCK: false,
 }));
 
 const renderPackagesTable = () =>
@@ -39,7 +42,16 @@ const renderPackagesTable = () =>
     </ReactQueryTestWrapper>,
   );
 
+const mockRepositoryListQuery = () => ({
+  isLoading: false,
+  data: {
+    data: [defaultLightwellContentItem],
+    meta: { count: 1, limit: 100, offset: 0 },
+  },
+});
+
 it('shows empty state when there are no packages', async () => {
+  (useContentListQuery as jest.Mock).mockImplementation(() => mockRepositoryListQuery());
   (useFetchContent as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     data: defaultLightwellContentItem,
@@ -58,6 +70,7 @@ it('shows empty state when there are no packages', async () => {
 });
 
 it('renders with a single package', async () => {
+  (useContentListQuery as jest.Mock).mockImplementation(() => mockRepositoryListQuery());
   (useFetchContent as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     data: defaultLightwellContentItem,

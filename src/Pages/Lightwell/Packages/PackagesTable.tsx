@@ -23,7 +23,8 @@ import { CopyIcon, CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icon
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { createUseStyles } from 'react-jss';
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Table,
   TableVariant,
@@ -38,20 +39,24 @@ import {
 import {
   useLightwellRepositoryPackagesQuery,
   useFetchContent,
+  useContentListQuery,
 } from 'services/Content/ContentQueries';
 import { RepositoryPackageItem } from 'services/Content/ContentApi';
+import { getMockLightwellPackages } from '../mockPackages';
 import {
+  findRepositoryByPathSlug,
   formatRepositoryName,
   getRepositoryDescription,
   stripLightwellVersionSuffix,
 } from '../helpers';
 import Hide from 'components/Hide/Hide';
-import { lightwellPkgsPerPageKey } from '../constants';
+import { LIGHTWELL_FEATURE_NAME, LIGHTWELL_USE_MOCK, lightwellPkgsPerPageKey } from '../constants';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Loader from 'components/Loader';
-import { useLightwellNavigate } from '../../../Hooks/useLightwellNavigate';
+import { getMockLightwellRepositoryBySlug } from '../mockRepositories';
 import ConnectRepositoryPopover from '../Repositories/components/ConnectRepositoryPopover';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
+import { useQuery } from '@tanstack/react-query';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -97,6 +102,7 @@ const mapRepositoryPackage = (pkg: RepositoryPackageItem): MappedPackage => {
   };
 };
 
+// Definitions for optional expandable versions and releases
 type StackedItemsCellProps = {
   items: string[];
   packageKey: string;
@@ -146,42 +152,96 @@ const StackedItemsCell = ({
 
 const PackagesTable = () => {
   const classes = useStyles();
-  const repoUUID = useSafeUUIDParam('repoUUID');
-  const { goToRepositories, goToPackageDetails } = useLightwellNavigate();
+  const { repoName: repoSlug = '' } = useParams();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const storedPerPage = Number(localStorage.getItem(lightwellPkgsPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
   const [expandedPackages, setExpandedPackages] = useState<Set<string>>(new Set());
 
+  const useMock = LIGHTWELL_USE_MOCK;
+
+  const mockRepositoryQuery = useQuery({
+    queryKey: ['lightwell-repository-mock', repoSlug],
+    queryFn: () => {
+      const mockRepository = getMockLightwellRepositoryBySlug(repoSlug);
+      if (!mockRepository) {
+        throw new Error('Lightwell repository not found');
+      }
+      return mockRepository;
+    },
+    staleTime: 20000,
+    enabled: useMock && !!repoSlug,
+  });
+
+  const apiRepositoryListQuery = useContentListQuery(
+    1,
+    100,
+    { feature_name: LIGHTWELL_FEATURE_NAME },
+    '',
+    [],
+    !useMock && !!repoSlug,
+  );
+
+  const repoUUID = useMemo(() => {
+    if (useMock) {
+      return mockRepositoryQuery.data?.uuid ?? '';
+    }
+
+    return findRepositoryByPathSlug(apiRepositoryListQuery.data?.data ?? [], repoSlug)?.uuid ?? '';
+  }, [useMock, mockRepositoryQuery.data?.uuid, apiRepositoryListQuery.data?.data, repoSlug]);
+
+  const apiRepositoryQuery = useFetchContent(repoUUID, !!repoUUID && !useMock);
+  const apiPackagesQuery = useLightwellRepositoryPackagesQuery(
+    repoUUID,
+    page,
+    perPage,
+    '',
+    !!repoUUID && !useMock,
+  );
+
   const {
     data: repository,
     isLoading: isRepositoryLoading,
-    isError: isRepositoryError,
-    error: repositoryError,
-  } = useFetchContent(repoUUID, !!repoUUID);
+    isError,
+    error,
+  } = useMock ? mockRepositoryQuery : apiRepositoryQuery;
 
-  const {
-    data: packagesData,
-    isLoading: isLoadingPackages,
-    isFetching: isFetchingPackages,
-    isError: isPackagesError,
-    error: packagesError,
-  } = useLightwellRepositoryPackagesQuery(repoUUID, page, perPage, search, !!repoUUID);
+  const isResolvingRepository = useMock
+    ? isRepositoryLoading
+    : apiRepositoryListQuery.isLoading || isRepositoryLoading;
 
-  const results = packagesData?.results ?? [];
-  const packages = results.map(mapRepositoryPackage);
-  const packageCount = packagesData?.total ?? 0;
+  const { packages, packageCount } = useMemo(() => {
+    if (useMock) {
+      const mockPackages = getMockLightwellPackages(repoUUID, search);
+      const offset = (page - 1) * perPage;
+      return {
+        packages: mockPackages.slice(offset, offset + perPage).map(mapRepositoryPackage),
+        packageCount: mockPackages.length,
+      };
+    }
+
+    const results = apiPackagesQuery.data?.results ?? [];
+    return {
+      packages: results.map(mapRepositoryPackage),
+      packageCount: apiPackagesQuery.data?.total ?? 0,
+    };
+  }, [useMock, repoUUID, search, page, perPage, apiPackagesQuery.data]);
+
+  const isLoadingPackages = useMock
+    ? false
+    : apiPackagesQuery.isLoading || apiPackagesQuery.isFetching;
 
   const countIsZero = packageCount === 0;
   const showPagination = packages.length > 0;
 
-  if (isRepositoryLoading || !repository) {
+  if (isResolvingRepository || !repository) {
     return <Loader />;
   }
 
-  if (!repoUUID || isRepositoryError) throw repositoryError;
-  if (isPackagesError) throw packagesError;
+  if (!repoUUID || isError) throw error;
+  if (!useMock && apiPackagesQuery.isError) throw apiPackagesQuery.error;
 
   const onSetPage = (_, newPage: number) => setPage(newPage);
 
@@ -192,7 +252,7 @@ const PackagesTable = () => {
   };
 
   const paginationProps = {
-    isDisabled: isLoadingPackages || isFetchingPackages,
+    isDisabled: isLoadingPackages,
     itemCount: packageCount,
     perPage,
     page,
@@ -236,7 +296,10 @@ const PackagesTable = () => {
         <Stack>
           <StackItem>
             <Breadcrumb ouiaId='lightwell-packages-breadcrumb'>
-              <BreadcrumbItem component='button' onClick={goToRepositories}>
+              <BreadcrumbItem
+                component='button'
+                onClick={() => navigate('..', { relative: 'path' })}
+              >
                 Lightwell
               </BreadcrumbItem>
               <BreadcrumbItem disabled>{repositoryName}</BreadcrumbItem>
@@ -391,7 +454,7 @@ const PackagesTable = () => {
                               variant='link'
                               isInline
                               ouiaId={`lightwell-package-${name}`}
-                              onClick={() => goToPackageDetails(repoUUID, name)}
+                              onClick={() => navigate(encodeURIComponent(name))}
                             >
                               {name}
                             </Button>
