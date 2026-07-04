@@ -11,6 +11,8 @@ import {
   ValidationResponse,
   type ErrataItem,
   type Package,
+  type RepositoryPackageItem,
+  type RepositoryPackagesResponse,
   ContentOrigin,
 } from 'services/Content/ContentApi';
 import { AdminTask } from 'services/Admin/AdminTaskApi';
@@ -395,9 +397,11 @@ export const defaultLightwellContentItem: ContentItem = {
   distribution_versions: ['any'],
   name: 'lightwell/java/validated',
   org_id: '-3',
-  url: 'https://example.com/lightwell/java/validated',
+  url: '',
+  published_distribution_url: 'https://example.com/lightwell/java/validated',
   uuid: '3875c35b-a67a-4ac2-a989-21139433c177',
-  package_count: 1000,
+  package_count: 1,
+  build_count: 3,
   origin: ContentOrigin.CUSTOM,
   status: '',
   last_introspection_error: '',
@@ -408,9 +412,24 @@ export const defaultLightwellContentItem: ContentItem = {
   snapshot: false,
   module_hotfixes: false,
   last_introspection_status: '',
-  security_level: 'Validated',
+  security_level: 'validated',
   content_type: 'maven',
-  builds: 13,
+};
+
+export const defaultLightwellRepositoryPackageItem: RepositoryPackageItem = {
+  group: 'org.json.test',
+  name: 'json-test',
+  versions: ['3.14.0'],
+  latest_releases: [
+    { version: '3.14.0', release: 'rhlw-3004-test', created_at: '2026-07-01T00:00:00Z' },
+  ],
+};
+
+export const defaultLightwellRepositoryPackageResponse: RepositoryPackagesResponse = {
+  results: [defaultLightwellRepositoryPackageItem],
+  total: 1,
+  limit: 20,
+  offset: 0,
 };
 
 export const defaultTemplateItem: TemplateItem = {

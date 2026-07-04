@@ -38,6 +38,7 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
   const classes = useStyles();
   const tabs = useMemo(() => getConnectSnippetTabs(repository), [repository]);
   const [activeTabKey, setActiveTabKey] = useState(tabs[0]?.eventKey ?? '');
+  const firstTabKey = tabs[0]?.eventKey ?? '';
 
   const tabRefs = useMemo(
     () =>
@@ -118,9 +119,9 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
       headerContent='Connect to this repository'
       bodyContent={bodyContent}
       position='right'
-      showClose={false}
       minWidth='32rem'
       maxWidth='40rem'
+      onHide={() => setActiveTabKey(firstTabKey)}
     >
       {children}
     </Popover>
