@@ -1,18 +1,25 @@
 import { Breadcrumb, BreadcrumbItem, Grid, Stack, StackItem, Title } from '@patternfly/react-core';
+import { SkeletonTable } from '@patternfly/react-component-groups';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
+import { useQuery } from '@tanstack/react-query';
 import { createUseStyles } from 'react-jss';
-import { useParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { TableVariant } from '@patternfly/react-table';
 
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
+import Hide from 'components/Hide/Hide';
 import Loader from 'components/Loader';
-import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
 import {
+  useContentListQuery,
   useFetchContent,
   useLightwellRepositoryPackagesQuery,
 } from 'services/Content/ContentQueries';
 
-import { formatRepositoryName } from '../helpers';
-import { useLightwellNavigate } from '../../../Hooks/useLightwellNavigate';
+import { LIGHTWELL_FEATURE_NAME, LIGHTWELL_USE_MOCK } from '../constants';
+import { findRepositoryByPathSlug, formatRepositoryName } from '../helpers';
+import { getMockLightwellPackages } from '../mockPackages';
+import { getMockLightwellRepositoryBySlug } from '../mockRepositories';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -25,31 +32,80 @@ const useStyles = createUseStyles({
 
 const PackageDetails = () => {
   const classes = useStyles();
-  const repoUUID = useSafeUUIDParam('repoUUID');
-  const { packageName: packageNameParam = '' } = useParams();
-  const { goToRepositories, goToRepositoryPackages } = useLightwellNavigate();
+  const navigate = useNavigate();
+  const { repoName: repoSlug = '', packageName: packageNameParam = '' } = useParams();
   const packageName = packageNameParam ? decodeURIComponent(packageNameParam) : '';
+
+  const useMock = LIGHTWELL_USE_MOCK;
+
+  const mockRepositoryQuery = useQuery({
+    queryKey: ['lightwell-repository-mock', repoSlug],
+    queryFn: () => {
+      const mockRepository = getMockLightwellRepositoryBySlug(repoSlug);
+      if (!mockRepository) {
+        throw new Error('Lightwell repository not found');
+      }
+      return mockRepository;
+    },
+    staleTime: 20000,
+    enabled: useMock && !!repoSlug,
+  });
+
+  const apiRepositoryListQuery = useContentListQuery(
+    1,
+    100,
+    { feature_name: LIGHTWELL_FEATURE_NAME },
+    '',
+    [],
+    !useMock && !!repoSlug,
+  );
+
+  const repoUUID = useMemo(() => {
+    if (useMock) {
+      return mockRepositoryQuery.data?.uuid ?? '';
+    }
+
+    return findRepositoryByPathSlug(apiRepositoryListQuery.data?.data ?? [], repoSlug)?.uuid ?? '';
+  }, [useMock, mockRepositoryQuery.data?.uuid, apiRepositoryListQuery.data?.data, repoSlug]);
+
+  const apiRepositoryQuery = useFetchContent(repoUUID, !!repoUUID && !useMock);
+  const apiPackagesQuery = useLightwellRepositoryPackagesQuery(
+    repoUUID,
+    1,
+    100,
+    '',
+    !!repoUUID && !useMock,
+  );
 
   const {
     data: repository,
     isLoading: isRepositoryLoading,
-    isError: isRepositoryError,
-    error: repositoryError,
-  } = useFetchContent(repoUUID, !!repoUUID);
+    isError,
+    error,
+  } = useMock ? mockRepositoryQuery : apiRepositoryQuery;
 
-  const {
-    data: packages,
-    isLoading: isPackagesLoading,
-    isError: isPackagesError,
-    error: packagesError,
-  } = useLightwellRepositoryPackagesQuery(repoUUID, 1, 100, packageName, !!repoUUID);
+  const isResolvingRepository = useMock
+    ? isRepositoryLoading
+    : apiRepositoryListQuery.isLoading || isRepositoryLoading;
 
-  if (isRepositoryLoading || !repository || isPackagesLoading || !packages) {
+  const packageItem = useMemo(() => {
+    if (useMock) {
+      return getMockLightwellPackages(repoUUID).find((pkg) => pkg.name === packageName);
+    }
+
+    return (apiPackagesQuery.data?.results ?? []).find((pkg) => pkg.name === packageName);
+  }, [useMock, repoUUID, packageName, apiPackagesQuery.data?.results]);
+
+  const isLoadingPackages = useMock
+    ? false
+    : apiPackagesQuery.isLoading || apiPackagesQuery.isFetching;
+
+  if (isResolvingRepository || !repository) {
     return <Loader />;
   }
 
-  if (!repoUUID || isRepositoryError) throw repositoryError;
-  if (isPackagesError) throw packagesError;
+  if (!repoUUID || isError) throw error;
+  if (!useMock && apiPackagesQuery.isError) throw apiPackagesQuery.error;
 
   const repositoryName = formatRepositoryName(
     repository.content_type,
@@ -63,10 +119,16 @@ const PackageDetails = () => {
         <Stack>
           <StackItem>
             <Breadcrumb ouiaId='lightwell-package-details-breadcrumb'>
-              <BreadcrumbItem component='button' onClick={goToRepositories}>
+              <BreadcrumbItem
+                component='button'
+                onClick={() => navigate('../..', { relative: 'path' })}
+              >
                 Lightwell
               </BreadcrumbItem>
-              <BreadcrumbItem component='button' onClick={() => goToRepositoryPackages(repoUUID)}>
+              <BreadcrumbItem
+                component='button'
+                onClick={() => navigate('..', { relative: 'path' })}
+              >
                 {repositoryName}
               </BreadcrumbItem>
               <BreadcrumbItem disabled>{packageName || '—'}</BreadcrumbItem>
@@ -81,14 +143,20 @@ const PackageDetails = () => {
       </Grid>
 
       <Grid className={spacing.pxLg}>
-        <Stack>
-          <EmptyTableState
-            notFiltered
-            clearFilters={() => undefined}
-            itemName='package details'
-            notFilteredBody='No details available yet for this package.'
-          />
-        </Stack>
+        <Hide hide={!isLoadingPackages}>
+          <SkeletonTable rows={5} columnsCount={4} variant={TableVariant.compact} />
+        </Hide>
+
+        <Hide hide={isLoadingPackages || !packageItem}>
+          <Stack>
+            <EmptyTableState
+              notFiltered
+              clearFilters={() => undefined}
+              itemName='package details'
+              notFilteredBody='No package details available yet for this package.'
+            />
+          </Stack>
+        </Hide>
       </Grid>
     </>
   );

@@ -1,5 +1,7 @@
 import { ContentItem, ContentListResponse, FilterData } from 'services/Content/ContentApi';
 
+import { getRepositoryPathSlug } from './helpers';
+
 const mockRepositories = [
   {
     uuid: '11111111-1111-4111-8111-111111111111',
@@ -55,6 +57,11 @@ export const getMockLightwellRepository = (uuid: string): ContentItem | undefine
   const normalizedUuid = decodeURIComponent(uuid);
   return mockRepositories.find((repo) => repo.uuid === normalizedUuid);
 };
+
+export const getMockLightwellRepositoryBySlug = (slug: string): ContentItem | undefined =>
+  mockRepositories.find(
+    (repo) => getRepositoryPathSlug(repo.content_type, repo.security_level) === slug.toLowerCase(),
+  );
 
 export const getMockLightwellRepositoryList = (
   page: number,

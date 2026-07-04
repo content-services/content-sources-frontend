@@ -6,6 +6,7 @@ import { defaultLightwellContentItem, ReactQueryTestWrapper } from 'testingHelpe
 
 jest.mock('services/Content/ContentQueries', () => ({
   useContentListQuery: jest.fn(),
+  useLightwellRepositoryPackageCountsQuery: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -17,6 +18,11 @@ jest.mock('../../../Hooks/useLightwellNavigate', () => ({
   useLightwellNavigate: () => ({
     goToRepositoryPackages: jest.fn(),
   }),
+}));
+
+jest.mock('../constants', () => ({
+  ...jest.requireActual('../constants'),
+  LIGHTWELL_USE_MOCK: false,
 }));
 
 const renderRepositoriesTable = () =>

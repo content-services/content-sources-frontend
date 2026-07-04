@@ -1,4 +1,5 @@
 import { capitalize } from 'lodash';
+import { ContentItem } from 'services/Content/ContentApi';
 import { CONTENT_TYPE_PARAMETERS, REPOSITORY_DESCRIPTIONS } from './constants';
 
 const getContentTypeParameters = (contentType?: string) => {
@@ -36,5 +37,24 @@ export const formatRepositoryName = (
   return fallbackName || '—';
 };
 
+export const getRepositoryPathSlug = (contentType?: string, securityLevel?: string): string => {
+  const ecosystem = getEcosystemFromContentType(contentType)?.toLowerCase();
+  const level = securityLevel?.toLowerCase();
+
+  if (!ecosystem || !level) {
+    return '';
+  }
+
+  return `${ecosystem}-${level}`;
+};
+
 export const stripLightwellVersionSuffix = (version: string): string =>
   version.replace(/\.rhlw-.*$/, '');
+
+export const findRepositoryByPathSlug = (
+  repositories: ContentItem[],
+  slug: string,
+): ContentItem | undefined =>
+  repositories.find(
+    (repo) => getRepositoryPathSlug(repo.content_type, repo.security_level) === slug.toLowerCase(),
+  );

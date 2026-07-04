@@ -2,6 +2,8 @@ export const LIGHTWELL_FEATURE_NAME = 'lightwell-network';
 
 export const LIGHTWELL_ROUTE = '/lightwell';
 
+export const LIGHTWELL_USE_MOCK = false;
+
 export const lightwellReposPerPageKey = 'lightwellRepositoriesPerPage';
 
 export const lightwellPkgsPerPageKey = 'lightwellPackagesPerPage';
