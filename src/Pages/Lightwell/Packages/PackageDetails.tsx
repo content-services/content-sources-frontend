@@ -1,25 +1,50 @@
-import { Breadcrumb, BreadcrumbItem, Grid, Stack, StackItem, Title } from '@patternfly/react-core';
-import { SkeletonTable } from '@patternfly/react-component-groups';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  Button,
+  Card,
+  CardBody,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
+  Flex,
+  FlexItem,
+  Grid,
+  GridItem,
+  Icon,
+  Label,
+  MenuToggle,
+  Stack,
+  StackItem,
+  Tab,
+  TabContent,
+  TabContentBody,
+  Tabs,
+  TabTitleText,
+  Title,
+} from '@patternfly/react-core';
+import { CopyIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
-import { useQuery } from '@tanstack/react-query';
 import { createUseStyles } from 'react-jss';
-import { useMemo } from 'react';
+import { createRef, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { TableVariant } from '@patternfly/react-table';
 
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
-import Hide from 'components/Hide/Hide';
 import Loader from 'components/Loader';
 import {
-  useContentListQuery,
-  useFetchContent,
   useLightwellRepositoryPackagesQuery,
+  usePackageDetailQuery,
+  usePackageVersionsPreload,
 } from 'services/Content/ContentQueries';
 
-import { LIGHTWELL_FEATURE_NAME, LIGHTWELL_USE_MOCK } from '../constants';
-import { findRepositoryByPathSlug, formatRepositoryName } from '../helpers';
+import { LIGHTWELL_USE_MOCK } from '../constants';
+import { formatRepositoryName, stripLightwellVersionSuffix } from '../helpers';
 import { getMockLightwellPackages } from '../mockPackages';
-import { getMockLightwellRepositoryBySlug } from '../mockRepositories';
+import useLightwellRepository from '../useLightwellRepository';
+import PackageOverviewTab from './components/PackageOverviewTab';
+import PackageReleasesTab from './components/PackageReleasesTab';
+import PackageSidebar from './components/PackageSidebar';
+import PackageVersionsTab from './components/PackageVersionsTab';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -28,6 +53,9 @@ const useStyles = createUseStyles({
   titleWrapper: {
     padding: '24px 0 0',
   },
+  detailCard: {
+    overflow: 'visible',
+  },
 });
 
 const PackageDetails = () => {
@@ -35,40 +63,24 @@ const PackageDetails = () => {
   const navigate = useNavigate();
   const { repoName: repoSlug = '', packageName: packageNameParam = '' } = useParams();
   const packageName = packageNameParam ? decodeURIComponent(packageNameParam) : '';
+  const [activeTabKey, setActiveTabKey] = useState(0);
+  const [selectedVersion, setSelectedVersion] = useState<string>('');
+  const [versionDropdownOpen, setVersionDropdownOpen] = useState(false);
+
+  const overviewTabRef = createRef<HTMLElement>();
+  const releasesTabRef = createRef<HTMLElement>();
+  const versionsTabRef = createRef<HTMLElement>();
 
   const useMock = LIGHTWELL_USE_MOCK;
 
-  const mockRepositoryQuery = useQuery({
-    queryKey: ['lightwell-repository-mock', repoSlug],
-    queryFn: () => {
-      const mockRepository = getMockLightwellRepositoryBySlug(repoSlug);
-      if (!mockRepository) {
-        throw new Error('Lightwell repository not found');
-      }
-      return mockRepository;
-    },
-    staleTime: 20000,
-    enabled: useMock && !!repoSlug,
-  });
+  const {
+    repository,
+    repoUUID,
+    isLoading: isResolvingRepository,
+    isError,
+    error,
+  } = useLightwellRepository(repoSlug);
 
-  const apiRepositoryListQuery = useContentListQuery(
-    1,
-    100,
-    { feature_name: LIGHTWELL_FEATURE_NAME },
-    '',
-    [],
-    !useMock && !!repoSlug,
-  );
-
-  const repoUUID = useMemo(() => {
-    if (useMock) {
-      return mockRepositoryQuery.data?.uuid ?? '';
-    }
-
-    return findRepositoryByPathSlug(apiRepositoryListQuery.data?.data ?? [], repoSlug)?.uuid ?? '';
-  }, [useMock, mockRepositoryQuery.data?.uuid, apiRepositoryListQuery.data?.data, repoSlug]);
-
-  const apiRepositoryQuery = useFetchContent(repoUUID, !!repoUUID && !useMock);
   const apiPackagesQuery = useLightwellRepositoryPackagesQuery(
     repoUUID,
     1,
@@ -76,17 +88,6 @@ const PackageDetails = () => {
     '',
     !!repoUUID && !useMock,
   );
-
-  const {
-    data: repository,
-    isLoading: isRepositoryLoading,
-    isError,
-    error,
-  } = useMock ? mockRepositoryQuery : apiRepositoryQuery;
-
-  const isResolvingRepository = useMock
-    ? isRepositoryLoading
-    : apiRepositoryListQuery.isLoading || isRepositoryLoading;
 
   const packageItem = useMemo(() => {
     if (useMock) {
@@ -96,9 +97,40 @@ const PackageDetails = () => {
     return (apiPackagesQuery.data?.results ?? []).find((pkg) => pkg.name === packageName);
   }, [useMock, repoUUID, packageName, apiPackagesQuery.data?.results]);
 
+  const packageGroup = packageItem?.group ?? '';
+  const packageVersion = packageItem?.versions[0] ?? '';
+  const hasRelease = (packageItem?.latest_releases ?? []).some((r) => !!r.release);
+
+  useEffect(() => {
+    if (packageItem?.versions.length && !selectedVersion) {
+      setSelectedVersion(packageItem.versions[0]);
+    }
+  }, [packageItem?.versions]);
+
+  const activeVersion = selectedVersion || packageVersion;
+
+  const packageDetailQuery = usePackageDetailQuery(
+    repoUUID,
+    packageGroup,
+    packageName,
+    activeVersion,
+    !!repoUUID && !!packageGroup && !!activeVersion,
+  );
+
+  usePackageVersionsPreload(
+    repoUUID,
+    packageGroup,
+    packageName,
+    packageItem?.versions ?? [],
+    !hasRelease && !!repoUUID && !!packageGroup,
+  );
+
   const isLoadingPackages = useMock
     ? false
     : apiPackagesQuery.isLoading || apiPackagesQuery.isFetching;
+
+  const isLoadingDetail =
+    packageDetailQuery.isLoading || (hasRelease && packageDetailQuery.isFetching);
 
   if (isResolvingRepository || !repository) {
     return <Loader />;
@@ -112,6 +144,24 @@ const PackageDetails = () => {
     repository.security_level,
     repository.name,
   );
+
+  const builds = packageDetailQuery.data?.builds ?? [];
+  const latestBuild = builds[0];
+  const latestVersion = latestBuild?.version ?? activeVersion;
+  const upstreamVersion = stripLightwellVersionSuffix(latestVersion);
+  const displayVersion = hasRelease ? latestVersion : selectedVersion || packageVersion;
+  const mavenCoordinate = `${packageGroup}:${packageName}:${displayVersion}`;
+
+  const latestCreatedAt = builds
+    .map((b) => b.created_at)
+    .sort()
+    .at(-1);
+  const lastUpdated = latestCreatedAt?.split('T')[0] ?? '';
+
+  const doneLoading = !!packageItem && !isLoadingPackages && !isLoadingDetail;
+  const hasDetail =
+    doneLoading && (builds.length > 0 || (!hasRelease && packageItem!.versions.length > 0));
+  const showEmpty = doneLoading && !hasDetail;
 
   return (
     <>
@@ -131,33 +181,226 @@ const PackageDetails = () => {
               >
                 {repositoryName}
               </BreadcrumbItem>
-              <BreadcrumbItem disabled>{packageName || '—'}</BreadcrumbItem>
+              <BreadcrumbItem isActive>{packageName || '—'}</BreadcrumbItem>
             </Breadcrumb>
           </StackItem>
           <StackItem className={classes.titleWrapper}>
-            <Title headingLevel='h1' ouiaId='lightwell-package-details-header'>
-              {packageName || 'Package details'}
-            </Title>
+            <Flex
+              alignItems={{ default: 'alignItemsCenter' }}
+              justifyContent={{ default: 'justifyContentSpaceBetween' }}
+              gap={{ default: 'gapMd' }}
+            >
+              <Flex alignItems={{ default: 'alignItemsCenter' }} gap={{ default: 'gapSm' }}>
+                <FlexItem>
+                  <Icon size='xl'>
+                    {repository.content_type === 'maven' ? <JavaIcon /> : <PythonIcon />}
+                  </Icon>
+                </FlexItem>
+                <FlexItem>
+                  <Title headingLevel='h1' ouiaId='lightwell-package-details-header'>
+                    {packageName || 'Package details'}
+                  </Title>
+                </FlexItem>
+                {hasRelease &&
+                  upstreamVersion &&
+                  packageItem &&
+                  packageItem.versions.length <= 1 && (
+                    <FlexItem>
+                      <Label isCompact>{upstreamVersion}</Label>
+                    </FlexItem>
+                  )}
+                {packageItem && packageItem.versions.length > 1 && hasRelease && (
+                  <FlexItem>
+                    <Dropdown
+                      isScrollable
+                      onSelect={(_e, val) => {
+                        setSelectedVersion(val as string);
+                        setVersionDropdownOpen(false);
+                      }}
+                      toggle={(toggleRef) => (
+                        <MenuToggle
+                          ref={toggleRef}
+                          onClick={() => setVersionDropdownOpen((prev) => !prev)}
+                          isExpanded={versionDropdownOpen}
+                          ouiaId='lightwell-version-selector'
+                        >
+                          {stripLightwellVersionSuffix(selectedVersion)}
+                        </MenuToggle>
+                      )}
+                      onOpenChange={(isOpen) => setVersionDropdownOpen(isOpen)}
+                      isOpen={versionDropdownOpen}
+                    >
+                      <DropdownList>
+                        {packageItem.versions.map((v) => (
+                          <DropdownItem key={v} value={v} isSelected={selectedVersion === v}>
+                            {stripLightwellVersionSuffix(v)}
+                          </DropdownItem>
+                        ))}
+                      </DropdownList>
+                    </Dropdown>
+                  </FlexItem>
+                )}
+                {!hasRelease && packageItem && packageItem.versions.length > 0 && (
+                  <FlexItem>
+                    <Dropdown
+                      isScrollable
+                      onSelect={(_e, val) => {
+                        setSelectedVersion(val as string);
+                        setVersionDropdownOpen(false);
+                      }}
+                      toggle={(toggleRef) => (
+                        <MenuToggle
+                          ref={toggleRef}
+                          onClick={() => setVersionDropdownOpen((prev) => !prev)}
+                          isExpanded={versionDropdownOpen}
+                          ouiaId='lightwell-version-selector'
+                        >
+                          {selectedVersion}
+                        </MenuToggle>
+                      )}
+                      onOpenChange={(isOpen) => setVersionDropdownOpen(isOpen)}
+                      isOpen={versionDropdownOpen}
+                    >
+                      <DropdownList>
+                        {packageItem.versions.map((v) => (
+                          <DropdownItem key={v} value={v} isSelected={selectedVersion === v}>
+                            {v}
+                          </DropdownItem>
+                        ))}
+                      </DropdownList>
+                    </Dropdown>
+                  </FlexItem>
+                )}
+              </Flex>
+              {displayVersion && (
+                <FlexItem>
+                  <Button
+                    variant='secondary'
+                    icon={<CopyIcon />}
+                    iconPosition='end'
+                    onClick={() => navigator.clipboard.writeText(mavenCoordinate)}
+                  >
+                    {mavenCoordinate}
+                  </Button>
+                </FlexItem>
+              )}
+            </Flex>
           </StackItem>
         </Stack>
       </Grid>
 
-      <Grid className={spacing.pxLg}>
-        <Hide hide={!isLoadingPackages}>
-          <SkeletonTable rows={5} columnsCount={4} variant={TableVariant.compact} />
-        </Hide>
+      {(isLoadingPackages || isLoadingDetail) && <Loader />}
 
-        <Hide hide={isLoadingPackages || !packageItem}>
-          <Stack>
-            <EmptyTableState
-              notFiltered
-              clearFilters={() => undefined}
-              itemName='package details'
-              notFilteredBody='No package details available yet for this package.'
-            />
-          </Stack>
-        </Hide>
-      </Grid>
+      {showEmpty && (
+        <Grid className={spacing.pxLg}>
+          <EmptyTableState
+            notFiltered
+            clearFilters={() => undefined}
+            itemName='package details'
+            notFilteredBody='No details available yet for this package.'
+          />
+        </Grid>
+      )}
+
+      {hasDetail && (
+        <Card className={`${classes.detailCard} ${spacing.mxLg} ${spacing.mbLg}`}>
+          <CardBody>
+            <Grid hasGutter>
+              <GridItem md={8}>
+                <Tabs
+                  activeKey={activeTabKey}
+                  onSelect={(_, eventKey) => setActiveTabKey(eventKey as number)}
+                  aria-label='Package detail tabs'
+                  ouiaId='lightwell-package-detail-tabs'
+                >
+                  <Tab
+                    eventKey={0}
+                    title={<TabTitleText>Overview</TabTitleText>}
+                    tabContentRef={overviewTabRef}
+                    ouiaId='lightwell-package-overview-tab'
+                  />
+                  {hasRelease && (
+                    <Tab
+                      eventKey={1}
+                      title={<TabTitleText>Releases</TabTitleText>}
+                      tabContentRef={releasesTabRef}
+                      ouiaId='lightwell-package-releases-tab'
+                    />
+                  )}
+                  {!hasRelease && (
+                    <Tab
+                      eventKey={1}
+                      title={<TabTitleText>Versions</TabTitleText>}
+                      tabContentRef={versionsTabRef}
+                      ouiaId='lightwell-package-versions-tab'
+                    />
+                  )}
+                </Tabs>
+                <TabContent
+                  eventKey={0}
+                  id='lightwell-package-overview-panel'
+                  ref={overviewTabRef}
+                  aria-label='Overview'
+                >
+                  <TabContentBody hasPadding>
+                    <PackageOverviewTab
+                      group={packageGroup}
+                      name={packageName}
+                      latestRelease={displayVersion}
+                      hasRelease={hasRelease}
+                    />
+                  </TabContentBody>
+                </TabContent>
+                {hasRelease && (
+                  <TabContent
+                    eventKey={1}
+                    id='lightwell-package-releases-panel'
+                    ref={releasesTabRef}
+                    aria-label='Releases'
+                    hidden
+                  >
+                    <TabContentBody hasPadding>
+                      <PackageReleasesTab
+                        version={upstreamVersion}
+                        builds={builds}
+                        allVersions={packageItem?.versions ?? []}
+                        latestReleases={packageItem?.latest_releases ?? []}
+                        onVersionSelect={setSelectedVersion}
+                      />
+                    </TabContentBody>
+                  </TabContent>
+                )}
+                {!hasRelease && (
+                  <TabContent
+                    eventKey={1}
+                    id='lightwell-package-versions-panel'
+                    ref={versionsTabRef}
+                    aria-label='Versions'
+                    hidden
+                  >
+                    <TabContentBody hasPadding>
+                      <PackageVersionsTab
+                        currentVersion={selectedVersion}
+                        versions={packageItem?.versions ?? []}
+                        latestReleases={packageItem?.latest_releases ?? []}
+                        onVersionSelect={setSelectedVersion}
+                      />
+                    </TabContentBody>
+                  </TabContent>
+                )}
+              </GridItem>
+              <GridItem md={4}>
+                <PackageSidebar
+                  lastUpdated={lastUpdated}
+                  namespace={packageGroup}
+                  upstreamVersion={upstreamVersion}
+                  allVersions={!hasRelease ? packageItem?.versions : undefined}
+                />
+              </GridItem>
+            </Grid>
+          </CardBody>
+        </Card>
+      )}
     </>
   );
 };
