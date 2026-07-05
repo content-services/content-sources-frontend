@@ -36,27 +36,20 @@ import {
   type BaseCellProps,
 } from '@patternfly/react-table';
 
-import {
-  useLightwellRepositoryPackagesQuery,
-  useFetchContent,
-  useContentListQuery,
-} from 'services/Content/ContentQueries';
+import { useLightwellRepositoryPackagesQuery } from 'services/Content/ContentQueries';
 import { RepositoryPackageItem } from 'services/Content/ContentApi';
 import { getMockLightwellPackages } from '../mockPackages';
 import {
-  findRepositoryByPathSlug,
   formatRepositoryName,
   getRepositoryDescription,
   stripLightwellVersionSuffix,
 } from '../helpers';
 import Hide from 'components/Hide/Hide';
-import { LIGHTWELL_FEATURE_NAME, LIGHTWELL_USE_MOCK, lightwellPkgsPerPageKey } from '../constants';
+import { LIGHTWELL_USE_MOCK, lightwellPkgsPerPageKey } from '../constants';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Loader from 'components/Loader';
-import { getMockLightwellRepositoryBySlug } from '../mockRepositories';
 import ConnectRepositoryPopover from '../Repositories/components/ConnectRepositoryPopover';
-import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
-import { useQuery } from '@tanstack/react-query';
+import useLightwellRepository from '../useLightwellRepository';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -162,55 +155,21 @@ const PackagesTable = () => {
 
   const useMock = LIGHTWELL_USE_MOCK;
 
-  const mockRepositoryQuery = useQuery({
-    queryKey: ['lightwell-repository-mock', repoSlug],
-    queryFn: () => {
-      const mockRepository = getMockLightwellRepositoryBySlug(repoSlug);
-      if (!mockRepository) {
-        throw new Error('Lightwell repository not found');
-      }
-      return mockRepository;
-    },
-    staleTime: 20000,
-    enabled: useMock && !!repoSlug,
-  });
+  const {
+    repository,
+    repoUUID,
+    isLoading: isResolvingRepository,
+    isError,
+    error,
+  } = useLightwellRepository(repoSlug);
 
-  const apiRepositoryListQuery = useContentListQuery(
-    1,
-    100,
-    { feature_name: LIGHTWELL_FEATURE_NAME },
-    '',
-    [],
-    !useMock && !!repoSlug,
-  );
-
-  const repoUUID = useMemo(() => {
-    if (useMock) {
-      return mockRepositoryQuery.data?.uuid ?? '';
-    }
-
-    return findRepositoryByPathSlug(apiRepositoryListQuery.data?.data ?? [], repoSlug)?.uuid ?? '';
-  }, [useMock, mockRepositoryQuery.data?.uuid, apiRepositoryListQuery.data?.data, repoSlug]);
-
-  const apiRepositoryQuery = useFetchContent(repoUUID, !!repoUUID && !useMock);
   const apiPackagesQuery = useLightwellRepositoryPackagesQuery(
     repoUUID,
     page,
     perPage,
-    '',
+    search,
     !!repoUUID && !useMock,
   );
-
-  const {
-    data: repository,
-    isLoading: isRepositoryLoading,
-    isError,
-    error,
-  } = useMock ? mockRepositoryQuery : apiRepositoryQuery;
-
-  const isResolvingRepository = useMock
-    ? isRepositoryLoading
-    : apiRepositoryListQuery.isLoading || isRepositoryLoading;
 
   const { packages, packageCount } = useMemo(() => {
     if (useMock) {
@@ -229,9 +188,7 @@ const PackagesTable = () => {
     };
   }, [useMock, repoUUID, search, page, perPage, apiPackagesQuery.data]);
 
-  const isLoadingPackages = useMock
-    ? false
-    : apiPackagesQuery.isLoading || apiPackagesQuery.isFetching;
+  const isLoadingPackages = useMock ? false : apiPackagesQuery.isLoading;
 
   const countIsZero = packageCount === 0;
   const showPagination = packages.length > 0;

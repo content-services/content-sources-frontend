@@ -4,6 +4,7 @@ import {
   keepPreviousData,
   QueryClient,
   useMutation,
+  useQueries,
   useQuery,
   useQueryClient,
   UseQueryOptions,
@@ -49,6 +50,7 @@ import {
   PopularRepository,
   bulkRemoveRepositoryRpms,
   getLightwellRepositoryPackages,
+  getPackageDetail,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../Admin/AdminTaskQueries';
 import useErrorNotification from 'Hooks/useErrorNotification';
@@ -67,6 +69,7 @@ export const REPOSITORY_PARAMS_KEY = 'REPOSITORY_PARAMS_KEY';
 export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
 export const PACKAGES_KEY = 'PACKAGES_KEY';
 export const LIGHTWELL_REPOSITORY_PACKAGES_KEY = 'LIGHTWELL_REPOSITORY_PACKAGES_KEY';
+export const PACKAGE_DETAIL_KEY = 'PACKAGE_DETAIL_KEY';
 export const SNAPSHOT_PACKAGES_KEY = 'SNAPSHOT_PACKAGES_KEY';
 export const SNAPSHOT_ERRATA_KEY = 'SNAPSHOT_ERRATA_KEY';
 export const LIST_SNAPSHOTS_KEY = 'LIST_SNAPSHOTS_KEY';
@@ -684,6 +687,44 @@ export const useLightwellRepositoryPackagesQuery = (
       title: 'Unable to find packages for the repository.',
       id: 'lightwell-repository-packages-list-error',
     },
+  });
+
+export const usePackageDetailQuery = (
+  uuid: string,
+  group: string,
+  name: string,
+  version: string,
+  enabled = true,
+) =>
+  useQuery({
+    queryKey: [PACKAGE_DETAIL_KEY, uuid, group, name, version],
+    queryFn: () => getPackageDetail(uuid, group, name, version),
+    staleTime: 60000,
+    enabled: enabled && !!uuid && !!group && !!name && !!version,
+    meta: {
+      title: 'Unable to load package details.',
+      id: 'package-detail-error',
+    },
+  });
+
+export const usePackageVersionsPreload = (
+  uuid: string,
+  group: string,
+  name: string,
+  versions: string[],
+  enabled = true,
+) =>
+  useQueries({
+    queries: versions.map((version) => ({
+      queryKey: [PACKAGE_DETAIL_KEY, uuid, group, name, version],
+      queryFn: () => getPackageDetail(uuid, group, name, version),
+      staleTime: 60000,
+      enabled: enabled && !!uuid && !!group && !!name && !!version,
+      meta: {
+        title: 'Unable to load package details.',
+        id: 'package-detail-error',
+      },
+    })),
   });
 
 export const useGetSnapshotPackagesQuery = (

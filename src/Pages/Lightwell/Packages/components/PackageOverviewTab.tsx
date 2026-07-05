@@ -1,0 +1,129 @@
+import {
+  ClipboardCopy,
+  ClipboardCopyVariant,
+  Content,
+  Flex,
+  Stack,
+  StackItem,
+  Tab,
+  TabContent,
+  Tabs,
+  TabTitleText,
+  Title,
+} from '@patternfly/react-core';
+import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
+import { createRef, useMemo, useState } from 'react';
+
+import { ConnectSnippetTab } from '../../Repositories/components/connectSnippets';
+import { getPackageDependencySnippetTabs } from './packageDependencySnippets';
+
+type PackageOverviewTabProps = {
+  group: string;
+  name: string;
+  latestRelease: string;
+  hasRelease: boolean;
+};
+
+const PackageOverviewTab = ({
+  group,
+  name,
+  latestRelease,
+  hasRelease,
+}: PackageOverviewTabProps) => {
+  const tabs = useMemo(
+    () => getPackageDependencySnippetTabs({ group, name, release: latestRelease }),
+    [group, name, latestRelease],
+  );
+  const [activeTabKey, setActiveTabKey] = useState(tabs[0]?.eventKey ?? '');
+
+  const tabRefs = useMemo(
+    () =>
+      tabs.reduce(
+        (refs, tab) => {
+          refs[tab.eventKey] = createRef<HTMLElement>();
+          return refs;
+        },
+        {} as Record<string, React.RefObject<HTMLElement>>,
+      ),
+    [tabs],
+  );
+
+  const renderTabPanel = (tab: ConnectSnippetTab) => (
+    <Stack hasGutter>
+      {tab.snippets.map((snippet) => (
+        <StackItem key={snippet.label}>
+          <ClipboardCopy
+            isReadOnly
+            isCode
+            hoverTip='Copy'
+            clickTip='Copied'
+            variant={ClipboardCopyVariant.expansion}
+            isExpanded
+          >
+            {snippet.code}
+          </ClipboardCopy>
+        </StackItem>
+      ))}
+    </Stack>
+  );
+
+  return (
+    <Flex direction={{ default: 'column' }} gap={{ default: 'gapLg' }}>
+      <div>
+        <Title headingLevel='h3' size='md'>
+          About this package
+        </Title>
+        <Content component='p'>Package description not yet available.</Content>
+        {hasRelease ? (
+          <Content component='p'>
+            This package has been rebuilt by Red Hat with backported fixes for known
+            vulnerabilities. The upstream version is pinned and Red Hat applies security patches as
+            sequential releases (.rhlw suffix).
+          </Content>
+        ) : (
+          <Content component='p'>
+            This package has been rebuilt from source by Red Hat with no modifications. Multiple
+            upstream versions are available, each verified end-to-end through the Red Hat build
+            pipeline.
+          </Content>
+        )}
+      </div>
+      <div>
+        <Title headingLevel='h3' size='md'>
+          How to use
+        </Title>
+        <Tabs
+          activeKey={activeTabKey}
+          onSelect={(_, eventKey) => setActiveTabKey(eventKey as string)}
+          aria-label='Package dependency snippets'
+          ouiaId='lightwell-package-dependency-tabs'
+        >
+          {tabs.map((tab) => (
+            <Tab
+              key={tab.eventKey}
+              eventKey={tab.eventKey}
+              title={<TabTitleText>{tab.title}</TabTitleText>}
+              tabContentRef={tabRefs[tab.eventKey]}
+              ouiaId={`lightwell-dependency-tab-${tab.eventKey}`}
+            />
+          ))}
+        </Tabs>
+        {tabs.map((tab, index) => (
+          <TabContent
+            key={tab.eventKey}
+            eventKey={tab.eventKey}
+            id={`lightwell-dependency-panel-${tab.eventKey}`}
+            aria-label={tab.title}
+            ref={tabRefs[tab.eventKey]}
+            hidden={index > 0}
+            className={spacing.ptSm}
+          >
+            {renderTabPanel(tab)}
+          </TabContent>
+        ))}
+      </div>
+    </Flex>
+  );
+};
+
+export default PackageOverviewTab;

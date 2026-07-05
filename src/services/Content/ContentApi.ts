@@ -250,6 +250,13 @@ export type RepositoryPackagesResponse = {
   offset: number;
 };
 
+export interface PackageDetailResponse {
+  group: string;
+  name: string;
+  version: string;
+  builds: RepositoryPackageReleaseInfo[];
+}
+
 export type ErrataResponse = {
   data: ErrataItem[];
   links: Links;
@@ -692,6 +699,18 @@ export const bulkRemoveRepositoryRpms: (
   const { data } = await axios.post(
     `/api/content-sources/v1.0/repositories/${repoUuid}/rpms/bulk_remove/`,
     { rpm_uuids },
+  );
+  return data;
+};
+
+export const getPackageDetail: (
+  uuid: string,
+  group: string,
+  name: string,
+  version: string,
+) => Promise<PackageDetailResponse> = async (uuid, group, name, version) => {
+  const { data } = await axios.get(
+    `/api/content-sources/v1/repositories/${uuid}/maven_packages/${group}/${name}/${version}`,
   );
   return data;
 };

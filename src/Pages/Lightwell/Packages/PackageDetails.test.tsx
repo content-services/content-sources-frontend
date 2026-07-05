@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import PackageDetails from './PackageDetails';
 import {
   useLightwellRepositoryPackagesQuery,
+  usePackageDetailQuery,
 } from 'services/Content/ContentQueries';
 import {
   defaultLightwellContentItem,
@@ -13,6 +14,7 @@ import {
 } from 'testingHelpers';
 import { RepositoryPackageItem } from 'services/Content/ContentApi';
 import { getRepositoryPathSlug } from '../helpers';
+import useLightwellRepository from '../useLightwellRepository';
 
 jest.mock('services/Content/ContentQueries', () => ({
   useLightwellRepositoryPackagesQuery: jest.fn(),
@@ -71,9 +73,7 @@ const multiVersionNoReleasePackage: RepositoryPackageItem = {
   ],
 };
 
-const noReleaseBuilds = [
-  { version: '2.21.2', release: '', created_at: '2026-07-01T00:00:00Z' },
-];
+const noReleaseBuilds = [{ version: '2.21.2', release: '', created_at: '2026-07-01T00:00:00Z' }];
 
 const mockPackageDetailQuery = (builds = defaultBuilds) => ({
   isLoading: false,
@@ -108,10 +108,20 @@ beforeEach(() => {
     repoUUID: defaultRepoSlug,
     packageName,
   });
+  (useLightwellRepository as jest.Mock).mockReturnValue({
+    repository: defaultLightwellContentItem,
+    repoUUID: defaultLightwellContentItem.uuid,
+    isLoading: false,
+    isError: false,
+    error: undefined,
+  });
   (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(mockPackagesQuery);
+  (usePackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery());
 });
 
 it('shows empty state when the package has no builds', async () => {
+  (usePackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery([]));
+
   renderPackageDetails();
 
   expect(await screen.findByText('No details available yet for this package.')).toBeInTheDocument();
@@ -127,6 +137,9 @@ const setupNoReleasePackage = () => {
       total: 1,
     },
   }));
+  (usePackageDetailQuery as jest.Mock).mockImplementation(() =>
+    mockPackageDetailQuery(noReleaseBuilds),
+  );
 };
 
 it('does not show Releases tab when package has no release', async () => {
@@ -189,9 +202,7 @@ it('shows non-release description text', async () => {
   renderPackageDetails();
 
   expect(
-    await screen.findByText(
-      /rebuilt from source by Red Hat with no modifications/,
-    ),
+    await screen.findByText(/rebuilt from source by Red Hat with no modifications/),
   ).toBeInTheDocument();
 });
 
@@ -214,6 +225,7 @@ const setupMultiVersionReleasePackage = () => {
       total: 1,
     },
   }));
+  (usePackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery());
 };
 
 it('shows "Other available versions" on Releases tab for multi-version release packages', async () => {
