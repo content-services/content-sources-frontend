@@ -33,8 +33,9 @@ import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Loader from 'components/Loader';
 import {
   useLightwellRepositoryPackagesQuery,
-  usePackageDetailQuery,
-  usePackageVersionsPreload,
+  useMavenPackageDetailQuery,
+  useMavenPackageVersionsPreload,
+  usePythonPackageVersionsQuery,
 } from 'services/Content/ContentQueries';
 
 import { LIGHTWELL_USE_MOCK } from '../constants';
@@ -42,7 +43,7 @@ import { formatRepositoryName, stripLightwellVersionSuffix } from '../helpers';
 import { getMockLightwellPackages } from '../mockPackages';
 import useLightwellRepository from '../useLightwellRepository';
 import PackageOverviewTab from './components/PackageOverviewTab';
-import PackageReleasesTab from './components/PackageReleasesTab';
+import PackageReleasesTab, { buildVersionFromRelease } from './components/PackageReleasesTab';
 import PackageSidebar from './components/PackageSidebar';
 import PackageVersionsTab from './components/PackageVersionsTab';
 
@@ -84,9 +85,9 @@ const PackageDetails = () => {
   const apiPackagesQuery = useLightwellRepositoryPackagesQuery(
     repoUUID,
     1,
-    100,
-    '',
-    !!repoUUID && !useMock,
+    20,
+    packageName,
+    !!repoUUID && !!packageName && !useMock,
   );
 
   const packageItem = useMemo(() => {
@@ -100,37 +101,93 @@ const PackageDetails = () => {
   const packageGroup = packageItem?.group ?? '';
   const packageVersion = packageItem?.versions[0] ?? '';
   const hasRelease = (packageItem?.latest_releases ?? []).some((r) => !!r.release);
-
-  useEffect(() => {
-    if (packageItem?.versions.length && !selectedVersion) {
-      setSelectedVersion(packageItem.versions[0]);
-    }
-  }, [packageItem?.versions]);
-
+  const isMaven = repository?.content_type === 'maven';
+  const isPython = repository?.content_type === 'python';
   const activeVersion = selectedVersion || packageVersion;
 
-  const packageDetailQuery = usePackageDetailQuery(
+  const mavenPackageDetailQuery = useMavenPackageDetailQuery(
     repoUUID,
     packageGroup,
     packageName,
     activeVersion,
-    !!repoUUID && !!packageGroup && !!activeVersion,
+    isMaven && !!repoUUID && !!packageGroup && !!activeVersion && !useMock,
   );
 
-  usePackageVersionsPreload(
+  const pythonPackageVersionsQuery = usePythonPackageVersionsQuery(
+    repoUUID,
+    packageName,
+    isPython && !!repoUUID && !!packageName && !useMock,
+  );
+
+  useMavenPackageVersionsPreload(
     repoUUID,
     packageGroup,
     packageName,
     packageItem?.versions ?? [],
-    !hasRelease && !!repoUUID && !!packageGroup,
+    isMaven && !hasRelease && !!repoUUID && !!packageGroup && !useMock,
   );
 
-  const isLoadingPackages = useMock
-    ? false
-    : apiPackagesQuery.isLoading || apiPackagesQuery.isFetching;
+  const mavenDetail = mavenPackageDetailQuery.data;
+  const pythonVersionsFromApi = useMemo(
+    () => pythonPackageVersionsQuery.data?.versions?.map((version) => version.version) ?? [],
+    [pythonPackageVersionsQuery.data?.versions],
+  );
+  const pythonVersions = useMock ? (packageItem?.versions ?? []) : pythonVersionsFromApi;
+  const pythonDetail = useMemo(() => {
+    if (useMock) {
+      return undefined;
+    }
 
-  const isLoadingDetail =
-    packageDetailQuery.isLoading || (hasRelease && packageDetailQuery.isFetching);
+    return pythonPackageVersionsQuery.data?.versions.find(
+      (version) => version.version === activeVersion,
+    );
+  }, [useMock, pythonPackageVersionsQuery.data?.versions, activeVersion]);
+  const pythonVersionReleases = useMemo(() => {
+    if (useMock) {
+      return (packageItem?.latest_releases ?? []).map((release) => ({
+        version: release.version,
+        release: release.release,
+        created_at: release.created_at,
+      }));
+    }
+
+    return (pythonPackageVersionsQuery.data?.versions ?? []).map((version) => ({
+      version: version.version,
+      release: '',
+      created_at: version.last_updated,
+    }));
+  }, [useMock, packageItem?.latest_releases, pythonPackageVersionsQuery.data?.versions]);
+  const pythonBuilds = useMemo(() => {
+    if (!isPython || !packageItem) return [];
+
+    const upstream = stripLightwellVersionSuffix(activeVersion);
+    return (packageItem.latest_releases ?? [])
+      .filter(
+        (release) => !!release.release && stripLightwellVersionSuffix(release.version) === upstream,
+      )
+      .map((release) => ({
+        version: buildVersionFromRelease(release),
+        release: release.release,
+        created_at: release.created_at,
+      }));
+  }, [isPython, packageItem, activeVersion]);
+
+  useEffect(() => {
+    if (isPython && pythonVersions.length) {
+      if (!selectedVersion || !pythonVersions.includes(selectedVersion)) {
+        setSelectedVersion(pythonVersions[0]);
+      }
+      return;
+    }
+
+    if (packageItem?.versions.length && !selectedVersion) {
+      setSelectedVersion(packageItem.versions[0]);
+    }
+  }, [isPython, pythonVersions, packageItem?.versions, selectedVersion]);
+
+  const isLoadingDetail = isMaven
+    ? mavenPackageDetailQuery.isLoading || (hasRelease && mavenPackageDetailQuery.isFetching)
+    : pythonPackageVersionsQuery.isLoading && !pythonPackageVersionsQuery.data;
 
   if (isResolvingRepository || !repository) {
     return <Loader />;
@@ -145,23 +202,58 @@ const PackageDetails = () => {
     repository.name,
   );
 
-  const builds = packageDetailQuery.data?.builds ?? [];
+  const versionOptions = isPython ? pythonVersions : (packageItem?.versions ?? []);
+  const builds = mavenDetail?.builds ?? [];
   const latestBuild = builds[0];
-  const latestVersion = latestBuild?.version ?? activeVersion;
-  const upstreamVersion = stripLightwellVersionSuffix(latestVersion);
-  const displayVersion = hasRelease ? latestVersion : selectedVersion || packageVersion;
-  const mavenCoordinate = `${packageGroup}:${packageName}:${displayVersion}`;
+  const latestVersion = isMaven ? (latestBuild?.version ?? activeVersion) : activeVersion;
+  const upstreamVersion = stripLightwellVersionSuffix(isMaven ? latestVersion : activeVersion);
+  const pythonBuildVersion = pythonBuilds[0]?.version;
+  const displayVersion = isMaven
+    ? hasRelease
+      ? latestVersion
+      : selectedVersion || packageVersion
+    : hasRelease && pythonBuildVersion
+      ? pythonBuildVersion
+      : activeVersion;
+  const installCommand = isMaven
+    ? `${packageGroup}:${packageName}:${displayVersion}`
+    : hasRelease && pythonBuildVersion
+      ? `pip install ${packageName}==${pythonBuildVersion}`
+      : `pip install ${packageName}==${upstreamVersion}`;
+  const formatReleaseCopyText = (version: string) =>
+    isMaven
+      ? `${packageGroup}:${packageName}:${version}`
+      : `pip install ${packageName}==${version}`;
 
-  const latestCreatedAt = builds
-    .map((b) => b.created_at)
-    .sort()
-    .at(-1);
-  const lastUpdated = latestCreatedAt?.split('T')[0] ?? '';
+  const lastUpdated = isMaven
+    ? (builds
+        .map((b) => b.created_at)
+        .sort()
+        .at(-1)
+        ?.split('T')[0] ?? '')
+    : (pythonDetail?.last_updated?.split('T')[0] ?? '');
 
-  const doneLoading = !!packageItem && !isLoadingPackages && !isLoadingDetail;
+  const packagesReady = useMock || (!apiPackagesQuery.isLoading && !!apiPackagesQuery.data);
+  const detailReady = !isLoadingDetail;
+
+  const doneLoading = !!packageItem && packagesReady && detailReady;
   const hasDetail =
-    doneLoading && (builds.length > 0 || (!hasRelease && packageItem!.versions.length > 0));
-  const showEmpty = doneLoading && !hasDetail;
+    !!packageItem &&
+    detailReady &&
+    (isMaven
+      ? builds.length > 0 || (!hasRelease && !!packageItem.versions.length)
+      : hasRelease
+        ? pythonBuilds.length > 0
+        : pythonVersions.length > 0);
+  const showEmpty = packagesReady && detailReady && !hasDetail;
+  const showVersionsTab = isMaven
+    ? !hasRelease
+    : isPython && !hasRelease && pythonVersions.length > 0;
+  const showReleasesTab = hasRelease && (isMaven || isPython);
+
+  if (!doneLoading && !showEmpty) {
+    return <Loader />;
+  }
 
   return (
     <>
@@ -201,15 +293,14 @@ const PackageDetails = () => {
                     {packageName || 'Package details'}
                   </Title>
                 </FlexItem>
-                {hasRelease &&
-                  upstreamVersion &&
-                  packageItem &&
-                  packageItem.versions.length <= 1 && (
-                    <FlexItem>
-                      <Label isCompact>{upstreamVersion}</Label>
-                    </FlexItem>
-                  )}
-                {packageItem && packageItem.versions.length > 1 && hasRelease && (
+                {versionOptions.length <= 1 && (selectedVersion || activeVersion) ? (
+                  <FlexItem>
+                    <Label isCompact>
+                      {isMaven && hasRelease ? upstreamVersion : selectedVersion || activeVersion}
+                    </Label>
+                  </FlexItem>
+                ) : null}
+                {versionOptions.length > 1 ? (
                   <FlexItem>
                     <Dropdown
                       isScrollable
@@ -224,74 +315,43 @@ const PackageDetails = () => {
                           isExpanded={versionDropdownOpen}
                           ouiaId='lightwell-version-selector'
                         >
-                          {stripLightwellVersionSuffix(selectedVersion)}
+                          {isMaven && hasRelease
+                            ? stripLightwellVersionSuffix(selectedVersion)
+                            : selectedVersion || activeVersion}
                         </MenuToggle>
                       )}
                       onOpenChange={(isOpen) => setVersionDropdownOpen(isOpen)}
                       isOpen={versionDropdownOpen}
                     >
                       <DropdownList>
-                        {packageItem.versions.map((v) => (
+                        {versionOptions.map((v) => (
                           <DropdownItem key={v} value={v} isSelected={selectedVersion === v}>
-                            {stripLightwellVersionSuffix(v)}
+                            {isMaven && hasRelease ? stripLightwellVersionSuffix(v) : v}
                           </DropdownItem>
                         ))}
                       </DropdownList>
                     </Dropdown>
                   </FlexItem>
-                )}
-                {!hasRelease && packageItem && packageItem.versions.length > 0 && (
-                  <FlexItem>
-                    <Dropdown
-                      isScrollable
-                      onSelect={(_e, val) => {
-                        setSelectedVersion(val as string);
-                        setVersionDropdownOpen(false);
-                      }}
-                      toggle={(toggleRef) => (
-                        <MenuToggle
-                          ref={toggleRef}
-                          onClick={() => setVersionDropdownOpen((prev) => !prev)}
-                          isExpanded={versionDropdownOpen}
-                          ouiaId='lightwell-version-selector'
-                        >
-                          {selectedVersion}
-                        </MenuToggle>
-                      )}
-                      onOpenChange={(isOpen) => setVersionDropdownOpen(isOpen)}
-                      isOpen={versionDropdownOpen}
-                    >
-                      <DropdownList>
-                        {packageItem.versions.map((v) => (
-                          <DropdownItem key={v} value={v} isSelected={selectedVersion === v}>
-                            {v}
-                          </DropdownItem>
-                        ))}
-                      </DropdownList>
-                    </Dropdown>
-                  </FlexItem>
-                )}
+                ) : null}
               </Flex>
-              {displayVersion && (
+              {displayVersion ? (
                 <FlexItem>
                   <Button
                     variant='secondary'
                     icon={<CopyIcon />}
                     iconPosition='end'
-                    onClick={() => navigator.clipboard.writeText(mavenCoordinate)}
+                    onClick={() => navigator.clipboard.writeText(installCommand)}
                   >
-                    {mavenCoordinate}
+                    {installCommand}
                   </Button>
                 </FlexItem>
-              )}
+              ) : null}
             </Flex>
           </StackItem>
         </Stack>
       </Grid>
 
-      {(isLoadingPackages || isLoadingDetail) && <Loader />}
-
-      {showEmpty && (
+      {showEmpty ? (
         <Grid className={spacing.pxLg}>
           <EmptyTableState
             notFiltered
@@ -300,9 +360,9 @@ const PackageDetails = () => {
             notFilteredBody='No details available yet for this package.'
           />
         </Grid>
-      )}
+      ) : null}
 
-      {hasDetail && (
+      {hasDetail ? (
         <Card className={`${classes.detailCard} ${spacing.mxLg} ${spacing.mbLg}`}>
           <CardBody>
             <Grid hasGutter>
@@ -319,7 +379,7 @@ const PackageDetails = () => {
                     tabContentRef={overviewTabRef}
                     ouiaId='lightwell-package-overview-tab'
                   />
-                  {hasRelease && (
+                  {showReleasesTab && (
                     <Tab
                       eventKey={1}
                       title={<TabTitleText>Releases</TabTitleText>}
@@ -327,7 +387,7 @@ const PackageDetails = () => {
                       ouiaId='lightwell-package-releases-tab'
                     />
                   )}
-                  {!hasRelease && (
+                  {showVersionsTab && (
                     <Tab
                       eventKey={1}
                       title={<TabTitleText>Versions</TabTitleText>}
@@ -344,14 +404,18 @@ const PackageDetails = () => {
                 >
                   <TabContentBody hasPadding>
                     <PackageOverviewTab
+                      isMaven={isMaven}
                       group={packageGroup}
                       name={packageName}
                       latestRelease={displayVersion}
                       hasRelease={hasRelease}
+                      summary={isMaven ? mavenDetail?.summary : pythonDetail?.summary}
+                      sourceUrl={repository.published_distribution_url ?? ''}
+                      installCommand={!isMaven ? installCommand : undefined}
                     />
                   </TabContentBody>
                 </TabContent>
-                {hasRelease && (
+                {showReleasesTab && (
                   <TabContent
                     eventKey={1}
                     id='lightwell-package-releases-panel'
@@ -362,15 +426,16 @@ const PackageDetails = () => {
                     <TabContentBody hasPadding>
                       <PackageReleasesTab
                         version={upstreamVersion}
-                        builds={builds}
+                        builds={isMaven ? builds : pythonBuilds}
                         allVersions={packageItem?.versions ?? []}
                         latestReleases={packageItem?.latest_releases ?? []}
                         onVersionSelect={setSelectedVersion}
+                        formatCopyText={formatReleaseCopyText}
                       />
                     </TabContentBody>
                   </TabContent>
                 )}
-                {!hasRelease && (
+                {showVersionsTab && (
                   <TabContent
                     eventKey={1}
                     id='lightwell-package-versions-panel'
@@ -380,9 +445,11 @@ const PackageDetails = () => {
                   >
                     <TabContentBody hasPadding>
                       <PackageVersionsTab
-                        currentVersion={selectedVersion}
-                        versions={packageItem?.versions ?? []}
-                        latestReleases={packageItem?.latest_releases ?? []}
+                        currentVersion={selectedVersion || activeVersion}
+                        versions={versionOptions}
+                        latestReleases={
+                          isPython ? pythonVersionReleases : (packageItem?.latest_releases ?? [])
+                        }
                         onVersionSelect={setSelectedVersion}
                       />
                     </TabContentBody>
@@ -394,13 +461,23 @@ const PackageDetails = () => {
                   lastUpdated={lastUpdated}
                   namespace={packageGroup}
                   upstreamVersion={upstreamVersion}
-                  allVersions={!hasRelease ? packageItem?.versions : undefined}
+                  allVersions={
+                    isMaven && !hasRelease
+                      ? packageItem?.versions
+                      : isPython && pythonVersions.length > 1
+                        ? pythonVersions
+                        : undefined
+                  }
+                  license={isMaven ? mavenDetail?.license : pythonDetail?.license}
+                  author={isMaven ? mavenDetail?.author : pythonDetail?.author?.name}
+                  projectUrl={isMaven ? mavenDetail?.project_url : pythonDetail?.project_url}
+                  hasRelease={hasRelease}
                 />
               </GridItem>
             </Grid>
           </CardBody>
         </Card>
-      )}
+      ) : null}
     </>
   );
 };

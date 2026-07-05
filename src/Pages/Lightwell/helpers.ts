@@ -1,6 +1,5 @@
 import { capitalize } from 'lodash';
-import { ContentItem } from 'services/Content/ContentApi';
-import { CONTENT_TYPE_PARAMETERS, REPOSITORY_DESCRIPTIONS } from './constants';
+import { CONTENT_TYPE_PARAMETERS, LIGHTWELL_ORIGIN, REPOSITORY_DESCRIPTIONS } from './constants';
 
 const getContentTypeParameters = (contentType?: string) => {
   const normalized = contentType?.toLowerCase();
@@ -17,10 +16,14 @@ export const formatEcosystemDisplay = (contentType?: string): string | undefined
   return `${config.ecosystem} (${config.label})`;
 };
 
-export const getRepositoryDescription = (contentType?: string): string | undefined => {
-  const normalized = contentType?.toLowerCase();
-  if (!normalized) return undefined;
-  return REPOSITORY_DESCRIPTIONS[normalized];
+export const getRepositoryDescription = (
+  contentType?: string,
+  securityLevel?: string,
+): string | undefined => {
+  const normalizedType = contentType?.toLowerCase();
+  const normalizedLevel = securityLevel?.toLowerCase();
+  if (!normalizedType || !normalizedLevel) return undefined;
+  return REPOSITORY_DESCRIPTIONS[normalizedType]?.[normalizedLevel];
 };
 
 export const formatRepositoryName = (
@@ -48,13 +51,19 @@ export const getRepositoryPathSlug = (contentType?: string, securityLevel?: stri
   return `${ecosystem}-${level}`;
 };
 
+export const getRepositoryNameFromPathSlug = (slug: string): string => {
+  const normalized = slug.toLowerCase();
+  const separatorIndex = normalized.indexOf('-');
+
+  if (separatorIndex <= 0 || separatorIndex === normalized.length - 1) {
+    return '';
+  }
+
+  const ecosystem = normalized.slice(0, separatorIndex);
+  const securityLevel = normalized.slice(separatorIndex + 1);
+
+  return `${LIGHTWELL_ORIGIN}/${ecosystem}/${securityLevel}`;
+};
+
 export const stripLightwellVersionSuffix = (version: string): string =>
   version.replace(/\.rhlw-.*$/, '');
-
-export const findRepositoryByPathSlug = (
-  repositories: ContentItem[],
-  slug: string,
-): ContentItem | undefined =>
-  repositories.find(
-    (repo) => getRepositoryPathSlug(repo.content_type, repo.security_level) === slug.toLowerCase(),
-  );

@@ -12,7 +12,15 @@ type PackageReleasesTabProps = {
   allVersions: string[];
   latestReleases: RepositoryPackageReleaseInfo[];
   onVersionSelect: (version: string) => void;
+  formatCopyText: (version: string) => string;
 };
+
+export const buildVersionFromRelease = (
+  release: Pick<RepositoryPackageReleaseInfo, 'version' | 'release'>,
+) =>
+  release.version.includes('.rhlw-')
+    ? release.version
+    : `${stripLightwellVersionSuffix(release.version)}.${release.release}`;
 
 const PackageReleasesTab = ({
   version,
@@ -20,8 +28,9 @@ const PackageReleasesTab = ({
   allVersions,
   latestReleases,
   onVersionSelect,
+  formatCopyText,
 }: PackageReleasesTabProps) => {
-  const otherVersions = allVersions.filter((v) => v !== version);
+  const otherVersions = allVersions.filter((v) => stripLightwellVersionSuffix(v) !== version);
 
   const releaseMap = useMemo(() => {
     const map: Record<string, RepositoryPackageReleaseInfo> = {};
@@ -44,25 +53,28 @@ const PackageReleasesTab = ({
           </Tr>
         </Thead>
         <Tbody>
-          {builds.map((build) => (
-            <Tr key={build.version}>
-              <Td dataLabel='Release'>
-                <Label
-                  isCompact
-                  icon={<CopyIcon />}
-                  onClick={() => navigator.clipboard.writeText(build.version)}
-                  aria-label={`Copy ${build.version}`}
-                  style={{ cursor: 'pointer' }}
-                >
-                  {build.version}
-                </Label>
-              </Td>
-              <Td dataLabel='Date'>{build.created_at?.split('T')[0] ?? '—'}</Td>
-            </Tr>
-          ))}
+          {builds.map((build) => {
+            const copyText = formatCopyText(build.version);
+            return (
+              <Tr key={build.version}>
+                <Td dataLabel='Release'>
+                  <Label
+                    isCompact
+                    icon={<CopyIcon />}
+                    onClick={() => navigator.clipboard.writeText(copyText)}
+                    aria-label={`Copy ${copyText}`}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {build.version}
+                  </Label>
+                </Td>
+                <Td dataLabel='Date'>{build.created_at?.split('T')[0] ?? '—'}</Td>
+              </Tr>
+            );
+          })}
         </Tbody>
       </Table>
-      {otherVersions.length > 0 && (
+      {otherVersions.length > 0 ? (
         <>
           <Title headingLevel='h3' size='md'>
             Other available versions
@@ -78,8 +90,9 @@ const PackageReleasesTab = ({
             </Thead>
             <Tbody>
               {otherVersions.map((v) => {
-                const release = releaseMap[v];
-                const fullRelease = release?.release ?? '—';
+                const release = releaseMap[v] ?? releaseMap[stripLightwellVersionSuffix(v)];
+                const releaseVersion = release ? buildVersionFromRelease(release) : '';
+                const copyText = release ? formatCopyText(releaseVersion) : '';
                 const date = release?.created_at?.split('T')[0] ?? '—';
                 return (
                   <Tr key={v}>
@@ -93,11 +106,11 @@ const PackageReleasesTab = ({
                         <Label
                           isCompact
                           icon={<CopyIcon />}
-                          onClick={() => navigator.clipboard.writeText(fullRelease)}
-                          aria-label={`Copy ${fullRelease}`}
+                          onClick={() => navigator.clipboard.writeText(copyText)}
+                          aria-label={`Copy ${copyText}`}
                           style={{ cursor: 'pointer' }}
                         >
-                          {fullRelease}
+                          {releaseVersion}
                         </Label>
                       ) : (
                         '—'
@@ -111,7 +124,7 @@ const PackageReleasesTab = ({
             </Tbody>
           </Table>
         </>
-      )}
+      ) : null}
     </Flex>
   );
 };

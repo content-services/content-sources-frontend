@@ -1,6 +1,6 @@
 import { ContentItem, ContentListResponse, FilterData } from 'services/Content/ContentApi';
 
-import { getRepositoryPathSlug } from './helpers';
+import { getRepositoryPathSlug, getRepositoryDescription } from './helpers';
 
 const mockRepositories = [
   {
@@ -8,8 +8,7 @@ const mockRepositories = [
     name: 'lightwell/java/validated',
     published_distribution_url:
       'https://packages.stage.redhat.com/api/pulp-content/lightwell/java/validated/',
-    description:
-      'Maven artifacts with Red Hat backported fixes for known vulnerabilities in pinned versions.',
+    description: getRepositoryDescription('maven', 'validated')!,
     security_level: 'validated',
     content_type: 'maven',
     package_count: 10,
@@ -20,8 +19,7 @@ const mockRepositories = [
     name: 'lightwell/java/remediated',
     published_distribution_url:
       'https://packages.stage.redhat.com/api/pulp-content/lightwell/java/remediated/',
-    description:
-      'Maven artifacts with Red Hat backported fixes for known vulnerabilities in pinned versions.',
+    description: getRepositoryDescription('maven', 'remediated')!,
     security_level: 'remediated',
     content_type: 'maven',
     package_count: 11,
@@ -32,8 +30,7 @@ const mockRepositories = [
     name: 'lightwell/python/remediated',
     published_distribution_url:
       'https://packages.stage.redhat.com/api/pulp-content/lightwell/python/remediated/',
-    description:
-      'Python wheels with Red Hat backported fixes for known vulnerabilities in pinned versions.',
+    description: getRepositoryDescription('python', 'remediated')!,
     security_level: 'remediated',
     content_type: 'python',
     package_count: 13,
@@ -44,8 +41,7 @@ const mockRepositories = [
     name: 'lightwell/python/validated',
     published_distribution_url:
       'https://packages.stage.redhat.com/api/pulp-content/lightwell/python/validated/',
-    description:
-      'Python wheels with Red Hat backported fixes for known vulnerabilities in pinned versions.',
+    description: getRepositoryDescription('python', 'validated')!,
     security_level: 'validated',
     content_type: 'python',
     package_count: 10,

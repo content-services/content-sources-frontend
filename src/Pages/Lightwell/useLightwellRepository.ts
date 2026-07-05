@@ -1,12 +1,7 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-
-import { useContentListQuery, useFetchContent } from 'services/Content/ContentQueries';
+import { useContentListQuery } from 'services/Content/ContentQueries';
 import { ContentItem } from 'services/Content/ContentApi';
-
-import { LIGHTWELL_FEATURE_NAME, LIGHTWELL_USE_MOCK } from './constants';
-import { findRepositoryByPathSlug } from './helpers';
-import { getMockLightwellRepositoryBySlug } from './mockRepositories';
+import { LIGHTWELL_FEATURE_NAME } from './constants';
+import { getRepositoryNameFromPathSlug } from './helpers';
 
 interface UseLightwellRepositoryResult {
   repository: ContentItem | undefined;
@@ -17,52 +12,26 @@ interface UseLightwellRepositoryResult {
 }
 
 const useLightwellRepository = (repoSlug: string): UseLightwellRepositoryResult => {
-  const useMock = LIGHTWELL_USE_MOCK;
+  const repositoryName = getRepositoryNameFromPathSlug(repoSlug);
 
-  const mockRepositoryQuery = useQuery({
-    queryKey: ['lightwell-repository-mock', repoSlug],
-    queryFn: () => {
-      const mockRepository = getMockLightwellRepositoryBySlug(repoSlug);
-      if (!mockRepository) {
-        throw new Error('Lightwell repository not found');
-      }
-      return mockRepository;
-    },
-    staleTime: 20000,
-    enabled: useMock && !!repoSlug,
-  });
-
-  const apiRepositoryListQuery = useContentListQuery(
+  const { data, isLoading, isError, error } = useContentListQuery(
     1,
-    100,
-    { feature_name: LIGHTWELL_FEATURE_NAME },
+    1,
+    { feature_name: LIGHTWELL_FEATURE_NAME, name: repositoryName },
     '',
     [],
-    !useMock && !!repoSlug,
+    !!repositoryName,
   );
 
-  const repoUUID = useMemo(() => {
-    if (useMock) {
-      return mockRepositoryQuery.data?.uuid ?? '';
-    }
+  const repository = data?.data[0];
 
-    return findRepositoryByPathSlug(apiRepositoryListQuery.data?.data ?? [], repoSlug)?.uuid ?? '';
-  }, [useMock, mockRepositoryQuery.data?.uuid, apiRepositoryListQuery.data?.data, repoSlug]);
-
-  const apiRepositoryQuery = useFetchContent(repoUUID, !!repoUUID && !useMock);
-
-  const {
-    data: repository,
-    isLoading: isRepositoryLoading,
+  return {
+    repository,
+    repoUUID: repository?.uuid ?? '',
+    isLoading,
     isError,
     error,
-  } = useMock ? mockRepositoryQuery : apiRepositoryQuery;
-
-  const isLoading = useMock
-    ? isRepositoryLoading
-    : apiRepositoryListQuery.isLoading || isRepositoryLoading;
-
-  return { repository, repoUUID, isLoading, isError, error };
+  };
 };
 
 export default useLightwellRepository;

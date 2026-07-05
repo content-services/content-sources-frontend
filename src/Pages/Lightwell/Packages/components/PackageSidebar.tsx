@@ -6,12 +6,17 @@ import {
   DescriptionListGroup,
   DescriptionListTerm,
 } from '@patternfly/react-core';
+import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
 
 type PackageSidebarProps = {
   lastUpdated: string;
-  namespace: string;
+  namespace?: string;
   upstreamVersion: string;
   allVersions?: string[];
+  license?: string;
+  author?: string;
+  projectUrl?: string;
+  hasRelease: boolean;
 };
 
 const PackageSidebar = ({
@@ -19,34 +24,63 @@ const PackageSidebar = ({
   namespace,
   upstreamVersion,
   allVersions,
+  license,
+  author,
+  projectUrl,
+  hasRelease,
 }: PackageSidebarProps) => (
   <Card isPlain>
     <CardBody>
-      {/* TODO: Add License, Original author, and Project fields when package metadata becomes available from the API */}
       <DescriptionList>
-        <DescriptionListGroup>
-          <DescriptionListTerm>Last updated</DescriptionListTerm>
-          <DescriptionListDescription>{lastUpdated || '—'}</DescriptionListDescription>
-        </DescriptionListGroup>
-        <DescriptionListGroup>
-          <DescriptionListTerm>Namespace</DescriptionListTerm>
-          <DescriptionListDescription>{namespace || '—'}</DescriptionListDescription>
-        </DescriptionListGroup>
-        <DescriptionListGroup>
-          <DescriptionListTerm>Rebuilt by</DescriptionListTerm>
-          <DescriptionListDescription>Red Hat</DescriptionListDescription>
-        </DescriptionListGroup>
-        {allVersions && allVersions.length > 0 ? (
+        {lastUpdated ? (
+          <DescriptionListGroup>
+            <DescriptionListTerm>Last updated</DescriptionListTerm>
+            <DescriptionListDescription>{lastUpdated}</DescriptionListDescription>
+          </DescriptionListGroup>
+        ) : null}
+        {license ? (
+          <DescriptionListGroup>
+            <DescriptionListTerm>License</DescriptionListTerm>
+            <DescriptionListDescription>{license}</DescriptionListDescription>
+          </DescriptionListGroup>
+        ) : null}
+        {namespace ? (
+          <DescriptionListGroup>
+            <DescriptionListTerm>Namespace</DescriptionListTerm>
+            <DescriptionListDescription>{namespace}</DescriptionListDescription>
+          </DescriptionListGroup>
+        ) : null}
+        {author ? (
+          <DescriptionListGroup>
+            <DescriptionListTerm>{hasRelease ? 'Original author' : 'Author'}</DescriptionListTerm>
+            <DescriptionListDescription>{author}</DescriptionListDescription>
+          </DescriptionListGroup>
+        ) : null}
+        {hasRelease ? (
+          <DescriptionListGroup>
+            <DescriptionListTerm>Rebuilt by</DescriptionListTerm>
+            <DescriptionListDescription>Red Hat</DescriptionListDescription>
+          </DescriptionListGroup>
+        ) : null}
+        {allVersions && allVersions.length > 1 ? (
           <DescriptionListGroup>
             <DescriptionListTerm>Upstream versions</DescriptionListTerm>
             <DescriptionListDescription>{allVersions.join(', ')}</DescriptionListDescription>
           </DescriptionListGroup>
-        ) : (
+        ) : upstreamVersion ? (
           <DescriptionListGroup>
             <DescriptionListTerm>Upstream version</DescriptionListTerm>
-            <DescriptionListDescription>{upstreamVersion || '—'}</DescriptionListDescription>
+            <DescriptionListDescription>{upstreamVersion}</DescriptionListDescription>
           </DescriptionListGroup>
-        )}
+        ) : null}
+        {projectUrl ? (
+          <DescriptionListGroup>
+            <DescriptionListTerm>Project</DescriptionListTerm>
+            <DescriptionListDescription>
+              <UrlWithExternalIcon href={projectUrl} customText='Source' />
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+        ) : null}
       </DescriptionList>
     </CardBody>
   </Card>
