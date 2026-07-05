@@ -4,12 +4,29 @@ import userEvent from '@testing-library/user-event';
 import PackageDetails from './PackageDetails';
 import {
   useLightwellRepositoryPackagesQuery,
-  usePackageDetailQuery,
+  useMavenPackageDetailQuery,
+  usePythonPackageVersionsQuery,
 } from 'services/Content/ContentQueries';
 import {
   defaultLightwellContentItem,
   defaultLightwellRepositoryPackageItem,
   defaultLightwellRepositoryPackageResponse,
+  defaultPythonRemediatedContentItem,
+  defaultPythonPackageVersions,
+  defaultPythonRemediatedRepositoryPackageItem,
+  defaultPythonValidatedContentItem,
+  defaultPythonValidatedPackageItem,
+  defaultPythonValidatedPackageVersions,
+  gradleRemediatedDependencySnippet,
+  gradleValidatedDependencySnippet,
+  javaRemediatedCopyCommand,
+  javaRemediatedCopyCommand2,
+  javaValidatedCopyCommand,
+  mavenRemediatedDependencySnippet,
+  mavenValidatedDependencySnippet,
+  pythonRemediatedPipCommand,
+  pythonRemediatedPipCommand2,
+  pythonValidatedPipCommand,
   ReactQueryTestWrapper,
 } from 'testingHelpers';
 import { RepositoryPackageItem } from 'services/Content/ContentApi';
@@ -18,8 +35,9 @@ import useLightwellRepository from '../useLightwellRepository';
 
 jest.mock('services/Content/ContentQueries', () => ({
   useLightwellRepositoryPackagesQuery: jest.fn(),
-  usePackageDetailQuery: jest.fn(),
-  usePackageVersionsPreload: jest.fn(() => []),
+  useMavenPackageDetailQuery: jest.fn(),
+  useMavenPackageVersionsPreload: jest.fn(() => []),
+  usePythonPackageVersionsQuery: jest.fn(),
 }));
 
 jest.mock('../useLightwellRepository');
@@ -75,7 +93,14 @@ const multiVersionNoReleasePackage: RepositoryPackageItem = {
 
 const noReleaseBuilds = [{ version: '2.21.2', release: '', created_at: '2026-07-01T00:00:00Z' }];
 
-const mockPackageDetailQuery = (builds = defaultBuilds) => ({
+type PackageMetadata = {
+  summary?: string;
+  license?: string;
+  author?: string;
+  project_url?: string;
+};
+
+const mockPackageDetailQuery = (builds = defaultBuilds, metadata: PackageMetadata = {}) => ({
   isLoading: false,
   isFetching: false,
   data: {
@@ -83,6 +108,7 @@ const mockPackageDetailQuery = (builds = defaultBuilds) => ({
     name: defaultLightwellRepositoryPackageItem.name,
     version: '3.14.0',
     builds,
+    ...metadata,
   },
 });
 
@@ -116,11 +142,16 @@ beforeEach(() => {
     error: undefined,
   });
   (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(mockPackagesQuery);
-  (usePackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery());
+  (useMavenPackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery());
+  (usePythonPackageVersionsQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    isFetching: false,
+    data: undefined,
+  }));
 });
 
 it('shows empty state when the package has no builds', async () => {
-  (usePackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery([]));
+  (useMavenPackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery([]));
 
   renderPackageDetails();
 
@@ -137,9 +168,37 @@ const setupNoReleasePackage = () => {
       total: 1,
     },
   }));
-  (usePackageDetailQuery as jest.Mock).mockImplementation(() =>
+  (useMavenPackageDetailQuery as jest.Mock).mockImplementation(() =>
     mockPackageDetailQuery(noReleaseBuilds),
   );
+};
+
+const setupPythonRemediatedPackage = () => {
+  mockUseParams.mockReturnValue({
+    repoUUID: getRepositoryPathSlug('python', 'remediated'),
+    packageName: defaultPythonRemediatedRepositoryPackageItem.name,
+  });
+  (useLightwellRepository as jest.Mock).mockReturnValue({
+    repository: defaultPythonRemediatedContentItem,
+    repoUUID: defaultPythonRemediatedContentItem.uuid,
+    isLoading: false,
+    isError: false,
+    error: undefined,
+  });
+  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    isFetching: false,
+    data: {
+      ...defaultLightwellRepositoryPackageResponse,
+      results: [defaultPythonRemediatedRepositoryPackageItem],
+      total: 1,
+    },
+  }));
+  (usePythonPackageVersionsQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    isFetching: false,
+    data: defaultPythonPackageVersions,
+  }));
 };
 
 it('does not show Releases tab when package has no release', async () => {
@@ -162,6 +221,15 @@ it('renders package detail content with builds', async () => {
 });
 
 it('renders sidebar metadata', async () => {
+  (useMavenPackageDetailQuery as jest.Mock).mockImplementation(() =>
+    mockPackageDetailQuery(defaultBuilds, {
+      summary: 'JSON library for Java',
+      license: 'MIT',
+      author: 'JSON.org',
+      project_url: 'https://example.com/json-test',
+    }),
+  );
+
   renderPackageDetails();
 
   expect(await screen.findByText('Last updated')).toBeInTheDocument();
@@ -170,6 +238,24 @@ it('renders sidebar metadata', async () => {
   expect(await screen.findByText(defaultLightwellRepositoryPackageItem.group)).toBeInTheDocument();
   expect(await screen.findByText('Rebuilt by')).toBeInTheDocument();
   expect(await screen.findByText('Red Hat')).toBeInTheDocument();
+  expect(await screen.findByText('JSON library for Java')).toBeInTheDocument();
+  expect(await screen.findByText('License')).toBeInTheDocument();
+  expect(await screen.findByText('MIT')).toBeInTheDocument();
+  expect(await screen.findByText('Original author')).toBeInTheDocument();
+  expect(await screen.findByText('JSON.org')).toBeInTheDocument();
+  expect(await screen.findByText('Project')).toBeInTheDocument();
+  expect(await screen.findByRole('link', { name: 'Source' })).toHaveAttribute(
+    'href',
+    'https://example.com/json-test',
+  );
+});
+
+it('shows fallback summary when maven package summary is unavailable', async () => {
+  renderPackageDetails();
+
+  expect(await screen.findByText('Package description not yet available.')).toBeInTheDocument();
+  expect(screen.queryByText('License')).not.toBeInTheDocument();
+  expect(screen.queryByText('Original author')).not.toBeInTheDocument();
 });
 
 it('shows Versions tab for non-release packages', async () => {
@@ -225,7 +311,7 @@ const setupMultiVersionReleasePackage = () => {
       total: 1,
     },
   }));
-  (usePackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery());
+  (useMavenPackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery());
 };
 
 it('shows "Other available versions" on Releases tab for multi-version release packages', async () => {
@@ -238,7 +324,7 @@ it('shows "Other available versions" on Releases tab for multi-version release p
 
   expect(await screen.findByText('Other available versions')).toBeInTheDocument();
   expect(await screen.findByRole('button', { name: '2.12.0' })).toBeInTheDocument();
-  expect(await screen.findByText('rhlw-00002')).toBeInTheDocument();
+  expect(await screen.findByText('2.12.0.rhlw-00002')).toBeInTheDocument();
   expect(await screen.findByText('2026-06-18')).toBeInTheDocument();
 });
 
@@ -254,4 +340,225 @@ it('shows version dropdown for multi-version release packages', async () => {
 
   const menuItems = await screen.findAllByRole('menuitem');
   expect(menuItems).toHaveLength(2);
+});
+
+it('shows install section for python package', async () => {
+  setupPythonRemediatedPackage();
+
+  renderPackageDetails();
+
+  expect(
+    await screen.findByRole('heading', { name: defaultPythonRemediatedRepositoryPackageItem.name }),
+  ).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'Install' })).toBeInTheDocument();
+  expect(screen.queryByText('How to use')).not.toBeInTheDocument();
+  expect(
+    await screen.findByRole('button', { name: pythonRemediatedPipCommand }),
+  ).toBeInTheDocument();
+  expect(document.body).toHaveTextContent(pythonRemediatedPipCommand);
+});
+
+const mockClipboard = () => {
+  const writeText = jest.fn().mockResolvedValue(undefined);
+  Object.assign(navigator, { clipboard: { writeText } });
+  return writeText;
+};
+
+const assertClipboardCopy = async (
+  writeText: jest.Mock,
+  click: () => Promise<void>,
+  expected: string,
+) => {
+  writeText.mockClear();
+  await click();
+  expect(writeText).toHaveBeenCalledTimes(1);
+  expect(writeText).toHaveBeenCalledWith(expected);
+};
+
+it('copies pip command to clipboard for remediated python package', async () => {
+  const writeText = mockClipboard();
+
+  setupPythonRemediatedPackage();
+  renderPackageDetails();
+
+  // PackageDetails header
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(
+        await screen.findByRole('button', { name: pythonRemediatedPipCommand }),
+      );
+    },
+    pythonRemediatedPipCommand,
+  );
+
+  // "Install" section of Overview tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+    },
+    pythonRemediatedPipCommand,
+  );
+
+  // "Releases for version x.x.x" section of Releases tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('tab', { name: 'Releases' }));
+      await userEvent.click(await screen.findByRole('button', { name: '2.31.0.rhlw-3001' }));
+    },
+    pythonRemediatedPipCommand,
+  );
+
+  // "Other available versions" section of Releases tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('button', { name: '2.32.0.rhlw-3002' }));
+    },
+    pythonRemediatedPipCommand2,
+  );
+});
+
+it('copies maven coordinate to clipboard for remediated java package', async () => {
+  const writeText = mockClipboard();
+
+  setupMultiVersionReleasePackage();
+  renderPackageDetails();
+
+  // PackageDetails header
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('button', { name: javaRemediatedCopyCommand }));
+    },
+    javaRemediatedCopyCommand,
+  );
+
+  // Maven tab in "How to use" section of Overview tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+    },
+    mavenRemediatedDependencySnippet,
+  );
+
+  // Gradle tab in "How to use" section of Overview tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('tab', { name: 'Gradle' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+    },
+    gradleRemediatedDependencySnippet,
+  );
+
+  // "Releases for version x.x.x" section of Releases tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('tab', { name: 'Releases' }));
+      await userEvent.click(await screen.findByRole('button', { name: '3.14.0.rhlw-00001' }));
+    },
+    javaRemediatedCopyCommand,
+  );
+
+  // "Other available versions" section of Releases tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('button', { name: '2.12.0.rhlw-00002' }));
+    },
+    javaRemediatedCopyCommand2,
+  );
+});
+
+const setupPythonValidatedPackage = () => {
+  mockUseParams.mockReturnValue({
+    repoUUID: getRepositoryPathSlug('python', 'validated'),
+    packageName: defaultPythonValidatedPackageItem.name,
+  });
+  (useLightwellRepository as jest.Mock).mockReturnValue({
+    repository: defaultPythonValidatedContentItem,
+    repoUUID: defaultPythonValidatedContentItem.uuid,
+    isLoading: false,
+    isError: false,
+    error: undefined,
+  });
+  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    isFetching: false,
+    data: {
+      ...defaultLightwellRepositoryPackageResponse,
+      results: [defaultPythonValidatedPackageItem],
+      total: 1,
+    },
+  }));
+  (usePythonPackageVersionsQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    isFetching: false,
+    data: defaultPythonValidatedPackageVersions,
+  }));
+};
+
+it('copies pip command to clipboard for validated python package', async () => {
+  const writeText = mockClipboard();
+
+  setupPythonValidatedPackage();
+  renderPackageDetails();
+
+  // PackageDetails header
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('button', { name: pythonValidatedPipCommand }));
+    },
+    pythonValidatedPipCommand,
+  );
+
+  // "Install" section of Overview tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+    },
+    pythonValidatedPipCommand,
+  );
+});
+
+it('copies maven coordinate to clipboard for validated java package', async () => {
+  const writeText = mockClipboard();
+
+  setupNoReleasePackage();
+  renderPackageDetails();
+
+  // PackageDetails header
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('button', { name: javaValidatedCopyCommand }));
+    },
+    javaValidatedCopyCommand,
+  );
+
+  // Maven tab in "How to use" section of Overview tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+    },
+    mavenValidatedDependencySnippet,
+  );
+
+  // Gradle tab in "How to use" section of Overview tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('tab', { name: 'Gradle' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+    },
+    gradleValidatedDependencySnippet,
+  );
 });

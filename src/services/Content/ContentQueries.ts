@@ -50,7 +50,9 @@ import {
   PopularRepository,
   bulkRemoveRepositoryRpms,
   getLightwellRepositoryPackages,
-  getPackageDetail,
+  getPythonPackageDetail,
+  getPythonPackageVersions,
+  getMavenPackageDetail,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../Admin/AdminTaskQueries';
 import useErrorNotification from 'Hooks/useErrorNotification';
@@ -69,7 +71,9 @@ export const REPOSITORY_PARAMS_KEY = 'REPOSITORY_PARAMS_KEY';
 export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
 export const PACKAGES_KEY = 'PACKAGES_KEY';
 export const LIGHTWELL_REPOSITORY_PACKAGES_KEY = 'LIGHTWELL_REPOSITORY_PACKAGES_KEY';
-export const PACKAGE_DETAIL_KEY = 'PACKAGE_DETAIL_KEY';
+export const MAVEN_PACKAGE_DETAIL_KEY = 'MAVEN_PACKAGE_DETAIL_KEY';
+export const PYTHON_PACKAGE_DETAIL_KEY = 'PYTHON_PACKAGE_DETAIL_KEY';
+export const PYTHON_PACKAGE_VERSIONS_KEY = 'PYTHON_PACKAGE_VERSIONS_KEY';
 export const SNAPSHOT_PACKAGES_KEY = 'SNAPSHOT_PACKAGES_KEY';
 export const SNAPSHOT_ERRATA_KEY = 'SNAPSHOT_ERRATA_KEY';
 export const LIST_SNAPSHOTS_KEY = 'LIST_SNAPSHOTS_KEY';
@@ -90,7 +94,7 @@ const buildContentListKey = (
     '',
   )}${filterData?.versions?.join('')}${filterData?.urls?.join('')}${filterData?.uuids?.join(
     '',
-  )}${filterData?.statuses?.join('')}${filterData?.availableForArch}${filterData?.availableForVersion}${filterData?.search}${filterData?.extended_release}${filterData?.extended_release_version}${filterData?.feature_name}`;
+  )}${filterData?.statuses?.join('')}${filterData?.availableForArch}${filterData?.availableForVersion}${filterData?.search}${filterData?.name}${filterData?.extended_release}${filterData?.extended_release_version}${filterData?.feature_name}`;
 
 export const useFetchContent = (uuid: string, enabled = true) =>
   useQuery({
@@ -689,7 +693,7 @@ export const useLightwellRepositoryPackagesQuery = (
     },
   });
 
-export const usePackageDetailQuery = (
+export const useMavenPackageDetailQuery = (
   uuid: string,
   group: string,
   name: string,
@@ -697,17 +701,17 @@ export const usePackageDetailQuery = (
   enabled = true,
 ) =>
   useQuery({
-    queryKey: [PACKAGE_DETAIL_KEY, uuid, group, name, version],
-    queryFn: () => getPackageDetail(uuid, group, name, version),
+    queryKey: [MAVEN_PACKAGE_DETAIL_KEY, uuid, group, name, version],
+    queryFn: () => getMavenPackageDetail(uuid, group, name, version),
     staleTime: 60000,
     enabled: enabled && !!uuid && !!group && !!name && !!version,
     meta: {
       title: 'Unable to load package details.',
-      id: 'package-detail-error',
+      id: 'maven-package-detail-error',
     },
   });
 
-export const usePackageVersionsPreload = (
+export const useMavenPackageVersionsPreload = (
   uuid: string,
   group: string,
   name: string,
@@ -716,15 +720,45 @@ export const usePackageVersionsPreload = (
 ) =>
   useQueries({
     queries: versions.map((version) => ({
-      queryKey: [PACKAGE_DETAIL_KEY, uuid, group, name, version],
-      queryFn: () => getPackageDetail(uuid, group, name, version),
+      queryKey: [MAVEN_PACKAGE_DETAIL_KEY, uuid, group, name, version],
+      queryFn: () => getMavenPackageDetail(uuid, group, name, version),
       staleTime: 60000,
       enabled: enabled && !!uuid && !!group && !!name && !!version,
       meta: {
         title: 'Unable to load package details.',
-        id: 'package-detail-error',
+        id: 'maven-package-detail-error',
       },
     })),
+  });
+
+export const usePythonPackageDetailQuery = (
+  uuid: string,
+  name: string,
+  version: string,
+  enabled = true,
+) =>
+  useQuery({
+    queryKey: [PYTHON_PACKAGE_DETAIL_KEY, uuid, name, version],
+    queryFn: () => getPythonPackageDetail(uuid, name, version),
+    staleTime: 60000,
+    placeholderData: keepPreviousData,
+    enabled: enabled && !!uuid && !!name && !!version,
+    meta: {
+      title: 'Unable to load package details.',
+      id: 'python-package-detail-error',
+    },
+  });
+
+export const usePythonPackageVersionsQuery = (uuid: string, name: string, enabled = true) =>
+  useQuery({
+    queryKey: [PYTHON_PACKAGE_VERSIONS_KEY, uuid, name],
+    queryFn: () => getPythonPackageVersions(uuid, name),
+    staleTime: 60000,
+    enabled: enabled && !!uuid && !!name,
+    meta: {
+      title: 'Unable to load package versions.',
+      id: 'python-package-versions-error',
+    },
   });
 
 export const useGetSnapshotPackagesQuery = (

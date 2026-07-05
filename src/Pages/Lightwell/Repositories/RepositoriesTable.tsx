@@ -142,7 +142,6 @@ const RepositoriesTable = () => {
                 <Pagination
                   id='lightwell-top-pagination'
                   widgetId='lightwellTopPaginationWidgetId'
-                  isCompact
                   {...paginationProps}
                 />
               </FlexItem>
@@ -211,7 +210,7 @@ const RepositoriesTable = () => {
                                 </Flex>
                                 <FlexItem>
                                   <Content component='small'>
-                                    {getRepositoryDescription(content_type)}
+                                    {getRepositoryDescription(content_type, security_level)}
                                   </Content>
                                 </FlexItem>
                                 <FlexItem>
@@ -248,8 +247,8 @@ const RepositoriesTable = () => {
                                 '—'
                               )}
                             </Td>
-                            <Td>{package_count}</Td>
-                            <Td>{build_count ?? '0'}</Td>
+                            <Td>{package_count.toLocaleString() ?? '0'}</Td>
+                            <Td>{build_count?.toLocaleString() ?? '0'}</Td>
                           </Tr>
                         );
                       })}

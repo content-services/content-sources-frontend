@@ -4,6 +4,7 @@ interface PackageCoordinate {
   group: string;
   name: string;
   release: string;
+  sourceUrl: string;
 }
 
 export const getPackageDependencySnippetTabs = (pkg: PackageCoordinate): ConnectSnippetTab[] => [
@@ -13,7 +14,8 @@ export const getPackageDependencySnippetTabs = (pkg: PackageCoordinate): Connect
     snippets: [
       {
         label: 'Add to your pom.xml:',
-        code: `<dependency>
+        code: `<!-- Source: ${pkg.sourceUrl} -->
+<dependency>
   <groupId>${pkg.group}</groupId>
   <artifactId>${pkg.name}</artifactId>
   <version>${pkg.release}</version>
@@ -27,7 +29,8 @@ export const getPackageDependencySnippetTabs = (pkg: PackageCoordinate): Connect
     snippets: [
       {
         label: 'Add to your build.gradle:',
-        code: `implementation '${pkg.group}:${pkg.name}:${pkg.release}'`,
+        code: `// Source: ${pkg.sourceUrl}
+implementation("${pkg.group}:${pkg.name}:${pkg.release}")`,
       },
     ],
   },

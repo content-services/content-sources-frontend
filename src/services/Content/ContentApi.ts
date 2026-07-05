@@ -163,6 +163,7 @@ export type FilterData = Partial<{
   availableForArch: string;
   availableForVersion: string;
   feature_name: string;
+  name: string;
 }>;
 
 export type ValidateItem = {
@@ -255,6 +256,43 @@ export interface PackageDetailResponse {
   name: string;
   version: string;
   builds: RepositoryPackageReleaseInfo[];
+  summary?: string;
+  license?: string;
+  project_url?: string;
+  author?: string;
+}
+
+export interface PythonPackageAuthor {
+  name: string;
+  email?: string;
+}
+
+export interface PythonDistribution {
+  name: string;
+  filename: string;
+  packagetype: string;
+  python_version: string;
+  sha256: string;
+  size: number;
+  created_at: string;
+}
+
+export interface PythonPackageDetailResponse {
+  name: string;
+  version: string;
+  summary: string;
+  description: string;
+  last_updated: string;
+  license: string;
+  author: PythonPackageAuthor;
+  upstream_versions: string[];
+  project_url: string;
+  distributions: PythonDistribution[];
+}
+
+export interface PythonPackageVersionsResponse {
+  name: string;
+  versions: PythonPackageDetailResponse[];
 }
 
 export type ErrataResponse = {
@@ -380,6 +418,7 @@ export enum ContentOrigin {
   'COMMUNITY' = 'community',
   'CUSTOM' = 'external,upload',
   'ALL' = 'red_hat,external,upload,community',
+  'LIGHTWELL' = 'lightwell',
 }
 
 export const getContentList: (
@@ -416,6 +455,7 @@ export const getContentList: (
       extended_release: extendedReleaseParam,
       extended_release_version: filterData.extended_release_version,
       feature_name: filterData.feature_name,
+      name: filterData.name,
     })}`,
   );
   return data;
@@ -703,7 +743,7 @@ export const bulkRemoveRepositoryRpms: (
   return data;
 };
 
-export const getPackageDetail: (
+export const getMavenPackageDetail: (
   uuid: string,
   group: string,
   name: string,
@@ -711,6 +751,27 @@ export const getPackageDetail: (
 ) => Promise<PackageDetailResponse> = async (uuid, group, name, version) => {
   const { data } = await axios.get(
     `/api/content-sources/v1/repositories/${uuid}/maven_packages/${group}/${name}/${version}`,
+  );
+  return data;
+};
+
+export const getPythonPackageDetail: (
+  uuid: string,
+  name: string,
+  version: string,
+) => Promise<PythonPackageDetailResponse> = async (uuid, name, version) => {
+  const { data } = await axios.get(
+    `/api/content-sources/v1/repositories/${uuid}/python_packages/${name}/${version}`,
+  );
+  return data;
+};
+
+export const getPythonPackageVersions: (
+  uuid: string,
+  name: string,
+) => Promise<PythonPackageVersionsResponse> = async (uuid, name) => {
+  const { data } = await axios.get(
+    `/api/content-sources/v1/repositories/${uuid}/python_packages/${name}`,
   );
   return data;
 };

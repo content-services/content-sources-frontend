@@ -18,21 +18,35 @@ import { ConnectSnippetTab } from '../../Repositories/components/connectSnippets
 import { getPackageDependencySnippetTabs } from './packageDependencySnippets';
 
 type PackageOverviewTabProps = {
+  isMaven: boolean;
   group: string;
   name: string;
   latestRelease: string;
   hasRelease: boolean;
+  summary?: string;
+  sourceUrl?: string;
+  installCommand?: string;
 };
 
 const PackageOverviewTab = ({
+  isMaven,
   group,
   name,
   latestRelease,
   hasRelease,
+  summary,
+  sourceUrl = '',
+  installCommand,
 }: PackageOverviewTabProps) => {
   const tabs = useMemo(
-    () => getPackageDependencySnippetTabs({ group, name, release: latestRelease }),
-    [group, name, latestRelease],
+    () =>
+      getPackageDependencySnippetTabs({
+        group,
+        name,
+        release: latestRelease,
+        sourceUrl,
+      }),
+    [group, name, latestRelease, sourceUrl],
   );
   const [activeTabKey, setActiveTabKey] = useState(tabs[0]?.eventKey ?? '');
 
@@ -56,7 +70,7 @@ const PackageOverviewTab = ({
             isReadOnly
             isCode
             hoverTip='Copy'
-            clickTip='Copied'
+            clickTip=''
             variant={ClipboardCopyVariant.expansion}
             isExpanded
           >
@@ -73,7 +87,7 @@ const PackageOverviewTab = ({
         <Title headingLevel='h3' size='md'>
           About this package
         </Title>
-        <Content component='p'>Package description not yet available.</Content>
+        <Content component='p'>{summary ?? 'Package description not yet available.'}</Content>
         {hasRelease ? (
           <Content component='p'>
             This package has been rebuilt by Red Hat with backported fixes for known
@@ -88,40 +102,57 @@ const PackageOverviewTab = ({
           </Content>
         )}
       </div>
-      <div>
-        <Title headingLevel='h3' size='md'>
-          How to use
-        </Title>
-        <Tabs
-          activeKey={activeTabKey}
-          onSelect={(_, eventKey) => setActiveTabKey(eventKey as string)}
-          aria-label='Package dependency snippets'
-          ouiaId='lightwell-package-dependency-tabs'
-        >
-          {tabs.map((tab) => (
-            <Tab
+      {isMaven ? (
+        <div>
+          <Title headingLevel='h3' size='md'>
+            How to use
+          </Title>
+          <Tabs
+            activeKey={activeTabKey}
+            onSelect={(_, eventKey) => setActiveTabKey(eventKey as string)}
+            aria-label='Package dependency snippets'
+            ouiaId='lightwell-package-dependency-tabs'
+          >
+            {tabs.map((tab) => (
+              <Tab
+                key={tab.eventKey}
+                eventKey={tab.eventKey}
+                title={<TabTitleText>{tab.title}</TabTitleText>}
+                tabContentRef={tabRefs[tab.eventKey]}
+                ouiaId={`lightwell-dependency-tab-${tab.eventKey}`}
+              />
+            ))}
+          </Tabs>
+          {tabs.map((tab, index) => (
+            <TabContent
               key={tab.eventKey}
               eventKey={tab.eventKey}
-              title={<TabTitleText>{tab.title}</TabTitleText>}
-              tabContentRef={tabRefs[tab.eventKey]}
-              ouiaId={`lightwell-dependency-tab-${tab.eventKey}`}
-            />
+              id={`lightwell-dependency-panel-${tab.eventKey}`}
+              aria-label={tab.title}
+              ref={tabRefs[tab.eventKey]}
+              hidden={index > 0}
+              className={spacing.ptSm}
+            >
+              {renderTabPanel(tab)}
+            </TabContent>
           ))}
-        </Tabs>
-        {tabs.map((tab, index) => (
-          <TabContent
-            key={tab.eventKey}
-            eventKey={tab.eventKey}
-            id={`lightwell-dependency-panel-${tab.eventKey}`}
-            aria-label={tab.title}
-            ref={tabRefs[tab.eventKey]}
-            hidden={index > 0}
-            className={spacing.ptSm}
+        </div>
+      ) : (
+        <div>
+          <Title headingLevel='h3' size='md'>
+            Install
+          </Title>
+          <ClipboardCopy
+            isReadOnly
+            isCode
+            hoverTip='Copy'
+            clickTip=''
+            variant={ClipboardCopyVariant.inline}
           >
-            {renderTabPanel(tab)}
-          </TabContent>
-        ))}
-      </div>
+            {installCommand ?? `pip install ${name}==${latestRelease}`}
+          </ClipboardCopy>
+        </div>
+      )}
     </Flex>
   );
 };

@@ -14,6 +14,8 @@ import {
   type RepositoryPackageItem,
   type RepositoryPackagesResponse,
   ContentOrigin,
+  PythonPackageDetailResponse,
+  PythonPackageVersionsResponse,
 } from 'services/Content/ContentApi';
 import { AdminTask } from 'services/Admin/AdminTaskApi';
 import { TemplateItem } from 'services/Templates/TemplateApi';
@@ -402,7 +404,7 @@ export const defaultLightwellContentItem: ContentItem = {
   uuid: '3875c35b-a67a-4ac2-a989-21139433c177',
   package_count: 1,
   build_count: 3,
-  origin: ContentOrigin.CUSTOM,
+  origin: ContentOrigin.LIGHTWELL,
   status: '',
   last_introspection_error: '',
   last_introspection_time: '',
@@ -416,6 +418,23 @@ export const defaultLightwellContentItem: ContentItem = {
   content_type: 'maven',
 };
 
+export const defaultPythonRemediatedContentItem: ContentItem = {
+  ...defaultLightwellContentItem,
+  name: 'lightwell/python/remediated',
+  published_distribution_url: 'https://example.com/lightwell/python/remediated',
+  uuid: '3875c35b-a67a-4a22-a989-21139433c173',
+  security_level: 'remediated',
+  content_type: 'python',
+};
+
+export const defaultPythonValidatedContentItem: ContentItem = {
+  ...defaultPythonRemediatedContentItem,
+  name: 'lightwell/python/validated',
+  published_distribution_url: 'https://example.com/lightwell/python/validated',
+  uuid: '3875c35b-a67a-4a22-a989-21139433c174',
+  security_level: 'validated',
+};
+
 export const defaultLightwellRepositoryPackageItem: RepositoryPackageItem = {
   group: 'org.json.test',
   name: 'json-test',
@@ -425,12 +444,118 @@ export const defaultLightwellRepositoryPackageItem: RepositoryPackageItem = {
   ],
 };
 
+export const defaultPythonRemediatedRepositoryPackageItem: RepositoryPackageItem = {
+  group: '',
+  name: 'requests',
+  versions: ['2.31.0', '2.32.0'],
+  latest_releases: [
+    { version: '2.31.0', release: 'rhlw-3001', created_at: '2026-07-01T00:00:00Z' },
+    { version: '2.32.0', release: 'rhlw-3002', created_at: '2026-06-18T00:00:00Z' },
+  ],
+};
+
+export const defaultPythonValidatedPackageItem: RepositoryPackageItem = {
+  group: '',
+  name: 'requests',
+  versions: ['2.21.2', '2.20.0'],
+  latest_releases: [
+    { version: '2.21.2', release: '', created_at: '2026-07-01T00:00:00Z' },
+    { version: '2.20.0', release: '', created_at: '2026-06-15T00:00:00Z' },
+  ],
+};
+
 export const defaultLightwellRepositoryPackageResponse: RepositoryPackagesResponse = {
   results: [defaultLightwellRepositoryPackageItem],
   total: 1,
   limit: 20,
   offset: 0,
 };
+
+export const defaultPythonPackageDetail: PythonPackageDetailResponse = {
+  name: 'requests',
+  version: '2.31.0',
+  summary: 'Python HTTP library',
+  description: 'Python HTTP library but longer',
+  last_updated: '2026-07-01T00:00:00Z',
+  license: 'Apache 2.0',
+  author: { name: 'Google' },
+  upstream_versions: [],
+  project_url: 'https://requests.readthedocs.io',
+  distributions: [],
+};
+
+export const defaultPythonPackageVersions: PythonPackageVersionsResponse = {
+  name: 'requests',
+  versions: [
+    {
+      name: 'requests',
+      version: '2.31.0',
+      summary: 'Python HTTP library',
+      description: 'Python HTTP library but longer',
+      last_updated: '2026-07-01T00:00:00Z',
+      license: 'Apache 2.0',
+      author: { name: 'Google' },
+      upstream_versions: [],
+      project_url: 'https://requests.readthedocs.io',
+      distributions: [],
+    },
+    {
+      name: 'requests',
+      version: '2.32.0',
+      summary: 'Python HTTP library',
+      description: 'Python HTTP library but longer',
+      last_updated: '2026-07-01T00:00:00Z',
+      license: 'Apache 2.0',
+      author: { name: 'Google' },
+      upstream_versions: [],
+      project_url: 'https://requests.readthedocs.io',
+      distributions: [],
+    },
+  ],
+};
+
+export const defaultPythonValidatedPackageVersions: PythonPackageVersionsResponse = {
+  name: 'requests',
+  versions: [
+    {
+      ...defaultPythonPackageDetail,
+      version: '2.21.2',
+    },
+    {
+      ...defaultPythonPackageDetail,
+      version: '2.20.0',
+      last_updated: '2026-06-15T00:00:00Z',
+    },
+  ],
+};
+
+export const pythonRemediatedPipCommand = `pip install ${defaultPythonRemediatedRepositoryPackageItem.name}==2.31.0.rhlw-3001`;
+export const pythonRemediatedPipCommand2 = `pip install ${defaultPythonRemediatedRepositoryPackageItem.name}==2.32.0.rhlw-3002`;
+export const pythonValidatedPipCommand = `pip install ${defaultPythonValidatedPackageItem.name}==2.21.2`;
+
+export const javaRemediatedCopyCommand = `${defaultLightwellRepositoryPackageItem.group}:${defaultLightwellRepositoryPackageItem.name}:3.14.0.rhlw-00001`;
+export const javaRemediatedCopyCommand2 = `${defaultLightwellRepositoryPackageItem.group}:${defaultLightwellRepositoryPackageItem.name}:2.12.0.rhlw-00002`;
+export const javaValidatedCopyCommand = `${defaultLightwellRepositoryPackageItem.group}:${defaultLightwellRepositoryPackageItem.name}:2.21.2`;
+
+export const mavenRemediatedDependencySnippet = `<!-- Source: ${defaultLightwellContentItem.published_distribution_url} -->
+<dependency>
+  <groupId>${defaultLightwellRepositoryPackageItem.group}</groupId>
+  <artifactId>${defaultLightwellRepositoryPackageItem.name}</artifactId>
+  <version>3.14.0.rhlw-00001</version>
+</dependency>`;
+
+export const gradleRemediatedDependencySnippet = `// Source: ${defaultLightwellContentItem.published_distribution_url}
+implementation("${defaultLightwellRepositoryPackageItem.group}:${defaultLightwellRepositoryPackageItem.name}:3.14.0.rhlw-00001")`;
+
+export const mavenValidatedDependencySnippet = `<!-- Source: ${defaultLightwellContentItem.published_distribution_url} -->
+<dependency>
+  <groupId>${defaultLightwellRepositoryPackageItem.group}</groupId>
+  <artifactId>${defaultLightwellRepositoryPackageItem.name}</artifactId>
+  <version>2.21.2</version>
+</dependency>`;
+
+export const gradleValidatedDependencySnippet = `// Source: ${defaultLightwellContentItem.published_distribution_url}
+implementation("${defaultLightwellRepositoryPackageItem.group}:${defaultLightwellRepositoryPackageItem.name}:2.21.2")`;
 
 export const defaultTemplateItem: TemplateItem = {
   uuid: '50412eda-7df5-4fac-8556-278f45e2ef9b',
