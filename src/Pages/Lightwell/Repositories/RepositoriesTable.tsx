@@ -224,10 +224,10 @@ const RepositoriesTable = () => {
                                   >
                                     <Label
                                       isCompact
+                                      isClickable
                                       icon={<CodeIcon />}
                                       variant='outline'
                                       color='blue'
-                                      tabIndex={0}
                                     >
                                       Connect to this repository
                                     </Label>

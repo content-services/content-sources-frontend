@@ -60,10 +60,10 @@ const PackageReleasesTab = ({
                 <Td dataLabel='Release'>
                   <Label
                     isCompact
+                    isClickable
                     icon={<CopyIcon />}
                     onClick={() => navigator.clipboard.writeText(copyText)}
                     aria-label={`Copy ${copyText}`}
-                    style={{ cursor: 'pointer' }}
                   >
                     {build.version}
                   </Label>
@@ -105,10 +105,10 @@ const PackageReleasesTab = ({
                       {release ? (
                         <Label
                           isCompact
+                          isClickable
                           icon={<CopyIcon />}
                           onClick={() => navigator.clipboard.writeText(copyText)}
                           aria-label={`Copy ${copyText}`}
-                          style={{ cursor: 'pointer' }}
                         >
                           {releaseVersion}
                         </Label>
