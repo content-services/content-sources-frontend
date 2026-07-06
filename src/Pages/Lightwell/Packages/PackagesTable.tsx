@@ -17,6 +17,7 @@ import {
   Toolbar,
   ToolbarContent,
   ToolbarItem,
+  Timestamp,
   Tooltip,
 } from '@patternfly/react-core';
 import { CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
@@ -24,6 +25,9 @@ import { SkeletonTable } from '@patternfly/react-component-groups';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import text from '@patternfly/react-styles/css/utilities/Text/text';
 import { createUseStyles } from 'react-jss';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -122,7 +126,7 @@ const mapRepositoryPackage = (pkg: RepositoryPackageItem): MappedPackage => {
       version: stripLightwellVersionSuffix(release.version),
       release: release.release,
     })),
-    last_updated: latestCreatedAt?.split('T')[0] ?? '—',
+    last_updated: latestCreatedAt ?? '',
   };
 };
 
@@ -501,7 +505,21 @@ const PackagesTable = () => {
                               </Td>
                             ) : null}
                             {isMaven ? <Td>{group_id}</Td> : null}
-                            <Td>{last_updated}</Td>
+                            <Td>
+                              {last_updated ? (
+                                <Timestamp
+                                  date={new Date(last_updated)}
+                                  dateFormat='medium'
+                                  timeFormat='short'
+                                  tooltip={{ variant: 'default' }}
+                                  style={{ fontSize: 'inherit', textDecoration: 'none' }}
+                                >
+                                  {dayjs(last_updated).fromNow()}
+                                </Timestamp>
+                              ) : (
+                                '—'
+                              )}
+                            </Td>
                           </Tr>
                         );
                       })}
