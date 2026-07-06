@@ -171,7 +171,7 @@ const RepositoriesTable = () => {
           </Hide>
           <Hide hide={countIsZero || isLoading}>
             <Stack>
-              <Card className={`${spacing.ptLg} ${spacing.pbXl} ${spacing.pxLg}`}>
+              <Card className={`${spacing.ptLg} ${spacing.pb_2xl} ${spacing.pxLg}`}>
                 <Stack>
                   <Table
                     aria-label='Lightwell repositories table'
