@@ -21,6 +21,7 @@ import {
 import { CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
+import text from '@patternfly/react-styles/css/utilities/Text/text';
 import { createUseStyles } from 'react-jss';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -456,6 +457,7 @@ const PackagesTable = () => {
                               <Button
                                 variant='link'
                                 isInline
+                                className={text.fontWeightBold}
                                 ouiaId={`lightwell-package-${name}`}
                                 onClick={() =>
                                   navigate(
