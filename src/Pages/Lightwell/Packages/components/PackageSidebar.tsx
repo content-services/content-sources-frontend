@@ -5,8 +5,12 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
+  Timestamp,
 } from '@patternfly/react-core';
 import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 type PackageSidebarProps = {
   lastUpdated: string;
@@ -35,7 +39,17 @@ const PackageSidebar = ({
         {lastUpdated ? (
           <DescriptionListGroup>
             <DescriptionListTerm>Last updated</DescriptionListTerm>
-            <DescriptionListDescription>{lastUpdated}</DescriptionListDescription>
+            <DescriptionListDescription>
+              <Timestamp
+                date={new Date(lastUpdated)}
+                dateFormat='medium'
+                timeFormat='short'
+                tooltip={{ variant: 'default' }}
+                style={{ fontSize: 'inherit', textDecoration: 'none' }}
+              >
+                {dayjs(lastUpdated).fromNow()}
+              </Timestamp>
+            </DescriptionListDescription>
           </DescriptionListGroup>
         ) : null}
         {license ? (

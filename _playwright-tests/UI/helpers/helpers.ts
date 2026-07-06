@@ -168,7 +168,7 @@ export const waitForTaskPickup = async (page: Page, repoUrl: string, type: strin
   const body = await response.json();
   expect(Array.isArray(body.data)).toBeTruthy();
   const uuidList = body.data.map((data: { uuid: string }) => data.uuid) as string[];
-  expect(uuidList.length).toEqual(1);
+  expect(uuidList).toHaveLength(1);
   const repoUuid = uuidList[0];
 
   await expect
