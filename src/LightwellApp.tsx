@@ -1,3 +1,4 @@
+import '../styles/lightwell-chrome-overrides.scss';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import { Bullseye, Spinner } from '@patternfly/react-core';
 import { useEffect } from 'react';
