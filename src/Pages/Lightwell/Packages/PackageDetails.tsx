@@ -57,7 +57,7 @@ const useStyles = createUseStyles({
     padding: '16px 24px',
   },
   titleWrapper: {
-    padding: '24px 0 0',
+    padding: '16px 0 0',
   },
   detailCard: {
     overflow: 'visible',
