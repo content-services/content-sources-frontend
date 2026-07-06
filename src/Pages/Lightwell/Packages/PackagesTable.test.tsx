@@ -151,7 +151,7 @@ it('shows a loading skeleton while packages are fetching', () => {
 
   renderPackagesTable();
 
-  expect(screen.getByLabelText('Filter by name or namespace')).toBeInTheDocument();
+  expect(screen.getByLabelText('Filter by name or group ID')).toBeInTheDocument();
   expect(screen.queryByRole('table', { name: 'Lightwell packages table' })).not.toBeInTheDocument();
 });
 
@@ -166,7 +166,7 @@ it('shows loader while the repository is resolving', () => {
 
   renderPackagesTable();
 
-  expect(screen.queryByLabelText('Filter by name or namespace')).not.toBeInTheDocument();
+  expect(screen.queryByLabelText('Filter by name or group ID')).not.toBeInTheDocument();
 });
 
 it('shows filtered empty state when search returns no packages', async () => {
@@ -178,7 +178,7 @@ it('shows filtered empty state when search returns no packages', async () => {
 
   renderPackagesTable();
 
-  await userEvent.type(screen.getByLabelText('Filter by name or namespace'), 'missing');
+  await userEvent.type(screen.getByLabelText('Filter by name or group ID'), 'missing');
 
   expect(await screen.findByText('No packages match the filter criteria')).toBeInTheDocument();
   expect(screen.getByText('Clear all filters to show more results.')).toBeInTheDocument();
@@ -243,7 +243,7 @@ it('renders remediated java packages with a Latest release column', async () => 
   expect(screen.queryByLabelText('Copy 3.14.0')).not.toBeInTheDocument();
 });
 
-it('renders python validated packages with pip copy labels and no namespace column', async () => {
+it('renders python validated packages with pip copy labels and no group ID column', async () => {
   mockUseParams.mockReturnValue({
     repoName: getRepositoryPathSlug('python', 'validated'),
   });
@@ -262,7 +262,7 @@ it('renders python validated packages with pip copy labels and no namespace colu
   renderPackagesTable();
 
   expect(await screen.findByRole('heading', { name: 'Python Validated' })).toBeInTheDocument();
-  expect(screen.queryByRole('columnheader', { name: 'Namespace' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('columnheader', { name: 'Group ID' })).not.toBeInTheDocument();
   expect(screen.queryByRole('columnheader', { name: 'Latest release' })).not.toBeInTheDocument();
 
   await clickCopyLabel('Copy 2.21.2');
@@ -300,12 +300,12 @@ it('clears the search filter from the filtered empty state', async () => {
 
   renderPackagesTable();
 
-  await userEvent.type(screen.getByLabelText('Filter by name or namespace'), 'missing');
+  await userEvent.type(screen.getByLabelText('Filter by name or group ID'), 'missing');
   expect(await screen.findByText('No packages match the filter criteria')).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole('button', { name: 'Clear all filters' }));
 
-  await waitFor(() => expect(screen.getByLabelText('Filter by name or namespace')).toHaveValue(''));
+  await waitFor(() => expect(screen.getByLabelText('Filter by name or group ID')).toHaveValue(''));
 });
 
 it('renders connect action and repository description', async () => {

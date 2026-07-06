@@ -2,32 +2,20 @@ import {
   ClipboardCopy,
   ClipboardCopyVariant,
   Content,
+  Flex,
+  FlexItem,
   Popover,
-  Stack,
-  StackItem,
   Tab,
   TabContent,
   Tabs,
   TabTitleText,
 } from '@patternfly/react-core';
 import { createRef, ReactElement, useMemo, useState } from 'react';
-import { createUseStyles } from 'react-jss';
 
 import { ContentItem } from 'services/Content/ContentApi';
 
 import { ConnectSnippetTab, getConnectSnippetTabs } from './connectSnippets';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
-
-const useStyles = createUseStyles({
-  popoverBody: {
-    minWidth: '32rem',
-    maxWidth: '40rem',
-    '& .pf-v6-c-clipboard-copy__expandable-content': {
-      '--pf-v6-c-clipboard-copy__expandable-content--BorderColor':
-        'var(--pf-t--global--border--color--control--default)',
-    },
-  },
-});
 
 type ConnectRepositoryPopoverProps = {
   repository: Pick<ContentItem, 'name' | 'published_distribution_url' | 'content_type' | 'uuid'>;
@@ -35,7 +23,6 @@ type ConnectRepositoryPopoverProps = {
 };
 
 const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPopoverProps) => {
-  const classes = useStyles();
   const tabs = useMemo(() => getConnectSnippetTabs(repository), [repository]);
   const [activeTabKey, setActiveTabKey] = useState(tabs[0]?.eventKey ?? '');
   const firstTabKey = tabs[0]?.eventKey ?? '';
@@ -53,9 +40,9 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
   );
 
   const renderTabPanel = (tab: ConnectSnippetTab) => (
-    <Stack hasGutter>
+    <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
       {tab.snippets.map((snippet) => (
-        <StackItem key={snippet.label}>
+        <FlexItem key={snippet.label}>
           <Content component='small' style={{ textAlign: 'left' }}>
             {snippet.label}
           </Content>
@@ -74,13 +61,13 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
               {snippet.description}
             </Content>
           )}
-        </StackItem>
+        </FlexItem>
       ))}
-    </Stack>
+    </Flex>
   );
 
   const bodyContent = (
-    <div className={classes.popoverBody}>
+    <div>
       <Tabs
         activeKey={activeTabKey}
         onSelect={(_, eventKey) => setActiveTabKey(eventKey as string)}
@@ -118,10 +105,10 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
       aria-label='Connect to this repository'
       headerContent='Connect to this repository'
       bodyContent={bodyContent}
-      position='right'
-      minWidth='32rem'
-      maxWidth='40rem'
-      onHide={() => setActiveTabKey(firstTabKey)}
+      position='right-start'
+      flipBehavior={['right-start', 'left-start']}
+      onShow={() => setActiveTabKey(firstTabKey)}
+      minWidth='600px'
     >
       {children}
     </Popover>

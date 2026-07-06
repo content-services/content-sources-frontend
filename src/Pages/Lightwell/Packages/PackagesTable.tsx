@@ -298,7 +298,7 @@ const PackagesTable = () => {
     { title: 'Package', width: 25 },
     { title: 'Version', width: 15 },
     ...(isRemediated ? [{ title: 'Latest release', width: 20 as BaseCellProps['width'] }] : []),
-    ...(isMaven ? [{ title: 'Namespace', width: 20 as BaseCellProps['width'] }] : []),
+    ...(isMaven ? [{ title: 'Group ID', width: 20 as BaseCellProps['width'] }] : []),
     { title: 'Last updated', width: 15 },
   ];
 
@@ -375,8 +375,8 @@ const PackagesTable = () => {
             <ToolbarItem className={classes.filterToolbarItem}>
               <SearchInput
                 id='lightwell-package-filter'
-                aria-label='Filter by name or namespace'
-                placeholder='Filter by name or namespace'
+                aria-label={isMaven ? 'Filter by name or group ID' : 'Filter by name'}
+                placeholder={isMaven ? 'Filter by name or group ID' : 'Filter by name'}
                 value={searchQuery}
                 onChange={(_event, value) => {
                   setSearchQuery(value);
