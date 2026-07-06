@@ -189,7 +189,9 @@ it('navigates to package details when a package name is clicked', async () => {
 
   await userEvent.click(await screen.findByRole('button', { name: 'json-test' }));
 
-  expect(mockNavigate).toHaveBeenCalledWith(encodeURIComponent('json-test'));
+  expect(mockNavigate).toHaveBeenCalledWith(
+    `${encodeURIComponent(defaultLightwellRepositoryPackageItem.group)}/${encodeURIComponent('json-test')}`,
+  );
 });
 
 it('copies the maven coordinate when a validated version label is clicked', async () => {

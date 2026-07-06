@@ -67,3 +67,6 @@ export const getRepositoryNameFromPathSlug = (slug: string): string => {
 
 export const stripLightwellVersionSuffix = (version: string): string =>
   version.replace(/\.rhlw-.*$/, '');
+
+export const lightwellReleaseNum = (versionOrRelease: string): number =>
+  parseInt(versionOrRelease.match(/(\d+)$/)?.[1] ?? '0', 10);
