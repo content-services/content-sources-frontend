@@ -28,6 +28,7 @@ import {
 import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
+import text from '@patternfly/react-styles/css/utilities/Text/text';
 
 import EmptyTableState from './components/EmptyTableState';
 import Header from 'components/Header/Header';
@@ -213,6 +214,7 @@ const RepositoriesTable = () => {
                                     variant='link'
                                     isInline
                                     ouiaId={`lightwell-repo-${uuid}`}
+                                    className={text.fontWeightBold}
                                     onClick={() =>
                                       navigate(getRepositoryPathSlug(content_type, security_level))
                                     }
