@@ -34,6 +34,7 @@ export default function LightwellApp() {
       <div data-ouia-safe={pageSafe} />
       <Routes>
         <Route index element={<RepositoriesTable />} />
+        <Route path=':repoName/:group/:packageName' element={<PackageDetails />} />
         <Route path=':repoName/:packageName' element={<PackageDetails />} />
         <Route path=':repoName' element={<PackagesTable />} />
       </Routes>

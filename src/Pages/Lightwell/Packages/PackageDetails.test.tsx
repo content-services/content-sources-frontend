@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import PackageDetails from './PackageDetails';
 import {
   useLightwellRepositoryPackagesQuery,
-  useMavenPackageDetailQuery,
+  useMavenPackageVersionsListQuery,
   usePythonPackageVersionsQuery,
 } from 'services/Content/ContentQueries';
 import {
@@ -35,8 +35,7 @@ import useLightwellRepository from '../useLightwellRepository';
 
 jest.mock('services/Content/ContentQueries', () => ({
   useLightwellRepositoryPackagesQuery: jest.fn(),
-  useMavenPackageDetailQuery: jest.fn(),
-  useMavenPackageVersionsPreload: jest.fn(() => []),
+  useMavenPackageVersionsListQuery: jest.fn(),
   usePythonPackageVersionsQuery: jest.fn(),
 }));
 
@@ -49,10 +48,10 @@ const defaultRepoSlug = getRepositoryPathSlug(
 
 const packageName = defaultLightwellRepositoryPackageItem.name;
 
-const mockUseParams = jest.fn(() => ({
-  repoUUID: defaultLightwellContentItem.uuid,
-  packageName: 'missing-package',
-}));
+const mockUseParams = jest.fn<
+  Partial<{ repoName: string; group: string; packageName: string }>,
+  []
+>();
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
@@ -100,15 +99,24 @@ type PackageMetadata = {
   project_url?: string;
 };
 
-const mockPackageDetailQuery = (builds = defaultBuilds, metadata: PackageMetadata = {}) => ({
+const mockVersionsListQuery = (
+  builds = defaultBuilds,
+  metadata: PackageMetadata = {},
+  version = '3.14.0',
+) => ({
   isLoading: false,
-  isFetching: false,
   data: {
     group: defaultLightwellRepositoryPackageItem.group,
     name: defaultLightwellRepositoryPackageItem.name,
-    version: '3.14.0',
-    builds,
-    ...metadata,
+    versions: [
+      {
+        group: defaultLightwellRepositoryPackageItem.group,
+        name: defaultLightwellRepositoryPackageItem.name,
+        version,
+        builds,
+        ...metadata,
+      },
+    ],
   },
 });
 
@@ -131,7 +139,8 @@ const renderPackageDetails = () =>
 
 beforeEach(() => {
   mockUseParams.mockReturnValue({
-    repoUUID: defaultRepoSlug,
+    repoName: defaultRepoSlug,
+    group: defaultLightwellRepositoryPackageItem.group,
     packageName,
   });
   (useLightwellRepository as jest.Mock).mockReturnValue({
@@ -142,7 +151,7 @@ beforeEach(() => {
     error: undefined,
   });
   (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(mockPackagesQuery);
-  (useMavenPackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery());
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => mockVersionsListQuery());
   (usePythonPackageVersionsQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     isFetching: false,
@@ -151,7 +160,9 @@ beforeEach(() => {
 });
 
 it('shows empty state when the package has no builds', async () => {
-  (useMavenPackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery([]));
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() =>
+    mockVersionsListQuery([]),
+  );
 
   renderPackageDetails();
 
@@ -168,14 +179,14 @@ const setupNoReleasePackage = () => {
       total: 1,
     },
   }));
-  (useMavenPackageDetailQuery as jest.Mock).mockImplementation(() =>
-    mockPackageDetailQuery(noReleaseBuilds),
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() =>
+    mockVersionsListQuery(noReleaseBuilds, {}, '2.21.2'),
   );
 };
 
 const setupPythonRemediatedPackage = () => {
   mockUseParams.mockReturnValue({
-    repoUUID: getRepositoryPathSlug('python', 'remediated'),
+    repoName: getRepositoryPathSlug('python', 'remediated'),
     packageName: defaultPythonRemediatedRepositoryPackageItem.name,
   });
   (useLightwellRepository as jest.Mock).mockReturnValue({
@@ -221,8 +232,8 @@ it('renders package detail content with builds', async () => {
 });
 
 it('renders sidebar metadata', async () => {
-  (useMavenPackageDetailQuery as jest.Mock).mockImplementation(() =>
-    mockPackageDetailQuery(defaultBuilds, {
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() =>
+    mockVersionsListQuery(defaultBuilds, {
       summary: 'JSON library for Java',
       license: 'MIT',
       author: 'JSON.org',
@@ -311,7 +322,7 @@ const setupMultiVersionReleasePackage = () => {
       total: 1,
     },
   }));
-  (useMavenPackageDetailQuery as jest.Mock).mockImplementation(() => mockPackageDetailQuery());
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => mockVersionsListQuery());
 };
 
 it('shows "Other available versions" on Releases tab for multi-version release packages', async () => {
@@ -477,7 +488,7 @@ it('copies maven coordinate to clipboard for remediated java package', async () 
 
 const setupPythonValidatedPackage = () => {
   mockUseParams.mockReturnValue({
-    repoUUID: getRepositoryPathSlug('python', 'validated'),
+    repoName: getRepositoryPathSlug('python', 'validated'),
     packageName: defaultPythonValidatedPackageItem.name,
   });
   (useLightwellRepository as jest.Mock).mockReturnValue({

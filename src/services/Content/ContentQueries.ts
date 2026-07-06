@@ -53,6 +53,7 @@ import {
   getPythonPackageDetail,
   getPythonPackageVersions,
   getMavenPackageDetail,
+  getMavenPackageVersionsList,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../Admin/AdminTaskQueries';
 import useErrorNotification from 'Hooks/useErrorNotification';
@@ -72,6 +73,7 @@ export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
 export const PACKAGES_KEY = 'PACKAGES_KEY';
 export const LIGHTWELL_REPOSITORY_PACKAGES_KEY = 'LIGHTWELL_REPOSITORY_PACKAGES_KEY';
 export const MAVEN_PACKAGE_DETAIL_KEY = 'MAVEN_PACKAGE_DETAIL_KEY';
+export const MAVEN_PACKAGE_VERSIONS_LIST_KEY = 'MAVEN_PACKAGE_VERSIONS_LIST_KEY';
 export const PYTHON_PACKAGE_DETAIL_KEY = 'PYTHON_PACKAGE_DETAIL_KEY';
 export const PYTHON_PACKAGE_VERSIONS_KEY = 'PYTHON_PACKAGE_VERSIONS_KEY';
 export const SNAPSHOT_PACKAGES_KEY = 'SNAPSHOT_PACKAGES_KEY';
@@ -729,6 +731,18 @@ export const useMavenPackageVersionsPreload = (
         id: 'maven-package-detail-error',
       },
     })),
+  });
+
+export const useMavenPackageVersionsListQuery = (uuid: string, group: string, name: string) =>
+  useQuery({
+    queryKey: [MAVEN_PACKAGE_VERSIONS_LIST_KEY, uuid, group, name],
+    queryFn: () => getMavenPackageVersionsList(uuid, group, name),
+    staleTime: 60000,
+    enabled: !!uuid && !!group && !!name,
+    meta: {
+      title: 'Unable to load package versions.',
+      id: 'maven-package-versions-list-error',
+    },
   });
 
 export const usePythonPackageDetailQuery = (

@@ -262,6 +262,12 @@ export interface PackageDetailResponse {
   author?: string;
 }
 
+export interface MavenPackageVersionsListResponse {
+  group: string;
+  name: string;
+  versions: PackageDetailResponse[];
+}
+
 export interface PythonPackageAuthor {
   name: string;
   email?: string;
@@ -772,6 +778,17 @@ export const getPythonPackageVersions: (
 ) => Promise<PythonPackageVersionsResponse> = async (uuid, name) => {
   const { data } = await axios.get(
     `/api/content-sources/v1/repositories/${uuid}/python_packages/${name}`,
+  );
+  return data;
+};
+
+export const getMavenPackageVersionsList: (
+  uuid: string,
+  group: string,
+  name: string,
+) => Promise<MavenPackageVersionsListResponse> = async (uuid, group, name) => {
+  const { data } = await axios.get(
+    `/api/content-sources/v1/repositories/${uuid}/maven_packages/${group}/${name}`,
   );
   return data;
 };

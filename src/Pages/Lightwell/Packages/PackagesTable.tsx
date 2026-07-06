@@ -449,7 +449,13 @@ const PackagesTable = () => {
                                 variant='link'
                                 isInline
                                 ouiaId={`lightwell-package-${name}`}
-                                onClick={() => navigate(encodeURIComponent(name))}
+                                onClick={() =>
+                                  navigate(
+                                    isMaven
+                                      ? `${encodeURIComponent(group_id)}/${encodeURIComponent(name)}`
+                                      : encodeURIComponent(name),
+                                  )
+                                }
                               >
                                 {name}
                               </Button>
