@@ -245,7 +245,7 @@ it('renders sidebar metadata', async () => {
 
   expect(await screen.findByText('Last updated')).toBeInTheDocument();
   expect(await screen.findAllByText('2026-07-01')).toHaveLength(2);
-  expect(await screen.findByText('Namespace')).toBeInTheDocument();
+  expect(await screen.findByText('Group ID')).toBeInTheDocument();
   expect(await screen.findByText(defaultLightwellRepositoryPackageItem.group)).toBeInTheDocument();
   expect(await screen.findByText('Rebuilt by')).toBeInTheDocument();
   expect(await screen.findByText('Red Hat')).toBeInTheDocument();

@@ -475,7 +475,7 @@ const PackageDetails = () => {
               <GridItem md={4}>
                 <PackageSidebar
                   lastUpdated={lastUpdated}
-                  namespace={packageGroup}
+                  groupId={packageGroup}
                   upstreamVersion={upstreamVersion}
                   allVersions={
                     isMaven && !hasRelease

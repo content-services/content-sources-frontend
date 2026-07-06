@@ -10,7 +10,7 @@ import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
 
 type PackageSidebarProps = {
   lastUpdated: string;
-  namespace?: string;
+  groupId?: string;
   upstreamVersion: string;
   allVersions?: string[];
   license?: string;
@@ -21,7 +21,7 @@ type PackageSidebarProps = {
 
 const PackageSidebar = ({
   lastUpdated,
-  namespace,
+  groupId,
   upstreamVersion,
   allVersions,
   license,
@@ -44,10 +44,10 @@ const PackageSidebar = ({
             <DescriptionListDescription>{license}</DescriptionListDescription>
           </DescriptionListGroup>
         ) : null}
-        {namespace ? (
+        {groupId ? (
           <DescriptionListGroup>
-            <DescriptionListTerm>Namespace</DescriptionListTerm>
-            <DescriptionListDescription>{namespace}</DescriptionListDescription>
+            <DescriptionListTerm>Group ID</DescriptionListTerm>
+            <DescriptionListDescription>{groupId}</DescriptionListDescription>
           </DescriptionListGroup>
         ) : null}
         {author ? (
