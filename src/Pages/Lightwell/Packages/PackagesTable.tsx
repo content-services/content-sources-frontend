@@ -366,7 +366,7 @@ const PackagesTable = () => {
                 </ConnectRepositoryModal>
               </FlexItem>
             </Flex>
-            <Content className={spacing.pySm}>
+            <Content className={spacing.ptSm}>
               {getRepositoryDescription(repository.content_type, repository.security_level)}
             </Content>
           </StackItem>
