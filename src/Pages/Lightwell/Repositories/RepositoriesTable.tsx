@@ -23,6 +23,7 @@ import {
   Thead,
   Tr,
   type BaseCellProps,
+  type ThInfoType,
 } from '@patternfly/react-table';
 import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
@@ -96,12 +97,23 @@ const RepositoriesTable = () => {
 
   if (isError) throw error;
 
-  const columnHeaders: { title: string; width?: BaseCellProps['width'] }[] = [
+  const columnHeaders: { title: string; width?: BaseCellProps['width']; info?: ThInfoType }[] = [
     { title: 'Repository' },
     { title: 'Ecosystem', width: 15 },
     { title: 'Security level', width: 15 },
-    { title: 'Packages', width: 10 },
-    { title: 'Builds', width: 10 },
+    {
+      title: 'Packages',
+      width: 10,
+      info: { tooltip: 'Unique package names available in this repository.' },
+    },
+    {
+      title: 'Builds',
+      width: 10,
+      info: {
+        tooltip:
+          'Total built artifacts across all versions. A single package may have multiple builds.',
+      },
+    },
   ];
 
   const onSetPage = (_, newPage: number) => setPage(newPage);
@@ -167,9 +179,9 @@ const RepositoriesTable = () => {
                   >
                     <Thead>
                       <Tr>
-                        {columnHeaders.map(({ title, width }) => (
-                          <Th key={title + 'column'} width={width} modifier='wrap'>
-                            {title}
+                        {columnHeaders.map(({ title, width, info }) => (
+                          <Th key={title + 'column'} width={width} modifier='wrap' info={info}>
+                            {info ? <span>{title}</span> : title}
                           </Th>
                         ))}
                       </Tr>
