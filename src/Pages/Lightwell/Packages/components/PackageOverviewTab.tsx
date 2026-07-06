@@ -83,28 +83,30 @@ const PackageOverviewTab = ({
 
   return (
     <Flex direction={{ default: 'column' }} gap={{ default: 'gapLg' }}>
-      <div>
-        <Title headingLevel='h3' size='md'>
+      <Stack hasGutter>
+        <Title headingLevel='h2' size='lg'>
           About this package
         </Title>
-        <Content component='p'>{summary ?? 'Package description not yet available.'}</Content>
-        {hasRelease ? (
-          <Content component='p'>
-            This package has been rebuilt by Red Hat with backported fixes for known
-            vulnerabilities. The upstream version is pinned and Red Hat applies security patches as
-            sequential releases (.rhlw suffix).
-          </Content>
-        ) : (
-          <Content component='p'>
-            This package has been rebuilt from source by Red Hat with no modifications. Multiple
-            upstream versions are available, each verified end-to-end through the Red Hat build
-            pipeline.
-          </Content>
-        )}
-      </div>
+        <Content>
+          <p>{summary ?? 'Package description not yet available.'}</p>
+          {hasRelease ? (
+            <p>
+              This package has been rebuilt by Red Hat with backported fixes for known
+              vulnerabilities. The upstream version is pinned and Red Hat applies security patches
+              as sequential releases (.rhlw suffix).
+            </p>
+          ) : (
+            <p>
+              This package has been rebuilt from source by Red Hat with no modifications. Multiple
+              upstream versions are available, each verified end-to-end through the Red Hat build
+              pipeline.
+            </p>
+          )}
+        </Content>
+      </Stack>
       {isMaven ? (
-        <div>
-          <Title headingLevel='h3' size='md'>
+        <Stack hasGutter>
+          <Title headingLevel='h2' size='lg'>
             How to use
           </Title>
           <Tabs
@@ -136,10 +138,10 @@ const PackageOverviewTab = ({
               {renderTabPanel(tab)}
             </TabContent>
           ))}
-        </div>
+        </Stack>
       ) : (
-        <div>
-          <Title headingLevel='h3' size='md'>
+        <Stack hasGutter>
+          <Title headingLevel='h2' size='lg'>
             Install
           </Title>
           <ClipboardCopy
@@ -151,7 +153,7 @@ const PackageOverviewTab = ({
           >
             {installCommand ?? `pip install ${name}==${latestRelease}`}
           </ClipboardCopy>
-        </div>
+        </Stack>
       )}
     </Flex>
   );

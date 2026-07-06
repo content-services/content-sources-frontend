@@ -1,6 +1,7 @@
-import { Button, ClipboardCopy, ClipboardCopyVariant, Flex, Title } from '@patternfly/react-core';
+import { Button, Flex, Label, Title, Tooltip } from '@patternfly/react-core';
+import { CopyIcon } from '@patternfly/react-icons';
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { RepositoryPackageReleaseInfo } from 'services/Content/ContentApi';
 import { stripLightwellVersionSuffix } from '../../helpers';
@@ -29,7 +30,7 @@ const PackageReleasesTab = ({
   onVersionSelect,
   formatCopyText,
 }: PackageReleasesTabProps) => {
-  const otherVersions = allVersions.filter((v) => stripLightwellVersionSuffix(v) !== version);
+  const [copiedVersion, setCopiedVersion] = useState<string | null>(null);
 
   const releaseMap = useMemo(() => {
     const map: Record<string, RepositoryPackageReleaseInfo> = {};
@@ -41,7 +42,7 @@ const PackageReleasesTab = ({
 
   return (
     <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
-      <Title headingLevel='h3' size='md'>
+      <Title headingLevel='h2' size='lg'>
         Releases for version {version}
       </Title>
       <Table aria-label={`Releases for ${version}`} variant={TableVariant.compact}>
@@ -57,16 +58,32 @@ const PackageReleasesTab = ({
             return (
               <Tr key={build.version}>
                 <Td dataLabel='Release'>
-                  <ClipboardCopy
-                    isReadOnly
-                    hoverTip='Copy'
-                    clickTip='Copied'
-                    copyAriaLabel={`Copy ${copyText}`}
-                    variant={ClipboardCopyVariant.inlineCompact}
-                    onCopy={() => navigator.clipboard.writeText(copyText)}
-                  >
-                    {build.version}
-                  </ClipboardCopy>
+                  {copiedVersion === build.version ? (
+                    <Tooltip content='Copied' isVisible>
+                      <Label
+                        isCompact
+                        isClickable
+                        icon={<CopyIcon />}
+                        aria-label={`Copy ${copyText}`}
+                      >
+                        {build.version}
+                      </Label>
+                    </Tooltip>
+                  ) : (
+                    <Label
+                      isCompact
+                      isClickable
+                      icon={<CopyIcon />}
+                      onClick={() => {
+                        navigator.clipboard.writeText(copyText);
+                        setCopiedVersion(build.version);
+                        setTimeout(() => setCopiedVersion(null), 2000);
+                      }}
+                      aria-label={`Copy ${copyText}`}
+                    >
+                      {build.version}
+                    </Label>
+                  )}
                 </Td>
                 <Td dataLabel='Date'>{build.created_at?.split('T')[0] ?? '—'}</Td>
               </Tr>
@@ -74,58 +91,81 @@ const PackageReleasesTab = ({
           })}
         </Tbody>
       </Table>
-      {otherVersions.length > 0 ? (
-        <>
-          <Title headingLevel='h3' size='md'>
-            Other available versions
-          </Title>
-          <Table aria-label='Other versions' variant={TableVariant.compact}>
-            <Thead>
-              <Tr>
-                <Th>Version</Th>
-                <Th>Latest release</Th>
-                <Th>Releases</Th>
-                <Th width={15}>Date</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {otherVersions.map((v) => {
-                const release = releaseMap[v] ?? releaseMap[stripLightwellVersionSuffix(v)];
-                const releaseVersion = release ? buildVersionFromRelease(release) : '';
-                const copyText = release ? formatCopyText(releaseVersion) : '';
-                const date = release?.created_at?.split('T')[0] ?? '—';
-                return (
-                  <Tr key={v}>
-                    <Td dataLabel='Version'>
-                      <Button variant='link' isInline onClick={() => onVersionSelect(v)}>
-                        {stripLightwellVersionSuffix(v)}
-                      </Button>
-                    </Td>
-                    <Td dataLabel='Latest release'>
-                      {release ? (
-                        <ClipboardCopy
-                          isReadOnly
-                          hoverTip='Copy'
-                          clickTip='Copied'
-                          copyAriaLabel={`Copy ${copyText}`}
-                          variant={ClipboardCopyVariant.inlineCompact}
-                          onCopy={() => navigator.clipboard.writeText(copyText)}
+      <Title headingLevel='h2' size='lg'>
+        Available versions
+      </Title>
+      <Table aria-label='Available versions' variant={TableVariant.compact}>
+        <Thead>
+          <Tr>
+            <Th>Version</Th>
+            <Th>Latest release</Th>
+            <Th>Releases</Th>
+            <Th width={15}>Date</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {allVersions.map((v) => {
+            const stripped = stripLightwellVersionSuffix(v);
+            const isSelected = stripped === version;
+            const release = releaseMap[v] ?? releaseMap[stripped];
+            const releaseVersion = release ? buildVersionFromRelease(release) : '';
+            const copyText = release ? formatCopyText(releaseVersion) : '';
+            const date = release?.created_at?.split('T')[0] ?? '—';
+            return (
+              <Tr key={v}>
+                <Td dataLabel='Version'>
+                  {isSelected ? (
+                    <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }}>
+                      <span style={{ fontWeight: 'bold' }}>{stripped}</span>
+                      <Label isCompact color='blue'>
+                        Selected
+                      </Label>
+                    </Flex>
+                  ) : (
+                    <Button variant='link' isInline onClick={() => onVersionSelect(v)}>
+                      {stripped}
+                    </Button>
+                  )}
+                </Td>
+                <Td dataLabel='Latest release'>
+                  {release ? (
+                    copiedVersion === releaseVersion ? (
+                      <Tooltip content='Copied' isVisible>
+                        <Label
+                          isCompact
+                          isClickable
+                          icon={<CopyIcon />}
+                          aria-label={`Copy ${copyText}`}
                         >
                           {releaseVersion}
-                        </ClipboardCopy>
-                      ) : (
-                        '—'
-                      )}
-                    </Td>
-                    <Td dataLabel='Releases'>{release ? 1 : 0}</Td>
-                    <Td dataLabel='Date'>{date}</Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
-        </>
-      ) : null}
+                        </Label>
+                      </Tooltip>
+                    ) : (
+                      <Label
+                        isCompact
+                        isClickable
+                        icon={<CopyIcon />}
+                        onClick={() => {
+                          navigator.clipboard.writeText(copyText);
+                          setCopiedVersion(releaseVersion);
+                          setTimeout(() => setCopiedVersion(null), 2000);
+                        }}
+                        aria-label={`Copy ${copyText}`}
+                      >
+                        {releaseVersion}
+                      </Label>
+                    )
+                  ) : (
+                    '—'
+                  )}
+                </Td>
+                <Td dataLabel='Releases'>{release ? 1 : 0}</Td>
+                <Td dataLabel='Date'>{date}</Td>
+              </Tr>
+            );
+          })}
+        </Tbody>
+      </Table>
     </Flex>
   );
 };

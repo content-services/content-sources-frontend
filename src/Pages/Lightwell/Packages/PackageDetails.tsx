@@ -59,7 +59,7 @@ const useStyles = createUseStyles({
     padding: '16px 24px',
   },
   titleWrapper: {
-    padding: '24px 0 0',
+    padding: '16px 0 0',
   },
   detailCard: {
     overflow: 'visible',
@@ -307,9 +307,8 @@ const PackageDetails = () => {
     ? (builds
         .map((b) => b.created_at)
         .sort()
-        .at(-1)
-        ?.split('T')[0] ?? '')
-    : (pythonDetail?.last_updated?.split('T')[0] ?? '');
+        .at(-1) ?? '')
+    : (pythonDetail?.last_updated ?? '');
 
   const packagesReady = useMock || (!apiPackagesQuery.isLoading && !!apiPackagesQuery.data);
   const detailReady = !isLoadingDetail;
@@ -376,7 +375,7 @@ const PackageDetails = () => {
                 </FlexItem>
                 {versionOptions.length === 1 && (selectedVersion || activeVersion) ? (
                   <FlexItem>
-                    <Label isCompact>
+                    <Label variant='outline' style={{ fontSize: '14px', padding: '8px 16px' }}>
                       {isMaven && hasRelease ? upstreamVersion : selectedVersion || activeVersion}
                     </Label>
                   </FlexItem>
