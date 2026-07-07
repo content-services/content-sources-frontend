@@ -8,11 +8,12 @@ import {
   waitForValidStatus,
 } from './helpers/helpers';
 
-const uploadRepoName = 'Upload Repo!';
+const uploadRepoNamePrefix = 'Upload Repo!';
 
 test.describe('Upload Repositories', () => {
   test('Upload repo creation and deletion', async ({ page, client, cleanup }) => {
-    await cleanup.runAndAdd(() => cleanupRepositories(client, uploadRepoName));
+    const uploadRepoName = `${uploadRepoNamePrefix}-${randomName()}`;
+    await cleanup.runAndAdd(() => cleanupRepositories(client, uploadRepoNamePrefix));
     await closeGenericPopupsIfExist(page);
     await navigateToRepositories(page);
 
