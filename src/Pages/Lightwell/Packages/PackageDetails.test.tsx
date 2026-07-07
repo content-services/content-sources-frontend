@@ -23,9 +23,15 @@ import {
   javaValidatedCopyCommand,
   mavenRemediatedDependencySnippet,
   mavenValidatedDependencySnippet,
+  pipConfRemediatedInstallSnippet,
+  pipConfValidatedInstallSnippet,
+  pipRemediatedInstallSnippet,
+  pipValidatedInstallSnippet,
   pythonRemediatedPipCommand,
   pythonValidatedPipCommand,
   ReactQueryTestWrapper,
+  requirementsRemediatedInstallSnippet,
+  requirementsValidatedInstallSnippet,
   otherPythonRemediatedPipCommand,
   otherJavaRemediatedCopyCommand,
 } from 'testingHelpers';
@@ -76,6 +82,14 @@ const multiVersionReleasePackage: RepositoryPackageItem = {
   latest_releases: [
     { version: '3.14.0', release: 'rhlw-00001', created_at: '2026-07-01T00:00:00Z' },
     { version: '2.12.0', release: 'rhlw-00002', created_at: '2026-06-18T00:00:00Z' },
+  ],
+};
+
+const multiVersionReleasePackageWithFullVersions: RepositoryPackageItem = {
+  ...multiVersionReleasePackage,
+  latest_releases: [
+    { version: '3.14.0.rhlw-00001', release: 'rhlw-00001', created_at: '2026-07-01T00:00:00Z' },
+    { version: '2.12.0.rhlw-00002', release: 'rhlw-00002', created_at: '2026-06-18T00:00:00Z' },
   ],
 };
 
@@ -337,6 +351,33 @@ it('shows "Available versions" on Releases tab for multi-version release package
   expect(await screen.findByRole('button', { name: '2.12.0' })).toBeInTheDocument();
   expect(await screen.findByText('2.12.0.rhlw-00002')).toBeInTheDocument();
   expect(await screen.findByText('2026-06-18')).toBeInTheDocument();
+
+  const availableVersionsTable = screen.getByRole('grid', { name: 'Available versions' });
+  const versionRows = availableVersionsTable.querySelectorAll('tbody tr');
+  expect(versionRows[0]).toHaveTextContent('3.14.0');
+  expect(versionRows[1]).toHaveTextContent('2.12.0');
+});
+
+it('shows release metadata when latest_releases use full version strings', async () => {
+  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    isFetching: false,
+    data: {
+      ...defaultLightwellRepositoryPackageResponse,
+      results: [multiVersionReleasePackageWithFullVersions],
+      total: 1,
+    },
+  }));
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => mockVersionsListQuery());
+
+  renderPackageDetails();
+
+  const releasesTab = await screen.findByRole('tab', { name: 'Releases' });
+  await userEvent.click(releasesTab);
+
+  expect(await screen.findByText('2.12.0.rhlw-00002')).toBeInTheDocument();
+  expect(await screen.findByText('2026-06-18')).toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: '2.12.0' })).toBeInTheDocument();
 });
 
 it('shows version dropdown for multi-version release packages', async () => {
@@ -353,7 +394,7 @@ it('shows version dropdown for multi-version release packages', async () => {
   expect(menuItems).toHaveLength(2);
 });
 
-it('shows install section for python package', async () => {
+it('shows how to use section for python package', async () => {
   setupPythonRemediatedPackage();
 
   renderPackageDetails();
@@ -361,8 +402,11 @@ it('shows install section for python package', async () => {
   expect(
     await screen.findByRole('heading', { name: defaultPythonRemediatedRepositoryPackageItem.name }),
   ).toBeInTheDocument();
-  expect(await screen.findByRole('heading', { name: 'Install' })).toBeInTheDocument();
-  expect(screen.queryByText('How to use')).not.toBeInTheDocument();
+  expect(await screen.findByText('How to use')).toBeInTheDocument();
+  expect(screen.queryByRole('heading', { name: 'Install' })).not.toBeInTheDocument();
+  expect(await screen.findByRole('tab', { name: 'pip' })).toBeInTheDocument();
+  expect(await screen.findByRole('tab', { name: 'requirements.txt' })).toBeInTheDocument();
+  expect(await screen.findByRole('tab', { name: 'pip.conf' })).toBeInTheDocument();
   expect(
     await screen.findByRole('button', { name: pythonRemediatedPipCommand }),
   ).toBeInTheDocument();
@@ -402,13 +446,33 @@ it('copies pip command to clipboard for remediated python package', async () => 
     pythonRemediatedPipCommand,
   );
 
-  // "Install" section of Overview tab
+  // pip tab in "How to use" section of Overview tab
   await assertClipboardCopy(
     writeText,
     async () => {
       await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
     },
-    pythonRemediatedPipCommand,
+    pipRemediatedInstallSnippet,
+  );
+
+  // requirements.txt tab in "How to use" section of Overview tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('tab', { name: 'requirements.txt' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+    },
+    requirementsRemediatedInstallSnippet,
+  );
+
+  // pip.conf tab in "How to use" section of Overview tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('tab', { name: 'pip.conf' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+    },
+    pipConfRemediatedInstallSnippet,
   );
 
   // "Releases for version x.x.x" section of Releases tab
@@ -530,13 +594,33 @@ it('copies pip command to clipboard for validated python package', async () => {
     pythonValidatedPipCommand,
   );
 
-  // "Install" section of Overview tab
+  // pip tab in "How to use" section of Overview tab
   await assertClipboardCopy(
     writeText,
     async () => {
       await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
     },
-    pythonValidatedPipCommand,
+    pipValidatedInstallSnippet,
+  );
+
+  // requirements.txt tab in "How to use" section of Overview tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('tab', { name: 'requirements.txt' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+    },
+    requirementsValidatedInstallSnippet,
+  );
+
+  // pip.conf tab in "How to use" section of Overview tab
+  await assertClipboardCopy(
+    writeText,
+    async () => {
+      await userEvent.click(await screen.findByRole('tab', { name: 'pip.conf' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+    },
+    pipConfValidatedInstallSnippet,
   );
 });
 

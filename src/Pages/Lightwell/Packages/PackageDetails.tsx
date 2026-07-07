@@ -501,7 +501,6 @@ const PackageDetails = () => {
                       hasRelease={hasRelease}
                       summary={isMaven ? mavenDetail?.summary : pythonDetail?.summary}
                       sourceUrl={repository.published_distribution_url ?? ''}
-                      installCommand={!isMaven ? installCommand : undefined}
                     />
                   </TabContentBody>
                 </TabContent>
