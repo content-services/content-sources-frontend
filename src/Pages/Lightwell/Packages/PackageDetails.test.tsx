@@ -426,9 +426,7 @@ it('copies pip command to clipboard for remediated python package', async () => 
   await assertClipboardCopy(
     writeText,
     async () => {
-      await userEvent.click(
-        await screen.findByRole('button', { name: `Copy ${otherPythonRemediatedPipCommand}` }),
-      );
+      await userEvent.click(await screen.findByRole('button', { name: '2.31.0.rhlw-0001' }));
     },
     otherPythonRemediatedPipCommand,
   );
@@ -483,9 +481,7 @@ it('copies maven coordinate to clipboard for remediated java package', async () 
   await assertClipboardCopy(
     writeText,
     async () => {
-      await userEvent.click(
-        await screen.findByRole('button', { name: `Copy ${otherJavaRemediatedCopyCommand}` }),
-      );
+      await userEvent.click(await screen.findByRole('button', { name: '2.12.0.rhlw-00002' }));
     },
     otherJavaRemediatedCopyCommand,
   );

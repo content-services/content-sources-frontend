@@ -1,10 +1,10 @@
-import { Button, Flex, Label, Title, Tooltip } from '@patternfly/react-core';
-import { CopyIcon } from '@patternfly/react-icons';
+import { Button, Flex, Label, Title } from '@patternfly/react-core';
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { RepositoryPackageReleaseInfo } from 'services/Content/ContentApi';
-import { stripLightwellVersionSuffix } from '../../helpers';
+import { lightwellReleaseNum, stripLightwellVersionSuffix } from '../../helpers';
+import CopyLabel from './CopyLabel';
 
 type PackageReleasesTabProps = {
   version: string;
@@ -30,15 +30,28 @@ const PackageReleasesTab = ({
   onVersionSelect,
   formatCopyText,
 }: PackageReleasesTabProps) => {
-  const [copiedVersion, setCopiedVersion] = useState<string | null>(null);
-
   const releaseMap = useMemo(() => {
     const map: Record<string, RepositoryPackageReleaseInfo> = {};
     latestReleases.forEach((r) => {
-      if (r.release) map[r.version] = r;
+      if (!r.release) return;
+      const key = stripLightwellVersionSuffix(r.version);
+      const existing = map[key];
+      if (!existing || lightwellReleaseNum(r.release) > lightwellReleaseNum(existing.release)) {
+        map[key] = r;
+      }
     });
     return map;
   }, [latestReleases]);
+
+  const uniqueVersions = useMemo(() => {
+    const seen = new Set<string>();
+    return allVersions.filter((v) => {
+      const key = stripLightwellVersionSuffix(v);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [allVersions]);
 
   return (
     <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
@@ -53,42 +66,14 @@ const PackageReleasesTab = ({
           </Tr>
         </Thead>
         <Tbody>
-          {builds.map((build) => {
-            const copyText = formatCopyText(build.version);
-            return (
-              <Tr key={build.version}>
-                <Td dataLabel='Release'>
-                  {copiedVersion === build.version ? (
-                    <Tooltip content='Copied' isVisible>
-                      <Label
-                        isCompact
-                        isClickable
-                        icon={<CopyIcon />}
-                        aria-label={`Copy ${copyText}`}
-                      >
-                        {build.version}
-                      </Label>
-                    </Tooltip>
-                  ) : (
-                    <Label
-                      isCompact
-                      isClickable
-                      icon={<CopyIcon />}
-                      onClick={() => {
-                        navigator.clipboard.writeText(copyText);
-                        setCopiedVersion(build.version);
-                        setTimeout(() => setCopiedVersion(null), 2000);
-                      }}
-                      aria-label={`Copy ${copyText}`}
-                    >
-                      {build.version}
-                    </Label>
-                  )}
-                </Td>
-                <Td dataLabel='Date'>{build.created_at?.split('T')[0] ?? '—'}</Td>
-              </Tr>
-            );
-          })}
+          {builds.map((build) => (
+            <Tr key={build.version}>
+              <Td dataLabel='Release'>
+                <CopyLabel copyText={formatCopyText(build.version)}>{build.version}</CopyLabel>
+              </Td>
+              <Td dataLabel='Date'>{build.created_at?.split('T')[0] ?? '—'}</Td>
+            </Tr>
+          ))}
         </Tbody>
       </Table>
       <Title headingLevel='h2' size='lg'>
@@ -104,10 +89,10 @@ const PackageReleasesTab = ({
           </Tr>
         </Thead>
         <Tbody>
-          {allVersions.map((v) => {
+          {uniqueVersions.map((v) => {
             const stripped = stripLightwellVersionSuffix(v);
             const isSelected = stripped === version;
-            const release = releaseMap[v] ?? releaseMap[stripped];
+            const release = releaseMap[stripped];
             const releaseVersion = release ? buildVersionFromRelease(release) : '';
             const copyText = release ? formatCopyText(releaseVersion) : '';
             const date = release?.created_at?.split('T')[0] ?? '—';
@@ -128,36 +113,7 @@ const PackageReleasesTab = ({
                   )}
                 </Td>
                 <Td dataLabel='Latest release'>
-                  {release ? (
-                    copiedVersion === releaseVersion ? (
-                      <Tooltip content='Copied' isVisible>
-                        <Label
-                          isCompact
-                          isClickable
-                          icon={<CopyIcon />}
-                          aria-label={`Copy ${copyText}`}
-                        >
-                          {releaseVersion}
-                        </Label>
-                      </Tooltip>
-                    ) : (
-                      <Label
-                        isCompact
-                        isClickable
-                        icon={<CopyIcon />}
-                        onClick={() => {
-                          navigator.clipboard.writeText(copyText);
-                          setCopiedVersion(releaseVersion);
-                          setTimeout(() => setCopiedVersion(null), 2000);
-                        }}
-                        aria-label={`Copy ${copyText}`}
-                      >
-                        {releaseVersion}
-                      </Label>
-                    )
-                  ) : (
-                    '—'
-                  )}
+                  {release ? <CopyLabel copyText={copyText}>{releaseVersion}</CopyLabel> : '—'}
                 </Td>
                 <Td dataLabel='Releases'>{release ? 1 : 0}</Td>
                 <Td dataLabel='Date'>{date}</Td>

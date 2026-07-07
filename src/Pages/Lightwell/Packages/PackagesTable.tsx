@@ -3,8 +3,6 @@ import {
   BreadcrumbItem,
   Button,
   Card,
-  ClipboardCopy,
-  ClipboardCopyVariant,
   Content,
   Flex,
   FlexItem,
@@ -54,6 +52,7 @@ import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Loader from 'components/Loader';
 import ConnectRepositoryPopover from '../Repositories/components/ConnectRepositoryPopover';
 import { buildVersionFromRelease } from './components/PackageReleasesTab';
+import CopyLabel from './components/CopyLabel';
 import RemediatedDataWarning from '../RemediatedDataWarning';
 import useLightwellRepository from '../useLightwellRepository';
 
@@ -141,19 +140,7 @@ type PackageCopyLabelProps = {
 
 const PackageCopyLabel = ({ name, groupId, version, isPython }: PackageCopyLabelProps) => {
   const copyText = isPython ? `pip install ${name}==${version}` : `${groupId}:${name}:${version}`;
-
-  return (
-    <ClipboardCopy
-      isReadOnly
-      hoverTip='Copy'
-      clickTip='Copied'
-      variant={ClipboardCopyVariant.inlineCompact}
-      copyAriaLabel={`Copy ${version}`}
-      onCopy={() => navigator.clipboard.writeText(copyText)}
-    >
-      {version}
-    </ClipboardCopy>
-  );
+  return <CopyLabel copyText={copyText}>{version}</CopyLabel>;
 };
 
 const StackedItemsCell = <T,>({
@@ -349,14 +336,9 @@ const PackagesTable = () => {
                   </Title>
                 </FlexItem>
                 <FlexItem>
-                  <ClipboardCopy
-                    isReadOnly
-                    hoverTip='Copy'
-                    clickTip='Copied'
-                    variant={ClipboardCopyVariant.inlineCompact}
-                  >
+                  <CopyLabel copyText={repository.published_distribution_url || ''}>
                     {repository.published_distribution_url || ''}
-                  </ClipboardCopy>
+                  </CopyLabel>
                 </FlexItem>
               </Flex>
               <FlexItem align={{ default: 'alignRight' }}>
