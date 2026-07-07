@@ -281,9 +281,8 @@ const PackageDetails = () => {
     ? (builds
         .map((b) => b.created_at)
         .sort()
-        .at(-1)
-        ?.split('T')[0] ?? '')
-    : (pythonDetail?.last_updated?.split('T')[0] ?? '');
+        .at(-1) ?? '')
+    : (pythonDetail?.last_updated ?? '');
 
   const packagesReady = useMock || (!apiPackagesQuery.isLoading && !!apiPackagesQuery.data);
   const detailReady = !isLoadingDetail;
