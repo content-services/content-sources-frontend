@@ -226,7 +226,7 @@ it('renders package detail content with builds', async () => {
 
   expect(await screen.findByRole('heading', { name: packageName })).toBeInTheDocument();
   expect(await screen.findByText('Overview')).toBeInTheDocument();
-  expect(await screen.findByText('Releases')).toBeInTheDocument();
+  expect(await screen.findByRole('tab', { name: 'Releases' })).toBeInTheDocument();
   expect(await screen.findByText('About this package')).toBeInTheDocument();
   expect(await screen.findByText('How to use')).toBeInTheDocument();
 });
@@ -325,7 +325,7 @@ const setupMultiVersionReleasePackage = () => {
   (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => mockVersionsListQuery());
 };
 
-it('shows "Other available versions" on Releases tab for multi-version release packages', async () => {
+it('shows "Available versions" on Releases tab for multi-version release packages', async () => {
   setupMultiVersionReleasePackage();
 
   renderPackageDetails();
@@ -333,7 +333,7 @@ it('shows "Other available versions" on Releases tab for multi-version release p
   const releasesTab = await screen.findByRole('tab', { name: 'Releases' });
   await userEvent.click(releasesTab);
 
-  expect(await screen.findByText('Other available versions')).toBeInTheDocument();
+  expect(await screen.findByText('Available versions')).toBeInTheDocument();
   expect(await screen.findByRole('button', { name: '2.12.0' })).toBeInTheDocument();
   expect(await screen.findByText('2.12.0.rhlw-00002')).toBeInTheDocument();
   expect(await screen.findByText('2026-06-18')).toBeInTheDocument();
@@ -407,9 +407,7 @@ it('copies pip command to clipboard for remediated python package', async () => 
   await assertClipboardCopy(
     writeText,
     async () => {
-      await userEvent.click(
-        await screen.findByRole('button', { name: pythonRemediatedPipCommand }),
-      );
+      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
     },
     pythonRemediatedPipCommand,
   );
@@ -419,14 +417,13 @@ it('copies pip command to clipboard for remediated python package', async () => 
     writeText,
     async () => {
       await userEvent.click(await screen.findByRole('tab', { name: 'Releases' }));
-      await userEvent.click(
-        await screen.findByRole('button', { name: pythonRemediatedPipCommand }),
-      );
+      const buttons = await screen.findAllByRole('button', { name: '2.32.0.rhlw-0002' });
+      await userEvent.click(buttons[0]);
     },
     pythonRemediatedPipCommand,
   );
 
-  // "Other available versions" section of Releases tab
+  // "Available versions" section of Releases tab
   await assertClipboardCopy(
     writeText,
     async () => {
@@ -475,12 +472,13 @@ it('copies maven coordinate to clipboard for remediated java package', async () 
     writeText,
     async () => {
       await userEvent.click(await screen.findByRole('tab', { name: 'Releases' }));
-      await userEvent.click(await screen.findByRole('button', { name: '3.14.0.rhlw-00001' }));
+      const buttons = await screen.findAllByRole('button', { name: '3.14.0.rhlw-00001' });
+      await userEvent.click(buttons[0]);
     },
     javaRemediatedCopyCommand,
   );
 
-  // "Other available versions" section of Releases tab
+  // "Available versions" section of Releases tab
   await assertClipboardCopy(
     writeText,
     async () => {

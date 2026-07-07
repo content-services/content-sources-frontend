@@ -30,7 +30,6 @@ const PackageReleasesTab = ({
   onVersionSelect,
   formatCopyText,
 }: PackageReleasesTabProps) => {
-  const otherVersions = allVersions.filter((v) => stripLightwellVersionSuffix(v) !== version);
   const [copiedVersion, setCopiedVersion] = useState<string | null>(null);
 
   const releaseMap = useMemo(() => {
@@ -61,7 +60,12 @@ const PackageReleasesTab = ({
                 <Td dataLabel='Release'>
                   {copiedVersion === build.version ? (
                     <Tooltip content='Copied' isVisible>
-                      <Label isCompact isClickable icon={<CopyIcon />} aria-label={`Copy ${copyText}`}>
+                      <Label
+                        isCompact
+                        isClickable
+                        icon={<CopyIcon />}
+                        aria-label={`Copy ${copyText}`}
+                      >
                         {build.version}
                       </Label>
                     </Tooltip>
@@ -113,7 +117,9 @@ const PackageReleasesTab = ({
                   {isSelected ? (
                     <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }}>
                       <span style={{ fontWeight: 'bold' }}>{stripped}</span>
-                      <Label isCompact color='blue'>Selected</Label>
+                      <Label isCompact color='blue'>
+                        Selected
+                      </Label>
                     </Flex>
                   ) : (
                     <Button variant='link' isInline onClick={() => onVersionSelect(v)}>
@@ -125,7 +131,12 @@ const PackageReleasesTab = ({
                   {release ? (
                     copiedVersion === releaseVersion ? (
                       <Tooltip content='Copied' isVisible>
-                        <Label isCompact isClickable icon={<CopyIcon />} aria-label={`Copy ${copyText}`}>
+                        <Label
+                          isCompact
+                          isClickable
+                          icon={<CopyIcon />}
+                          aria-label={`Copy ${copyText}`}
+                        >
                           {releaseVersion}
                         </Label>
                       </Tooltip>

@@ -92,8 +92,8 @@ const PackageOverviewTab = ({
           {hasRelease ? (
             <p>
               This package has been rebuilt by Red Hat with backported fixes for known
-              vulnerabilities. The upstream version is pinned and Red Hat applies security patches as
-              sequential releases (.rhlw suffix).
+              vulnerabilities. The upstream version is pinned and Red Hat applies security patches
+              as sequential releases (.rhlw suffix).
             </p>
           ) : (
             <p>

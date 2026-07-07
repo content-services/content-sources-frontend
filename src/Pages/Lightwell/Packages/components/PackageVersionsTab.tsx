@@ -46,7 +46,9 @@ const PackageVersionsTab = ({
                   {isSelected ? (
                     <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }}>
                       <span style={{ fontWeight: 'bold' }}>{version}</span>
-                      <Label isCompact color='blue'>Selected</Label>
+                      <Label isCompact color='blue'>
+                        Selected
+                      </Label>
                     </Flex>
                   ) : (
                     <Button variant='link' isInline onClick={() => onVersionSelect(version)}>

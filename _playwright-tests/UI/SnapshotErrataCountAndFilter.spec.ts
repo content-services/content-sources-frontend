@@ -110,8 +110,8 @@ test.describe('Snapshot Errata Count and Filter', () => {
       await expect(matchingErrata).toBeVisible();
 
       const filteredRows = snapshotListModal.getByRole('row');
-      const filteredCount = await filteredRows.count();
-      expect(filteredCount).toBe(2); // 1 data row + 1 header row
+      const filteredCount = filteredRows;
+      await expect(filteredCount).toHaveCount(2); // 1 data row + 1 header row
 
       await snapshotListModal.getByRole('button', { name: 'Clear filters' }).click();
       await expect(snapshotListModal.getByRole('button', { name: 'Clear filters' })).toBeHidden();
@@ -155,11 +155,11 @@ test.describe('Snapshot Errata Count and Filter', () => {
 
       const rhsaCount = await page.getByRole('gridcell').filter({ hasText: /RHSA-/ }).count();
       const rhbaCount = await page.getByRole('gridcell').filter({ hasText: /RHBA-/ }).count();
-      const rheaCount = await page.getByRole('gridcell').filter({ hasText: /RHEA-/ }).count();
+      const rheaCount = page.getByRole('gridcell').filter({ hasText: /RHEA-/ });
 
       expect(rhsaCount).toBeGreaterThan(0); // Should have Security errata
       expect(rhbaCount).toBeGreaterThan(0); // Should have Bugfix errata
-      expect(rheaCount).toBe(0); // Should have no Enhancement errata
+      await expect(rheaCount).toHaveCount(0); // Should have no Enhancement errata
       expect(rhsaCount + rhbaCount).toBe(typeCount); // Only Security and Bugfix should be present
 
       await snapshotListModal.getByRole('button', { name: 'Clear filters' }).click();
@@ -201,13 +201,13 @@ test.describe('Snapshot Errata Count and Filter', () => {
 
       const criticalCount = await page.getByRole('gridcell', { name: 'Critical' }).count();
       const lowCount = await page.getByRole('gridcell', { name: 'Low' }).count();
-      const moderateCount = await page.getByRole('gridcell', { name: 'Moderate' }).count();
-      const importantCount = await page.getByRole('gridcell', { name: 'Important' }).count();
+      const moderateCount = page.getByRole('gridcell', { name: 'Moderate' });
+      const importantCount = page.getByRole('gridcell', { name: 'Important' });
 
       expect(criticalCount).toBeGreaterThan(0); // Should have Critical severity errata
       expect(lowCount).toBeGreaterThan(0); // Should have Low severity errata
-      expect(moderateCount).toBe(0); // Should have no Moderate severity errata
-      expect(importantCount).toBe(0); // Should have no Important severity errata
+      await expect(moderateCount).toHaveCount(0); // Should have no Moderate severity errata
+      await expect(importantCount).toHaveCount(0); // Should have no Important severity errata
 
       await snapshotListModal.getByRole('button', { name: 'Clear filters' }).click();
     });
