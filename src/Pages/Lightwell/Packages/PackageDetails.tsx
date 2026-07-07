@@ -1,4 +1,5 @@
 import {
+  Alert,
   Breadcrumb,
   BreadcrumbItem,
   Button,
@@ -434,6 +435,11 @@ const PackageDetails = () => {
               ) : null}
             </Flex>
           </StackItem>
+          {repository.security_level === 'remediated' && (
+            <StackItem className={spacing.ptMd}>
+              <Alert variant='warning' isInline title='This data is sensitive. Do not share or capture screenshots.' />
+            </StackItem>
+          )}
         </Stack>
       </Grid>
 

@@ -1,4 +1,5 @@
 import {
+  Alert,
   Breadcrumb,
   BreadcrumbItem,
   Button,
@@ -377,6 +378,11 @@ const PackagesTable = () => {
               {getRepositoryDescription(repository.content_type, repository.security_level)}
             </Content>
           </StackItem>
+          {isRemediated && (
+            <StackItem className={spacing.ptSm}>
+              <Alert variant='warning' isInline title='This data is sensitive. Do not share or capture screenshots.' />
+            </StackItem>
+          )}
         </Stack>
       </Grid>
 
