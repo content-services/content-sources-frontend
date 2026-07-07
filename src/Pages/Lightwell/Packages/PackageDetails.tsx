@@ -22,6 +22,7 @@ import {
   Tabs,
   TabTitleText,
   Title,
+  Tooltip,
 } from '@patternfly/react-core';
 import { CopyIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
@@ -80,6 +81,7 @@ const PackageDetails = () => {
   const [activeTabKey, setActiveTabKey] = useState(0);
   const [selectedVersion, setSelectedVersion] = useState<string>('');
   const [versionDropdownOpen, setVersionDropdownOpen] = useState(false);
+  const [installCopied, setInstallCopied] = useState(false);
 
   const overviewTabRef = createRef<HTMLElement>();
   const releasesTabRef = createRef<HTMLElement>();
@@ -390,14 +392,26 @@ const PackageDetails = () => {
               </Flex>
               {displayVersion ? (
                 <FlexItem>
-                  <Button
-                    variant='secondary'
-                    icon={<CopyIcon />}
-                    iconPosition='end'
-                    onClick={() => navigator.clipboard.writeText(installCommand)}
-                  >
-                    {installCommand}
-                  </Button>
+                  {installCopied ? (
+                    <Tooltip content='Copied' isVisible>
+                      <Button variant='secondary' icon={<CopyIcon />} iconPosition='end'>
+                        {installCommand}
+                      </Button>
+                    </Tooltip>
+                  ) : (
+                    <Button
+                      variant='secondary'
+                      icon={<CopyIcon />}
+                      iconPosition='end'
+                      onClick={() => {
+                        navigator.clipboard.writeText(installCommand);
+                        setInstallCopied(true);
+                        setTimeout(() => setInstallCopied(false), 2000);
+                      }}
+                    >
+                      {installCommand}
+                    </Button>
+                  )}
                 </FlexItem>
               ) : null}
             </Flex>

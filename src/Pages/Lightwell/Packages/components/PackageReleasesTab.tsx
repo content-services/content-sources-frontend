@@ -1,7 +1,7 @@
-import { Button, Flex, Label, Title } from '@patternfly/react-core';
+import { Button, Flex, Label, Title, Tooltip } from '@patternfly/react-core';
 import { CopyIcon } from '@patternfly/react-icons';
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { RepositoryPackageReleaseInfo } from 'services/Content/ContentApi';
 import { stripLightwellVersionSuffix } from '../../helpers';
@@ -31,6 +31,7 @@ const PackageReleasesTab = ({
   formatCopyText,
 }: PackageReleasesTabProps) => {
   const otherVersions = allVersions.filter((v) => stripLightwellVersionSuffix(v) !== version);
+  const [copiedVersion, setCopiedVersion] = useState<string | null>(null);
 
   const releaseMap = useMemo(() => {
     const map: Record<string, RepositoryPackageReleaseInfo> = {};
@@ -58,15 +59,27 @@ const PackageReleasesTab = ({
             return (
               <Tr key={build.version}>
                 <Td dataLabel='Release'>
-                  <Label
-                    isCompact
-                    isClickable
-                    icon={<CopyIcon />}
-                    onClick={() => navigator.clipboard.writeText(copyText)}
-                    aria-label={`Copy ${copyText}`}
-                  >
-                    {build.version}
-                  </Label>
+                  {copiedVersion === build.version ? (
+                    <Tooltip content='Copied' isVisible>
+                      <Label isCompact isClickable icon={<CopyIcon />} aria-label={`Copy ${copyText}`}>
+                        {build.version}
+                      </Label>
+                    </Tooltip>
+                  ) : (
+                    <Label
+                      isCompact
+                      isClickable
+                      icon={<CopyIcon />}
+                      onClick={() => {
+                        navigator.clipboard.writeText(copyText);
+                        setCopiedVersion(build.version);
+                        setTimeout(() => setCopiedVersion(null), 2000);
+                      }}
+                      aria-label={`Copy ${copyText}`}
+                    >
+                      {build.version}
+                    </Label>
+                  )}
                 </Td>
                 <Td dataLabel='Date'>{build.created_at?.split('T')[0] ?? '—'}</Td>
               </Tr>
@@ -103,15 +116,27 @@ const PackageReleasesTab = ({
                     </Td>
                     <Td dataLabel='Latest release'>
                       {release ? (
-                        <Label
-                          isCompact
-                          isClickable
-                          icon={<CopyIcon />}
-                          onClick={() => navigator.clipboard.writeText(copyText)}
-                          aria-label={`Copy ${copyText}`}
-                        >
-                          {releaseVersion}
-                        </Label>
+                        copiedVersion === releaseVersion ? (
+                          <Tooltip content='Copied' isVisible>
+                            <Label isCompact isClickable icon={<CopyIcon />} aria-label={`Copy ${copyText}`}>
+                              {releaseVersion}
+                            </Label>
+                          </Tooltip>
+                        ) : (
+                          <Label
+                            isCompact
+                            isClickable
+                            icon={<CopyIcon />}
+                            onClick={() => {
+                              navigator.clipboard.writeText(copyText);
+                              setCopiedVersion(releaseVersion);
+                              setTimeout(() => setCopiedVersion(null), 2000);
+                            }}
+                            aria-label={`Copy ${copyText}`}
+                          >
+                            {releaseVersion}
+                          </Label>
+                        )
                       ) : (
                         '—'
                       )}
