@@ -23,9 +23,8 @@ import {
   Thead,
   Tr,
   type BaseCellProps,
-  type ThInfoType,
 } from '@patternfly/react-table';
-import { useState } from 'react';
+import { type ComponentProps, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import text from '@patternfly/react-styles/css/utilities/Text/text';
@@ -98,7 +97,7 @@ const RepositoriesTable = () => {
 
   if (isError) throw error;
 
-  const columnHeaders: { title: string; width?: BaseCellProps['width']; info?: ThInfoType }[] = [
+  const columnHeaders: { title: string; width?: BaseCellProps['width']; info?: ComponentProps<typeof Th>['info'] }[] = [
     { title: 'Repository' },
     { title: 'Ecosystem', width: 15 },
     { title: 'Security level', width: 15 },
