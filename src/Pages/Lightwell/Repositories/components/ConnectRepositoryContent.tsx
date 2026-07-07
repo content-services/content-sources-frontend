@@ -5,29 +5,70 @@ import {
   Content,
   Flex,
   FlexItem,
-  Popover,
   Tab,
   TabContent,
   Tabs,
   TabTitleText,
 } from '@patternfly/react-core';
 import { ExternalLinkAltIcon } from '@patternfly/react-icons';
-import { createRef, ReactElement, useMemo, useState } from 'react';
+import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
+import { createRef, useEffect, useMemo, useState } from 'react';
 
 import { ContentItem } from 'services/Content/ContentApi';
 
 import { ConnectSnippetTab, getConnectSnippetTabs } from './connectSnippets';
-import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 
-type ConnectRepositoryPopoverProps = {
+type ConnectRepositoryContentProps = {
   repository: Pick<ContentItem, 'name' | 'published_distribution_url' | 'content_type' | 'uuid'>;
-  children: ReactElement;
 };
 
-const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPopoverProps) => {
+const renderTabPanel = (tab: ConnectSnippetTab) => (
+  <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
+    {tab.snippets.map((snippet) => (
+      <FlexItem key={snippet.label}>
+        <Content component='p' style={{ textAlign: 'left' }}>
+          {snippet.label}
+        </Content>
+        <ClipboardCopy
+          isReadOnly
+          isCode
+          hoverTip='Copy'
+          clickTip='Copied'
+          variant={snippet.urlOnly ? ClipboardCopyVariant.inline : ClipboardCopyVariant.expansion}
+          isExpanded={false}
+        >
+          {snippet.code}
+        </ClipboardCopy>
+        {snippet.description && (
+          <Content component='small' className={spacing.mtSm} style={{ textAlign: 'left' }}>
+            {snippet.description}
+          </Content>
+        )}
+      </FlexItem>
+    ))}
+    {tab.docsUrl && (
+      <FlexItem>
+        <Button
+          variant='link'
+          isInline
+          component='a'
+          href={tab.docsUrl}
+          target='_blank'
+          rel='noopener noreferrer'
+          icon={<ExternalLinkAltIcon />}
+          iconPosition='end'
+        >
+          Full documentation for {tab.title}
+        </Button>
+      </FlexItem>
+    )}
+  </Flex>
+);
+
+const ConnectRepositoryContent = ({ repository }: ConnectRepositoryContentProps) => {
   const tabs = useMemo(() => getConnectSnippetTabs(repository), [repository]);
-  const [activeTabKey, setActiveTabKey] = useState(tabs[0]?.eventKey ?? '');
   const firstTabKey = tabs[0]?.eventKey ?? '';
+  const [activeTabKey, setActiveTabKey] = useState(firstTabKey);
 
   const tabRefs = useMemo(
     () =>
@@ -41,51 +82,13 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
     [tabs],
   );
 
-  const renderTabPanel = (tab: ConnectSnippetTab) => (
-    <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
-      {tab.snippets.map((snippet) => (
-        <FlexItem key={snippet.label}>
-          <Content component='p' style={{ textAlign: 'left' }}>
-            {snippet.label}
-          </Content>
-          <ClipboardCopy
-            isReadOnly
-            isCode
-            hoverTip='Copy'
-            clickTip='Copied'
-            variant={snippet.urlOnly ? ClipboardCopyVariant.inline : ClipboardCopyVariant.expansion}
-            isExpanded={!snippet.urlOnly}
-          >
-            {snippet.code}
-          </ClipboardCopy>
-          {snippet.description && (
-            <Content component='small' className={spacing.mtSm} style={{ textAlign: 'left' }}>
-              {snippet.description}
-            </Content>
-          )}
-        </FlexItem>
-      ))}
-      {tab.docsUrl && (
-        <FlexItem>
-          <Button
-            variant='link'
-            isInline
-            component='a'
-            href={tab.docsUrl}
-            target='_blank'
-            icon={<ExternalLinkAltIcon />}
-            iconPosition='end'
-          >
-            Full documentation for {tab.title}
-          </Button>
-        </FlexItem>
-      )}
-    </Flex>
-  );
+  useEffect(() => {
+    setActiveTabKey(firstTabKey);
+  }, [firstTabKey, repository.uuid]);
 
-  const bodyContent = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div>
+  return (
+    <Flex direction={{ default: 'column' }} gap={{ default: 'gapLg' }}>
+      <FlexItem>
         <Content component='h4' className={spacing.mbSm}>
           Authenticate build tools
         </Content>
@@ -97,6 +100,7 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
             component='a'
             href='https://access.redhat.com/terms-based-registry/'
             target='_blank'
+            rel='noopener noreferrer'
             icon={<ExternalLinkAltIcon />}
             iconPosition='end'
             style={{ fontWeight: 'bold' }}
@@ -112,6 +116,7 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
             component='a'
             href='https://docs.redhat.com/en/documentation/red_hat_lightwell_network/'
             target='_blank'
+            rel='noopener noreferrer'
             icon={<ExternalLinkAltIcon />}
             iconPosition='end'
           >
@@ -119,8 +124,8 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
           </Button>
           .
         </Content>
-      </div>
-      <div>
+      </FlexItem>
+      <FlexItem>
         <Content component='h4' className={spacing.mbSm}>
           Connect to your build tool
         </Content>
@@ -153,23 +158,9 @@ const ConnectRepositoryPopover = ({ repository, children }: ConnectRepositoryPop
             {renderTabPanel(tab)}
           </TabContent>
         ))}
-      </div>
-    </div>
-  );
-
-  return (
-    <Popover
-      aria-label='Connect to this repository'
-      headerContent='Connect to this repository'
-      bodyContent={bodyContent}
-      position='right-start'
-      flipBehavior={['right-start', 'left-start']}
-      onShow={() => setActiveTabKey(firstTabKey)}
-      minWidth='600px'
-    >
-      {children}
-    </Popover>
+      </FlexItem>
+    </Flex>
   );
 };
 
-export default ConnectRepositoryPopover;
+export default ConnectRepositoryContent;

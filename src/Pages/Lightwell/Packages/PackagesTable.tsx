@@ -50,7 +50,7 @@ import Hide from 'components/Hide/Hide';
 import { LIGHTWELL_USE_MOCK, lightwellPkgsPerPageKey } from '../constants';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Loader from 'components/Loader';
-import ConnectRepositoryPopover from '../Repositories/components/ConnectRepositoryPopover';
+import ConnectRepositoryModal from '../Repositories/components/ConnectRepositoryModal';
 import { buildVersionFromRelease } from './components/PackageReleasesTab';
 import CopyLabel from './components/CopyLabel';
 import RemediatedDataWarning from '../RemediatedDataWarning';
@@ -342,7 +342,7 @@ const PackagesTable = () => {
                 </FlexItem>
               </Flex>
               <FlexItem align={{ default: 'alignRight' }}>
-                <ConnectRepositoryPopover
+                <ConnectRepositoryModal
                   repository={{
                     uuid: repository.uuid,
                     name: repository.name,
@@ -353,7 +353,7 @@ const PackagesTable = () => {
                   <Button size='sm' variant='secondary' icon={<CodeIcon />}>
                     Connect
                   </Button>
-                </ConnectRepositoryPopover>
+                </ConnectRepositoryModal>
               </FlexItem>
             </Flex>
             <Content className={spacing.pySm}>
