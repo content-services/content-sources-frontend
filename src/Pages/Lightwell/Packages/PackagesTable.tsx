@@ -98,16 +98,25 @@ const mapRepositoryPackage = (pkg: RepositoryPackageItem): MappedPackage => {
 
   const sortedReleases = [...pkg.latest_releases].sort(compareReleasesDesc);
 
+  // Deduplicate: keep only the latest release per upstream version
+  const seenVersions = new Set<string>();
+  const latestReleasePerVersion = sortedReleases.filter((release) => {
+    const v = stripLightwellVersionSuffix(release.version);
+    if (seenVersions.has(v)) return false;
+    seenVersions.add(v);
+    return true;
+  });
+
   const sortedVersions =
-    sortedReleases.length > 0
-      ? sortedReleases.map((release) => stripLightwellVersionSuffix(release.version))
+    latestReleasePerVersion.length > 0
+      ? latestReleasePerVersion.map((release) => stripLightwellVersionSuffix(release.version))
       : sortVersionsDesc(pkg.versions.map(stripLightwellVersionSuffix));
 
   return {
     group_id: pkg.group,
     name: pkg.name,
     versions: sortedVersions,
-    latest_releases: sortedReleases.map((release) => ({
+    latest_releases: latestReleasePerVersion.map((release) => ({
       version: stripLightwellVersionSuffix(release.version),
       release: release.release,
     })),

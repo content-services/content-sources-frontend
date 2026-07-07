@@ -15,7 +15,7 @@ import {
   pythonValidatedPipCommand,
   ReactQueryTestWrapper,
 } from 'testingHelpers';
-import { ContentItem } from 'services/Content/ContentApi';
+import { ContentItem, RepositoryPackageItem } from 'services/Content/ContentApi';
 import { getRepositoryPathSlug } from '../helpers';
 import useLightwellRepository from '../useLightwellRepository';
 
@@ -240,6 +240,51 @@ it('renders remediated java packages with a Latest release column', async () => 
   expect(await screen.findByRole('heading', { name: 'Java Remediated' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Latest release' })).toBeInTheDocument();
   expect(await screen.findByRole('button', { name: '3.14.0.rhlw-0004' })).toBeInTheDocument();
+});
+
+it('shows one version row per upstream version with its latest release only', async () => {
+  const multiReleasePackage: RepositoryPackageItem = {
+    group: 'org.example',
+    name: 'my-lib',
+    versions: ['2.0.0', '1.0.0'],
+    latest_releases: [
+      { version: '2.0.0.rhlw-2', release: 'rhlw-2', created_at: '2026-07-02T00:00:00Z' },
+      { version: '2.0.0.rhlw-1', release: 'rhlw-1', created_at: '2026-07-01T00:00:00Z' },
+      { version: '1.0.0.rhlw-3', release: 'rhlw-3', created_at: '2026-06-15T00:00:00Z' },
+      { version: '1.0.0.rhlw-1', release: 'rhlw-1', created_at: '2026-06-13T00:00:00Z' },
+    ],
+  };
+
+  mockUseParams.mockReturnValue({
+    repoName: getRepositoryPathSlug('maven', 'remediated'),
+  });
+  mockRepository(javaRemediatedContentItem);
+  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() =>
+    mockPackagesQuery({
+      data: {
+        ...defaultLightwellRepositoryPackageResponse,
+        results: [multiReleasePackage],
+        total: 1,
+      },
+    }),
+  );
+
+  renderPackagesTable();
+
+  // Version column: 2.0.0 shown once (not duplicated for each release), 1.0.0 collapsed
+  expect(await screen.findByText('2.0.0')).toBeInTheDocument();
+  expect(screen.queryAllByText('2.0.0')).toHaveLength(1);
+  expect(screen.queryByText('1.0.0')).not.toBeInTheDocument();
+
+  // Latest release column: shows the latest release for 2.0.0, not the older one
+  expect(screen.getByRole('button', { name: '2.0.0.rhlw-2' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: '2.0.0.rhlw-1' })).not.toBeInTheDocument();
+
+  // Expand to reveal 1.0.0 with its latest release (rhlw-3, not rhlw-1)
+  await userEvent.click(screen.getByRole('button', { name: '1 more' }));
+  expect(screen.getByText('1.0.0')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '1.0.0.rhlw-3' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: '1.0.0.rhlw-1' })).not.toBeInTheDocument();
 });
 
 it('renders python validated packages with pip copy labels and no group ID column', async () => {
