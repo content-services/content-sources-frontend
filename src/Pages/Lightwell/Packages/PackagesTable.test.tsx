@@ -239,8 +239,8 @@ it('renders remediated java packages with a Latest release column', async () => 
 
   expect(await screen.findByRole('heading', { name: 'Java Remediated' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Latest release' })).toBeInTheDocument();
-  expect(await screen.findByLabelText('Copy 3.14.0.rhlw-3004-test')).toHaveTextContent(
-    '3.14.0.rhlw-3004-test',
+  expect(await screen.findByLabelText('Copy 3.14.0.rhlw-0004')).toHaveTextContent(
+    '3.14.0.rhlw-0004',
   );
   expect(screen.queryByLabelText('Copy 3.14.0')).not.toBeInTheDocument();
 });
@@ -290,7 +290,7 @@ it('renders python remediated packages with a Latest release column', async () =
 
   expect(await screen.findByRole('heading', { name: 'Python Remediated' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Latest release' })).toBeInTheDocument();
-  expect(await screen.findByLabelText('Copy 2.31.0.rhlw-3001')).toBeInTheDocument();
+  expect(await screen.findByLabelText('Copy 2.32.0.rhlw-0002')).toBeInTheDocument();
 });
 
 it('clears the search filter from the filtered empty state', async () => {

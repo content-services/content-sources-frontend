@@ -20,14 +20,14 @@ import {
   gradleRemediatedDependencySnippet,
   gradleValidatedDependencySnippet,
   javaRemediatedCopyCommand,
-  javaRemediatedCopyCommand2,
   javaValidatedCopyCommand,
   mavenRemediatedDependencySnippet,
   mavenValidatedDependencySnippet,
   pythonRemediatedPipCommand,
-  pythonRemediatedPipCommand2,
   pythonValidatedPipCommand,
   ReactQueryTestWrapper,
+  otherPythonRemediatedPipCommand,
+  otherJavaRemediatedCopyCommand,
 } from 'testingHelpers';
 import { RepositoryPackageItem } from 'services/Content/ContentApi';
 import { getRepositoryPathSlug } from '../helpers';
@@ -407,7 +407,9 @@ it('copies pip command to clipboard for remediated python package', async () => 
   await assertClipboardCopy(
     writeText,
     async () => {
-      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
+      await userEvent.click(
+        await screen.findByRole('button', { name: pythonRemediatedPipCommand }),
+      );
     },
     pythonRemediatedPipCommand,
   );
@@ -417,7 +419,9 @@ it('copies pip command to clipboard for remediated python package', async () => 
     writeText,
     async () => {
       await userEvent.click(await screen.findByRole('tab', { name: 'Releases' }));
-      await userEvent.click(await screen.findByRole('button', { name: '2.31.0.rhlw-3001' }));
+      await userEvent.click(
+        await screen.findByRole('button', { name: pythonRemediatedPipCommand }),
+      );
     },
     pythonRemediatedPipCommand,
   );
@@ -426,9 +430,9 @@ it('copies pip command to clipboard for remediated python package', async () => 
   await assertClipboardCopy(
     writeText,
     async () => {
-      await userEvent.click(await screen.findByRole('button', { name: '2.32.0.rhlw-3002' }));
+      await userEvent.click(await screen.findByText('2.31.0.rhlw-0001'));
     },
-    pythonRemediatedPipCommand2,
+    otherPythonRemediatedPipCommand,
   );
 });
 
@@ -480,9 +484,9 @@ it('copies maven coordinate to clipboard for remediated java package', async () 
   await assertClipboardCopy(
     writeText,
     async () => {
-      await userEvent.click(await screen.findByRole('button', { name: '2.12.0.rhlw-00002' }));
+      await userEvent.click(await screen.findByText('2.12.0.rhlw-00002'));
     },
-    javaRemediatedCopyCommand2,
+    otherJavaRemediatedCopyCommand,
   );
 });
 

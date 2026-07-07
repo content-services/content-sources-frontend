@@ -440,7 +440,7 @@ export const defaultLightwellRepositoryPackageItem: RepositoryPackageItem = {
   name: 'json-test',
   versions: ['3.14.0'],
   latest_releases: [
-    { version: '3.14.0', release: 'rhlw-3004-test', created_at: '2026-07-01T00:00:00Z' },
+    { version: '3.14.0', release: 'rhlw-0004', created_at: '2026-07-01T00:00:00Z' },
   ],
 };
 
@@ -449,8 +449,8 @@ export const defaultPythonRemediatedRepositoryPackageItem: RepositoryPackageItem
   name: 'requests',
   versions: ['2.31.0', '2.32.0'],
   latest_releases: [
-    { version: '2.31.0', release: 'rhlw-3001', created_at: '2026-07-01T00:00:00Z' },
-    { version: '2.32.0', release: 'rhlw-3002', created_at: '2026-06-18T00:00:00Z' },
+    { version: '2.31.0', release: 'rhlw-0001', created_at: '2026-07-01T00:00:00Z' },
+    { version: '2.32.0', release: 'rhlw-0002', created_at: '2026-06-18T00:00:00Z' },
   ],
 };
 
@@ -529,12 +529,12 @@ export const defaultPythonValidatedPackageVersions: PythonPackageVersionsRespons
   ],
 };
 
-export const pythonRemediatedPipCommand = `pip install ${defaultPythonRemediatedRepositoryPackageItem.name}==2.31.0.rhlw-3001`;
-export const pythonRemediatedPipCommand2 = `pip install ${defaultPythonRemediatedRepositoryPackageItem.name}==2.32.0.rhlw-3002`;
+export const pythonRemediatedPipCommand = `pip install ${defaultPythonRemediatedRepositoryPackageItem.name}==2.32.0.rhlw-0002`;
+export const otherPythonRemediatedPipCommand = `pip install ${defaultPythonRemediatedRepositoryPackageItem.name}==2.31.0.rhlw-0001`;
 export const pythonValidatedPipCommand = `pip install ${defaultPythonValidatedPackageItem.name}==2.21.2`;
 
 export const javaRemediatedCopyCommand = `${defaultLightwellRepositoryPackageItem.group}:${defaultLightwellRepositoryPackageItem.name}:3.14.0.rhlw-00001`;
-export const javaRemediatedCopyCommand2 = `${defaultLightwellRepositoryPackageItem.group}:${defaultLightwellRepositoryPackageItem.name}:2.12.0.rhlw-00002`;
+export const otherJavaRemediatedCopyCommand = `${defaultLightwellRepositoryPackageItem.group}:${defaultLightwellRepositoryPackageItem.name}:2.12.0.rhlw-00002`;
 export const javaValidatedCopyCommand = `${defaultLightwellRepositoryPackageItem.group}:${defaultLightwellRepositoryPackageItem.name}:2.21.2`;
 
 export const mavenRemediatedDependencySnippet = `<!-- Source: ${defaultLightwellContentItem.published_distribution_url} -->
