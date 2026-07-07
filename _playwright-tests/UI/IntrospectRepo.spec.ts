@@ -1,5 +1,5 @@
 import { test, expect } from 'test-utils';
-import { cleanupRepositories } from 'test-utils/helpers';
+import { cleanupRepositories, randomName } from 'test-utils/helpers';
 import { navigateToRepositories } from './helpers/navHelpers';
 import {
   closeGenericPopupsIfExist,
@@ -9,7 +9,7 @@ import {
 } from './helpers/helpers';
 
 test.describe('Introspect Repositories', () => {
-  const repoName = 'introspection-test';
+  const repoNamePrefix = 'introspection-test';
   const repoUrl = 'https://fedorapeople.org/groups/katello/fakerepos/zoo/';
   const repoPackageCount = '8';
   const repoVersion = '0.3';
@@ -18,7 +18,8 @@ test.describe('Introspect Repositories', () => {
   const testPackage = 'cheetah';
 
   test('Create and delete an introspection repository', async ({ page, client, cleanup }) => {
-    await cleanup.runAndAdd(() => cleanupRepositories(client, repoName, repoUrl));
+    const repoName = `${repoNamePrefix}-${randomName()}`;
+    await cleanup.runAndAdd(() => cleanupRepositories(client, repoNamePrefix, repoUrl));
     await navigateToRepositories(page);
     await closeGenericPopupsIfExist(page);
 

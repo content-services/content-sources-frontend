@@ -4,11 +4,12 @@ import { navigateToRepositories } from './helpers/navHelpers';
 import {
   closeGenericPopupsIfExist,
   getRowByNameOrUrl,
+  randomName,
   retry,
   waitForValidStatus,
 } from './helpers/helpers';
 
-const uploadRepoNamePrefix = 'Upload Repo!';
+const uploadRepoNamePrefix = 'Upload Repo';
 
 test.describe('Upload Repositories', () => {
   test('Upload repo creation and deletion', async ({ page, client, cleanup }) => {
