@@ -37,7 +37,6 @@ import {
   useMavenPackageVersionsListQuery,
   usePythonPackageVersionsQuery,
 } from 'services/Content/ContentQueries';
-
 import { LIGHTWELL_USE_MOCK } from '../constants';
 import {
   compareVersionsDesc,

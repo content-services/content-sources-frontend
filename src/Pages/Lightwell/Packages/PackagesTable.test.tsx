@@ -139,7 +139,7 @@ it('renders with a single package', async () => {
   ).toBeInTheDocument();
   expect(await screen.findByText('org.json.test')).toBeInTheDocument();
   expect(screen.queryByText('rhlw-3004-test')).not.toBeInTheDocument();
-  expect(await screen.findByRole('button', { name: 'Copy 3.14.0' })).toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: '3.14.0' })).toBeInTheDocument();
   expect(screen.getByText('3.14.0')).toBeInTheDocument();
   expect(await screen.findByText('2026-07-01')).toBeInTheDocument();
 });
@@ -198,7 +198,7 @@ it('copies the maven coordinate when a validated version label is clicked', asyn
   const writeText = mockClipboard();
   renderPackagesTable();
 
-  await clickCopyButton('Copy 3.14.0');
+  await clickCopyButton('3.14.0');
 
   expect(writeText).toHaveBeenCalledWith(javaValidatedTableCopyCommand);
 });
@@ -239,9 +239,7 @@ it('renders remediated java packages with a Latest release column', async () => 
 
   expect(await screen.findByRole('heading', { name: 'Java Remediated' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Latest release' })).toBeInTheDocument();
-  expect(await screen.findByRole('button', { name: 'Copy 3.14.0.rhlw-0004' })).toBeInTheDocument();
-  expect(screen.getByText('3.14.0.rhlw-0004')).toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Copy 3.14.0' })).not.toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: '3.14.0.rhlw-0004' })).toBeInTheDocument();
 });
 
 it('renders python validated packages with pip copy labels and no group ID column', async () => {
@@ -266,7 +264,7 @@ it('renders python validated packages with pip copy labels and no group ID colum
   expect(screen.queryByRole('columnheader', { name: 'Group ID' })).not.toBeInTheDocument();
   expect(screen.queryByRole('columnheader', { name: 'Latest release' })).not.toBeInTheDocument();
 
-  await clickCopyButton('Copy 2.21.2');
+  await clickCopyButton('2.21.2');
   expect(writeText).toHaveBeenCalledWith(pythonValidatedPipCommand);
 });
 
@@ -289,7 +287,7 @@ it('renders python remediated packages with a Latest release column', async () =
 
   expect(await screen.findByRole('heading', { name: 'Python Remediated' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Latest release' })).toBeInTheDocument();
-  expect(await screen.findByRole('button', { name: 'Copy 2.32.0.rhlw-0002' })).toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: '2.32.0.rhlw-0002' })).toBeInTheDocument();
 });
 
 it('clears the search filter from the filtered empty state', async () => {
