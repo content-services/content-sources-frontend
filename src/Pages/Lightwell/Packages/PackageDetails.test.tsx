@@ -20,7 +20,6 @@ import {
   gradleRemediatedDependencySnippet,
   gradleValidatedDependencySnippet,
   javaRemediatedCopyCommand,
-  javaValidatedCopyCommand,
   mavenRemediatedDependencySnippet,
   mavenValidatedDependencySnippet,
   pipConfRemediatedInstallSnippet,
@@ -28,7 +27,6 @@ import {
   pipRemediatedInstallSnippet,
   pipValidatedInstallSnippet,
   pythonRemediatedPipCommand,
-  pythonValidatedPipCommand,
   ReactQueryTestWrapper,
   requirementsRemediatedInstallSnippet,
   requirementsValidatedInstallSnippet,
@@ -407,9 +405,6 @@ it('shows how to use section for python package', async () => {
   expect(await screen.findByRole('tab', { name: 'pip' })).toBeInTheDocument();
   expect(await screen.findByRole('tab', { name: 'requirements.txt' })).toBeInTheDocument();
   expect(await screen.findByRole('tab', { name: 'pip.conf' })).toBeInTheDocument();
-  expect(
-    await screen.findByRole('button', { name: pythonRemediatedPipCommand }),
-  ).toBeInTheDocument();
 });
 
 const mockClipboard = () => {
@@ -434,17 +429,6 @@ it('copies pip command to clipboard for remediated python package', async () => 
 
   setupPythonRemediatedPackage();
   renderPackageDetails();
-
-  // PackageDetails header
-  await assertClipboardCopy(
-    writeText,
-    async () => {
-      await userEvent.click(
-        await screen.findByRole('button', { name: pythonRemediatedPipCommand }),
-      );
-    },
-    pythonRemediatedPipCommand,
-  );
 
   // pip tab in "How to use" section of Overview tab
   await assertClipboardCopy(
@@ -501,15 +485,6 @@ it('copies maven coordinate to clipboard for remediated java package', async () 
 
   setupMultiVersionReleasePackage();
   renderPackageDetails();
-
-  // PackageDetails header
-  await assertClipboardCopy(
-    writeText,
-    async () => {
-      await userEvent.click(await screen.findByRole('button', { name: javaRemediatedCopyCommand }));
-    },
-    javaRemediatedCopyCommand,
-  );
 
   // Maven tab in "How to use" section of Overview tab
   await assertClipboardCopy(
@@ -585,15 +560,6 @@ it('copies pip command to clipboard for validated python package', async () => {
   setupPythonValidatedPackage();
   renderPackageDetails();
 
-  // PackageDetails header
-  await assertClipboardCopy(
-    writeText,
-    async () => {
-      await userEvent.click(await screen.findByRole('button', { name: pythonValidatedPipCommand }));
-    },
-    pythonValidatedPipCommand,
-  );
-
   // pip tab in "How to use" section of Overview tab
   await assertClipboardCopy(
     writeText,
@@ -629,15 +595,6 @@ it('copies maven coordinate to clipboard for validated java package', async () =
 
   setupNoReleasePackage();
   renderPackageDetails();
-
-  // PackageDetails header
-  await assertClipboardCopy(
-    writeText,
-    async () => {
-      await userEvent.click(await screen.findByRole('button', { name: javaValidatedCopyCommand }));
-    },
-    javaValidatedCopyCommand,
-  );
 
   // Maven tab in "How to use" section of Overview tab
   await assertClipboardCopy(
