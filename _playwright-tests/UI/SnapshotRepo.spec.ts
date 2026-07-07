@@ -15,11 +15,13 @@ import {
 
 test.describe('Snapshot Repositories', () => {
   test('Snapshot a repository', async ({ page, client, cleanup }) => {
-    const repoName = 'one';
+    const repoNamePrefix = 'one';
+    const repoRevision = 'one';
+    const repoName = `${repoNamePrefix}-${randomName()}`;
     const editedRepoName = `${repoName}-edited`;
-    const repoUrl = 'https://jlsherrill.fedorapeople.org/fake-repos/revision/' + repoName;
+    const repoUrl = `https://jlsherrill.fedorapeople.org/fake-repos/revision/${repoRevision}/`;
 
-    await cleanup.runAndAdd(() => cleanupRepositories(client, repoName, repoUrl));
+    await cleanup.runAndAdd(() => cleanupRepositories(client, repoNamePrefix, repoUrl));
     await navigateToRepositories(page);
     await closeGenericPopupsIfExist(page);
 

@@ -1,5 +1,5 @@
 import { test, expect } from 'test-utils';
-import { cleanupRepositories } from 'test-utils/helpers';
+import { cleanupRepositories, randomName } from 'test-utils/helpers';
 
 import { closeGenericPopupsIfExist } from './helpers/helpers';
 import { navigateToRepositories } from './helpers/navHelpers';
@@ -14,12 +14,14 @@ test.describe('Custom repositories pagination', () => {
     cleanup,
     unusedRepoUrl,
   }) => {
+    const repoNameBase = `${repoNamePrefix}-${randomName()}`;
+
     await test.step('Populate the custom repo table', async () => {
       await cleanup.runAndAdd(() => cleanupRepositories(client, repoNamePrefix));
-      await bulkCreateRepos(page, 12, repoNamePrefix, unusedRepoUrl);
+      await bulkCreateRepos(page, 12, repoNameBase, unusedRepoUrl);
       await navigateToRepositories(page);
       await closeGenericPopupsIfExist(page);
-      await page.getByPlaceholder(/^Filter by name.*$/).fill(repoNamePrefix);
+      await page.getByPlaceholder(/^Filter by name.*$/).fill(repoNameBase);
     });
 
     await test.step('Set pagination to 10 using top paginator', async () => {
@@ -34,9 +36,9 @@ test.describe('Custom repositories pagination', () => {
       await expect(page.locator('button#topPaginationWidgetId-top-toggle')).toHaveText(
         '1 - 10 of 12',
       );
-      await expect(page.getByText(`${repoNamePrefix}-10`)).toBeVisible();
-      await expect(page.getByText(`${repoNamePrefix}-11`)).toBeHidden();
-      const targetRows = page.getByRole('row').filter({ has: page.getByText(repoNamePrefix) });
+      await expect(page.getByText(`${repoNameBase}-10`)).toBeVisible();
+      await expect(page.getByText(`${repoNameBase}-11`)).toBeHidden();
+      const targetRows = page.getByRole('row').filter({ has: page.getByText(repoNameBase) });
       await expect(targetRows).toHaveCount(10);
     });
 
@@ -45,10 +47,10 @@ test.describe('Custom repositories pagination', () => {
       await expect(page.locator('button#topPaginationWidgetId-top-toggle')).toHaveText(
         '11 - 12 of 12',
       );
-      await expect(page.getByText(`${repoNamePrefix}-11`)).toBeVisible();
-      await expect(page.getByText(`${repoNamePrefix}-12`)).toBeVisible();
-      await expect(page.getByText(`${repoNamePrefix}-10`)).toBeHidden();
-      const targetRows = page.getByRole('row').filter({ has: page.getByText(repoNamePrefix) });
+      await expect(page.getByText(`${repoNameBase}-11`)).toBeVisible();
+      await expect(page.getByText(`${repoNameBase}-12`)).toBeVisible();
+      await expect(page.getByText(`${repoNameBase}-10`)).toBeHidden();
+      const targetRows = page.getByRole('row').filter({ has: page.getByText(repoNameBase) });
       await expect(targetRows).toHaveCount(2);
     });
 
@@ -57,9 +59,9 @@ test.describe('Custom repositories pagination', () => {
       await expect(page.locator('button#topPaginationWidgetId-top-toggle')).toHaveText(
         '1 - 10 of 12',
       );
-      await expect(page.getByText(`${repoNamePrefix}-10`)).toBeVisible();
-      await expect(page.getByText(`${repoNamePrefix}-11`)).toBeHidden();
-      const targetRows = page.getByRole('row').filter({ has: page.getByText(repoNamePrefix) });
+      await expect(page.getByText(`${repoNameBase}-10`)).toBeVisible();
+      await expect(page.getByText(`${repoNameBase}-11`)).toBeHidden();
+      const targetRows = page.getByRole('row').filter({ has: page.getByText(repoNameBase) });
       await expect(targetRows).toHaveCount(10);
     });
   });
