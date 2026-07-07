@@ -349,7 +349,7 @@ const PackageDetails = () => {
                 </FlexItem>
                 {versionOptions.length === 1 && (selectedVersion || activeVersion) ? (
                   <FlexItem>
-                    <Label isCompact>
+                    <Label variant='outline' style={{ fontSize: '14px', padding: '8px 16px' }}>
                       {isMaven && hasRelease ? upstreamVersion : selectedVersion || activeVersion}
                     </Label>
                   </FlexItem>
