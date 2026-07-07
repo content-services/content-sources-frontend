@@ -18,7 +18,6 @@ import {
   ToolbarContent,
   ToolbarItem,
   Timestamp,
-  Tooltip,
 } from '@patternfly/react-core';
 import { CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import { SkeletonTable } from '@patternfly/react-component-groups';
@@ -214,7 +213,6 @@ const PackagesTable = () => {
     { searchQuery },
     searchQuery === '' ? 0 : 500,
   );
-  const [urlCopied, setUrlCopied] = useState(false);
 
   useEffect(() => {
     setFilterData({

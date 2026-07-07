@@ -141,7 +141,7 @@ it('renders with a single package', async () => {
   expect(screen.queryByText('rhlw-3004-test')).not.toBeInTheDocument();
   expect(await screen.findByRole('button', { name: '3.14.0' })).toBeInTheDocument();
   expect(screen.getByText('3.14.0')).toBeInTheDocument();
-  expect(await screen.findByText('2026-07-01')).toBeInTheDocument();
+  expect(document.querySelector('time[datetime="2026-07-01T00:00:00.000Z"]')).toBeInTheDocument();
 });
 
 it('shows a loading skeleton while packages are fetching', () => {
