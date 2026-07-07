@@ -26,4 +26,4 @@ export const REPOSITORY_DESCRIPTIONS: Record<string, Record<string, string>> = {
   },
 };
 
-export const LIGHTWELL_PROJECT_URL = 'https://www.redhat.com/en/lightwell#follow-our-progress';
+export const LIGHTWELL_PROJECT_URL = 'https://www.redhat.com/en/lightwell';

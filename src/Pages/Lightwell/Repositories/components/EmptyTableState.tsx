@@ -35,7 +35,7 @@ const EmptyTableState = () => {
           target='_blank'
           rel='noopener noreferrer'
         >
-          Contact sales for access
+          Not a member? Get started
         </Button>
       </EmptyStateBody>
     </EmptyState>
