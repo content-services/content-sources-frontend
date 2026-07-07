@@ -1,4 +1,4 @@
-import { Button, Flex, Title } from '@patternfly/react-core';
+import { Button, Flex, Label, Title } from '@patternfly/react-core';
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { useMemo } from 'react';
 
@@ -25,40 +25,41 @@ const PackageVersionsTab = ({
     return map;
   }, [latestReleases]);
 
-  const otherVersions = versions.filter((v) => v !== currentVersion);
-
   return (
     <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
-      <Title headingLevel='h3' size='md'>
-        Current version: {currentVersion}
+      <Title headingLevel='h2' size='lg'>
+        Available versions
       </Title>
-      {otherVersions.length > 0 && (
-        <>
-          <Title headingLevel='h3' size='md'>
-            Other available versions
-          </Title>
-          <Table aria-label='Other versions' variant={TableVariant.compact}>
-            <Thead>
-              <Tr>
-                <Th>Version</Th>
-                <Th width={15}>Date</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {otherVersions.map((version) => (
-                <Tr key={version}>
-                  <Td dataLabel='Version'>
+      <Table aria-label='Available versions' variant={TableVariant.compact}>
+        <Thead>
+          <Tr>
+            <Th>Version</Th>
+            <Th width={15}>Date</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {versions.map((version) => {
+            const isSelected = version === currentVersion;
+            return (
+              <Tr key={version}>
+                <Td dataLabel='Version'>
+                  {isSelected ? (
+                    <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }}>
+                      <span style={{ fontWeight: 'bold' }}>{version}</span>
+                      <Label isCompact color='blue'>Selected</Label>
+                    </Flex>
+                  ) : (
                     <Button variant='link' isInline onClick={() => onVersionSelect(version)}>
                       {version}
                     </Button>
-                  </Td>
-                  <Td dataLabel='Date'>{releaseDateMap[version] ?? '—'}</Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </>
-      )}
+                  )}
+                </Td>
+                <Td dataLabel='Date'>{releaseDateMap[version] ?? '—'}</Td>
+              </Tr>
+            );
+          })}
+        </Tbody>
+      </Table>
     </Flex>
   );
 };
