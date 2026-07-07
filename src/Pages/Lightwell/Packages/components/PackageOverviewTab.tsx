@@ -70,7 +70,7 @@ const PackageOverviewTab = ({
             isReadOnly
             isCode
             hoverTip='Copy'
-            clickTip=''
+            clickTip='Copied'
             variant={ClipboardCopyVariant.expansion}
             isExpanded
           >
@@ -146,7 +146,7 @@ const PackageOverviewTab = ({
             isReadOnly
             isCode
             hoverTip='Copy'
-            clickTip=''
+            clickTip='Copied'
             variant={ClipboardCopyVariant.inline}
           >
             {installCommand ?? `pip install ${name}==${latestRelease}`}

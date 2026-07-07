@@ -88,9 +88,8 @@ const mockClipboard = () => {
   return writeText;
 };
 
-const clickCopyLabel = async (label: string) => {
-  const copyLabel = await screen.findByLabelText(label);
-  await userEvent.click(copyLabel.querySelector('button')!);
+const clickCopyButton = async (label: string) => {
+  await userEvent.click(await screen.findByRole('button', { name: label }));
 };
 
 const javaValidatedTableCopyCommand = `${defaultLightwellRepositoryPackageItem.group}:${defaultLightwellRepositoryPackageItem.name}:3.14.0`;
@@ -135,12 +134,13 @@ it('renders with a single package', async () => {
   renderPackagesTable();
 
   expect(screen.queryAllByText('Java Validated')).toHaveLength(2);
-  expect(await screen.findByLabelText('Repository URL')).toHaveTextContent(
-    'https://example.com/lightwell/java/validated',
-  );
+  expect(
+    await screen.findByText('https://example.com/lightwell/java/validated'),
+  ).toBeInTheDocument();
   expect(await screen.findByText('org.json.test')).toBeInTheDocument();
   expect(screen.queryByText('rhlw-3004-test')).not.toBeInTheDocument();
-  expect(await screen.findByLabelText('Copy 3.14.0')).toHaveTextContent('3.14.0');
+  expect(await screen.findByRole('button', { name: 'Copy 3.14.0' })).toBeInTheDocument();
+  expect(screen.getByText('3.14.0')).toBeInTheDocument();
   expect(await screen.findByText('2026-07-01')).toBeInTheDocument();
 });
 
@@ -198,7 +198,7 @@ it('copies the maven coordinate when a validated version label is clicked', asyn
   const writeText = mockClipboard();
   renderPackagesTable();
 
-  await clickCopyLabel('Copy 3.14.0');
+  await clickCopyButton('Copy 3.14.0');
 
   expect(writeText).toHaveBeenCalledWith(javaValidatedTableCopyCommand);
 });
@@ -239,10 +239,9 @@ it('renders remediated java packages with a Latest release column', async () => 
 
   expect(await screen.findByRole('heading', { name: 'Java Remediated' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Latest release' })).toBeInTheDocument();
-  expect(await screen.findByLabelText('Copy 3.14.0.rhlw-0004')).toHaveTextContent(
-    '3.14.0.rhlw-0004',
-  );
-  expect(screen.queryByLabelText('Copy 3.14.0')).not.toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: 'Copy 3.14.0.rhlw-0004' })).toBeInTheDocument();
+  expect(screen.getByText('3.14.0.rhlw-0004')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Copy 3.14.0' })).not.toBeInTheDocument();
 });
 
 it('renders python validated packages with pip copy labels and no group ID column', async () => {
@@ -267,7 +266,7 @@ it('renders python validated packages with pip copy labels and no group ID colum
   expect(screen.queryByRole('columnheader', { name: 'Group ID' })).not.toBeInTheDocument();
   expect(screen.queryByRole('columnheader', { name: 'Latest release' })).not.toBeInTheDocument();
 
-  await clickCopyLabel('Copy 2.21.2');
+  await clickCopyButton('Copy 2.21.2');
   expect(writeText).toHaveBeenCalledWith(pythonValidatedPipCommand);
 });
 
@@ -290,7 +289,7 @@ it('renders python remediated packages with a Latest release column', async () =
 
   expect(await screen.findByRole('heading', { name: 'Python Remediated' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Latest release' })).toBeInTheDocument();
-  expect(await screen.findByLabelText('Copy 2.32.0.rhlw-0002')).toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: 'Copy 2.32.0.rhlw-0002' })).toBeInTheDocument();
 });
 
 it('clears the search filter from the filtered empty state', async () => {

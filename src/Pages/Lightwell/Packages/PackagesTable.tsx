@@ -3,12 +3,13 @@ import {
   BreadcrumbItem,
   Button,
   Card,
+  ClipboardCopy,
+  ClipboardCopyVariant,
   Content,
   Flex,
   FlexItem,
   Grid,
   Icon,
-  Label,
   Pagination,
   PaginationVariant,
   SearchInput,
@@ -19,7 +20,7 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { CopyIcon, CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
+import { CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { createUseStyles } from 'react-jss';
@@ -141,14 +142,16 @@ const PackageCopyLabel = ({ name, groupId, version, isPython }: PackageCopyLabel
   const copyText = isPython ? `pip install ${name}==${version}` : `${groupId}:${name}:${version}`;
 
   return (
-    <Label
-      isCompact
-      icon={<CopyIcon />}
-      onClick={() => navigator.clipboard.writeText(copyText)}
-      aria-label={`Copy ${version}`}
+    <ClipboardCopy
+      isReadOnly
+      hoverTip='Copy'
+      clickTip='Copied'
+      variant={ClipboardCopyVariant.inlineCompact}
+      copyAriaLabel={`Copy ${version}`}
+      onCopy={() => navigator.clipboard.writeText(copyText)}
     >
       {version}
-    </Label>
+    </ClipboardCopy>
   );
 };
 
@@ -345,16 +348,14 @@ const PackagesTable = () => {
                   </Title>
                 </FlexItem>
                 <FlexItem>
-                  <Label
-                    aria-label='Repository URL'
-                    icon={<CopyIcon />}
-                    isCompact
-                    onClick={() =>
-                      navigator.clipboard.writeText(repository.published_distribution_url || '')
-                    }
+                  <ClipboardCopy
+                    isReadOnly
+                    hoverTip='Copy'
+                    clickTip='Copied'
+                    variant={ClipboardCopyVariant.inlineCompact}
                   >
-                    {repository.published_distribution_url}
-                  </Label>
+                    {repository.published_distribution_url || ''}
+                  </ClipboardCopy>
                 </FlexItem>
               </Flex>
               <FlexItem align={{ default: 'alignRight' }}>

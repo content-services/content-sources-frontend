@@ -1,4 +1,5 @@
 import '../styles/lightwell-chrome-overrides.scss';
+import '../styles/lightwell-clipboard-copy.scss';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import { Bullseye, Spinner } from '@patternfly/react-core';
 import { useEffect } from 'react';

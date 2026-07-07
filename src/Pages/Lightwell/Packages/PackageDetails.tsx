@@ -22,11 +22,12 @@ import {
   Tabs,
   TabTitleText,
   Title,
+  Tooltip,
 } from '@patternfly/react-core';
 import { CopyIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { createUseStyles } from 'react-jss';
-import { createRef, useEffect, useMemo, useState } from 'react';
+import { createRef, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
@@ -80,6 +81,8 @@ const PackageDetails = () => {
   const [activeTabKey, setActiveTabKey] = useState(0);
   const [selectedVersion, setSelectedVersion] = useState<string>('');
   const [versionDropdownOpen, setVersionDropdownOpen] = useState(false);
+  const [isCopyTooltipVisible, setIsCopyTooltipVisible] = useState(false);
+  const copyTooltipTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const overviewTabRef = createRef<HTMLElement>();
   const releasesTabRef = createRef<HTMLElement>();
@@ -233,6 +236,28 @@ const PackageDetails = () => {
       setSelectedVersion(versionOptions[0]);
     }
   }, [versionOptions, selectedVersion]);
+
+  useEffect(
+    () => () => {
+      if (copyTooltipTimeoutRef.current) {
+        clearTimeout(copyTooltipTimeoutRef.current);
+      }
+    },
+    [],
+  );
+
+  const handleCopyInstallCommand = (text: string) => {
+    void navigator.clipboard.writeText(text);
+
+    if (copyTooltipTimeoutRef.current) {
+      clearTimeout(copyTooltipTimeoutRef.current);
+    }
+
+    setIsCopyTooltipVisible(true);
+    copyTooltipTimeoutRef.current = setTimeout(() => {
+      setIsCopyTooltipVisible(false);
+    }, 2000);
+  };
 
   const isLoadingDetail = isMaven
     ? mavenVersionsListQuery.isLoading
@@ -391,14 +416,20 @@ const PackageDetails = () => {
               </Flex>
               {displayVersion ? (
                 <FlexItem>
-                  <Button
-                    variant='secondary'
-                    icon={<CopyIcon />}
-                    iconPosition='end'
-                    onClick={() => navigator.clipboard.writeText(installCommand)}
+                  <Tooltip
+                    content={isCopyTooltipVisible ? 'Copied' : 'Copy'}
+                    trigger='mouseenter focus'
+                    isVisible={isCopyTooltipVisible}
                   >
-                    {installCommand}
-                  </Button>
+                    <Button
+                      variant='secondary'
+                      icon={<CopyIcon />}
+                      iconPosition='end'
+                      onClick={() => handleCopyInstallCommand(installCommand)}
+                    >
+                      {installCommand}
+                    </Button>
+                  </Tooltip>
                 </FlexItem>
               ) : null}
             </Flex>
