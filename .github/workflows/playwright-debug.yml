@@ -1,0 +1,440 @@
+name: Playwright debug
+on:
+  workflow_dispatch:
+    inputs:
+      test_grep:
+        description: 'Playwright --grep pattern (e.g. "Upload Repositories")'
+        required: true
+        type: string
+      repeat_each:
+        description: 'Number of times to repeat each matching test'
+        required: false
+        default: '3'
+        type: string
+      interval:
+        description: 'Wait between runs (e.g. 1m, 1h). When set, runs are spaced out periodically.'
+        required: false
+        type: string
+      workers:
+        description: 'Number of parallel Playwright workers (default 1). Use 1 to avoid cross-run cleanup collisions.'
+        required: false
+        default: '1'
+        type: string
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: playwright-debug-${{ github.event.pull_request.number || github.event.issue.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  playwright-debug:
+    if: |
+      github.event_name == 'workflow_dispatch' || (
+        github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association) &&
+        contains(github.event.comment.body, '/debug-playwright')
+      )
+    runs-on:
+      - codebuild-content-services-fe-repo-${{ github.run_id }}-${{ github.run_attempt }}
+      - instance-size:large
+      - buildspec-override:true
+    env:
+      CAPTURE_BROWSER_CONSOLE: true
+      COVERAGE: false
+
+    steps:
+      - name: Resolve debug parameters
+        id: debug-params
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const defaultRepeatEach = 3;
+            const defaultWorkers = 1;
+            const maxRepeatEach = 20;
+            const maxWorkers = 10;
+            const maxTotalWaitSeconds = 6 * 3600;
+
+            function validateRepeatEach(repeatEach) {
+              if (!Number.isInteger(repeatEach) || repeatEach < 1 || repeatEach > maxRepeatEach) {
+                core.setFailed(`--repeat-each must be an integer between 1 and ${maxRepeatEach}`);
+                return false;
+              }
+              return true;
+            }
+
+            function validateWorkers(workers) {
+              if (!Number.isInteger(workers) || workers < 1 || workers > maxWorkers) {
+                core.setFailed(`--workers must be an integer between 1 and ${maxWorkers}`);
+                return false;
+              }
+              return true;
+            }
+
+            function parseInterval(rawInterval) {
+              if (!rawInterval) {
+                return null;
+              }
+
+              const match = String(rawInterval).trim().match(/^(\d+)([mh])$/i);
+              if (!match) {
+                core.setFailed('--interval must be in the form Nm or Nh (e.g. 1m, 1h)');
+                return null;
+              }
+
+              const value = parseInt(match[1], 10);
+              const unit = match[2].toLowerCase();
+              if (value < 1) {
+                core.setFailed('--interval must be at least 1m or 1h');
+                return null;
+              }
+
+              const seconds = unit === 'm' ? value * 60 : value * 3600;
+              return {
+                label: `${value}${unit}`,
+                seconds,
+              };
+            }
+
+            function validateSchedule(repeatEach, interval) {
+              if (!interval) {
+                return true;
+              }
+
+              if (repeatEach < 2) {
+                core.setFailed('--interval requires --repeat-each to be at least 2');
+                return false;
+              }
+
+              const totalWaitSeconds = (repeatEach - 1) * interval.seconds;
+              if (totalWaitSeconds > maxTotalWaitSeconds) {
+                core.setFailed(
+                  `Scheduled wait of ${totalWaitSeconds}s exceeds maximum of ${maxTotalWaitSeconds}s. Reduce --repeat-each or --interval.`,
+                );
+                return false;
+              }
+
+              return true;
+            }
+
+            function setDebugOutputs(grep, repeatEach, interval, workers) {
+              core.setOutput('grep', grep);
+              core.setOutput('repeat_each', String(repeatEach));
+              core.setOutput('interval', interval ? interval.label : '');
+              core.setOutput('workers', String(workers));
+            }
+
+            function parseCommentFlags(rest) {
+              let repeatEach = defaultRepeatEach;
+              let workers = defaultWorkers;
+              let interval = null;
+
+              const repeatMatch = rest.match(/--repeat-each\s+(\d+)/);
+              if (repeatMatch) {
+                repeatEach = parseInt(repeatMatch[1], 10);
+                rest = rest.replace(/--repeat-each\s+\d+/, '').trim();
+              }
+
+              const workersMatch = rest.match(/--workers\s+(\d+)/);
+              if (workersMatch) {
+                workers = parseInt(workersMatch[1], 10);
+                rest = rest.replace(/--workers\s+\d+/, '').trim();
+              }
+
+              const intervalMatch = rest.match(/--interval\s+(\S+)/i);
+              if (intervalMatch) {
+                interval = parseInterval(intervalMatch[1]);
+                if (!interval) {
+                  return null;
+                }
+                rest = rest.replace(/--interval\s+\S+/i, '').trim();
+              }
+
+              return { rest, repeatEach, interval, workers };
+            }
+
+            if (context.eventName === 'workflow_dispatch') {
+              const grep = String('${{ inputs.test_grep }}').trim();
+              const repeatEach = parseInt(String('${{ inputs.repeat_each }}'), 10) || defaultRepeatEach;
+              const workers = parseInt(String('${{ inputs.workers }}'), 10) || defaultWorkers;
+              const interval = parseInterval(String('${{ inputs.interval }}').trim());
+
+              if (!grep) {
+                core.setFailed('test_grep is required');
+                return;
+              }
+
+              if (interval === null && String('${{ inputs.interval }}').trim()) {
+                return;
+              }
+
+              if (
+                !validateRepeatEach(repeatEach) ||
+                !validateWorkers(workers) ||
+                !validateSchedule(repeatEach, interval)
+              ) {
+                return;
+              }
+
+              setDebugOutputs(grep, repeatEach, interval, workers);
+              return;
+            }
+
+            const body = context.payload.comment.body.trim();
+            if (!body.startsWith('/debug-playwright')) {
+              core.setFailed('Comment is not a /debug-playwright command');
+              return;
+            }
+
+            const parsed = parseCommentFlags(body.slice('/debug-playwright'.length).trim());
+            if (!parsed) {
+              return;
+            }
+
+            const { rest, repeatEach, interval, workers } = parsed;
+
+            if (!rest) {
+              core.setFailed(
+                'Usage: /debug-playwright <grep pattern> [--repeat-each N] [--workers N] [--interval 1m|1h]',
+              );
+              return;
+            }
+
+            if (
+              !validateRepeatEach(repeatEach) ||
+              !validateWorkers(workers) ||
+              !validateSchedule(repeatEach, interval)
+            ) {
+              return;
+            }
+
+            setDebugOutputs(rest, repeatEach, interval, workers);
+
+      - name: Resolve PR head for comment trigger
+        id: pr-ref
+        if: github.event_name == 'issue_comment'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            core.setOutput('sha', pr.head.sha);
+
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.pr-ref.outputs.sha || github.event.pull_request.head.sha || github.sha }}
+          submodules: recursive
+
+      - name: Set up sparse checkout
+        uses: ./.github/actions/sparse-checkout-utils
+
+      - name: Create front-end .env file
+        run: |
+          {
+            echo "BASE_URL=https://stage.foo.redhat.com:1337"
+            echo "CI=true"
+            echo "RBAC=true"
+            echo "CAPTURE_BROWSER_CONSOLE=true"
+            echo "COVERAGE=false"
+          } >> .env
+
+          echo ".env file created successfully."
+
+          if [ -z "$PW_CREDENTIALS" ]; then
+            echo "Error: PW_CREDENTIALS secret is not set."
+            exit 1
+          fi
+
+          printf '%s' "$PW_CREDENTIALS" > creds.json
+
+      - name: Get current PR URL
+        id: get-pr-url
+        run: |
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            pr_url="https://github.com/${{ github.repository }}/pull/${{ github.event.issue.number }}"
+          else
+            pr_url=$(jq -r '.pull_request.html_url // empty' < "$GITHUB_EVENT_PATH")
+            if [ -z "$pr_url" ]; then
+              pr_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            fi
+          fi
+          echo "Pull Request URL: $pr_url"
+          echo "pr_url=$pr_url" >> $GITHUB_ENV
+
+      - name: Get appropriate back-end branch
+        run: |
+          chmod +x .github/workflowScripts/getBackendBranch.sh
+          .github/workflowScripts/getBackendBranch.sh "${{ env.pr_url }}"
+
+      - name: Copy the example config
+        working-directory: content-sources-backend
+        run: cp ./configs/config.yaml.example ./configs/config.yaml
+
+      - name: Create cdn.pem file
+        working-directory: content-sources-backend
+        run: |
+          echo "$REDHAT_CDN_CERT" | sed 's/\\n/\n/g' > ./configs/cdn.pem
+
+      - name: Update cert_path in config.yaml
+        working-directory: content-sources-backend
+        run: |
+          sed -i 's|# cert_path:.*|cert_path: ./configs/cdn.pem|' ./configs/config.yaml
+
+      - name: Throw error if cert is invalid
+        working-directory: content-sources-backend
+        run: |
+          if ! openssl x509 -in ./configs/cdn.pem -noout; then
+            echo "Invalid PEM certificate format"
+            exit 1
+          fi
+          echo "PEM certificate is valid"
+
+      - name: Check CDN certificate expiry
+        working-directory: content-sources-backend
+        run: |
+          NOT_AFTER=$(openssl x509 -in ./configs/cdn.pem -noout -enddate | cut -d= -f2)
+          NOT_AFTER_EPOCH=$(date -d "$NOT_AFTER" +%s)
+          CURRENT_EPOCH=$(date +%s)
+          DAYS_UNTIL_EXPIRY=$(( (NOT_AFTER_EPOCH - CURRENT_EPOCH) / 86400 ))
+
+          if [[ $DAYS_UNTIL_EXPIRY -le 0 ]]; then
+            echo "ERROR: CDN certificate has EXPIRED!"
+            exit 1
+          else
+            echo "CDN certificate is valid for $DAYS_UNTIL_EXPIRY more days."
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Cache - node_modules
+        uses: actions/cache@v5
+        with:
+          path: |
+            node_modules
+            dist
+          key: ${{ runner.os }}-frontend-node-modules-${{ hashFiles('yarn.lock') }}
+          restore-keys: ${{ runner.os }}-frontend-node-modules-
+
+      - name: Cache - Backend compose files
+        uses: actions/cache@v5
+        with:
+          path: content-sources-backend/release
+          key: ${{ runner.os }}-compose-${{ hashFiles('content-sources-backend/compose_files/pulp/docker-compose.yml') }}-${{ hashFiles('content-sources-backend/compose_files/candlepin/Dockerfile') }}
+          restore-keys: ${{ runner.os }}-compose-
+
+      - name: Install Make
+        working-directory: content-sources-backend
+        run: sudo apt-get install -y make
+
+      - name: Install Parallel
+        working-directory: content-sources-backend
+        run: sudo apt-get install -y parallel
+
+      - name: Increase file watchers limit
+        run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
+      - name: Run get_go_version.sh script
+        working-directory: content-sources-backend
+        id: get-go-version
+        run: |
+          chmod +x ./scripts/get_go_version.sh
+          GO_VERSION=$(./scripts/get_go_version.sh ./go.mod)
+          echo "go-version=$GO_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '${{ steps.get-go-version.outputs.go-version }}'
+          cache: false
+
+      - name: Update /etc/hosts
+        run: sudo npm run patch:hosts
+
+      - name: Log into Docker Hub
+        run: |
+          if [ -z "$DOCKER_PULL_USER" ] || [ -z "$DOCKER_PULL_TOKEN" ]; then
+            echo "Docker Hub credentials not available - proceeding with unauthenticated pulls"
+            exit 0
+          fi
+          echo "$DOCKER_PULL_TOKEN" | docker login -u "$DOCKER_PULL_USER" --password-stdin
+
+      - name: Run front-end and back-end setup in parallel
+        run: |
+          parallel --line-buffer --tagstring "[{#}]:" ::: "yarn install --frozen-lockfile && yarn build && yarn playwright install chromium --only-shell" "cd content-sources-backend && make compose-down compose-clean compose-up"
+
+      - name: Frontend run (static)
+        run: yarn fec static --port 8003 &
+
+      - name: Backend run
+        working-directory: content-sources-backend
+        run: make run &
+
+      - name: Wait for frontend to be ready
+        run: npx wait-on http://localhost:8003/apps/content-sources/
+
+      - name: Wait for backend to be ready
+        run: |
+          chmod +x .github/workflowScripts/waitForBackend.sh
+          .github/workflowScripts/waitForBackend.sh
+
+      - name: Run testing proxy
+        run: docker run -d --network=host -e HTTPS_PROXY=$RH_PROXY_URL -e ROUTES_JSON_PATH=/config/routes-ci.json -v "$(pwd)/config:/config:ro,Z"  --name frontend-development-proxy quay.io/redhat-user-workloads/hcc-platex-services-tenant/frontend-development-proxy:latest
+
+      - name: Setup the minimal needed repositories (Small RHEL, EPEL 10)
+        working-directory: content-sources-backend
+        run: make repos-minimal
+
+      - name: Wait for setup repos to be valid
+        timeout-minutes: 3
+        working-directory: content-sources-backend
+        run: while [[ "$(curl http://localhost:8000/api/content-sources/v1.0/repositories/ -H "$( ./scripts/header.sh 9999 1111)" | jq '.data | all(.status == "Valid")')" == "false" ]]; do sleep 5; done;
+
+      - name: Run Playwright tests (debug)
+        run: |
+          chmod +x .github/workflowScripts/runPlaywrightDebug.sh
+          ARGS=(
+            --grep "${{ steps.debug-params.outputs.grep }}"
+            --repeat-each "${{ steps.debug-params.outputs.repeat_each }}"
+            --workers "${{ steps.debug-params.outputs.workers }}"
+          )
+          if [ -n "${{ steps.debug-params.outputs.interval }}" ]; then
+            ARGS+=(--interval "${{ steps.debug-params.outputs.interval }}")
+          fi
+          .github/workflowScripts/runPlaywrightDebug.sh "${ARGS[@]}"
+
+      - name: Publish front-end Test Report
+        if: always()
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: './playwright-ctrf/playwright-ctrf.json'
+
+      - name: Store Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-debug-report
+          path: playwright-report/
+          retention-days: 10
+
+      - name: Store Playwright test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-debug-test-results
+          path: |
+            test-results/
+            playwright-debug-runs/
+          if-no-files-found: ignore
+          retention-days: 10
