@@ -1,5 +1,4 @@
-import { Button, Flex, Label, Title } from '@patternfly/react-core';
-import { CopyIcon } from '@patternfly/react-icons';
+import { Button, ClipboardCopy, ClipboardCopyVariant, Flex, Title } from '@patternfly/react-core';
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { useMemo } from 'react';
 
@@ -58,15 +57,16 @@ const PackageReleasesTab = ({
             return (
               <Tr key={build.version}>
                 <Td dataLabel='Release'>
-                  <Label
-                    isCompact
-                    isClickable
-                    icon={<CopyIcon />}
-                    onClick={() => navigator.clipboard.writeText(copyText)}
-                    aria-label={`Copy ${copyText}`}
+                  <ClipboardCopy
+                    isReadOnly
+                    hoverTip='Copy'
+                    clickTip='Copied'
+                    copyAriaLabel={`Copy ${copyText}`}
+                    variant={ClipboardCopyVariant.inlineCompact}
+                    onCopy={() => navigator.clipboard.writeText(copyText)}
                   >
                     {build.version}
-                  </Label>
+                  </ClipboardCopy>
                 </Td>
                 <Td dataLabel='Date'>{build.created_at?.split('T')[0] ?? '—'}</Td>
               </Tr>
@@ -103,15 +103,16 @@ const PackageReleasesTab = ({
                     </Td>
                     <Td dataLabel='Latest release'>
                       {release ? (
-                        <Label
-                          isCompact
-                          isClickable
-                          icon={<CopyIcon />}
-                          onClick={() => navigator.clipboard.writeText(copyText)}
-                          aria-label={`Copy ${copyText}`}
+                        <ClipboardCopy
+                          isReadOnly
+                          hoverTip='Copy'
+                          clickTip='Copied'
+                          copyAriaLabel={`Copy ${copyText}`}
+                          variant={ClipboardCopyVariant.inlineCompact}
+                          onCopy={() => navigator.clipboard.writeText(copyText)}
                         >
                           {releaseVersion}
-                        </Label>
+                        </ClipboardCopy>
                       ) : (
                         '—'
                       )}

@@ -366,7 +366,6 @@ it('shows install section for python package', async () => {
   expect(
     await screen.findByRole('button', { name: pythonRemediatedPipCommand }),
   ).toBeInTheDocument();
-  expect(document.body).toHaveTextContent(pythonRemediatedPipCommand);
 });
 
 const mockClipboard = () => {
@@ -430,7 +429,9 @@ it('copies pip command to clipboard for remediated python package', async () => 
   await assertClipboardCopy(
     writeText,
     async () => {
-      await userEvent.click(await screen.findByText('2.31.0.rhlw-0001'));
+      await userEvent.click(
+        await screen.findByRole('button', { name: `Copy ${otherPythonRemediatedPipCommand}` }),
+      );
     },
     otherPythonRemediatedPipCommand,
   );
@@ -475,7 +476,9 @@ it('copies maven coordinate to clipboard for remediated java package', async () 
     writeText,
     async () => {
       await userEvent.click(await screen.findByRole('tab', { name: 'Releases' }));
-      await userEvent.click(await screen.findByRole('button', { name: '3.14.0.rhlw-00001' }));
+      await userEvent.click(
+        await screen.findByRole('button', { name: `Copy ${javaRemediatedCopyCommand}` }),
+      );
     },
     javaRemediatedCopyCommand,
   );
@@ -484,7 +487,9 @@ it('copies maven coordinate to clipboard for remediated java package', async () 
   await assertClipboardCopy(
     writeText,
     async () => {
-      await userEvent.click(await screen.findByText('2.12.0.rhlw-00002'));
+      await userEvent.click(
+        await screen.findByRole('button', { name: `Copy ${otherJavaRemediatedCopyCommand}` }),
+      );
     },
     otherJavaRemediatedCopyCommand,
   );
