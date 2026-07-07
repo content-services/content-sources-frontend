@@ -1,5 +1,4 @@
 import {
-  Alert,
   Breadcrumb,
   BreadcrumbItem,
   Button,
@@ -48,6 +47,7 @@ import {
   stripLightwellVersionSuffix,
 } from '../helpers';
 import { getMockLightwellPackages } from '../mockPackages';
+import RemediatedDataWarning from '../RemediatedDataWarning';
 import useLightwellRepository from '../useLightwellRepository';
 import PackageOverviewTab from './components/PackageOverviewTab';
 import PackageReleasesTab, { buildVersionFromRelease } from './components/PackageReleasesTab';
@@ -437,7 +437,7 @@ const PackageDetails = () => {
           </StackItem>
           {repository.security_level === 'remediated' && (
             <StackItem className={spacing.ptMd}>
-              <Alert variant='warning' isInline title='This data is sensitive. Do not share or capture screenshots.' />
+              <RemediatedDataWarning />
             </StackItem>
           )}
         </Stack>

@@ -1,5 +1,4 @@
 import {
-  Alert,
   Breadcrumb,
   BreadcrumbItem,
   Button,
@@ -55,6 +54,7 @@ import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Loader from 'components/Loader';
 import ConnectRepositoryPopover from '../Repositories/components/ConnectRepositoryPopover';
 import { buildVersionFromRelease } from './components/PackageReleasesTab';
+import RemediatedDataWarning from '../RemediatedDataWarning';
 import useLightwellRepository from '../useLightwellRepository';
 
 const useStyles = createUseStyles({
@@ -380,7 +380,7 @@ const PackagesTable = () => {
           </StackItem>
           {isRemediated && (
             <StackItem className={spacing.ptSm}>
-              <Alert variant='warning' isInline title='This data is sensitive. Do not share or capture screenshots.' />
+              <RemediatedDataWarning />
             </StackItem>
           )}
         </Stack>
