@@ -43,7 +43,7 @@ import {
   formatRepositoryName,
   getRepositoryPathSlug,
 } from '../helpers';
-import ConnectRepositoryPopover from './components/ConnectRepositoryPopover';
+import ConnectRepositoryModal from './components/ConnectRepositoryModal';
 import { capitalize } from 'lodash';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -231,7 +231,7 @@ const RepositoriesTable = () => {
                                   </Content>
                                 </FlexItem>
                                 <FlexItem>
-                                  <ConnectRepositoryPopover
+                                  <ConnectRepositoryModal
                                     repository={{
                                       uuid,
                                       name,
@@ -248,7 +248,7 @@ const RepositoriesTable = () => {
                                     >
                                       Connect to this repository
                                     </Label>
-                                  </ConnectRepositoryPopover>
+                                  </ConnectRepositoryModal>
                                 </FlexItem>
                               </Flex>
                             </Td>
