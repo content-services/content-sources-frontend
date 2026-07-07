@@ -1,7 +1,6 @@
 import {
   Breadcrumb,
   BreadcrumbItem,
-  Button,
   Card,
   CardBody,
   Dropdown,
@@ -22,9 +21,8 @@ import {
   Tabs,
   TabTitleText,
   Title,
-  Tooltip,
 } from '@patternfly/react-core';
-import { CopyIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
+import { JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { createUseStyles } from 'react-jss';
 import { createRef, useEffect, useMemo, useRef, useState } from 'react';
@@ -81,7 +79,6 @@ const PackageDetails = () => {
   const [activeTabKey, setActiveTabKey] = useState(0);
   const [selectedVersion, setSelectedVersion] = useState<string>('');
   const [versionDropdownOpen, setVersionDropdownOpen] = useState(false);
-  const [isCopyTooltipVisible, setIsCopyTooltipVisible] = useState(false);
   const copyTooltipTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const overviewTabRef = createRef<HTMLElement>();
@@ -246,19 +243,6 @@ const PackageDetails = () => {
     [],
   );
 
-  const handleCopyInstallCommand = (text: string) => {
-    void navigator.clipboard.writeText(text);
-
-    if (copyTooltipTimeoutRef.current) {
-      clearTimeout(copyTooltipTimeoutRef.current);
-    }
-
-    setIsCopyTooltipVisible(true);
-    copyTooltipTimeoutRef.current = setTimeout(() => {
-      setIsCopyTooltipVisible(false);
-    }, 2000);
-  };
-
   const isLoadingDetail = isMaven
     ? mavenVersionsListQuery.isLoading
     : pythonPackageVersionsQuery.isLoading && !pythonPackageVersionsQuery.data;
@@ -290,12 +274,6 @@ const PackageDetails = () => {
     : hasRelease && pythonBuildVersion
       ? pythonBuildVersion
       : activeVersion;
-
-  const installCommand = isMaven
-    ? `${packageGroup}:${packageName}:${displayVersion}`
-    : hasRelease && pythonBuildVersion
-      ? `pip install ${packageName}==${pythonBuildVersion}`
-      : `pip install ${packageName}==${upstreamVersion}`;
 
   const formatReleaseCopyText = (version: string) =>
     isMaven
@@ -413,24 +391,6 @@ const PackageDetails = () => {
                   </FlexItem>
                 ) : null}
               </Flex>
-              {displayVersion ? (
-                <FlexItem>
-                  <Tooltip
-                    content={isCopyTooltipVisible ? 'Copied' : 'Copy'}
-                    trigger='mouseenter focus'
-                    isVisible={isCopyTooltipVisible}
-                  >
-                    <Button
-                      variant='secondary'
-                      icon={<CopyIcon />}
-                      iconPosition='end'
-                      onClick={() => handleCopyInstallCommand(installCommand)}
-                    >
-                      {installCommand}
-                    </Button>
-                  </Tooltip>
-                </FlexItem>
-              ) : null}
             </Flex>
           </StackItem>
           {repository.security_level === 'remediated' && (
