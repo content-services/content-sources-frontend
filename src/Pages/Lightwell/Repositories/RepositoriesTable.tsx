@@ -97,7 +97,11 @@ const RepositoriesTable = () => {
 
   if (isError) throw error;
 
-  const columnHeaders: { title: string; width?: BaseCellProps['width']; info?: ComponentProps<typeof Th>['info'] }[] = [
+  const columnHeaders: {
+    title: string;
+    width?: BaseCellProps['width'];
+    info?: ComponentProps<typeof Th>['info'];
+  }[] = [
     { title: 'Repository' },
     { title: 'Ecosystem', width: 15 },
     { title: 'Security level', width: 15 },
