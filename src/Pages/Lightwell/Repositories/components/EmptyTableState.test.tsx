@@ -5,5 +5,5 @@ it('Empty Lightwell state shows expected content', () => {
   const { queryByText } = render(<EmptyTableState />);
 
   expect(queryByText('Lightwell members only')).toBeInTheDocument();
-  expect(queryByText('Contact sales for access')).toBeInTheDocument();
+  expect(queryByText('Not a member? Get started')).toBeInTheDocument();
 });
