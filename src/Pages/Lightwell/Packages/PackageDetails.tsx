@@ -38,7 +38,13 @@ import {
 } from 'services/Content/ContentQueries';
 
 import { LIGHTWELL_USE_MOCK } from '../constants';
-import { formatRepositoryName, lightwellReleaseNum, stripLightwellVersionSuffix } from '../helpers';
+import {
+  compareVersionsDesc,
+  formatRepositoryName,
+  lightwellReleaseNum,
+  sortVersionsDesc,
+  stripLightwellVersionSuffix,
+} from '../helpers';
 import { getMockLightwellPackages } from '../mockPackages';
 import useLightwellRepository from '../useLightwellRepository';
 import PackageOverviewTab from './components/PackageOverviewTab';
@@ -61,12 +67,16 @@ const useStyles = createUseStyles({
 const PackageDetails = () => {
   const classes = useStyles();
   const navigate = useNavigate();
+
   const {
     repoName: repoSlug = '',
     group: groupParam = '',
     packageName: packageNameParam = '',
   } = useParams();
+
   const packageName = packageNameParam ? decodeURIComponent(packageNameParam) : '';
+  const packageGroup = decodeURIComponent(groupParam);
+
   const [activeTabKey, setActiveTabKey] = useState(0);
   const [selectedVersion, setSelectedVersion] = useState<string>('');
   const [versionDropdownOpen, setVersionDropdownOpen] = useState(false);
@@ -101,11 +111,11 @@ const PackageDetails = () => {
     return (apiPackagesQuery.data?.results ?? []).find((pkg) => pkg.name === packageName);
   }, [useMock, repoUUID, packageName, apiPackagesQuery.data?.results]);
 
-  const packageGroup = decodeURIComponent(groupParam);
   const packageVersion = packageItem?.versions[0] ?? '';
   const hasRelease = (packageItem?.latest_releases ?? []).some((r) => !!r.release);
   const isMaven = repository?.content_type === 'maven';
   const isPython = repository?.content_type === 'python';
+
   const activeVersion = selectedVersion || packageVersion;
 
   const mavenVersionsListQuery = useMavenPackageVersionsListQuery(
@@ -121,21 +131,53 @@ const PackageDetails = () => {
   );
 
   const mavenDetail = mavenVersionsListQuery.data?.versions.find(
-    (v) => v.version === activeVersion,
+    (v) => stripLightwellVersionSuffix(v.version) === stripLightwellVersionSuffix(activeVersion),
   );
+
   const mavenBuilds = useMemo(() => {
     if (!isMaven || !hasRelease || !mavenVersionsListQuery.data?.versions) return [];
+
     const upstream = stripLightwellVersionSuffix(activeVersion);
+
     return mavenVersionsListQuery.data.versions
       .filter((v) => stripLightwellVersionSuffix(v.version) === upstream)
       .flatMap((v) => v.builds)
       .sort((a, b) => lightwellReleaseNum(b.release) - lightwellReleaseNum(a.release));
   }, [isMaven, hasRelease, mavenVersionsListQuery.data?.versions, activeVersion]);
+
+  const mavenDeduplicatedVersions = useMemo(() => {
+    const versions = packageItem?.versions ?? [];
+
+    if (!isMaven || !hasRelease) {
+      return sortVersionsDesc(versions.map(stripLightwellVersionSuffix));
+    }
+
+    const seen = new Set<string>();
+
+    return [...(packageItem?.versions ?? [])]
+      .sort((a, b) => lightwellReleaseNum(b) - lightwellReleaseNum(a))
+      .filter((v) => {
+        const upstream = stripLightwellVersionSuffix(v);
+        if (seen.has(upstream)) {
+          return false;
+        }
+        seen.add(upstream);
+        return true;
+      })
+      .map(stripLightwellVersionSuffix)
+      .sort(compareVersionsDesc);
+  }, [isMaven, hasRelease, packageItem?.versions]);
+
   const pythonVersionsFromApi = useMemo(
     () => pythonPackageVersionsQuery.data?.versions?.map((version) => version.version) ?? [],
     [pythonPackageVersionsQuery.data?.versions],
   );
-  const pythonVersions = useMock ? (packageItem?.versions ?? []) : pythonVersionsFromApi;
+
+  const pythonVersions = useMemo(() => {
+    const versions = useMock ? (packageItem?.versions ?? []) : pythonVersionsFromApi;
+    return sortVersionsDesc(versions.map(stripLightwellVersionSuffix));
+  }, [useMock, packageItem?.versions, pythonVersionsFromApi]);
+
   const pythonDetail = useMemo(() => {
     if (useMock) {
       return undefined;
@@ -145,6 +187,7 @@ const PackageDetails = () => {
       (version) => version.version === activeVersion,
     );
   }, [useMock, pythonPackageVersionsQuery.data?.versions, activeVersion]);
+
   const pythonVersionReleases = useMemo(() => {
     if (useMock) {
       return (packageItem?.latest_releases ?? []).map((release) => ({
@@ -160,6 +203,7 @@ const PackageDetails = () => {
       created_at: version.last_updated,
     }));
   }, [useMock, packageItem?.latest_releases, pythonPackageVersionsQuery.data?.versions]);
+
   const pythonBuilds = useMemo(() => {
     if (!isPython || !packageItem) return [];
 
@@ -175,31 +219,20 @@ const PackageDetails = () => {
       }));
   }, [isPython, packageItem, activeVersion]);
 
-  const mavenDeduplicatedVersions = useMemo(() => {
-    if (!isMaven || !hasRelease) return packageItem?.versions ?? [];
-    const seen = new Set<string>();
-    return [...(packageItem?.versions ?? [])]
-      .sort((a, b) => lightwellReleaseNum(b) - lightwellReleaseNum(a))
-      .filter((v) => {
-        const upstream = stripLightwellVersionSuffix(v);
-        if (seen.has(upstream)) return false;
-        seen.add(upstream);
-        return true;
-      });
-  }, [isMaven, hasRelease, packageItem?.versions]);
+  const versionOptions = isPython ? pythonVersions : mavenDeduplicatedVersions;
 
   useEffect(() => {
-    if (isPython && pythonVersions.length) {
-      if (!selectedVersion || !pythonVersions.includes(selectedVersion)) {
-        setSelectedVersion(pythonVersions[0]);
-      }
+    if (!versionOptions.length) {
       return;
     }
 
-    if (packageItem?.versions.length && !selectedVersion) {
-      setSelectedVersion(packageItem.versions[0]);
+    if (
+      !selectedVersion ||
+      !versionOptions.includes(stripLightwellVersionSuffix(selectedVersion))
+    ) {
+      setSelectedVersion(versionOptions[0]);
     }
-  }, [isPython, pythonVersions, packageItem?.versions, selectedVersion]);
+  }, [versionOptions, selectedVersion]);
 
   const isLoadingDetail = isMaven
     ? mavenVersionsListQuery.isLoading
@@ -218,12 +251,13 @@ const PackageDetails = () => {
     repository.name,
   );
 
-  const versionOptions = isPython ? pythonVersions : mavenDeduplicatedVersions;
   const builds = isMaven && hasRelease ? mavenBuilds : (mavenDetail?.builds ?? []);
   const latestBuild = builds[0];
+
   const latestVersion = isMaven ? (latestBuild?.version ?? activeVersion) : activeVersion;
   const upstreamVersion = stripLightwellVersionSuffix(isMaven ? latestVersion : activeVersion);
   const pythonBuildVersion = pythonBuilds[0]?.version;
+
   const displayVersion = isMaven
     ? hasRelease
       ? latestVersion
@@ -231,11 +265,13 @@ const PackageDetails = () => {
     : hasRelease && pythonBuildVersion
       ? pythonBuildVersion
       : activeVersion;
+
   const installCommand = isMaven
     ? `${packageGroup}:${packageName}:${displayVersion}`
     : hasRelease && pythonBuildVersion
       ? `pip install ${packageName}==${pythonBuildVersion}`
       : `pip install ${packageName}==${upstreamVersion}`;
+
   const formatReleaseCopyText = (version: string) =>
     isMaven
       ? `${packageGroup}:${packageName}:${version}`
@@ -251,8 +287,8 @@ const PackageDetails = () => {
 
   const packagesReady = useMock || (!apiPackagesQuery.isLoading && !!apiPackagesQuery.data);
   const detailReady = !isLoadingDetail;
-
   const doneLoading = !!packageItem && packagesReady && detailReady;
+
   const hasDetail =
     !!packageItem &&
     detailReady &&
@@ -261,10 +297,13 @@ const PackageDetails = () => {
       : hasRelease
         ? pythonBuilds.length > 0
         : pythonVersions.length > 0);
+
   const showEmpty = packagesReady && detailReady && !hasDetail;
+
   const showVersionsTab = isMaven
     ? !hasRelease
     : isPython && !hasRelease && pythonVersions.length > 0;
+
   const showReleasesTab = hasRelease && (isMaven || isPython);
 
   if (!doneLoading && !showEmpty) {

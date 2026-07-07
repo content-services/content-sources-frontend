@@ -41,8 +41,10 @@ import { RepositoryPackageItem } from 'services/Content/ContentApi';
 import useDebounce from 'Hooks/useDebounce';
 import { getMockLightwellPackages } from '../mockPackages';
 import {
+  compareReleasesDesc,
   formatRepositoryName,
   getRepositoryDescription,
+  sortVersionsDesc,
   stripLightwellVersionSuffix,
 } from '../helpers';
 import Hide from 'components/Hide/Hide';
@@ -93,12 +95,19 @@ const mapRepositoryPackage = (pkg: RepositoryPackageItem): MappedPackage => {
     .sort()
     .at(-1);
 
+  const sortedReleases = [...pkg.latest_releases].sort(compareReleasesDesc);
+
+  const sortedVersions =
+    sortedReleases.length > 0
+      ? sortedReleases.map((release) => stripLightwellVersionSuffix(release.version))
+      : sortVersionsDesc(pkg.versions.map(stripLightwellVersionSuffix));
+
   return {
     group_id: pkg.group,
     name: pkg.name,
-    versions: pkg.versions.map(stripLightwellVersionSuffix),
-    latest_releases: pkg.latest_releases.map((release) => ({
-      version: release.version,
+    versions: sortedVersions,
+    latest_releases: sortedReleases.map((release) => ({
+      version: stripLightwellVersionSuffix(release.version),
       release: release.release,
     })),
     last_updated: latestCreatedAt?.split('T')[0] ?? '—',
@@ -184,26 +193,27 @@ const StackedItemsCell = <T,>({
 
 const PackagesTable = () => {
   const classes = useStyles();
+
   const { repoName: repoSlug = '' } = useParams();
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const storedPerPage = Number(localStorage.getItem(lightwellPkgsPerPageKey)) || 20;
+  const [perPage, setPerPage] = useState(storedPerPage);
+  const [expandedPackages, setExpandedPackages] = useState<Set<string>>(new Set());
+  const useMock = LIGHTWELL_USE_MOCK;
+
   const [filterData, setFilterData] = useState<PackageFilterData>(defaultFilterData);
   const [searchQuery, setSearchQuery] = useState('');
   const { searchQuery: debouncedSearchQuery } = useDebounce(
     { searchQuery },
     searchQuery === '' ? 0 : 500,
   );
-  const [page, setPage] = useState(1);
-  const storedPerPage = Number(localStorage.getItem(lightwellPkgsPerPageKey)) || 20;
-  const [perPage, setPerPage] = useState(storedPerPage);
-  const [expandedPackages, setExpandedPackages] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setFilterData({
       search: searchQuery === '' ? searchQuery : debouncedSearchQuery,
     });
   }, [searchQuery, debouncedSearchQuery]);
-
-  const useMock = LIGHTWELL_USE_MOCK;
 
   const {
     repository,
