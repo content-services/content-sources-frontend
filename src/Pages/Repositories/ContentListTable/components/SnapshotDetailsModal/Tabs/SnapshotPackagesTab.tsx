@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useGetSnapshotPackagesQuery } from 'services/Content/ContentQueries';
 import PackagesTableWithToolbars from 'components/Tables/Packages/PackagesTableWithToolbars';
-import { useTablePaginationLocalStorage } from 'components/Tables/Generic/hooks/useTablePaginationLocalStorage';
+import { usePaginationLocalStorage } from 'Hooks/tables/usePaginationLocalStorage';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
 import { usePackageTableFilters } from 'components/Tables/Packages/hooks/usePackageTableFilters';
 import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
@@ -16,7 +16,7 @@ export function SnapshotPackagesTab() {
   const filterData = usePackageTableFilters();
   const { debouncedSearch } = filterData;
 
-  const paginationData = useTablePaginationLocalStorage({ key: perPageKey });
+  const paginationData = usePaginationLocalStorage({ key: perPageKey });
   const { page, perPage } = paginationData;
 
   const {

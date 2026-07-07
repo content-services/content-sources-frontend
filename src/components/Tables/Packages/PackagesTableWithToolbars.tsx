@@ -10,7 +10,7 @@ import {
   BulkSelectValue,
 } from '@patternfly/react-component-groups/dist/dynamic/BulkSelect';
 
-import { DataView, DataViewState } from '@patternfly/react-data-view/dist/dynamic/DataView';
+import { DataView } from '@patternfly/react-data-view/dist/dynamic/DataView';
 import {
   DataViewTable,
   DataViewTh,
@@ -28,7 +28,8 @@ import { DELETE_ROUTE } from 'Routes/constants';
 import { Pagination } from '@patternfly/react-core';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { FilterProps } from 'components/Tables/Packages/hooks/usePackageTableFilters';
-import { PaginationLocalStorage } from '../Generic/hooks/useTablePaginationLocalStorage';
+import { PaginationLocalStorage } from 'Hooks/tables/usePaginationLocalStorage';
+import useTableActiveState from 'Hooks/tables/useTableActiveState';
 
 interface PackagesTableProps {
   isFetching: boolean;
@@ -67,19 +68,10 @@ const PackagesTableWithToolbars = ({
     itemCount: count,
   };
 
-  // table states
   const isFetchingOrLoading = isFetching || isLoading;
   const isLoadingOrZeroCount = isFetchingOrLoading || !count;
 
-  const activeState = useMemo(() => {
-    if (isFetchingOrLoading) {
-      return DataViewState.loading;
-    } else if (isLoadingOrZeroCount) {
-      return DataViewState.empty;
-    } else {
-      return undefined;
-    }
-  }, [isFetchingOrLoading, isLoadingOrZeroCount]);
+  const activeState = useTableActiveState(isLoading, count, isFetching);
 
   // delete single rpm through kebab
   const handleSingleRowDelete = useCallback(

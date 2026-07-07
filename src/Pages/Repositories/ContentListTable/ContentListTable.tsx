@@ -6,6 +6,7 @@ import {
   DataViewTrObject,
 } from '@patternfly/react-data-view/dist/dynamic/DataViewTable';
 import { DataView, DataViewState } from '@patternfly/react-data-view/dist/dynamic/DataView';
+import useTableActiveState from '../../../Hooks/tables/useTableActiveState';
 import { DataViewTextFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewTextFilter';
 import { DataViewCheckboxFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewCheckboxFilter';
 import { DataViewTreeFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewTreeFilter';
@@ -21,6 +22,7 @@ import {
   useBulkDeleteContentItemMutate,
 } from '../../../services/Content/ContentQueries';
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { usePaginationLocalStorage } from 'Hooks/tables/usePaginationLocalStorage';
 import {
   ContentItem,
   ContentOrigin,
@@ -125,9 +127,9 @@ const ContentListTable = () => {
   const [polling, setPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
 
-  const [page, setPage] = useState(1);
-  const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
-  const [perPage, setPerPage] = useState(storedPerPage);
+  const { page, perPage, onPerPageSelect, onSetPage, setPage } = usePaginationLocalStorage({
+    key: perPageKey,
+  });
 
   // Used to force-reset the active attribute of DataViewFilters back to the first item (Name)
   const [filtersActiveAttributeResetKey, setFiltersActiveAttributeResetKey] = useState(0);
@@ -257,15 +259,6 @@ const ContentListTable = () => {
     throw new Error('Unable to load Red Hat repositories');
   }
 
-  const onSetPage = (_, newPage: number) => setPage(newPage);
-
-  const onPerPageSelect = (_, newPerPage: number, newPage: number) => {
-    localStorage.setItem(perPageKey, newPerPage.toString());
-    setPerPage(newPerPage);
-    setPage(newPage);
-  };
-
-  // Common pagination props to avoid duplication
   const paginationProps = {
     isDisabled: isLoading,
     itemCount: count,
@@ -514,15 +507,7 @@ const ContentListTable = () => {
 
   const ouiaId = 'repositories-table';
 
-  const [activeState, setActiveState] = useState<DataViewState | undefined>(DataViewState.loading);
-
-  useEffect(() => {
-    if (isLoading) {
-      setActiveState(DataViewState.loading);
-    } else {
-      setActiveState(count === 0 ? DataViewState.empty : undefined);
-    }
-  }, [count, isLoading]);
+  const activeState = useTableActiveState(isLoading, count);
 
   const shouldEnableSelection =
     !(!rbac?.repoWrite || isReadOnlyOrigin) &&
