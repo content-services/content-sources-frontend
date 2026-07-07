@@ -10,3 +10,13 @@ li.pf-v6-c-menu__list-item:has(> a[href="/settings/notifications/user-preference
 .chr-c-menu-settings .pf-v6-c-divider {
     display: none !important;
 }
+
+// TrustArc "Cookie preferences" link is injected by Chrome and pushed off-screen,
+// causing an unwanted scrollbar. Fix it in the bottom-left corner instead.
+.truste_caIcon_display {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 1000 !important;
+    overflow: visible !important;
+}
