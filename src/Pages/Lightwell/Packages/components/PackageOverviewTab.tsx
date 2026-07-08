@@ -128,7 +128,11 @@ const PackageOverviewTab = ({
         </Title>
         <Content>
           <Flex alignItems={{ default: 'alignItemsCenter' }} gap={{ default: 'gapSm' }}>
-            <span>First, configure your build tool to use this repository.</span>
+            <span>
+              {isMaven
+                ? 'First, configure your build tool (Maven, Gradle, Artifactory, or Nexus) to use this repository.'
+                : 'First, configure your build tool (pip, Pipenv, Poetry, Artifactory, or Nexus) to use this repository.'}
+            </span>
             {repository && (
               <ConnectRepositoryModal
                 repository={{
