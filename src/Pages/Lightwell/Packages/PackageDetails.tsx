@@ -331,7 +331,9 @@ const PackageDetails = () => {
               >
                 {repositoryName}
               </BreadcrumbItem>
-              <BreadcrumbItem isActive>{packageName || '—'}</BreadcrumbItem>
+              <BreadcrumbItem isActive>
+                {isMaven ? `${packageGroup}:${packageName}` : packageName || '—'}
+              </BreadcrumbItem>
             </Breadcrumb>
           </StackItem>
           <StackItem className={classes.titleWrapper}>
@@ -348,7 +350,7 @@ const PackageDetails = () => {
                 </FlexItem>
                 <FlexItem>
                   <Title headingLevel='h1' ouiaId='lightwell-package-details-header'>
-                    {packageName || 'Package details'}
+                    {isMaven ? `${packageGroup}:${packageName}` : packageName || 'Package details'}
                   </Title>
                 </FlexItem>
                 {versionOptions.length === 1 && (selectedVersion || activeVersion) ? (

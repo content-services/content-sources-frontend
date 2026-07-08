@@ -314,7 +314,6 @@ const PackagesTable = () => {
     { title: 'Package', width: 25 },
     { title: 'Version', width: 15 },
     ...(isRemediated ? [{ title: 'Latest release', width: 20 as BaseCellProps['width'] }] : []),
-    ...(isMaven ? [{ title: 'Group ID', width: 20 as BaseCellProps['width'] }] : []),
     { title: 'Last updated', width: 15 },
   ];
 
@@ -476,7 +475,7 @@ const PackagesTable = () => {
                                   )
                                 }
                               >
-                                {name}
+                                {isMaven ? `${group_id}:${name}` : name}
                               </Button>
                             </Td>
                             <Td>
@@ -507,7 +506,6 @@ const PackagesTable = () => {
                                 />
                               </Td>
                             ) : null}
-                            {isMaven ? <Td>{group_id}</Td> : null}
                             <Td>
                               {last_updated ? (
                                 <Timestamp
