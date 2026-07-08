@@ -1,4 +1,5 @@
 import {
+  Button,
   ClipboardCopy,
   ClipboardCopyVariant,
   Content,
@@ -11,10 +12,13 @@ import {
   TabTitleText,
   Title,
 } from '@patternfly/react-core';
+import { CodeIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { createRef, useMemo, useState } from 'react';
 
+import ConnectRepositoryModal from '../../Repositories/components/ConnectRepositoryModal';
 import { ConnectSnippetTab } from '../../Repositories/components/connectSnippets';
+import { formatDistributionUrl } from '../../helpers';
 import {
   getMavenPackageUsageSnippetTabs,
   getPythonPackageUsageSnippetTabs,
@@ -28,6 +32,12 @@ type PackageOverviewTabProps = {
   hasRelease: boolean;
   summary?: string;
   sourceUrl?: string;
+  repository?: {
+    uuid: string;
+    name: string;
+    published_distribution_url: string;
+    content_type: string;
+  };
 };
 
 const PackageOverviewTab = ({
@@ -38,6 +48,7 @@ const PackageOverviewTab = ({
   hasRelease,
   summary,
   sourceUrl = '',
+  repository,
 }: PackageOverviewTabProps) => {
   const tabs = useMemo(
     () =>
@@ -115,6 +126,27 @@ const PackageOverviewTab = ({
         <Title headingLevel='h2' size='lg'>
           How to use
         </Title>
+        <Content>
+          <Flex alignItems={{ default: 'alignItemsCenter' }} gap={{ default: 'gapSm' }}>
+            <span>First, configure your build tool to use this repository.</span>
+            {repository && (
+              <ConnectRepositoryModal
+                repository={{
+                  uuid: repository.uuid,
+                  name: repository.name,
+                  published_distribution_url: formatDistributionUrl(
+                    repository.published_distribution_url || '',
+                  ),
+                  content_type: repository.content_type,
+                }}
+              >
+                <Button variant='link' isInline icon={<CodeIcon />}>
+                  Connect
+                </Button>
+              </ConnectRepositoryModal>
+            )}
+          </Flex>
+        </Content>
         <Tabs
           activeKey={activeTabKey}
           onSelect={(_, eventKey) => setActiveTabKey(eventKey as string)}
