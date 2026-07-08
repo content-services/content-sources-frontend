@@ -1,6 +1,7 @@
 import {
   Breadcrumb,
   BreadcrumbItem,
+  Button,
   Card,
   CardBody,
   Dropdown,
@@ -22,7 +23,7 @@ import {
   TabTitleText,
   Title,
 } from '@patternfly/react-core';
-import { JavaIcon, PythonIcon } from '@patternfly/react-icons';
+import { CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { createUseStyles } from 'react-jss';
 import { createRef, useEffect, useMemo, useRef, useState } from 'react';
@@ -46,6 +47,7 @@ import {
 } from '../helpers';
 import { getMockLightwellPackages } from '../mockPackages';
 import RemediatedDataWarning from '../RemediatedDataWarning';
+import ConnectRepositoryModal from '../Repositories/components/ConnectRepositoryModal';
 import useLightwellRepository from '../useLightwellRepository';
 import PackageOverviewTab from './components/PackageOverviewTab';
 import PackageReleasesTab, { buildVersionFromRelease } from './components/PackageReleasesTab';
@@ -394,6 +396,22 @@ const PackageDetails = () => {
                   </FlexItem>
                 ) : null}
               </Flex>
+              <FlexItem align={{ default: 'alignRight' }}>
+                <ConnectRepositoryModal
+                  repository={{
+                    uuid: repository.uuid,
+                    name: repository.name,
+                    published_distribution_url: formatDistributionUrl(
+                      repository.published_distribution_url || '',
+                    ),
+                    content_type: repository.content_type,
+                  }}
+                >
+                  <Button size='sm' variant='secondary' icon={<CodeIcon />}>
+                    Connect
+                  </Button>
+                </ConnectRepositoryModal>
+              </FlexItem>
             </Flex>
           </StackItem>
           {repository.security_level === 'remediated' && (
