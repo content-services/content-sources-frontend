@@ -12,13 +12,11 @@ import {
   TabTitleText,
   Title,
 } from '@patternfly/react-core';
-import { CodeIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { createRef, useMemo, useState } from 'react';
 
 import ConnectRepositoryModal from '../../Repositories/components/ConnectRepositoryModal';
 import { ConnectSnippetTab } from '../../Repositories/components/connectSnippets';
-import { formatDistributionUrl } from '../../helpers';
 import {
   getMavenPackageUsageSnippetTabs,
   getPythonPackageUsageSnippetTabs,
@@ -127,29 +125,32 @@ const PackageOverviewTab = ({
           How to use
         </Title>
         <Content>
-          <Flex alignItems={{ default: 'alignItemsCenter' }} gap={{ default: 'gapSm' }}>
+          {repository ? (
+            <span>
+              First,{' '}
+              <ConnectRepositoryModal
+                repository={{
+                  uuid: repository.uuid,
+                  name: repository.name,
+                  published_distribution_url: sourceUrl,
+                  content_type: repository.content_type,
+                }}
+              >
+                <Button variant='link' isInline>
+                  {isMaven
+                    ? 'configure your build tool (Maven, Gradle, Artifactory, or Nexus)'
+                    : 'configure your build tool (pip, Pipenv, Poetry, Artifactory, or Nexus)'}
+                </Button>
+              </ConnectRepositoryModal>{' '}
+              to use this repository.
+            </span>
+          ) : (
             <span>
               {isMaven
                 ? 'First, configure your build tool (Maven, Gradle, Artifactory, or Nexus) to use this repository.'
                 : 'First, configure your build tool (pip, Pipenv, Poetry, Artifactory, or Nexus) to use this repository.'}
             </span>
-            {repository && (
-              <ConnectRepositoryModal
-                repository={{
-                  uuid: repository.uuid,
-                  name: repository.name,
-                  published_distribution_url: formatDistributionUrl(
-                    repository.published_distribution_url || '',
-                  ),
-                  content_type: repository.content_type,
-                }}
-              >
-                <Button variant='link' isInline icon={<CodeIcon />}>
-                  Connect
-                </Button>
-              </ConnectRepositoryModal>
-            )}
-          </Flex>
+          )}
         </Content>
         <Tabs
           activeKey={activeTabKey}

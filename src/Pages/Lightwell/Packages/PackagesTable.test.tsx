@@ -137,7 +137,9 @@ it('renders with a single package', async () => {
   expect(
     await screen.findByText('https://example.com/lightwell/java/validated'),
   ).toBeInTheDocument();
-  expect(await screen.findByRole('button', { name: 'org.json.test:json-test' })).toBeInTheDocument();
+  expect(
+    await screen.findByRole('button', { name: 'org.json.test:json-test' }),
+  ).toBeInTheDocument();
   expect(screen.queryByText('rhlw-3004-test')).not.toBeInTheDocument();
   expect(await screen.findByRole('button', { name: '3.14.0' })).toBeInTheDocument();
   expect(screen.getByText('3.14.0')).toBeInTheDocument();

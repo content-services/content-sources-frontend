@@ -485,8 +485,10 @@ const PackageDetails = () => {
                       repository={{
                         uuid: repository.uuid,
                         name: repository.name,
-                        published_distribution_url: repository.published_distribution_url,
-                        content_type: repository.content_type,
+                        published_distribution_url: formatDistributionUrl(
+                          repository.published_distribution_url ?? '',
+                        ),
+                        content_type: repository.content_type ?? '',
                       }}
                     />
                   </TabContentBody>
