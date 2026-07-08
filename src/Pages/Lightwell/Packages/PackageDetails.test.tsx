@@ -236,7 +236,11 @@ it('does not show Releases tab when package has no release', async () => {
 it('renders package detail content with builds', async () => {
   renderPackageDetails();
 
-  expect(await screen.findByRole('heading', { name: `${defaultLightwellRepositoryPackageItem.group}:${packageName}` })).toBeInTheDocument();
+  expect(
+    await screen.findByRole('heading', {
+      name: `${defaultLightwellRepositoryPackageItem.group}:${packageName}`,
+    }),
+  ).toBeInTheDocument();
   expect(await screen.findByText('Overview')).toBeInTheDocument();
   expect(await screen.findByRole('tab', { name: 'Releases' })).toBeInTheDocument();
   expect(await screen.findByText('About this package')).toBeInTheDocument();
