@@ -44,6 +44,7 @@ const javaRemediatedContentItem: ContentItem = {
   security_level: 'remediated',
   package_count: 11,
   build_count: 28,
+  version_count: 28,
 };
 
 const renderRepositoriesTable = () =>
@@ -206,5 +207,5 @@ it('renders repository table column headers', async () => {
   expect(screen.getByRole('columnheader', { name: 'Ecosystem' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Security level' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Packages' })).toBeInTheDocument();
-  expect(screen.getByRole('columnheader', { name: 'Builds' })).toBeInTheDocument();
+  expect(screen.getByRole('columnheader', { name: 'Versions' })).toBeInTheDocument();
 });
