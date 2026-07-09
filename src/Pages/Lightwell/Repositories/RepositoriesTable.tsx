@@ -111,11 +111,10 @@ const RepositoriesTable = () => {
       info: { tooltip: 'Unique package names available in this repository.' },
     },
     {
-      title: 'Builds',
+      title: 'Versions',
       width: 10,
       info: {
-        tooltip:
-          'Total built artifacts across all versions. A single package may have multiple builds.',
+        tooltip: 'Total package versions available in this repository.',
       },
     },
   ];
@@ -199,7 +198,7 @@ const RepositoriesTable = () => {
                           published_distribution_url,
                           security_level,
                           package_count,
-                          build_count,
+                          version_count,
                         } = repo;
 
                         return (
@@ -265,7 +264,7 @@ const RepositoriesTable = () => {
                               )}
                             </Td>
                             <Td>{package_count.toLocaleString() ?? '0'}</Td>
-                            <Td>{build_count?.toLocaleString() ?? '0'}</Td>
+                            <Td>{version_count?.toLocaleString() ?? '0'}</Td>
                           </Tr>
                         );
                       })}

@@ -34,6 +34,7 @@ export interface ContentItem {
   security_level?: string;
   published_distribution_url?: string;
   build_count?: number;
+  version_count?: number;
 }
 
 export interface PopularRepository {

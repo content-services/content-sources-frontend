@@ -404,6 +404,7 @@ export const defaultLightwellContentItem: ContentItem = {
   uuid: '3875c35b-a67a-4ac2-a989-21139433c177',
   package_count: 1,
   build_count: 3,
+  version_count: 3,
   origin: ContentOrigin.LIGHTWELL,
   status: '',
   last_introspection_error: '',

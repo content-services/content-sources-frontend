@@ -13,6 +13,7 @@ const mockRepositories = [
     content_type: 'maven',
     package_count: 10,
     build_count: 24,
+    version_count: 24,
   },
   {
     uuid: '22222222-2222-4222-8222-222222222222',
@@ -24,6 +25,7 @@ const mockRepositories = [
     content_type: 'maven',
     package_count: 11,
     build_count: 28,
+    version_count: 28,
   },
   {
     uuid: '33333333-3333-4333-8333-333333333333',
@@ -35,6 +37,7 @@ const mockRepositories = [
     content_type: 'python',
     package_count: 13,
     build_count: 31,
+    version_count: 31,
   },
   {
     uuid: '44444444-4444-4444-8444-444444444444',
@@ -46,6 +49,7 @@ const mockRepositories = [
     content_type: 'python',
     package_count: 10,
     build_count: 22,
+    version_count: 22,
   },
 ] as ContentItem[];
 
