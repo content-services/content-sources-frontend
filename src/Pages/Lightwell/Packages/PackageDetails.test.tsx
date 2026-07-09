@@ -91,6 +91,25 @@ const multiVersionReleasePackageWithFullVersions: RepositoryPackageItem = {
   ],
 };
 
+const multipleReleasesPerVersionPackage: RepositoryPackageItem = {
+  group: 'org.json.test',
+  name: 'json-test',
+  versions: [
+    '3.14.0.rhlw-00003',
+    '3.14.0.rhlw-00002',
+    '3.14.0.rhlw-00001',
+    '2.12.0.rhlw-00002',
+    '2.12.0.rhlw-00001',
+  ],
+  latest_releases: [
+    { version: '3.14.0.rhlw-00003', release: 'rhlw-00003', created_at: '2026-07-03T00:00:00Z' },
+    { version: '3.14.0.rhlw-00002', release: 'rhlw-00002', created_at: '2026-07-02T00:00:00Z' },
+    { version: '3.14.0.rhlw-00001', release: 'rhlw-00001', created_at: '2026-07-01T00:00:00Z' },
+    { version: '2.12.0.rhlw-00002', release: 'rhlw-00002', created_at: '2026-06-18T00:00:00Z' },
+    { version: '2.12.0.rhlw-00001', release: 'rhlw-00001', created_at: '2026-06-17T00:00:00Z' },
+  ],
+};
+
 const multiVersionNoReleasePackage: RepositoryPackageItem = {
   group: 'org.json.test',
   name: 'json-test',
@@ -356,6 +375,36 @@ it('shows "Available versions" on Releases tab for multi-version release package
 
   const availableVersionsTable = screen.getByRole('grid', { name: 'Available versions' });
   const versionRows = availableVersionsTable.querySelectorAll('tbody tr');
+  expect(versionRows[0]).toHaveTextContent('3.14.0');
+  expect(versionRows[1]).toHaveTextContent('2.12.0');
+});
+
+it('deduplicates "Available versions" rows when multiple releases share the same base version', async () => {
+  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    isFetching: false,
+    data: {
+      ...defaultLightwellRepositoryPackageResponse,
+      results: [multipleReleasesPerVersionPackage],
+      total: 1,
+    },
+  }));
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() =>
+    mockVersionsListQuery(
+      [{ version: '3.14.0.rhlw-00003', release: 'rhlw-00003', created_at: '2026-07-03T00:00:00Z' }],
+      {},
+      '3.14.0.rhlw-00003',
+    ),
+  );
+
+  renderPackageDetails();
+
+  const releasesTab = await screen.findByRole('tab', { name: 'Releases' });
+  await userEvent.click(releasesTab);
+
+  const availableVersionsTable = await screen.findByRole('grid', { name: 'Available versions' });
+  const versionRows = availableVersionsTable.querySelectorAll('tbody tr');
+  expect(versionRows).toHaveLength(2);
   expect(versionRows[0]).toHaveTextContent('3.14.0');
   expect(versionRows[1]).toHaveTextContent('2.12.0');
 });

@@ -30,24 +30,26 @@ const PackageReleasesTab = ({
   onVersionSelect,
   formatCopyText,
 }: PackageReleasesTabProps) => {
-  const releaseMap = useMemo(() => {
+  const { releaseMap, sortedVersions } = useMemo(() => {
     const map: Record<string, RepositoryPackageReleaseInfo> = {};
-    latestReleases.forEach((r) => {
-      if (r.release) {
-        map[stripLightwellVersionSuffix(r.version)] = r;
+    const versions: string[] = [];
+    const sorted = [...latestReleases].sort(compareReleasesDesc);
+
+    for (const r of sorted) {
+      if (!r.release) continue;
+      const upstream = stripLightwellVersionSuffix(r.version);
+      if (!map[upstream]) {
+        map[upstream] = r;
+        versions.push(upstream);
       }
-    });
-    return map;
-  }, [latestReleases]);
-
-  const sortedVersions = useMemo(() => {
-    const sortedReleases = [...latestReleases].sort(compareReleasesDesc);
-
-    if (sortedReleases.length > 0) {
-      return sortedReleases.map((release) => stripLightwellVersionSuffix(release.version));
     }
 
-    return sortVersionsDesc(allVersions.map(stripLightwellVersionSuffix));
+    if (versions.length > 0) {
+      return { releaseMap: map, sortedVersions: versions };
+    }
+
+    const stripped = allVersions.map(stripLightwellVersionSuffix);
+    return { releaseMap: map, sortedVersions: sortVersionsDesc([...new Set(stripped)]) };
   }, [allVersions, latestReleases]);
 
   return (
