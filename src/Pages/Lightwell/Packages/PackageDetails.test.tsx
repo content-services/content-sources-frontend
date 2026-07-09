@@ -287,6 +287,7 @@ it('renders sidebar metadata', async () => {
   expect(await screen.findByText('JSON library for Java')).toBeInTheDocument();
   expect(await screen.findByText('License')).toBeInTheDocument();
   expect(await screen.findByText('MIT')).toBeInTheDocument();
+  expect(screen.queryByText('show more')).not.toBeInTheDocument();
   expect(await screen.findByText('Original author')).toBeInTheDocument();
   expect(await screen.findByText('JSON.org')).toBeInTheDocument();
   expect(await screen.findByText('Project')).toBeInTheDocument();
