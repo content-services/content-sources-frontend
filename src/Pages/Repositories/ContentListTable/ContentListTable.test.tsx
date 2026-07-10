@@ -220,6 +220,31 @@ it('disables delete kebab when Red Hat and/or EPEL tabs are active and shows rea
   ).toBeInTheDocument();
 });
 
+it('queries with ContentOrigin.ALL when no origin filter is selected', () => {
+  (useAppContext as jest.Mock).mockReturnValue({
+    features: { snapshots: { accessible: true } },
+    rbac: { repoWrite: true, repoRead: true },
+    contentOrigin: [],
+    setContentOrigin: () => {},
+  });
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: { data: [], meta: { count: 0, limit: 20, offset: 0 } },
+  }));
+
+  renderContentListTable();
+
+  expect(useContentListQuery).toHaveBeenCalledWith(
+    1,
+    expect.any(Number),
+    expect.any(Object),
+    expect.any(String),
+    [ContentOrigin.ALL],
+    true,
+    false,
+  );
+});
+
 it('hides bulk select when Red Hat and/or EPEL tabs are active', async () => {
   (useContentListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,

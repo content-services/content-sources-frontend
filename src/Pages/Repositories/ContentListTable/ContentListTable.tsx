@@ -207,13 +207,16 @@ const ContentListTable = () => {
     setUrlSearchParams,
   ]);
 
+  // Set content origins for the repository list query explicitly if no origin filters are selected
+  const originsForQuery = contentOrigin.length ? contentOrigin : [ContentOrigin.ALL];
+
   const {
     isLoading,
     isFetching,
     error,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useContentListQuery(page, perPage, filters, sortString, contentOrigin, true, polling);
+  } = useContentListQuery(page, perPage, filters, sortString, originsForQuery, true, polling);
 
   useEffect(() => {
     if (isError) {
