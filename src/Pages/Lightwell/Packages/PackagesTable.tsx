@@ -27,8 +27,8 @@ import { createUseStyles } from 'react-jss';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useMemo, useState, type ReactNode } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   Table,
   TableVariant,
@@ -42,7 +42,6 @@ import {
 
 import { useLightwellRepositoryPackagesQuery } from 'services/Content/ContentQueries';
 import { RepositoryPackageItem } from 'services/Content/ContentApi';
-import useDebounce from 'Hooks/useDebounce';
 import { getMockLightwellPackages } from '../mockPackages';
 import {
   compareReleasesDesc,
@@ -61,7 +60,9 @@ import ConnectRepositoryModal from '../Repositories/components/ConnectRepository
 import { buildVersionFromRelease } from './components/PackageReleasesTab';
 import CopyLabel from './components/CopyLabel';
 import RemediatedDataWarning from '../RemediatedDataWarning';
-import useLightwellRepository from '../useLightwellRepository';
+import useLightwellRepository from '../../../Hooks/Lightwell/useLightwellRepository';
+import { useLightwellNavigateTo } from '../../../Hooks/Lightwell/navigation/useLightwellNavigateTo';
+import { useLightwellPackagesParams } from '../../../Hooks/Lightwell/useLightwellPackagesParams';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -131,12 +132,6 @@ const mapRepositoryPackage = (pkg: RepositoryPackageItem): MappedPackage => {
   };
 };
 
-type PackageFilterData = {
-  search: string;
-};
-
-const defaultFilterData: PackageFilterData = { search: '' };
-
 type StackedItemsCellProps<T> = {
   items: T[];
   packageKey: string;
@@ -202,26 +197,16 @@ const PackagesTable = () => {
   const classes = useStyles();
 
   const { repoName: repoSlug = '' } = useParams();
-  const navigate = useNavigate();
   const isDemo = useLightwellDemo();
-  const [page, setPage] = useState(1);
+  const { navigateTo } = useLightwellNavigateTo();
+  const { searchQuery, setSearchQuery, debouncedSearch, page, setPage, onSetPage, packagesParams } =
+    useLightwellPackagesParams();
+
   const storedPerPage = Number(localStorage.getItem(lightwellPkgsPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
+
   const [expandedPackages, setExpandedPackages] = useState<Set<string>>(new Set());
   const useMock = LIGHTWELL_USE_MOCK || isDemo;
-
-  const [filterData, setFilterData] = useState<PackageFilterData>(defaultFilterData);
-  const [searchQuery, setSearchQuery] = useState('');
-  const { searchQuery: debouncedSearchQuery } = useDebounce(
-    { searchQuery },
-    searchQuery === '' ? 0 : 500,
-  );
-
-  useEffect(() => {
-    setFilterData({
-      search: searchQuery === '' ? searchQuery : debouncedSearchQuery,
-    });
-  }, [searchQuery, debouncedSearchQuery]);
 
   const {
     repository,
@@ -235,7 +220,7 @@ const PackagesTable = () => {
     repoUUID,
     page,
     perPage,
-    filterData.search,
+    debouncedSearch,
     !!repoUUID && !useMock,
   );
 
@@ -247,7 +232,7 @@ const PackagesTable = () => {
 
   const { packages, packageCount } = useMemo(() => {
     if (useMock) {
-      const mockPackages = getMockLightwellPackages(repoUUID, filterData.search);
+      const mockPackages = getMockLightwellPackages(repoUUID, debouncedSearch);
       const offset = (page - 1) * perPage;
       return {
         packages: mockPackages.slice(offset, offset + perPage).map(mapRepositoryPackage),
@@ -260,7 +245,7 @@ const PackagesTable = () => {
       packages: results.map(mapRepositoryPackage),
       packageCount: packagesData?.total ?? 0,
     };
-  }, [useMock, repoUUID, filterData.search, page, perPage, packagesData]);
+  }, [useMock, repoUUID, debouncedSearch, page, perPage, packagesData]);
 
   const fetchingOrLoading = useMock ? false : isPackagesLoading || isPackagesFetching;
   const countIsZero = packageCount === 0;
@@ -274,8 +259,6 @@ const PackagesTable = () => {
   if (!useMock && apiPackagesQuery.isError) throw apiPackagesQuery.error;
 
   const showEmptyState = countIsZero && !fetchingOrLoading;
-
-  const onSetPage = (_, newPage: number) => setPage(newPage);
 
   const onPerPageSelect = (_, newPerPage: number, newPage: number) => {
     localStorage.setItem(lightwellPkgsPerPageKey, newPerPage.toString());
@@ -325,10 +308,7 @@ const PackagesTable = () => {
         <Stack>
           <StackItem>
             <Breadcrumb ouiaId='lightwell-packages-breadcrumb'>
-              <BreadcrumbItem
-                component='button'
-                onClick={() => navigate('..', { relative: 'path' })}
-              >
+              <BreadcrumbItem component='button' onClick={() => navigateTo('repositories')}>
                 Lightwell
               </BreadcrumbItem>
               <BreadcrumbItem disabled>{repositoryName}</BreadcrumbItem>
@@ -397,14 +377,8 @@ const PackagesTable = () => {
                 aria-label={isMaven ? 'Filter by name or group ID' : 'Filter by name'}
                 placeholder={isMaven ? 'Filter by name or group ID' : 'Filter by name'}
                 value={searchQuery}
-                onChange={(_event, value) => {
-                  setSearchQuery(value);
-                  setPage(1);
-                }}
-                onClear={() => {
-                  setSearchQuery('');
-                  setPage(1);
-                }}
+                onChange={(_event, value) => setSearchQuery(value)}
+                onClear={() => setSearchQuery('')}
               />
             </ToolbarItem>
             <ToolbarItem variant='pagination' align={{ default: 'alignEnd' }}>
@@ -470,11 +444,12 @@ const PackagesTable = () => {
                                 className={text.fontWeightBold}
                                 ouiaId={`lightwell-package-${name}`}
                                 onClick={() =>
-                                  navigate(
-                                    isMaven
-                                      ? `${encodeURIComponent(group_id)}/${encodeURIComponent(name)}`
-                                      : encodeURIComponent(name),
-                                  )
+                                  navigateTo('packageDetails', {
+                                    repoSlug,
+                                    packageName: name,
+                                    groupId: isMaven ? group_id : undefined,
+                                    packagesParams,
+                                  })
                                 }
                               >
                                 {isMaven ? `${group_id}:${name}` : name}

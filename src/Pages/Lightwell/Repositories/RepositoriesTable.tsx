@@ -50,7 +50,7 @@ import {
 import ConnectRepositoryModal from './components/ConnectRepositoryModal';
 import { capitalize } from 'lodash';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useLightwellNavigateTo } from 'Hooks/Lightwell/navigation/useLightwellNavigateTo';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -65,8 +65,8 @@ const useStyles = createUseStyles({
 
 const RepositoriesTable = () => {
   const classes = useStyles();
-  const navigate = useNavigate();
   const isDemo = useLightwellDemo();
+  const { navigateTo } = useLightwellNavigateTo();
   const [page, setPage] = useState(1);
   const storedPerPage = Number(localStorage.getItem(lightwellReposPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
@@ -225,7 +225,12 @@ const RepositoriesTable = () => {
                                     ouiaId={`lightwell-repo-${uuid}`}
                                     className={text.fontWeightBold}
                                     onClick={() =>
-                                      navigate(getRepositoryPathSlug(content_type, security_level))
+                                      navigateTo('repositoryPackages', {
+                                        repoSlug: getRepositoryPathSlug(
+                                          content_type,
+                                          security_level,
+                                        ),
+                                      })
                                     }
                                   >
                                     {formatRepositoryName(content_type, security_level, name)}

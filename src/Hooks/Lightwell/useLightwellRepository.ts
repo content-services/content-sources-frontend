@@ -1,9 +1,9 @@
 import { useContentListQuery } from 'services/Content/ContentQueries';
 import { ContentItem } from 'services/Content/ContentApi';
-import { LIGHTWELL_FEATURE_NAME } from './constants';
-import { getRepositoryNameFromPathSlug } from './helpers';
-import { useLightwellDemo } from './LightwellDemoContext';
-import { getMockLightwellRepositoryBySlug } from './mockRepositories';
+import { useLightwellDemo } from '../../Pages/Lightwell/LightwellDemoContext';
+import { getMockLightwellRepositoryBySlug } from '../../Pages/Lightwell/mockRepositories';
+import { LIGHTWELL_FEATURE_NAME } from '../../Pages/Lightwell/constants';
+import { getRepositoryNameFromPathSlug } from '../../Pages/Lightwell/helpers';
 
 interface UseLightwellRepositoryResult {
   repository: ContentItem | undefined;
