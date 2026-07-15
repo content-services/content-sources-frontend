@@ -23,6 +23,9 @@ objects:
       image: ${IMAGE}:${IMAGE_TAG}
       module:
         manifestLocation: /apps/content-sources/fed-mods.json
+        analytics:
+          APIKey: apRCg9V6oMXCcnTingqRYW6m1er4hkCW
+          APIKeyDev: aMINBssUhXV1okzk7ZBaqwdTgtA0ySpg
         modules:
           - id: insights-content-sources
             module: ./RootApp
