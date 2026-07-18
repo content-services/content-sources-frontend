@@ -112,6 +112,31 @@ objects:
             - Red Hat repositories
             - snapshot
             - insights
+        - id: lightwell
+          title: Lightwell
+          href: /lightwell
+          description: Remediated and validated open source libraries for Java and Python.
+          alt_title:
+            - lightwell
+            - light well
+            - lightwell network
+            - lightwell clearinghouse
+            - remediated packages
+            - remediated libraries
+            - validated packages
+            - validated libraries
+            - trusted content
+            - supply chain security
+            - open source supply chain
+            - secured repositories
+            - signed libraries
+            - patched artifacts
+            - CVE remediation
+            - vulnerability remediation
+            - backported patches
+            - remediated java
+            - remediated python
+            - lightwell repositories
 
 parameters:
   - name: ENV_NAME
