@@ -169,7 +169,7 @@ const getPythonSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[
         },
         {
           label: 'Install from the repository:',
-          code: `pipenv install --index ${distributionUrl}`,
+          code: `pipenv install --index ${distributionUrl.replace(/\/+$/, '')}/simple`,
         },
       ],
     },
