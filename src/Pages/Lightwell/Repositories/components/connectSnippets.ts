@@ -88,21 +88,16 @@ const getMavenSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[]
           label: 'Add to your build.gradle:',
           code: `repositories {
     maven {
-        credentials {
-            username "$mavenUser"
-            password "$mavenPassword"
-        }
+        name = "${repoId}"
         url "${distributionUrl}"
+        credentials {
+            username = "<service_account_username>"
+            password = "<service_account_token>"
+        }
     }
     mavenCentral()
 }`,
-          description: 'Place above mavenCentral() to prioritize patched versions.',
-        },
-        {
-          label: 'Add credentials to ~/.gradle/gradle.properties:',
-          code: `mavenUser=<service_account_username>
-mavenPassword=<service_account_token>`,
-          description: 'Do not commit credentials. Store in ~/.gradle/gradle.properties.',
+          description: 'Username format: XXXXXXX|service-account-name',
         },
       ],
     },
