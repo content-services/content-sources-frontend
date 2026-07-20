@@ -156,7 +156,7 @@ const getPythonSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[
         },
         {
           label: 'Set as default index:',
-          code: `pip config set global.index-url ${distributionUrl}/simple`,
+          code: `pip config set global.index-url ${distributionUrl.replace(/\/+$/, '')}/simple`,
         },
       ],
     },
