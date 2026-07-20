@@ -37,6 +37,7 @@ import {
   usePythonPackageVersionsQuery,
 } from 'services/Content/ContentQueries';
 import { LIGHTWELL_USE_MOCK } from '../constants';
+import { useLightwellDemo } from '../LightwellDemoContext';
 import {
   compareVersionsDesc,
   formatDistributionUrl,
@@ -45,7 +46,11 @@ import {
   sortVersionsDesc,
   stripLightwellVersionSuffix,
 } from '../helpers';
-import { getMockLightwellPackages } from '../mockPackages';
+import {
+  getMockLightwellPackages,
+  getMockMavenPackageVersionsList,
+  getMockPythonPackageVersions,
+} from '../mockPackages';
 import RemediatedDataWarning from '../RemediatedDataWarning';
 import ConnectRepositoryModal from '../Repositories/components/ConnectRepositoryModal';
 import useLightwellRepository from '../useLightwellRepository';
@@ -88,7 +93,8 @@ const PackageDetails = () => {
   const releasesTabRef = createRef<HTMLElement>();
   const versionsTabRef = createRef<HTMLElement>();
 
-  const useMock = LIGHTWELL_USE_MOCK;
+  const isDemo = useLightwellDemo();
+  const useMock = LIGHTWELL_USE_MOCK || isDemo;
 
   const {
     repository,
@@ -125,6 +131,7 @@ const PackageDetails = () => {
     repoUUID,
     packageGroup,
     packageName,
+    !useMock,
   );
 
   const pythonPackageVersionsQuery = usePythonPackageVersionsQuery(
@@ -133,20 +140,37 @@ const PackageDetails = () => {
     isPython && !!repoUUID && !!packageName && !useMock,
   );
 
-  const mavenDetail = mavenVersionsListQuery.data?.versions.find(
+  const mockMavenVersionsList = useMemo(
+    () =>
+      useMock && isMaven
+        ? getMockMavenPackageVersionsList(repoUUID, packageGroup, packageName)
+        : undefined,
+    [useMock, isMaven, repoUUID, packageGroup, packageName],
+  );
+
+  const mockPythonVersions = useMemo(
+    () => (useMock && isPython ? getMockPythonPackageVersions(repoUUID, packageName) : undefined),
+    [useMock, isPython, repoUUID, packageName],
+  );
+
+  const mavenDetail = (
+    useMock ? mockMavenVersionsList : mavenVersionsListQuery.data
+  )?.versions.find(
     (v) => stripLightwellVersionSuffix(v.version) === stripLightwellVersionSuffix(activeVersion),
   );
 
+  const mavenVersionsData = useMock ? mockMavenVersionsList : mavenVersionsListQuery.data;
+
   const mavenBuilds = useMemo(() => {
-    if (!isMaven || !hasRelease || !mavenVersionsListQuery.data?.versions) return [];
+    if (!isMaven || !hasRelease || !mavenVersionsData?.versions) return [];
 
     const upstream = stripLightwellVersionSuffix(activeVersion);
 
-    return mavenVersionsListQuery.data.versions
+    return mavenVersionsData.versions
       .filter((v) => stripLightwellVersionSuffix(v.version) === upstream)
       .flatMap((v) => v.builds)
       .sort((a, b) => lightwellReleaseNum(b.release) - lightwellReleaseNum(a.release));
-  }, [isMaven, hasRelease, mavenVersionsListQuery.data?.versions, activeVersion]);
+  }, [isMaven, hasRelease, mavenVersionsData?.versions, activeVersion]);
 
   const mavenDeduplicatedVersions = useMemo(() => {
     const versions = packageItem?.versions ?? [];
@@ -171,41 +195,39 @@ const PackageDetails = () => {
       .sort(compareVersionsDesc);
   }, [isMaven, hasRelease, packageItem?.versions]);
 
+  const pythonVersionsData = useMock ? mockPythonVersions : pythonPackageVersionsQuery.data;
+
   const pythonVersionsFromApi = useMemo(
-    () => pythonPackageVersionsQuery.data?.versions?.map((version) => version.version) ?? [],
-    [pythonPackageVersionsQuery.data?.versions],
+    () => pythonVersionsData?.versions?.map((version) => version.version) ?? [],
+    [pythonVersionsData?.versions],
   );
 
   const pythonVersions = useMemo(() => {
-    const versions = useMock ? (packageItem?.versions ?? []) : pythonVersionsFromApi;
+    const versions =
+      useMock && !pythonVersionsData ? (packageItem?.versions ?? []) : pythonVersionsFromApi;
     return sortVersionsDesc(versions.map(stripLightwellVersionSuffix));
-  }, [useMock, packageItem?.versions, pythonVersionsFromApi]);
+  }, [useMock, pythonVersionsData, packageItem?.versions, pythonVersionsFromApi]);
 
-  const pythonDetail = useMemo(() => {
-    if (useMock) {
-      return undefined;
-    }
-
-    return pythonPackageVersionsQuery.data?.versions.find(
-      (version) => version.version === activeVersion,
-    );
-  }, [useMock, pythonPackageVersionsQuery.data?.versions, activeVersion]);
+  const pythonDetail = useMemo(
+    () => pythonVersionsData?.versions.find((version) => version.version === activeVersion),
+    [pythonVersionsData?.versions, activeVersion],
+  );
 
   const pythonVersionReleases = useMemo(() => {
-    if (useMock) {
-      return (packageItem?.latest_releases ?? []).map((release) => ({
-        version: release.version,
-        release: release.release,
-        created_at: release.created_at,
+    if (pythonVersionsData?.versions) {
+      return pythonVersionsData.versions.map((version) => ({
+        version: version.version,
+        release: '',
+        created_at: version.last_updated,
       }));
     }
 
-    return (pythonPackageVersionsQuery.data?.versions ?? []).map((version) => ({
-      version: version.version,
-      release: '',
-      created_at: version.last_updated,
+    return (packageItem?.latest_releases ?? []).map((release) => ({
+      version: release.version,
+      release: release.release,
+      created_at: release.created_at,
     }));
-  }, [useMock, packageItem?.latest_releases, pythonPackageVersionsQuery.data?.versions]);
+  }, [pythonVersionsData?.versions, packageItem?.latest_releases]);
 
   const pythonBuilds = useMemo(() => {
     if (!isPython || !packageItem) return [];
@@ -246,9 +268,11 @@ const PackageDetails = () => {
     [],
   );
 
-  const isLoadingDetail = isMaven
-    ? mavenVersionsListQuery.isLoading
-    : pythonPackageVersionsQuery.isLoading && !pythonPackageVersionsQuery.data;
+  const isLoadingDetail = useMock
+    ? false
+    : isMaven
+      ? mavenVersionsListQuery.isLoading
+      : pythonPackageVersionsQuery.isLoading && !pythonPackageVersionsQuery.data;
 
   if (isResolvingRepository || !repository) {
     return <Loader />;
