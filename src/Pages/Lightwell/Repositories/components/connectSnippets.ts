@@ -140,7 +140,8 @@ mavenPassword=<service_account_token>`,
 };
 
 const getPythonSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[] => {
-  const distributionUrl = formatDistributionUrl(repository.published_distribution_url || '');
+  const rawUrl = repository.published_distribution_url || '';
+  const distributionUrl = formatDistributionUrl(rawUrl);
 
   return [
     {
@@ -198,14 +199,24 @@ const getPythonSnippetTabs = (repository: RepositoryContext): ConnectSnippetTab[
       eventKey: 'artifactory',
       title: 'Artifactory',
       docsUrl:
-        'https://docs.redhat.com/en/documentation/red_hat_lightwell_network/current/configure-configure_artifactory_to_use_rhln_repository',
+        'https://docs.redhat.com/en/documentation/red_hat_lightwell_network/current/configure-configure_artifactory_to_use_rhln_repository_python',
       snippets: [
         {
-          label: 'Configure as a remote PyPI repository:',
+          label: 'URL:',
+          code: rawUrl,
+          urlOnly: true,
+        },
+        {
+          label: 'Registry URL:',
           code: distributionUrl || '',
           urlOnly: true,
+        },
+        {
+          label: 'Registry Index Location URL Suffix:',
+          code: 'simple',
+          urlOnly: true,
           description:
-            'Set as the remote URL in Artifactory. Configure basic authentication with your service account credentials.',
+            'Leave at the default value. Configure basic authentication with your service account credentials.',
         },
       ],
     },
