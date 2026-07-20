@@ -36,7 +36,11 @@ import { FilterData } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 
 import { LIGHTWELL_FEATURE_NAME, LIGHTWELL_USE_MOCK, lightwellReposPerPageKey } from '../constants';
-import { getMockLightwellRepositoryList } from '../mockRepositories';
+import { useLightwellDemo } from '../LightwellDemoContext';
+import {
+  getDemoLightwellRepositoryList,
+  getMockLightwellRepositoryList,
+} from '../mockRepositories';
 import {
   formatEcosystemDisplay,
   getRepositoryDescription,
@@ -62,6 +66,7 @@ const useStyles = createUseStyles({
 const RepositoriesTable = () => {
   const classes = useStyles();
   const navigate = useNavigate();
+  const isDemo = useLightwellDemo();
   const [page, setPage] = useState(1);
   const storedPerPage = Number(localStorage.getItem(lightwellReposPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
@@ -69,12 +74,14 @@ const RepositoriesTable = () => {
     feature_name: LIGHTWELL_FEATURE_NAME,
   };
 
-  // Set to true in constants.ts to use mock repositories and packages
-  const useMock = LIGHTWELL_USE_MOCK;
+  const useMock = LIGHTWELL_USE_MOCK || isDemo;
 
   const mockRepositoryListQuery = useQuery({
-    queryKey: ['lightwell-repositories-mock', page, perPage, filters],
-    queryFn: () => getMockLightwellRepositoryList(page, perPage, filters),
+    queryKey: ['lightwell-repositories-mock', page, perPage, filters, isDemo],
+    queryFn: () =>
+      isDemo
+        ? getDemoLightwellRepositoryList(page, perPage, filters)
+        : getMockLightwellRepositoryList(page, perPage, filters),
     placeholderData: keepPreviousData,
     staleTime: 20000,
     enabled: useMock,

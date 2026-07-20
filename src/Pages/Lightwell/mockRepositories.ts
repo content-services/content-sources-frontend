@@ -63,14 +63,22 @@ export const getMockLightwellRepositoryBySlug = (slug: string): ContentItem | un
     (repo) => getRepositoryPathSlug(repo.content_type, repo.security_level) === slug.toLowerCase(),
   );
 
-export const getMockLightwellRepositoryList = (
+const demoRepositorySlugs = new Set(['java-validated', 'java-remediated', 'python-validated']);
+
+const demoRepositories = mockRepositories.filter((repo) => {
+  const slug = getRepositoryPathSlug(repo.content_type, repo.security_level);
+  return demoRepositorySlugs.has(slug);
+});
+
+const buildMockRepositoryList = (
+  repos: ContentItem[],
   page: number,
   perPage: number,
   filters: FilterData,
 ): ContentListResponse => {
   const search = (filters.search ?? '').trim().toLowerCase();
 
-  let filtered = mockRepositories;
+  let filtered = repos;
 
   if (search) {
     filtered = filtered.filter((repo) => repo.name.toLowerCase().includes(search));
@@ -89,3 +97,15 @@ export const getMockLightwellRepositoryList = (
     },
   };
 };
+
+export const getMockLightwellRepositoryList = (
+  page: number,
+  perPage: number,
+  filters: FilterData,
+): ContentListResponse => buildMockRepositoryList(mockRepositories, page, perPage, filters);
+
+export const getDemoLightwellRepositoryList = (
+  page: number,
+  perPage: number,
+  filters: FilterData,
+): ContentListResponse => buildMockRepositoryList(demoRepositories, page, perPage, filters);

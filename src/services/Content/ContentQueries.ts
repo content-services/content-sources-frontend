@@ -733,12 +733,17 @@ export const useMavenPackageVersionsPreload = (
     })),
   });
 
-export const useMavenPackageVersionsListQuery = (uuid: string, group: string, name: string) =>
+export const useMavenPackageVersionsListQuery = (
+  uuid: string,
+  group: string,
+  name: string,
+  enabled = true,
+) =>
   useQuery({
     queryKey: [MAVEN_PACKAGE_VERSIONS_LIST_KEY, uuid, group, name],
     queryFn: () => getMavenPackageVersionsList(uuid, group, name),
     staleTime: 60000,
-    enabled: !!uuid && !!group && !!name,
+    enabled: enabled && !!uuid && !!group && !!name,
     meta: {
       title: 'Unable to load package versions.',
       id: 'maven-package-versions-list-error',
