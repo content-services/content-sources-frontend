@@ -37,6 +37,18 @@ const EmptyTableState = () => {
         >
           Not a member? Get started
         </Button>
+        <br />
+        <Button
+          variant='link'
+          component='a'
+          href='lightwell/demo'
+          target='_blank'
+          rel='noopener noreferrer'
+          icon={<ExternalLinkAltIcon />}
+          iconPosition='end'
+        >
+          For a sneak peek, click here for a demo
+        </Button>
       </EmptyStateBody>
     </EmptyState>
   );
