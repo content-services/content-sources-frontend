@@ -35,7 +35,12 @@ import Hide from 'components/Hide/Hide';
 import { FilterData } from 'services/Content/ContentApi';
 import { useContentListQuery } from 'services/Content/ContentQueries';
 
-import { LIGHTWELL_FEATURE_NAME, LIGHTWELL_USE_MOCK, lightwellReposPerPageKey } from '../constants';
+import {
+  LIGHTWELL_DEMO_FEATURE_NAME,
+  LIGHTWELL_FEATURE_NAME,
+  LIGHTWELL_USE_MOCK,
+  lightwellReposPerPageKey,
+} from '../constants';
 import { useLightwellDemo } from '../LightwellDemoContext';
 import {
   getDemoLightwellRepositoryList,
@@ -71,10 +76,10 @@ const RepositoriesTable = () => {
   const storedPerPage = Number(localStorage.getItem(lightwellReposPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
   const filters: FilterData = {
-    feature_name: LIGHTWELL_FEATURE_NAME,
+    feature_name: isDemo ? LIGHTWELL_DEMO_FEATURE_NAME : LIGHTWELL_FEATURE_NAME,
   };
 
-  const useMock = LIGHTWELL_USE_MOCK || isDemo;
+  const useMock = LIGHTWELL_USE_MOCK;
 
   const mockRepositoryListQuery = useQuery({
     queryKey: ['lightwell-repositories-mock', page, perPage, filters, isDemo],

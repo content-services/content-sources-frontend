@@ -1,4 +1,5 @@
 export const LIGHTWELL_FEATURE_NAME = 'lightwell-network';
+export const LIGHTWELL_DEMO_FEATURE_NAME = 'lightwell-network-demo';
 export const LIGHTWELL_ROUTE = '/lightwell';
 export const LIGHTWELL_ORIGIN = 'lightwell';
 export const LIGHTWELL_USE_MOCK = false;
