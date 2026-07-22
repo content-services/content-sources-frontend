@@ -1,6 +1,10 @@
 import { useContentListQuery } from 'services/Content/ContentQueries';
 import { ContentItem } from 'services/Content/ContentApi';
-import { LIGHTWELL_FEATURE_NAME } from './constants';
+import {
+  LIGHTWELL_DEMO_FEATURE_NAME,
+  LIGHTWELL_FEATURE_NAME,
+  LIGHTWELL_USE_MOCK,
+} from './constants';
 import { getRepositoryNameFromPathSlug } from './helpers';
 import { useLightwellDemo } from './LightwellDemoContext';
 import { getMockLightwellRepositoryBySlug } from './mockRepositories';
@@ -16,17 +20,18 @@ interface UseLightwellRepositoryResult {
 const useLightwellRepository = (repoSlug: string): UseLightwellRepositoryResult => {
   const isDemo = useLightwellDemo();
   const repositoryName = getRepositoryNameFromPathSlug(repoSlug);
+  const featureName = isDemo ? LIGHTWELL_DEMO_FEATURE_NAME : LIGHTWELL_FEATURE_NAME;
 
   const { data, isLoading, isError, error } = useContentListQuery(
     1,
     1,
-    { feature_name: LIGHTWELL_FEATURE_NAME, name: repositoryName },
+    { feature_name: featureName, name: repositoryName },
     '',
     [],
-    !!repositoryName && !isDemo,
+    !!repositoryName && !LIGHTWELL_USE_MOCK,
   );
 
-  if (isDemo) {
+  if (LIGHTWELL_USE_MOCK) {
     const mockRepo = getMockLightwellRepositoryBySlug(repoSlug);
     return {
       repository: mockRepo,

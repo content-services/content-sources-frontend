@@ -37,7 +37,6 @@ import {
   usePythonPackageVersionsQuery,
 } from 'services/Content/ContentQueries';
 import { LIGHTWELL_USE_MOCK } from '../constants';
-import { useLightwellDemo } from '../LightwellDemoContext';
 import {
   compareVersionsDesc,
   formatDistributionUrl,
@@ -93,8 +92,7 @@ const PackageDetails = () => {
   const releasesTabRef = createRef<HTMLElement>();
   const versionsTabRef = createRef<HTMLElement>();
 
-  const isDemo = useLightwellDemo();
-  const useMock = LIGHTWELL_USE_MOCK || isDemo;
+  const useMock = LIGHTWELL_USE_MOCK;
 
   const {
     repository,

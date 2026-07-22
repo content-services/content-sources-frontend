@@ -54,7 +54,6 @@ import {
 } from '../helpers';
 import Hide from 'components/Hide/Hide';
 import { LIGHTWELL_USE_MOCK, lightwellPkgsPerPageKey } from '../constants';
-import { useLightwellDemo } from '../LightwellDemoContext';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Loader from 'components/Loader';
 import ConnectRepositoryModal from '../Repositories/components/ConnectRepositoryModal';
@@ -203,12 +202,11 @@ const PackagesTable = () => {
 
   const { repoName: repoSlug = '' } = useParams();
   const navigate = useNavigate();
-  const isDemo = useLightwellDemo();
   const [page, setPage] = useState(1);
   const storedPerPage = Number(localStorage.getItem(lightwellPkgsPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
   const [expandedPackages, setExpandedPackages] = useState<Set<string>>(new Set());
-  const useMock = LIGHTWELL_USE_MOCK || isDemo;
+  const useMock = LIGHTWELL_USE_MOCK;
 
   const [filterData, setFilterData] = useState<PackageFilterData>(defaultFilterData);
   const [searchQuery, setSearchQuery] = useState('');
