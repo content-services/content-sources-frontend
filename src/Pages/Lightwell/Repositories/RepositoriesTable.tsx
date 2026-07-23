@@ -50,7 +50,7 @@ import {
   formatEcosystemDisplay,
   getRepositoryDescription,
   formatRepositoryName,
-  getRepositoryPathSlug,
+  getSlugFromRepositoryName,
 } from '../helpers';
 import ConnectRepositoryModal from './components/ConnectRepositoryModal';
 import { capitalize } from 'lodash';
@@ -229,9 +229,7 @@ const RepositoriesTable = () => {
                                     isInline
                                     ouiaId={`lightwell-repo-${uuid}`}
                                     className={text.fontWeightBold}
-                                    onClick={() =>
-                                      navigate(getRepositoryPathSlug(content_type, security_level))
-                                    }
+                                    onClick={() => navigate(getSlugFromRepositoryName(name))}
                                   >
                                     {formatRepositoryName(content_type, security_level, name)}
                                   </Button>
