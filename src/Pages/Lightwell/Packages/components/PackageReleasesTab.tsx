@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { RepositoryPackageReleaseInfo } from 'services/Content/ContentApi';
 import CopyLabel from './CopyLabel';
-import { compareReleasesDesc, sortVersionsDesc, stripLightwellVersionSuffix } from '../../helpers';
+import { compareReleasesDesc, sortVersionsDesc } from '../../helpers';
 
 type PackageReleasesTabProps = {
   version: string;
@@ -17,10 +17,7 @@ type PackageReleasesTabProps = {
 
 export const buildVersionFromRelease = (
   release: Pick<RepositoryPackageReleaseInfo, 'version' | 'release'>,
-) =>
-  release.version.includes('.rhlw-')
-    ? release.version
-    : `${stripLightwellVersionSuffix(release.version)}.${release.release}`;
+) => `${release.version}.${release.release}`;
 
 const PackageReleasesTab = ({
   version,
@@ -37,10 +34,9 @@ const PackageReleasesTab = ({
 
     for (const r of sorted) {
       if (!r.release) continue;
-      const upstream = stripLightwellVersionSuffix(r.version);
-      if (!map[upstream]) {
-        map[upstream] = r;
-        versions.push(upstream);
+      if (!map[r.version]) {
+        map[r.version] = r;
+        versions.push(r.version);
       }
     }
 
@@ -48,8 +44,7 @@ const PackageReleasesTab = ({
       return { releaseMap: map, sortedVersions: versions };
     }
 
-    const stripped = allVersions.map(stripLightwellVersionSuffix);
-    return { releaseMap: map, sortedVersions: sortVersionsDesc([...new Set(stripped)]) };
+    return { releaseMap: map, sortedVersions: sortVersionsDesc([...new Set(allVersions)]) };
   }, [allVersions, latestReleases]);
 
   return (
@@ -65,14 +60,17 @@ const PackageReleasesTab = ({
           </Tr>
         </Thead>
         <Tbody>
-          {builds.map((build) => (
-            <Tr key={build.version}>
-              <Td dataLabel='Release'>
-                <CopyLabel copyText={formatCopyText(build.version)}>{build.version}</CopyLabel>
-              </Td>
-              <Td dataLabel='Date'>{build.created_at?.split('T')[0] ?? '—'}</Td>
-            </Tr>
-          ))}
+          {builds.map((build) => {
+            const fullVersion = buildVersionFromRelease(build);
+            return (
+              <Tr key={fullVersion}>
+                <Td dataLabel='Release'>
+                  <CopyLabel copyText={formatCopyText(fullVersion)}>{fullVersion}</CopyLabel>
+                </Td>
+                <Td dataLabel='Date'>{build.created_at?.split('T')[0] ?? '—'}</Td>
+              </Tr>
+            );
+          })}
         </Tbody>
       </Table>
       <Title headingLevel='h2' size='lg'>

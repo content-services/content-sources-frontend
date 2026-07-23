@@ -250,10 +250,10 @@ it('shows one version row per upstream version with its latest release only', as
     name: 'my-lib',
     versions: ['2.0.0', '1.0.0'],
     latest_releases: [
-      { version: '2.0.0.rhlw-2', release: 'rhlw-2', created_at: '2026-07-02T00:00:00Z' },
-      { version: '2.0.0.rhlw-1', release: 'rhlw-1', created_at: '2026-07-01T00:00:00Z' },
-      { version: '1.0.0.rhlw-3', release: 'rhlw-3', created_at: '2026-06-15T00:00:00Z' },
-      { version: '1.0.0.rhlw-1', release: 'rhlw-1', created_at: '2026-06-13T00:00:00Z' },
+      { version: '2.0.0', release: 'rhlw-2', created_at: '2026-07-02T00:00:00Z' },
+      { version: '2.0.0', release: 'rhlw-1', created_at: '2026-07-01T00:00:00Z' },
+      { version: '1.0.0', release: 'rhlw-3', created_at: '2026-06-15T00:00:00Z' },
+      { version: '1.0.0', release: 'rhlw-1', created_at: '2026-06-13T00:00:00Z' },
     ],
   };
 

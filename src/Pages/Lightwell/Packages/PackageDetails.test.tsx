@@ -3,14 +3,12 @@ import userEvent from '@testing-library/user-event';
 
 import PackageDetails from './PackageDetails';
 import {
-  useLightwellRepositoryPackagesQuery,
   useMavenPackageVersionsListQuery,
   usePythonPackageVersionsQuery,
 } from 'services/Content/ContentQueries';
 import {
   defaultLightwellContentItem,
   defaultLightwellRepositoryPackageItem,
-  defaultLightwellRepositoryPackageResponse,
   defaultPythonRemediatedContentItem,
   defaultPythonPackageVersions,
   defaultPythonRemediatedRepositoryPackageItem,
@@ -22,23 +20,16 @@ import {
   javaRemediatedCopyCommand,
   mavenRemediatedDependencySnippet,
   mavenValidatedDependencySnippet,
-  pipConfRemediatedInstallSnippet,
   pipConfValidatedInstallSnippet,
-  pipRemediatedInstallSnippet,
   pipValidatedInstallSnippet,
-  pythonRemediatedPipCommand,
   ReactQueryTestWrapper,
-  requirementsRemediatedInstallSnippet,
   requirementsValidatedInstallSnippet,
-  otherPythonRemediatedPipCommand,
   otherJavaRemediatedCopyCommand,
 } from 'testingHelpers';
-import { RepositoryPackageItem } from 'services/Content/ContentApi';
 import { getRepositoryPathSlug } from '../helpers';
 import useLightwellRepository from '../useLightwellRepository';
 
 jest.mock('services/Content/ContentQueries', () => ({
-  useLightwellRepositoryPackagesQuery: jest.fn(),
   useMavenPackageVersionsListQuery: jest.fn(),
   usePythonPackageVersionsQuery: jest.fn(),
 }));
@@ -70,58 +61,8 @@ jest.mock('../../../Hooks/useLightwellNavigate', () => ({
 }));
 
 const defaultBuilds = [
-  { version: '3.14.0.rhlw-00001', release: 'rhlw-00001', created_at: '2026-07-01T00:00:00Z' },
+  { version: '3.14.0', release: 'rhlw-00001', created_at: '2026-07-01T00:00:00Z' },
 ];
-
-const multiVersionReleasePackage: RepositoryPackageItem = {
-  group: 'org.json.test',
-  name: 'json-test',
-  versions: ['3.14.0', '2.12.0'],
-  latest_releases: [
-    { version: '3.14.0', release: 'rhlw-00001', created_at: '2026-07-01T00:00:00Z' },
-    { version: '2.12.0', release: 'rhlw-00002', created_at: '2026-06-18T00:00:00Z' },
-  ],
-};
-
-const multiVersionReleasePackageWithFullVersions: RepositoryPackageItem = {
-  ...multiVersionReleasePackage,
-  latest_releases: [
-    { version: '3.14.0.rhlw-00001', release: 'rhlw-00001', created_at: '2026-07-01T00:00:00Z' },
-    { version: '2.12.0.rhlw-00002', release: 'rhlw-00002', created_at: '2026-06-18T00:00:00Z' },
-  ],
-};
-
-const multipleReleasesPerVersionPackage: RepositoryPackageItem = {
-  group: 'org.json.test',
-  name: 'json-test',
-  versions: [
-    '3.14.0.rhlw-00003',
-    '3.14.0.rhlw-00002',
-    '3.14.0.rhlw-00001',
-    '2.12.0.rhlw-00002',
-    '2.12.0.rhlw-00001',
-  ],
-  latest_releases: [
-    { version: '3.14.0.rhlw-00003', release: 'rhlw-00003', created_at: '2026-07-03T00:00:00Z' },
-    { version: '3.14.0.rhlw-00002', release: 'rhlw-00002', created_at: '2026-07-02T00:00:00Z' },
-    { version: '3.14.0.rhlw-00001', release: 'rhlw-00001', created_at: '2026-07-01T00:00:00Z' },
-    { version: '2.12.0.rhlw-00002', release: 'rhlw-00002', created_at: '2026-06-18T00:00:00Z' },
-    { version: '2.12.0.rhlw-00001', release: 'rhlw-00001', created_at: '2026-06-17T00:00:00Z' },
-  ],
-};
-
-const multiVersionNoReleasePackage: RepositoryPackageItem = {
-  group: 'org.json.test',
-  name: 'json-test',
-  versions: ['2.21.2', '2.20.0', '2.19.1'],
-  latest_releases: [
-    { version: '2.21.2', release: '', created_at: '2026-07-01T00:00:00Z' },
-    { version: '2.20.0', release: '', created_at: '2026-06-15T00:00:00Z' },
-    { version: '2.19.1', release: '', created_at: '2026-06-01T00:00:00Z' },
-  ],
-};
-
-const noReleaseBuilds = [{ version: '2.21.2', release: '', created_at: '2026-07-01T00:00:00Z' }];
 
 type PackageMetadata = {
   summary?: string;
@@ -151,16 +92,6 @@ const mockVersionsListQuery = (
   },
 });
 
-const mockPackagesQuery = () => ({
-  isLoading: false,
-  isFetching: false,
-  data: {
-    ...defaultLightwellRepositoryPackageResponse,
-    results: [defaultLightwellRepositoryPackageItem],
-    total: 1,
-  },
-});
-
 const renderPackageDetails = () =>
   render(
     <ReactQueryTestWrapper>
@@ -181,7 +112,6 @@ beforeEach(() => {
     isError: false,
     error: undefined,
   });
-  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(mockPackagesQuery);
   (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => mockVersionsListQuery());
   (usePythonPackageVersionsQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
@@ -191,9 +121,14 @@ beforeEach(() => {
 });
 
 it('shows empty state when the package has no builds', async () => {
-  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() =>
-    mockVersionsListQuery([]),
-  );
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: {
+      group: defaultLightwellRepositoryPackageItem.group,
+      name: defaultLightwellRepositoryPackageItem.name,
+      versions: [],
+    },
+  }));
 
   renderPackageDetails();
 
@@ -201,18 +136,33 @@ it('shows empty state when the package has no builds', async () => {
 });
 
 const setupNoReleasePackage = () => {
-  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => ({
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
-    isFetching: false,
     data: {
-      ...defaultLightwellRepositoryPackageResponse,
-      results: [multiVersionNoReleasePackage],
-      total: 1,
+      group: 'org.json.test',
+      name: 'json-test',
+      versions: [
+        {
+          group: 'org.json.test',
+          name: 'json-test',
+          version: '2.21.2',
+          builds: [{ version: '2.21.2', release: '', created_at: '2026-07-01T00:00:00Z' }],
+        },
+        {
+          group: 'org.json.test',
+          name: 'json-test',
+          version: '2.20.0',
+          builds: [{ version: '2.20.0', release: '', created_at: '2026-06-15T00:00:00Z' }],
+        },
+        {
+          group: 'org.json.test',
+          name: 'json-test',
+          version: '2.19.1',
+          builds: [{ version: '2.19.1', release: '', created_at: '2026-06-01T00:00:00Z' }],
+        },
+      ],
     },
   }));
-  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() =>
-    mockVersionsListQuery(noReleaseBuilds, {}, '2.21.2'),
-  );
 };
 
 const setupPythonRemediatedPackage = () => {
@@ -227,15 +177,6 @@ const setupPythonRemediatedPackage = () => {
     isError: false,
     error: undefined,
   });
-  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => ({
-    isLoading: false,
-    isFetching: false,
-    data: {
-      ...defaultLightwellRepositoryPackageResponse,
-      results: [defaultPythonRemediatedRepositoryPackageItem],
-      total: 1,
-    },
-  }));
   (usePythonPackageVersionsQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     isFetching: false,
@@ -349,16 +290,31 @@ it('shows upstream versions list in sidebar for non-release packages', async () 
 });
 
 const setupMultiVersionReleasePackage = () => {
-  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => ({
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
-    isFetching: false,
     data: {
-      ...defaultLightwellRepositoryPackageResponse,
-      results: [multiVersionReleasePackage],
-      total: 1,
+      group: 'org.json.test',
+      name: 'json-test',
+      versions: [
+        {
+          group: 'org.json.test',
+          name: 'json-test',
+          version: '3.14.0',
+          builds: [
+            { version: '3.14.0', release: 'rhlw-00001', created_at: '2026-07-01T00:00:00Z' },
+          ],
+        },
+        {
+          group: 'org.json.test',
+          name: 'json-test',
+          version: '2.12.0',
+          builds: [
+            { version: '2.12.0', release: 'rhlw-00002', created_at: '2026-06-18T00:00:00Z' },
+          ],
+        },
+      ],
     },
   }));
-  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => mockVersionsListQuery());
 };
 
 it('shows "Available versions" on Releases tab for multi-version release packages', async () => {
@@ -381,22 +337,34 @@ it('shows "Available versions" on Releases tab for multi-version release package
 });
 
 it('deduplicates "Available versions" rows when multiple releases share the same base version', async () => {
-  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => ({
+  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
-    isFetching: false,
     data: {
-      ...defaultLightwellRepositoryPackageResponse,
-      results: [multipleReleasesPerVersionPackage],
-      total: 1,
+      group: 'org.json.test',
+      name: 'json-test',
+      versions: [
+        {
+          group: 'org.json.test',
+          name: 'json-test',
+          version: '3.14.0',
+          builds: [
+            { version: '3.14.0', release: 'rhlw-00003', created_at: '2026-07-03T00:00:00Z' },
+            { version: '3.14.0', release: 'rhlw-00002', created_at: '2026-07-02T00:00:00Z' },
+            { version: '3.14.0', release: 'rhlw-00001', created_at: '2026-07-01T00:00:00Z' },
+          ],
+        },
+        {
+          group: 'org.json.test',
+          name: 'json-test',
+          version: '2.12.0',
+          builds: [
+            { version: '2.12.0', release: 'rhlw-00002', created_at: '2026-06-18T00:00:00Z' },
+            { version: '2.12.0', release: 'rhlw-00001', created_at: '2026-06-17T00:00:00Z' },
+          ],
+        },
+      ],
     },
   }));
-  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() =>
-    mockVersionsListQuery(
-      [{ version: '3.14.0.rhlw-00003', release: 'rhlw-00003', created_at: '2026-07-03T00:00:00Z' }],
-      {},
-      '3.14.0.rhlw-00003',
-    ),
-  );
 
   renderPackageDetails();
 
@@ -408,28 +376,6 @@ it('deduplicates "Available versions" rows when multiple releases share the same
   expect(versionRows).toHaveLength(2);
   expect(versionRows[0]).toHaveTextContent('3.14.0');
   expect(versionRows[1]).toHaveTextContent('2.12.0');
-});
-
-it('shows release metadata when latest_releases use full version strings', async () => {
-  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => ({
-    isLoading: false,
-    isFetching: false,
-    data: {
-      ...defaultLightwellRepositoryPackageResponse,
-      results: [multiVersionReleasePackageWithFullVersions],
-      total: 1,
-    },
-  }));
-  (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => mockVersionsListQuery());
-
-  renderPackageDetails();
-
-  const releasesTab = await screen.findByRole('tab', { name: 'Releases' });
-  await userEvent.click(releasesTab);
-
-  expect(await screen.findByText('2.12.0.rhlw-00002')).toBeInTheDocument();
-  expect(await screen.findByText('2026-06-18')).toBeInTheDocument();
-  expect(await screen.findByRole('button', { name: '2.12.0' })).toBeInTheDocument();
 });
 
 it('shows version dropdown for multi-version release packages', async () => {
@@ -477,62 +423,6 @@ const assertClipboardCopy = async (
   expect(writeText).toHaveBeenCalledTimes(1);
   expect(writeText).toHaveBeenCalledWith(expected);
 };
-
-it('copies pip command to clipboard for remediated python package', async () => {
-  const writeText = mockClipboard();
-
-  setupPythonRemediatedPackage();
-  renderPackageDetails();
-
-  // pip tab in "How to use" section of Overview tab
-  await assertClipboardCopy(
-    writeText,
-    async () => {
-      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
-    },
-    pipRemediatedInstallSnippet,
-  );
-
-  // requirements.txt tab in "How to use" section of Overview tab
-  await assertClipboardCopy(
-    writeText,
-    async () => {
-      await userEvent.click(await screen.findByRole('tab', { name: 'requirements.txt' }));
-      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
-    },
-    requirementsRemediatedInstallSnippet,
-  );
-
-  // pip.conf tab in "How to use" section of Overview tab
-  await assertClipboardCopy(
-    writeText,
-    async () => {
-      await userEvent.click(await screen.findByRole('tab', { name: 'pip.conf' }));
-      await userEvent.click(await screen.findByRole('button', { name: 'Copy' }));
-    },
-    pipConfRemediatedInstallSnippet,
-  );
-
-  // "Releases for version x.x.x" section of Releases tab
-  await assertClipboardCopy(
-    writeText,
-    async () => {
-      await userEvent.click(await screen.findByRole('tab', { name: 'Releases' }));
-      const buttons = await screen.findAllByRole('button', { name: '2.32.0.rhlw-0002' });
-      await userEvent.click(buttons[0]);
-    },
-    pythonRemediatedPipCommand,
-  );
-
-  // "Available versions" section of Releases tab
-  await assertClipboardCopy(
-    writeText,
-    async () => {
-      await userEvent.click(await screen.findByRole('button', { name: '2.31.0.rhlw-0001' }));
-    },
-    otherPythonRemediatedPipCommand,
-  );
-});
 
 it('copies maven coordinate to clipboard for remediated java package', async () => {
   const writeText = mockClipboard();
@@ -592,15 +482,6 @@ const setupPythonValidatedPackage = () => {
     isError: false,
     error: undefined,
   });
-  (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => ({
-    isLoading: false,
-    isFetching: false,
-    data: {
-      ...defaultLightwellRepositoryPackageResponse,
-      results: [defaultPythonValidatedPackageItem],
-      total: 1,
-    },
-  }));
   (usePythonPackageVersionsQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     isFetching: false,

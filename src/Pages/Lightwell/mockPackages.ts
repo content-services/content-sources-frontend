@@ -337,9 +337,7 @@ const mavenRemediatedDetail = (
     group,
     name,
     version: v.version,
-    builds: [
-      { version: `${v.version}.rhlw-00001`, release: 'rhlw-00001', created_at: v.created_at },
-    ],
+    builds: [{ version: v.version, release: 'rhlw-00001', created_at: v.created_at }],
     summary,
     license,
     project_url: projectUrl,
@@ -487,17 +485,17 @@ const mockMavenVersionsListByRepo: Record<
           version: '2.24.1',
           builds: [
             {
-              version: '2.24.1.rhlw-00003',
+              version: '2.24.1',
               release: 'rhlw-00003',
               created_at: '2026-07-10T00:00:00Z',
             },
             {
-              version: '2.24.1.rhlw-00002',
+              version: '2.24.1',
               release: 'rhlw-00002',
               created_at: '2026-06-28T00:00:00Z',
             },
             {
-              version: '2.24.1.rhlw-00001',
+              version: '2.24.1',
               release: 'rhlw-00001',
               created_at: '2026-06-15T00:00:00Z',
             },
@@ -530,12 +528,12 @@ const mockMavenVersionsListByRepo: Record<
           version: '6.2.1',
           builds: [
             {
-              version: '6.2.1.rhlw-00002',
+              version: '6.2.1',
               release: 'rhlw-00002',
               created_at: '2026-07-05T00:00:00Z',
             },
             {
-              version: '6.2.1.rhlw-00001',
+              version: '6.2.1',
               release: 'rhlw-00001',
               created_at: '2026-06-22T00:00:00Z',
             },
@@ -590,12 +588,12 @@ const mockMavenVersionsListByRepo: Record<
           version: '4.1.115',
           builds: [
             {
-              version: '4.1.115.rhlw-00002',
+              version: '4.1.115',
               release: 'rhlw-00002',
               created_at: '2026-07-12T00:00:00Z',
             },
             {
-              version: '4.1.115.rhlw-00001',
+              version: '4.1.115',
               release: 'rhlw-00001',
               created_at: '2026-07-03T00:00:00Z',
             },
@@ -612,12 +610,12 @@ const mockMavenVersionsListByRepo: Record<
           version: '4.1.114',
           builds: [
             {
-              version: '4.1.114.rhlw-00002',
+              version: '4.1.114',
               release: 'rhlw-00002',
               created_at: '2026-06-15T00:00:00Z',
             },
             {
-              version: '4.1.114.rhlw-00001',
+              version: '4.1.114',
               release: 'rhlw-00001',
               created_at: '2026-06-01T00:00:00Z',
             },

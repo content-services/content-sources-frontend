@@ -50,7 +50,6 @@ import {
   formatRepositoryName,
   getRepositoryDescription,
   sortVersionsDesc,
-  stripLightwellVersionSuffix,
 } from '../helpers';
 import Hide from 'components/Hide/Hide';
 import { LIGHTWELL_USE_MOCK, lightwellPkgsPerPageKey } from '../constants';
@@ -105,26 +104,24 @@ const mapRepositoryPackage = (pkg: RepositoryPackageItem): MappedPackage => {
 
   const sortedReleases = [...pkg.latest_releases].sort(compareReleasesDesc);
 
-  // Deduplicate: keep only the latest release per upstream version
   const seenVersions = new Set<string>();
   const latestReleasePerVersion = sortedReleases.filter((release) => {
-    const v = stripLightwellVersionSuffix(release.version);
-    if (seenVersions.has(v)) return false;
-    seenVersions.add(v);
+    if (seenVersions.has(release.version)) return false;
+    seenVersions.add(release.version);
     return true;
   });
 
   const sortedVersions =
     latestReleasePerVersion.length > 0
-      ? latestReleasePerVersion.map((release) => stripLightwellVersionSuffix(release.version))
-      : sortVersionsDesc(pkg.versions.map(stripLightwellVersionSuffix));
+      ? latestReleasePerVersion.map((release) => release.version)
+      : sortVersionsDesc(pkg.versions);
 
   return {
     group_id: pkg.group,
     name: pkg.name,
     versions: sortedVersions,
     latest_releases: latestReleasePerVersion.map((release) => ({
-      version: stripLightwellVersionSuffix(release.version),
+      version: release.version,
       release: release.release,
     })),
     last_updated: latestCreatedAt ?? '',
