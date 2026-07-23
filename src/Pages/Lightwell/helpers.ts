@@ -53,6 +53,11 @@ export const getRepositoryPathSlug = (contentType?: string, securityLevel?: stri
   return `${ecosystem}-${level}`;
 };
 
+export const getSlugFromRepositoryName = (name: string): string => {
+  const path = name.replace(`${LIGHTWELL_ORIGIN}/`, '').replace('/', '-');
+  return path || '';
+};
+
 // Converts URL path slug to its Lightwell repository name
 export const getRepositoryNameFromPathSlug = (slug: string): string => {
   const normalized = slug.toLowerCase();
