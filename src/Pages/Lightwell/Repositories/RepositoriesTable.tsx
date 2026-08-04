@@ -56,6 +56,12 @@ import ConnectRepositoryModal from './components/ConnectRepositoryModal';
 import { capitalize } from 'lodash';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useLightwellNavigateTo } from 'Hooks/Lightwell/navigation/useLightwellNavigateTo';
+import {
+  canManageLightwellTokens,
+  canViewLightwellPackages,
+  useIsOrgAdmin,
+} from 'Hooks/Lightwell/useIsOrgAdmin';
+import { useAppContext } from 'middleware/AppContext';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -72,6 +78,10 @@ const RepositoriesTable = () => {
   const classes = useStyles();
   const isDemo = useLightwellDemo();
   const { navigateTo } = useLightwellNavigateTo();
+  const { features } = useAppContext();
+  const { isOrgAdmin } = useIsOrgAdmin();
+  const showAccessTokens = canManageLightwellTokens(features, isOrgAdmin);
+  const canViewPackages = canViewLightwellPackages(features, isOrgAdmin);
   const [page, setPage] = useState(1);
   const storedPerPage = Number(localStorage.getItem(lightwellReposPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
@@ -160,6 +170,23 @@ const RepositoriesTable = () => {
       />
       <PageSection hasBodyWrapper={false} className={`${spacing.pt_0} ${spacing.pb_2xl}`}>
         <Grid data-ouia-component-id='lightwell-repositories-page'>
+          <Hide hide={!showAccessTokens}>
+            <Flex
+              className={classes.topContainer}
+              data-ouia-component-id='lightwell-repositories-tokens-toolbar'
+            >
+              <FlexItem />
+              <FlexItem>
+                <Button
+                  variant='secondary'
+                  ouiaId='lightwell-access-tokens-button'
+                  onClick={() => navigateTo('tokens')}
+                >
+                  Access tokens
+                </Button>
+              </FlexItem>
+            </Flex>
+          </Hide>
           <Hide hide={countIsZero || count < 10}>
             <Flex
               className={classes.topContainer}
@@ -224,19 +251,28 @@ const RepositoriesTable = () => {
                                   <Icon size='xl'>
                                     {content_type === 'maven' ? <JavaIcon /> : <PythonIcon />}
                                   </Icon>
-                                  <Button
-                                    variant='link'
-                                    isInline
-                                    ouiaId={`lightwell-repo-${uuid}`}
-                                    className={text.fontWeightBold}
-                                    onClick={() =>
-                                      navigateTo('repositoryPackages', {
-                                        repoSlug: getSlugFromRepositoryName(name),
-                                      })
-                                    }
-                                  >
-                                    {formatRepositoryName(content_type, security_level, name)}
-                                  </Button>
+                                  {canViewPackages ? (
+                                    <Button
+                                      variant='link'
+                                      isInline
+                                      ouiaId={`lightwell-repo-${uuid}`}
+                                      className={text.fontWeightBold}
+                                      onClick={() =>
+                                        navigateTo('repositoryPackages', {
+                                          repoSlug: getSlugFromRepositoryName(name),
+                                        })
+                                      }
+                                    >
+                                      {formatRepositoryName(content_type, security_level, name)}
+                                    </Button>
+                                  ) : (
+                                    <span
+                                      className={text.fontWeightBold}
+                                      data-ouia-component-id={`lightwell-repo-${uuid}`}
+                                    >
+                                      {formatRepositoryName(content_type, security_level, name)}
+                                    </span>
+                                  )}
                                 </Flex>
                                 <FlexItem>
                                   <Content component='small'>

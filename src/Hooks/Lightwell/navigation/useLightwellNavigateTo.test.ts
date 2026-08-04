@@ -24,6 +24,14 @@ describe('useLightwellNavigateTo', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/root');
   });
 
+  it('navigates to tokens', () => {
+    const { result } = renderHook(() => useLightwellNavigateTo());
+
+    act(() => result.current.navigateTo('tokens'));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/root/tokens');
+  });
+
   it('navigates to repository packages', () => {
     const { result } = renderHook(() => useLightwellNavigateTo());
 
