@@ -29,6 +29,8 @@ import {
 import { getRepositoryPathSlug } from '../helpers';
 import useLightwellRepository from '../../../Hooks/Lightwell/useLightwellRepository';
 import { useLightwellNavigateTo } from '../../../Hooks/Lightwell/navigation/useLightwellNavigateTo';
+import { useAppContext } from 'middleware/AppContext';
+import { useIsOrgAdmin } from 'Hooks/Lightwell/useIsOrgAdmin';
 
 jest.mock('services/Content/ContentQueries', () => ({
   useMavenPackageVersionsListQuery: jest.fn(),
@@ -36,6 +38,16 @@ jest.mock('services/Content/ContentQueries', () => ({
 }));
 
 jest.mock('Hooks/Lightwell/useLightwellRepository');
+
+jest.mock('middleware/AppContext', () => ({
+  useAppContext: jest.fn(),
+}));
+
+jest.mock('Hooks/Lightwell/useIsOrgAdmin', () => ({
+  useIsOrgAdmin: jest.fn(),
+  canViewLightwellPackages: jest.requireActual('Hooks/Lightwell/useIsOrgAdmin')
+    .canViewLightwellPackages,
+}));
 
 const defaultRepoSlug = getRepositoryPathSlug(
   defaultLightwellContentItem.content_type,
@@ -106,6 +118,10 @@ beforeEach(() => {
   (useLightwellNavigateTo as jest.Mock).mockReturnValue({
     navigateTo: mockNavigateTo,
   });
+  (useAppContext as jest.Mock).mockReturnValue({
+    features: { lightwell: { enabled: true, accessible: true } },
+  });
+  (useIsOrgAdmin as jest.Mock).mockReturnValue({ isOrgAdmin: true, isLoading: false });
   mockUseParams.mockReturnValue({
     repoName: defaultRepoSlug,
     group: defaultLightwellRepositoryPackageItem.group,
@@ -124,6 +140,14 @@ beforeEach(() => {
     isFetching: false,
     data: undefined,
   }));
+});
+
+it('shows no permissions for non-org-admins', async () => {
+  (useIsOrgAdmin as jest.Mock).mockReturnValue({ isOrgAdmin: false, isLoading: false });
+
+  renderPackageDetails();
+
+  expect(await screen.findByText('You do not have access')).toBeInTheDocument();
 });
 
 it('shows empty state when the package has no builds', async () => {

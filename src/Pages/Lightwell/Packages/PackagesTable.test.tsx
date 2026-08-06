@@ -18,6 +18,8 @@ import { ContentItem, RepositoryPackageItem } from 'services/Content/ContentApi'
 import { getRepositoryPathSlug } from '../helpers';
 import useLightwellRepository from '../../../Hooks/Lightwell/useLightwellRepository';
 import { useLightwellNavigateTo } from '../../../Hooks/Lightwell/navigation/useLightwellNavigateTo';
+import { useAppContext } from 'middleware/AppContext';
+import { useIsOrgAdmin } from 'Hooks/Lightwell/useIsOrgAdmin';
 
 jest.mock('services/Content/ContentQueries', () => ({
   useLightwellRepositoryPackagesQuery: jest.fn(),
@@ -31,6 +33,16 @@ const mockNavigateTo = jest.fn();
 
 jest.mock('Hooks/Lightwell/navigation/useLightwellNavigateTo', () => ({
   useLightwellNavigateTo: jest.fn(),
+}));
+
+jest.mock('middleware/AppContext', () => ({
+  useAppContext: jest.fn(),
+}));
+
+jest.mock('Hooks/Lightwell/useIsOrgAdmin', () => ({
+  useIsOrgAdmin: jest.fn(),
+  canViewLightwellPackages: jest.requireActual('Hooks/Lightwell/useIsOrgAdmin')
+    .canViewLightwellPackages,
 }));
 
 const mockUseParams = jest.fn(() => ({
@@ -110,6 +122,10 @@ beforeEach(() => {
   (useLightwellNavigateTo as jest.Mock).mockReturnValue({
     navigateTo: mockNavigateTo,
   });
+  (useAppContext as jest.Mock).mockReturnValue({
+    features: { lightwell: { enabled: true, accessible: true } },
+  });
+  (useIsOrgAdmin as jest.Mock).mockReturnValue({ isOrgAdmin: true, isLoading: false });
   mockUseParams.mockReturnValue({
     repoName: getRepositoryPathSlug(
       defaultLightwellContentItem.content_type,
@@ -118,6 +134,21 @@ beforeEach(() => {
   });
   mockRepository();
   (useLightwellRepositoryPackagesQuery as jest.Mock).mockImplementation(() => mockPackagesQuery());
+});
+
+it('shows no permissions for non-org-admins', async () => {
+  (useIsOrgAdmin as jest.Mock).mockReturnValue({ isOrgAdmin: false, isLoading: false });
+
+  renderPackagesTable();
+
+  expect(await screen.findByText('You do not have access')).toBeInTheDocument();
+  expect(useLightwellRepositoryPackagesQuery).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.anything(),
+    expect.anything(),
+    expect.anything(),
+    false,
+  );
 });
 
 it('shows empty state when there are no packages', async () => {
