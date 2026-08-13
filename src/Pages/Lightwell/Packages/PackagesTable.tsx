@@ -51,6 +51,7 @@ import {
   sortVersionsDesc,
 } from '../helpers';
 import Hide from 'components/Hide/Hide';
+import { NoPermissionsPage } from 'components/NoPermissionsPage/NoPermissionsPage';
 import { LIGHTWELL_USE_MOCK, lightwellPkgsPerPageKey } from '../constants';
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Loader from 'components/Loader';
@@ -61,6 +62,8 @@ import RemediatedDataWarning from '../RemediatedDataWarning';
 import useLightwellRepository from '../../../Hooks/Lightwell/useLightwellRepository';
 import { useLightwellNavigateTo } from '../../../Hooks/Lightwell/navigation/useLightwellNavigateTo';
 import { useLightwellPackagesParams } from '../../../Hooks/Lightwell/useLightwellPackagesParams';
+import { canViewLightwellPackages, useIsOrgAdmin } from '../../../Hooks/Lightwell/useIsOrgAdmin';
+import { useAppContext } from 'middleware/AppContext';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -194,6 +197,9 @@ const PackagesTable = () => {
 
   const { repoName: repoSlug = '' } = useParams();
   const { navigateTo } = useLightwellNavigateTo();
+  const { features } = useAppContext();
+  const { isOrgAdmin, isLoading: isOrgAdminLoading } = useIsOrgAdmin();
+  const canViewPackages = canViewLightwellPackages(features, isOrgAdmin);
   const { searchQuery, setSearchQuery, debouncedSearch, page, setPage, onSetPage, packagesParams } =
     useLightwellPackagesParams();
 
@@ -216,7 +222,7 @@ const PackagesTable = () => {
     page,
     perPage,
     debouncedSearch,
-    !!repoUUID && !useMock,
+    canViewPackages && !!repoUUID && !useMock,
   );
 
   const {
@@ -245,6 +251,14 @@ const PackagesTable = () => {
   const fetchingOrLoading = useMock ? false : isPackagesLoading || isPackagesFetching;
   const countIsZero = packageCount === 0;
   const showPagination = packages.length > 0;
+
+  if (isOrgAdminLoading || features === null) {
+    return <Loader />;
+  }
+
+  if (!canViewPackages) {
+    return <NoPermissionsPage />;
+  }
 
   if (isResolvingRepository || !repository) {
     return <Loader />;

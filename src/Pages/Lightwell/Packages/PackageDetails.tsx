@@ -31,6 +31,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 
 import EmptyTableState from 'components/EmptyTableState/EmptyTableState';
 import Loader from 'components/Loader';
+import { NoPermissionsPage } from 'components/NoPermissionsPage/NoPermissionsPage';
 import {
   useMavenPackageVersionsListQuery,
   usePythonPackageVersionsQuery,
@@ -51,12 +52,14 @@ import {
 import RemediatedDataWarning from '../RemediatedDataWarning';
 import ConnectRepositoryModal from '../Repositories/components/ConnectRepositoryModal';
 import useLightwellRepository from '../../../Hooks/Lightwell/useLightwellRepository';
+import { canViewLightwellPackages, useIsOrgAdmin } from '../../../Hooks/Lightwell/useIsOrgAdmin';
 import PackageOverviewTab from './components/PackageOverviewTab';
 import PackageReleasesTab, { buildVersionFromRelease } from './components/PackageReleasesTab';
 import PackageSidebar from './components/PackageSidebar';
 import PackageVersionsTab from './components/PackageVersionsTab';
 import { useLightwellNavigateTo } from '../../../Hooks/Lightwell/navigation/useLightwellNavigateTo';
 import { parseSearchParams } from '../../../Hooks/Lightwell/lightwellPackagesParams';
+import { useAppContext } from 'middleware/AppContext';
 
 const useStyles = createUseStyles({
   topContainer: {
@@ -73,6 +76,9 @@ const useStyles = createUseStyles({
 const PackageDetails = () => {
   const classes = useStyles();
   const { navigateTo } = useLightwellNavigateTo();
+  const { features } = useAppContext();
+  const { isOrgAdmin, isLoading: isOrgAdminLoading } = useIsOrgAdmin();
+  const canViewPackages = canViewLightwellPackages(features, isOrgAdmin);
   const [searchParams] = useSearchParams();
   const packagesParams = parseSearchParams(searchParams); // preserve the params when navigating back to packages table
 
@@ -111,13 +117,13 @@ const PackageDetails = () => {
     repoUUID,
     packageGroup,
     packageName,
-    !useMock,
+    canViewPackages && !useMock,
   );
 
   const pythonPackageVersionsQuery = usePythonPackageVersionsQuery(
     repoUUID,
     packageName,
-    isPython && !!repoUUID && !!packageName && !useMock,
+    canViewPackages && isPython && !!repoUUID && !!packageName && !useMock,
   );
 
   const mockMavenVersionsList = useMemo(
@@ -222,6 +228,14 @@ const PackageDetails = () => {
     : isMaven
       ? mavenVersionsListQuery.isLoading
       : pythonPackageVersionsQuery.isLoading && !pythonPackageVersionsQuery.data;
+
+  if (isOrgAdminLoading || features === null) {
+    return <Loader />;
+  }
+
+  if (!canViewPackages) {
+    return <NoPermissionsPage />;
+  }
 
   if (isResolvingRepository || !repository) {
     return <Loader />;

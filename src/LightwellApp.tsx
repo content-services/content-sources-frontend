@@ -9,6 +9,7 @@ import usePageSafe from 'Hooks/usePageSafe';
 import PackagesTable from 'Pages/Lightwell/Packages/PackagesTable';
 import PackageDetails from 'Pages/Lightwell/Packages/PackageDetails';
 import RepositoriesTable from 'Pages/Lightwell/Repositories/RepositoriesTable';
+import TokensTable from 'Pages/Lightwell/Tokens/TokensTable';
 import { LightwellDemoLayout } from 'Pages/Lightwell/LightwellDemoContext';
 
 export default function LightwellApp() {
@@ -30,6 +31,8 @@ export default function LightwellApp() {
           <Route path=':repoName' element={<PackagesTable />} />
         </Route>
         <Route index element={<RepositoriesTable />} />
+        {/* Must be registered before :repoName or "tokens" is captured as a repo slug */}
+        <Route path='tokens' element={<TokensTable />} />
         <Route path=':repoName/:group/:packageName' element={<PackageDetails />} />
         <Route path=':repoName/:packageName' element={<PackageDetails />} />
         <Route path=':repoName' element={<PackagesTable />} />

@@ -12,6 +12,8 @@ import {
 import { ContentItem } from 'services/Content/ContentApi';
 import { getRepositoryPathSlug } from '../helpers';
 import { useLightwellNavigateTo } from '../../../Hooks/Lightwell/navigation/useLightwellNavigateTo';
+import { useAppContext } from 'middleware/AppContext';
+import { useIsOrgAdmin } from 'Hooks/Lightwell/useIsOrgAdmin';
 
 jest.mock('services/Content/ContentQueries', () => ({
   useContentListQuery: jest.fn(),
@@ -22,6 +24,18 @@ const mockNavigateTo = jest.fn();
 
 jest.mock('Hooks/Lightwell/navigation/useLightwellNavigateTo', () => ({
   useLightwellNavigateTo: jest.fn(),
+}));
+
+jest.mock('middleware/AppContext', () => ({
+  useAppContext: jest.fn(),
+}));
+
+jest.mock('Hooks/Lightwell/useIsOrgAdmin', () => ({
+  useIsOrgAdmin: jest.fn(),
+  canManageLightwellTokens: jest.requireActual('Hooks/Lightwell/useIsOrgAdmin')
+    .canManageLightwellTokens,
+  canViewLightwellPackages: jest.requireActual('Hooks/Lightwell/useIsOrgAdmin')
+    .canViewLightwellPackages,
 }));
 
 jest.mock('../constants', () => ({
@@ -48,9 +62,14 @@ const renderRepositoriesTable = () =>
   );
 
 beforeEach(() => {
+  mockNavigateTo.mockClear();
   (useLightwellNavigateTo as jest.Mock).mockReturnValue({
     navigateTo: mockNavigateTo,
   });
+  (useAppContext as jest.Mock).mockReturnValue({
+    features: { lightwell: { enabled: true, accessible: true } },
+  });
+  (useIsOrgAdmin as jest.Mock).mockReturnValue({ isOrgAdmin: false, isLoading: false });
 });
 
 it('shows empty state when there are no repositories', async () => {
@@ -97,6 +116,7 @@ it('shows a loading skeleton while repositories are loading', () => {
 });
 
 it('navigates to repository packages when a repository name is clicked', async () => {
+  (useIsOrgAdmin as jest.Mock).mockReturnValue({ isOrgAdmin: true, isLoading: false });
   (useContentListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     data: {
@@ -115,6 +135,21 @@ it('navigates to repository packages when a repository name is clicked', async (
       defaultLightwellContentItem.security_level,
     ),
   });
+});
+
+it('does not link repository names for non-org-admins', async () => {
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: {
+      data: [defaultLightwellContentItem],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+  }));
+
+  renderRepositoriesTable();
+
+  expect(await screen.findByText('Java Validated')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Java Validated' })).not.toBeInTheDocument();
 });
 
 it('renders java remediated repository with remediated description', async () => {
@@ -203,4 +238,35 @@ it('renders repository table column headers', async () => {
   expect(screen.getByRole('columnheader', { name: 'Security level' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Packages' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Versions' })).toBeInTheDocument();
+});
+
+it('shows access tokens button for org admins with lightwell feature', async () => {
+  (useIsOrgAdmin as jest.Mock).mockReturnValue({ isOrgAdmin: true, isLoading: false });
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: {
+      data: [defaultLightwellContentItem],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+  }));
+
+  renderRepositoriesTable();
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Access tokens' }));
+  expect(mockNavigateTo).toHaveBeenCalledWith('tokens');
+});
+
+it('hides access tokens button for non-admins', async () => {
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: {
+      data: [defaultLightwellContentItem],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+  }));
+
+  renderRepositoriesTable();
+
+  expect(await screen.findByText('Java Validated')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Access tokens' })).not.toBeInTheDocument();
 });
