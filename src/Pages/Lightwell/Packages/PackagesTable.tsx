@@ -19,6 +19,8 @@ import {
   ToolbarItem,
   Timestamp,
 } from '@patternfly/react-core';
+import { useRemoteHook } from '@scalprum/react-core';
+import { useFlag } from '@unleash/proxy-client-react';
 import { CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
@@ -61,6 +63,7 @@ import CopyLabel from './components/CopyLabel';
 import RemediatedDataWarning from '../RemediatedDataWarning';
 import useLightwellRepository from '../../../Hooks/Lightwell/useLightwellRepository';
 import { useLightwellNavigateTo } from '../../../Hooks/Lightwell/navigation/useLightwellNavigateTo';
+import { useLightwellRootPath } from '../../../Hooks/Lightwell/navigation/useLightwellRootPath';
 import { useLightwellPackagesParams } from '../../../Hooks/Lightwell/useLightwellPackagesParams';
 
 const useStyles = createUseStyles({
@@ -243,6 +246,26 @@ const PackagesTable = () => {
     };
   }, [useMock, repoUUID, debouncedSearch, page, perPage, packagesData]);
 
+  const rootPath = useLightwellRootPath();
+  const appBreadcrumbsEnabled = useFlag('platform.chrome.app-breadcrumbs');
+  const breadcrumbRepoName = repository
+    ? formatRepositoryName(repository.content_type, repository.security_level, repository.name)
+    : '';
+
+  const breadcrumbs = useMemo(
+    () => [
+      { pathname: rootPath, title: 'Lightwell' },
+      { pathname: `${rootPath}/${repoSlug}`, title: breadcrumbRepoName },
+    ],
+    [rootPath, repoSlug, breadcrumbRepoName],
+  );
+
+  useRemoteHook({
+    scope: 'chrome',
+    module: './breadcrumbs/useReplaceBreadcrumbs',
+    args: appBreadcrumbsEnabled ? [breadcrumbs] : [[]],
+  });
+
   const fetchingOrLoading = useMock ? false : isPackagesLoading || isPackagesFetching;
   const countIsZero = packageCount === 0;
   const showPagination = packages.length > 0;
@@ -306,14 +329,16 @@ const PackagesTable = () => {
     <>
       <Grid className={classes.topContainer}>
         <Stack>
-          <StackItem>
-            <Breadcrumb ouiaId='lightwell-packages-breadcrumb'>
-              <BreadcrumbItem component='button' onClick={() => navigateTo('repositories')}>
-                Lightwell
-              </BreadcrumbItem>
-              <BreadcrumbItem disabled>{repositoryName}</BreadcrumbItem>
-            </Breadcrumb>
-          </StackItem>
+          {!appBreadcrumbsEnabled && (
+            <StackItem>
+              <Breadcrumb ouiaId='lightwell-packages-breadcrumb'>
+                <BreadcrumbItem component='button' onClick={() => navigateTo('repositories')}>
+                  Lightwell
+                </BreadcrumbItem>
+                <BreadcrumbItem isActive>{breadcrumbRepoName}</BreadcrumbItem>
+              </Breadcrumb>
+            </StackItem>
+          )}
           <StackItem className={classes.titleWrapper}>
             <Flex
               alignItems={{ default: 'alignItemsCenter' }}

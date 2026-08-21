@@ -14,6 +14,8 @@ import {
   Switch,
 } from '@patternfly/react-core';
 import { CodeIcon, JavaIcon, PythonIcon, BellIcon } from '@patternfly/react-icons';
+import { useRemoteHook } from '@scalprum/react-core';
+import { useFlag } from '@unleash/proxy-client-react';
 import { SkeletonTable } from '@patternfly/react-component-groups';
 import {
   Table,
@@ -25,7 +27,7 @@ import {
   Tr,
   type BaseCellProps,
 } from '@patternfly/react-table';
-import { type ComponentProps, useState } from 'react';
+import { type ComponentProps, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import text from '@patternfly/react-styles/css/utilities/Text/text';
@@ -57,6 +59,7 @@ import ConnectRepositoryModal from './components/ConnectRepositoryModal';
 import { capitalize } from 'lodash';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useLightwellNavigateTo } from 'Hooks/Lightwell/navigation/useLightwellNavigateTo';
+import { useLightwellRootPath } from 'Hooks/Lightwell/navigation/useLightwellRootPath';
 import NotificationPreferencesModal from './components/NotificationPreferencesModal';
 import LightwellPageHeader from '../components/LightwellPageHeader';
 import { useLightwellNotificationPrefs } from './hooks/useLightwellNotificationPrefs';
@@ -80,12 +83,22 @@ const RepositoriesTable = () => {
   const classes = useStyles();
   const isDemo = useLightwellDemo();
   const { navigateTo } = useLightwellNavigateTo();
+  const rootPath = useLightwellRootPath();
   const [page, setPage] = useState(1);
   const storedPerPage = Number(localStorage.getItem(lightwellReposPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
   const filters: FilterData = {
     feature_name: isDemo ? LIGHTWELL_DEMO_FEATURE_NAME : LIGHTWELL_FEATURE_NAME,
   };
+
+  const appBreadcrumbsEnabled = useFlag('platform.chrome.app-breadcrumbs');
+  const breadcrumbs = useMemo(() => [{ pathname: rootPath, title: 'Lightwell' }], [rootPath]);
+
+  useRemoteHook({
+    scope: 'chrome',
+    module: './breadcrumbs/useReplaceBreadcrumbs',
+    args: appBreadcrumbsEnabled ? [breadcrumbs] : [[]],
+  });
 
   const useMock = LIGHTWELL_USE_MOCK;
 
