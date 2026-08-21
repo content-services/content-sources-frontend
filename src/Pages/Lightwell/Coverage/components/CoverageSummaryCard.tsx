@@ -5,11 +5,13 @@ import {
   Flex,
   FlexItem,
   Title,
+  Tooltip,
 } from '@patternfly/react-core';
 import text from '@patternfly/react-styles/css/utilities/Text/text';
 import alignment from '@patternfly/react-styles/css/utilities/Alignment/alignment';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { ChartDonut } from '@patternfly/react-charts/victory';
+import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { EXACT_MATCH_COLOR, FUZZY_MATCH_COLOR, UNCOVERED_COLOR } from '../constants';
 import { CompletedCoverageReport } from 'services/Lightwell/CoverageReportsApi';
 
@@ -55,16 +57,31 @@ const CoverageSummaryCard = ({ report }: CoverageSummaryCardProps) => {
               <CardBody>
                 <Flex gap={{ default: 'gapLg' }} justifyContent={{ default: 'justifyContentSpaceAround' }}>
                   {[
-                    { count: report.exact_matches, label: 'Exact matches' },
-                    { count: report.partial_matches, label: 'Partial matches' },
-                    { count: report.unmatched, label: 'Out of network' },
-                  ].map(({ count, label }) => (
+                    {
+                      count: report.exact_matches,
+                      label: 'Exact matches',
+                      tooltip: 'Package name and version found in the Lightwell Network catalog.',
+                    },
+                    {
+                      count: report.partial_matches,
+                      label: 'Partial matches',
+                      tooltip: 'Package name found in the catalog, but not the specific version you are running.',
+                    },
+                    {
+                      count: report.unmatched,
+                      label: 'Out of network',
+                      tooltip: 'Package not found in the Lightwell Network catalog.',
+                    },
+                  ].map(({ count, label, tooltip }) => (
                     <FlexItem key={label} style={{ textAlign: 'center' }}>
                       <Title headingLevel='h4' size='4xl'>
                         {count}
                       </Title>
-                      <Content component='p'>
-                        {label}
+                      <Content component='p' className={text.fontSizeLg}>
+                        {label}{' '}
+                        <Tooltip content={tooltip}>
+                          <OutlinedQuestionCircleIcon className={text.textColorSubtle} />
+                        </Tooltip>
                       </Content>
                     </FlexItem>
                   ))}
