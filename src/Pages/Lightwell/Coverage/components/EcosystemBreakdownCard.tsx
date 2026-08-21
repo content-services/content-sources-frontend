@@ -1,8 +1,4 @@
 import {
-  Card,
-  CardBody,
-  CardHeader,
-  CardTitle,
   Content,
   Flex,
   FlexItem,
@@ -40,24 +36,19 @@ const EcosystemBreakdownCard = ({ report }: EcosystemBreakdownCardProps) => {
   }));
 
   return (
-    <Card isGlass>
-      <CardHeader>
-        <CardTitle>
-          <Title headingLevel='h3' size='lg'>
-            Coverage by Ecosystem Breakdown
-          </Title>
-        </CardTitle>
-      </CardHeader>
-      <CardBody>
-        <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
-          <FlexItem>
-            <Content component='p'>
-              {inNetwork} of {report.total} packages in your inventory are available in the
-              Lightwell Validated catalog.
-            </Content>
-          </FlexItem>
-          {/* TODO: v2 — make charts responsive */}
-          <FlexItem alignSelf={{ default: 'alignSelfCenter' }} style={{ maxWidth: 450 }}>
+    <>
+      <Title headingLevel='h3' size='lg'>
+        Coverage by Ecosystem
+      </Title>
+      <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
+        <FlexItem>
+          <Content component='p'>
+            {inNetwork} of {report.total} packages in your inventory are available in the
+            Lightwell Validated catalog.
+          </Content>
+        </FlexItem>
+        {/* TODO: v2 — make charts responsive */}
+        <FlexItem alignSelf={{ default: 'alignSelfCenter' }} style={{ maxWidth: 450 }}>
             <Chart
               ariaDesc='Horizontal stacked bar chart showing exact match, name match, and unmatched packages per ecosystem'
               horizontal
@@ -69,8 +60,8 @@ const EcosystemBreakdownCard = ({ report }: EcosystemBreakdownCardProps) => {
               legendOrientation='vertical'
               legendData={[
                 { name: 'Exact match', symbol: { fill: EXACT_MATCH_COLOR } },
-                { name: 'Name match', symbol: { fill: FUZZY_MATCH_COLOR } },
-                { name: 'No match', symbol: { fill: UNCOVERED_COLOR } },
+                { name: 'Partial match', symbol: { fill: FUZZY_MATCH_COLOR } },
+                { name: 'Out of network', symbol: { fill: UNCOVERED_COLOR } },
               ]}
             >
               <ChartAxis style={{ tickLabels: { fontSize: 14 } }} />
@@ -95,20 +86,19 @@ const EcosystemBreakdownCard = ({ report }: EcosystemBreakdownCardProps) => {
                   data={fuzzyPackages}
                   style={{ data: { fill: FUZZY_MATCH_COLOR } }}
                   labelComponent={<ChartTooltip constrainToVisibleArea />}
-                  labels={({ datum }) => `${datum.x} name match: ${datum.y}`}
+                  labels={({ datum }) => `${datum.x} partial match: ${datum.y}`}
                 />
                 <ChartBar
                   data={unmatchedPackages}
                   style={{ data: { fill: UNCOVERED_COLOR } }}
                   labelComponent={<ChartTooltip constrainToVisibleArea />}
-                  labels={({ datum }) => `${datum.x} no match: ${datum.y}`}
+                  labels={({ datum }) => `${datum.x} out of network: ${datum.y}`}
                 />
               </ChartStack>
             </Chart>
           </FlexItem>
-        </Flex>
-      </CardBody>
-    </Card>
+      </Flex>
+    </>
   );
 };
 

@@ -5,13 +5,47 @@ import {
 } from 'services/Lightwell/CoverageReportsQueries';
 import { validateManifestFile } from '../utils/validateManifestFile';
 import type { CompletedCoverageReport } from 'services/Lightwell/CoverageReportsApi';
+import { LIGHTWELL_USE_MOCK } from 'Pages/Lightwell/constants';
 
 export type ProcessStep = 'select' | 'uploading' | 'analyzing' | 'complete' | 'error';
 export type FileUploadStatus = 'success' | 'error' | 'default';
 
 const POLLING_RETRY_LIMIT = 40;
 
+const MOCK_REPORT: CompletedCoverageReport = {
+  uuid: 'mock-report',
+  status: 'completed',
+  created_at: '2026-08-18T00:00:00Z',
+  completed_at: '2026-08-18T00:00:01Z',
+  total: 7,
+  exact_matches: 4,
+  partial_matches: 2,
+  unmatched: 1,
+  ecosystem_coverage_summary: [
+    { ecosystem: 'maven', total: 3, exact_matches: 2, partial_matches: 1, unmatched: 0 },
+    { ecosystem: 'npm', total: 2, exact_matches: 1, partial_matches: 1, unmatched: 0 },
+    { ecosystem: 'pypi', total: 2, exact_matches: 1, partial_matches: 0, unmatched: 1 },
+  ],
+};
+
 export const useCoverageAnalysis = () => {
+  if (LIGHTWELL_USE_MOCK) {
+    return {
+      filename: 'Vuln-Report_2026-08-18.csv',
+      report: MOCK_REPORT,
+      uploadProps: {
+        file: undefined,
+        fileError: undefined,
+        processError: undefined,
+        validated: 'default' as FileUploadStatus,
+        isLoading: false,
+        onDropAccepted: () => undefined,
+        onClearClick: () => undefined,
+        onRetry: () => undefined,
+      },
+      startOver: () => undefined,
+    };
+  }
   const [step, setStep] = useState<ProcessStep>('select');
   const [file, setFile] = useState<File | undefined>();
   const [reportUUID, setReportUUID] = useState('');
