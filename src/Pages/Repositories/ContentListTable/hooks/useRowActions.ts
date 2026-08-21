@@ -5,7 +5,7 @@ import { TooltipPosition } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import { useAppContext } from 'middleware/AppContext';
-import { EDIT_ROUTE, UPLOAD_ROUTE, DELETE_ROUTE } from 'Routes/constants';
+import { EDIT_ROUTE, UPLOAD_ROUTE, DELETE_ROUTE, PARTNER_REPO_ROUTE } from 'Routes/constants';
 import type { ActionRowData } from '../components/RepositoryActionCell';
 
 const useStyles = createUseStyles({
@@ -33,10 +33,26 @@ export default function useRowActions({
   const classes = useStyles();
 
   const rowActions = useCallback(
-    (rowData: ActionRowData): IAction[] =>
-      isRedHatRepository ||
-      rowData.origin === ContentOrigin.REDHAT ||
-      rowData.origin === ContentOrigin.COMMUNITY
+    (rowData: ActionRowData): IAction[] => {
+      // admin partner repository
+      const isMarkRepoAsPartnerAllowed = (repository: ActionRowData) =>
+        features?.adminpartnerrepositories?.enabled &&
+        features.adminpartnerrepositories.accessible &&
+        repository.origin === ContentOrigin.UPLOAD &&
+        !repository.partner; // disable umarking repository as partner
+
+      const markRepoAsPartnerAction = {
+        isDisabled: rowData?.status === 'Pending',
+        title: 'Mark as partner repository',
+        ouiaId: 'kebab-mark-as-partner',
+        onClick: () => {
+          navigate(`${rowData.uuid}/${PARTNER_REPO_ROUTE}`);
+        },
+      };
+
+      return isRedHatRepository ||
+        rowData.origin === ContentOrigin.REDHAT ||
+        rowData.origin === ContentOrigin.COMMUNITY
         ? features?.snapshots?.accessible
           ? [
               {
@@ -76,6 +92,7 @@ export default function useRowActions({
                         },
                       ]
                     : []),
+                  ...(isMarkRepoAsPartnerAllowed(rowData) ? [markRepoAsPartnerAction] : []),
                 ]
               : []),
             ...(features?.snapshots?.accessible
@@ -138,7 +155,8 @@ export default function useRowActions({
                   },
                 ]
               : []),
-          ],
+          ];
+    },
     [
       isRedHatRepository,
       features?.snapshots?.accessible,
