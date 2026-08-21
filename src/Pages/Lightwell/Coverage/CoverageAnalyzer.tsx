@@ -35,7 +35,7 @@ const CoverageAnalyzer = () => {
       <PageSection
         aria-label='Coverage Analyzer'
         hasBodyWrapper={false}
-        className={`${spacing.pt_0} ${spacing.pbLg} ${spacing.plXs}`}
+        className={`${spacing.pt_0} ${spacing.pbLg} ${spacing.pxLg} ${spacing.plXs}`}
       >
         <Stack hasGutter>
           {report ? (
