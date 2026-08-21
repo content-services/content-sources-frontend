@@ -16,7 +16,7 @@ import {
   ChartTooltip,
 } from '@patternfly/react-charts/victory';
 
-import { IN_NETWORK_COLOR, UNCOVERED_COLOR } from '../constants';
+import { EXACT_MATCH_COLOR, FUZZY_MATCH_COLOR, UNCOVERED_COLOR } from '../constants';
 import { CompletedCoverageReport } from 'services/Lightwell/CoverageReportsApi';
 
 type EcosystemBreakdownCardProps = {
@@ -26,9 +26,13 @@ type EcosystemBreakdownCardProps = {
 const EcosystemBreakdownCard = ({ report }: EcosystemBreakdownCardProps) => {
   const ecosystemCount = report.ecosystem_coverage_summary.length;
   const inNetwork = report.exact_matches + report.partial_matches;
-  const matchedPackages = report.ecosystem_coverage_summary.map((eco) => ({
+  const exactPackages = report.ecosystem_coverage_summary.map((eco) => ({
     x: eco.ecosystem,
-    y: eco.exact_matches + eco.partial_matches,
+    y: eco.exact_matches,
+  }));
+  const fuzzyPackages = report.ecosystem_coverage_summary.map((eco) => ({
+    x: eco.ecosystem,
+    y: eco.partial_matches,
   }));
   const unmatchedPackages = report.ecosystem_coverage_summary.map((eco) => ({
     x: eco.ecosystem,
@@ -55,7 +59,7 @@ const EcosystemBreakdownCard = ({ report }: EcosystemBreakdownCardProps) => {
           {/* TODO: v2 — make charts responsive */}
           <FlexItem alignSelf={{ default: 'alignSelfCenter' }} style={{ maxWidth: 450 }}>
             <Chart
-              ariaDesc='Horizontal stacked bar chart showing in-network vs out-of-network packages per ecosystem'
+              ariaDesc='Horizontal stacked bar chart showing exact match, name match, and unmatched packages per ecosystem'
               horizontal
               domainPadding={{ x: [15, 15] }}
               height={75 + ecosystemCount * 55}
@@ -64,8 +68,9 @@ const EcosystemBreakdownCard = ({ report }: EcosystemBreakdownCardProps) => {
               legendPosition='right'
               legendOrientation='vertical'
               legendData={[
-                { name: 'In Network', symbol: { fill: IN_NETWORK_COLOR } },
-                { name: 'Out of Network', symbol: { fill: UNCOVERED_COLOR } },
+                { name: 'Exact match', symbol: { fill: EXACT_MATCH_COLOR } },
+                { name: 'Name match', symbol: { fill: FUZZY_MATCH_COLOR } },
+                { name: 'No match', symbol: { fill: UNCOVERED_COLOR } },
               ]}
             >
               <ChartAxis style={{ tickLabels: { fontSize: 14 } }} />
@@ -81,16 +86,22 @@ const EcosystemBreakdownCard = ({ report }: EcosystemBreakdownCardProps) => {
               />
               <ChartStack>
                 <ChartBar
-                  data={matchedPackages}
-                  style={{ data: { fill: IN_NETWORK_COLOR } }}
+                  data={exactPackages}
+                  style={{ data: { fill: EXACT_MATCH_COLOR } }}
                   labelComponent={<ChartTooltip constrainToVisibleArea />}
-                  labels={({ datum }) => `${datum.x} in network: ${datum.y}`}
+                  labels={({ datum }) => `${datum.x} exact match: ${datum.y}`}
+                />
+                <ChartBar
+                  data={fuzzyPackages}
+                  style={{ data: { fill: FUZZY_MATCH_COLOR } }}
+                  labelComponent={<ChartTooltip constrainToVisibleArea />}
+                  labels={({ datum }) => `${datum.x} name match: ${datum.y}`}
                 />
                 <ChartBar
                   data={unmatchedPackages}
                   style={{ data: { fill: UNCOVERED_COLOR } }}
                   labelComponent={<ChartTooltip constrainToVisibleArea />}
-                  labels={({ datum }) => `${datum.x} out of network: ${datum.y}`}
+                  labels={({ datum }) => `${datum.x} no match: ${datum.y}`}
                 />
               </ChartStack>
             </Chart>

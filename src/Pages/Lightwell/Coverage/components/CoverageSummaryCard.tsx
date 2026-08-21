@@ -12,7 +12,7 @@ import { ChartDonut } from '@patternfly/react-charts/victory';
 import text from '@patternfly/react-styles/css/utilities/Text/text';
 import alignment from '@patternfly/react-styles/css/utilities/Alignment/alignment';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
-import { IN_NETWORK_COLOR, UNCOVERED_COLOR } from '../constants';
+import { EXACT_MATCH_COLOR, FUZZY_MATCH_COLOR, UNCOVERED_COLOR } from '../constants';
 import { CompletedCoverageReport } from 'services/Lightwell/CoverageReportsApi';
 
 type CoverageSummaryCardProps = {
@@ -22,7 +22,6 @@ type CoverageSummaryCardProps = {
 
 const CoverageSummaryCard = ({ filename, report }: CoverageSummaryCardProps) => {
   const inNetwork = report.exact_matches + report.partial_matches;
-  const outOfNetwork = report.unmatched;
   const percentage = report.total > 0 ? Math.round((inNetwork / report.total) * 100) : 0;
 
   return (
@@ -45,10 +44,11 @@ const CoverageSummaryCard = ({ filename, report }: CoverageSummaryCardProps) => 
               ariaDesc='Coverage summary donut chart'
               constrainToVisibleArea
               data={[
-                { x: 'In Network', y: inNetwork },
-                { x: 'Out of Network', y: outOfNetwork },
+                { x: 'Exact match', y: report.exact_matches },
+                { x: 'Name match', y: report.partial_matches },
+                { x: 'No match', y: report.unmatched },
               ]}
-              colorScale={[IN_NETWORK_COLOR, UNCOVERED_COLOR]}
+              colorScale={[EXACT_MATCH_COLOR, FUZZY_MATCH_COLOR, UNCOVERED_COLOR]}
               labels={({ datum }) => `${datum.x}: ${datum.y}`}
               title={`${percentage}%`}
               subTitle='in network'
