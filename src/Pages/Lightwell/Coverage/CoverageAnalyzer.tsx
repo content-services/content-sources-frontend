@@ -37,7 +37,7 @@ const CoverageAnalyzer = () => {
         hasBodyWrapper={false}
         className={`${spacing.pt_0} ${spacing.pbLg} ${spacing.pxLg} ${spacing.plXs}`}
       >
-        <Stack hasGutter>
+        <Stack hasGutter style={{ maxWidth: 1200 }}>
           {report ? (
             <>
               <StackItem>
@@ -45,6 +45,16 @@ const CoverageAnalyzer = () => {
               </StackItem>
               <StackItem>
                 <EcosystemBreakdownCard report={report} />
+              </StackItem>
+              <StackItem>
+                <Divider />
+                <HelperText className={spacing.pMd}>
+                  <HelperTextItem variant='default'>
+                    {report.unmatched} out of network packages logged as demand signals for the
+                    Catalog Build Queue. This does not constitute a commitment to build these
+                    packages.
+                  </HelperTextItem>
+                </HelperText>
               </StackItem>
             </>
           ) : (

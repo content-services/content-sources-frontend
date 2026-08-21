@@ -4,6 +4,7 @@ import {
   FlexItem,
   Title,
 } from '@patternfly/react-core';
+import { useRef, useState, useEffect } from 'react';
 import {
   Chart,
   ChartAxis,
@@ -13,6 +14,7 @@ import {
 } from '@patternfly/react-charts/victory';
 
 import { EXACT_MATCH_COLOR, FUZZY_MATCH_COLOR, UNCOVERED_COLOR } from '../constants';
+import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { CompletedCoverageReport } from 'services/Lightwell/CoverageReportsApi';
 
 type EcosystemBreakdownCardProps = {
@@ -20,6 +22,19 @@ type EcosystemBreakdownCardProps = {
 };
 
 const EcosystemBreakdownCard = ({ report }: EcosystemBreakdownCardProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(500);
+
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setChartWidth(entry.contentRect.width);
+      }
+    });
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   const ecosystemCount = report.ecosystem_coverage_summary.length;
   const inNetwork = report.exact_matches + report.partial_matches;
   const exactPackages = report.ecosystem_coverage_summary.map((eco) => ({
@@ -37,30 +52,30 @@ const EcosystemBreakdownCard = ({ report }: EcosystemBreakdownCardProps) => {
 
   return (
     <>
-      <Title headingLevel='h3' size='lg'>
+      <Title headingLevel='h3' size='2xl' className={spacing.pbSm}>
         Coverage by Ecosystem
       </Title>
       <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
         <FlexItem>
           <Content component='p'>
-            {inNetwork} of {report.total} packages in your inventory are available in the
+            <strong>{inNetwork}</strong> of <strong>{report.total}</strong> packages in your inventory are available in the
             Lightwell Validated catalog.
           </Content>
         </FlexItem>
-        {/* TODO: v2 — make charts responsive */}
-        <FlexItem alignSelf={{ default: 'alignSelfCenter' }} style={{ maxWidth: 450 }}>
+        <FlexItem>
+          <div ref={containerRef} style={{ width: '100%' }}>
             <Chart
               ariaDesc='Horizontal stacked bar chart showing exact match, name match, and unmatched packages per ecosystem'
               horizontal
               domainPadding={{ x: [15, 15] }}
               height={75 + ecosystemCount * 55}
-              width={500}
+              width={chartWidth}
               padding={{ bottom: 65, left: 100, right: 140, top: 10 }}
               legendPosition='right'
               legendOrientation='vertical'
               legendData={[
-                { name: 'Exact match', symbol: { fill: EXACT_MATCH_COLOR } },
-                { name: 'Partial match', symbol: { fill: FUZZY_MATCH_COLOR } },
+                { name: 'Exact matches', symbol: { fill: EXACT_MATCH_COLOR } },
+                { name: 'Partial matches', symbol: { fill: FUZZY_MATCH_COLOR } },
                 { name: 'Out of network', symbol: { fill: UNCOVERED_COLOR } },
               ]}
             >
@@ -96,6 +111,7 @@ const EcosystemBreakdownCard = ({ report }: EcosystemBreakdownCardProps) => {
                 />
               </ChartStack>
             </Chart>
+          </div>
           </FlexItem>
       </Flex>
     </>

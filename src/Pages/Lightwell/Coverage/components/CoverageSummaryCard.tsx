@@ -29,8 +29,8 @@ const CoverageSummaryCard = ({ report }: CoverageSummaryCardProps) => {
             ariaDesc='Coverage summary donut chart'
             constrainToVisibleArea
             data={[
-              { x: 'Exact match', y: report.exact_matches },
-              { x: 'Partial match', y: report.partial_matches },
+              { x: 'Exact matches', y: report.exact_matches },
+              { x: 'Partial matches', y: report.partial_matches },
               { x: 'Out of network', y: report.unmatched },
             ]}
             colorScale={[EXACT_MATCH_COLOR, FUZZY_MATCH_COLOR, UNCOVERED_COLOR]}
@@ -55,8 +55,8 @@ const CoverageSummaryCard = ({ report }: CoverageSummaryCardProps) => {
               <CardBody>
                 <Flex gap={{ default: 'gapLg' }} justifyContent={{ default: 'justifyContentSpaceAround' }}>
                   {[
-                    { count: report.exact_matches, label: 'Exact match' },
-                    { count: report.partial_matches, label: 'Partial match' },
+                    { count: report.exact_matches, label: 'Exact matches' },
+                    { count: report.partial_matches, label: 'Partial matches' },
                     { count: report.unmatched, label: 'Out of network' },
                   ].map(({ count, label }) => (
                     <FlexItem key={label} style={{ textAlign: 'center' }}>
