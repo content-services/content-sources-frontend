@@ -74,23 +74,43 @@ export const getRepositoryNameFromPathSlug = (slug: string): string => {
 };
 
 /**
- * Removes the Lightwell release suffix (.rhlw-xxxx) from a version
+ * Removes the Lightwell release suffix from a version
  *
- * Example:
- * 1.2.3.rhlw-00001 -> 1.2.3
+ * Examples:
+ * 1.2.3.rhlw-00001 -> 1.2.3 (OLD format)
+ * 1.2.3-rhlw.00003.n00001 -> 1.2.3 (NEW format)
  */
 export const stripLightwellVersionSuffix = (version: string): string =>
-  version.replace(/\.rhlw-.*$/, '');
+  version.replace(/(?:\.rhlw-|-rhlw\.).*$/, '');
+
+/**
+ * Detects whether a release string uses OLD or NEW format
+ *
+ * Examples:
+ * rhlw-00003 -> 'old' (hyphen before digits)
+ * rhlw.00003 -> 'new' (dot before digits)
+ */
+export const detectLightwellFormat = (release: string): 'old' | 'new' =>
+  release.includes('rhlw-') ? 'old' : 'new';
 
 /**
  * Extracts a release number from a Lightwell version or release
  *
  * Examples:
- * 1.2.3.rhlw-0001 -> 1
- * rhlw-0002 -> 2
+ * 1.2.3.rhlw-0001 -> 1 (OLD format)
+ * rhlw-0002 -> 2 (OLD format)
+ * rhlw.00003 -> 3 (NEW format - baseline)
+ * rhlw.00003.n00001 -> 3 (NEW format - returns baseline, ignores novel/hotfix)
  */
-export const lightwellReleaseNum = (versionOrRelease: string): number =>
-  parseInt(versionOrRelease.match(/rhlw-(\d+)$/)?.[1] ?? '0', 10);
+export const lightwellReleaseNum = (versionOrRelease: string): number => {
+  // Try OLD format first: rhlw-00003
+  const oldMatch = versionOrRelease.match(/rhlw-(\d+)/);
+  if (oldMatch) return parseInt(oldMatch[1], 10);
+
+  // Try NEW format: rhlw.00003 (baseline counter)
+  const newMatch = versionOrRelease.match(/rhlw\.(\d+)/);
+  return parseInt(newMatch?.[1] ?? '0', 10);
+};
 
 /**
  * Sorts versions in descending semantic order
@@ -121,24 +141,24 @@ export const compareVersionsDesc = (a: string, b: string) =>
 /**
  * Compares Lightwell releases in descending order. Orders initially by
  * version (ignoring the .rhlw suffix). If two releases have the same
- * version, uses the release number as a tiebreaker
+ * version, compares release strings lexicographically.
  *
- * Example:
- * 1.2.3.rhlw-0001
- * 1.2.2.rhlw-0009
- * 1.2.2.rhlw-0008
+ * Examples:
+ * Old format: 1.2.3.rhlw-0002 > 1.2.3.rhlw-0001
+ * New format: 1.2.3-rhlw.00004 > 1.2.3-rhlw.00003.n00001 > 1.2.3-rhlw.00003
  */
 export const compareReleasesDesc = (
   a: RepositoryPackageItem['latest_releases'][number],
   b: RepositoryPackageItem['latest_releases'][number],
 ) => {
+  // First compare by upstream version
   const versionComparison = compareVersionsDesc(a.version, b.version);
 
   if (versionComparison !== 0) {
     return versionComparison;
   }
 
-  return lightwellReleaseNum(b.release) - lightwellReleaseNum(a.release);
+  return b.release.localeCompare(a.release);
 };
 
 /**

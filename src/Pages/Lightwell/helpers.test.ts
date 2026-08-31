@@ -1,6 +1,7 @@
 import {
   compareReleasesDesc,
   compareVersionsDesc,
+  detectLightwellFormat,
   formatDistributionUrl,
   formatEcosystemDisplay,
   formatRepositoryName,
@@ -121,22 +122,35 @@ describe('getRepositoryNameFromPathSlug', () => {
 });
 
 describe('stripLightwellVersionSuffix', () => {
-  it('removes Lightwell release suffix from a version', () => {
+  it('removes OLD format Lightwell release suffix from a version', () => {
     expect(stripLightwellVersionSuffix('1.2.3.rhlw-00001')).toBe('1.2.3');
+    expect(stripLightwellVersionSuffix('2.24.1.rhlw-00002')).toBe('2.24.1');
+  });
+
+  it('removes NEW format Lightwell release suffix from a version', () => {
+    expect(stripLightwellVersionSuffix('1.2.3-rhlw.00003')).toBe('1.2.3');
+    expect(stripLightwellVersionSuffix('1.2.3-rhlw.00003.n00001')).toBe('1.2.3');
+    expect(stripLightwellVersionSuffix('1.2.3-rhlw.00003.hf00001')).toBe('1.2.3');
   });
 
   it('returns the original version when no Lightwell suffix exists', () => {
     expect(stripLightwellVersionSuffix('1.2.3')).toBe('1.2.3');
+    expect(stripLightwellVersionSuffix('1.2.3-SNAPSHOT')).toBe('1.2.3-SNAPSHOT');
   });
 });
 
 describe('lightwellReleaseNum', () => {
-  it('extracts release number from a release', () => {
+  it('extracts release number from OLD format release', () => {
     expect(lightwellReleaseNum('1.2.3.rhlw-00012')).toBe(12);
   });
 
-  it('extracts release number from a release suffix', () => {
+  it('extracts release number from OLD format release suffix', () => {
     expect(lightwellReleaseNum('rhlw-00007')).toBe(7);
+  });
+
+  it('extracts baseline number from NEW format release', () => {
+    expect(lightwellReleaseNum('rhlw.00003')).toBe(3);
+    expect(lightwellReleaseNum('rhlw.00003.n00001')).toBe(3);
   });
 
   it('returns 0 when no trailing number exists', () => {
@@ -145,6 +159,17 @@ describe('lightwellReleaseNum', () => {
 
   it('returns 0 when no Lightwell release or release exists', () => {
     expect(lightwellReleaseNum('1.2.3')).toBe(0);
+  });
+});
+
+describe('detectLightwellFormat', () => {
+  it('detects OLD format', () => {
+    expect(detectLightwellFormat('rhlw-00003')).toBe('old');
+  });
+
+  it('detects NEW format', () => {
+    expect(detectLightwellFormat('rhlw.00003')).toBe('new');
+    expect(detectLightwellFormat('rhlw.00003.n00001')).toBe('new');
   });
 });
 
@@ -200,6 +225,36 @@ describe('compareReleasesDesc', () => {
       release('1.2.2.rhlw-00009', 'rhlw-00009'),
       release('1.2.2.rhlw-00008', 'rhlw-00008'),
       release('1.2.2.rhlw-00003', 'rhlw-00003'),
+    ]);
+  });
+
+  it('sorts NEW format releases lexicographically', () => {
+    const releases = [
+      release('1.2.3', 'rhlw.00003.n00001'),
+      release('1.2.3', 'rhlw.00003'),
+      release('1.2.3', 'rhlw.00004'),
+    ];
+
+    expect([...releases].sort(compareReleasesDesc)).toEqual([
+      release('1.2.3', 'rhlw.00004'),
+      release('1.2.3', 'rhlw.00003.n00001'),
+      release('1.2.3', 'rhlw.00003'),
+    ]);
+  });
+
+  it('handles mixed OLD and NEW format releases', () => {
+    const releases = [
+      release('1.2.3', 'rhlw.00003'),
+      release('1.2.3', 'rhlw-00002'),
+      release('1.2.3', 'rhlw-00001'),
+    ];
+
+    // Lexicographic sorting: "rhlw.00003" > "rhlw-00002" > "rhlw-00001"
+    // (dot comes after hyphen in ASCII)
+    expect([...releases].sort(compareReleasesDesc)).toEqual([
+      release('1.2.3', 'rhlw.00003'),
+      release('1.2.3', 'rhlw-00002'),
+      release('1.2.3', 'rhlw-00001'),
     ]);
   });
 });
