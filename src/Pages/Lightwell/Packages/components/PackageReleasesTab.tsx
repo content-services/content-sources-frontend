@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { RepositoryPackageReleaseInfo } from 'services/Content/ContentApi';
 import CopyLabel from './CopyLabel';
-import { compareReleasesDesc, sortVersionsDesc } from '../../helpers';
+import { compareReleasesDesc, detectLightwellFormat, sortVersionsDesc } from '../../helpers';
 
 type PackageReleasesTabProps = {
   version: string;
@@ -17,7 +17,15 @@ type PackageReleasesTabProps = {
 
 export const buildVersionFromRelease = (
   release: Pick<RepositoryPackageReleaseInfo, 'version' | 'release'>,
-) => `${release.version}.${release.release}`;
+) => {
+  if (!release.release) return release.version; // Validated packages (no release)
+
+  // Detect format to use correct separator
+  const format = detectLightwellFormat(release.release);
+  const separator = format === 'old' ? '.' : '-';
+
+  return `${release.version}${separator}${release.release}`;
+};
 
 const PackageReleasesTab = ({
   version,
