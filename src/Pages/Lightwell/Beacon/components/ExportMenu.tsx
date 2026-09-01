@@ -8,15 +8,14 @@ import {
   Spinner,
   type MenuToggleElement,
 } from '@patternfly/react-core';
-import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
-import type { PDFRequestPayload } from '@redhat-cloud-services/types';
+import { pdf } from '@react-pdf/renderer';
 
 import useErrorNotification from 'Hooks/useErrorNotification';
 import useNotification from 'Hooks/useNotification';
 import { getVulnerabilities, type BeaconVulnerabilityFilters } from 'services/Lightwell/BeaconApi';
 import type { Vulnerability } from '../types';
 
-import { buildBeaconPdfPayload } from '../pdf/beaconPdf';
+import BeaconPdfDocument, { computeBeaconMeta } from '../pdf/BeaconPdfDocument';
 import { exportToCsv, exportToJson } from '../utils/exportUtils';
 import type { VulnerabilityTableColumn } from '../utils/vulnerabilityTableColumns';
 
@@ -24,7 +23,6 @@ type ExportMenuProps = {
   customerId?: string;
   filters?: BeaconVulnerabilityFilters;
   visibleColumns: Pick<VulnerabilityTableColumn, 'key' | 'title'>[];
-  itemCount?: number;
 };
 
 type ExportFormat = 'csv' | 'json' | 'pdf';
@@ -56,30 +54,15 @@ export async function fetchAllFilteredVulnerabilities(
   return vulnerabilities;
 }
 
-async function resolvePdfItemCount(
-  customerId: string,
-  filters: BeaconVulnerabilityFilters | undefined,
-  itemCount: number,
-): Promise<number> {
-  if (itemCount > 0) {
-    return itemCount;
-  }
-
-  const { meta } = await getVulnerabilities(customerId, filters, { limit: 1, offset: 0 });
-  return meta.count;
-}
-
 export function ExportMenu({
   customerId,
   filters,
   visibleColumns,
-  itemCount = 0,
 }: ExportMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const errorNotifier = useErrorNotification();
   const { notify } = useNotification();
-  const { requestPdf } = useChrome();
 
   const handleExport = async (format: ExportFormat) => {
     if (!customerId || isExporting) {
@@ -95,16 +78,21 @@ export function ExportMenu({
           title: 'Generating PDF',
           description: 'Your PDF is being generated. The download will start when it is ready.',
         });
-        const count = await resolvePdfItemCount(customerId, filters, itemCount);
-        await requestPdf({
-          filename: `lightwell-beacon-${customerId}.pdf`,
-          payload: buildBeaconPdfPayload({
-            customerId,
-            filters,
-            visibleColumns,
-            itemCount: count,
-          }) as unknown as PDFRequestPayload,
-        });
+        const vulnerabilities = await fetchAllFilteredVulnerabilities(customerId, filters);
+        const meta = computeBeaconMeta(vulnerabilities);
+        const blob = await pdf(
+          <BeaconPdfDocument
+            data={{ vulnerabilities, meta }}
+            columns={visibleColumns}
+            customerId={customerId}
+          />,
+        ).toBlob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `lightwell-beacon-${customerId}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
         notify({
           variant: AlertVariant.success,
           title: 'PDF ready',

@@ -46,6 +46,7 @@
     "@patternfly/react-table": "^6.3.1",
     "@patternfly/react-templates": "^6.6.1",
     "@project-kessel/react-kessel-access-check": "^0.5.7",
+    "@react-pdf/renderer": "^4.9.0",
     "@redhat-cloud-services/frontend-components": "^7.10.5",
     "@redhat-cloud-services/frontend-components-config": "^6.14.4",
     "@redhat-cloud-services/frontend-components-notifications": "^6.11.5",

@@ -5,8 +5,15 @@ import { AlertVariant } from '@patternfly/react-core';
 import { ExportMenu } from './ExportMenu';
 import { getVulnerabilities } from 'services/Lightwell/BeaconApi';
 
-jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
-  useChrome: jest.fn(),
+const mockToBlob = jest.fn();
+
+jest.mock('@react-pdf/renderer', () => ({
+  pdf: jest.fn(() => ({ toBlob: mockToBlob })),
+  Document: 'Document',
+  Page: 'Page',
+  View: 'View',
+  Text: 'Text',
+  StyleSheet: { create: <T extends Record<string, object>>(s: T): T => s },
 }));
 
 jest.mock('services/Lightwell/BeaconApi', () => {
@@ -27,29 +34,53 @@ jest.mock('Hooks/useNotification', () => ({
   default: jest.fn(),
 }));
 
-import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import useNotification from 'Hooks/useNotification';
 
-const requestPdf = jest.fn().mockResolvedValue(undefined);
 const notify = jest.fn();
 
 beforeEach(() => {
-  (useChrome as jest.Mock).mockReturnValue({ requestPdf });
   (useNotification as jest.Mock).mockReturnValue({ notify });
-  requestPdf.mockReset();
-  requestPdf.mockResolvedValue(undefined);
   notify.mockClear();
+  mockToBlob.mockReset();
+  mockToBlob.mockResolvedValue(new Blob(['%PDF-1.4'], { type: 'application/pdf' }));
   (getVulnerabilities as jest.Mock).mockReset();
+  URL.createObjectURL = jest.fn().mockReturnValue('blob:mock');
+  URL.revokeObjectURL = jest.fn();
 });
 
 describe('ExportMenu PDF', () => {
-  it('requests a split PDF from crc-pdf-generator without fetching every row', async () => {
+  it('generates a PDF client-side via @react-pdf/renderer and triggers a blob download', async () => {
+    (getVulnerabilities as jest.Mock).mockResolvedValue({
+      vulnerabilities: [
+        {
+          uuid: 'v1',
+          vulnerabilityId: 'CVE-2024-0001',
+          severity: 'Critical',
+          stage: 'Submitted',
+          componentName: 'pkg',
+          componentVersion: '1.0',
+          lastUpdated: '2024-01-01',
+          title: 'Test',
+          cvss: 9.8,
+          language: 'java',
+          submittedDate: '2024-01-01',
+          duplicate: false,
+          purl: '',
+          cwe: '',
+          description: '',
+          exploitTested: false,
+          reproducerIncluded: false,
+          ageDays: 10,
+        },
+      ],
+      meta: { count: 1, criticalCount: 1, stageCounts: { Submitted: 1 } },
+    });
+
     const user = userEvent.setup();
     render(
       <ExportMenu
         customerId='CID-01'
         visibleColumns={[{ key: 'vulnerabilityId', title: 'Vulnerability ID' }]}
-        itemCount={120}
       />,
     );
 
@@ -57,36 +88,32 @@ describe('ExportMenu PDF', () => {
     await user.click(screen.getByRole('menuitem', { name: 'Export as PDF' }));
 
     await waitFor(() => {
-      expect(requestPdf).toHaveBeenCalledTimes(1);
+      expect(mockToBlob).toHaveBeenCalledTimes(1);
     });
-    expect(getVulnerabilities).not.toHaveBeenCalled();
-    const pdfRequest = requestPdf.mock.calls[0][0];
-    expect(pdfRequest.filename).toBe('lightwell-beacon-CID-01.pdf');
-    expect(pdfRequest.payload).toHaveLength(3);
-    expect(pdfRequest.payload[0]).toMatchObject({
-      module: './BeaconPdfEntry',
-      landscape: false,
-      fetchDataParams: { customerId: 'CID-01', limit: 50, offset: 0 },
-      additionalData: { includeSummary: true, customerId: 'CID-01', headerBrand: 'lightwell' },
-    });
-    expect(pdfRequest.payload[1].fetchDataParams.offset).toBe(50);
-    expect(pdfRequest.payload[2].fetchDataParams.offset).toBe(100);
+
+    expect(getVulnerabilities).toHaveBeenCalled();
+    expect(URL.createObjectURL).toHaveBeenCalled();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock');
   });
 
   it('closes the menu and shows generating feedback while the PDF is in progress', async () => {
-    let resolvePdf: () => void = () => undefined;
-    requestPdf.mockReturnValue(
-      new Promise<void>((resolve) => {
-        resolvePdf = resolve;
+    let resolveBlob: (value: Blob) => void = () => undefined;
+    mockToBlob.mockReturnValue(
+      new Promise<Blob>((resolve) => {
+        resolveBlob = resolve;
       }),
     );
+
+    (getVulnerabilities as jest.Mock).mockResolvedValue({
+      vulnerabilities: [],
+      meta: { count: 0, criticalCount: 0, stageCounts: {} },
+    });
 
     const user = userEvent.setup();
     render(
       <ExportMenu
         customerId='CID-01'
         visibleColumns={[{ key: 'vulnerabilityId', title: 'Vulnerability ID' }]}
-        itemCount={10}
       />,
     );
 
@@ -104,7 +131,7 @@ describe('ExportMenu PDF', () => {
       }),
     );
 
-    resolvePdf();
+    resolveBlob(new Blob(['%PDF-1.4'], { type: 'application/pdf' }));
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
