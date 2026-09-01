@@ -1,4 +1,6 @@
 import { useMemo } from 'react';
+import { useRemoteHook } from '@scalprum/react-core';
+import { useFlag } from '@unleash/proxy-client-react';
 import LightwellPageHeader from '../components/LightwellPageHeader';
 import {
   PageSection,
@@ -21,9 +23,22 @@ import { useCoverageAnalysis } from './hooks/useCoverageAnalysis';
 import { PlusIcon } from '@patternfly/react-icons';
 import PackageCoverageTable from './components/PackageCoverageTable';
 import RemediatedDataWarning from '../RemediatedDataWarning';
+import { useLightwellRootPath } from '../../../Hooks/Lightwell/navigation/useLightwellRootPath';
 
 const CoverageAnalyzer = () => {
   const { filename, report, uploadProps, startOver } = useCoverageAnalysis();
+  const rootPath = useLightwellRootPath();
+  const appBreadcrumbsEnabled = useFlag('platform.chrome.app-breadcrumbs');
+  const breadcrumbs = useMemo(
+    () => [{ pathname: `${rootPath}/lens`, title: 'Lightwell Lens' }],
+    [rootPath],
+  );
+
+  useRemoteHook({
+    scope: 'chrome',
+    module: './breadcrumbs/useReplaceBreadcrumbs',
+    args: appBreadcrumbsEnabled ? [breadcrumbs] : [[]],
+  });
 
   const ecosystems = useMemo(
     () => report?.ecosystem_coverage_summary.map((summary) => summary.ecosystem) ?? [],
