@@ -28,7 +28,7 @@ test.describe('Custom repositories pagination', () => {
       await expect(page.locator('button#topPaginationWidgetId-top-toggle')).toHaveText(
         '1 - 12 of 12',
       );
-      await page.click('button#topPaginationWidgetId-top-toggle');
+      await page.locator('button#topPaginationWidgetId-top-toggle').click();
       await page.getByRole('menuitem', { name: '10 per page' }).click();
     });
 
