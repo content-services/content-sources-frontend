@@ -8,15 +8,17 @@ import {
   Spinner,
   type MenuToggleElement,
 } from '@patternfly/react-core';
-import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
-import type { PDFRequestPayload } from '@redhat-cloud-services/types';
+import axios from 'axios';
 
 import useErrorNotification from 'Hooks/useErrorNotification';
 import useNotification from 'Hooks/useNotification';
-import { getVulnerabilities, type BeaconVulnerabilityFilters } from 'services/Lightwell/BeaconApi';
+import {
+  getVulnerabilities,
+  type BeaconData,
+  type BeaconVulnerabilityFilters,
+} from 'services/Lightwell/BeaconApi';
 import type { Vulnerability } from '../types';
 
-import { buildBeaconPdfPayload } from '../pdf/beaconPdf';
 import { exportToCsv, exportToJson } from '../utils/exportUtils';
 import type { VulnerabilityTableColumn } from '../utils/vulnerabilityTableColumns';
 
@@ -24,7 +26,6 @@ type ExportMenuProps = {
   customerId?: string;
   filters?: BeaconVulnerabilityFilters;
   visibleColumns: Pick<VulnerabilityTableColumn, 'key' | 'title'>[];
-  itemCount?: number;
 };
 
 type ExportFormat = 'csv' | 'json' | 'pdf';
@@ -34,52 +35,38 @@ const EXPORT_PAGE_SIZE = 200;
 export async function fetchAllFilteredVulnerabilities(
   customerId: string,
   filters?: BeaconVulnerabilityFilters,
-): Promise<Vulnerability[]> {
+): Promise<BeaconData> {
   const vulnerabilities: Vulnerability[] = [];
+  let meta: BeaconData['meta'] | undefined;
   let offset = 0;
 
   while (true) {
-    const { vulnerabilities: page } = await getVulnerabilities(customerId, filters, {
+    const result = await getVulnerabilities(customerId, filters, {
       limit: EXPORT_PAGE_SIZE,
       offset,
     });
 
-    vulnerabilities.push(...page);
+    vulnerabilities.push(...result.vulnerabilities);
+    meta = result.meta;
 
-    if (page.length < EXPORT_PAGE_SIZE) {
+    if (result.vulnerabilities.length < EXPORT_PAGE_SIZE) {
       break;
     }
 
-    offset += page.length;
+    offset += result.vulnerabilities.length;
   }
 
-  return vulnerabilities;
+  return {
+    vulnerabilities,
+    meta: meta ?? { count: 0, criticalCount: 0, stageCounts: {} },
+  };
 }
 
-async function resolvePdfItemCount(
-  customerId: string,
-  filters: BeaconVulnerabilityFilters | undefined,
-  itemCount: number,
-): Promise<number> {
-  if (itemCount > 0) {
-    return itemCount;
-  }
-
-  const { meta } = await getVulnerabilities(customerId, filters, { limit: 1, offset: 0 });
-  return meta.count;
-}
-
-export function ExportMenu({
-  customerId,
-  filters,
-  visibleColumns,
-  itemCount = 0,
-}: ExportMenuProps) {
+export function ExportMenu({ customerId, filters, visibleColumns }: ExportMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const errorNotifier = useErrorNotification();
   const { notify } = useNotification();
-  const { requestPdf } = useChrome();
 
   const handleExport = async (format: ExportFormat) => {
     if (!customerId || isExporting) {
@@ -95,16 +82,18 @@ export function ExportMenu({
           title: 'Generating PDF',
           description: 'Your PDF is being generated. The download will start when it is ready.',
         });
-        const count = await resolvePdfItemCount(customerId, filters, itemCount);
-        await requestPdf({
-          filename: `lightwell-beacon-${customerId}.pdf`,
-          payload: buildBeaconPdfPayload({
-            customerId,
-            filters,
-            visibleColumns,
-            itemCount: count,
-          }) as unknown as PDFRequestPayload,
-        });
+        const data = await fetchAllFilteredVulnerabilities(customerId, filters);
+        const response = await axios.post(
+          '/pdf/beacon',
+          { customerId, visibleColumns, data },
+          { responseType: 'blob' },
+        );
+        const url = URL.createObjectURL(response.data as Blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `lightwell-beacon-${customerId}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
         notify({
           variant: AlertVariant.success,
           title: 'PDF ready',
@@ -113,7 +102,7 @@ export function ExportMenu({
         return;
       }
 
-      const vulnerabilities = await fetchAllFilteredVulnerabilities(customerId, filters);
+      const { vulnerabilities } = await fetchAllFilteredVulnerabilities(customerId, filters);
 
       if (format === 'csv') {
         exportToCsv(vulnerabilities, `lightwell-vulnerabilities.csv`);
