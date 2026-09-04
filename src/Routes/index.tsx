@@ -33,6 +33,7 @@ import ContentListTable from 'Pages/Repositories/ContentListTable/ContentListTab
 import AddContent from 'Pages/Repositories/ContentListTable/components/AddContent/AddContent';
 import DeleteContentModal from 'Pages/Repositories/ContentListTable/components/DeleteContentModal/DeleteContentModal';
 import SnapshotListModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/SnapshotListModal';
+import SnapshotListModalDataView from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/SnapshotListModalDataView';
 import SnapshotDetailsModal from 'Pages/Repositories/ContentListTable/components/SnapshotDetailsModal/SnapshotDetailsModal';
 import PackageModal from 'Pages/Repositories/ContentListTable/components/PackageModal/PackageModal';
 import AdminTaskTable from 'Pages/Repositories/AdminTaskTable/AdminTaskTable';
@@ -113,6 +114,18 @@ export default function RepositoriesRoutes() {
                   path={`:repoUUID/${SNAPSHOTS_ROUTE}/:snapshotUUID`}
                   element={<SnapshotDetailsModal />}
                 />
+                {/* Temporary route for DataView migration testing */}
+                <Route
+                  key=':repoUUID/snapshots-dv'
+                  path=':repoUUID/snapshots-dv'
+                  element={<SnapshotListModalDataView />}
+                >
+                  {rbac?.repoWrite ? (
+                    <Route key='dv-delete' path={DELETE_ROUTE} element={<DeleteSnapshotsModal />} />
+                  ) : (
+                    ''
+                  )}
+                </Route>
               </>
             ) : (
               ''
