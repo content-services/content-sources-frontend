@@ -43,6 +43,7 @@ interface PackagesTableProps {
   selection?: ReturnType<typeof useDataViewSelection>;
 }
 
+// actions available: delete, bulk select, filter by name, paginate
 const PackagesTableWithToolbars = ({
   packagesList,
   paginationData,
