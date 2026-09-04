@@ -14,10 +14,15 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
+import { useRemoteHook } from '@scalprum/react-core';
+import { useFlag } from '@unleash/proxy-client-react';
+import { useMemo } from 'react';
 import { Outlet, useParams } from 'react-router-dom';
 import { createUseStyles } from 'react-jss';
+import { TEMPLATES_ROUTE } from 'Routes/constants';
 import { useFetchTemplate } from 'services/Templates/TemplateQueries';
 import useDistributionDetails from '../../../Hooks/useDistributionDetails';
+import useRootPath from 'Hooks/useRootPath';
 import DetailItem from './components/DetaiItem';
 import Hide from 'components/Hide/Hide';
 import { formatDateDDMMMYYYY } from 'helpers';
@@ -57,8 +62,10 @@ const useStyles = createUseStyles({
 export default function TemplateDetails() {
   const classes = useStyles();
   const { templateUUID } = useParams();
+  const rootPath = useRootPath();
 
   const navigateToTemplateList = useNavigateTo('templates');
+  const appBreadcrumbsEnabled = useFlag('platform.chrome.app-breadcrumbs');
 
   const { data: template, isError, error, isLoading } = useFetchTemplate(templateUUID as string);
 
@@ -72,6 +79,20 @@ export default function TemplateDetails() {
     getStreamName,
   } = useDistributionDetails();
 
+  const breadcrumbs = useMemo(
+    () => [
+      { pathname: `${rootPath}/${TEMPLATES_ROUTE}`, title: 'Templates' },
+      { pathname: `${rootPath}/${TEMPLATES_ROUTE}/${templateUUID}`, title: template?.name || '' },
+    ],
+    [rootPath, templateUUID, template?.name],
+  );
+
+  useRemoteHook({
+    scope: 'chrome',
+    module: './breadcrumbs/useReplaceBreadcrumbs',
+    args: appBreadcrumbsEnabled ? [breadcrumbs] : [[]],
+  });
+
   // Error is caught in the wrapper component
   if (isError) throw error;
   if (repositoryParamsIsError) throw repositoryParamsError;
@@ -84,14 +105,16 @@ export default function TemplateDetails() {
     <>
       <Grid className={classes.topContainer}>
         <Stack>
-          <StackItem>
-            <Breadcrumb ouiaId='template_details_breadcrumb'>
-              <BreadcrumbItem component='button' onClick={navigateToTemplateList}>
-                Templates
-              </BreadcrumbItem>
-              <BreadcrumbItem disabled>{template?.name}</BreadcrumbItem>
-            </Breadcrumb>
-          </StackItem>
+          {!appBreadcrumbsEnabled && (
+            <StackItem>
+              <Breadcrumb ouiaId='template_details_breadcrumb'>
+                <BreadcrumbItem component='button' onClick={navigateToTemplateList}>
+                  Templates
+                </BreadcrumbItem>
+                <BreadcrumbItem isActive>{template?.name}</BreadcrumbItem>
+              </Breadcrumb>
+            </StackItem>
+          )}
           <StackItem className={classes.titleWrapper}>
             <Flex
               direction={{ default: 'row' }}

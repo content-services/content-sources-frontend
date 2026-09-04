@@ -8,6 +8,18 @@ import { apiError, taskError } from './utils/errors';
 
 jest.mock('./hooks/useCoverageAnalysis');
 
+jest.mock('@scalprum/react-core', () => ({
+  useRemoteHook: jest.fn(),
+}));
+
+jest.mock('@unleash/proxy-client-react', () => ({
+  useFlag: jest.fn(() => true),
+}));
+
+jest.mock('Hooks/Lightwell/navigation/useLightwellRootPath', () => ({
+  useLightwellRootPath: jest.fn(() => '/lightwell'),
+}));
+
 // Charts are not under test here, no-op mocks keep the focus on text and button assertions
 jest.mock('@patternfly/react-charts/victory', () => ({
   ChartDonut: () => null,
