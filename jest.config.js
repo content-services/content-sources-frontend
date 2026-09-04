@@ -10,7 +10,7 @@ module.exports = {
     '^.+\\.(css|scss|sass|less)$': 'jest-preview/transforms/css',
     '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)': 'jest-preview/transforms/file',
   },
-  setupFiles: [],
+  setupFiles: ['<rootDir>/config/setupTextEncoder.js'],
   setupFilesAfterEnv: ['<rootDir>/config/setupAfterEnv.ts'],
   moduleDirectories: ['<rootDir>/node_modules', '<rootDir>/src'],
   // Below replaces things for speed

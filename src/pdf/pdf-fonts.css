@@ -1,0 +1,22 @@
+/* Red Hat font-face rules extracted from PatternFly for PDF rendering. */
+/* Font URLs are relative to this file; Express serves the assets/ directory alongside it. */
+@font-face {
+  font-family: 'Red Hat Text';
+  font-style: normal;
+  src: url('./assets/fonts/RedHatText/RedHatTextVF.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Red Hat Text';
+  font-style: italic;
+  src: url('./assets/fonts/RedHatText/RedHatTextVF-Italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  font-style: normal;
+  src: url('./assets/fonts/RedHatDisplay/RedHatDisplayVF.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  font-style: italic;
+  src: url('./assets/fonts/RedHatDisplay/RedHatDisplayVF-Italic.woff2') format('woff2');
+}

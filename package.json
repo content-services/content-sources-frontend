@@ -32,7 +32,8 @@
     "testAllPreviewFailures": "npm-run-all -p test jestPreview",
     "jestPreview": "jest-preview",
     "jestClear": "jest --clearCache",
-    "get-tests-prod": ".github/workflowScripts/getProdTests.sh"
+    "get-tests-prod": ".github/workflowScripts/getProdTests.sh",
+    "start:pdf": "tsx -r ./src/pdf/register-css-stub.ts src/pdf/pdfServer.ts"
   },
   "dependencies": {
     "@patternfly/react-catalog-view-extension": "^6.5.0",
@@ -94,6 +95,7 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.6",
+    "@types/express": "^5.0.6",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.25",
     "@types/node": "^26.2.0",
@@ -109,6 +111,7 @@
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-unused-imports": "^4.4.1",
+    "express": "^5.2.1",
     "globals": "^17.11.0",
     "htmlparser2": "^9.1.0",
     "identity-obj-proxy": "^3.0.0",
@@ -122,15 +125,20 @@
     "prettier": "^3.9.6",
     "pretty-format": "^30.4.1",
     "prop-types": "15.8.1",
+    "puppeteer": "^25.9.0",
     "source-map": "^0.8.0",
     "ts-jest": "^29.4.12",
     "ts-patch": ">=3.3.0 <4.0.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.9.2",
     "webpack-bundle-analyzer": "^5.3.1"
   },
   "insights": {
     "appname": "content-sources",
     "buildrepo": "git@github.com:RedHatInsights/content-sources-frontend-build.git"
+  },
+  "optionalDependencies": {
+    "frontend-assets": "github:RedHatInsights/frontend-assets"
   },
   "resolutions": {
     "ts-patch": ">=3.3.0 <4.0.0",

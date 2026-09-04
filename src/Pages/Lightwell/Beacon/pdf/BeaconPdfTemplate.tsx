@@ -34,7 +34,9 @@ const BeaconPdfTemplate = ({ asyncData, additionalData }: BeaconPdfTemplateProps
 
   return (
     <div className={`beacon-pdf ${landscape ? 'beacon-pdf--landscape' : 'beacon-pdf--portrait'}`}>
-      <style>{`
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .beacon-pdf {
           color: #151515;
           font-family: 'Red Hat Text', Helvetica, Arial, sans-serif;
@@ -138,7 +140,9 @@ const BeaconPdfTemplate = ({ asyncData, additionalData }: BeaconPdfTemplateProps
           white-space: normal;
           overflow-wrap: anywhere;
         }
-      `}</style>
+      `,
+        }}
+      />
       {includeSummary ? (
         <>
           <Title headingLevel='h1' size='xl'>
