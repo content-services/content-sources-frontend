@@ -40,6 +40,7 @@ import { useAppContext } from 'middleware/AppContext';
 import { formatDateDDMMMYYYY } from 'helpers';
 import { DELETE_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
 import { SNAPSHOTS_TABLE_COLUMNS } from './constants';
+import { SnapshotsPrimaryActionButton } from './SnapshotsPrimaryActionButton';
 
 interface SnapshotsTableProps {
   isFetching: boolean;
@@ -241,33 +242,27 @@ const SnapshotsTableWithToolbars = ({
     />
   );
 
-  // delete snapshots primary button
-  const deleteButton = (
-    <ConditionalTooltip
-      content='You do not have the required permissions to perform this action.'
-      show={!rbac?.repoWrite}
-      setDisabled
-    >
-      <Button
-        key='confirm'
-        ouiaId='remove_snapshots_bulk'
-        variant='primary'
-        isLoading={isFetchingOrLoading}
-        isDisabled={
-          isLoadingOrZeroCount || !selected.length || selected.length === count || !rbac?.repoWrite
-        }
-        onClick={() => navigate(DELETE_ROUTE)}
-      >
-        {deleteButtonLabel}
-      </Button>
-    </ConditionalTooltip>
+  // primary actions dropdown
+  const navigateOnDeleteClick = () => navigate(DELETE_ROUTE);
+  const isDeleteDisabled =
+    isLoadingOrZeroCount || !selected.length || selected.length === count || !rbac?.repoWrite;
+
+  const actionsDropdown = (
+    <SnapshotsPrimaryActionButton
+      deleteButtonLabel={deleteButtonLabel}
+      onDeleteClick={navigateOnDeleteClick}
+      isDeleteDisabled={isDeleteDisabled}
+      isFetchingOrLoading={isFetchingOrLoading}
+      isNothingToDelete={count === 1}
+      rbac={rbac}
+    />
   );
 
-  const bulkDeleteProps = shouldEnableBulkSelection
-    ? { bulkSelect, actions: deleteButton }
+  const bulkActionProps = shouldEnableBulkSelection
+    ? { bulkSelect, actions: actionsDropdown }
     : snapshotsReadOnly
       ? {}
-      : { actions: deleteButton };
+      : { actions: actionsDropdown };
 
   // pagination
   const topPagination = (
@@ -313,7 +308,7 @@ const SnapshotsTableWithToolbars = ({
       activeState={activeState}
       {...(shouldEnableBulkSelection ? { selection } : {})}
     >
-      <DataViewToolbar className={spacing.pSm} {...bulkDeleteProps}>
+      <DataViewToolbar className={spacing.pSm} {...bulkActionProps}>
         <ToolbarItem variant={ToolbarItemVariant.pagination} align={{ default: 'alignEnd' }}>
           {topPagination}
         </ToolbarItem>
