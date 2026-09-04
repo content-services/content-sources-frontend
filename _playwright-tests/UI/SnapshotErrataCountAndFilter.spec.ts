@@ -48,7 +48,9 @@ test.describe('Snapshot Errata Count and Filter', () => {
       const snapshotsModal = page.getByRole('dialog', { name: 'Snapshots' });
       await expect(snapshotsModal).toBeVisible();
 
-      const errataCountButton = page.getByRole('button', { name: '4' });
+      const errataCountButton = snapshotsModal.locator(
+        '[data-ouia-component-id="snapshot_advisory_count_button"]',
+      );
       await expect(errataCountButton).toBeVisible();
 
       await snapshotsModal.getByRole('contentinfo').getByRole('button', { name: 'Close' }).click();
@@ -76,12 +78,21 @@ test.describe('Snapshot Errata Count and Filter', () => {
 
       await navigateToSnapshotsOfRepository(page, editedRow);
 
-      const errataCountButton = page.getByRole('button', { name: '6' });
+      // expecting the first repo to be the one which was edited in the previous step
+      const firstSnapshotRow = page
+        .locator('[data-ouia-component-id="snapshot_list_table"] tbody tr')
+        .first();
+
+      const errataCountButton = firstSnapshotRow.locator(
+        '[data-ouia-component-id="snapshot_advisory_count_button"]',
+      );
       await expect(errataCountButton).toBeVisible();
     });
 
     await test.step('Test errata name filtering', async () => {
-      const errataCountButton = page.getByRole('button', { name: '6' });
+      const errataCountButton = page.locator(
+        '[data-ouia-component-id="snapshot_advisory_count_button"]',
+      );
       await errataCountButton.click();
 
       const snapshotListModal = page.getByRole('dialog', { name: 'Snapshot detail' });

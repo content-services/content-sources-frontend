@@ -222,17 +222,29 @@ test.describe('Snapshot Repositories', () => {
       const row = await getRowByNameOrUrl(page, repoName);
       await navigateToSnapshotsOfRepository(page, row);
 
-      await expect(page.getByRole('dialog', { name: 'Snapshots' }).locator('tbody')).toBeVisible();
-      await page
-        .getByRole('row', { name: 'select-snapshot-checkbox' })
-        .getByRole('checkbox')
-        .click();
+      const snapshotsDialog = page.getByRole('dialog', { name: 'Snapshots' });
+      await expect(snapshotsDialog.locator('tbody')).toBeVisible();
+
+      // Select all snapshots
+      await page.locator('[name="bulk-select-snapshots-checkbox"]').click();
+
       // Verify that you can't delete all snapshots
       // Bulk delete button is disabled
-      await expect(page.getByTestId('remove_snapshots_bulk')).toBeDisabled();
+      await snapshotsDialog.getByRole('button', { name: 'Actions' }).click();
+      await expect(
+        page.locator('[data-ouia-component-id="remove_snapshots_bulk"]'),
+      ).toHaveAttribute('aria-disabled', 'true');
+      // Close the dropdown (click toggle again)
+      await snapshotsDialog.getByRole('button', { name: 'Actions' }).click();
+
       // Therefore uncheck the first snapshot
       await page.getByRole('checkbox', { name: 'Select row 0' }).uncheck();
-      await page.getByTestId('remove_snapshots_bulk').click();
+
+      // Open Actions dropdown and click delete
+      await snapshotsDialog.getByRole('button', { name: 'Actions' }).click();
+      await page.locator('[data-ouia-component-id="remove_snapshots_bulk"]').click();
+
+      // Another delete confirm modal shows up
       await expect(page.getByText('Delete snapshots?')).toBeVisible();
 
       await waitForLastTaskStatus(client, 'delete-snapshots', 'completed');
