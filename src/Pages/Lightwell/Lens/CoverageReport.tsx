@@ -25,6 +25,8 @@ import LightwellNotFound from '../components/LightwellNotFound';
 import type { EcosystemInfo } from './utils/ecosystem';
 import { useLightwellRootPath } from '../../../Hooks/Lightwell/navigation/useLightwellRootPath';
 
+const DROP_LAST_CHROME_SEGMENT_OPTIONS = { dropLastChromeSegment: true };
+
 const CoverageReport = () => {
   const { reportUUID } = useParams();
   const { filename, report, isLoading, isError, error, startOver } = useCoverageReport(reportUUID);
@@ -38,7 +40,7 @@ const CoverageReport = () => {
   useRemoteHook({
     scope: 'chrome',
     module: './breadcrumbs/useReplaceBreadcrumbs',
-    args: appBreadcrumbsEnabled ? [breadcrumbs] : [[]],
+    args: appBreadcrumbsEnabled ? [breadcrumbs, DROP_LAST_CHROME_SEGMENT_OPTIONS] : [[]],
   });
 
   const ecosystems: EcosystemInfo[] = useMemo(
