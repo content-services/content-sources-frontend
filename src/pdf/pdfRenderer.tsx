@@ -24,7 +24,7 @@ import {
 import { getHeaderAndFooterTemplates } from './pdfHeader';
 import { getFontLinkTag } from './pdfFonts';
 import { LIGHTWELL_LOGOMARK_SVG } from './lightwellLogomark';
-import { PDF_STYLES_BASE_URL, PDF_SERVER_ORIGIN, pendingRenders } from './pdfConfig';
+import { PDF_STYLES_BASE_URL, PDF_SERVER_ORIGIN, MAX_CONCURRENT_RENDERS, pendingRenders } from './pdfConfig';
 
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
@@ -84,7 +84,40 @@ export function renderBeaconPdfHtml(
 </html>`;
 }
 
+// Concurrency semaphore: limits simultaneous Puppeteer renders to avoid OOM.
+let activeRenders = 0;
+let waitQueue: Array<() => void> = [];
+
+function acquireSlot(): Promise<void> {
+  if (activeRenders < MAX_CONCURRENT_RENDERS) {
+    activeRenders++;
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => waitQueue.push(resolve));
+}
+
+function releaseSlot(): void {
+  const next = waitQueue.shift();
+  if (next) {
+    next();
+  } else {
+    activeRenders--;
+  }
+}
+
 export async function printPdf(
+  html: string,
+  options: { landscape?: boolean },
+): Promise<Uint8Array> {
+  await acquireSlot();
+  try {
+    return await printPdfInner(html, options);
+  } finally {
+    releaseSlot();
+  }
+}
+
+async function printPdfInner(
   html: string,
   options: { landscape?: boolean },
 ): Promise<Uint8Array> {

@@ -1,6 +1,12 @@
 /** Shared configuration for the PDF server and renderer. */
 export const PDF_SERVER_PORT = parseInt(process.env.PDF_SERVER_PORT || '3001', 10);
 
+/**
+ * Max simultaneous Puppeteer render processes (not PDF pages -- each render
+ * produces one complete multi-page PDF in a single Chromium tab).
+ */
+export const MAX_CONCURRENT_RENDERS = parseInt(process.env.PDF_MAX_CONCURRENT || '3', 10);
+
 export const PDF_SERVER_ORIGIN = `http://127.0.0.1:${PDF_SERVER_PORT}`;
 
 /** Base URL where the PDF server serves PatternFly styles (fonts + CSS). */
