@@ -29,6 +29,7 @@ import {
   MAX_VULNERABILITIES,
   pendingRenders,
 } from './pdfConfig';
+import { registry, pdfDuration, pdfErrors } from './pdfMetrics';
 
 type PdfRequestBody = {
   customerId: string;
@@ -67,8 +68,10 @@ export async function handleBeaconPdf(req: express.Request, res: express.Respons
   }
 
   try {
+    const end = pdfDuration.startTimer();
     const generatedAt = formatBeaconPdfGeneratedAt();
     const pdfBuffer = await generateBeaconPdf(data, visibleColumns, customerId, generatedAt);
+    end();
 
     const filename = `lightwell-beacon-${customerId}.pdf`;
 
@@ -77,6 +80,7 @@ export async function handleBeaconPdf(req: express.Request, res: express.Respons
     res.setHeader('Content-Length', pdfBuffer.length);
     res.send(Buffer.from(pdfBuffer));
   } catch (err) {
+    pdfErrors.inc({ reason: err instanceof Error ? err.constructor.name : 'unknown' });
     console.error('PDF generation failed:', err);
     res.status(500).json({
       error: 'PDF generation failed',
@@ -116,6 +120,11 @@ app.use(
 );
 
 app.get('/pdf/healthz', handleHealthz);
+
+app.get('/metrics', async (_req, res) => {
+  res.set('Content-Type', registry.contentType);
+  res.send(await registry.metrics());
+});
 
 app.get('/pdf/render/:id', (req, res) => {
   const { id } = req.params;

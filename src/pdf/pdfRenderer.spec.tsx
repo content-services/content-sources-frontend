@@ -11,6 +11,10 @@ jest.mock('./pdfConfig', () => ({
   pendingRenders: new Map(),
 }));
 
+jest.mock('./pdfMetrics', () => ({
+  activeRenders: { inc: jest.fn(), dec: jest.fn() },
+}));
+
 jest.mock('./pdfFonts', () => ({
   getFontLinkTag: (baseUrl: string) => `<link rel="stylesheet" href="${baseUrl}/pdf-fonts.css">`,
   PF_STYLES_DIR: '/mock/styles',

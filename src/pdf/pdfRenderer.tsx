@@ -31,6 +31,7 @@ import {
   RENDER_TIMEOUT_MS,
   pendingRenders,
 } from './pdfConfig';
+import { activeRenders as activeRendersGauge } from './pdfMetrics';
 
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
@@ -97,12 +98,19 @@ let waitQueue: Array<() => void> = [];
 function acquireSlot(): Promise<void> {
   if (activeRenders < MAX_CONCURRENT_RENDERS) {
     activeRenders++;
+    activeRendersGauge.inc();
     return Promise.resolve();
   }
-  return new Promise((resolve) => waitQueue.push(resolve));
+  return new Promise((resolve) =>
+    waitQueue.push(() => {
+      activeRendersGauge.inc();
+      resolve();
+    }),
+  );
 }
 
 function releaseSlot(): void {
+  activeRendersGauge.dec();
   const next = waitQueue.shift();
   if (next) {
     next();

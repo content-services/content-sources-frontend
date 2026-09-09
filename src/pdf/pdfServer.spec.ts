@@ -18,6 +18,13 @@ jest.mock('./pdfConfig', () => ({
   pendingRenders: new Map(),
 }));
 
+jest.mock('./pdfMetrics', () => ({
+  registry: { contentType: 'text/plain', metrics: jest.fn().mockResolvedValue('') },
+  pdfDuration: { startTimer: jest.fn().mockReturnValue(jest.fn()) },
+  pdfErrors: { inc: jest.fn() },
+  activeRenders: { inc: jest.fn(), dec: jest.fn() },
+}));
+
 import type { Request, Response } from 'express';
 import { handleBeaconPdf, handleHealthz } from './pdfServer';
 import { generateBeaconPdf, getBrowser } from './pdfRenderer';
