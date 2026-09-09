@@ -32,21 +32,31 @@ const VIEWPORT_WIDTH = (A4_HEIGHT_MM - 20) * 4; // 1108
 const VIEWPORT_HEIGHT = (A4_WIDTH_MM - 40) * 4; // 680
 
 let browserInstance: Browser | null = null;
+let launchPromise: Promise<Browser> | null = null;
 
 async function getBrowser(): Promise<Browser> {
-  if (browserInstance && browserInstance.connected) {
+  if (browserInstance?.connected) {
     return browserInstance;
   }
-  const executablePath = process.env.CHROME_PATH || undefined;
-  browserInstance = await puppeteer.launch({
-    headless: true,
-    executablePath,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
-  });
-  return browserInstance;
+  if (!launchPromise) {
+    launchPromise = (async () => {
+      const executablePath = process.env.CHROME_PATH || undefined;
+      const browser = await puppeteer.launch({
+        headless: true,
+        executablePath,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+      });
+      browserInstance = browser;
+      return browser;
+    })().finally(() => {
+      launchPromise = null;
+    });
+  }
+  return launchPromise;
 }
 
 export async function closeBrowser(): Promise<void> {
+  launchPromise = null;
   if (browserInstance) {
     await browserInstance.close();
     browserInstance = null;
