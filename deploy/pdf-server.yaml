@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: content-sources-pdf-server
+objects:
+  - apiVersion: cloud.redhat.com/v1alpha1
+    kind: ClowdApp
+    metadata:
+      name: content-sources-pdf-server
+    spec:
+      envName: ${ENV_NAME}
+      deployments:
+        - name: api
+          minReplicas: ${{REPLICAS}}
+          web: true
+          podSpec:
+            image: ${IMAGE}:${IMAGE_TAG}
+            resources:
+              limits:
+                cpu: ${CPU_LIMIT}
+                memory: ${MEMORY_LIMIT}
+              requests:
+                cpu: ${CPU_REQUEST}
+                memory: ${MEMORY_REQUEST}
+            readinessProbe:
+              httpGet:
+                path: /pdf/healthz
+                port: 8000
+                scheme: HTTP
+              initialDelaySeconds: 10
+              periodSeconds: 30
+            livenessProbe:
+              httpGet:
+                path: /pdf/healthz
+                port: 8000
+                scheme: HTTP
+              initialDelaySeconds: 15
+              periodSeconds: 60
+            env:
+              - name: PDF_SERVER_PORT
+                value: "8000"
+              - name: PDF_MAX_CONCURRENT
+                value: "${PDF_MAX_CONCURRENT}"
+
+parameters:
+  - description: Number of PDF server replicas
+    name: REPLICAS
+    value: '1'
+  - description: PDF server container image
+    name: IMAGE
+    value: quay.io/redhat-user-workloads/insights-management-tenant/insights-content-sources/content-sources-pdf-server
+  - description: PDF server image tag
+    name: IMAGE_TAG
+    required: true
+    value: latest
+  - description: Clowder environment name
+    name: ENV_NAME
+    required: true
+  - description: Memory request (Chromium needs ~1-2Gi per active render)
+    name: MEMORY_REQUEST
+    value: 2Gi
+  - description: Memory limit (ceiling for MAX_CONCURRENT_RENDERS=3)
+    name: MEMORY_LIMIT
+    value: 4Gi
+  - description: CPU request
+    name: CPU_REQUEST
+    value: 100m
+  - description: CPU limit
+    name: CPU_LIMIT
+    value: '1'
+  - description: Maximum concurrent Puppeteer render processes
+    name: PDF_MAX_CONCURRENT
+    value: '3'
