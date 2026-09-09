@@ -12,6 +12,7 @@ jest.mock('./pdfConfig', () => ({
   PDF_SERVER_PORT: 3001,
   PDF_SERVER_ORIGIN: 'http://127.0.0.1:3001',
   PDF_STYLES_BASE_URL: 'http://127.0.0.1:3001/pdf/styles',
+  MAX_VULNERABILITIES: 5000,
   pendingRenders: new Map(),
 }));
 
@@ -131,6 +132,34 @@ describe('handleBeaconPdf', () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({ error: 'data with vulnerabilities is required' });
+    expect(mockedGeneratePdf).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when vulnerabilities exceed the maximum', async () => {
+    const oversizedVulnerabilities = Array.from({ length: 5001 }, (_, i) => ({
+      uuid: String(i),
+      vulnerabilityId: `CVE-2024-${i}`,
+      purl: 'pkg:npm/foo@1.0',
+      componentName: 'foo',
+      componentVersion: '1.0.0',
+      title: 'Test',
+      severity: 'Low',
+      cvss: 1,
+      stage: 'Submitted',
+    }));
+
+    const { req, res } = mockReqRes({
+      customerId: 'CID-01',
+      visibleColumns: [{ key: 'vulnerabilityId', title: 'ID' }],
+      data: { vulnerabilities: oversizedVulnerabilities, meta: { count: 5001 } },
+    });
+
+    await handleBeaconPdf(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'Too many vulnerabilities (5001). Maximum is 5000.',
+    });
     expect(mockedGeneratePdf).not.toHaveBeenCalled();
   });
 

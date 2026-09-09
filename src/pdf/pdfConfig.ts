@@ -7,6 +7,9 @@ export const PDF_SERVER_PORT = parseInt(process.env.PDF_SERVER_PORT || '3001', 1
  */
 export const MAX_CONCURRENT_RENDERS = parseInt(process.env.PDF_MAX_CONCURRENT || '3', 10);
 
+/** Maximum number of vulnerabilities allowed in a single PDF export. */
+export const MAX_VULNERABILITIES = 5000;
+
 export const PDF_SERVER_ORIGIN = `http://127.0.0.1:${PDF_SERVER_PORT}`;
 
 /** Base URL where the PDF server serves PatternFly styles (fonts + CSS). */

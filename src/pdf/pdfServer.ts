@@ -22,7 +22,7 @@ import {
 
 import { generateBeaconPdf, closeBrowser } from './pdfRenderer';
 import { PF_STYLES_DIR } from './pdfFonts';
-import { PDF_SERVER_PORT, pendingRenders } from './pdfConfig';
+import { PDF_SERVER_PORT, MAX_VULNERABILITIES, pendingRenders } from './pdfConfig';
 
 type PdfRequestBody = {
   customerId: string;
@@ -50,6 +50,13 @@ export async function handleBeaconPdf(req: express.Request, res: express.Respons
 
   if (!data?.vulnerabilities) {
     res.status(400).json({ error: 'data with vulnerabilities is required' });
+    return;
+  }
+
+  if (data.vulnerabilities.length > MAX_VULNERABILITIES) {
+    res.status(400).json({
+      error: `Too many vulnerabilities (${data.vulnerabilities.length}). Maximum is ${MAX_VULNERABILITIES}.`,
+    });
     return;
   }
 
