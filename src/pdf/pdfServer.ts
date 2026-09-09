@@ -13,6 +13,7 @@
  */
 import { resolve } from 'path';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 
 import {
   formatBeaconPdfGeneratedAt,
@@ -110,7 +111,15 @@ app.get('/pdf/render/:id', (req, res) => {
   res.send(html);
 });
 
-app.post('/pdf/beacon', (req, res) => {
+const pdfRateLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 5,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Too many PDF requests. Please wait a minute before trying again.' },
+});
+
+app.post('/pdf/beacon', pdfRateLimiter, (req, res) => {
   const timer = setTimeout(() => {
     if (!res.headersSent) {
       res.status(504).json({ error: 'PDF generation timed out' });
