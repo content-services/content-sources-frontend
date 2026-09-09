@@ -82,7 +82,7 @@ export async function handleBeaconPdf(req: express.Request, res: express.Respons
 
 const app = express();
 app.disable('x-powered-by');
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '10mb' }));
 
 app.get('/pdf/styles/pdf-fonts.css', (_req, res) => {
   res.sendFile(resolve(__dirname, 'pdf-fonts.css'));
