@@ -46,11 +46,24 @@ export default function LightwellAppEntry({ logger }: LightwellAppEntryProps) {
         queryCache: new QueryCache({
           onError: (_, query) => {
             if (query.meta?.title) {
-              const { title, description } = composeErrorDescription(
-                query.meta.title as string,
-                'An error occurred',
-                query.state.error,
-              );
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const isForbidden = (query.state.error as any)?.response?.status === 403;
+              const isNotificationQuery = [
+                'get-notification-subscriptions-error',
+                'get-user-preferences-error',
+              ].includes(query.meta.id as string);
+
+              const { title, description } =
+                isForbidden && isNotificationQuery
+                  ? {
+                      title: "You don't have permissions to set notifications",
+                      description: 'Please reach out to your org admin to grant you permissions.',
+                    }
+                  : composeErrorDescription(
+                      query.meta.title as string,
+                      'An error occurred',
+                      query.state.error,
+                    );
               notificationsStore.addNotification({
                 title,
                 description,
