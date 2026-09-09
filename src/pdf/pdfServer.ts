@@ -21,9 +21,14 @@ import {
   type BeaconPdfData,
 } from 'Pages/Lightwell/Beacon/pdf/beaconPdf';
 
-import { generateBeaconPdf, closeBrowser } from './pdfRenderer';
+import { generateBeaconPdf, closeBrowser, getBrowser } from './pdfRenderer';
 import { PF_STYLES_DIR } from './pdfFonts';
-import { PDF_SERVER_PORT, HANDLER_TIMEOUT_MS, MAX_VULNERABILITIES, pendingRenders } from './pdfConfig';
+import {
+  PDF_SERVER_PORT,
+  HANDLER_TIMEOUT_MS,
+  MAX_VULNERABILITIES,
+  pendingRenders,
+} from './pdfConfig';
 
 type PdfRequestBody = {
   customerId: string;
@@ -80,6 +85,20 @@ export async function handleBeaconPdf(req: express.Request, res: express.Respons
   }
 }
 
+export async function handleHealthz(_req: express.Request, res: express.Response): Promise<void> {
+  try {
+    const browser = await getBrowser();
+    const page = await browser.newPage();
+    await page.close();
+    res.json({ status: 'ok' });
+  } catch (err) {
+    res.status(503).json({
+      status: 'unhealthy',
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
+
 const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '10mb' }));
@@ -95,6 +114,8 @@ app.use(
     immutable: true,
   }),
 );
+
+app.get('/pdf/healthz', handleHealthz);
 
 app.get('/pdf/render/:id', (req, res) => {
   const { id } = req.params;

@@ -1,6 +1,7 @@
 jest.mock('./pdfRenderer', () => ({
   generateBeaconPdf: jest.fn(),
   closeBrowser: jest.fn(),
+  getBrowser: jest.fn(),
 }));
 
 jest.mock('./pdfFonts', () => ({
@@ -18,10 +19,11 @@ jest.mock('./pdfConfig', () => ({
 }));
 
 import type { Request, Response } from 'express';
-import { handleBeaconPdf } from './pdfServer';
-import { generateBeaconPdf } from './pdfRenderer';
+import { handleBeaconPdf, handleHealthz } from './pdfServer';
+import { generateBeaconPdf, getBrowser } from './pdfRenderer';
 
 const mockedGeneratePdf = generateBeaconPdf as jest.MockedFunction<typeof generateBeaconPdf>;
+const mockedGetBrowser = getBrowser as jest.MockedFunction<typeof getBrowser>;
 
 function mockReqRes(body: Record<string, unknown>) {
   const req = { body, headers: {} } as unknown as Request;
@@ -179,6 +181,36 @@ describe('handleBeaconPdf', () => {
     expect(res.json).toHaveBeenCalledWith({
       error: 'PDF generation failed',
       message: 'Puppeteer crashed',
+    });
+  });
+});
+
+describe('handleHealthz', () => {
+  it('returns ok when the browser is healthy', async () => {
+    const mockPage = { close: jest.fn() };
+    const mockBrowser = { newPage: jest.fn().mockResolvedValue(mockPage) };
+    mockedGetBrowser.mockResolvedValue(mockBrowser as never);
+
+    const { req, res } = mockReqRes({});
+
+    await handleHealthz(req, res);
+
+    expect(mockBrowser.newPage).toHaveBeenCalled();
+    expect(mockPage.close).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith({ status: 'ok' });
+  });
+
+  it('returns 503 when the browser is unhealthy', async () => {
+    mockedGetBrowser.mockRejectedValue(new Error('Browser crashed'));
+
+    const { req, res } = mockReqRes({});
+
+    await handleHealthz(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(res.json).toHaveBeenCalledWith({
+      status: 'unhealthy',
+      error: 'Browser crashed',
     });
   });
 });

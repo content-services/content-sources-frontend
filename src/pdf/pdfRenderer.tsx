@@ -24,7 +24,13 @@ import {
 import { getHeaderAndFooterTemplates } from './pdfHeader';
 import { getFontLinkTag } from './pdfFonts';
 import { LIGHTWELL_LOGOMARK_SVG } from './lightwellLogomark';
-import { PDF_STYLES_BASE_URL, PDF_SERVER_ORIGIN, MAX_CONCURRENT_RENDERS, RENDER_TIMEOUT_MS, pendingRenders } from './pdfConfig';
+import {
+  PDF_STYLES_BASE_URL,
+  PDF_SERVER_ORIGIN,
+  MAX_CONCURRENT_RENDERS,
+  RENDER_TIMEOUT_MS,
+  pendingRenders,
+} from './pdfConfig';
 
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
@@ -34,7 +40,7 @@ const VIEWPORT_HEIGHT = (A4_WIDTH_MM - 40) * 4; // 680
 let browserInstance: Browser | null = null;
 let launchPromise: Promise<Browser> | null = null;
 
-async function getBrowser(): Promise<Browser> {
+export async function getBrowser(): Promise<Browser> {
   if (browserInstance?.connected) {
     return browserInstance;
   }
@@ -117,10 +123,7 @@ export async function printPdf(
   }
 }
 
-async function printPdfInner(
-  html: string,
-  options: { landscape?: boolean },
-): Promise<Uint8Array> {
+async function printPdfInner(html: string, options: { landscape?: boolean }): Promise<Uint8Array> {
   const browser = await getBrowser();
   const page = await browser.newPage();
 
