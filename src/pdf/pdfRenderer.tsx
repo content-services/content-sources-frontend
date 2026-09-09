@@ -24,7 +24,7 @@ import {
 import { getHeaderAndFooterTemplates } from './pdfHeader';
 import { getFontLinkTag } from './pdfFonts';
 import { LIGHTWELL_LOGOMARK_SVG } from './lightwellLogomark';
-import { PDF_STYLES_BASE_URL, PDF_SERVER_ORIGIN, MAX_CONCURRENT_RENDERS, pendingRenders } from './pdfConfig';
+import { PDF_STYLES_BASE_URL, PDF_SERVER_ORIGIN, MAX_CONCURRENT_RENDERS, RENDER_TIMEOUT_MS, pendingRenders } from './pdfConfig';
 
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
@@ -137,6 +137,7 @@ async function printPdfInner(
 
     await page.goto(`${PDF_SERVER_ORIGIN}/pdf/render/${renderId}`, {
       waitUntil: 'networkidle0',
+      timeout: RENDER_TIMEOUT_MS,
     });
 
     await page.evaluate(async () => {
@@ -159,6 +160,7 @@ async function printPdfInner(
       footerTemplate,
       landscape: options.landscape ?? false,
       margin: { top: '80px', bottom: '54px', left: '28px', right: '28px' },
+      timeout: RENDER_TIMEOUT_MS,
     });
 
     return new Uint8Array(buffer);

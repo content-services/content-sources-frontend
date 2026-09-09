@@ -22,7 +22,7 @@ import {
 
 import { generateBeaconPdf, closeBrowser } from './pdfRenderer';
 import { PF_STYLES_DIR } from './pdfFonts';
-import { PDF_SERVER_PORT, MAX_VULNERABILITIES, pendingRenders } from './pdfConfig';
+import { PDF_SERVER_PORT, HANDLER_TIMEOUT_MS, MAX_VULNERABILITIES, pendingRenders } from './pdfConfig';
 
 type PdfRequestBody = {
   customerId: string;
@@ -110,7 +110,15 @@ app.get('/pdf/render/:id', (req, res) => {
   res.send(html);
 });
 
-app.post('/pdf/beacon', handleBeaconPdf);
+app.post('/pdf/beacon', (req, res) => {
+  const timer = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(504).json({ error: 'PDF generation timed out' });
+    }
+  }, HANDLER_TIMEOUT_MS);
+
+  handleBeaconPdf(req, res).finally(() => clearTimeout(timer));
+});
 
 export default app;
 

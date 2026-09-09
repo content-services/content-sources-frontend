@@ -13,6 +13,7 @@ jest.mock('./pdfConfig', () => ({
   PDF_SERVER_ORIGIN: 'http://127.0.0.1:3001',
   PDF_STYLES_BASE_URL: 'http://127.0.0.1:3001/pdf/styles',
   MAX_VULNERABILITIES: 5000,
+  HANDLER_TIMEOUT_MS: 60000,
   pendingRenders: new Map(),
 }));
 
