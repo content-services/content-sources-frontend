@@ -9,16 +9,18 @@
 import { type PropsWithChildren } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-function getHeaderDate(): string {
+export function getHeaderDate(): string {
   const date = new Date();
-  const day = date.getDate();
-  const year = date.getFullYear();
+  const day = date.getUTCDate();
+  const year = date.getUTCFullYear();
   return `${day} ${date.toLocaleString('en-us', {
     month: 'short',
+    timeZone: 'UTC',
   })} ${year} ${date.toLocaleString('en-us', {
     hour: '2-digit',
     hour12: false,
     minute: 'numeric',
+    timeZone: 'UTC',
   })} UTC`;
 }
 
