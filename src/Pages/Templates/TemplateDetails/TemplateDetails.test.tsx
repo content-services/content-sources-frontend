@@ -12,6 +12,19 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
+const mockUseRemoteHook = jest.fn();
+jest.mock('@scalprum/react-core', () => ({
+  useRemoteHook: (...args: unknown[]) => mockUseRemoteHook(...args),
+}));
+
+jest.mock('@unleash/proxy-client-react', () => ({
+  useFlag: jest.fn(() => true),
+}));
+
+jest.mock('Hooks/navigation/useNavigateTo', () => ({
+  useNavigateTo: jest.fn(() => jest.fn()),
+}));
+
 jest.mock('services/Templates/TemplateQueries', () => ({
   useFetchTemplate: jest.fn(),
 }));
@@ -44,7 +57,7 @@ it('renders standard template details correctly', () => {
   const { getAllByText, queryByText } = render(<TemplateDetails />);
 
   expect(queryByText('TemplateDetailsTabs')).toBeInTheDocument();
-  expect(getAllByText(defaultTemplateItem.name)).toHaveLength(2); // Two instances of the template name for the breadcrumb and template title
+  expect(getAllByText(defaultTemplateItem.name)).toHaveLength(1);
   expect(queryByText(versionName)).toBeInTheDocument();
   expect(queryByText(defaultTemplateItem.arch)).toBeInTheDocument();
 });
@@ -70,7 +83,7 @@ it('renders EUS template details correctly', () => {
   const { getAllByText, queryByText } = render(<TemplateDetails />);
 
   expect(queryByText('TemplateDetailsTabs')).toBeInTheDocument();
-  expect(getAllByText(defaultEUSupportTemplateItem.name)).toHaveLength(2);
+  expect(getAllByText(defaultEUSupportTemplateItem.name)).toHaveLength(1);
   expect(queryByText(minorVersionName)).toBeInTheDocument();
   expect(queryByText('EUS')).toBeInTheDocument(); // The EUS label at the top of the page
   expect(queryByText(defaultEUSupportTemplateItem.arch)).toBeInTheDocument();
