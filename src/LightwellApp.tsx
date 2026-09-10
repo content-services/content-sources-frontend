@@ -1,6 +1,7 @@
 import '@patternfly/react-catalog-view-extension/dist/css/react-catalog-view-extension.css';
 import '../styles/lightwell-chrome-overrides.scss';
 import '../styles/lightwell-clipboard-copy.scss';
+import '../styles/lightwell-coverage-charts.scss';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
@@ -15,8 +16,8 @@ import Beacon from 'Pages/Lightwell/Beacon/Beacon';
 import LightwellNotFound from 'Pages/Lightwell/components/LightwellNotFound';
 import { LightwellDemoLayout } from 'Pages/Lightwell/LightwellDemoContext';
 import { useAppContext } from './middleware/AppContext';
-import CoverageReport from 'Pages/Lightwell/Coverage/CoverageReport';
-import ManifestUpload from 'Pages/Lightwell/Coverage/ManifestUpload';
+import CoverageReport from 'Pages/Lightwell/Lens/CoverageReport';
+import ManifestUpload from 'Pages/Lightwell/Lens/ManifestUpload';
 
 export default function LightwellApp() {
   const pageSafe = usePageSafe();
