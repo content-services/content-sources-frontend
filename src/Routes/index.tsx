@@ -97,8 +97,8 @@ export default function RepositoriesRoutes() {
             {features?.snapshots?.enabled && features.snapshots?.accessible ? (
               <>
                 <Route
-                  key={`:repoUUID/${SNAPSHOTS_ROUTE}`}
-                  path={`:repoUUID/${SNAPSHOTS_ROUTE}`}
+                  key={`:repoUUID/${SNAPSHOTS_ROUTE}-old`}
+                  path={`:repoUUID/${SNAPSHOTS_ROUTE}-old`}
                   element={<SnapshotListModal />}
                 >
                   {rbac?.repoWrite ? (
@@ -118,8 +118,8 @@ export default function RepositoriesRoutes() {
                 />
                 {/* Temporary route for DataView migration testing */}
                 <Route
-                  key=':repoUUID/snapshots-dv'
-                  path=':repoUUID/snapshots-dv'
+                  key=':repoUUID/snapshots'
+                  path=':repoUUID/snapshots'
                   element={<SnapshotListModalDataView />}
                 >
                   {rbac?.repoWrite ? (
