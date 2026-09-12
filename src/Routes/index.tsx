@@ -14,6 +14,7 @@ import {
   EDIT_ROUTE,
   PACKAGES_ROUTE,
   PARTNER_REPO_ROUTE,
+  PUBLISH_ROUTE,
   REDHAT_REPO_GEN_ROUTE,
   REPOSITORIES_ROUTE,
   SNAPSHOTS_ROUTE,
@@ -33,6 +34,7 @@ import ContentListTable from 'Pages/Repositories/ContentListTable/ContentListTab
 import AddContent from 'Pages/Repositories/ContentListTable/components/AddContent/AddContent';
 import DeleteContentModal from 'Pages/Repositories/ContentListTable/components/DeleteContentModal/DeleteContentModal';
 import SnapshotListModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/SnapshotListModal';
+import SnapshotListModalDataView from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/SnapshotListModalDataView';
 import SnapshotDetailsModal from 'Pages/Repositories/ContentListTable/components/SnapshotDetailsModal/SnapshotDetailsModal';
 import PackageModal from 'Pages/Repositories/ContentListTable/components/PackageModal/PackageModal';
 import AdminTaskTable from 'Pages/Repositories/AdminTaskTable/AdminTaskTable';
@@ -41,6 +43,7 @@ import DeleteTemplateModal from 'Pages/Templates/TemplatesTable/components/Delet
 import TemplateRepositoriesTab from 'Pages/Templates/TemplateDetails/components/Tabs/TemplateRepositoriesTab';
 import UploadContent from 'Pages/Repositories/ContentListTable/components/UploadContent/UploadContent';
 import DeleteSnapshotsModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/DeleteSnapshotsModal/DeleteSnapshotsModal';
+import PublishSnapshotModal from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/PublishSnapshotModal/PublishSnapshotModal';
 import AdminFeaturesTable from 'Pages/Repositories/AdminFeaturesTable/AdminFeaturesTable';
 import AssignTemplateModal from '../Pages/Templates/TemplateDetails/components/AssignTemplateModal/AssignTemplateModal';
 import PackagesDeleteModal from 'Pages/Repositories/ContentListTable/components/PackagesDeleteModal/PackagesDeleteModal';
@@ -94,8 +97,8 @@ export default function RepositoriesRoutes() {
             {features?.snapshots?.enabled && features.snapshots?.accessible ? (
               <>
                 <Route
-                  key={`:repoUUID/${SNAPSHOTS_ROUTE}`}
-                  path={`:repoUUID/${SNAPSHOTS_ROUTE}`}
+                  key={`:repoUUID/${SNAPSHOTS_ROUTE}-old`}
+                  path={`:repoUUID/${SNAPSHOTS_ROUTE}-old`}
                   element={<SnapshotListModal />}
                 >
                   {rbac?.repoWrite ? (
@@ -113,6 +116,29 @@ export default function RepositoriesRoutes() {
                   path={`:repoUUID/${SNAPSHOTS_ROUTE}/:snapshotUUID`}
                   element={<SnapshotDetailsModal />}
                 />
+                {/* Temporary route for DataView migration testing */}
+                <Route
+                  key=':repoUUID/snapshots'
+                  path=':repoUUID/snapshots'
+                  element={<SnapshotListModalDataView />}
+                >
+                  {rbac?.repoWrite ? (
+                    <>
+                      <Route
+                        key='dv-delete'
+                        path={DELETE_ROUTE}
+                        element={<DeleteSnapshotsModal />}
+                      />
+                      <Route
+                        key='dv-publish'
+                        path={PUBLISH_ROUTE}
+                        element={<PublishSnapshotModal />}
+                      />
+                    </>
+                  ) : (
+                    ''
+                  )}
+                </Route>
               </>
             ) : (
               ''
