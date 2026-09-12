@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import SnapshotListModalDataView from './SnapshotListModalDataView';
 import {
   ReactQueryTestWrapper,
@@ -136,7 +136,78 @@ it('Render empty state', () => {
   );
 
   expect(getByText('No snapshots')).toBeInTheDocument();
-  expect(
-    getByText('No snapshots have been taken for this repository yet.'),
-  ).toBeInTheDocument();
+  expect(getByText('No snapshots have been taken for this repository yet.')).toBeInTheDocument();
+});
+
+it('Shows Published label when snapshot is published and distribution URL exists', () => {
+  const publishedSnapshot = { ...defaultSnapshotItem, published: true };
+  (useFetchContent as jest.Mock).mockImplementation(() => ({
+    data: {
+      ...defaultContentItemWithSnapshot,
+      published_distribution_url: 'https://example.com/dist',
+    },
+  }));
+  (useGetSnapshotList as jest.Mock).mockImplementation(() => ({
+    data: {
+      meta: defaultMetaItem,
+      data: [publishedSnapshot],
+    },
+    isLoading: false,
+    isFetching: false,
+  }));
+
+  render(
+    <ReactQueryTestWrapper>
+      <SnapshotListModalDataView />
+    </ReactQueryTestWrapper>,
+  );
+
+  expect(screen.getByText('Published')).toBeInTheDocument();
+});
+
+it('Shows Publishing in progress label when snapshot is published but no distribution URL', () => {
+  const publishedSnapshot = { ...defaultSnapshotItem, published: true };
+  (useFetchContent as jest.Mock).mockImplementation(() => ({
+    data: { ...defaultContentItemWithSnapshot, published_distribution_url: undefined },
+  }));
+  (useGetSnapshotList as jest.Mock).mockImplementation(() => ({
+    data: {
+      meta: defaultMetaItem,
+      data: [publishedSnapshot],
+    },
+    isLoading: false,
+    isFetching: false,
+  }));
+
+  render(
+    <ReactQueryTestWrapper>
+      <SnapshotListModalDataView />
+    </ReactQueryTestWrapper>,
+  );
+
+  expect(screen.getByText('Publishing in progress')).toBeInTheDocument();
+});
+
+it('Shows no publish label when snapshot is not published', () => {
+  const unpublishedSnapshot = { ...defaultSnapshotItem, published: false };
+  (useFetchContent as jest.Mock).mockImplementation(() => ({
+    data: defaultContentItemWithSnapshot,
+  }));
+  (useGetSnapshotList as jest.Mock).mockImplementation(() => ({
+    data: {
+      meta: defaultMetaItem,
+      data: [unpublishedSnapshot],
+    },
+    isLoading: false,
+    isFetching: false,
+  }));
+
+  render(
+    <ReactQueryTestWrapper>
+      <SnapshotListModalDataView />
+    </ReactQueryTestWrapper>,
+  );
+
+  expect(screen.queryByText('Published')).not.toBeInTheDocument();
+  expect(screen.queryByText('Publishing in progress')).not.toBeInTheDocument();
 });

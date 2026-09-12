@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet, useOutletContext } from 'react-router-dom';
 
 import {
@@ -18,6 +18,7 @@ import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 import { usePaginationLocalStorage } from 'Hooks/tables/usePaginationLocalStorage';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
 import { useIsSnapshotReadOnly } from 'components/Tables/Snapshots/useIsSnapshotReadOnly';
+import { usePublishSnapshotPolling } from 'Hooks/usePublishSnapshot';
 
 const perPageKey = 'snapshotPerPage';
 
@@ -48,12 +49,14 @@ const SnapshotListModalDataView = () => {
     setPage(1);
   }, [sortString]);
 
+  // Track whether we should poll for in-progress publish tasks
+  const [isPublishPolling, setIsPublishPolling] = useState(false);
+
   const {
     isLoading,
-    isFetching,
     isError,
     data = { data: [], meta: { count: 0, limit: 20, offset: 0 } },
-  } = useGetSnapshotList(repoUUID, page, perPage, sortString);
+  } = useGetSnapshotList(repoUUID, page, perPage, sortString, isPublishPolling);
 
   useEffect(() => {
     if (isError) {
@@ -66,7 +69,17 @@ const SnapshotListModalDataView = () => {
     meta: { count = 0 },
   } = data;
 
-  // required for outlet to confirm action
+  usePublishSnapshotPolling(snapshotsList, setIsPublishPolling);
+
+  // Derive polling state from snapshot data: any snapshot with an in-progress publish task
+  useEffect(() => {
+    const hasInProgress = snapshotsList.some(
+      (s) => s.publish_task?.status === 'pending' || s.publish_task?.status === 'running',
+    );
+    setIsPublishPolling(hasInProgress);
+  }, [snapshotsList]);
+
+  // Required for outlet to confirm action
   const clearCheckedSnapshots = useCallback(() => onSelect(false), [onSelect]);
 
   const checkedSnapshots = useMemo(() => new Set<string>(selected.map((s) => s.id)), [selected]);
@@ -102,7 +115,6 @@ const SnapshotListModalDataView = () => {
             <SnapshotsTableWithToolbars
               snapshotsList={snapshotsList}
               paginationData={paginationData}
-              isFetching={isFetching}
               isLoading={isLoading}
               count={count}
               snapshotsReadOnly={isSnapshotsReadOnly}
@@ -122,7 +134,7 @@ const SnapshotListModalDataView = () => {
   );
 };
 
-export const useSnapshotListOutletContext = () =>
+export const useSnapshotListDataViewOutletContext = () =>
   useOutletContext<{
     clearCheckedSnapshots: () => void;
     deletionContext: {

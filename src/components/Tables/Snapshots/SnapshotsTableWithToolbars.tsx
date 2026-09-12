@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
-import { Button, Pagination, ToolbarItem, ToolbarItemVariant } from '@patternfly/react-core';
+import { Button, Flex, Pagination, ToolbarItem, ToolbarItemVariant } from '@patternfly/react-core';
 
 import { ActionsColumn, IAction, ThProps } from '@patternfly/react-table';
 import { SkeletonTableBody } from '@patternfly/react-component-groups';
@@ -38,12 +38,14 @@ import { SnapshotItem } from 'services/Content/ContentApi';
 import { useAppContext } from 'middleware/AppContext';
 
 import { formatDateDDMMMYYYY } from 'helpers';
-import { DELETE_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
+import { DELETE_ROUTE, PUBLISH_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
 import { SNAPSHOTS_TABLE_COLUMNS } from './constants';
 import { SnapshotsPrimaryActionButton } from './SnapshotsPrimaryActionButton';
+import { usePublishSnapshotApi, usePublishSnapshotState } from 'Hooks/usePublishSnapshot';
+import { useDeleteSnapshot } from 'Hooks/useDeleteSnapshot';
+import { PublishLabels } from 'components/RepositoryLabels/PublishLabels';
 
 interface SnapshotsTableProps {
-  isFetching: boolean;
   isLoading: boolean;
   count: number;
   repoUUID: string;
@@ -54,11 +56,9 @@ interface SnapshotsTableProps {
   sortProps: ReturnType<typeof useDataViewSort>;
 }
 
-// actions available: delete, bulk select, sort by name, paginate
 const SnapshotsTableWithToolbars = ({
   snapshotsList,
   paginationData,
-  isFetching,
   isLoading,
   count,
   snapshotsReadOnly,
@@ -70,16 +70,16 @@ const SnapshotsTableWithToolbars = ({
   const navigate = useNavigate();
   const rootPath = useRootPath();
 
-  const { selected, onSelect, isSelected } = selection;
+  const { selected: selectedRows, onSelect, isSelected } = selection;
   const { sortBy, direction, onSort } = sortProps;
   const paginationProps = {
     ...paginationData,
     itemCount: count,
   };
-  const isFetchingOrLoading = isFetching || isLoading;
-  const isLoadingOrZeroCount = isFetchingOrLoading || !count;
 
-  const activeState = useTableActiveState({ isLoading, count, isFetching });
+  const isLoadingOrZeroCount = isLoading || !count;
+
+  const activeState = useTableActiveState({ isLoading, count });
   const shouldEnableBulkSelection =
     !snapshotsReadOnly && rbac?.repoWrite && count >= 2 && activeState === undefined;
 
@@ -101,7 +101,6 @@ const SnapshotsTableWithToolbars = ({
     };
   };
 
-  // DataView table props, rows and columns
   const ouiaId = 'snapshot_list_table';
 
   const dataViewColumns: DataViewTh[] = SNAPSHOTS_TABLE_COLUMNS.map((col, index) => ({
@@ -109,22 +108,62 @@ const SnapshotsTableWithToolbars = ({
     props: col.sortAttribute ? { sort: getSortParams(index) } : {},
   }));
 
+  // publish snapshot action
+  const { onPublishClick, publishButtonLabel, isPublishDisabled } = usePublishSnapshotApi({
+    selectedRows,
+    snapshotsList,
+  });
+
+  const { getSnapshotPublishState } = usePublishSnapshotState();
+
+  // delete snapshot action
+  const { deleteButtonLabel, navigateOnDeleteClick, isDeleteDisabled } = useDeleteSnapshot({
+    selectedRows,
+    count,
+    isLoadingOrZeroCount,
+  });
+
   const rowActions = useCallback(
-    (snapUuid: string): IAction[] =>
-      snapshotsReadOnly
-        ? []
-        : [
-            {
-              isDisabled: count < 2,
-              title: 'Delete',
-              onClick: () => navigate(`${DELETE_ROUTE}?snapshotUUID=${snapUuid}`),
-            },
-          ],
+    (
+      snapUuid: string,
+      isPublished: boolean,
+      hasInProgressTask: boolean,
+      packageCount: number,
+    ): IAction[] => {
+      if (snapshotsReadOnly) return [];
+
+      const actions: IAction[] = [
+        {
+          isDisabled: count < 2,
+          title: 'Delete',
+          onClick: () => navigate(`${DELETE_ROUTE}?snapshotUUID=${snapUuid}`),
+        },
+      ];
+
+      if (isPublished) {
+        actions.push({
+          isDisabled: hasInProgressTask,
+          title: 'Unpublish',
+          onClick: () => navigate(`${PUBLISH_ROUTE}?snapshotUUID=${snapUuid}&action=unpublish`),
+        });
+      } else {
+        actions.push({
+          isDisabled: hasInProgressTask || packageCount === 0,
+          title: 'Publish',
+          ...(packageCount === 0 && {
+            title: 'Cannot publish snapshot with 0 packages',
+          }),
+          onClick: () => navigate(`${PUBLISH_ROUTE}?snapshotUUID=${snapUuid}`),
+        });
+      }
+
+      return actions;
+    },
     [snapshotsReadOnly, count, navigate],
   );
 
   const kebab = useCallback(
-    (snapUuid: string) => {
+    (snapUuid: string, isPublished: boolean, hasInProgressTask: boolean, packageCount: number) => {
       if (snapshotsReadOnly) return [];
       return [
         {
@@ -138,7 +177,9 @@ const SnapshotsTableWithToolbars = ({
               show={!snapshotsReadOnly && (!rbac?.repoWrite || count < 2)}
               setDisabled
             >
-              <ActionsColumn items={rowActions(snapUuid)} />
+              <ActionsColumn
+                items={rowActions(snapUuid, isPublished, hasInProgressTask, packageCount)}
+              />
             </ConditionalTooltip>
           ),
           props: { isActionCell: true },
@@ -150,11 +191,42 @@ const SnapshotsTableWithToolbars = ({
 
   const dataViewRows: DataViewTrObject[] = useMemo(
     () =>
-      snapshotsList.map(
-        ({ uuid: snapUuid, created_at, content_counts, added_counts, removed_counts }) => ({
+      snapshotsList.map((snapshot) => {
+        const {
+          uuid: snapUuid,
+          created_at,
+          content_counts,
+          added_counts,
+          removed_counts,
+          published,
+        } = snapshot;
+        const publishState = getSnapshotPublishState(snapshot);
+        const hasInProgressTask =
+          snapshot.publish_task?.status === 'pending' ||
+          snapshot.publish_task?.status === 'running';
+        const packageCount = content_counts?.['rpm.package'] || 0;
+
+        return {
           id: snapUuid,
           row: [
-            { cell: formatDateDDMMMYYYY(created_at, true) },
+            {
+              cell: (
+                <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }}>
+                  <Button
+                    variant='link'
+                    isInline
+                    onClick={() =>
+                      navigate(
+                        `${rootPath}/${REPOSITORIES_ROUTE}/${repoUUID}/snapshots/${snapUuid}`,
+                      )
+                    }
+                  >
+                    {formatDateDDMMMYYYY(created_at, true)}
+                  </Button>
+                  <PublishLabels publishState={publishState} />
+                </Flex>
+              ),
+            },
             {
               cell: (
                 <ChangedArrows
@@ -198,11 +270,11 @@ const SnapshotsTableWithToolbars = ({
             {
               cell: <RepoConfig repoUUID={repoUUID} snapUUID={snapUuid} latest={false} />,
             },
-            ...kebab(snapUuid),
+            ...kebab(snapUuid, !!published, hasInProgressTask, packageCount),
           ],
-        }),
-      ),
-    [snapshotsList, repoUUID, rootPath, navigate, kebab],
+        };
+      }),
+    [snapshotsList, repoUUID, rootPath, navigate, kebab, getSnapshotPublishState],
   );
 
   // bulk select action
@@ -221,17 +293,11 @@ const SnapshotsTableWithToolbars = ({
   const isPageSelected = dataViewRows.length > 0 && pageSelectionCount === dataViewRows.length;
   const isPagePartiallySelected = pageSelectionCount > 0 && !isPageSelected;
 
-  const deleteButtonLabel = useMemo(() => {
-    if (!selected.length || !rbac?.repoWrite) return 'Delete selected snapshots';
-    if (selected.length === count) return "Can't delete all snapshots";
-    return `Delete ${selected.length} snapshots`;
-  }, [selected.length, count, rbac?.repoWrite]);
-
   const bulkSelect = (
     <BulkSelect
       isDataPaginated
       onSelect={handleBulkSelect}
-      selectedCount={selected.length}
+      selectedCount={selectedRows.length}
       pageCount={dataViewRows.length}
       pageSelected={isPageSelected}
       pagePartiallySelected={isPagePartiallySelected}
@@ -242,19 +308,17 @@ const SnapshotsTableWithToolbars = ({
     />
   );
 
-  // primary actions dropdown
-  const navigateOnDeleteClick = () => navigate(DELETE_ROUTE);
-  const isDeleteDisabled =
-    isLoadingOrZeroCount || !selected.length || selected.length === count || !rbac?.repoWrite;
-
   const actionsDropdown = (
     <SnapshotsPrimaryActionButton
       deleteButtonLabel={deleteButtonLabel}
       onDeleteClick={navigateOnDeleteClick}
       isDeleteDisabled={isDeleteDisabled}
-      isFetchingOrLoading={isFetchingOrLoading}
+      isFetchingOrLoading={isLoading}
       isNothingToDelete={count === 1}
       rbac={rbac}
+      onPublishClick={onPublishClick}
+      isPublishDisabled={isPublishDisabled}
+      publishButtonLabel={publishButtonLabel}
     />
   );
 
@@ -271,7 +335,7 @@ const SnapshotsTableWithToolbars = ({
       widgetId='topPaginationWidgetId'
       {...paginationProps}
       isCompact
-      isDisabled={isFetchingOrLoading}
+      isDisabled={isLoading}
     />
   );
 
