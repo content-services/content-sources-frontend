@@ -65,6 +65,18 @@ Keep in mind that you have to be connected to the VPN for this to work, even in 
 
 2. With a browser, open the URL listed in the terminal output, <https://stage.foo.redhat.com:1337/insights/content> for example.
 
+3. **Optional — Lightwell Beacon PDF export:** In a separate terminal, start the local PDF server:
+
+   ```bash
+   yarn start:pdf
+   ```
+
+   The PDF server is a pure renderer — the browser fetches vulnerability data
+   and sends it in the POST body, so no backend connection or environment
+   variables are needed for the PDF server itself. Mock data controlled by
+   `LIGHTWELL_BEACON_USE_MOCK` in `src/Pages/Lightwell/constants.ts` flows
+   through automatically.
+
 ### Running the app in static mode with a testing proxy
 
 Sometimes the default development proxy started with `yarn start||local` can be

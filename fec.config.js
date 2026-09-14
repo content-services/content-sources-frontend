@@ -108,7 +108,6 @@ module.exports = {
     exposes: {
       './RootApp': path.resolve(__dirname, './src/AppEntry.tsx'),
       './LightwellApp': path.resolve(__dirname, './src/LightwellAppEntry.tsx'),
-      './BeaconPdfEntry': path.resolve(__dirname, './src/moduleEntries/BeaconPdfEntry.tsx'),
     },
     exclude: ['react-router-dom'],
     shared: [
@@ -141,9 +140,9 @@ module.exports = {
         host: `http://127.0.0.1:${process.env.BACKEND_PORT}`,
       },
     }),
-    ...(process.env.PDF_GENERATOR_PORT && {
-      '/api/crc-pdf-generator': {
-        host: `http://127.0.0.1:${process.env.PDF_GENERATOR_PORT}`,
+    ...(process.env.PDF_SERVER_PORT && {
+      '/pdf/': {
+        host: `http://127.0.0.1:${process.env.PDF_SERVER_PORT}`,
       },
     }),
   },
