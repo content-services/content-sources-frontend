@@ -3,37 +3,45 @@ import { Flex } from '@patternfly/react-core';
 import MarkAsPartneredInProgressLabel from 'components/RepositoryLabels/MarkPartnerInProgressLabel';
 import PartneredLabel from 'components/RepositoryLabels/PartneredLabel';
 import PartnerRepositoryLabel from 'components/RepositoryLabels/PartnerRepositoryLabel';
+import { PublishLabels } from 'components/RepositoryLabels/PublishLabels';
 import UploadRepositoryLabel from 'components/RepositoryLabels/UploadRepositoryLabel';
 
 import { ContentOrigin } from 'services/Content/ContentApi';
+import { SnapshotPublishState } from 'services/SnapshotPublish/SnapshotPublishApi';
 
 type RepositoryLabelsProps = {
   origin: ContentOrigin | undefined;
   isRepoBeingMarkedAsPartner: boolean;
   isPartner: boolean | undefined;
+  publishState?: SnapshotPublishState;
 };
 
 export const RepositoryLabels = ({
   origin,
   isRepoBeingMarkedAsPartner,
   isPartner,
+  publishState,
 }: RepositoryLabelsProps) => {
   // upload repositories
   if (origin === ContentOrigin.UPLOAD) {
-    let additionalLabels;
-    if (isRepoBeingMarkedAsPartner) additionalLabels = <MarkAsPartneredInProgressLabel />;
-    if (isPartner) additionalLabels = <PartneredLabel />;
-
     return (
       <Flex gap={{ default: 'gapXs' }} alignItems={{ default: 'alignItemsCenter' }}>
         <UploadRepositoryLabel />
-        {additionalLabels}
+        {isRepoBeingMarkedAsPartner && <MarkAsPartneredInProgressLabel />}
+        {isPartner && <PartneredLabel />}
+        <PublishLabels publishState={publishState} />
       </Flex>
     );
   }
 
-  // partner repositories
-  if (origin === ContentOrigin.COMMUNITY) return <PartnerRepositoryLabel />;
+  // partner repositories - partner consumers
+  if (origin === ContentOrigin.COMMUNITY) {
+    return (
+      <Flex gap={{ default: 'gapXs' }} alignItems={{ default: 'alignItemsCenter' }}>
+        <PartnerRepositoryLabel />
+      </Flex>
+    );
+  }
 
   return null;
 };
