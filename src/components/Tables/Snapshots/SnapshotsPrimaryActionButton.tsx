@@ -16,6 +16,10 @@ interface SnapshotsPrimaryActionButtonProps {
   isFetchingOrLoading: boolean;
   rbac: AppContextInterface['rbac'];
   isNothingToDelete: boolean;
+  canPublish: boolean;
+  onPublishClick: () => void;
+  isPublishDisabled: boolean;
+  publishButtonLabel: string;
 }
 
 export const SnapshotsPrimaryActionButton = ({
@@ -25,6 +29,10 @@ export const SnapshotsPrimaryActionButton = ({
   isFetchingOrLoading,
   isNothingToDelete,
   rbac,
+  canPublish,
+  onPublishClick,
+  isPublishDisabled,
+  publishButtonLabel,
 }: SnapshotsPrimaryActionButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const isActionDisabled = isNothingToDelete;
@@ -58,15 +66,29 @@ export const SnapshotsPrimaryActionButton = ({
           <DropdownItem
             value='delete'
             ouiaId='remove_snapshots_bulk'
-            isDisabled={isDeleteDisabled}
+            isDisabled={isDeleteDisabled || !rbac?.repoWrite}
             onClick={onDeleteClick}
           >
             {deleteButtonLabel}
           </DropdownItem>
         </ConditionalTooltip>
-        <DropdownItem value='publish' isDisabled>
-          Publish
-        </DropdownItem>
+        {canPublish && (
+          <ConditionalTooltip
+            key='publish-action'
+            content='You do not have the required permissions to perform this action.'
+            show={!rbac?.repoWrite}
+            setDisabled
+          >
+            <DropdownItem
+              value='publish'
+              ouiaId='publish_snapshot_bulk'
+              isDisabled={isPublishDisabled}
+              onClick={onPublishClick}
+            >
+              {publishButtonLabel}
+            </DropdownItem>
+          </ConditionalTooltip>
+        )}
       </DropdownList>
     </Dropdown>
   );
