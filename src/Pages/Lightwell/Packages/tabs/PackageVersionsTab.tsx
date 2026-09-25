@@ -2,7 +2,8 @@ import { Button, Flex, Label, Title } from '@patternfly/react-core';
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { useMemo } from 'react';
 
-import { RepositoryPackageReleaseInfo } from 'services/Content/ContentApi';
+import { RepositoryPackageReleaseInfo } from '../../../../services/Content/ContentApi';
+import { formatReleaseDate } from '../utils/format';
 
 type PackageVersionsTabProps = {
   currentVersion: string;
@@ -20,7 +21,7 @@ const PackageVersionsTab = ({
   const releaseDateMap = useMemo(() => {
     const map: Record<string, string> = {};
     latestReleases.forEach((r) => {
-      map[r.version] = r.created_at?.split('T')[0] ?? '—';
+      map[r.version] = formatReleaseDate(r.created_at);
     });
     return map;
   }, [latestReleases]);

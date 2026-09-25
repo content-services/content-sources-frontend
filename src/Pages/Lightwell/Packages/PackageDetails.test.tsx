@@ -6,6 +6,7 @@ import {
   useMavenPackageVersionsListQuery,
   usePythonPackageVersionsQuery,
 } from 'services/Content/ContentQueries';
+import { usePackageAdvisoriesQuery } from 'services/Lightwell/AdvisoriesQueries';
 import {
   defaultLightwellContentItem,
   defaultLightwellRepositoryPackageItem,
@@ -34,6 +35,10 @@ jest.mock('services/Content/ContentQueries', () => ({
   usePythonPackageVersionsQuery: jest.fn(),
 }));
 
+jest.mock('services/Lightwell/AdvisoriesQueries', () => ({
+  usePackageAdvisoriesQuery: jest.fn(() => ({ isLoading: false, data: undefined })),
+}));
+
 jest.mock('Hooks/Lightwell/useLightwellRepository');
 
 const defaultRepoSlug = getRepositoryPathSlug(
@@ -42,6 +47,7 @@ const defaultRepoSlug = getRepositoryPathSlug(
 );
 
 const packageName = defaultLightwellRepositoryPackageItem.name;
+const packageCoordinate = `${defaultLightwellRepositoryPackageItem.group}:${packageName}`;
 
 const mockUseParams = jest.fn<
   Partial<{ repoName: string; group: string; packageName: string }>,
@@ -112,6 +118,44 @@ const renderPackageDetails = () =>
     </ReactQueryTestWrapper>,
   );
 
+const latestReleaseAdvisory = {
+  advisory_name: 'CVE-2024-0001',
+  severity: '8.5',
+  severity_score: 8.5,
+  package_name: packageCoordinate,
+  package_version: '3.14.0',
+};
+
+const mockPackageAdvisoriesQuery = (advisories?: (typeof latestReleaseAdvisory)[]) => {
+  (usePackageAdvisoriesQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: advisories ? { data: advisories } : undefined,
+  }));
+};
+
+const setupRepository = (securityLevel: 'remediated' | 'predisclosure') => {
+  const repository = {
+    ...defaultLightwellContentItem,
+    name: `lightwell/java/${securityLevel}`,
+    published_distribution_url: `https://example.com/lightwell/java/${securityLevel}`,
+    security_level: securityLevel,
+  };
+
+  mockUseParams.mockReturnValue({
+    repoName: getRepositoryPathSlug('maven', securityLevel),
+    group: defaultLightwellRepositoryPackageItem.group,
+    packageName,
+  });
+
+  (useLightwellRepository as jest.Mock).mockReturnValue({
+    repository,
+    repoUUID: repository.uuid,
+    isLoading: false,
+    isError: false,
+    error: undefined,
+  });
+};
+
 beforeEach(() => {
   searchParams = new URLSearchParams();
   mockUseParams.mockReturnValue({
@@ -132,6 +176,7 @@ beforeEach(() => {
     isFetching: false,
     data: undefined,
   }));
+  mockPackageAdvisoriesQuery(); // Clear advisory data between tests
 });
 
 it('shows empty state when the package has no builds', async () => {
@@ -146,36 +191,39 @@ it('shows empty state when the package has no builds', async () => {
 
   renderPackageDetails();
 
+  expect(await screen.findByRole('heading', { name: 'No package details' })).toBeInTheDocument();
   expect(await screen.findByText('No details available yet for this package.')).toBeInTheDocument();
 });
 
 const setupNoReleasePackage = () => {
+  const data = {
+    group: 'org.json.test',
+    name: 'json-test',
+    versions: [
+      {
+        group: 'org.json.test',
+        name: 'json-test',
+        version: '2.21.2',
+        builds: [{ version: '2.21.2', release: '', created_at: '2026-07-01T00:00:00Z' }],
+      },
+      {
+        group: 'org.json.test',
+        name: 'json-test',
+        version: '2.20.0',
+        builds: [{ version: '2.20.0', release: '', created_at: '2026-06-15T00:00:00Z' }],
+      },
+      {
+        group: 'org.json.test',
+        name: 'json-test',
+        version: '2.19.1',
+        builds: [{ version: '2.19.1', release: '', created_at: '2026-06-01T00:00:00Z' }],
+      },
+    ],
+  };
+
   (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
-    data: {
-      group: 'org.json.test',
-      name: 'json-test',
-      versions: [
-        {
-          group: 'org.json.test',
-          name: 'json-test',
-          version: '2.21.2',
-          builds: [{ version: '2.21.2', release: '', created_at: '2026-07-01T00:00:00Z' }],
-        },
-        {
-          group: 'org.json.test',
-          name: 'json-test',
-          version: '2.20.0',
-          builds: [{ version: '2.20.0', release: '', created_at: '2026-06-15T00:00:00Z' }],
-        },
-        {
-          group: 'org.json.test',
-          name: 'json-test',
-          version: '2.19.1',
-          builds: [{ version: '2.19.1', release: '', created_at: '2026-06-01T00:00:00Z' }],
-        },
-      ],
-    },
+    data,
   }));
 };
 
@@ -234,7 +282,6 @@ it('renders sidebar metadata', async () => {
   renderPackageDetails();
 
   expect(await screen.findByText('Last updated')).toBeInTheDocument();
-  expect(await screen.findAllByText('2026-07-01')).toHaveLength(2);
   expect(await screen.findByText('Group ID')).toBeInTheDocument();
   expect(await screen.findByText(defaultLightwellRepositoryPackageItem.group)).toBeInTheDocument();
   expect(await screen.findByText('Rebuilt by')).toBeInTheDocument();
@@ -331,26 +378,36 @@ const setupMultiVersionReleasePackage = () => {
   }));
 };
 
-it('shows "Available versions" on Releases tab for multi-version release packages', async () => {
+it('shows Lightwell releases for the selected version on the Releases tab', async () => {
   setupMultiVersionReleasePackage();
 
   renderPackageDetails();
 
-  const releasesTab = await screen.findByRole('tab', { name: 'Releases' });
-  await userEvent.click(releasesTab);
+  await userEvent.click(await screen.findByRole('tab', { name: 'Releases' }));
 
-  expect(await screen.findByText('Available versions')).toBeInTheDocument();
-  expect(await screen.findByRole('button', { name: '2.12.0' })).toBeInTheDocument();
-  expect(await screen.findByText('2.12.0.rhlw-00002')).toBeInTheDocument();
-  expect(await screen.findByText('2026-06-18')).toBeInTheDocument();
+  expect(await screen.findByText('Releases for: version 3.14.0')).toBeInTheDocument();
 
-  const availableVersionsTable = screen.getByRole('grid', { name: 'Available versions' });
-  const versionRows = availableVersionsTable.querySelectorAll('tbody tr');
-  expect(versionRows[0]).toHaveTextContent('3.14.0');
-  expect(versionRows[1]).toHaveTextContent('2.12.0');
+  const releasesTable = screen.getByRole('grid', { name: 'Releases for 3.14.0' });
+  const releaseRows = releasesTable.querySelectorAll('tbody tr');
+  expect(releaseRows).toHaveLength(1);
+  expect(releaseRows[0]).toHaveTextContent('3.14.0.rhlw-00001');
+  expect(releaseRows[0]).toHaveTextContent('Latest');
+  expect(screen.queryByText('2.12.0.rhlw-00002')).not.toBeInTheDocument();
+
+  await userEvent.click(await screen.findByRole('button', { name: '3.14.0' }));
+  await userEvent.click(await screen.findByRole('menuitem', { name: '2.12.0' }));
+
+  expect(await screen.findByText('Releases for: version 2.12.0')).toBeInTheDocument();
+
+  const selectedVersionTable = screen.getByRole('grid', { name: 'Releases for 2.12.0' });
+  const selectedVersionRows = selectedVersionTable.querySelectorAll('tbody tr');
+  expect(selectedVersionRows).toHaveLength(1);
+  expect(selectedVersionRows[0]).toHaveTextContent('2.12.0.rhlw-00002');
+  expect(selectedVersionRows[0]).toHaveTextContent('Latest');
+  expect(screen.queryByText('3.14.0.rhlw-00001')).not.toBeInTheDocument();
 });
 
-it('deduplicates "Available versions" rows when multiple releases share the same base version', async () => {
+it('lists all Lightwell releases for the selected version from latest to oldest', async () => {
   (useMavenPackageVersionsListQuery as jest.Mock).mockImplementation(() => ({
     isLoading: false,
     data: {
@@ -382,14 +439,70 @@ it('deduplicates "Available versions" rows when multiple releases share the same
 
   renderPackageDetails();
 
-  const releasesTab = await screen.findByRole('tab', { name: 'Releases' });
-  await userEvent.click(releasesTab);
+  await userEvent.click(await screen.findByRole('tab', { name: 'Releases' }));
 
-  const availableVersionsTable = await screen.findByRole('grid', { name: 'Available versions' });
-  const versionRows = availableVersionsTable.querySelectorAll('tbody tr');
-  expect(versionRows).toHaveLength(2);
-  expect(versionRows[0]).toHaveTextContent('3.14.0');
-  expect(versionRows[1]).toHaveTextContent('2.12.0');
+  const releasesTable = await screen.findByRole('grid', { name: 'Releases for 3.14.0' });
+  const releaseRows = releasesTable.querySelectorAll('tbody tr');
+  expect(releaseRows).toHaveLength(3);
+  expect(releaseRows[0]).toHaveTextContent('3.14.0.rhlw-00003');
+  expect(releaseRows[0]).toHaveTextContent('Latest');
+  expect(releaseRows[0]).toHaveTextContent('3 Jul 2026');
+  expect(releaseRows[1]).toHaveTextContent('3.14.0.rhlw-00002');
+  expect(releaseRows[1]).toHaveTextContent('2 Jul 2026');
+  expect(releaseRows[1]).not.toHaveTextContent('Latest');
+  expect(releaseRows[2]).toHaveTextContent('3.14.0.rhlw-00001');
+  expect(releaseRows[2]).toHaveTextContent('1 Jul 2026');
+  expect(screen.queryByText('2.12.0.rhlw-00002')).not.toBeInTheDocument();
+});
+
+it('shows latest release fixes for a remediated repository', async () => {
+  setupRepository('remediated');
+  mockPackageAdvisoriesQuery([latestReleaseAdvisory]);
+
+  renderPackageDetails();
+
+  expect(await screen.findByText('1 new backported fixes in this release')).toBeInTheDocument();
+  expect(screen.getByTestId('lightwell-fixes-card')).toBeInTheDocument();
+  expect(usePackageAdvisoriesQuery).toHaveBeenCalledWith(expect.any(Object), { enabled: true });
+});
+
+it('shows the low-severity description when the latest release only fixes low issues', async () => {
+  setupRepository('remediated');
+  mockPackageAdvisoriesQuery([
+    { ...latestReleaseAdvisory, severity: '3.1', severity_score: 3.0999999046325684 },
+  ]);
+
+  renderPackageDetails();
+
+  expect(await screen.findByText('1 new backported fixes in this release')).toBeInTheDocument();
+  expect(screen.getByTestId('lightwell-fixes-card')).toBeInTheDocument();
+  expect(
+    screen.getByText('Resolves remaining low-severity issues from earlier release cycles.'),
+  ).toBeInTheDocument();
+});
+
+it('shows a dependency-update description when the latest release has no fixes', async () => {
+  setupRepository('remediated');
+  mockPackageAdvisoriesQuery([]);
+
+  renderPackageDetails();
+
+  expect(
+    await screen.findByRole('heading', { name: 'No new backported fixes in this release' }),
+  ).toBeInTheDocument();
+  expect(screen.queryByTestId('lightwell-fixes-card')).not.toBeInTheDocument();
+  expect(screen.getByText('Issued to support a dependency update.')).toBeInTheDocument();
+});
+
+it('hides latest release fixes for a predisclosure repository', async () => {
+  setupRepository('predisclosure');
+  mockPackageAdvisoriesQuery([latestReleaseAdvisory]);
+
+  renderPackageDetails();
+
+  expect(await screen.findByRole('heading', { name: 'About this package' })).toBeInTheDocument();
+  expect(screen.queryByText(/new backported fixes in this release/)).not.toBeInTheDocument();
+  expect(usePackageAdvisoriesQuery).toHaveBeenCalledWith(expect.any(Object), { enabled: false });
 });
 
 it('shows version dropdown for multi-version release packages', async () => {
@@ -458,9 +571,10 @@ it('shows Python remediated releases and copies the published pip version', asyn
   await userEvent.click(latestRelease[0]);
   expect(writeText).toHaveBeenCalledWith('pip install requests==3.0.1+rhlw.2');
 
-  await userEvent.click(screen.getByRole('button', { name: '2.9.0' }));
+  await userEvent.click(screen.getByRole('button', { name: '3.0.1' }));
+  await userEvent.click(await screen.findByRole('menuitem', { name: '2.9.0' }));
   expect(
-    await screen.findByRole('heading', { name: 'Releases for version 2.9.0' }),
+    await screen.findByRole('heading', { name: 'Releases for: version 2.9.0' }),
   ).toBeInTheDocument();
   const olderRelease = await screen.findAllByRole('button', { name: '2.9.0+rhlw.1' });
   await userEvent.click(olderRelease[0]);
@@ -514,16 +628,17 @@ it('copies maven coordinate to clipboard for remediated java package', async () 
     writeText,
     async () => {
       await userEvent.click(await screen.findByRole('tab', { name: 'Releases' }));
-      const buttons = await screen.findAllByRole('button', { name: '3.14.0.rhlw-00001' });
-      await userEvent.click(buttons[0]);
+      await userEvent.click(await screen.findByRole('button', { name: '3.14.0.rhlw-00001' }));
     },
     javaRemediatedCopyCommand,
   );
 
-  // "Available versions" section of Releases tab
+  // Releases for a different selected version
   await assertClipboardCopy(
     writeText,
     async () => {
+      await userEvent.click(await screen.findByRole('button', { name: '3.14.0' }));
+      await userEvent.click(await screen.findByRole('menuitem', { name: '2.12.0' }));
       await userEvent.click(await screen.findByRole('button', { name: '2.12.0.rhlw-00002' }));
     },
     otherJavaRemediatedCopyCommand,

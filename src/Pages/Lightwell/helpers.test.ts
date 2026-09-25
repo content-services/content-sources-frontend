@@ -1,17 +1,19 @@
 import {
-  compareReleasesDesc,
-  compareVersionsDesc,
   formatDistributionUrl,
   formatRepositoryName,
   getEcosystemFromContentType,
   getRepositoryDescription,
   getRepositoryNameFromPathSlug,
   getRepositoryPathSlug,
+} from './helpers';
+import {
+  compareReleasesDesc,
+  compareVersionsDesc,
   lightwellReleaseNum,
   pythonLightwellRelease,
   sortVersionsDesc,
   stripLightwellVersionSuffix,
-} from './helpers';
+} from './Packages/utils/versions';
 
 describe('getEcosystemFromContentType', () => {
   it('returns the ecosystem for a known content type', () => {
