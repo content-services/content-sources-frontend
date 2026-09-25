@@ -1,5 +1,3 @@
-import { capitalize } from 'lodash';
-
 export type ProcessError = { title: string; description: string };
 
 const API_ERROR_DEFAULTS = {
@@ -15,7 +13,9 @@ export function apiError(context: 'upload' | 'fetch'): ProcessError {
 export function taskError(error?: string): ProcessError {
   return {
     title: 'Could not prepare analysis report',
-    description: capitalize(error) || 'Something went wrong while preparing your report',
+    description: error
+      ? error[0].toUpperCase() + error.slice(1)
+      : 'Something went wrong while preparing your report',
   };
 }
 
