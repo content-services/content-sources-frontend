@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRemoteHook } from '@scalprum/react-core';
 import { useFlag } from '@unleash/proxy-client-react';
-import LightwellPageHeader from '../components/LightwellPageHeader';
+import { LwPageHero } from 'kit/components/assemblies';
 import {
   Button,
   Card,
@@ -90,7 +90,7 @@ const CoverageReport = () => {
 
   return (
     <>
-      <LightwellPageHeader
+      <LwPageHero
         title={matchAnalysisTitle}
         ouiaId='lightwell-coverage-header'
         actions={
@@ -116,7 +116,7 @@ const CoverageReport = () => {
           </Flex>
         }
       />
-      {/* plXs matches the mXs margin LightwellPageHeader applies to its inner title flex, keeping content left-aligned */}
+      {/* plXs matches the mXs margin LwPageHero applies to its inner title flex, keeping content left-aligned */}
       <PageSection
         aria-label='Match analysis'
         hasBodyWrapper={false}
