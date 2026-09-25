@@ -116,7 +116,7 @@ const AnalysisProgress = ({ step, reportUUID, processError, onRetry }: AnalysisP
                   alignItems={{ default: 'alignItemsCenter' }}
                 >
                   <Alert variant='danger' isInline isPlain title={processError.title}>
-                    {processError.description}
+                    <span style={{ whiteSpace: 'pre-line' }}>{processError.description}</span>
                   </Alert>
                   <Button variant='primary' onClick={onRetry}>
                     Reupload file
