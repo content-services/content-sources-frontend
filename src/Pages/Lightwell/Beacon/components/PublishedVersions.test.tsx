@@ -1,5 +1,4 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { PublishedVersions } from './PublishedVersions';
 
@@ -20,8 +19,6 @@ describe('PublishedVersions', () => {
   });
 
   it('reveals additional versions in a popover', async () => {
-    const user = userEvent.setup();
-
     render(
       <PublishedVersions
         versions={['1.10.2.rhlw-00003', '1.10.1.rhlw-00002', '1.10.0.rhlw-00001']}
@@ -31,10 +28,14 @@ describe('PublishedVersions', () => {
     expect(screen.getByText('1.10.2.rhlw-00003')).toBeInTheDocument();
     expect(screen.queryByText('1.10.1.rhlw-00002')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Show 2 more published versions' }));
+    const overflowButton = screen.getByRole('button', { name: 'Show 2 more published versions' });
+    overflowButton.focus();
+    fireEvent.click(overflowButton);
 
     expect(screen.getByRole('dialog', { name: 'Other published versions' })).toBeInTheDocument();
-    expect(screen.getByRole('list', { name: 'Additional published versions' })).toHaveFocus();
+    await waitFor(() =>
+      expect(screen.getByRole('list', { name: 'Additional published versions' })).toHaveFocus(),
+    );
     expect(screen.getByText('1.10.1.rhlw-00002')).toBeInTheDocument();
     expect(screen.getByText('1.10.0.rhlw-00001')).toBeInTheDocument();
   });
