@@ -244,7 +244,52 @@ const Beacon = () => {
             itemCount={displayMeta?.count ?? 0}
           />
         }
-      />
+        hasAside={
+          !selectedCustomerId && !isLoadingCustomers ? (
+            <EmptyState
+              headingLevel='h2'
+              icon={UserIcon}
+              titleText='Select customer'
+              variant={EmptyStateVariant.sm}
+            >
+              <EmptyStateBody>
+                Select a customer ID first to view the status of their Lightwell submissions.
+              </EmptyStateBody>
+            </EmptyState>
+          ) : selectedCustomerId && isLoading ? (
+            <Skeleton height='120px' />
+          ) : selectedCustomerId ? (
+            <LwCard
+              hasHeader={`Status Summary${activeFilterCount > 0 ? ' (filtered)' : ''}`}
+              hasAction={<SlaInfoPopover />}
+            >
+              <Flex
+                justifyContent={{ default: 'justifyContentCenter' }}
+                gap={{ default: 'gapXl' }}
+                alignItems={{ default: 'alignItemsCenter' }}
+                style={{ marginBottom: 'var(--pf-t--global--spacer--md)' }}
+              >
+                <FlexItem>
+                  <LwStatItem value={displayMeta?.count ?? filteredVulns.length} label='Total' />
+                </FlexItem>
+                <FlexItem>
+                  <LwStatItem
+                    value={displayMeta?.criticalCount ?? 0}
+                    label='Critical'
+                    variant='danger'
+                  />
+                </FlexItem>
+              </Flex>
+              <PipelineView statusCounts={displayMeta?.statusCounts} />
+            </LwCard>
+          ) : undefined
+        }
+      >
+        <CustomerIdSelect
+          selectedCustomerId={selectedCustomerId}
+          onCustomerIdChange={handleCustomerIdChange}
+        />
+      </LwPageHero>
 
       <PageSection hasBodyWrapper={false} data-ouia-component-id='lightwell-beacon-page'>
         <Stack hasGutter className='lightwell-beacon-content'>
@@ -255,10 +300,6 @@ const Beacon = () => {
               className='lightwell-beacon-layout'
             >
               <FlexItem className='lightwell-filter-panel'>
-                <CustomerIdSelect
-                  selectedCustomerId={selectedCustomerId}
-                  onCustomerIdChange={handleCustomerIdChange}
-                />
                 <span className='lightwell-filter-panel-header'>
                   <Title headingLevel='h4' size='md'>
                     Filters
@@ -332,73 +373,23 @@ const Beacon = () => {
               </FlexItem>
               <FlexItem flex={{ default: 'flex_1' }} className='lightwell-beacon-table-area'>
                 {selectedCustomerId && !isLoading ? (
-                  <Stack hasGutter>
-                    <StackItem>
-                      <LwCard
-                        hasHeader={`Status Summary${activeFilterCount > 0 ? ' (filtered)' : ''}`}
-                        hasAction={<SlaInfoPopover />}
-                      >
-                        <Flex
-                          justifyContent={{ default: 'justifyContentCenter' }}
-                          gap={{ default: 'gapXl' }}
-                          alignItems={{ default: 'alignItemsCenter' }}
-                          style={{ marginBottom: 'var(--pf-t--global--spacer--md)' }}
-                        >
-                          <FlexItem>
-                            <LwStatItem
-                              value={displayMeta?.count ?? filteredVulns.length}
-                              label='Total'
-                            />
-                          </FlexItem>
-                          <FlexItem>
-                            <LwStatItem
-                              value={displayMeta?.criticalCount ?? 0}
-                              label='Critical'
-                              variant='danger'
-                            />
-                          </FlexItem>
-                        </Flex>
-                        <PipelineView statusCounts={displayMeta?.statusCounts} />
-                      </LwCard>
-                    </StackItem>
-                    <StackItem>
-                      <VulnerabilityTable
-                        vulnerabilities={filteredVulns}
-                        itemCount={displayMeta?.count ?? 0}
-                        page={page}
-                        perPage={perPage}
-                        onSetPage={onSetPage}
-                        onPerPageSelect={onPerPageSelect}
-                        searchValue={searchQuery}
-                        onSearchChange={setSearchQuery}
-                        onSearchClear={() => setSearchQuery('')}
-                        onResetFilters={resetFilters}
-                        columns={columns}
-                        onColumnsChange={setColumns}
-                      />
-                    </StackItem>
-                  </Stack>
-                ) : !selectedCustomerId && !isLoadingCustomers ? (
-                  <EmptyState
-                    headingLevel='h2'
-                    icon={UserIcon}
-                    titleText='Select customer'
-                    variant={EmptyStateVariant.sm}
-                  >
-                    <EmptyStateBody>
-                      Select a customer ID first to view the status of their Lightwell submissions.
-                    </EmptyStateBody>
-                  </EmptyState>
-                ) : (
-                  <Stack hasGutter>
-                    <StackItem>
-                      <Skeleton height='120px' />
-                    </StackItem>
-                    <StackItem>
-                      <Skeleton height='400px' />
-                    </StackItem>
-                  </Stack>
-                )}
+                  <VulnerabilityTable
+                    vulnerabilities={filteredVulns}
+                    itemCount={displayMeta?.count ?? 0}
+                    page={page}
+                    perPage={perPage}
+                    onSetPage={onSetPage}
+                    onPerPageSelect={onPerPageSelect}
+                    searchValue={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    onSearchClear={() => setSearchQuery('')}
+                    onResetFilters={resetFilters}
+                    columns={columns}
+                    onColumnsChange={setColumns}
+                  />
+                ) : selectedCustomerId ? (
+                  <Skeleton height='400px' />
+                ) : null}
               </FlexItem>
             </Flex>
           </StackItem>
