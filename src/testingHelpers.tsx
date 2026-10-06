@@ -848,6 +848,7 @@ export const defaultCoverageReportItem: CompletedCoverageReport = {
   unmatched: 25,
   total: 100,
   completed_at: '2026-08-18T12:01:00Z',
+  cve_summary: { critical: 12, high: 34, medium: 18, low: 7 },
   ecosystem_coverage_summary: [
     {
       ecosystem: 'Java',
@@ -877,13 +878,30 @@ export const defaultCoverageReportItem: CompletedCoverageReport = {
 };
 
 export const defaultCoverageReportPackagesItem: CoverageReportPackage[] = [
-  { name: 'spring-web', version: '6.1.5', ecosystem: 'Java', covered: true, match_status: 'exact' },
-  { name: 'flask', version: '3.0.3', ecosystem: 'Python', covered: true, match_status: 'partial' },
+  {
+    name: 'spring-web',
+    version: '6.1.5',
+    ecosystem: 'Java',
+    covered: true,
+    match_status: 'exact',
+    cve_count: { critical: 2, high: 3, medium: 1, low: 0 },
+    cve_range: { low: 5.4, high: 9.8 },
+  },
+  {
+    name: 'flask',
+    version: '3.0.3',
+    ecosystem: 'Python',
+    covered: true,
+    match_status: 'partial',
+    cve_count: { critical: 0, high: 2, medium: 1, low: 0 },
+    cve_range: { low: 5.3, high: 8.1 },
+  },
   {
     name: 'lodash',
     version: '4.17.21',
     ecosystem: 'JavaScript',
     covered: false,
     match_status: 'none',
+    cve_count: { critical: 0, high: 0, medium: 0, low: 0 },
   },
 ];

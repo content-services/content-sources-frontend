@@ -18,6 +18,7 @@ import {
 import { PlusIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import CoverageSummaryBlock from './components/CoverageSummaryBlock';
+import CveFixesBlock from './components/CveFixesBlock';
 import EcosystemBreakdownBlock from './components/EcosystemBreakdownBlock';
 import PackageCoverageTable from './components/PackageCoverageTable';
 import { ExportMenu } from './components/ExportMenu';
@@ -114,6 +115,9 @@ const CoverageReport = () => {
         <Stack hasGutter style={{ maxWidth: 1200, gap: '3rem' }}>
           <StackItem>
             <CoverageSummaryBlock report={report} />
+          </StackItem>
+          <StackItem>
+            <CveFixesBlock report={report} />
           </StackItem>
           <StackItem>
             <EcosystemBreakdownBlock report={report} />

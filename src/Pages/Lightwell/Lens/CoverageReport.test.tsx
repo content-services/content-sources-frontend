@@ -100,6 +100,19 @@ describe('CoverageReport', () => {
     expect(screen.getByText('Partial match')).toBeInTheDocument();
   });
 
+  it('displays the CVEs fixed card with per-severity counts', () => {
+    renderCoverageReport();
+    expect(screen.getByRole('heading', { level: 3, name: 'CVEs fixed' })).toBeInTheDocument();
+    expect(screen.getByText('Critical')).toBeInTheDocument();
+    expect(screen.getByText('High')).toBeInTheDocument();
+    expect(screen.getByText('Medium')).toBeInTheDocument();
+    expect(screen.getByText('Low')).toBeInTheDocument();
+    expect(screen.getByText('12')).toBeInTheDocument();
+    expect(screen.getByText('34')).toBeInTheDocument();
+    expect(screen.getByText('18')).toBeInTheDocument();
+    expect(screen.getByText('7')).toBeInTheDocument();
+  });
+
   it('displays ecosystem breakdown with package counts', () => {
     renderCoverageReport();
     expect(screen.getByText('Packages by ecosystem')).toBeInTheDocument();

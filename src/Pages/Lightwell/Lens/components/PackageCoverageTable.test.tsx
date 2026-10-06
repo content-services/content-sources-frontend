@@ -83,11 +83,28 @@ describe('PackageCoverageTable', () => {
     renderTable();
 
     const headers = screen.getAllByRole('columnheader');
-    expect(headers).toHaveLength(4);
+    expect(headers).toHaveLength(6);
     expect(headers[0]).toHaveTextContent('Package');
     expect(headers[1]).toHaveTextContent('Version');
     expect(headers[2]).toHaveTextContent('Ecosystem');
     expect(headers[3]).toHaveTextContent('Match');
+    expect(headers[4]).toHaveTextContent('CVE Fixes (net delta)');
+    expect(headers[5]).toHaveTextContent('CVSS Scores');
+  });
+
+  it('renders CVE fix counts and CVSS score ranges', () => {
+    renderTable();
+
+    // spring-web: critical 2, high 3, medium 1, no low; range 5.4–9.8
+    const springRow = screen.getByText('spring-web').closest('tr')!;
+    expect(within(springRow).getByText('2')).toBeInTheDocument();
+    expect(within(springRow).getByText('3')).toBeInTheDocument();
+    expect(within(springRow).getByText('1')).toBeInTheDocument();
+    expect(within(springRow).getByText('5.4–9.8')).toBeInTheDocument();
+
+    // lodash has no CVEs: both columns show an em dash
+    const lodashRow = screen.getByText('lodash').closest('tr')!;
+    expect(within(lodashRow).getAllByText('—')).toHaveLength(2);
   });
 
   it('shows empty state when no packages are returned', () => {

@@ -44,9 +44,17 @@ describe('CoveragePdfTemplate', () => {
 
     expect(screen.getByText('Packages by ecosystem')).toBeInTheDocument();
 
+    expect(screen.getByText('CVEs fixed')).toBeInTheDocument();
+    const cveSummary = screen.getByText('CVEs fixed').closest('.coverage-pdf-cve-section');
+    expect(cveSummary).toHaveTextContent('Critical');
+    expect(cveSummary).toHaveTextContent('High');
+    expect(cveSummary).toHaveTextContent('Medium');
+    expect(cveSummary).toHaveTextContent('Low');
+
     const packageRow = screen.getByText('spring-web').closest('tr');
     expect(packageRow).toHaveTextContent('6.1.5');
     expect(packageRow).toHaveTextContent('Exact');
+    expect(packageRow).toHaveTextContent('5.4–9.8');
   });
 
   it('omits the cover summary on continuation pages', () => {

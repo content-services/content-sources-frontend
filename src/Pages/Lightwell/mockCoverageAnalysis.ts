@@ -10,6 +10,7 @@ export const MOCK_REPORT: CompletedCoverageReport = {
   exact_matches: 1100,
   partial_matches: 270,
   unmatched: 460,
+  cve_summary: { critical: 23, high: 76, medium: 27, low: 15 },
   ecosystem_coverage_summary: [
     {
       ecosystem: 'Python',

@@ -1,10 +1,12 @@
 import {
   Flex,
+  FlexItem,
   Label,
   LabelColor,
   Pagination,
   ToolbarItem,
   ToolbarItemVariant,
+  Tooltip,
 } from '@patternfly/react-core';
 import { SkeletonTableBody, ErrorState } from '@patternfly/react-component-groups';
 import { DataView } from '@patternfly/react-data-view/dist/dynamic/DataView';
@@ -29,8 +31,21 @@ import { useCoverageReportPackagesQuery } from 'services/Lightwell/CoverageRepor
 import { matchFilterOptions, usePackageCoverageTable } from '../hooks/usePackageCoverageTable';
 import type { CoverageReportPackage } from 'services/Lightwell/CoverageReportsApi';
 import type { EcosystemInfo } from '../utils/ecosystem';
+import {
+  CVE_SEVERITIES,
+  formatCvssRange,
+  getTotalCveCount,
+  renderCveSeverityIcon,
+} from '../utils/cveSeverity';
 
-const COLUMNS = ['Package', 'Version', 'Ecosystem', 'Match'];
+const COLUMNS = [
+  'Package',
+  'Version',
+  'Ecosystem',
+  'Match',
+  'CVE Fixes (net delta)',
+  'CVSS Scores',
+];
 
 const MATCH_STATUS_LABEL: Record<
   CoverageReportPackage['match_status'],
@@ -40,6 +55,37 @@ const MATCH_STATUS_LABEL: Record<
   partial: { text: 'Partial', color: LabelColor.yellow },
   none: { text: 'None', color: LabelColor.grey },
 };
+
+const renderCveFixesCell = (pkg: CoverageReportPackage) => {
+  if (getTotalCveCount(pkg.cve_count) === 0) {
+    return '—';
+  }
+
+  return (
+    <Flex
+      alignItems={{ default: 'alignItemsCenter' }}
+      gap={{ default: 'gapMd' }}
+      flexWrap={{ default: 'nowrap' }}
+    >
+      {CVE_SEVERITIES.filter((meta) => pkg.cve_count[meta.key] > 0).map((meta) => (
+        <FlexItem key={meta.key}>
+          <Tooltip content={meta.label} position='top'>
+            <Flex
+              alignItems={{ default: 'alignItemsCenter' }}
+              gap={{ default: 'gapXs' }}
+              flexWrap={{ default: 'nowrap' }}
+            >
+              {renderCveSeverityIcon(meta)}
+              <span>{pkg.cve_count[meta.key]}</span>
+            </Flex>
+          </Tooltip>
+        </FlexItem>
+      ))}
+    </Flex>
+  );
+};
+
+const renderCvssScoresCell = (pkg: CoverageReportPackage) => formatCvssRange(pkg.cve_range);
 
 type PackageCoverageTableProps = {
   uuid: string;
@@ -106,7 +152,7 @@ const PackageCoverageTable = ({ uuid, ecosystems, table }: PackageCoverageTableP
 
   const dataViewColumns: DataViewTh[] = COLUMNS.map((name, index) => ({
     cell: name,
-    props: { width: ([35, 20, 25, 20] as const)[index] },
+    props: { width: ([25, 15, 20, 10, 15, 15] as const)[index] },
   }));
 
   const dataViewRows: DataViewTrObject[] = packages.map((pkg: CoverageReportPackage) => {
@@ -141,6 +187,8 @@ const PackageCoverageTable = ({ uuid, ecosystems, table }: PackageCoverageTableP
             </Label>
           ),
         },
+        { cell: renderCveFixesCell(pkg) },
+        { cell: renderCvssScoresCell(pkg) },
       ],
     };
   });
