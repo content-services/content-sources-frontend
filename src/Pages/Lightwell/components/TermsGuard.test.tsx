@@ -31,6 +31,7 @@ it('shows loader while loading', () => {
   renderGuard();
 
   expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
+  expect(screen.getByRole('progressbar')).toBeInTheDocument();
 });
 
 it('renders children when terms are not required', () => {
@@ -62,7 +63,9 @@ it('redirects to terms service when terms are required', () => {
   expect(window.location.href).toContain('site=lightwell');
   expect(window.location.href).toContain('event=network');
   expect(window.location.href).toContain('event=academic');
-  expect(window.location.href).toContain('redirect=');
+  expect(window.location.href).toContain(
+    `redirect=${encodeURIComponent('https://console.redhat.com/lightwell')}`,
+  );
 
   Object.defineProperty(window, 'location', { writable: true, value: originalLocation });
 });
