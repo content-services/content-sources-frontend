@@ -4,9 +4,15 @@ import Loader from 'components/Loader';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import { useTermsRequired } from 'services/Lightwell/TermsQueries';
 
-export function buildTermsUrl(termsHost: string, currentUrl: string): string {
+export function buildTermsUrl(
+  termsHost: string,
+  currentUrl: string,
+  site: string,
+  events: string[],
+): string {
   const returnUrl = encodeURIComponent(currentUrl);
-  return `${termsHost}/svcrest/terms/presentation/isrequired?site=FIEnrollment&event=FITerms&redirect=${returnUrl}`;
+  const eventParams = events.map((e) => `event=${encodeURIComponent(e)}`).join('&');
+  return `${termsHost}/svcrest/terms/presentation/isrequired?site=${encodeURIComponent(site)}&${eventParams}&redirect=${returnUrl}`;
 }
 
 interface TermsGuardProps {
@@ -23,14 +29,16 @@ export default function TermsGuard({ children }: TermsGuardProps) {
       ? 'https://terms.api.redhat.com'
       : 'https://terms.stage.api.redhat.com';
 
-  useEffect(() => {
-    if (!isLoading && !isError && data?.required && !redirecting.current) {
-      redirecting.current = true;
-      window.location.href = buildTermsUrl(termsHost, window.location.href);
-    }
-  }, [isLoading, isError, data, termsHost]);
+  const canRedirect = data?.required && data.site && !!data.events?.length;
 
-  if (isLoading || (data?.required && !isError)) {
+  useEffect(() => {
+    if (!isLoading && !isError && canRedirect && !redirecting.current) {
+      redirecting.current = true;
+      window.location.href = buildTermsUrl(termsHost, window.location.href, data.site!, data.events!);
+    }
+  }, [isLoading, isError, canRedirect, data, termsHost]);
+
+  if (isLoading || (canRedirect && !isError)) {
     return <Loader />;
   }
 

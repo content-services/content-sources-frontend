@@ -2,6 +2,8 @@ import axios from 'axios';
 
 export interface TermsRequiredResponse {
   required: boolean;
+  site?: string;
+  events?: string[];
 }
 
 export const getTermsRequired = async (): Promise<TermsRequiredResponse> => {
