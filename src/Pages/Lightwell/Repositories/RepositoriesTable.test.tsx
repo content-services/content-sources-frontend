@@ -96,6 +96,7 @@ beforeEach(() => {
   (useLightwellRepoNotifications as jest.Mock).mockReturnValue({
     isRepoSubscribed: jest.fn().mockReturnValue(false),
     setRepoSubscribed: jest.fn(),
+    hasAnyNotifySubscription: false,
     isLoading: false,
     isError: false,
     pendingEventType: undefined,
@@ -502,6 +503,84 @@ it('subscribes to python remediated repository notifications when toggle is turn
     'critical',
     'important',
   ]);
+});
+
+it('warns when notifications are enabled but no repositories are selected', async () => {
+  (useLightwellNotificationPrefs as jest.Mock).mockReturnValue({
+    prefs: { enabled: true, minimumSeverity: 'critical' },
+    isLoading: false,
+    isError: false,
+    shouldExposeNotifications: true,
+  });
+  (useLightwellRepoNotifications as jest.Mock).mockReturnValue({
+    isRepoSubscribed: jest.fn().mockReturnValue(false),
+    setRepoSubscribed: jest.fn(),
+    hasAnyNotifySubscription: false,
+    isLoading: false,
+    isError: false,
+    pendingEventType: undefined,
+  });
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: {
+      data: [javaRemediatedContentItem],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+  }));
+
+  renderRepositoriesTable();
+
+  expect(
+    await screen.findByText('You will not receive any notifications', { exact: false }),
+  ).toBeInTheDocument();
+});
+
+it('does not warn when at least one repository is selected for notifications', async () => {
+  (useLightwellNotificationPrefs as jest.Mock).mockReturnValue({
+    prefs: { enabled: true, minimumSeverity: 'critical' },
+    isLoading: false,
+    isError: false,
+    shouldExposeNotifications: true,
+  });
+  (useLightwellRepoNotifications as jest.Mock).mockReturnValue({
+    isRepoSubscribed: jest.fn().mockReturnValue(true),
+    setRepoSubscribed: jest.fn(),
+    hasAnyNotifySubscription: true,
+    isLoading: false,
+    isError: false,
+    pendingEventType: undefined,
+  });
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: {
+      data: [javaRemediatedContentItem],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+  }));
+
+  renderRepositoriesTable();
+
+  await screen.findByText('Java Remediated');
+  expect(
+    screen.queryByText('You will not receive any notifications', { exact: false }),
+  ).not.toBeInTheDocument();
+});
+
+it('does not warn when notifications are not enabled', async () => {
+  (useContentListQuery as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    data: {
+      data: [javaRemediatedContentItem],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+  }));
+
+  renderRepositoriesTable();
+
+  await screen.findByText('Java Remediated');
+  expect(
+    screen.queryByText('You will not receive any notifications', { exact: false }),
+  ).not.toBeInTheDocument();
 });
 
 it('registers breadcrumbs with Chrome via useRemoteHook', async () => {
