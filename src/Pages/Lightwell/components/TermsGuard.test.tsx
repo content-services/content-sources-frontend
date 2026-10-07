@@ -59,7 +59,7 @@ it('redirects to terms service when terms are required', () => {
   });
   renderGuard();
 
-  expect(window.location.href).toContain('terms.stage.api.redhat.com');
+  expect(window.location.href).toContain('www.stage.redhat.com/wapps/tnc/ackrequired');
   expect(window.location.href).toContain('site=lightwell');
   expect(window.location.href).toContain('event=network');
   expect(window.location.href).toContain('event=academic');
@@ -95,27 +95,27 @@ it('renders children when required but site/events missing (fail-open)', () => {
 describe('buildTermsUrl', () => {
   it('builds a correct URL with encoded redirect and single event', () => {
     const url = buildTermsUrl(
-      'https://terms.stage.api.redhat.com',
+      'https://www.stage.redhat.com',
       'https://console.redhat.com/lightwell',
       'lightwell',
       ['network'],
     );
 
     expect(url).toBe(
-      'https://terms.stage.api.redhat.com/svcrest/terms/presentation/isrequired?site=lightwell&event=network&redirect=https%3A%2F%2Fconsole.redhat.com%2Flightwell',
+      'https://www.stage.redhat.com/wapps/tnc/ackrequired?site=lightwell&event=network&redirect=https%3A%2F%2Fconsole.redhat.com%2Flightwell',
     );
   });
 
   it('builds a correct URL with multiple events', () => {
     const url = buildTermsUrl(
-      'https://terms.stage.api.redhat.com',
+      'https://www.stage.redhat.com',
       'https://console.redhat.com/lightwell',
       'lightwell',
       ['network', 'academic'],
     );
 
     expect(url).toBe(
-      'https://terms.stage.api.redhat.com/svcrest/terms/presentation/isrequired?site=lightwell&event=network&event=academic&redirect=https%3A%2F%2Fconsole.redhat.com%2Flightwell',
+      'https://www.stage.redhat.com/wapps/tnc/ackrequired?site=lightwell&event=network&event=academic&redirect=https%3A%2F%2Fconsole.redhat.com%2Flightwell',
     );
   });
 });
