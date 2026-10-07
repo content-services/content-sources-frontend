@@ -12,7 +12,7 @@ export function buildTermsUrl(
 ): string {
   const returnUrl = encodeURIComponent(currentUrl);
   const eventParams = events.map((e) => `event=${encodeURIComponent(e)}`).join('&');
-  return `${termsHost}/svcrest/terms/presentation/isrequired?site=${encodeURIComponent(site)}&${eventParams}&redirect=${returnUrl}`;
+  return `${termsHost}/wapps/tnc/ackrequired?site=${encodeURIComponent(site)}&${eventParams}&redirect=${returnUrl}`;
 }
 
 interface TermsGuardProps {
@@ -26,8 +26,8 @@ export default function TermsGuard({ children }: TermsGuardProps) {
 
   const termsHost =
     getEnvironment() === 'prod'
-      ? 'https://terms.api.redhat.com'
-      : 'https://terms.stage.api.redhat.com';
+      ? 'https://www.redhat.com'
+      : 'https://www.stage.redhat.com';
 
   const canRedirect = data?.required && data.site && !!data.events?.length;
 
