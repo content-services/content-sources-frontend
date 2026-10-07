@@ -104,8 +104,8 @@ describe('CoverageReport', () => {
     renderCoverageReport();
     expect(screen.getByRole('heading', { level: 3, name: 'CVEs fixed' })).toBeInTheDocument();
     expect(screen.getByText('Critical')).toBeInTheDocument();
-    expect(screen.getByText('High')).toBeInTheDocument();
-    expect(screen.getByText('Medium')).toBeInTheDocument();
+    expect(screen.getByText('Important')).toBeInTheDocument();
+    expect(screen.getByText('Moderate')).toBeInTheDocument();
     expect(screen.getByText('Low')).toBeInTheDocument();
     expect(screen.getByText('12')).toBeInTheDocument();
     expect(screen.getByText('34')).toBeInTheDocument();

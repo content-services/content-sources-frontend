@@ -47,8 +47,8 @@ describe('CoveragePdfTemplate', () => {
     expect(screen.getByText('CVEs fixed')).toBeInTheDocument();
     const cveSummary = screen.getByText('CVEs fixed').closest('.coverage-pdf-cve-section');
     expect(cveSummary).toHaveTextContent('Critical');
-    expect(cveSummary).toHaveTextContent('High');
-    expect(cveSummary).toHaveTextContent('Medium');
+    expect(cveSummary).toHaveTextContent('Important');
+    expect(cveSummary).toHaveTextContent('Moderate');
     expect(cveSummary).toHaveTextContent('Low');
 
     const packageRow = screen.getByText('spring-web').closest('tr');

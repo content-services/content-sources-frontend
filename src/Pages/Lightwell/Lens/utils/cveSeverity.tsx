@@ -34,13 +34,13 @@ export const CVE_SEVERITIES: CveSeverityMeta[] = [
   },
   {
     key: 'important',
-    label: 'High',
+    label: 'Important',
     icon: RhUiSeverityImportantFillIcon,
     color: t_global_icon_color_severity_important_default.var,
   },
   {
     key: 'moderate',
-    label: 'Medium',
+    label: 'Moderate',
     icon: RhUiSeverityModerateFillIcon,
     color: t_global_icon_color_severity_moderate_default.var,
   },

@@ -893,8 +893,7 @@ export const defaultCoverageReportPackagesItem: CoverageReportPackage[] = [
     ecosystem: 'Python',
     covered: true,
     match_status: 'partial',
-    cve_count: { critical: 0, important: 2, moderate: 1, low: 0 },
-    cve_range: { low: 5.3, high: 8.1 },
+    cve_count: { critical: 0, important: 0, moderate: 0, low: 0 },
   },
   {
     name: 'lodash',

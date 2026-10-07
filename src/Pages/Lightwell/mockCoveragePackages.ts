@@ -51,8 +51,9 @@ const dummyCveData = (
   index: number,
   matchStatus: CoverageReportPackage['match_status'],
 ): Pick<CoverageReportPackage, 'cve_count' | 'cve_range'> => {
-  // Unmatched packages are not remediated, so they have no CVE fixes.
-  if (matchStatus === 'none') {
+  // Only fully matched packages are remediated, so unmatched and partially
+  // matched packages have no CVE fixes.
+  if (matchStatus === 'none' || matchStatus === 'partial') {
     return { cve_count: { critical: 0, important: 0, moderate: 0, low: 0 } };
   }
 
