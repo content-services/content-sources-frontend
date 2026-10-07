@@ -23,8 +23,8 @@ export type CveSeverityMeta = {
   color: string;
 };
 
-// Red Hat uses "Important"/"Moderate"/"Minor" severity icons; the CVE data uses
-// "High"/"Medium"/"Low", so the labels and icons are mapped by position.
+// The CVE data and Red Hat's severity icons share the same
+// Critical/Important/Moderate/Low scale, so keys, labels, and icons line up directly.
 export const CVE_SEVERITIES: CveSeverityMeta[] = [
   {
     key: 'critical',
@@ -33,13 +33,13 @@ export const CVE_SEVERITIES: CveSeverityMeta[] = [
     color: t_global_icon_color_severity_critical_default.var,
   },
   {
-    key: 'high',
+    key: 'important',
     label: 'High',
     icon: RhUiSeverityImportantFillIcon,
     color: t_global_icon_color_severity_important_default.var,
   },
   {
-    key: 'medium',
+    key: 'moderate',
     label: 'Medium',
     icon: RhUiSeverityModerateFillIcon,
     color: t_global_icon_color_severity_moderate_default.var,

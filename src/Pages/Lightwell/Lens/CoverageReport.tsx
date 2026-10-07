@@ -28,6 +28,7 @@ import { usePackageCoverageTable } from './hooks/usePackageCoverageTable';
 import Loader from 'components/Loader';
 import LightwellNotFound from '../components/LightwellNotFound';
 import type { EcosystemInfo } from './utils/ecosystem';
+import { getTotalCveCount } from './utils/cveSeverity';
 import { useLightwellRootPath } from '../../../Hooks/Lightwell/navigation/useLightwellRootPath';
 
 const DROP_LAST_CHROME_SEGMENT_OPTIONS = { dropLastChromeSegment: true };
@@ -116,9 +117,11 @@ const CoverageReport = () => {
           <StackItem>
             <CoverageSummaryBlock report={report} />
           </StackItem>
-          <StackItem>
-            <CveFixesBlock report={report} />
-          </StackItem>
+          {getTotalCveCount(report.cve_summary) > 0 && (
+            <StackItem>
+              <CveFixesBlock report={report} />
+            </StackItem>
+          )}
           <StackItem>
             <EcosystemBreakdownBlock report={report} />
           </StackItem>

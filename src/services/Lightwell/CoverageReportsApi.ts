@@ -16,8 +16,8 @@ export type CoverageMatchStatus = 'exact' | 'partial' | 'none';
 // Count of CVEs fixed in remediated repos, bucketed by severity.
 export type CveCount = {
   critical: number;
-  high: number;
-  medium: number;
+  important: number;
+  moderate: number;
   low: number;
 };
 

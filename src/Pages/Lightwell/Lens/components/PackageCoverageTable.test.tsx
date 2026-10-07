@@ -95,7 +95,7 @@ describe('PackageCoverageTable', () => {
   it('renders CVE fix counts and CVSS score ranges', () => {
     renderTable();
 
-    // spring-web: critical 2, high 3, medium 1, no low; range 5.4–9.8
+    // spring-web: critical 2, important 3, moderate 1, no low; range 5.4–9.8
     const springRow = screen.getByText('spring-web').closest('tr')!;
     expect(within(springRow).getByText('2')).toBeInTheDocument();
     expect(within(springRow).getByText('3')).toBeInTheDocument();

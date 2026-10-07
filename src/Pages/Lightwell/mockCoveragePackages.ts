@@ -53,14 +53,14 @@ const dummyCveData = (
 ): Pick<CoverageReportPackage, 'cve_count' | 'cve_range'> => {
   // Unmatched packages are not remediated, so they have no CVE fixes.
   if (matchStatus === 'none') {
-    return { cve_count: { critical: 0, high: 0, medium: 0, low: 0 } };
+    return { cve_count: { critical: 0, important: 0, moderate: 0, low: 0 } };
   }
 
   return {
     cve_count: {
       critical: index % 3,
-      high: (index % 4) + 1,
-      medium: index % 2,
+      important: (index % 4) + 1,
+      moderate: index % 2,
       low: (index + 1) % 2,
     },
     cve_range: { low: 2 + (index % 5), high: 9.8 - (index % 3) },

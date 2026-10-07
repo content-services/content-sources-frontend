@@ -848,7 +848,7 @@ export const defaultCoverageReportItem: CompletedCoverageReport = {
   unmatched: 25,
   total: 100,
   completed_at: '2026-08-18T12:01:00Z',
-  cve_summary: { critical: 12, high: 34, medium: 18, low: 7 },
+  cve_summary: { critical: 12, important: 34, moderate: 18, low: 7 },
   ecosystem_coverage_summary: [
     {
       ecosystem: 'Java',
@@ -884,7 +884,7 @@ export const defaultCoverageReportPackagesItem: CoverageReportPackage[] = [
     ecosystem: 'Java',
     covered: true,
     match_status: 'exact',
-    cve_count: { critical: 2, high: 3, medium: 1, low: 0 },
+    cve_count: { critical: 2, important: 3, moderate: 1, low: 0 },
     cve_range: { low: 5.4, high: 9.8 },
   },
   {
@@ -893,7 +893,7 @@ export const defaultCoverageReportPackagesItem: CoverageReportPackage[] = [
     ecosystem: 'Python',
     covered: true,
     match_status: 'partial',
-    cve_count: { critical: 0, high: 2, medium: 1, low: 0 },
+    cve_count: { critical: 0, important: 2, moderate: 1, low: 0 },
     cve_range: { low: 5.3, high: 8.1 },
   },
   {
@@ -902,6 +902,6 @@ export const defaultCoverageReportPackagesItem: CoverageReportPackage[] = [
     ecosystem: 'JavaScript',
     covered: false,
     match_status: 'none',
-    cve_count: { critical: 0, high: 0, medium: 0, low: 0 },
+    cve_count: { critical: 0, important: 0, moderate: 0, low: 0 },
   },
 ];
