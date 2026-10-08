@@ -1,19 +1,11 @@
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  Button,
-  Card,
-  Content,
   Flex,
-  FlexItem,
   Grid,
-  Icon,
   Pagination,
   PaginationVariant,
   SearchInput,
   Stack,
   StackItem,
-  Title,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -67,25 +59,21 @@ import {
   stripLightwellVersionSuffix,
   toLightwellRelease,
 } from './utils/versions';
-import RemediatedDataWarning from '../RemediatedDataWarning';
 import useLightwellRepository from '../../../Hooks/Lightwell/useLightwellRepository';
 import { useLightwellNavigateTo } from '../../../Hooks/Lightwell/navigation/useLightwellNavigateTo';
 import { useLightwellRootPath } from '../../../Hooks/Lightwell/navigation/useLightwellRootPath';
 import { useLightwellPackagesParams } from '../../../Hooks/Lightwell/useLightwellPackagesParams';
+import {
+  LwButtonGroup,
+  LwPageHeader,
+  PageChromeSlot,
+  PageChromeSlotFooter,
+  PageChromeSlots,
+  PageTitleStack,
+} from 'kit/components/assemblies';
+import { LwAlert, LwButton, LwCard, LwClipboardCopy } from 'kit/components/primitives';
 
 const useStyles = createUseStyles({
-  topContainer: {
-    padding: '16px 24px',
-  },
-  titleWrapper: {
-    padding: '16px 0 0',
-  },
-  packagesList: {
-    paddingTop: '16px',
-  },
-  bottomContainer: {
-    justifyContent: 'space-between',
-  },
   filterToolbarItem: {
     minWidth: '18rem',
     '& .pf-v6-c-search-input': {
@@ -204,9 +192,9 @@ const StackedItemsCell = <T,>({
       <Flex alignItems={{ default: 'alignItemsCenter' }} gap={{ default: 'gapSm' }}>
         <span>{renderItem(primary)}</span>
         {showToggle && (
-          <Button variant='link' isInline onClick={() => onToggle(packageKey)}>
+          <LwButton variant='link' isInline onClick={() => onToggle(packageKey)}>
             {isExpanded ? 'hide' : `${rest.length} more`}
-          </Button>
+          </LwButton>
         )}
       </Flex>
       {isExpanded && rest.map((item) => <span key={getItemKey(item)}>{renderItem(item)}</span>)}
@@ -360,42 +348,20 @@ const PackagesTable = () => {
 
   return (
     <>
-      <Grid className={classes.topContainer}>
-        <Stack>
-          {!appBreadcrumbsEnabled && (
-            <StackItem>
-              <Breadcrumb ouiaId='lightwell-packages-breadcrumb'>
-                <BreadcrumbItem component='button' onClick={() => navigateTo('repositories')}>
-                  Lightwell Repositories
-                </BreadcrumbItem>
-                <BreadcrumbItem isActive>{breadcrumbRepoName}</BreadcrumbItem>
-              </Breadcrumb>
-            </StackItem>
-          )}
-          <StackItem className={classes.titleWrapper}>
-            <Flex
-              alignItems={{ default: 'alignItemsCenter' }}
-              justifyContent={{ default: 'justifyContentSpaceBetween' }}
-              gap={{ default: 'gapMd' }}
-            >
-              <Flex alignItems={{ default: 'alignItemsCenter' }} gap={{ default: 'gapSm' }}>
-                <FlexItem>
-                  <Icon size='xl'>{getEcosystemIcon(repository?.content_type)}</Icon>
-                </FlexItem>
-                <FlexItem>
-                  <Title headingLevel='h1' ouiaId='lightwell-packages-header'>
-                    {repositoryName}
-                  </Title>
-                </FlexItem>
-                <FlexItem>
-                  <CopyLabel
-                    copyText={formatDistributionUrl(repository.published_distribution_url || '')}
-                  >
-                    {formatDistributionUrl(repository.published_distribution_url || '')}
-                  </CopyLabel>
-                </FlexItem>
-              </Flex>
-              <FlexItem align={{ default: 'alignRight' }}>
+      <LwPageHeader>
+        <PageChromeSlots>
+          <PageChromeSlot>
+            <PageTitleStack
+              title={repositoryName}
+              icon={getEcosystemIcon(repository?.content_type)}
+              description={getRepositoryDescription(
+                repository.content_type,
+                repository.security_level,
+              )}
+              ouiaId='lightwell-packages-header'
+            />
+            <PageChromeSlotFooter>
+              <LwButtonGroup>
                 <ConnectRepositoryModal
                   repository={{
                     uuid: repository.uuid,
@@ -406,23 +372,19 @@ const PackagesTable = () => {
                     content_type: repository.content_type,
                   }}
                 >
-                  <Button size='sm' variant='secondary' icon={<CodeIcon />}>
+                  <LwButton variant='secondary' icon={<CodeIcon />}>
                     Connect
-                  </Button>
+                  </LwButton>
                 </ConnectRepositoryModal>
-              </FlexItem>
-            </Flex>
-            <Content className={spacing.ptSm}>
-              {getRepositoryDescription(repository.content_type, repository.security_level)}
-            </Content>
-          </StackItem>
-          {(isRemediated || isPredisclosure) && (
-            <StackItem className={spacing.ptSm}>
-              <RemediatedDataWarning />
-            </StackItem>
-          )}
-        </Stack>
-      </Grid>
+                <LwClipboardCopy isCode>
+                  {formatDistributionUrl(repository.published_distribution_url || '')}
+                </LwClipboardCopy>
+              </LwButtonGroup>
+              {(isRemediated || isPredisclosure) && <LwAlert />}
+            </PageChromeSlotFooter>
+          </PageChromeSlot>
+        </PageChromeSlots>
+      </LwPageHeader>
 
       <Grid className={`${spacing.pxLg} ${spacing.pbLg}`}>
         <Toolbar ouiaId='lightwell-packages-toolbar'>
@@ -461,7 +423,7 @@ const PackagesTable = () => {
         <Hide hide={fetchingOrLoading}>
           <Hide hide={countIsZero}>
             <Stack>
-              <Card className={`${spacing.ptLg} ${spacing.pbXl} ${spacing.pxLg}`}>
+              <LwCard className={`${spacing.ptLg} ${spacing.pbXl} ${spacing.pxLg}`}>
                 <Stack>
                   <Table
                     aria-label='Lightwell packages table'
@@ -498,7 +460,7 @@ const PackagesTable = () => {
                         return (
                           <Tr key={packageKey}>
                             <Td dataLabel={columnHeaders[0].title}>
-                              <Button
+                              <LwButton
                                 variant='link'
                                 isInline
                                 className={text.fontWeightBold}
@@ -513,7 +475,7 @@ const PackagesTable = () => {
                                 }
                               >
                                 {packageCoordinate}
-                              </Button>
+                              </LwButton>
                             </Td>
                             <Td dataLabel={columnHeaders[1].title}>
                               <StackedItemsCell
@@ -574,7 +536,7 @@ const PackagesTable = () => {
                     />
                   </Hide>
                 </Stack>
-              </Card>
+              </LwCard>
             </Stack>
           </Hide>
           <Hide hide={!showEmptyState}>

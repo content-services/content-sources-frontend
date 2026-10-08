@@ -1,21 +1,15 @@
-import { useMemo, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useRemoteHook } from '@scalprum/react-core';
 import { useFlag } from '@unleash/proxy-client-react';
 import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  CardTitle,
   Content,
-  EmptyState,
+  EmptyStateActions,
   EmptyStateBody,
+  EmptyStateFooter,
   EmptyStateVariant,
   Flex,
   FlexItem,
   PageSection,
-  Popover,
-  Skeleton,
   Stack,
   StackItem,
   Title,
@@ -25,17 +19,35 @@ import {
   FilterSidePanelCategory,
   FilterSidePanelCategoryItem,
 } from '@patternfly/react-catalog-view-extension';
-import HelpIcon from '@patternfly/react-icons/dist/esm/icons/help-icon';
 import UserIcon from '@patternfly/react-icons/dist/esm/icons/user-icon';
+import HelpIcon from '@patternfly/react-icons/dist/esm/icons/help-icon';
+
+import RhUiInProgressIcon from '@patternfly/react-icons/dist/esm/icons/rh-ui-in-progress-icon';
+import RhUiPendingIcon from '@patternfly/react-icons/dist/esm/icons/rh-ui-pending-icon';
+import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle-icon';
+import OutlinedHourglassIcon from '@patternfly/react-icons/dist/esm/icons/outlined-hourglass-icon';
+import BundleIcon from '@patternfly/react-icons/dist/esm/icons/bundle-icon';
 
 import useDebounce from 'Hooks/useDebounce';
 import { useLightwellRootPath } from '../../../Hooks/Lightwell/navigation/useLightwellRootPath';
-import LightwellPageHeader from '../components/LightwellPageHeader';
-import { SEVERITIES, STATUSES } from './constants';
+import {
+  LwButtonGroup,
+  LwLoaded,
+  LwMetricsCard,
+  LwMetricsCount,
+  LwMetricsStepper,
+  LwPageHeader,
+  PageChromeSlot,
+  PageChromeSlotFooter,
+  PageChromeSlots,
+  PageTitleStack,
+} from 'kit/components/assemblies';
+import { LwButton, LwEmptyState, LwMenu, LwPopover, LwSkeleton } from 'kit/components/primitives';
+
+import type { LwStepIconColorKey } from 'kit/lightwell.config';
+import { SEVERITIES, STATUS_DESCRIPTIONS, STATUSES } from './constants';
 import type { Severity, Status } from './types';
-import { CustomerIdSelect } from './components/CustomerIdSelect';
 import { ExportMenu } from './components/ExportMenu';
-import { PipelineView } from './components/PipelineView';
 import { VulnerabilityTable } from './components/VulnerabilityTable';
 import { useBeaconData } from './hooks/useBeaconData';
 import {
@@ -52,6 +64,8 @@ import {
 import '../../../../styles/lightwell-beacon.scss';
 
 const DEFAULT_PER_PAGE = 20;
+
+const DROP_LAST_CHROME_SEGMENT_OPTIONS = { dropLastChromeSegment: true };
 
 function buildBeaconFilters(
   selectedSeverities: Set<Severity>,
@@ -77,8 +91,6 @@ function buildBeaconFilters(
 
   return hasFilters ? filters : undefined;
 }
-
-const DROP_LAST_CHROME_SEGMENT_OPTIONS = { dropLastChromeSegment: true };
 
 const Beacon = () => {
   const rootPath = useLightwellRootPath();
@@ -156,6 +168,20 @@ const Beacon = () => {
     [selectedCustomerId],
   );
 
+  const { data: customerIds, isLoading: isLoadingCustomers } = useCustomerIdsQuery();
+
+  useEffect(() => {
+    if (!selectedCustomerId && customerIds?.length === 1) {
+      handleCustomerIdChange(customerIds[0]);
+    }
+  }, [selectedCustomerId, customerIds, handleCustomerIdChange]);
+
+  const customerIdMenuItems = (customerIds ?? []).map((customerId) => ({
+    id: customerId,
+    children: customerId,
+    onSelect: () => handleCustomerIdChange(customerId),
+  }));
+
   const resetFilters = useCallback(() => {
     setSelectedSeverities(new Set());
     setSelectedStatuses(new Set());
@@ -173,7 +199,6 @@ const Beacon = () => {
   } = useBeaconData(selectedCustomerId, queryFilters, pagination);
   const { data: ltwlsuptTicketIds = [] } = useLtwlsuptTicketIdsQuery(selectedCustomerId);
   const { data: lastUpdated } = useBeaconStatusQuery();
-  const { isLoading: isLoadingCustomers } = useCustomerIdsQuery();
 
   const isLoading = !displayData && isLoadingDisplay;
 
@@ -225,34 +250,214 @@ const Beacon = () => {
     setPage(newPage);
   };
 
+  // Beacon owns domain → stepIcon mapping; kit stepper stays product-agnostic.
+  const isPipelineHydrated = Boolean(selectedCustomerId && !isLoading);
+  const pipelineStepIcons: Record<Status, ReactNode> = {
+    Submitted: <RhUiPendingIcon />,
+    Classified: <CheckCircleIcon />,
+    'Fix in Progress': <RhUiInProgressIcon />,
+    Validation: <OutlinedHourglassIcon />,
+    'Lightwell Network': <BundleIcon />,
+    Upstreaming: <RhUiInProgressIcon />,
+    Published: <CheckCircleIcon />,
+  };
+  /** Distinct `lightwellConfig.colors.stepIcon` key per pipeline status. */
+  const pipelineStepColors = {
+    Submitted: 'blue',
+    Classified: 'exact',
+    'Fix in Progress': 'orange',
+    Validation: 'purple',
+    'Lightwell Network': 'teal',
+  } as const satisfies Record<string, LwStepIconColorKey>;
+  const pipelineMetricSteps = STATUSES.map((status) => {
+    const count = displayMeta?.statusCounts?.[status] ?? 0;
+    return {
+      id: status,
+      label: status,
+      tooltip: STATUS_DESCRIPTIONS[status],
+      value: isPipelineHydrated ? count : undefined,
+      icon: pipelineStepIcons[status],
+      variant: isPipelineHydrated && count === 0 ? ('pending' as const) : undefined,
+      color: isPipelineHydrated
+        ? pipelineStepColors[status as keyof typeof pipelineStepColors]
+        : undefined,
+    };
+  });
+
+  const showCustomerEmpty = !selectedCustomerId && !isLoadingCustomers;
+
   return (
     <>
-      <LightwellPageHeader
-        title='Beacon'
-        ouiaId='lightwell-beacon-header'
-        description={
-          <Content component='p' ouiaId='lightwell-beacon-header'>
-            Understand the status of your Lightwell submissions
-            {lastUpdated ? (
-              <>
-                <br />
-                Last updated: {lastUpdated}
-              </>
-            ) : null}
-          </Content>
-        }
-        actions={
-          <ExportMenu
-            customerId={selectedCustomerId}
-            filters={queryFilters}
-            visibleColumns={getVisibleVulnerabilityColumns(columns)}
-            itemCount={displayMeta?.count ?? 0}
-          />
-        }
-      />
-
+      <LwPageHeader hero bodyWidth='100%' bodyMaxWidth='100%'>
+        <PageChromeSlots>
+          <PageChromeSlot>
+            <PageTitleStack
+              title='Beacon'
+              description={
+                <>
+                  Understand the status of your Lightwell submissions
+                  {lastUpdated ? (
+                    <>
+                      <br />
+                      Last updated: {lastUpdated}
+                    </>
+                  ) : null}
+                </>
+              }
+              ouiaId='lightwell-beacon-header'
+            />
+            <PageChromeSlotFooter>
+              <LwMetricsStepper
+                isHorizontal
+                aria-label='Submission pipeline metrics'
+                isHydrated={isPipelineHydrated}
+                steps={pipelineMetricSteps}
+              />
+            </PageChromeSlotFooter>
+          </PageChromeSlot>
+          {showCustomerEmpty ? (
+            <PageChromeSlot>
+              <LwEmptyState
+                headingLevel='h2'
+                icon={UserIcon}
+                titleText='Select customer'
+                variant={EmptyStateVariant.sm}
+              >
+                <EmptyStateFooter>
+                  <EmptyStateActions>
+                    <LwMenu
+                      label={selectedCustomerId ?? 'Select customer ID'}
+                      toggleProps={{
+                        ouiaId: 'customer-id-select-toggle',
+                        size: 'lg',
+                        variant: 'primary',
+                      }}
+                      isDisabled={customerIdMenuItems.length === 0}
+                      items={customerIdMenuItems}
+                    />
+                  </EmptyStateActions>
+                </EmptyStateFooter>
+                <EmptyStateBody>
+                  Select a customer ID first to view the status of their Lightwell submissions.
+                </EmptyStateBody>
+              </LwEmptyState>
+            </PageChromeSlot>
+          ) : selectedCustomerId ? (
+            <PageChromeSlot>
+              <LwMetricsCard
+                hasHeader={`Status Summary${activeFilterCount > 0 ? ' (filtered)' : ''}`}
+                hasAction={
+                  <LwPopover
+                    hasHeader='SLA Policy'
+                    hasBody={
+                      <Content>
+                        <p>
+                          <strong>Submit</strong> vulnerabilities to the clearinghouse at any time.
+                        </p>
+                        <p>
+                          <strong>Triage within 48 hours.</strong>
+                        </p>
+                        <p>
+                          <strong>Priority is yours.</strong> Your severity sets the default order.
+                          Adjust at any time.
+                        </p>
+                        <p>
+                          A fix is complete when a patched artifact is published in the repository
+                          (or when it gets to the Lightwell Network).
+                        </p>
+                        <br />
+                        <p>
+                          SLA applies to up to 25 findings per member per week. All other findings
+                          are worked continuously on a best-effort basis.
+                        </p>
+                      </Content>
+                    }
+                    hasTrigger={
+                      <LwButton isCircle variant='plain' aria-label='SLA help'>
+                        <HelpIcon />
+                      </LwButton>
+                    }
+                  />
+                }
+              >
+                <LwLoaded
+                  isLoaded={!isLoading}
+                  fallback={
+                    <Flex
+                      justifyContent={{ default: 'justifyContentCenter' }}
+                      gap={{ default: 'gapLg' }}
+                    >
+                      <Flex
+                        direction={{ default: 'column' }}
+                        gap={{ default: 'gapSm' }}
+                        alignItems={{ default: 'alignItemsCenter' }}
+                      >
+                        <LwSkeleton
+                          fontSize='3xl'
+                          width='4ch'
+                          screenreaderText='Loading status summary'
+                        />
+                        <LwSkeleton fontSize='sm' width='5ch' />
+                      </Flex>
+                      <Flex
+                        direction={{ default: 'column' }}
+                        gap={{ default: 'gapSm' }}
+                        alignItems={{ default: 'alignItemsCenter' }}
+                      >
+                        <LwSkeleton fontSize='3xl' width='4ch' />
+                        <LwSkeleton fontSize='sm' width='5ch' />
+                      </Flex>
+                    </Flex>
+                  }
+                >
+                  <Flex
+                    justifyContent={{ default: 'justifyContentCenter' }}
+                    gap={{ default: 'gapLg' }}
+                  >
+                    <LwMetricsCount
+                      value={displayMeta?.count ?? filteredVulns.length}
+                      label='Total'
+                    />
+                    <LwMetricsCount
+                      value={displayMeta?.criticalCount ?? 0}
+                      label='Critical'
+                      color='red'
+                    />
+                  </Flex>
+                </LwLoaded>
+              </LwMetricsCard>
+            </PageChromeSlot>
+          ) : null}
+        </PageChromeSlots>
+      </LwPageHeader>
       <PageSection hasBodyWrapper={false} data-ouia-component-id='lightwell-beacon-page'>
         <Stack hasGutter className='lightwell-beacon-content'>
+          {!showCustomerEmpty ? (
+            <StackItem>
+              <LwButtonGroup>
+                {isLoadingCustomers ? (
+                  <div className='lw-c-menu lw-c-menu-group' role='group' aria-label='Customer ID'>
+                    <span className='lw-c-menu-group__label'>Customer ID</span>
+                    <LwSkeleton height='36px' />
+                  </div>
+                ) : (
+                  <LwMenu
+                    fieldLabel='Customer ID'
+                    label={selectedCustomerId ?? 'Select customer ID'}
+                    toggleProps={{ ouiaId: 'customer-id-select-toggle' }}
+                    isDisabled={customerIdMenuItems.length === 0}
+                    items={customerIdMenuItems}
+                  />
+                )}
+                <ExportMenu
+                  customerId={selectedCustomerId}
+                  filters={queryFilters}
+                  visibleColumns={getVisibleVulnerabilityColumns(columns)}
+                  itemCount={displayMeta?.count ?? 0}
+                />
+              </LwButtonGroup>
+            </StackItem>
+          ) : null}
           <StackItem>
             <Flex
               gap={{ default: 'gapMd' }}
@@ -260,10 +465,6 @@ const Beacon = () => {
               className='lightwell-beacon-layout'
             >
               <FlexItem className='lightwell-filter-panel'>
-                <CustomerIdSelect
-                  selectedCustomerId={selectedCustomerId}
-                  onCustomerIdChange={handleCustomerIdChange}
-                />
                 <span className='lightwell-filter-panel-header'>
                   <Title headingLevel='h4' size='md'>
                     Filters
@@ -337,127 +538,23 @@ const Beacon = () => {
               </FlexItem>
               <FlexItem flex={{ default: 'flex_1' }} className='lightwell-beacon-table-area'>
                 {selectedCustomerId && !isLoading ? (
-                  <Stack hasGutter>
-                    <StackItem>
-                      <Card isGlass>
-                        <CardHeader>
-                          <CardTitle>
-                            <Flex
-                              gap={{ default: 'gapSm' }}
-                              alignItems={{ default: 'alignItemsCenter' }}
-                            >
-                              <FlexItem>
-                                <Title headingLevel='h3' size='md'>
-                                  Status Summary{activeFilterCount > 0 ? ' (filtered)' : ''}
-                                </Title>
-                              </FlexItem>
-                              <FlexItem>
-                                <Popover
-                                  headerContent='SLA Policy'
-                                  bodyContent={
-                                    <Content>
-                                      <p>
-                                        <strong>Submit</strong> vulnerabilities to the clearinghouse
-                                        at any time.
-                                      </p>
-                                      <p>
-                                        <strong>Triage within 48 hours.</strong>
-                                      </p>
-                                      <p>
-                                        <strong>Priority is yours.</strong> Your severity sets the
-                                        default order. Adjust at any time.
-                                      </p>
-                                      <p>
-                                        A fix is complete when a patched artifact is published in
-                                        the repository (or when it gets to the Lightwell Network).
-                                      </p>
-                                      <br />
-                                      <p>
-                                        SLA applies to up to 25 findings per member per week. All
-                                        other findings are worked continuously on a best-effort
-                                        basis.
-                                      </p>
-                                    </Content>
-                                  }
-                                >
-                                  <Button
-                                    variant='plain'
-                                    aria-label='SLA help'
-                                    className='lightwell-help-btn'
-                                  >
-                                    <HelpIcon />
-                                  </Button>
-                                </Popover>
-                              </FlexItem>
-                            </Flex>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardBody>
-                          <Flex
-                            justifyContent={{ default: 'justifyContentCenter' }}
-                            gap={{ default: 'gapXl' }}
-                            alignItems={{ default: 'alignItemsCenter' }}
-                            style={{ marginBottom: 'var(--pf-t--global--spacer--md)' }}
-                          >
-                            <FlexItem style={{ textAlign: 'center' }}>
-                              <span className='lightwell-stat-number'>
-                                {displayMeta?.count ?? filteredVulns.length}
-                              </span>
-                              <Content component='small' style={{ display: 'block' }}>
-                                Total
-                              </Content>
-                            </FlexItem>
-                            <FlexItem style={{ textAlign: 'center' }}>
-                              <span className='lightwell-stat-number lightwell-stat--critical'>
-                                {displayMeta?.criticalCount ?? 0}
-                              </span>
-                              <Content component='small' style={{ display: 'block' }}>
-                                Critical
-                              </Content>
-                            </FlexItem>
-                          </Flex>
-                          <PipelineView statusCounts={displayMeta?.statusCounts} />
-                        </CardBody>
-                      </Card>
-                    </StackItem>
-                    <StackItem>
-                      <VulnerabilityTable
-                        vulnerabilities={filteredVulns}
-                        itemCount={displayMeta?.count ?? 0}
-                        page={page}
-                        perPage={perPage}
-                        onSetPage={onSetPage}
-                        onPerPageSelect={onPerPageSelect}
-                        searchValue={searchQuery}
-                        onSearchChange={setSearchQuery}
-                        onSearchClear={() => setSearchQuery('')}
-                        onResetFilters={resetFilters}
-                        columns={columns}
-                        onColumnsChange={setColumns}
-                      />
-                    </StackItem>
-                  </Stack>
-                ) : !selectedCustomerId && !isLoadingCustomers ? (
-                  <EmptyState
-                    headingLevel='h2'
-                    icon={UserIcon}
-                    titleText='Select customer'
-                    variant={EmptyStateVariant.sm}
-                  >
-                    <EmptyStateBody>
-                      Select a customer ID first to view the status of their Lightwell submissions.
-                    </EmptyStateBody>
-                  </EmptyState>
-                ) : (
-                  <Stack hasGutter>
-                    <StackItem>
-                      <Skeleton height='120px' />
-                    </StackItem>
-                    <StackItem>
-                      <Skeleton height='400px' />
-                    </StackItem>
-                  </Stack>
-                )}
+                  <VulnerabilityTable
+                    vulnerabilities={filteredVulns}
+                    itemCount={displayMeta?.count ?? 0}
+                    page={page}
+                    perPage={perPage}
+                    onSetPage={onSetPage}
+                    onPerPageSelect={onPerPageSelect}
+                    searchValue={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    onSearchClear={() => setSearchQuery('')}
+                    onResetFilters={resetFilters}
+                    columns={columns}
+                    onColumnsChange={setColumns}
+                  />
+                ) : selectedCustomerId ? (
+                  <LwSkeleton height='400px' />
+                ) : null}
               </FlexItem>
             </Flex>
           </StackItem>
