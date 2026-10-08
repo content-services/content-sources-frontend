@@ -8,10 +8,8 @@ import { useFetchContent } from 'services/Content/ContentQueries';
 export const useIsSnapshotType = (repoUUID: string) => {
   const { features } = useAppContext();
   const { data: repository, isError } = useFetchContent(repoUUID);
-
   const isSnapshotsReadOnly =
     repository?.origin === ContentOrigin.REDHAT || repository?.origin === ContentOrigin.COMMUNITY;
-
   const isPartnerRepo = !!repository?.partner;
   const canPublish =
     isPartnerRepo &&
@@ -75,8 +73,6 @@ export const usePublishSnapshotApi = ({ selectedRows, snapshotsList, canPublish 
     const selectedId = (selectedRows[0] as { id: string })?.id;
     return snapshotsList.find((s) => s.uuid === selectedId);
   }, [selectedRows, snapshotsList]);
-
-  const publishActionState = getPublishActionState({});
 
   // Determine if the selected snapshot can be published/unpublished
   const isPublishDisabled = useMemo(() => {

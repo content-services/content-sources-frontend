@@ -7,35 +7,35 @@ import {
   MenuToggleElement,
 } from '@patternfly/react-core';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
-import { AppContextInterface } from 'middleware/AppContext';
 
 interface SnapshotsPrimaryActionButtonProps {
-  deleteButtonLabel: string;
-  onDeleteClick: () => void;
-  isDeleteDisabled: boolean;
   isFetchingOrLoading: boolean;
-  rbac: AppContextInterface['rbac'];
-  isNothingToDelete: boolean;
-  canPublish: boolean;
+  // Whether the repo supports publishing AND the action isn't a hidden
+  // Unpublish (B8/U1) - renamed from `canPublish` since it now encodes both.
+  isPublishActionVisible: boolean;
   onPublishClick: () => void;
   isPublishDisabled: boolean;
+  publishTooltip?: string;
   publishButtonLabel: string;
+  actions: any;
 }
 
 export const SnapshotsPrimaryActionButton = ({
-  deleteButtonLabel,
-  onDeleteClick,
-  isDeleteDisabled,
+  actions,
   isFetchingOrLoading,
-  isNothingToDelete,
-  rbac,
-  canPublish,
+  isPublishActionVisible,
   onPublishClick,
   isPublishDisabled,
+  publishTooltip,
   publishButtonLabel,
 }: SnapshotsPrimaryActionButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const isActionDisabled = isNothingToDelete;
+  const { deleteAction, publishAction } = actions;
+
+  // U3a: if every action that would actually render inside is disabled,
+  // disable the toggle too - there's nothing useful to do behind it. Delete
+  // always renders; Publish/Unpublish only counts when it's visible at all.
+  //   const isEveryActionDisabled = isDeleteDisabled && (!isPublishActionVisible || isPublishDisabled);
 
   return (
     <Dropdown
@@ -47,7 +47,7 @@ export const SnapshotsPrimaryActionButton = ({
           ref={toggleRef}
           variant='primary'
           isExpanded={isOpen}
-          isDisabled={isFetchingOrLoading || isActionDisabled}
+          isDisabled={isFetchingOrLoading}
           onClick={() => setIsOpen((prev) => !prev)}
         >
           Actions
@@ -59,24 +59,24 @@ export const SnapshotsPrimaryActionButton = ({
       <DropdownList>
         <ConditionalTooltip
           key='delete-action'
-          content='You do not have the required permissions to perform this action.'
-          show={!rbac?.repoWrite}
+          content={deleteAction.tooltip}
+          show={!!deleteAction.tooltip}
           setDisabled
         >
           <DropdownItem
             value='delete'
             ouiaId='remove_snapshots_bulk'
-            isDisabled={isDeleteDisabled || !rbac?.repoWrite}
-            onClick={onDeleteClick}
+            isDisabled={deleteAction.isDisabled}
+            onClick={deleteAction.navigate}
           >
-            {deleteButtonLabel}
+            {deleteAction.label}
           </DropdownItem>
         </ConditionalTooltip>
-        {canPublish && (
+        {isPublishActionVisible && (
           <ConditionalTooltip
             key='publish-action'
-            content='You do not have the required permissions to perform this action.'
-            show={!rbac?.repoWrite}
+            content={publishTooltip}
+            show={!!publishTooltip}
             setDisabled
           >
             <DropdownItem

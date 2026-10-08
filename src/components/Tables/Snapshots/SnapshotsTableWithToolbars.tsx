@@ -24,7 +24,6 @@ import {
 } from '@patternfly/react-component-groups/dist/dynamic/BulkSelect';
 
 import EmptyTableDataView from 'components/EmptyTableDataView/EmptyTableDataView';
-import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 
 import ChangedArrows from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/components/ChangedArrows';
 import RepoConfig from 'Pages/Repositories/ContentListTable/components/SnapshotListModal/components/RepoConfig';
@@ -44,7 +43,13 @@ import { SnapshotsPrimaryActionButton } from './SnapshotsPrimaryActionButton';
 import { usePublishSnapshotApi, usePublishSnapshotState } from 'Hooks/usePublishSnapshot';
 import { useDeleteSnapshot } from 'Hooks/useDeleteSnapshot';
 import { PublishLabels } from 'components/RepositoryLabels/PublishLabels';
-import { canModifySnapshots, getDeleteActionState } from './snapshotActionRules';
+import {
+  canModifySnapshots,
+  getDeleteActionState,
+  getPublishActionState,
+  isPublishActionVisible,
+  isSnapshotEffectivelyPublished,
+} from 'Hooks/snapshotActionRules';
 
 interface SnapshotsTableProps {
   isLoading: boolean;
@@ -81,13 +86,10 @@ const SnapshotsTableWithToolbars = ({
     itemCount: count,
   };
 
-  console.log('selectedRows', selectedRows);
-
   const isLoadingOrZeroCount = isLoading || !count;
 
   const activeState = useTableActiveState({ isLoading, count });
-  const shouldEnableBulkSelection =
-    !snapshotsReadOnly && rbac?.repoWrite && count >= 2 && activeState === undefined;
+  const shouldEnableBulkSelection = canModify && activeState === undefined;
 
   const activeSortIndex = sortBy
     ? SNAPSHOTS_TABLE_COLUMNS.findIndex((col) => col.name === sortBy)
@@ -115,20 +117,46 @@ const SnapshotsTableWithToolbars = ({
   }));
 
   // publish snapshot action
-  const { onPublishClick, publishButtonLabel, isPublishDisabled } = usePublishSnapshotApi({
-    selectedRows,
-    snapshotsList,
-    canPublish,
-  });
+  const {
+    onPublishClick,
+    publishButtonLabel,
+    isPublishDisabled,
+    publishTooltip,
+    isPublishActionVisible: showPublishAction,
+  } = usePublishSnapshotApi({ selectedRows, snapshotsList, canPublish, snapshotsReadOnly });
+
+  console.log('showPublishAction', showPublishAction);
 
   const { getSnapshotPublishState } = usePublishSnapshotState();
 
   // delete snapshot action
-  const { deleteButtonLabel, navigateOnDeleteClick, isDeleteDisabled } = useDeleteSnapshot({
-    selectedRows,
-    count,
-    isLoadingOrZeroCount,
-  });
+  const { deleteButtonLabel, navigateOnDeleteClick, isDeleteDisabled, deleteTooltip } =
+    useDeleteSnapshot({
+      selectedRows,
+      snapshotsList,
+      count,
+      isLoadingOrZeroCount,
+      snapshotsReadOnly,
+    });
+
+  const deleteActionPrimaryButton = {
+    label: deleteButtonLabel,
+    navigate: navigateOnDeleteClick,
+    isDisabled: isDeleteDisabled,
+    tooltip: deleteTooltip,
+  };
+
+  const publishActionPrimaryButton = {
+    label: publishButtonLabel,
+    isDisabled: isPublishDisabled,
+    navigate: onPublishClick,
+    tooltip: publishTooltip,
+  };
+
+  const actions = {
+    deleteAction: deleteActionPrimaryButton,
+    publishAction: publishActionPrimaryButton,
+  };
 
   const rowActions = useCallback(
     (
@@ -137,43 +165,54 @@ const SnapshotsTableWithToolbars = ({
       hasInProgressTask: boolean,
       packageCount: number,
     ): IAction[] => {
-      // no action is possible if the repo is a redhat or community one
       if (snapshotsReadOnly) return [];
 
-      const deleteState = getDeleteActionState({ count, selectedRows, hasPublishedSnapshot });
+      // 1. Compute state for each action from the single shared functions.
+      const deleteState = getDeleteActionState({
+        canModify,
+        isPublished,
+        hasInProgressTask,
+        targetCount: 1,
+        totalCount: count,
+      });
+      const publishState = getPublishActionState({
+        canModify,
+        isPublished,
+        packageCount,
+        hasInProgressTask,
+      });
 
+      // 2. Build each fully-formed IAction from its state.
       const deleteAction: IAction = {
-        isDisabled: deleteState.isDisabled,
-        tooltipProps: deleteState.text ? { content: deleteState.text } : undefined,
-        title: deleteState.text,
+        isAriaDisabled: deleteState.isDisabled,
+        tooltipProps: deleteState.tooltip ? { content: deleteState.tooltip } : undefined,
+        title: 'Delete',
         onClick: () => navigate(`${DELETE_ROUTE}?snapshotUUID=${snapUuid}`),
       };
 
       const publishAction: IAction = {
-        isDisabled: hasInProgressTask || packageCount === 0,
-        title: 'Publish',
-        ...(packageCount === 0 && {
-          title: 'Cannot publish snapshot with 0 packages',
-        }),
-        onClick: () => navigate(`${PUBLISH_ROUTE}?snapshotUUID=${snapUuid}`),
+        isAriaDisabled: publishState.isDisabled,
+        tooltipProps: publishState.tooltip ? { content: publishState.tooltip } : undefined,
+        title: isPublished
+          ? 'Unpublish'
+          : packageCount === 0
+            ? 'Cannot publish snapshot with 0 packages'
+            : 'Publish',
+        onClick: () =>
+          navigate(
+            isPublished
+              ? `${PUBLISH_ROUTE}?snapshotUUID=${snapUuid}&action=unpublish`
+              : `${PUBLISH_ROUTE}?snapshotUUID=${snapUuid}`,
+          ),
       };
 
-      //   const unpublishAction: IAction = {
-      //     isDisabled: hasInProgressTask,
-      //     title: 'Unpublish',
-      //     onClick: () => navigate(`${PUBLISH_ROUTE}?snapshotUUID=${snapUuid}&action=unpublish`),
-      //   };
-
-      return canPublish
-        ? isPublished
-          ? [
-              deleteAction,
-              // unpublishAction - TODO: to turn on later
-            ]
-          : [deleteAction, publishAction]
-        : [deleteAction];
+      // 3. Assemble the final list. B8/U1: omit Publish/Unpublish entirely
+      // (not disabled - hidden) when it would be "Unpublish" and that's
+      // currently switched off.
+      const showPublishActionForRow = canPublish && isPublishActionVisible({ isPublished });
+      return showPublishActionForRow ? [deleteAction, publishAction] : [deleteAction];
     },
-    [snapshotsReadOnly, count, navigate, canPublish],
+    [snapshotsReadOnly, count, navigate, canPublish, canModify],
   );
 
   const kebab = useCallback(
@@ -182,31 +221,15 @@ const SnapshotsTableWithToolbars = ({
       return [
         {
           cell: (
-            <ConditionalTooltip
-              content={
-                count < 2
-                  ? "You can't delete the last snapshot in a repository"
-                  : 'You do not have the required permissions to perform this action.'
-              }
-              show={!snapshotsReadOnly && (!rbac?.repoWrite || count < 2)}
-              setDisabled
-            >
-              <ActionsColumn
-                items={rowActions(
-                  snapUuid,
-                  isPublished,
-                  hasInProgressTask,
-                  packageCount,
-                  canModify,
-                )}
-              />
-            </ConditionalTooltip>
+            <ActionsColumn
+              items={rowActions(snapUuid, isPublished, hasInProgressTask, packageCount)}
+            />
           ),
           props: { isActionCell: true },
         },
       ];
     },
-    [snapshotsReadOnly, rbac?.repoWrite, count, rowActions, canModify],
+    [snapshotsReadOnly, rowActions],
   );
 
   const dataViewRows: DataViewTrObject[] = useMemo(
@@ -221,9 +244,9 @@ const SnapshotsTableWithToolbars = ({
           published,
         } = snapshot;
         const publishState = getSnapshotPublishState(snapshot);
-        const hasInProgressTask =
-          snapshot.publish_task?.status === 'pending' ||
-          snapshot.publish_task?.status === 'running';
+        const taskStatus = snapshot.publish_task?.status;
+        const hasInProgressTask = taskStatus === 'pending' || taskStatus === 'running';
+        const isPublished = isSnapshotEffectivelyPublished({ published, taskStatus });
         const packageCount = content_counts?.['rpm.package'] || 0;
 
         return {
@@ -290,7 +313,7 @@ const SnapshotsTableWithToolbars = ({
             {
               cell: <RepoConfig repoUUID={repoUUID} snapUUID={snapUuid} latest={false} />,
             },
-            ...kebab(snapUuid, !!published, hasInProgressTask, packageCount),
+            ...kebab(snapUuid, isPublished, hasInProgressTask, packageCount),
           ],
         };
       }),
@@ -330,15 +353,12 @@ const SnapshotsTableWithToolbars = ({
 
   const actionsDropdown = (
     <SnapshotsPrimaryActionButton
-      deleteButtonLabel={deleteButtonLabel}
-      onDeleteClick={navigateOnDeleteClick}
-      isDeleteDisabled={isDeleteDisabled}
+      actions={actions}
       isFetchingOrLoading={isLoading}
-      isNothingToDelete={count === 1}
-      rbac={rbac}
-      canPublish={canPublish}
+      isPublishActionVisible={showPublishAction}
       onPublishClick={onPublishClick}
       isPublishDisabled={isPublishDisabled}
+      publishTooltip={publishTooltip}
       publishButtonLabel={publishButtonLabel}
     />
   );

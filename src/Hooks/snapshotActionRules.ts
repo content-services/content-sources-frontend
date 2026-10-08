@@ -19,9 +19,6 @@ export const ZERO_PACKAGES_TOOLTIP = 'Cannot publish snapshot with 0 packages';
 // `getPublishActionState`, so flipping this to `true` is sufficient and no
 // other code needs to change.
 // ---------------------------------------------------------------------------
-export const UNPUBLISH_ENABLED = false;
-
-export const UNPUBLISH_DISABLED_TOOLTIP = 'Unpublishing is temporarily unavailable.';
 
 // Single gate for "may this user modify this repository's snapshots at all":
 // requires repoWrite RBAC AND the repo's snapshots must not be read-only.
@@ -62,7 +59,7 @@ export const isSnapshotEffectivelyPublished = ({
 // `rowActions` and the primary button's `usePublishSnapshotApi` - must check
 // this instead of only checking `canPublish`.
 export const isPublishActionVisible = ({ isPublished }: { isPublished: boolean }): boolean =>
-  UNPUBLISH_ENABLED || !isPublished;
+  !isPublished;
 
 // SINGLE source of truth for Delete, used by both the row kebab (targetCount=1,
 // single snapshot's own isPublished/hasInProgressTask) and the bulk primary
@@ -105,49 +102,9 @@ export const getPublishActionState = ({
   hasInProgressTask: boolean;
 }): SnapshotActionState => {
   if (!canModify) return { isDisabled: true, tooltip: NO_PERMISSION_TOOLTIP };
-  // Defense-in-depth for B8: callers are expected to hide this action entirely
-  // via `isPublishActionVisible` rather than render it disabled, but if one
-  // doesn't, it must never be clickable while the switch is off.
-  if (isPublished && !UNPUBLISH_ENABLED) {
-    return { isDisabled: true, tooltip: UNPUBLISH_DISABLED_TOOLTIP };
-  }
   if (hasInProgressTask) return { isDisabled: true, tooltip: IN_PROGRESS_TASK_TOOLTIP };
   if (!isPublished && packageCount === 0) {
     return { isDisabled: true, tooltip: ZERO_PACKAGES_TOOLTIP };
   }
   return { isDisabled: false };
 };
-
-// business rules
-// user has to have rbacWrite `You do not have the required permissions to perform this action.`
-// !repository.upload - 'Redhat and Community repos can't be modified'
-
-// publish
-// !repository.partner - 'Repository must be a partner repository to publish'
-// packageCount === 0 - 'Cannot publish snapshot with 0 packages'
-// In-progress publish / delete task blocks publish
-
-// Failed/canceled task means "not published"
-// publish enabled
-
-// delete
-// last snapshot - Can't delete the last snapshot
-// In-progress publish / delete task blocks delete
-// "Can't delete all snapshots"
-
-// ui rules
-// publish
-// selectedRows.length > 1 - 'Can publish one snapshot at a time'
-
-// delete
-// disabled, shaded, no row selected - delete selected snapshots
-
-// actions button
-// - delete action
-// - publish action (no unpublish - disabled)
-
-// kebab button
-// - delete action
-// - publish action (no unpublish)
-
-// confluence
