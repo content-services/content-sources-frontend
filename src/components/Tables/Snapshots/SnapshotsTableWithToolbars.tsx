@@ -44,6 +44,7 @@ import { SnapshotsPrimaryActionButton } from './SnapshotsPrimaryActionButton';
 import { usePublishSnapshotApi, usePublishSnapshotState } from 'Hooks/usePublishSnapshot';
 import { useDeleteSnapshot } from 'Hooks/useDeleteSnapshot';
 import { PublishLabels } from 'components/RepositoryLabels/PublishLabels';
+import { canModifySnapshots, getDeleteActionState } from './snapshotActionRules';
 
 interface SnapshotsTableProps {
   isLoading: boolean;
@@ -69,6 +70,7 @@ const SnapshotsTableWithToolbars = ({
   sortProps,
 }: SnapshotsTableProps) => {
   const { rbac } = useAppContext();
+  const canModify = canModifySnapshots({ snapshotsReadOnly, rbacWrite: !!rbac?.repoWrite });
   const navigate = useNavigate();
   const rootPath = useRootPath();
 
@@ -78,6 +80,8 @@ const SnapshotsTableWithToolbars = ({
     ...paginationData,
     itemCount: count,
   };
+
+  console.log('selectedRows', selectedRows);
 
   const isLoadingOrZeroCount = isLoading || !count;
 
@@ -133,36 +137,41 @@ const SnapshotsTableWithToolbars = ({
       hasInProgressTask: boolean,
       packageCount: number,
     ): IAction[] => {
+      // no action is possible if the repo is a redhat or community one
       if (snapshotsReadOnly) return [];
 
-      const actions: IAction[] = [
-        {
-          isDisabled: count < 2,
-          title: 'Delete',
-          onClick: () => navigate(`${DELETE_ROUTE}?snapshotUUID=${snapUuid}`),
-        },
-      ];
+      const deleteState = getDeleteActionState({ count, selectedRows, hasPublishedSnapshot });
 
-      if (canPublish) {
-        if (isPublished) {
-          actions.push({
-            isDisabled: hasInProgressTask,
-            title: 'Unpublish',
-            onClick: () => navigate(`${PUBLISH_ROUTE}?snapshotUUID=${snapUuid}&action=unpublish`),
-          });
-        } else {
-          actions.push({
-            isDisabled: hasInProgressTask || packageCount === 0,
-            title: 'Publish',
-            ...(packageCount === 0 && {
-              title: 'Cannot publish snapshot with 0 packages',
-            }),
-            onClick: () => navigate(`${PUBLISH_ROUTE}?snapshotUUID=${snapUuid}`),
-          });
-        }
-      }
+      const deleteAction: IAction = {
+        isDisabled: deleteState.isDisabled,
+        tooltipProps: deleteState.text ? { content: deleteState.text } : undefined,
+        title: deleteState.text,
+        onClick: () => navigate(`${DELETE_ROUTE}?snapshotUUID=${snapUuid}`),
+      };
 
-      return actions;
+      const publishAction: IAction = {
+        isDisabled: hasInProgressTask || packageCount === 0,
+        title: 'Publish',
+        ...(packageCount === 0 && {
+          title: 'Cannot publish snapshot with 0 packages',
+        }),
+        onClick: () => navigate(`${PUBLISH_ROUTE}?snapshotUUID=${snapUuid}`),
+      };
+
+      //   const unpublishAction: IAction = {
+      //     isDisabled: hasInProgressTask,
+      //     title: 'Unpublish',
+      //     onClick: () => navigate(`${PUBLISH_ROUTE}?snapshotUUID=${snapUuid}&action=unpublish`),
+      //   };
+
+      return canPublish
+        ? isPublished
+          ? [
+              deleteAction,
+              // unpublishAction - TODO: to turn on later
+            ]
+          : [deleteAction, publishAction]
+        : [deleteAction];
     },
     [snapshotsReadOnly, count, navigate, canPublish],
   );
@@ -183,7 +192,13 @@ const SnapshotsTableWithToolbars = ({
               setDisabled
             >
               <ActionsColumn
-                items={rowActions(snapUuid, isPublished, hasInProgressTask, packageCount)}
+                items={rowActions(
+                  snapUuid,
+                  isPublished,
+                  hasInProgressTask,
+                  packageCount,
+                  canModify,
+                )}
               />
             </ConditionalTooltip>
           ),
@@ -191,7 +206,7 @@ const SnapshotsTableWithToolbars = ({
         },
       ];
     },
-    [snapshotsReadOnly, rbac?.repoWrite, count, rowActions],
+    [snapshotsReadOnly, rbac?.repoWrite, count, rowActions, canModify],
   );
 
   const dataViewRows: DataViewTrObject[] = useMemo(
