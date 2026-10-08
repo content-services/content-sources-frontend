@@ -44,9 +44,46 @@ describe('CoveragePdfTemplate', () => {
 
     expect(screen.getByText('Packages by ecosystem')).toBeInTheDocument();
 
+    expect(screen.getByText('CVEs fixed')).toBeInTheDocument();
+    const cveSummary = screen.getByText('CVEs fixed').closest('.coverage-pdf-cve-section');
+    expect(cveSummary).toHaveTextContent('Critical');
+    expect(cveSummary).toHaveTextContent('Important');
+    expect(cveSummary).toHaveTextContent('Moderate');
+    expect(cveSummary).toHaveTextContent('Low');
+
     const packageRow = screen.getByText('spring-web').closest('tr');
     expect(packageRow).toHaveTextContent('6.1.5');
     expect(packageRow).toHaveTextContent('Exact');
+    expect(packageRow).toHaveTextContent('5.4–9.8');
+  });
+
+  it('omits the CVEs-fixed section and CVE columns when there is no CVE data', () => {
+    render(
+      <CoveragePdfTemplate
+        asyncData={{
+          data: {
+            packages: defaultCoverageReportPackagesItem,
+            meta: { count: 3, limit: 50, offset: 0 },
+            report: defaultCoverageReportItem,
+          },
+        }}
+        additionalData={{
+          filename: 'sbom.json',
+          generatedAt: '25 Aug 2026',
+          includeSummary: true,
+          includeCveData: false,
+        }}
+      />,
+    );
+
+    // The rest of the cover page still renders.
+    expect(screen.getByText('Lightwell Match Analysis Report')).toBeInTheDocument();
+    expect(screen.getByText('Packages by ecosystem')).toBeInTheDocument();
+
+    expect(screen.queryByText('CVEs fixed')).not.toBeInTheDocument();
+    expect(screen.queryByText('CVE Fixes (net delta)')).not.toBeInTheDocument();
+    expect(screen.queryByText('CVSS Scores')).not.toBeInTheDocument();
+    expect(screen.queryByText('5.4–9.8')).not.toBeInTheDocument();
   });
 
   it('omits the cover summary on continuation pages', () => {

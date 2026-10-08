@@ -17,9 +17,22 @@ jest.mock('Pages/Lightwell/constants', () => ({
   LIGHTWELL_LENS_USE_MOCK: false,
 }));
 
-const PackageCoverageTableHarness = ({ ecosystems }: { ecosystems: EcosystemInfo[] }) => {
+const PackageCoverageTableHarness = ({
+  ecosystems,
+  showCveColumns = true,
+}: {
+  ecosystems: EcosystemInfo[];
+  showCveColumns?: boolean;
+}) => {
   const table = usePackageCoverageTable(ecosystems);
-  return <PackageCoverageTable uuid='test-uuid' ecosystems={ecosystems} table={table} />;
+  return (
+    <PackageCoverageTable
+      uuid='test-uuid'
+      ecosystems={ecosystems}
+      table={table}
+      showCveColumns={showCveColumns}
+    />
+  );
 };
 
 const DEFAULT_ECOSYSTEMS: EcosystemInfo[] = [
@@ -28,10 +41,10 @@ const DEFAULT_ECOSYSTEMS: EcosystemInfo[] = [
   { name: 'JavaScript', supported: true },
 ];
 
-const renderTable = (ecosystems: EcosystemInfo[] = DEFAULT_ECOSYSTEMS) =>
+const renderTable = (ecosystems: EcosystemInfo[] = DEFAULT_ECOSYSTEMS, showCveColumns = true) =>
   render(
     <ReactQueryTestWrapper>
-      <PackageCoverageTableHarness ecosystems={ecosystems} />
+      <PackageCoverageTableHarness ecosystems={ecosystems} showCveColumns={showCveColumns} />
     </ReactQueryTestWrapper>,
   );
 
@@ -83,11 +96,40 @@ describe('PackageCoverageTable', () => {
     renderTable();
 
     const headers = screen.getAllByRole('columnheader');
-    expect(headers).toHaveLength(4);
+    expect(headers).toHaveLength(6);
     expect(headers[0]).toHaveTextContent('Package');
     expect(headers[1]).toHaveTextContent('Version');
     expect(headers[2]).toHaveTextContent('Ecosystem');
     expect(headers[3]).toHaveTextContent('Match');
+    expect(headers[4]).toHaveTextContent('CVE Fixes (net delta)');
+    expect(headers[5]).toHaveTextContent('CVSS Scores');
+  });
+
+  it('renders CVE fix counts and CVSS score ranges', () => {
+    renderTable();
+
+    // spring-web: critical 2, important 3, moderate 1, no low; range 5.4–9.8
+    const springRow = screen.getByText('spring-web').closest('tr')!;
+    expect(within(springRow).getByText('2')).toBeInTheDocument();
+    expect(within(springRow).getByText('3')).toBeInTheDocument();
+    expect(within(springRow).getByText('1')).toBeInTheDocument();
+    expect(within(springRow).getByText('5.4–9.8')).toBeInTheDocument();
+
+    // lodash has no CVEs: both columns show an em dash
+    const lodashRow = screen.getByText('lodash').closest('tr')!;
+    expect(within(lodashRow).getAllByText('—')).toHaveLength(2);
+  });
+
+  it('hides the CVE columns when the report has no CVE data', () => {
+    renderTable(DEFAULT_ECOSYSTEMS, false);
+
+    const headers = screen.getAllByRole('columnheader');
+    expect(headers).toHaveLength(4);
+    expect(screen.queryByText('CVE Fixes (net delta)')).not.toBeInTheDocument();
+    expect(screen.queryByText('CVSS Scores')).not.toBeInTheDocument();
+
+    // The CVSS range that would appear in the dropped column is gone too.
+    expect(screen.queryByText('5.4–9.8')).not.toBeInTheDocument();
   });
 
   it('shows empty state when no packages are returned', () => {

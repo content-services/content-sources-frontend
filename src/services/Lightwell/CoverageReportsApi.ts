@@ -13,12 +13,29 @@ export type EcosystemCoverageSummary = {
 
 export type CoverageMatchStatus = 'exact' | 'partial' | 'none';
 
+// Count of CVEs fixed in remediated repos, bucketed by severity.
+export type CveCount = {
+  critical: number;
+  important: number;
+  moderate: number;
+  low: number;
+};
+
+// Min/max CVSS severity scores across a package's CVEs.
+export type CveRange = {
+  low: number;
+  high: number;
+};
+
 export type CoverageReportPackage = {
   name: string;
   version: string;
   ecosystem: string;
   covered: boolean;
   match_status: CoverageMatchStatus;
+  cve_count: CveCount;
+  // Omitted by the backend when the package has no CVEs.
+  cve_range?: CveRange;
 };
 
 export type CoverageReportPackagesListResponse = {
@@ -51,6 +68,7 @@ export type CompletedCoverageReport = CoverageReportBase & {
   unmatched: number;
   total: number;
   ecosystem_coverage_summary: EcosystemCoverageSummary[];
+  cve_summary: CveCount;
   completed_at: string;
 };
 

@@ -18,6 +18,7 @@ import {
 import { PlusIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import CoverageSummaryBlock from './components/CoverageSummaryBlock';
+import CveFixesBlock from './components/CveFixesBlock';
 import EcosystemBreakdownBlock from './components/EcosystemBreakdownBlock';
 import PackageCoverageTable from './components/PackageCoverageTable';
 import { ExportMenu } from './components/ExportMenu';
@@ -27,6 +28,7 @@ import { usePackageCoverageTable } from './hooks/usePackageCoverageTable';
 import Loader from 'components/Loader';
 import LightwellNotFound from '../components/LightwellNotFound';
 import type { EcosystemInfo } from './utils/ecosystem';
+import { getTotalCveCount } from './utils/cveSeverity';
 import { useLightwellRootPath } from '../../../Hooks/Lightwell/navigation/useLightwellRootPath';
 
 const DROP_LAST_CHROME_SEGMENT_OPTIONS = { dropLastChromeSegment: true };
@@ -63,6 +65,10 @@ const CoverageReport = () => {
   if (isError) throw error;
   if (!report) return <LightwellNotFound />;
 
+  // Drives every CVE surface (summary card, table columns, exports): when the
+  // net-delta totals are all zero no package has CVE data worth showing.
+  const hasCveData = getTotalCveCount(report.cve_summary) > 0;
+
   const matchAnalysisTitle = filename ? (
     <Title headingLevel='h1'>
       Match analysis for manifest{' '}
@@ -90,7 +96,12 @@ const CoverageReport = () => {
         actions={
           <Flex gap={{ default: 'gapSm' }}>
             <FlexItem>
-              <ExportMenu uuid={report.uuid} filename={filename} filters={table.debouncedFilters} />
+              <ExportMenu
+                uuid={report.uuid}
+                filename={filename}
+                filters={table.debouncedFilters}
+                includeCveData={hasCveData}
+              />
             </FlexItem>
             <FlexItem>
               <Button
@@ -115,6 +126,11 @@ const CoverageReport = () => {
           <StackItem>
             <CoverageSummaryBlock report={report} />
           </StackItem>
+          {hasCveData && (
+            <StackItem>
+              <CveFixesBlock report={report} />
+            </StackItem>
+          )}
           <StackItem>
             <EcosystemBreakdownBlock report={report} />
           </StackItem>
@@ -123,7 +139,12 @@ const CoverageReport = () => {
               <CardBody>
                 {/* Remove Flex because it interacts with DataView's 100%-height and creates extra space below pagination */}
                 <RemediatedDataWarning className={spacing.mbMd} />
-                <PackageCoverageTable uuid={report.uuid} ecosystems={ecosystems} table={table} />
+                <PackageCoverageTable
+                  uuid={report.uuid}
+                  ecosystems={ecosystems}
+                  table={table}
+                  showCveColumns={hasCveData}
+                />
               </CardBody>
             </Card>
           </StackItem>

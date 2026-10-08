@@ -11,6 +11,12 @@ import MatchDonutChart from '../charts/MatchDonutChart';
 import EcosystemBarChart from '../charts/EcosystemBarChart';
 import { getMatchDonutChartHeight, getMatchedPackagePercentage } from '../charts/matchDonutModel';
 import { getEcosystemBarChartHeight } from '../charts/ecosystemBarModel';
+import {
+  CVE_SEVERITIES,
+  formatCvssRange,
+  getTotalCveCount,
+  type CveSeverityMeta,
+} from '../utils/cveSeverity';
 import type { CoveragePdfAdditionalData, CoveragePdfData } from './coveragePdf';
 
 type CoveragePdfTemplateProps = {
@@ -18,7 +24,20 @@ type CoveragePdfTemplateProps = {
   additionalData?: Partial<CoveragePdfAdditionalData>;
 };
 
-const PACKAGE_COLUMNS = ['Package', 'Version', 'Ecosystem', 'Match'] as const;
+const PACKAGE_COLUMNS = [
+  { label: 'Package', slug: 'package' },
+  { label: 'Version', slug: 'version' },
+  { label: 'Ecosystem', slug: 'ecosystem' },
+  { label: 'Match', slug: 'match' },
+  { label: 'CVE Fixes (net delta)', slug: 'cve' },
+  { label: 'CVSS Scores', slug: 'cvss' },
+] as const;
+
+// Raw severity SVG icon with inline color so it renders in the server-side PDF HTML.
+const SeverityGlyph = ({ meta }: { meta: CveSeverityMeta }) => {
+  const Glyph = meta.icon;
+  return <Glyph style={{ color: meta.color, fontSize: '11px', verticalAlign: '-2px' }} />;
+};
 
 const MATCH_STATUS_LABEL: Record<CoverageMatchStatus, string> = {
   exact: 'Exact',
@@ -49,6 +68,11 @@ const CoveragePdfTemplate = ({ asyncData, additionalData }: CoveragePdfTemplateP
   const filename = additionalData?.filename;
   const generatedAt = additionalData?.generatedAt;
   const includeSummary = additionalData?.includeSummary !== false && !!report;
+  // Mirror the on-screen report: hide every CVE surface when there is no data.
+  const includeCveData = additionalData?.includeCveData !== false;
+  const packageColumns = includeCveData
+    ? PACKAGE_COLUMNS
+    : PACKAGE_COLUMNS.filter(({ slug }) => slug !== 'cve' && slug !== 'cvss');
 
   return (
     <div className='coverage-pdf'>
@@ -139,9 +163,26 @@ const CoveragePdfTemplate = ({ asyncData, additionalData }: CoveragePdfTemplateP
         }
         .coverage-pdf .coverage-pdf-col-version,
         .coverage-pdf .coverage-pdf-col-ecosystem,
-        .coverage-pdf .coverage-pdf-col-match {
+        .coverage-pdf .coverage-pdf-col-match,
+        .coverage-pdf .coverage-pdf-col-cve,
+        .coverage-pdf .coverage-pdf-col-cvss {
           width: 1%;
           white-space: nowrap;
+        }
+        .coverage-pdf .coverage-pdf-cve-fix { display: inline-block; margin-right: 10px; }
+        .coverage-pdf .coverage-pdf-cve-fix:last-child { margin-right: 0; }
+        .coverage-pdf .coverage-pdf-cve-section h2 { margin: 0 0 8px; }
+        .coverage-pdf .coverage-pdf-cve-subtitle {
+          color: #6a6e73;
+          font-size: 11px;
+          margin-bottom: 12px;
+        }
+        .coverage-pdf .coverage-pdf-cve-summary-stats { display: flex; gap: 48px; }
+        .coverage-pdf .coverage-pdf-cve-summary-stat { text-align: center; }
+        .coverage-pdf .coverage-pdf-cve-summary-label {
+          font-size: 11px;
+          color: #6a6e73;
+          margin-top: 6px;
         }
         .coverage-pdf .coverage-pdf-pill {
           display: inline-block;
@@ -215,6 +256,26 @@ const CoveragePdfTemplate = ({ asyncData, additionalData }: CoveragePdfTemplateP
                 </div>
               </div>
             </div>
+            {includeCveData ? (
+              <div className='coverage-pdf-cve-section'>
+                <Title headingLevel='h2' size='md'>
+                  CVEs fixed
+                </Title>
+                <Content component='p' className='coverage-pdf-cve-subtitle'>
+                  Net delta of CVEs fixed by Lightwell (vs. unpatched version)
+                </Content>
+                <div className='coverage-pdf-cve-summary-stats'>
+                  {CVE_SEVERITIES.map((meta) => (
+                    <div key={meta.key} className='coverage-pdf-cve-summary-stat'>
+                      <div className='coverage-pdf-stat-value'>{report.cve_summary[meta.key]}</div>
+                      <div className='coverage-pdf-cve-summary-label'>
+                        <SeverityGlyph meta={meta} /> {meta.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <div className='coverage-pdf-ecosystem-section'>
               <Title headingLevel='h2' size='md'>
                 Packages by ecosystem
@@ -247,9 +308,9 @@ const CoveragePdfTemplate = ({ asyncData, additionalData }: CoveragePdfTemplateP
       >
         <Thead>
           <Tr>
-            {PACKAGE_COLUMNS.map((column) => (
-              <Th key={column} className={`coverage-pdf-col-${column.toLowerCase()}`}>
-                {column}
+            {packageColumns.map(({ label, slug }) => (
+              <Th key={slug} className={`coverage-pdf-col-${slug}`}>
+                {label}
               </Th>
             ))}
           </Tr>
@@ -274,6 +335,22 @@ const CoveragePdfTemplate = ({ asyncData, additionalData }: CoveragePdfTemplateP
                   {MATCH_STATUS_LABEL[pkg.match_status]}
                 </span>
               </Td>
+              {includeCveData ? (
+                <>
+                  <Td dataLabel='CVE Fixes (net delta)' className='coverage-pdf-col-cve'>
+                    {getTotalCveCount(pkg.cve_count) === 0
+                      ? '—'
+                      : CVE_SEVERITIES.filter((meta) => pkg.cve_count[meta.key] > 0).map((meta) => (
+                          <span key={meta.key} className='coverage-pdf-cve-fix'>
+                            <SeverityGlyph meta={meta} /> {pkg.cve_count[meta.key]}
+                          </span>
+                        ))}
+                  </Td>
+                  <Td dataLabel='CVSS Scores' className='coverage-pdf-col-cvss'>
+                    {formatCvssRange(pkg.cve_range)}
+                  </Td>
+                </>
+              ) : null}
             </Tr>
           ))}
         </Tbody>
