@@ -38,13 +38,20 @@ import {
   renderCveSeverityIcon,
 } from '../utils/cveSeverity';
 
-const COLUMNS = [
-  'Package',
-  'Version',
-  'Ecosystem',
-  'Match',
-  'CVE Fixes (net delta)',
-  'CVSS Scores',
+type ColumnWidth = 10 | 15 | 20 | 25;
+type ColumnDef = { name: string; width: ColumnWidth };
+
+const BASE_COLUMNS: ColumnDef[] = [
+  { name: 'Package', width: 25 },
+  { name: 'Version', width: 15 },
+  { name: 'Ecosystem', width: 20 },
+  { name: 'Match', width: 10 },
+];
+
+// Appended only when the report has CVE data; see showCveColumns.
+const CVE_COLUMNS: ColumnDef[] = [
+  { name: 'CVE Fixes (net delta)', width: 15 },
+  { name: 'CVSS Scores', width: 15 },
 ];
 
 const MATCH_STATUS_LABEL: Record<
@@ -92,9 +99,16 @@ type PackageCoverageTableProps = {
   ecosystems: EcosystemInfo[];
   // Table state is lifted so the page-level export can reuse the active filters.
   table: ReturnType<typeof usePackageCoverageTable>;
+  // Hide the CVE Fixes / CVSS Scores columns when the report has no CVE data.
+  showCveColumns: boolean;
 };
 
-const PackageCoverageTable = ({ uuid, ecosystems, table }: PackageCoverageTableProps) => {
+const PackageCoverageTable = ({
+  uuid,
+  ecosystems,
+  table,
+  showCveColumns,
+}: PackageCoverageTableProps) => {
   const useMock = LIGHTWELL_LENS_USE_MOCK;
   const ecosystemNames = ecosystems.map(({ name }) => name);
   const ecosystemSupportByName = new Map(
@@ -150,9 +164,11 @@ const PackageCoverageTable = ({ uuid, ecosystems, table }: PackageCoverageTableP
     isError,
   });
 
-  const dataViewColumns: DataViewTh[] = COLUMNS.map((name, index) => ({
+  const columns = showCveColumns ? [...BASE_COLUMNS, ...CVE_COLUMNS] : BASE_COLUMNS;
+
+  const dataViewColumns: DataViewTh[] = columns.map(({ name, width }) => ({
     cell: name,
-    props: { width: ([25, 15, 20, 10, 15, 15] as const)[index] },
+    props: { width },
   }));
 
   const dataViewRows: DataViewTrObject[] = packages.map((pkg: CoverageReportPackage) => {
@@ -187,8 +203,9 @@ const PackageCoverageTable = ({ uuid, ecosystems, table }: PackageCoverageTableP
             </Label>
           ),
         },
-        { cell: renderCveFixesCell(pkg) },
-        { cell: renderCvssScoresCell(pkg) },
+        ...(showCveColumns
+          ? [{ cell: renderCveFixesCell(pkg) }, { cell: renderCvssScoresCell(pkg) }]
+          : []),
       ],
     };
   });
@@ -261,11 +278,11 @@ const PackageCoverageTable = ({ uuid, ecosystems, table }: PackageCoverageTableP
               variant={isFiltered ? 'filtered' : 'zero'}
               itemName='packages'
               zeroBody='No packages were found in this manifest.'
-              colSpan={COLUMNS.length}
+              colSpan={columns.length}
               onClearFilters={clearAllFiltersAndResetPage}
             />
           ),
-          loading: <SkeletonTableBody rowsCount={perPage} columnsCount={COLUMNS.length} />,
+          loading: <SkeletonTableBody rowsCount={perPage} columnsCount={columns.length} />,
           error: (
             <ErrorState
               titleText='Unable to load packages'

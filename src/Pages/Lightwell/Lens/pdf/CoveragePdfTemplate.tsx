@@ -68,6 +68,11 @@ const CoveragePdfTemplate = ({ asyncData, additionalData }: CoveragePdfTemplateP
   const filename = additionalData?.filename;
   const generatedAt = additionalData?.generatedAt;
   const includeSummary = additionalData?.includeSummary !== false && !!report;
+  // Mirror the on-screen report: hide every CVE surface when there is no data.
+  const includeCveData = additionalData?.includeCveData !== false;
+  const packageColumns = includeCveData
+    ? PACKAGE_COLUMNS
+    : PACKAGE_COLUMNS.filter(({ slug }) => slug !== 'cve' && slug !== 'cvss');
 
   return (
     <div className='coverage-pdf'>
@@ -251,24 +256,26 @@ const CoveragePdfTemplate = ({ asyncData, additionalData }: CoveragePdfTemplateP
                 </div>
               </div>
             </div>
-            <div className='coverage-pdf-cve-section'>
-              <Title headingLevel='h2' size='md'>
-                CVEs fixed
-              </Title>
-              <Content component='p' className='coverage-pdf-cve-subtitle'>
-                Net delta of CVEs fixed by Lightwell (vs. unpatched version)
-              </Content>
-              <div className='coverage-pdf-cve-summary-stats'>
-                {CVE_SEVERITIES.map((meta) => (
-                  <div key={meta.key} className='coverage-pdf-cve-summary-stat'>
-                    <div className='coverage-pdf-stat-value'>{report.cve_summary[meta.key]}</div>
-                    <div className='coverage-pdf-cve-summary-label'>
-                      <SeverityGlyph meta={meta} /> {meta.label}
+            {includeCveData ? (
+              <div className='coverage-pdf-cve-section'>
+                <Title headingLevel='h2' size='md'>
+                  CVEs fixed
+                </Title>
+                <Content component='p' className='coverage-pdf-cve-subtitle'>
+                  Net delta of CVEs fixed by Lightwell (vs. unpatched version)
+                </Content>
+                <div className='coverage-pdf-cve-summary-stats'>
+                  {CVE_SEVERITIES.map((meta) => (
+                    <div key={meta.key} className='coverage-pdf-cve-summary-stat'>
+                      <div className='coverage-pdf-stat-value'>{report.cve_summary[meta.key]}</div>
+                      <div className='coverage-pdf-cve-summary-label'>
+                        <SeverityGlyph meta={meta} /> {meta.label}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null}
             <div className='coverage-pdf-ecosystem-section'>
               <Title headingLevel='h2' size='md'>
                 Packages by ecosystem
@@ -301,7 +308,7 @@ const CoveragePdfTemplate = ({ asyncData, additionalData }: CoveragePdfTemplateP
       >
         <Thead>
           <Tr>
-            {PACKAGE_COLUMNS.map(({ label, slug }) => (
+            {packageColumns.map(({ label, slug }) => (
               <Th key={slug} className={`coverage-pdf-col-${slug}`}>
                 {label}
               </Th>
@@ -328,18 +335,22 @@ const CoveragePdfTemplate = ({ asyncData, additionalData }: CoveragePdfTemplateP
                   {MATCH_STATUS_LABEL[pkg.match_status]}
                 </span>
               </Td>
-              <Td dataLabel='CVE Fixes (net delta)' className='coverage-pdf-col-cve'>
-                {getTotalCveCount(pkg.cve_count) === 0
-                  ? '—'
-                  : CVE_SEVERITIES.filter((meta) => pkg.cve_count[meta.key] > 0).map((meta) => (
-                      <span key={meta.key} className='coverage-pdf-cve-fix'>
-                        <SeverityGlyph meta={meta} /> {pkg.cve_count[meta.key]}
-                      </span>
-                    ))}
-              </Td>
-              <Td dataLabel='CVSS Scores' className='coverage-pdf-col-cvss'>
-                {formatCvssRange(pkg.cve_range)}
-              </Td>
+              {includeCveData ? (
+                <>
+                  <Td dataLabel='CVE Fixes (net delta)' className='coverage-pdf-col-cve'>
+                    {getTotalCveCount(pkg.cve_count) === 0
+                      ? '—'
+                      : CVE_SEVERITIES.filter((meta) => pkg.cve_count[meta.key] > 0).map((meta) => (
+                          <span key={meta.key} className='coverage-pdf-cve-fix'>
+                            <SeverityGlyph meta={meta} /> {pkg.cve_count[meta.key]}
+                          </span>
+                        ))}
+                  </Td>
+                  <Td dataLabel='CVSS Scores' className='coverage-pdf-col-cvss'>
+                    {formatCvssRange(pkg.cve_range)}
+                  </Td>
+                </>
+              ) : null}
             </Tr>
           ))}
         </Tbody>

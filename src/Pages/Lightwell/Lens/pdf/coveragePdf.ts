@@ -33,6 +33,8 @@ export type CoveragePdfAdditionalData = {
   filename?: string;
   generatedAt: string;
   includeSummary: boolean;
+  // When false, the CVEs-fixed summary and the CVE table columns are omitted.
+  includeCveData: boolean;
   headerBrand: 'lightwell';
 };
 
@@ -126,12 +128,14 @@ export function buildCoveragePdfPayload({
   filename,
   filters,
   itemCount,
+  includeCveData = true,
   generatedAt = formatCoveragePdfGeneratedAt(),
 }: {
   uuid: string;
   filename?: string;
   filters?: CoverageReportPackageFilters;
   itemCount: number;
+  includeCveData?: boolean;
   generatedAt?: string;
 }): PDFRequestPayload[] {
   const pageCount = Math.max(1, Math.ceil(Math.max(itemCount, 0) / COVERAGE_PDF_PAGE_SIZE));
@@ -151,6 +155,7 @@ export function buildCoveragePdfPayload({
       filename,
       generatedAt,
       includeSummary: pageIndex === 0,
+      includeCveData,
       headerBrand: 'lightwell',
     } satisfies CoveragePdfAdditionalData,
   }));

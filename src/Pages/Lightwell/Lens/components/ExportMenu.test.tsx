@@ -90,6 +90,23 @@ describe('ExportMenu PDF', () => {
     });
     expect(pdfRequest.payload[1].fetchDataParams.offset).toBe(COVERAGE_PDF_PAGE_SIZE);
     expect(pdfRequest.payload[2].fetchDataParams.offset).toBe(COVERAGE_PDF_PAGE_SIZE * 2);
+    // CVE data is present by default, so each page keeps it.
+    expect(pdfRequest.payload[0].additionalData).toMatchObject({ includeCveData: true });
+  });
+
+  it('signals the PDF module to omit CVE columns when there is no CVE data', async () => {
+    const user = userEvent.setup();
+    render(<ExportMenu uuid='report-uuid' filename='sbom.json' includeCveData={false} />);
+
+    await user.click(screen.getByRole('button', { name: 'Export' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Export as PDF' }));
+
+    await waitFor(() => {
+      expect(requestPdf).toHaveBeenCalledTimes(1);
+    });
+
+    const pdfRequest = requestPdf.mock.calls[0][0];
+    expect(pdfRequest.payload[0].additionalData).toMatchObject({ includeCveData: false });
   });
 
   it('closes the menu and shows generating feedback while the PDF is in progress', async () => {
@@ -282,6 +299,40 @@ describe('ExportMenu JSON', () => {
     const blob = (URL.createObjectURL as jest.Mock).mock.calls[0][0] as Blob;
     expect(blob.type).toBe('application/json;charset=utf-8;');
     await expect(readBlob(blob)).resolves.toEqual(JSON.stringify([pkg], null, 2));
+  });
+
+  it('strips empty CVE fields from the JSON when there is no CVE data', async () => {
+    const pkg = {
+      name: 'react',
+      version: '18.0.0',
+      ecosystem: 'npm',
+      covered: true,
+      match_status: 'exact',
+      cve_count: { critical: 0, important: 0, moderate: 0, low: 0 },
+    };
+    (getCoverageReportPackages as jest.Mock).mockResolvedValue({
+      data: [pkg],
+      links: { first: '', last: '' },
+      meta: { count: 1, limit: 200, offset: 0 },
+    });
+
+    const user = userEvent.setup();
+    render(<ExportMenu uuid='report-uuid' filename='sbom.json' includeCveData={false} />);
+
+    await user.click(screen.getByRole('button', { name: 'Export' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Export as JSON' }));
+
+    await waitFor(() => {
+      expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+    });
+
+    const blob = (URL.createObjectURL as jest.Mock).mock.calls[0][0] as Blob;
+    const json = await readBlob(blob);
+    expect(json).not.toContain('cve_count');
+    expect(json).not.toContain('cve_range');
+    expect(JSON.parse(json)).toEqual([
+      { name: 'react', version: '18.0.0', ecosystem: 'npm', covered: true, match_status: 'exact' },
+    ]);
   });
 
   it('surfaces an error notification when fetching packages fails', async () => {
