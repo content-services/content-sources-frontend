@@ -17,7 +17,7 @@ import { useGetSnapshotList } from 'services/Content/ContentQueries';
 import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 import { usePaginationLocalStorage } from 'Hooks/tables/usePaginationLocalStorage';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
-import { useIsSnapshotType, usePublishSnapshotPolling } from 'Hooks/usePublishSnapshot';
+import { useRepositoryType, usePublishSnapshotPolling } from 'Hooks/usePublishSnapshot';
 
 const perPageKey = 'snapshotPerPage';
 
@@ -26,7 +26,8 @@ const SnapshotListModal = () => {
 
   const onClose = useNavigateTo('repositories');
 
-  const { isSnapshotsReadOnly, canPublish, repositoryName } = useIsSnapshotType(repoUUID);
+  const { isRepositoryReadOnly, canPublish, canModify, repositoryName } =
+    useRepositoryType(repoUUID);
 
   const paginationData = usePaginationLocalStorage({ key: perPageKey });
   const { page, perPage, setPage } = paginationData;
@@ -108,8 +109,9 @@ const SnapshotListModal = () => {
               paginationData={paginationData}
               isLoading={isLoading}
               count={count}
-              snapshotsReadOnly={isSnapshotsReadOnly}
+              isRepositoryReadOnly={isRepositoryReadOnly}
               canPublish={canPublish}
+              canModify={canModify}
               repoUUID={repoUUID}
               selection={selection}
               sortProps={sortProps}

@@ -25,9 +25,9 @@ import { useGetSnapshotList } from 'services/Content/ContentQueries';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
 import { PublishLabels } from 'components/RepositoryLabels/PublishLabels';
 import {
-  useIsSnapshotType,
+  useRepositoryType,
   usePublishSnapshotPolling,
-  usePublishSnapshotState,
+  usePublishedSnapshotState,
 } from 'Hooks/usePublishSnapshot';
 
 const useStyles = createUseStyles({
@@ -56,8 +56,8 @@ export default function SnapshotDetailsModal() {
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
 
   const [isPublishPolling, setIsPublishPolling] = useState(false);
-  const { getSnapshotPublishState } = usePublishSnapshotState();
-  const { canPublish } = useIsSnapshotType(repoUUID);
+  const { getSnapshotPublishState } = usePublishedSnapshotState();
+  const { canPublish } = useRepositoryType(repoUUID);
   const { data = { data: [], meta: { count: 0, limit: 20, offset: 0 } } } = useGetSnapshotList(
     repoUUID,
     1,

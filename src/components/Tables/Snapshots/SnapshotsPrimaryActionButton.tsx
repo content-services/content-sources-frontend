@@ -8,34 +8,26 @@ import {
 } from '@patternfly/react-core';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 
+type Action = { label: string; isDisabled: boolean; tooltip?: string; navigate: () => void };
+
 interface SnapshotsPrimaryActionButtonProps {
   isFetchingOrLoading: boolean;
-  // Whether the repo supports publishing AND the action isn't a hidden
-  // Unpublish (B8/U1) - renamed from `canPublish` since it now encodes both.
-  isPublishActionVisible: boolean;
-  onPublishClick: () => void;
-  isPublishDisabled: boolean;
-  publishTooltip?: string;
-  publishButtonLabel: string;
-  actions: any;
+  actions: {
+    deleteAction: Action;
+    publishAction: Action;
+  };
+  canPublish: boolean;
 }
 
 export const SnapshotsPrimaryActionButton = ({
   actions,
   isFetchingOrLoading,
-  isPublishActionVisible,
-  onPublishClick,
-  isPublishDisabled,
-  publishTooltip,
-  publishButtonLabel,
+  canPublish,
 }: SnapshotsPrimaryActionButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { deleteAction, publishAction } = actions;
 
-  // U3a: if every action that would actually render inside is disabled,
-  // disable the toggle too - there's nothing useful to do behind it. Delete
-  // always renders; Publish/Unpublish only counts when it's visible at all.
-  //   const isEveryActionDisabled = isDeleteDisabled && (!isPublishActionVisible || isPublishDisabled);
+  console.log('deleteAction', deleteAction);
 
   return (
     <Dropdown
@@ -61,7 +53,6 @@ export const SnapshotsPrimaryActionButton = ({
           key='delete-action'
           content={deleteAction.tooltip}
           show={!!deleteAction.tooltip}
-          setDisabled
         >
           <DropdownItem
             value='delete'
@@ -72,20 +63,19 @@ export const SnapshotsPrimaryActionButton = ({
             {deleteAction.label}
           </DropdownItem>
         </ConditionalTooltip>
-        {isPublishActionVisible && (
+        {canPublish && (
           <ConditionalTooltip
             key='publish-action'
-            content={publishTooltip}
-            show={!!publishTooltip}
-            setDisabled
+            content={publishAction.tooltip}
+            show={!!publishAction.tooltip}
           >
             <DropdownItem
               value='publish'
               ouiaId='publish_snapshot_bulk'
-              isDisabled={isPublishDisabled}
-              onClick={onPublishClick}
+              isDisabled={publishAction.isDisabled}
+              onClick={publishAction.navigate}
             >
-              {publishButtonLabel}
+              {publishAction.label}
             </DropdownItem>
           </ConditionalTooltip>
         )}
