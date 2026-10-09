@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import CoverageReport from './CoverageReport';
 import { useCoverageReport } from './hooks/useCoverageReport';
 import {
@@ -99,6 +100,37 @@ describe('CoverageReport', () => {
     expect(screen.getByText('Exact match')).toBeInTheDocument();
     expect(screen.getByText('Partial match')).toBeInTheDocument();
   });
+
+  it.each([0, undefined])('hides the skipped-package warning for count %s', (skipped_entries) => {
+    (useCoverageReport as jest.Mock).mockReturnValue({
+      report: { ...defaultCoverageReportItem, skipped_entries },
+      isLoading: false,
+      startOver: jest.fn(),
+    });
+    renderCoverageReport();
+    expect(screen.queryByText(/skipped because/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Input formats' })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [1, "1 package was skipped because it doesn't match the input format."],
+    [3, "3 packages were skipped because they don't match the input format."],
+  ])(
+    'shows the warning and format help for %s skipped packages',
+    async (skipped_entries, message) => {
+      (useCoverageReport as jest.Mock).mockReturnValue({
+        filename: 'test-sbom.json',
+        report: { ...defaultCoverageReportItem, skipped_entries },
+        isLoading: false,
+        startOver: jest.fn(),
+      });
+      renderCoverageReport();
+      expect(screen.getByText(message)).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Input formats' }));
+      expect(await screen.findByText('What should my manifest contain?')).toBeInTheDocument();
+      expect(screen.getByText('What is the maximum manifest size?')).toBeInTheDocument();
+    },
+  );
 
   it('displays the CVEs fixed card with per-severity counts', () => {
     renderCoverageReport();
