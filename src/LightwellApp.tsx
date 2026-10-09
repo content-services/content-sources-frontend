@@ -18,6 +18,7 @@ import { LightwellDemoLayout } from 'Pages/Lightwell/LightwellDemoContext';
 import { useAppContext } from './middleware/AppContext';
 import CoverageReport from 'Pages/Lightwell/Lens/CoverageReport';
 import ManifestUpload from 'Pages/Lightwell/Lens/ManifestUpload';
+import TermsGuard from 'Pages/Lightwell/components/TermsGuard';
 
 export default function LightwellApp() {
   const pageSafe = usePageSafe();
@@ -34,28 +35,30 @@ export default function LightwellApp() {
       {isFetchingPermissions ? (
         <Loader />
       ) : (
-        <Routes>
-          <Route path='demo' element={<LightwellDemoLayout />}>
+        <TermsGuard>
+          <Routes>
+            <Route path='demo' element={<LightwellDemoLayout />}>
+              <Route index element={<RepositoriesTable />} />
+              <Route path=':repoName/:group/:packageName' element={<PackageDetails />} />
+              <Route path=':repoName/:packageName' element={<PackageDetails />} />
+              <Route path=':repoName' element={<PackagesTable />} />
+            </Route>
             <Route index element={<RepositoriesTable />} />
+            {features?.lightwellbeacon?.enabled && features?.lightwellbeacon?.accessible ? (
+              <Route path='beacon' element={<Beacon />} />
+            ) : null}
+            {features?.lightwelllens?.enabled && features?.lightwelllens?.accessible ? (
+              <>
+                <Route path='lens' element={<ManifestUpload />} />
+                <Route path='lens/:reportUUID' element={<CoverageReport />} />
+              </>
+            ) : null}
             <Route path=':repoName/:group/:packageName' element={<PackageDetails />} />
             <Route path=':repoName/:packageName' element={<PackageDetails />} />
             <Route path=':repoName' element={<PackagesTable />} />
-          </Route>
-          <Route index element={<RepositoriesTable />} />
-          {features?.lightwellbeacon?.enabled && features?.lightwellbeacon?.accessible ? (
-            <Route path='beacon' element={<Beacon />} />
-          ) : null}
-          {features?.lightwelllens?.enabled && features?.lightwelllens?.accessible ? (
-            <>
-              <Route path='lens' element={<ManifestUpload />} />
-              <Route path='lens/:reportUUID' element={<CoverageReport />} />
-            </>
-          ) : null}
-          <Route path=':repoName/:group/:packageName' element={<PackageDetails />} />
-          <Route path=':repoName/:packageName' element={<PackageDetails />} />
-          <Route path=':repoName' element={<PackagesTable />} />
-          <Route path='*' element={<LightwellNotFound />} />
-        </Routes>
+            <Route path='*' element={<LightwellNotFound />} />
+          </Routes>
+        </TermsGuard>
       )}
     </ErrorPage>
   );
