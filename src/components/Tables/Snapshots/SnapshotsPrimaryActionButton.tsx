@@ -7,8 +7,7 @@ import {
   MenuToggleElement,
 } from '@patternfly/react-core';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
-
-type Action = { label: string; isDisabled: boolean; tooltip?: string; navigate: () => void };
+import { Action } from 'Hooks/snapshotActions/sharedActionChecks';
 
 interface SnapshotsPrimaryActionButtonProps {
   isFetchingOrLoading: boolean;
@@ -60,7 +59,7 @@ export const SnapshotsPrimaryActionButton = ({
             isDisabled={deleteAction.isDisabled}
             onClick={deleteAction.navigate}
           >
-            {deleteAction.label}
+            {deleteAction.dynamicLabel}
           </DropdownItem>
         </ConditionalTooltip>
         {canPublish && (
@@ -75,7 +74,7 @@ export const SnapshotsPrimaryActionButton = ({
               isDisabled={publishAction.isDisabled}
               onClick={publishAction.navigate}
             >
-              {publishAction.label}
+              {publishAction.dynamicLabel}
             </DropdownItem>
           </ConditionalTooltip>
         )}

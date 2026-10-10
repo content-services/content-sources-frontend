@@ -5,16 +5,13 @@ import {
   IN_PROGRESS_TASK,
   isSnapshotEffectivelyPublished,
   NO_PERMISSION,
+  PublishRule,
 } from './sharedActionChecks';
-
-export type PublishRule = { reason: string; isDisabled: boolean };
 
 const NONE_SELECTED = 'Select one or more snapshots to delete';
 
-const LAST_SNAPSHOT = "You can't delete the last snapshot of a repository";
+const LAST_SNAPSHOT = 'Not allowed. At least one snapshot has to exist';
 const PUBLISHED_SNAPSHOT = "You can't delete a published snapshot";
-
-const DELETE_PASS = 'Delete';
 
 const getDeleteRuleOnSnapshot = (selectedSnapshot: SnapshotItem) => {
   if (isSnapshotEffectivelyPublished(selectedSnapshot))
@@ -28,7 +25,6 @@ const getDeleteRuleOnSnapshots = (
   canModify: boolean,
   totalCount: number,
 ): PublishRule => {
-  // label: Delete
   if (!canModify) return { isDisabled: true, reason: 'no-permission' };
   if (selectedSnapshots.length === 0) return { isDisabled: true, reason: 'none-selected' };
   if (selectedSnapshots.length === totalCount) return { isDisabled: true, reason: 'last-snapshot' };
@@ -57,8 +53,9 @@ const getDeleteTooltip = (reason: string): string => {
       return PUBLISHED_SNAPSHOT;
     case 'task-in-progress':
       return IN_PROGRESS_TASK;
+    case 'passed-all-checks':
     default:
-      return DELETE_PASS;
+      return '';
   }
 };
 
@@ -67,37 +64,24 @@ const getDeleteNavigate = (snapshots) => {
   if (snapshots.length === 1) return `${DELETE_ROUTE}?snapshotUUID=${snapshots[0].uuid}`;
   return DELETE_ROUTE;
 };
-// const getDeleteLabelForPrimaryButton = (reason, ) => {
-//   switch (reason) {
-//     case 'none-selected':
-//     case 'no-permission':
-//       return 'Delete selected snapshots';
-//     case 'would-remove-last-snapshot':
-//       return targetCount === 1 ? "Can't delete last snapshot" : "Can't delete all snapshots";
-//     default:
-//       return `Delete ${targetCount} ${targetCount === 1 ? 'snapshot' : 'snapshots'}`;
-//   }
 
-//   if (!selectedRows.length || !rbac?.repoWrite) return 'Delete selected snapshots';
-//   if (selectedRows.length === count && count === 1) return "Can't delete last snapshot";
-//   if (selectedRows.length === count && count >= 1) return "Can't delete all snapshots";
-//   return `Delete ${selectedRows.length} ${selectedRows.length === 1 ? 'snapshot' : 'snapshots'}`;
-// };
+export const getDynamicDeleteLabel = (reason, count) => {
+  switch (reason) {
+    case 'last-snapshot':
+      return count === 1 ? "Can't delete the last snapshot" : "Can't delete all snapshots";
+    case 'passed-all-checks':
+      return `Delete ${count} ${count === 1 ? 'snapshot' : 'snapshots'}`;
+    default:
+      return 'Delete selected snapshots';
+  }
+};
 
-const createForKebab = (rule, tooltip, navigate) => ({
+const createDeleteAction = (rule, tooltip, navigate) => ({
   isDisabled: rule.isDisabled,
   tooltip,
   rule: rule.reason,
   navigate,
-  label: 'Delete',
-});
-
-const createForPrimary = (rule, tooltip, navigate) => ({
-  isDisabled: rule.isDisabled,
-  tooltip,
-  rule: rule.reason,
-  navigate,
-  label: tooltip,
+  labelBasic: 'Delete',
 });
 
 export function getDeleteAction(
@@ -112,12 +96,9 @@ export function getDeleteAction(
     selectedRows.find((row) => row.id === snapshot.uuid),
   );
   const rule = getDeleteRuleOnSnapshots(selectedSnapshots, canModify, totalCount);
-  console.log('rule', rule);
-
   const tooltip = getDeleteTooltip(rule.reason);
   const navigate = getDeleteNavigate(selectedSnapshots);
-  const kebab = createForKebab(rule, tooltip, navigate);
-  const primary = createForPrimary(rule, tooltip, navigate);
+  const action = createDeleteAction(rule, tooltip, navigate);
 
-  return { kebab, primary };
+  return action;
 }

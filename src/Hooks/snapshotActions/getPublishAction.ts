@@ -5,16 +5,14 @@ import {
   IN_PROGRESS_TASK,
   isSnapshotEffectivelyPublished,
   NO_PERMISSION,
+  PublishRule,
 } from './sharedActionChecks';
-
-export type PublishRule = { reason: string; isDisabled: boolean };
 
 const NOT_PARTNER_ADMIN = 'This is not a partner repository or you do not have admin rights';
 const NONE_SELECTED = 'Select exactly one snapshot to publish';
 const ONE_SNAPSHOT_ONLY = 'Can publish only one snapshot at a time';
-const ALREADY_PUBLISHED = 'At least one selected snapshot is already published';
+const ALREADY_PUBLISHED = 'Unselect already published snapshot(s)';
 const ZERO_PACKAGES = 'Cannot publish snapshot with 0 packages';
-const PUBLISH_PASS = 'Publish';
 
 const hasZeroPackages = (snapshot: SnapshotItem) =>
   (snapshot.content_counts?.['rpm.package'] || 0) === 0;
@@ -32,7 +30,6 @@ const getPublishRuleOnSnapshots = (
   canModify: boolean,
   canPublish: boolean,
 ): PublishRule => {
-  // label: Publish
   if (!canModify) return { isDisabled: true, reason: 'no-permission' };
   if (!canPublish) return { isDisabled: true, reason: 'not-partner-repo-or-admin' };
   if (selectedSnapshots.length === 0) return { isDisabled: true, reason: 'none-selected' };
@@ -66,8 +63,9 @@ const getPublishTooltip = (reason: string): string => {
       return IN_PROGRESS_TASK;
     case 'zero-packages':
       return ZERO_PACKAGES;
+    case 'passed-all-checks':
     default:
-      return PUBLISH_PASS;
+      return '';
   }
 };
 
@@ -77,21 +75,25 @@ const getSingleSnapshotNavigate = (snapshots: SnapshotItem[]) => {
   return route;
 };
 
-const createForKebab = (rule, tooltip, navigate) => ({
+const createPublishAction = (rule, tooltip, navigate) => ({
   isDisabled: rule.isDisabled,
   tooltip,
   rule: rule.reason,
   navigate,
-  label: 'Publish',
+  labelBasic: 'Publish',
 });
 
-const createForPrimary = (rule, tooltip, navigate) => ({
-  isDisabled: rule.isDisabled,
-  tooltip,
-  rule: rule.reason,
-  navigate,
-  label: tooltip,
-});
+export const getDynamicPublishLabel = (reason) => {
+  switch (reason) {
+    case 'multiple-selected':
+      return 'More than 1 snapshot selected';
+    case 'already-published':
+      return 'Already published snapshot selected';
+    case 'passed-all-checks':
+    default:
+      return 'Publish a snapshot';
+  }
+};
 
 export function getPublishAction(
   snapshotsList: SnapshotItem[],
@@ -107,8 +109,7 @@ export function getPublishAction(
   const rule = getPublishRuleOnSnapshots(selectedSnapshots, canModify, canPublish);
   const tooltip = getPublishTooltip(rule.reason);
   const navigate = getSingleSnapshotNavigate(selectedSnapshots);
-  const kebab = createForKebab(rule, tooltip, navigate);
-  const primary = createForPrimary(rule, tooltip, navigate);
+  const action = createPublishAction(rule, tooltip, navigate);
 
-  return { kebab, primary };
+  return action;
 }

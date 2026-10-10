@@ -41,8 +41,8 @@ import { SNAPSHOTS_TABLE_COLUMNS } from './constants';
 import { SnapshotsPrimaryActionButton } from './SnapshotsPrimaryActionButton';
 import { usePublishedSnapshotState } from 'Hooks/usePublishSnapshot';
 import { PublishLabels } from 'components/RepositoryLabels/PublishLabels';
-import { getPublishAction } from 'Hooks/snapshotActions/getPublishAction';
-import { getDeleteAction } from 'Hooks/snapshotActions/getDeleteAction';
+import { getDynamicPublishLabel, getPublishAction } from 'Hooks/snapshotActions/getPublishAction';
+import { getDeleteAction, getDynamicDeleteLabel } from 'Hooks/snapshotActions/getDeleteAction';
 import { isSnapshotEffectivelyPublished } from 'Hooks/snapshotActions/sharedActionChecks';
 
 interface SnapshotsTableProps {
@@ -57,6 +57,103 @@ interface SnapshotsTableProps {
   selection: ReturnType<typeof useDataViewSelection>;
   sortProps: ReturnType<typeof useDataViewSort>;
 }
+
+const useSnapshotTableActions = ({
+  snapshotsList,
+  selectedRows,
+  canModify,
+  canPublish,
+  navigate,
+  count,
+  isRepositoryReadOnly,
+}) => {
+  const publishActionPrimaryButton = useMemo(() => {
+    const publishAction = getPublishAction(snapshotsList, selectedRows, canModify, canPublish);
+    const dynamicLabel = getDynamicPublishLabel(publishAction.rule);
+    return {
+      dynamicLabel,
+      label: publishAction.labelBasic,
+      isDisabled: publishAction.isDisabled,
+      navigate: () => navigate(publishAction.navigate),
+      tooltip: publishAction.tooltip,
+    };
+  }, [snapshotsList, selectedRows, canModify, canPublish]);
+
+  const deleteActionPrimaryButton = useMemo(() => {
+    const deleteAction = getDeleteAction(snapshotsList, selectedRows, canModify, count);
+    const dynamicLabel = getDynamicDeleteLabel(deleteAction.rule, selectedRows.length);
+    return {
+      dynamicLabel,
+      label: deleteAction.labelBasic,
+      isDisabled: deleteAction.isDisabled,
+      navigate: () => navigate(deleteAction.navigate),
+      tooltip: deleteAction.tooltip,
+    };
+  }, [snapshotsList, selectedRows, canModify, count]);
+
+  const rowActions = useCallback(
+    (snapshot: SnapshotItem): IAction[] => {
+      if (isRepositoryReadOnly) return [];
+
+      const isPublished = isSnapshotEffectivelyPublished(snapshot);
+
+      const publishActionBase = getPublishAction(
+        [snapshot],
+        [{ id: snapshot.uuid }],
+        canModify,
+        canPublish,
+      );
+
+      const deleteActionBase = getDeleteAction(
+        [snapshot],
+        [{ id: snapshot.uuid }],
+        canModify,
+        count,
+      );
+
+      const deleteAction: IAction = {
+        isAriaDisabled: deleteActionBase.isDisabled,
+        tooltipProps: deleteActionBase.tooltip ? { content: deleteActionBase.tooltip } : undefined,
+        title: deleteActionBase.labelBasic,
+        onClick: () => navigate(deleteActionBase.navigate),
+      };
+
+      const publishAction: IAction = {
+        isAriaDisabled: publishActionBase.isDisabled,
+        tooltipProps: publishActionBase.tooltip
+          ? { content: publishActionBase.tooltip }
+          : undefined,
+        title: publishActionBase.labelBasic,
+        onClick: () => navigate(publishActionBase.navigate),
+      };
+
+      return canPublish
+        ? isPublished
+          ? [
+              deleteAction,
+              // unpublishAction - TODO: put unpublish action here later
+            ]
+          : [deleteAction, publishAction]
+        : [deleteAction];
+    },
+    [isRepositoryReadOnly, count, navigate, canPublish, canModify],
+  );
+
+  const kebab = useCallback(
+    (snapshot: SnapshotItem) => {
+      if (isRepositoryReadOnly) return [];
+      return [
+        {
+          cell: <ActionsColumn items={rowActions(snapshot)} />,
+          props: { isActionCell: true },
+        },
+      ];
+    },
+    [isRepositoryReadOnly, rowActions],
+  );
+
+  return { publishActionPrimaryButton, deleteActionPrimaryButton, kebab };
+};
 
 const SnapshotsTableWithToolbars = ({
   snapshotsList,
@@ -111,85 +208,15 @@ const SnapshotsTableWithToolbars = ({
   }));
 
   const { getSnapshotPublishState } = usePublishedSnapshotState();
-
-  const publishActionPrimaryButton = useMemo(() => {
-    const { primary } = getPublishAction(snapshotsList, selectedRows, canModify, canPublish);
-    return {
-      label: primary.label,
-      isDisabled: primary.isDisabled,
-      navigate: () => navigate(primary.navigate),
-      tooltip: primary.tooltip,
-    };
-  }, [snapshotsList, selectedRows, canModify, canPublish]);
-
-  const deleteActionPrimaryButton = useMemo(() => {
-    const { primary } = getDeleteAction(snapshotsList, selectedRows, canModify, count);
-    return {
-      label: primary.label,
-      isDisabled: primary.isDisabled,
-      navigate: () => navigate(primary.navigate),
-      tooltip: primary.tooltip,
-    };
-  }, [snapshotsList, selectedRows, canModify, count]);
-
-  const rowActions = useCallback(
-    (snapshot: SnapshotItem): IAction[] => {
-      if (isRepositoryReadOnly) return [];
-
-      const isPublished = isSnapshotEffectivelyPublished(snapshot);
-
-      const { kebab } = getPublishAction(
-        [snapshot],
-        [{ id: snapshot.uuid }],
-        canModify,
-        canPublish,
-      );
-
-      const { kebab: kebabDelete } = getDeleteAction(
-        [snapshot],
-        [{ id: snapshot.uuid }],
-        canModify,
-        count,
-      );
-
-      const deleteAction: IAction = {
-        isAriaDisabled: kebabDelete.isDisabled,
-        tooltipProps: kebabDelete.tooltip ? { content: kebabDelete.tooltip } : undefined,
-        title: 'Delete',
-        onClick: () => navigate(kebabDelete.navigate),
-      };
-
-      const publishAction: IAction = {
-        isAriaDisabled: kebab.isDisabled,
-        tooltipProps: kebab.tooltip ? { content: kebab.tooltip } : undefined,
-        title: kebab.label,
-        onClick: () => navigate(kebab.navigate),
-      };
-
-      return canPublish
-        ? isPublished
-          ? [
-              deleteAction,
-              // unpublishAction - TODO: put unpublish action here later
-            ]
-          : [deleteAction, publishAction]
-        : [deleteAction];
-    },
-    [isRepositoryReadOnly, count, navigate, canPublish, canModify],
-  );
-
-  const kebab = useCallback(
-    (snapshot: SnapshotItem) => {
-      if (isRepositoryReadOnly) return [];
-      return [
-        {
-          cell: <ActionsColumn items={rowActions(snapshot)} />,
-          props: { isActionCell: true },
-        },
-      ];
-    },
-    [isRepositoryReadOnly, rowActions],
-  );
+  const { publishActionPrimaryButton, deleteActionPrimaryButton, kebab } = useSnapshotTableActions({
+    snapshotsList,
+    selectedRows,
+    canModify,
+    canPublish,
+    navigate,
+    count,
+    isRepositoryReadOnly,
+  });
 
   const dataViewRows: DataViewTrObject[] = useMemo(
     () =>
@@ -305,15 +332,13 @@ const SnapshotsTableWithToolbars = ({
     />
   );
 
-  const actions = {
-    deleteAction: deleteActionPrimaryButton,
-    publishAction: publishActionPrimaryButton,
-  };
-
   const actionsDropdown = (
     <SnapshotsPrimaryActionButton
       isFetchingOrLoading={isLoading}
-      actions={actions}
+      actions={{
+        deleteAction: deleteActionPrimaryButton,
+        publishAction: publishActionPrimaryButton,
+      }}
       canPublish={canPublish}
     />
   );
