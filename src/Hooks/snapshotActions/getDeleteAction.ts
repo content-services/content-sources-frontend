@@ -20,7 +20,7 @@ const getDeleteRuleOnSnapshot = (selectedSnapshot: SnapshotItem) => {
   return { isDisabled: false, reason: 'passed-all-checks' };
 };
 
-const getDeleteRuleOnSnapshots = (
+export const getDeleteRuleOnSnapshots = (
   selectedSnapshots: SnapshotItem[],
   canModify: boolean,
   totalCount: number,

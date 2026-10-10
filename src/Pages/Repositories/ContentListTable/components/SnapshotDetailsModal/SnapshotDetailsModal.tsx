@@ -28,7 +28,7 @@ import {
   useRepositoryType,
   usePublishSnapshotPolling,
   usePublishedSnapshotState,
-} from 'Hooks/usePublishSnapshot';
+} from 'Hooks/snapshotActions/usePublishSnapshot';
 
 const useStyles = createUseStyles({
   modalTableScope: modalTableSurfaceStyles,

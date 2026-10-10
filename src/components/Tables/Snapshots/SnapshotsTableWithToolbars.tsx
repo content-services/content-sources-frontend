@@ -39,7 +39,7 @@ import { formatDateDDMMMYYYY } from 'helpers';
 import { REPOSITORIES_ROUTE } from 'Routes/constants';
 import { SNAPSHOTS_TABLE_COLUMNS } from './constants';
 import { SnapshotsPrimaryActionButton } from './SnapshotsPrimaryActionButton';
-import { usePublishedSnapshotState } from 'Hooks/usePublishSnapshot';
+import { usePublishedSnapshotState } from 'Hooks/snapshotActions/usePublishSnapshot';
 import { PublishLabels } from 'components/RepositoryLabels/PublishLabels';
 import { getDynamicPublishLabel, getPublishAction } from 'Hooks/snapshotActions/getPublishAction';
 import { getDeleteAction, getDynamicDeleteLabel } from 'Hooks/snapshotActions/getDeleteAction';

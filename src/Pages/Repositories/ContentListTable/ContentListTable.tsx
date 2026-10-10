@@ -72,7 +72,7 @@ import {
   ToggleAsPartner,
   useToggleAsPartnerMutate,
 } from 'services/AdminPartnerRepos/AdminPartnerReposQueries';
-import { useRepositoryPublishSnapshotPolling } from 'Hooks/usePublishSnapshot';
+import { useRepositoryPublishSnapshotPolling } from 'Hooks/snapshotActions/usePublishSnapshot';
 
 export const perPageKey = 'contentListPerPage';
 

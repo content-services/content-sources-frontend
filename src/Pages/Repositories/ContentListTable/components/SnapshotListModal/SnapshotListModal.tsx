@@ -17,7 +17,10 @@ import { useGetSnapshotList } from 'services/Content/ContentQueries';
 import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 import { usePaginationLocalStorage } from 'Hooks/tables/usePaginationLocalStorage';
 import useSafeUUIDParam from 'Hooks/useSafeUUIDParam';
-import { useRepositoryType, usePublishSnapshotPolling } from 'Hooks/usePublishSnapshot';
+import {
+  useRepositoryType,
+  usePublishSnapshotPolling,
+} from 'Hooks/snapshotActions/usePublishSnapshot';
 
 const perPageKey = 'snapshotPerPage';
 

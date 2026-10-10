@@ -25,7 +25,7 @@ const getPublishRuleOnSnapshot = (selectedSnapshot: SnapshotItem) => {
   return { isDisabled: false, reason: 'passed-all-checks' };
 };
 
-const getPublishRuleOnSnapshots = (
+export const getPublishRuleOnSnapshots = (
   selectedSnapshots: SnapshotItem[],
   canModify: boolean,
   canPublish: boolean,
