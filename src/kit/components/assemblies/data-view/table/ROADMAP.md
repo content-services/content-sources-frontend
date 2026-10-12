@@ -53,20 +53,18 @@ harness, not a from-scratch table.
 
 ---
 
-## Beacon's unsolved requirements (first hard consumer)
+## Beacon's requirements — solved (D3 done)
 
-Neither `ContentListTable.tsx` nor Lens's `PackageCoverageTable.tsx` currently
-need these — they must be solved **in this unit** (or explicitly documented as
-an escape hatch) before Beacon's `VulnerabilityTable.tsx` can migrate:
+Neither `ContentListTable.tsx` nor Lens's `PackageCoverageTable.tsx` needed
+these, but both are now proven in `LwDataView` via Beacon's migration
+(`src/Pages/Lightwell/Beacon/components/VulnerabilityTable.tsx`):
 
-| Requirement | Current Beacon approach (hand-rolled) | Notes |
-| ----------- | -------------------------------------- | ----- |
-| Sticky columns | `OuterScrollContainer`/`InnerScrollContainer` from `@patternfly/react-table`, manual cell props from `vulnerabilityTableStickyColumns.ts` | Needs a DataView-compatible approach, or an explicit decision that sticky columns stay a Beacon-local wrapper around this unit |
-| Column management | `ColumnManagementModal` from `@patternfly/react-component-groups`, driven by local `columns`/`onColumnsChange` state | Needs to compose cleanly with `DataViewTable`'s column API |
+| Requirement | How it's solved |
+| ----------- | ---------------- |
+| Sticky columns | Native PF passthrough — each column/row's `props` field accepts `isStickyColumn` / `stickyMinWidth` / `stickyLeftOffset` / `hasRightBorder`, same as PatternFly's own `DataViewTableStickyExample`. `isSticky` on `LwDataView` enables the sticky header + scroll containers (replacing the old manual `OuterScrollContainer`/`InnerScrollContainer` wrapping). Beacon's existing `vulnerabilityTableStickyColumns.ts` helper is reused unchanged — it already returned PF `Th`/`Td`-shaped props. |
+| Column management | No kit API needed — `ColumnManagementModal` composes as a plain `actions` node in the toolbar unit, driven by the same call-site `columns`/`onColumnsChange` state as before. The column-visibility filter happens when building the `columns`/`rows` arrays passed to `LwDataView`. |
 
-If either can't be solved cleanly inside the unit, document the escape hatch
-here (e.g. "Beacon wraps `LwDataView` with its own sticky-column/column-mgmt
-layer") rather than blocking the whole family on it.
+No escape hatch needed.
 
 ---
 

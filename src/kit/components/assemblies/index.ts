@@ -53,6 +53,12 @@ export type {
 export { LwStatItem } from './metrics/stat-item/stat-item';
 export type { LwStatItemProps, LwStatItemVariant } from './metrics/stat-item/stat-item';
 
+export { LwDataView } from './data-view/table/table';
+export type { LwDataViewProps } from './data-view/table/table';
+
+export { LwDataViewToolbar } from './data-view/toolbar/toolbar';
+export type { LwDataViewToolbarProps } from './data-view/toolbar/toolbar';
+
 /**
  * Compat re-exports — Card / Popover live in primitives (A/B/C).
  * Existing page imports from `assemblies` keep working without touching domain files.

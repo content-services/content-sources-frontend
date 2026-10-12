@@ -4,8 +4,8 @@
 and cross-cutting conventions. Unit-specific phases live in each unit's
 `ROADMAP.md` — do not duplicate them here.
 
-**Status:** scaffolding. No data-view unit implementation until that unit's
-roadmap is agreed and its README exists.
+**Status:** `toolbar` and `table` units implemented; Beacon replace (D3) done.
+Lens re-point (D4) not yet started.
 
 ---
 
@@ -34,10 +34,10 @@ migrate/dissolve convention in
 
 ## Inventory
 
-| Unit | Export | Job | Unit roadmap |
-| ---- | ------ | --- | ------------ |
-| Toolbar | `LwDataViewToolbar` (name TBD at implement) | Filters + pagination composition over `DataViewToolbar` | [`toolbar/ROADMAP.md`](./toolbar/ROADMAP.md) |
-| Table | `LwDataView` | `DataView` root + `DataViewTable` + active-state wiring | [`table/ROADMAP.md`](./table/ROADMAP.md) |
+| Unit | Export | Job | Unit docs |
+| ---- | ------ | --- | --------- |
+| Toolbar | `LwDataViewToolbar` | Filters + pagination composition over `DataViewToolbar` | [`toolbar/README.md`](./toolbar/README.md) · [`toolbar/ROADMAP.md`](./toolbar/ROADMAP.md) |
+| Table | `LwDataView` | `DataView` root + `DataViewTable` + active-state wiring | [`table/README.md`](./table/README.md) · [`table/ROADMAP.md`](./table/ROADMAP.md) |
 
 Add a unit row here when a unit folder + roadmap + README are created. Do **not**
 put filter-component specifics, sort/selection APIs, or sticky-column mechanics
@@ -49,11 +49,11 @@ in this file.
 
 | Concern | Home | Notes |
 | ------- | ---- | ----- |
-| Active-state mapping (`{isLoading, isFetching, isError, count}` → `DataViewState`) | Relocate/generalize `src/Hooks/tables/useTableActiveState.ts` into kit | Already a small, generic hook — not a rewrite. |
-| Empty-state body (zero vs filtered) | Relocate/generalize `src/components/EmptyTableDataView/EmptyTableDataView.tsx` into kit | Already shared by `ContentListTable` and Lens's `PackageCoverageTable`. |
-| PF toolbar/pagination alignment bug workaround | Table or toolbar unit, TBD at implement | Known PF layout bug, already patched at both existing call sites in commit `9bdb20c` ("align toolbar with top pagination for all uses of PF DataView component — can revert after patternfly fixes this issue"). The kit unit must bake this in from day one, or it regresses visually versus the current hand-rolled/existing DataView tables. Revert when PatternFly fixes it upstream. |
-| Compact-variant default | Table unit `components.config.ts` entry | Default `DataViewTable` to **non-compact**; compact becomes an explicit opt-in prop. Fixes Lens's current `variant='compact'` misuse on a primary page view (flagged 2026-10-08: compact reserved for drawers/modals) automatically once Lens re-points onto this unit. |
-| Canonical filter/search order | Toolbar unit `components.config.ts` entry | One documented default order for filter controls, so Beacon/Lens/Repositories converge on it as they migrate, instead of each page inventing its own order. |
+| Active-state mapping (`{isLoading, isFetching, isError, count}` → `DataViewState`) | **Not yet relocated.** `src/Hooks/tables/useTableActiveState.ts` stays where it is; `LwDataView` just accepts `activeState` as a prop. Call sites (including Beacon) keep using the existing hook directly until a kit relocation is worth doing. | Already a small, generic hook — relocate opportunistically, not blocking. |
+| Empty-state body (zero vs filtered) | **Not yet relocated.** `src/components/EmptyTableDataView/EmptyTableDataView.tsx` stays where it is; pass it (or a domain-specific empty state) via `bodyStates`. | Already shared by `ContentListTable` and Lens's `PackageCoverageTable`. |
+| PF toolbar/pagination alignment bug workaround | **Implemented** in `toolbar/toolbar.tsx` (`LwDataViewToolbar`'s `pagination` slot) | Known PF layout bug, already patched at both existing call sites in commit `9bdb20c`. Revert when PatternFly fixes it upstream. |
+| Compact-variant default | **Implemented** as `table/table.tsx`'s `isCompact` prop (defaults to non-compact) | Fixes Lens's current `variant='compact'` misuse on a primary page view (flagged 2026-10-08: compact reserved for drawers/modals) automatically once Lens re-points onto this unit. |
+| Canonical filter/search order | **Open.** `toolbar/toolbar.tsx` only fixes the *slot* order (filters, then actions, then pagination) — which controls go inside `filters` and in what order is still undecided. | Decide when Lens migrates (D4) and a second real caller exists to compare against. |
 
 ---
 
@@ -61,10 +61,10 @@ in this file.
 
 | Order | Work | Owner doc |
 | ----- | ---- | --------- |
-| D0 | Family scaffolding (this file) | this file |
-| D1 | `toolbar` unit roadmap + implementation (generalize `DataViewToolbar` usage from the three existing call sites) | [`toolbar/ROADMAP.md`](./toolbar/ROADMAP.md) |
-| D2 | `table` unit roadmap + implementation (`LwDataView`; bake in PF workaround, non-compact default, active-state + empty-state wiring) | [`table/ROADMAP.md`](./table/ROADMAP.md) |
-| D3 | Beacon replace: `VulnerabilityTable`'s hand-rolled `Card`+`Toolbar`+raw `Table` → `LwDataView` + toolbar unit. Hardest case — sticky columns and `ColumnManagementModal` aren't solved by any existing DataView usage yet and must be proven here. | product + table/toolbar roadmaps |
+| D0 | Family scaffolding (this file) — done | this file |
+| D1 | `toolbar` unit roadmap + implementation — done (`LwDataViewToolbar`; filters/actions/pagination slots, PF workaround baked in; filter primitives and canonical order still open) | [`toolbar/README.md`](./toolbar/README.md) |
+| D2 | `table` unit roadmap + implementation — done (`LwDataView`; non-compact default, sticky passthrough, active/empty-state props; sort/selection not yet wired) | [`table/README.md`](./table/README.md) |
+| D3 | Beacon replace — done: `VulnerabilityTable`'s hand-rolled `Card`+`Toolbar`+raw `Table` → `LwDataView` + toolbar unit. Sticky columns proven via PF's native `DataViewTh`/`DataViewTd` `props` passthrough (`isStickyColumn` etc. — see PatternFly's `DataViewTableStickyExample`); `ColumnManagementModal` composes unchanged as a toolbar `actions` node. | product + table/toolbar roadmaps |
 | D4 | Lens re-point: `PackageCoverageTable` swaps its direct `@patternfly/react-data-view` imports for the kit units and drops `variant='compact'`. Low risk — already fully on DataView. | product |
 | D5 | Optional/opportunistic: `src/Pages/Lightwell/Repositories/RepositoriesTable.tsx` (still hand-rolled `LwCard` + raw `react-table`, not DataView at all). Not committed scope — not mentioned in any planning discussion for this family. | product |
 
