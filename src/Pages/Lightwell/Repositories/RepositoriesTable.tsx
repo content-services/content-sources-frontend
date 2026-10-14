@@ -62,6 +62,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useLightwellNavigateTo } from 'Hooks/Lightwell/navigation/useLightwellNavigateTo';
 import { useLightwellRootPath } from 'Hooks/Lightwell/navigation/useLightwellRootPath';
 import NotificationPreferencesModal from './components/NotificationPreferencesModal';
+import NoRepoNotificationsWarning from './components/NoRepoNotificationsWarning';
 import LightwellPageHeader from '../components/LightwellPageHeader';
 import { useLightwellNotificationPrefs } from './hooks/useLightwellNotificationPrefs';
 import {
@@ -149,11 +150,14 @@ const RepositoriesTable = () => {
     setRepoSubscribed,
     isLoading: isRepoNotificationsLoading,
     isError: isRepoNotificationsError,
+    hasAnyNotifySubscription: hasAnyNotifySubscription,
     pendingEventType,
   } = useLightwellRepoNotifications(!countIsZero);
 
   const shouldShowNotificationButton = (shouldExposeNotifications && !countIsZero) || isDemo;
   const showNotificationsColumn = prefs?.enabled === true && !isRepoNotificationsLoading;
+  const shouldShowNoRepoWarning =
+    showNotificationsColumn && !isDemo && !isRepoNotificationsError && !hasAnyNotifySubscription;
 
   const columnHeaders: {
     title: string;
@@ -258,6 +262,9 @@ const RepositoriesTable = () => {
           </Hide>
           <Hide hide={countIsZero || isLoading}>
             <Stack>
+              <Hide hide={!shouldShowNoRepoWarning}>
+                <NoRepoNotificationsWarning className={spacing.mbMd} />
+              </Hide>
               <Card className={`${spacing.ptLg} ${spacing.pb_2xl} ${spacing.pxLg}`}>
                 <Stack>
                   <Table

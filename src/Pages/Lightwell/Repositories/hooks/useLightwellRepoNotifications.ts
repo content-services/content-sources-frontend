@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import {
   useNotificationSubscriptionsQuery,
@@ -110,12 +110,28 @@ export const useLightwellRepoNotifications = (shouldFetch = true) => {
     [canFetch, query.data, mutate],
   );
 
+  const hasAnyNotifySubscription = useMemo(() => {
+    if (!query.data) return false;
+    for (const bundle of query.data) {
+      for (const app of bundle.applications) {
+        for (const et of app.event_types) {
+          const emailChannel = et.subscriptions.find(
+            ({ subscription_type }) => subscription_type === INSTANT_EMAIL_SUBSCRIPTION_TYPE,
+          );
+          if ((emailChannel?.subscribed_severities?.length ?? 0) > 0) return true;
+        }
+      }
+    }
+    return false;
+  }, [query.data]);
+
   const pendingEventType = isPending ? variables?.[0]?.event_type : undefined;
 
   return {
     isRepoSubscribed,
     setRepoSubscribed,
     syncAllSubscribedSeverities,
+    hasAnyNotifySubscription: hasAnyNotifySubscription,
     isLoading: canFetch && query.isLoading,
     isError: canFetch && query.isError,
     pendingEventType,
