@@ -4,8 +4,8 @@
 and cross-cutting conventions. Unit-specific phases live in each unit's
 `ROADMAP.md` — do not duplicate them here.
 
-**Status:** `toolbar` and `table` units implemented; Beacon replace (D3) done.
-Lens re-point (D4) not yet started.
+**Status:** `toolbar` and `table` units implemented; Beacon replace (D3) and
+Lens re-point (D4) done.
 
 ---
 
@@ -65,7 +65,7 @@ in this file.
 | D1 | `toolbar` unit roadmap + implementation — done (`LwDataViewToolbar`; filters/actions/pagination slots, PF workaround baked in; filter primitives and canonical order still open) | [`toolbar/README.md`](./toolbar/README.md) |
 | D2 | `table` unit roadmap + implementation — done (`LwDataView`; non-compact default, sticky passthrough, active/empty-state props; sort/selection not yet wired) | [`table/README.md`](./table/README.md) |
 | D3 | Beacon replace — done: `VulnerabilityTable`'s hand-rolled `Card`+`Toolbar`+raw `Table` → `LwDataView` + toolbar unit. Sticky columns proven via PF's native `DataViewTh`/`DataViewTd` `props` passthrough (`isStickyColumn` etc. — see PatternFly's `DataViewTableStickyExample`); `ColumnManagementModal` composes unchanged as a toolbar `actions` node. | product + table/toolbar roadmaps |
-| D4 | Lens re-point: `PackageCoverageTable` swaps its direct `@patternfly/react-data-view` imports for the kit units and drops `variant='compact'`. Low risk — already fully on DataView. | product |
+| D4 | Lens re-point — done: `PackageCoverageTable` swaps its direct `@patternfly/react-data-view` imports for the kit units (`LwDataView`/`LwDataViewToolbar`). `isCompact` is passed explicitly to keep the page visually unchanged in this pass; dropping it (the `variant='compact'` misuse fix) is deferred to a follow-up pass rather than bundled with this abstraction-only swap. | product |
 | D5 | Optional/opportunistic: `src/Pages/Lightwell/Repositories/RepositoriesTable.tsx` (still hand-rolled `LwCard` + raw `react-table`, not DataView at all). Not committed scope — not mentioned in any planning discussion for this family. | product |
 
 D3+ are **replace** operations at call sites — additive kit, swap imports/JSX.
@@ -91,4 +91,4 @@ an `UNUSED` marker rather than deleting it inline during a replace.
 | `table` unit: PF toolbar/pagination workaround (`9bdb20c`) present, default variant is non-compact | D2 |
 | `toolbar` unit: canonical filter order documented and used | D1 |
 | Beacon replace: existing `VulnerabilityTable` unit/visual tests still pass after swap | D3 |
-| Lens replace: `PackageCoverageTable` unit tests still pass; `variant='compact'` no longer present | D4 |
+| Lens replace: `PackageCoverageTable` unit tests still pass; `isCompact` kept for this pass (visual parity), dropping it is a deliberate follow-up | D4 |
