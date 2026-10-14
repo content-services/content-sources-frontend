@@ -191,6 +191,13 @@
   min-width: 100%;
 }
 
+// Sticky header is needed for sticky columns (see VulnerabilityTable.tsx),
+// but the solid header background it brings is a separate, deferred visual
+// change — remove this override once that update ships.
+.lightwell-vuln-table .pf-v6-c-table.pf-m-sticky-header {
+  --pf-v6-c-table--m-sticky-header--BackgroundColor: transparent;
+}
+
 .lightwell-cvss-vector {
   font-family: var(--pf-t--global--font--family--mono);
   font-size: var(--pf-t--global--font--size--body--sm);
