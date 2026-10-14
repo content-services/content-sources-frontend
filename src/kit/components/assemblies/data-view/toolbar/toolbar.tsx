@@ -6,9 +6,18 @@ import {
 } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
 
 type LwDataViewToolbarOwnedProps = {
-  /** Filter controls. Canonical order: filters, then actions, then pagination. */
+  /**
+   * Filter controls. Canonical order: filters, then actions, then pagination.
+   * `DataViewToolbar` always wraps this in its own unstyled `ToolbarItem` —
+   * content needing precise, unwrapped placement (e.g. a fixed-width search
+   * box) should go through `children` instead, which renders before the
+   * pagination item.
+   */
   filters?: ReactNode;
-  /** Non-filter actions (e.g. "Manage columns"), rendered between filters and pagination. */
+  /**
+   * Non-filter actions (e.g. "Manage columns"), rendered between filters and
+   * pagination. Same `ToolbarItem`-wrapping caveat as `filters` applies.
+   */
   actions?: ReactNode;
   /**
    * Pagination control. Rendered as a `ToolbarItem` with `align: 'alignEnd'`
@@ -44,6 +53,7 @@ export function LwDataViewToolbar({
 }: LwDataViewToolbarProps) {
   return (
     <DataViewToolbar filters={filters} actions={actions} {...rest}>
+      {children}
       {pagination ? (
         <ToolbarItem
           {...paginationItemProps}
@@ -53,7 +63,6 @@ export function LwDataViewToolbar({
           {pagination}
         </ToolbarItem>
       ) : null}
-      {children}
     </DataViewToolbar>
   );
 }

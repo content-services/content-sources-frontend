@@ -31,3 +31,21 @@ it('omits the pagination slot entirely when no pagination is passed', () => {
 
   expect(document.querySelector('.pf-m-pagination')).not.toBeInTheDocument();
 });
+
+it('renders children before the built-in pagination item, unwrapped', () => {
+  render(
+    <LwDataViewToolbar pagination={<div data-ouia-component-id='pagination'>Pagination</div>}>
+      <div data-ouia-component-id='custom-child'>Custom child</div>
+    </LwDataViewToolbar>,
+  );
+
+  const customChild = document.querySelector('[data-ouia-component-id="custom-child"]');
+  const paginationItem = document.querySelector('.pf-m-pagination');
+
+  // Not auto-wrapped in an extra ToolbarItem, unlike `filters`/`actions`.
+  expect(customChild?.parentElement).not.toHaveClass('pf-v6-c-toolbar__item');
+  // Renders before the pagination item in document order.
+  expect(customChild?.compareDocumentPosition(paginationItem as Node)).toBe(
+    Node.DOCUMENT_POSITION_FOLLOWING,
+  );
+});
