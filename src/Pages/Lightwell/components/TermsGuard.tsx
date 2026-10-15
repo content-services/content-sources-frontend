@@ -37,16 +37,19 @@ export default function TermsGuard({ children }: TermsGuardProps) {
   const redirecting = useRef(false);
 
   const termsHost =
-    getEnvironment() === 'prod'
-      ? 'https://www.redhat.com'
-      : 'https://www.stage.redhat.com';
+    getEnvironment() === 'prod' ? 'https://www.redhat.com' : 'https://www.stage.redhat.com';
 
   const canRedirect = data?.required && data.site && !!data.events?.length;
 
   useEffect(() => {
     if (!isLoading && !isError && canRedirect && !redirecting.current) {
       redirecting.current = true;
-      window.location.href = buildTermsUrl(termsHost, window.location.href, data.site!, data.events!);
+      window.location.href = buildTermsUrl(
+        termsHost,
+        window.location.href,
+        data.site!,
+        data.events!,
+      );
     }
   }, [isLoading, isError, canRedirect, data, termsHost]);
 
