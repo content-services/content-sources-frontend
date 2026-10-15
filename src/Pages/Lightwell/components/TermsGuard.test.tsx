@@ -5,6 +5,7 @@ import { ReactQueryTestWrapper } from 'testingHelpers';
 
 jest.mock('services/Lightwell/TermsQueries', () => ({
   useTermsRequired: jest.fn(),
+  TERMS_REQUIRED_KEY: 'TERMS_REQUIRED_KEY',
 }));
 
 jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
@@ -70,7 +71,7 @@ it('redirects to terms service when terms are required', () => {
   Object.defineProperty(window, 'location', { writable: true, value: originalLocation });
 });
 
-it('renders children on error (fail-open)', () => {
+it('blocks content on error (fail-closed)', () => {
   (useTermsRequired as jest.Mock).mockReturnValue({
     isLoading: false,
     data: undefined,
@@ -78,10 +79,12 @@ it('renders children on error (fail-open)', () => {
   });
   renderGuard();
 
-  expect(screen.getByTestId('protected-content')).toBeInTheDocument();
+  expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
+  expect(screen.getByText('Service temporarily unavailable')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
 });
 
-it('renders children when required but site/events missing (fail-open)', () => {
+it('renders children when required but site/events missing', () => {
   (useTermsRequired as jest.Mock).mockReturnValue({
     isLoading: false,
     data: { required: true },

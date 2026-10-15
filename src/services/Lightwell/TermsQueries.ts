@@ -9,6 +9,7 @@ export const useTermsRequired = () =>
     queryKey: [TERMS_REQUIRED_KEY],
     queryFn: getTermsRequired,
     staleTime: 60_000,
+    retry: false,
     meta: {
       title: 'Error checking terms acceptance',
       id: 'get-terms-required-error',
