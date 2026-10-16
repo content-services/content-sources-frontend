@@ -71,7 +71,7 @@ it('redirects to terms service when terms are required', () => {
   Object.defineProperty(window, 'location', { writable: true, value: originalLocation });
 });
 
-it('blocks content on error (fail-closed)', () => {
+it('shows error page when backend returns an error', () => {
   (useTermsRequired as jest.Mock).mockReturnValue({
     isLoading: false,
     data: undefined,
