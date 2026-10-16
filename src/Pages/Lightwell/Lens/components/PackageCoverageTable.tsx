@@ -1,28 +1,17 @@
 import { useEffect } from 'react';
-import {
-  Flex,
-  FlexItem,
-  Label,
-  LabelColor,
-  Pagination,
-  ToolbarItem,
-  ToolbarItemVariant,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Flex, FlexItem, Label, LabelColor, Pagination, Tooltip } from '@patternfly/react-core';
 import { SkeletonTableBody, ErrorState } from '@patternfly/react-component-groups';
-import { DataView } from '@patternfly/react-data-view/dist/dynamic/DataView';
-import {
-  DataViewTable,
+import type {
   DataViewTh,
   DataViewTrObject,
 } from '@patternfly/react-data-view/dist/dynamic/DataViewTable';
-import { DataViewToolbar } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
 import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
 import { DataViewTextFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewTextFilter';
 import { DataViewCheckboxFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewCheckboxFilter';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import EmptyTableDataView from 'components/EmptyTableDataView/EmptyTableDataView';
 import useTableActiveState from 'Hooks/tables/useTableActiveState';
+import { LwDataView, LwDataViewToolbar } from 'kit/components/assemblies';
 import { LIGHTWELL_LENS_USE_MOCK } from 'Pages/Lightwell/constants';
 import {
   getMockCoveragePackagesList,
@@ -250,44 +239,12 @@ const PackageCoverageTable = ({
   );
 
   return (
-    <DataView data-ouia-component-id={ouiaId} activeState={activeState}>
-      <DataViewToolbar
-        ouiaId='lightwell-package-coverage-toolbar'
-        clearAllFilters={clearAllFiltersAndResetPage}
-        filters={
-          <DataViewFilters onChange={handleFilterChange} values={filters}>
-            <DataViewTextFilter
-              key={`search-${filtersActiveAttributeResetKey}`}
-              filterId='search'
-              ouiaId='lightwell-package-coverage-filter-search'
-              title='Package'
-              placeholder='Search packages...'
-            />
-            <DataViewCheckboxFilter
-              filterId='match_status'
-              ouiaId='lightwell-package-coverage-filter-match'
-              title='Match'
-              placeholder='Filter by match'
-              options={matchFilterOptions}
-            />
-            <DataViewCheckboxFilter
-              filterId='ecosystem'
-              ouiaId='lightwell-package-coverage-filter-ecosystem'
-              title='Ecosystem'
-              placeholder='Filter by ecosystem'
-              options={ecosystemFilterOptions}
-            />
-          </DataViewFilters>
-        }
-      >
-        <ToolbarItem variant={ToolbarItemVariant.pagination} align={{ default: 'alignEnd' }}>
-          {topPagination}
-        </ToolbarItem>
-      </DataViewToolbar>
-      <DataViewTable
+    <>
+      <LwDataView
+        activeState={activeState}
         aria-label='Package coverage table'
         ouiaId={ouiaId}
-        variant='compact'
+        isCompact
         columns={dataViewColumns}
         rows={dataViewRows}
         bodyStates={{
@@ -311,9 +268,40 @@ const PackageCoverageTable = ({
             />
           ),
         }}
-      />
-      <DataViewToolbar pagination={bottomPagination} />
-    </DataView>
+      >
+        <LwDataViewToolbar
+          ouiaId='lightwell-package-coverage-toolbar'
+          clearAllFilters={clearAllFiltersAndResetPage}
+          pagination={topPagination}
+          filters={
+            <DataViewFilters onChange={handleFilterChange} values={filters}>
+              <DataViewTextFilter
+                key={`search-${filtersActiveAttributeResetKey}`}
+                filterId='search'
+                ouiaId='lightwell-package-coverage-filter-search'
+                title='Package'
+                placeholder='Search packages...'
+              />
+              <DataViewCheckboxFilter
+                filterId='match_status'
+                ouiaId='lightwell-package-coverage-filter-match'
+                title='Match'
+                placeholder='Filter by match'
+                options={matchFilterOptions}
+              />
+              <DataViewCheckboxFilter
+                filterId='ecosystem'
+                ouiaId='lightwell-package-coverage-filter-ecosystem'
+                title='Ecosystem'
+                placeholder='Filter by ecosystem'
+                options={ecosystemFilterOptions}
+              />
+            </DataViewFilters>
+          }
+        />
+      </LwDataView>
+      {bottomPagination}
+    </>
   );
 };
 
