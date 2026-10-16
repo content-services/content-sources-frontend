@@ -118,3 +118,15 @@ export const formatDistributionUrl = (url: string): string =>
   url
     .replace('/api/pulp-content/public-lightwell-demo', '/lightwell/public-lightwell-demo')
     .replace('/api/pulp-content/lightwell', '/lightwell');
+
+/**
+ * Display URL for the packages table header. Python repos include the /simple/ index path.
+ * Not used for connect snippets, those are handled separately based on the tool.
+ */
+export const formatRepositoryDisplayUrl = (url: string): string => {
+  const formatted = formatDistributionUrl(url);
+  if (!formatted.includes('/python/')) {
+    return formatted;
+  }
+  return `${formatted.replace(/\/+$/, '').replace(/\/simple$/, '')}/simple/`;
+};
