@@ -38,6 +38,7 @@ import { RepositoryPackageItem } from 'services/Content/ContentApi';
 import { getMockLightwellPackages } from '../mockPackages';
 import {
   formatDistributionUrl,
+  formatRepositoryDisplayUrl,
   formatRepositoryName,
   getEcosystemIcon,
   getRepositoryDescription,
@@ -377,7 +378,7 @@ const PackagesTable = () => {
                   </LwButton>
                 </ConnectRepositoryModal>
                 <LwClipboardCopy isCode>
-                  {formatDistributionUrl(repository.published_distribution_url || '')}
+                  {formatRepositoryDisplayUrl(repository.published_distribution_url || '')}
                 </LwClipboardCopy>
               </LwButtonGroup>
               {(isRemediated || isPredisclosure) && <LwAlert />}

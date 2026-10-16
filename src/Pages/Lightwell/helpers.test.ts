@@ -1,6 +1,7 @@
 import { CodeIcon, JavaIcon, PythonIcon } from '@patternfly/react-icons';
 import {
   formatDistributionUrl,
+  formatRepositoryDisplayUrl,
   formatRepositoryName,
   getEcosystemFromContentType,
   getEcosystemIcon,
@@ -330,5 +331,32 @@ describe('formatDistributionUrl', () => {
     expect(formatDistributionUrl('https://example.com/some/other/path')).toBe(
       'https://example.com/some/other/path',
     );
+  });
+});
+
+describe('formatRepositoryDisplayUrl', () => {
+  it('leaves java URLs unchanged beyond pulp path formatting', () => {
+    expect(
+      formatRepositoryDisplayUrl(
+        'https://packages.redhat.com/api/pulp-content/lightwell/java/validated',
+      ),
+    ).toBe('https://packages.redhat.com/lightwell/java/validated');
+  });
+
+  it('appends /simple/ for python URLs', () => {
+    expect(
+      formatRepositoryDisplayUrl(
+        'https://packages.redhat.com/api/pulp-content/lightwell/python/validated',
+      ),
+    ).toBe('https://packages.redhat.com/lightwell/python/validated/simple/');
+  });
+
+  it('is idempotent when /simple or /simple/ is already present', () => {
+    expect(
+      formatRepositoryDisplayUrl('https://packages.redhat.com/lightwell/python/validated/simple'),
+    ).toBe('https://packages.redhat.com/lightwell/python/validated/simple/');
+    expect(
+      formatRepositoryDisplayUrl('https://packages.redhat.com/lightwell/python/validated/simple/'),
+    ).toBe('https://packages.redhat.com/lightwell/python/validated/simple/');
   });
 });
