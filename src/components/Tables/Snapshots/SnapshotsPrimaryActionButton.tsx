@@ -26,7 +26,7 @@ export const SnapshotsPrimaryActionButton = ({
   const [isOpen, setIsOpen] = useState(false);
   const { deleteAction, publishAction } = actions;
 
-  console.log('deleteAction', deleteAction);
+  console.log('deleasdfasdf', deleteAction);
 
   return (
     <Dropdown
