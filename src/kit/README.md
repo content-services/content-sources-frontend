@@ -21,7 +21,11 @@ src/kit/
         ROADMAP.md                    Family inventory / shared config / sequencing
         stepper/                      LwMetricsStepper (README + unit roadmap first)
         stat-item/                    LwStatItem (compact value + label)
-      …                               (LwButtonGroup, LwDataView, …)
+      data-view/                      List/collection table surfaces (toolbar + table)
+        ROADMAP.md                    Family inventory / shared config / sequencing
+        table/                        LwDataView (README + unit roadmap first)
+        toolbar/                      LwDataViewToolbar (README + unit roadmap first)
+      …                               (LwButtonGroup, …)
     components.config.ts              Prop / behavior defaults for both tiers
     components.config.css             Domain presentational baseline
   docs/
@@ -43,6 +47,8 @@ import {
   PageChromeSlots,
   PageTitleStack,
   LwStatItem,
+  LwDataView,
+  LwDataViewToolbar,
 } from 'kit/components/assemblies';
 
 // Kit primitives (barrel)

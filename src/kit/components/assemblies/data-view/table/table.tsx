@@ -1,11 +1,17 @@
-import type { ReactNode } from 'react';
-import { DataView, type DataViewState } from '@patternfly/react-data-view/dist/dynamic/DataView';
+import type { CSSProperties, ReactNode } from 'react';
+import {
+  DataView,
+  type DataViewProps,
+  type DataViewState,
+} from '@patternfly/react-data-view/dist/dynamic/DataView';
 import {
   DataViewTable,
   type DataViewTh,
   type DataViewTr,
 } from '@patternfly/react-data-view/dist/dynamic/DataViewTable';
 import type { DataViewTableBasicProps } from '@patternfly/react-data-view/dist/dynamic/DataViewTableBasic';
+
+import { getLwDataViewDefaults, mergeComponentProps } from '../../../components.config';
 
 type LwDataViewOwnedProps = {
   /** DataView's loading/error/empty state. See `useTableActiveState`-style hooks at call sites. */
@@ -21,15 +27,26 @@ type LwDataViewOwnedProps = {
   bodyStates?: Partial<Record<DataViewState | string, ReactNode>>;
   headStates?: Partial<Record<DataViewState | string, ReactNode>>;
   /**
-   * Opt-in to PF's compact table density. Defaults to non-compact — compact
-   * is reserved for drawers/modals, not primary page views (flagged
-   * 2026-10-08; see `../ROADMAP.md`).
+   * Opt-in to PF's compact table density. Defaults to non-compact (see
+   * `components.config.ts`'s `dataView.isCompact`) — compact is reserved for
+   * drawers/modals, not primary page views (flagged 2026-10-08; see
+   * `../ROADMAP.md`).
    */
   isCompact?: boolean;
   /** Toggles sticky header + sticky columns (PF `DataViewTable` `isSticky`). */
   isSticky?: boolean;
-  /** Toolbar(s) and other chrome rendered above/below the table, inside `DataView`. */
+  /** Toolbar(s) and other chrome rendered above the table, inside `DataView`. */
   children?: ReactNode;
+  /** Chrome rendered after the table, still inside `DataView` (e.g. a bottom pagination toolbar). */
+  footer?: ReactNode;
+  /** PF `DataView` selection context — wires bulk-select/checkbox state to the table. Applies to the outer `DataView` host, not the inner table. */
+  selection?: DataViewProps['selection'];
+  /** className for the outer `DataView` host (page layout). Distinct from `className` in `...rest`, which targets the inner `DataViewTable`. */
+  wrapperClassName?: string;
+  /** style for the outer `DataView` host. Distinct from `style` in `...rest`, which targets the inner `DataViewTable`. */
+  wrapperStyle?: CSSProperties;
+  /** OUIA id for the outer `DataView` host. Distinct from `ouiaId` in `...rest`, which targets the inner `DataViewTable`. */
+  containerOuiaId?: string;
 };
 
 export type LwDataViewProps = LwDataViewOwnedProps &
@@ -53,20 +70,40 @@ export function LwDataView({
   isCompact,
   isSticky,
   children,
+  footer,
+  selection,
+  wrapperClassName,
+  wrapperStyle,
+  containerOuiaId,
   ...rest
 }: LwDataViewProps) {
+  // Strip kit-owned isCompact from PF host defaults (maps to variant, not a literal prop).
+  const { isCompact: defaultCompact, ...pfDefaults } = getLwDataViewDefaults();
+  const compact = isCompact ?? defaultCompact ?? false;
+
+  // PF host props passthrough via merge — call-site wins on everything except
+  // className/style, which merge against componentsConfig.dataView.
+  const tableProps = mergeComponentProps(pfDefaults, {
+    ...rest,
+    variant: compact ? ('compact' as const) : undefined,
+    isSticky,
+    columns,
+    rows,
+    bodyStates,
+    headStates,
+  });
+
   return (
-    <DataView activeState={activeState}>
+    <DataView
+      activeState={activeState}
+      selection={selection}
+      ouiaId={containerOuiaId}
+      className={wrapperClassName}
+      style={wrapperStyle}
+    >
       {children}
-      <DataViewTable
-        {...rest}
-        variant={isCompact ? 'compact' : undefined}
-        isSticky={isSticky}
-        columns={columns}
-        rows={rows}
-        bodyStates={bodyStates}
-        headStates={headStates}
-      />
+      <DataViewTable {...tableProps} />
+      {footer}
     </DataView>
   );
 }

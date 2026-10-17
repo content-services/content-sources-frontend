@@ -49,3 +49,63 @@ it('renders toolbar/chrome children above the table inside DataView', () => {
   expect(screen.getByTestId('toolbar')).toBeInTheDocument();
   expect(screen.getByRole('grid', { name: 'With chrome' })).toBeInTheDocument();
 });
+
+it('renders footer chrome after the table, still inside DataView', () => {
+  render(
+    <LwDataView
+      aria-label='With footer'
+      columns={columns}
+      rows={rows}
+      footer={<div data-ouia-component-id='bottom-toolbar'>Bottom toolbar</div>}
+    >
+      <div data-ouia-component-id='top-toolbar'>Top toolbar</div>
+    </LwDataView>,
+  );
+
+  const topToolbar = screen.getByTestId('top-toolbar');
+  const footer = screen.getByTestId('bottom-toolbar');
+  const table = screen.getByRole('grid', { name: 'With footer' });
+
+  expect(topToolbar.compareDocumentPosition(table)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  expect(table.compareDocumentPosition(footer)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+});
+
+it('applies selection to the outer DataView so rows become selectable', () => {
+  const selection = { onSelect: jest.fn(), isSelected: () => false };
+  render(
+    <LwDataView
+      aria-label='Selectable table'
+      columns={columns}
+      rows={rows}
+      selection={selection}
+    />,
+  );
+
+  // DataViewTable only renders a per-row checkbox column when `selection`
+  // reaches the outer DataView's InternalContext (isSelectable), not the
+  // inner DataViewTable directly.
+  expect(screen.getAllByRole('checkbox')).toHaveLength(rows.length);
+});
+
+it('applies wrapperClassName/wrapperStyle/containerOuiaId to the outer DataView host, distinct from the inner table', () => {
+  render(
+    <LwDataView
+      aria-label='Wrapped table'
+      columns={columns}
+      rows={rows}
+      wrapperClassName='custom-wrapper'
+      wrapperStyle={{ padding: 8 }}
+      containerOuiaId='page-data-view'
+    />,
+  );
+
+  const wrapper = document.querySelector('[data-ouia-component-id="page-data-view-stack"]');
+  expect(wrapper).toBeInTheDocument();
+  expect(wrapper).toHaveClass('custom-wrapper');
+  expect(wrapper).toHaveStyle({ padding: '8px' });
+
+  // Inner table keeps its own default ouia id — containerOuiaId never reaches it.
+  expect(
+    document.querySelector('[data-ouia-component-id="DataViewTableBasic"]'),
+  ).toBeInTheDocument();
+});

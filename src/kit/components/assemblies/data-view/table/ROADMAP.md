@@ -40,12 +40,14 @@ harness, not a from-scratch table.
 
 ## Defaults to bake in (not optional at implement)
 
-1. **Non-compact by default.** `DataViewTable`'s `variant` defaults to the PF
-   default (non-compact); compact is an explicit opt-in prop. This fixes Lens's
-   current `variant='compact'` misuse (confirmed at
-   `src/Pages/Lightwell/Lens/components/PackageCoverageTable.tsx:271`) the
-   moment Lens re-points onto this unit — flagged 2026-10-08: compact table
-   variants belong in drawers/modals, not primary page views.
+1. **Non-compact by default — done, routed through the config cascade.**
+   `isCompact` resolves via `components.config.ts`'s `dataView.isCompact`
+   (`false`) through `mergeComponentProps`, same pattern as `LwMetricsStepper`'s
+   `isHorizontal`, rather than a raw component-level default. Compact remains an
+   explicit opt-in prop. Flagged 2026-10-08: compact table variants belong in
+   drawers/modals, not primary page views — Repositories/Packages (D6/D7) still
+   pass `isCompact` explicitly to preserve their current density, matching
+   Lens's D4 approach.
 2. **PF toolbar/pagination alignment workaround.** See
    [`../toolbar/ROADMAP.md`](../toolbar/ROADMAP.md)'s "Known issue to carry
    forward" — whichever unit owns the DOM structure where this applies must
@@ -68,9 +70,23 @@ No escape hatch needed.
 
 ---
 
+## Repositories' and Packages' requirements — solved (D6/D7 done)
+
+Neither Beacon nor Lens needed these, but Repositories (`ContentListTable.tsx`)
+and Packages (`PackagesTableWithToolbars.tsx`) both put `selection` and
+page-layout `className`/`ouiaId` directly on the **outer** `<DataView>` —
+distinct from the inner `DataViewTable`'s own `className`/`style`/`ouiaId`,
+which already flow through `...rest`. Resolved by adding named outer-host
+own-props rather than overloading `className`/`style`/`ouiaId`:
+
+| Requirement | How it's solved |
+| ----------- | ---------------- |
+| Selection / bulk-select | `selection?: DataViewSelection` applied to the outer `<DataView selection={...}>` — this is how PF wires per-row checkbox context to `DataViewTable`, so it can't land on the inner table. |
+| Page-layout className/style | `wrapperClassName?` / `wrapperStyle?` applied to the outer `<DataView>` — kept separate from `className`/`style` in `...rest` (inner table) to avoid ambiguity about which host a plain `className` prop would target. |
+| Outer OUIA id | `containerOuiaId?` applied to the outer `<DataView ouiaId={...}>` — kept separate from the inner table's own `ouiaId` (in `...rest`), since Repositories/Packages use two distinct ids simultaneously. |
+| Bottom toolbar (after the table, still inside `DataView`) | `footer?: ReactNode`, rendered after `<DataViewTable>` inside `<DataView>` — `children` alone only covers chrome *above* the table. |
+
 ## Explicitly out of scope
 
 - Filters, pagination controls — **toolbar** unit
 - Domain row/column shapes — product call sites
-- Bulk actions, selection — open question whether this lives here or in toolbar;
-  decide at implement by following `ContentListTable.tsx`'s existing split

@@ -5,6 +5,8 @@ import {
   type DataViewToolbarProps,
 } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
 
+import { getLwDataViewToolbarDefaults, mergeComponentProps } from '../../../components.config';
+
 type LwDataViewToolbarOwnedProps = {
   /**
    * Filter controls. Canonical order: filters, then actions, then pagination.
@@ -51,8 +53,10 @@ export function LwDataViewToolbar({
   children,
   ...rest
 }: LwDataViewToolbarProps) {
+  const toolbarProps = mergeComponentProps(getLwDataViewToolbarDefaults(), rest);
+
   return (
-    <DataViewToolbar filters={filters} actions={actions} {...rest}>
+    <DataViewToolbar filters={filters} actions={actions} {...toolbarProps}>
       {children}
       {pagination ? (
         <ToolbarItem
