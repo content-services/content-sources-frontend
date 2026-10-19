@@ -14,16 +14,13 @@ the table unit, or other data-view units. Those live in
 
 ## Job
 
-Plug-and-play **toolbar composition**: filters (text / checkbox / tree, as
-needed per call site) + pagination, rebuilt on top of the kit's generic
-[`LwToolbar`](../../toolbar/ROADMAP.md) instead of
-`@patternfly/react-data-view`'s `DataViewToolbar`. The unit does not know
-Beacon/Lens/Repositories fetch or domain filter options — call sites pass
-filter config and pagination state.
+Plug-and-play **toolbar composition** over PatternFly's `DataViewToolbar`:
+filters (text / checkbox / tree, as needed per call site) + pagination. The unit
+does not know Beacon/Lens/Repositories fetch or domain filter options — call
+sites pass filter config and pagination state.
 
-**Host:** [`LwToolbar`](../../toolbar/toolbar.tsx) (PF `Toolbar`) + `DataViewFilters`
-family (`DataViewTextFilter`, etc., still call-site composition) — logic/composition
-harness, not a from-scratch toolbar.
+**Host:** `@patternfly/react-data-view`'s `DataViewToolbar` (+ `DataViewFilters`
+family) — logic/composition harness, not a from-scratch toolbar.
 
 **Generalizes from (read before implementing, don't reinvent):**
 - `src/Pages/Repositories/ContentListTable/ContentListTable.tsx` — most complete
@@ -49,17 +46,6 @@ day one versus their current (or existing) DataView tables. Revert this unit's
 copy once PatternFly fixes the underlying issue upstream and remove the
 workaround from the two existing call sites in the same pass.
 
-## Host change (2026-10-19)
-
-This unit no longer renders `@patternfly/react-data-view`'s `DataViewToolbar`
-directly — it renders [`LwToolbar`](../../toolbar/toolbar.tsx) and rebuilds
-`DataViewToolbar`'s `ToolbarContent` slot assembly (bulk select / filters /
-actions / toggle group / pagination) itself, so the family no longer depends on
-that PF package's `DataViewToolbar` component or its `DataViewToolbarProps`
-type. Public API (`filters`, `actions`, `pagination`, `paginationItemProps`, …)
-is unchanged; DOM output and PF classes are unchanged (same underlying
-`Toolbar`/`ToolbarContent`/`ToolbarItem` primitives).
-
 ---
 
 ## Open questions (resolve at implement)
@@ -80,5 +66,4 @@ is unchanged; DOM output and PF classes are unchanged (same underlying
 
 - Table rendering, `DataView` root, active-state wiring — `../data-view.tsx`
 - Sticky columns, column management — `../data-view.tsx` (Beacon's requirement)
-- Generic `Toolbar` shell / clear-filters default — **toolbar** unit (`LwToolbar`)
 - Domain filter option lists (statuses, severities, etc.) — product call sites

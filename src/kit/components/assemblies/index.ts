@@ -53,9 +53,6 @@ export type {
 export { LwStatItem } from './metrics/stat-item/stat-item';
 export type { LwStatItemProps, LwStatItemVariant } from './metrics/stat-item/stat-item';
 
-export { LwToolbar } from './toolbar/toolbar';
-export type { LwToolbarProps } from './toolbar/toolbar';
-
 export { LwDataView, LwDataViewToolbar } from './data-view';
 export type { LwDataViewProps, LwDataViewToolbarProps } from './data-view';
 

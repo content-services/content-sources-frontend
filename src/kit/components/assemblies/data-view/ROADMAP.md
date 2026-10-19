@@ -36,7 +36,7 @@ migrate/dissolve convention in
 
 | Unit | Export | Job | Unit docs |
 | ---- | ------ | --- | --------- |
-| Toolbar | `LwDataViewToolbar` | Filters + pagination composition over [`LwToolbar`](../toolbar/README.md) (generic kit `Toolbar` shell) | [`data-view-toolbar/README.md`](./data-view-toolbar/README.md) · [`data-view-toolbar/ROADMAP.md`](./data-view-toolbar/ROADMAP.md) |
+| Toolbar | `LwDataViewToolbar` | Filters + pagination composition over `DataViewToolbar` | [`data-view-toolbar/README.md`](./data-view-toolbar/README.md) · [`data-view-toolbar/ROADMAP.md`](./data-view-toolbar/ROADMAP.md) |
 | Table | `LwDataView` | `DataView` root + `DataViewTable` + active-state wiring | This file (see "Table unit" below) — `data-view.tsx` sits flat at the family root, same as `page/page-chrome-slots.tsx`, so it carries no separate unit-doc pair |
 
 Add a unit row here when a unit folder + roadmap + README are created. Do **not**
@@ -44,12 +44,12 @@ put filter-component specifics, sort/selection APIs, or sticky-column mechanics
 in this file.
 
 **2026-10-19 rehome:** `table/table.tsx` → `data-view.tsx` (flattened to the
-family root); `toolbar/` → `data-view-toolbar/` (renamed, now built on the new
-generic `assemblies/toolbar/` (`LwToolbar`) instead of
-`@patternfly/react-data-view`'s `DataViewToolbar` directly). Both units'
+family root); `toolbar/` → `data-view-toolbar/` (renamed). Both units'
 previous content (`table/README.md`, `table/ROADMAP.md`) is folded into this
 file below instead of carrying forward a separate doc pair for the now-flat
-`data-view.tsx`.
+`data-view.tsx`. (A generic `LwToolbar` assembly that `LwDataViewToolbar`
+could consume was explored and reverted the same day — see git history — in
+favor of continuing to wrap PF's `DataViewToolbar` directly.)
 
 ---
 
