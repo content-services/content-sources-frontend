@@ -53,11 +53,11 @@ export type {
 export { LwStatItem } from './metrics/stat-item/stat-item';
 export type { LwStatItemProps, LwStatItemVariant } from './metrics/stat-item/stat-item';
 
-export { LwDataView } from './data-view/table/table';
-export type { LwDataViewProps } from './data-view/table/table';
+export { LwToolbar } from './toolbar/toolbar';
+export type { LwToolbarProps } from './toolbar/toolbar';
 
-export { LwDataViewToolbar } from './data-view/toolbar/toolbar';
-export type { LwDataViewToolbarProps } from './data-view/toolbar/toolbar';
+export { LwDataView, LwDataViewToolbar } from './data-view';
+export type { LwDataViewProps, LwDataViewToolbarProps } from './data-view';
 
 /**
  * Compat re-exports — Card / Popover live in primitives (A/B/C).

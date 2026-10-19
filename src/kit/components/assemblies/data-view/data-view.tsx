@@ -11,7 +11,7 @@ import {
 } from '@patternfly/react-data-view/dist/dynamic/DataViewTable';
 import type { DataViewTableBasicProps } from '@patternfly/react-data-view/dist/dynamic/DataViewTableBasic';
 
-import { getLwDataViewDefaults, mergeComponentProps } from '../../../components.config';
+import { getLwDataViewDefaults, mergeComponentProps } from '../../components.config';
 
 type LwDataViewOwnedProps = {
   /** DataView's loading/error/empty state. See `useTableActiveState`-style hooks at call sites. */

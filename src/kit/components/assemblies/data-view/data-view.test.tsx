@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { DataViewState } from '@patternfly/react-data-view/dist/dynamic/DataView';
 
-import { LwDataView } from './table';
+import { LwDataView } from './data-view';
 
 const columns = [{ cell: 'Name' }, { cell: 'Status' }];
 const rows = [

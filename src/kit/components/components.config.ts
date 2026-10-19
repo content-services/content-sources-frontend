@@ -1,4 +1,4 @@
-import type { CSSProperties, HTMLAttributes } from 'react';
+import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 import {
   ClipboardCopyVariant,
   type AlertProps,
@@ -14,10 +14,10 @@ import {
   type ProgressStepperProps,
   type SkeletonProps,
   type TitleProps,
+  type ToolbarProps,
   type TooltipProps,
 } from '@patternfly/react-core';
 import type { DataViewTableBasicProps } from '@patternfly/react-data-view/dist/dynamic/DataViewTableBasic';
-import type { DataViewToolbarProps } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
 
 import { lightwellConfig, type LwStepIconColorKey } from '../lightwell.config';
 
@@ -194,12 +194,34 @@ export type LwDataViewConfig = Partial<LwDataViewPassthroughProps> & {
   isCompact?: boolean;
 };
 
-// ─── Assembly: LwDataViewToolbar (DataViewToolbar) ───────────────────────────
+// ─── Assembly: LwToolbar (PF Toolbar) ────────────────────────────────────────
 
-/** PF `DataViewToolbar` props forwarded by `LwDataViewToolbar` (its own `pagination` prop is superseded by the kit's `pagination` slot). */
-export type LwDataViewToolbarPassthroughProps = Omit<DataViewToolbarProps, 'pagination'>;
+/** PF `Toolbar` props forwarded by `LwToolbar` (excluding children / ref — kit owns those). */
+export type LwToolbarPassthroughProps = Omit<ToolbarProps, 'children' | 'ref'>;
 
-/** Defaults for `LwDataViewToolbar` — `DataViewToolbar` host; call-site wins via merge. */
+/** Defaults for `LwToolbar` — Toolbar host; call-site wins via merge. */
+export type LwToolbarConfig = Partial<LwToolbarPassthroughProps>;
+
+// ─── Assembly: LwDataViewToolbar (LwToolbar + filters/actions/pagination) ────
+
+/**
+ * Own slots `LwDataViewToolbar` adds on top of `LwToolbar` — ported from
+ * `@patternfly/react-data-view`'s `DataViewToolbarProps` so this unit no
+ * longer depends on that package's type. `pagination` is intentionally
+ * omitted here; it is superseded by the kit's own `pagination` slot.
+ */
+export type LwDataViewToolbarSlotProps = {
+  bulkSelect?: ReactNode;
+  toggleGroup?: ReactNode;
+  customLabelGroupContent?: ReactNode;
+  clearAllFilters?: () => void;
+};
+
+/** PF `Toolbar` props forwarded by `LwDataViewToolbar` (via `LwToolbar`), plus its own slots. */
+export type LwDataViewToolbarPassthroughProps = LwDataViewToolbarSlotProps &
+  Omit<ToolbarProps, 'children' | 'ref'>;
+
+/** Defaults for `LwDataViewToolbar` — `LwToolbar` host; call-site wins via merge. */
 export type LwDataViewToolbarConfig = Partial<LwDataViewToolbarPassthroughProps>;
 
 // ─── Assembly: LwLoaded (loading / loaded surface) ───────────────────────────
@@ -238,6 +260,7 @@ export interface LwComponentsConfig {
   metricsCard: LwMetricsCardConfig;
   loaded: LwLoadedConfig;
   dataView: LwDataViewConfig;
+  toolbar: LwToolbarConfig;
   dataViewToolbar: LwDataViewToolbarConfig;
 }
 
@@ -320,6 +343,9 @@ export const componentsConfig: LwComponentsConfig = {
     // Primary pages default to non-compact density; compact is an explicit
     // opt-in reserved for drawers/modals (flagged 2026-10-08).
     isCompact: false,
+  },
+  toolbar: {
+    // No Lightwell-specific Toolbar defaults yet.
   },
   dataViewToolbar: {
     // No Lightwell-specific DataViewToolbar defaults yet.
@@ -407,6 +433,10 @@ export function getLwLoadedDefaults(): LwLoadedConfig {
 
 export function getLwDataViewDefaults(): LwDataViewConfig {
   return { ...componentsConfig.dataView };
+}
+
+export function getLwToolbarDefaults(): LwToolbarConfig {
+  return { ...componentsConfig.toolbar };
 }
 
 export function getLwDataViewToolbarDefaults(): LwDataViewToolbarConfig {

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import { LwDataViewToolbar } from './toolbar';
+import { LwDataViewToolbar } from './data-view-toolbar';
 
 it('renders filters, actions, and pagination in canonical order', () => {
   render(

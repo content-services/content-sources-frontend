@@ -36,12 +36,20 @@ migrate/dissolve convention in
 
 | Unit | Export | Job | Unit docs |
 | ---- | ------ | --- | --------- |
-| Toolbar | `LwDataViewToolbar` | Filters + pagination composition over `DataViewToolbar` | [`toolbar/README.md`](./toolbar/README.md) · [`toolbar/ROADMAP.md`](./toolbar/ROADMAP.md) |
-| Table | `LwDataView` | `DataView` root + `DataViewTable` + active-state wiring | [`table/README.md`](./table/README.md) · [`table/ROADMAP.md`](./table/ROADMAP.md) |
+| Toolbar | `LwDataViewToolbar` | Filters + pagination composition over [`LwToolbar`](../toolbar/README.md) (generic kit `Toolbar` shell) | [`data-view-toolbar/README.md`](./data-view-toolbar/README.md) · [`data-view-toolbar/ROADMAP.md`](./data-view-toolbar/ROADMAP.md) |
+| Table | `LwDataView` | `DataView` root + `DataViewTable` + active-state wiring | This file (see "Table unit" below) — `data-view.tsx` sits flat at the family root, same as `page/page-chrome-slots.tsx`, so it carries no separate unit-doc pair |
 
 Add a unit row here when a unit folder + roadmap + README are created. Do **not**
 put filter-component specifics, sort/selection APIs, or sticky-column mechanics
 in this file.
+
+**2026-10-19 rehome:** `table/table.tsx` → `data-view.tsx` (flattened to the
+family root); `toolbar/` → `data-view-toolbar/` (renamed, now built on the new
+generic `assemblies/toolbar/` (`LwToolbar`) instead of
+`@patternfly/react-data-view`'s `DataViewToolbar` directly). Both units'
+previous content (`table/README.md`, `table/ROADMAP.md`) is folded into this
+file below instead of carrying forward a separate doc pair for the now-flat
+`data-view.tsx`.
 
 ---
 
@@ -80,10 +88,72 @@ an `UNUSED` marker rather than deleting it inline during a replace.
 
 ## Explicitly out of family roadmap
 
-- Sticky-column mechanics, `ColumnManagementModal` integration — **table** unit roadmap (Beacon is the first consumer that needs these; neither existing DataView call site does)
-- Filter component choice/props (`DataViewTextFilter`, `DataViewCheckboxFilter`, etc.), sort/selection hooks — **toolbar** unit roadmap
+- Sticky-column mechanics, `ColumnManagementModal` integration — **table** unit (below) (Beacon is the first consumer that needs these; neither existing DataView call site does)
+- Filter component choice/props (`DataViewTextFilter`, `DataViewCheckboxFilter`, etc.), sort/selection hooks — **data-view-toolbar** unit roadmap
 - Beacon/Lens page composition, where each page mounts the units — product
 - Chart sizing, alert banner width, Lens/Beacon visual misalignment items — unrelated families; tracked separately
+
+---
+
+## Table unit (`LwDataView`) — reference
+
+`data-view.tsx` is a flat family-root file (the "exception to the rule" —
+same shape as `assemblies/page/page-chrome-slots.tsx`), so it carries no
+separate unit `README.md`/`ROADMAP.md` pair. Its unit-level reference lives
+here instead.
+
+**Why it exists:** thin `DataView` + `DataViewTable` wrapper so product pages
+get PatternFly's DataView pattern with Lightwell-specific defaults baked in,
+instead of each page configuring `@patternfly/react-data-view` from scratch:
+non-compact density by default (compact is reserved for drawers/modals, not
+primary page views), native sticky-column/header support exposed directly, and
+named slots for the outer `DataView` host's `selection`/`className`/`style`/
+`ouiaId` (distinct from the inner table's own `className`/`style`/`ouiaId`).
+
+**Host:** `@patternfly/react-data-view`'s `DataView` + `DataViewTable`.
+Generalizes the pattern already used by
+`src/Pages/Repositories/ContentListTable/ContentListTable.tsx`,
+`src/components/Tables/Packages/PackagesTableWithToolbars.tsx`, and
+`src/Pages/Lightwell/Lens/components/PackageCoverageTable.tsx`. Prop defaults
+flow through `components.config.ts`'s `dataView` entry via `mergeComponentProps`.
+
+**API:**
+
+```tsx
+import { LwDataView, LwDataViewToolbar } from 'kit/components/assemblies';
+
+<LwDataView aria-label='Vulnerabilities' columns={columns} rows={rows} activeState={activeState}>
+  <LwDataViewToolbar filters={<SearchInput />} pagination={<Pagination {...paginationProps} />} />
+</LwDataView>
+```
+
+| Prop | Role |
+| ---- | ---- |
+| `columns` / `rows` | `DataViewTh[]` / `DataViewTr[]` — same shape as raw `DataViewTable`; use each row/cell's `props` for sticky columns, width, etc. |
+| `activeState?` / `bodyStates?` / `headStates?` | Same contract as `DataView` + `DataViewTableBasic` |
+| `isCompact?` | Opt into PF compact density (default: non-compact, from `components.config.ts`) |
+| `isSticky?` | Sticky header + sticky columns; per-column stickiness via each column/row's own `props.isStickyColumn` (native PF `Th`/`Td` passthrough) |
+| `children?` / `footer?` | Chrome above / below the table, inside `DataView` (e.g. a toolbar unit; a bottom pagination toolbar) |
+| `selection?` | `DataViewSelection` applied to the outer `DataView` — enables row checkboxes |
+| `wrapperClassName?` / `wrapperStyle?` / `containerOuiaId?` | Applied to the outer `DataView` host — separate from `className`/`style`/`ouiaId` in `...rest`, which target the inner `DataViewTable` |
+
+**Defaults baked in:**
+1. Non-compact by default, routed through the config cascade (`components.config.ts`'s `dataView.isCompact`, `false`) — flagged 2026-10-08: compact table variants belong in drawers/modals, not primary page views.
+2. PF toolbar/pagination alignment workaround — owned by `data-view-toolbar` (see its `ROADMAP.md`), not this unit; noted here since both units' DOM composes together inside `LwDataView`'s `children` slot.
+
+**Beacon / Repositories / Packages requirements — solved:**
+
+| Requirement | How it's solved |
+| ----------- | ---------------- |
+| Sticky columns | Native PF passthrough — each column/row's `props` field accepts `isStickyColumn` / `stickyMinWidth` / `stickyLeftOffset` / `hasRightBorder`. `isSticky` on `LwDataView` enables the sticky header + scroll containers. |
+| Column management | No kit API needed — `ColumnManagementModal` composes as a plain `actions` node in the toolbar unit. |
+| Selection / bulk-select | `selection?: DataViewSelection` applied to the outer `<DataView selection={...}>`. |
+| Page-layout className/style / outer OUIA id | `wrapperClassName?` / `wrapperStyle?` / `containerOuiaId?`, kept separate from the inner table's own `className`/`style`/`ouiaId`. |
+| Bottom toolbar (after the table, still inside `DataView`) | `footer?: ReactNode`, rendered after `<DataViewTable>` inside `<DataView>`. |
+
+**Out of scope:** filters, pagination controls (`./data-view-toolbar/`), sort
+hooks (call sites use `useDataViewSort` directly against `columns[].props.sort`),
+domain row/column shapes.
 
 ---
 
