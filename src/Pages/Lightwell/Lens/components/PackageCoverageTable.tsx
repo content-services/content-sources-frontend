@@ -239,69 +239,67 @@ const PackageCoverageTable = ({
   );
 
   return (
-    <>
-      <LwDataView
-        activeState={activeState}
-        aria-label='Package coverage table'
-        ouiaId={ouiaId}
-        isCompact
-        columns={dataViewColumns}
-        rows={dataViewRows}
-        bodyStates={{
-          empty: (
-            <EmptyTableDataView
-              ouiaId={ouiaId}
-              variant={isFiltered ? 'filtered' : 'zero'}
-              itemName='packages'
-              zeroBody='No packages were found in this manifest.'
-              colSpan={columns.length}
-              onClearFilters={clearAllFiltersAndResetPage}
+    <LwDataView
+      activeState={activeState}
+      aria-label='Package coverage table'
+      ouiaId={ouiaId}
+      isCompact
+      columns={dataViewColumns}
+      rows={dataViewRows}
+      bodyStates={{
+        empty: (
+          <EmptyTableDataView
+            ouiaId={ouiaId}
+            variant={isFiltered ? 'filtered' : 'zero'}
+            itemName='packages'
+            zeroBody='No packages were found in this manifest.'
+            colSpan={columns.length}
+            onClearFilters={clearAllFiltersAndResetPage}
+          />
+        ),
+        loading: <SkeletonTableBody rowsCount={perPage} columnsCount={columns.length} />,
+        error: (
+          <ErrorState
+            titleText='Unable to load packages'
+            bodyText='There was an error retrieving data. Check your connection and reload the page.'
+            // Pass fragment to avoid rendering the default footer with a CTA button
+            customFooter={<></>}
+          />
+        ),
+      }}
+      footer={<LwDataViewToolbar pagination={bottomPagination} />}
+    >
+      <LwDataViewToolbar
+        ouiaId='lightwell-package-coverage-toolbar'
+        clearAllFilters={clearAllFiltersAndResetPage}
+        pagination={topPagination}
+        filters={
+          <DataViewFilters onChange={handleFilterChange} values={filters}>
+            <DataViewTextFilter
+              key={`search-${filtersActiveAttributeResetKey}`}
+              filterId='search'
+              ouiaId='lightwell-package-coverage-filter-search'
+              title='Package'
+              placeholder='Search packages...'
             />
-          ),
-          loading: <SkeletonTableBody rowsCount={perPage} columnsCount={columns.length} />,
-          error: (
-            <ErrorState
-              titleText='Unable to load packages'
-              bodyText='There was an error retrieving data. Check your connection and reload the page.'
-              // Pass fragment to avoid rendering the default footer with a CTA button
-              customFooter={<></>}
+            <DataViewCheckboxFilter
+              filterId='match_status'
+              ouiaId='lightwell-package-coverage-filter-match'
+              title='Match'
+              placeholder='Filter by match'
+              options={matchFilterOptions}
             />
-          ),
-        }}
-      >
-        <LwDataViewToolbar
-          ouiaId='lightwell-package-coverage-toolbar'
-          clearAllFilters={clearAllFiltersAndResetPage}
-          pagination={topPagination}
-          filters={
-            <DataViewFilters onChange={handleFilterChange} values={filters}>
-              <DataViewTextFilter
-                key={`search-${filtersActiveAttributeResetKey}`}
-                filterId='search'
-                ouiaId='lightwell-package-coverage-filter-search'
-                title='Package'
-                placeholder='Search packages...'
-              />
-              <DataViewCheckboxFilter
-                filterId='match_status'
-                ouiaId='lightwell-package-coverage-filter-match'
-                title='Match'
-                placeholder='Filter by match'
-                options={matchFilterOptions}
-              />
-              <DataViewCheckboxFilter
-                filterId='ecosystem'
-                ouiaId='lightwell-package-coverage-filter-ecosystem'
-                title='Ecosystem'
-                placeholder='Filter by ecosystem'
-                options={ecosystemFilterOptions}
-              />
-            </DataViewFilters>
-          }
-        />
-      </LwDataView>
-      {bottomPagination}
-    </>
+            <DataViewCheckboxFilter
+              filterId='ecosystem'
+              ouiaId='lightwell-package-coverage-filter-ecosystem'
+              title='Ecosystem'
+              placeholder='Filter by ecosystem'
+              options={ecosystemFilterOptions}
+            />
+          </DataViewFilters>
+        }
+      />
+    </LwDataView>
   );
 };
 

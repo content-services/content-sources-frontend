@@ -15,7 +15,7 @@ import { getLwDataViewDefaults, mergeComponentProps } from '../../components.con
 
 type LwDataViewOwnedProps = {
   /** DataView's loading/error/empty state. See `useTableActiveState`-style hooks at call sites. */
-  activeState?: DataViewState | string;
+  activeState?: DataViewState;
   /** Column definitions. Supports PF `Th` passthrough via `props` (sort, sticky, width, …). */
   columns: DataViewTh[];
   /** Row definitions. Supports PF `Td` passthrough via `props`, including
@@ -24,8 +24,8 @@ type LwDataViewOwnedProps = {
    * (see PatternFly's `DataViewTableStickyExample`). */
   rows: DataViewTr[];
   /** Table head/body states to render per `activeState` (e.g. empty-state body). */
-  bodyStates?: Partial<Record<DataViewState | string, ReactNode>>;
-  headStates?: Partial<Record<DataViewState | string, ReactNode>>;
+  bodyStates?: Partial<Record<DataViewState, ReactNode>>;
+  headStates?: Partial<Record<DataViewState, ReactNode>>;
   /**
    * Opt-in to PF's compact table density. Defaults to non-compact (see
    * `components.config.ts`'s `dataView.isCompact`) — compact is reserved for

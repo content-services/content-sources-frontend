@@ -7,8 +7,9 @@ placement, and implementation phases for the data-view toolbar.
 the table unit, or other data-view units. Those live in
 [`../ROADMAP.md`](../ROADMAP.md).
 
-**Prerequisite:** this roadmap + `README.md` (not yet written) agreed before any
-`*.tsx` / unit CSS for the toolbar.
+**Status:** implemented — `LwDataViewToolbar` (`data-view-toolbar.tsx`) and
+[`README.md`](./README.md) are both live. Open questions below are follow-ups,
+not implementation blockers.
 
 ---
 
@@ -48,15 +49,14 @@ workaround from the two existing call sites in the same pass.
 
 ---
 
-## Open questions (resolve at implement)
+## Open questions (follow-up, not blocking)
 
-1. Export name — `LwDataViewToolbar` vs. folding filter composition directly
-   into the `table` unit's root. Family `ROADMAP.md` currently lists
-   `LwDataViewToolbar` as TBD.
-2. Canonical filter/search-input order (family `ROADMAP.md` calls for "one
-   documented default order") — needs the actual order decided here before
-   Beacon/Lens/Repositories migrate, since their current orders differ.
-3. Which filter primitives (`DataViewTextFilter` / `DataViewCheckboxFilter` /
+~~Export name~~ — resolved: `LwDataViewToolbar`.
+
+1. Canonical filter/search-input order (family `ROADMAP.md` calls for "one
+   documented default order") — still undecided across Beacon/Lens/Repositories/
+   Packages, which each use a different order today. See family `ROADMAP.md`.
+2. Which filter primitives (`DataViewTextFilter` / `DataViewCheckboxFilter` /
    `DataViewTreeFilter`) the unit exposes directly vs. which stay call-site
    composition.
 

@@ -11,9 +11,17 @@ it('renders filters, actions, and pagination in canonical order', () => {
     />,
   );
 
-  expect(screen.getByText('Filters')).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: 'Manage columns' })).toBeInTheDocument();
-  expect(screen.getByTestId('pagination')).toBeInTheDocument();
+  const filters = screen.getByText('Filters');
+  const actions = screen.getByRole('button', { name: 'Manage columns' });
+  const pagination = screen.getByTestId('pagination');
+
+  expect(filters).toBeInTheDocument();
+  expect(actions).toBeInTheDocument();
+  expect(pagination).toBeInTheDocument();
+
+  // Assert actual DOM order, not just presence — filters, then actions, then pagination.
+  expect(filters.compareDocumentPosition(actions)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  expect(actions.compareDocumentPosition(pagination)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
 });
 
 it('wraps pagination in an end-aligned ToolbarItem instead of the pagination prop', () => {
