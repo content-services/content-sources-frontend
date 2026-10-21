@@ -170,6 +170,7 @@ const ContentListTable = () => {
     osFilterOptions,
     archFilterOptions,
     statusFilterOptions,
+    productFilterOptions,
     isFiltered,
   } = useContentListFilters();
 
@@ -659,6 +660,14 @@ const ContentListTable = () => {
                   title={FilterLabelsMap.Statuses}
                   placeholder='Filter by status'
                   options={statusFilterOptions}
+                />
+                <DataViewCheckboxFilter
+                  filterId='feature_products'
+                  ouiaId='filter-products'
+                  aria-label='filter products'
+                  title={FilterLabelsMap.Products}
+                  placeholder='Filter by product'
+                  options={productFilterOptions}
                 />
               </DataViewFilters>
               <ContentOriginFilter

@@ -153,6 +153,7 @@ export interface RepositoryParamsResponse {
   distribution_arches: Array<NameLabel>;
   extended_release_streams: Array<ExtendedReleaseStream>;
   distribution_minor_versions: Array<DistributionMinorVersion>;
+  feature_products: Array<NameLabel>;
 }
 
 export interface GpgKeyResponse {
@@ -170,7 +171,7 @@ export type FilterData = Partial<{
   urls: Array<string>;
   availableForArch: string;
   availableForVersion: string;
-  feature_name: string;
+  feature_products: Array<string>;
   name: string;
   partner: boolean;
 }>;
@@ -463,6 +464,7 @@ export const getContentList: (
   const statusParam = filterData.statuses?.join(',');
   const urlParam = filterData.urls?.join(',');
   const uuidsParam = filterData.uuids?.join(',');
+  const featureNameParam = filterData.feature_products?.join(',');
   // The repositories endpoint accepts 'none' as a filter value to exclude extended release repos
   // We convert '' to 'none' because objectToUrlParams strips empty strings, which would result in no filter being applied
   const extendedReleaseParam =
@@ -483,7 +485,7 @@ export const getContentList: (
       available_for_version: filterData.availableForVersion,
       extended_release: extendedReleaseParam,
       extended_release_version: filterData.extended_release_version,
-      feature_name: filterData.feature_name,
+      feature_name: featureNameParam,
       name: filterData.name,
       partner: filterData.partner,
     })}`,
@@ -554,6 +556,7 @@ export const getRepositoryParams: () => Promise<RepositoryParamsResponse> = asyn
     // Backend returns [] when no subscriptions match, but guard against null just in case
     extended_release_streams: data.extended_release_streams ?? [],
     distribution_minor_versions: data.distribution_minor_versions ?? [],
+    feature_products: data.feature_products ?? [],
   };
 };
 

@@ -97,6 +97,16 @@ export const testRepositoryParamsResponse: RepositoryParamsResponse = {
   ],
   extended_release_streams: [],
   distribution_minor_versions: [],
+  feature_products: [
+    {
+      name: 'RHEL-OS-x86_64',
+      label: 'Red Hat Enterprise Linux for x86_64',
+    },
+    {
+      name: 'RHEL-OS-aarch64',
+      label: 'Red Hat Enterprise Linux for ARM 64',
+    },
+  ],
 };
 
 export const testEUSRepositoryParamsResponse: RepositoryParamsResponse = {

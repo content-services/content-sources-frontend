@@ -20,15 +20,19 @@ export const FilterLabelsMap = {
   Versions: 'Operating system',
   Arches: 'Architecture',
   Statuses: 'Status',
+  Products: 'Product',
 } as const;
 
-type RepositoryFilters = Required<Pick<FilterData, 'search' | 'arches' | 'versions' | 'statuses'>>;
+type RepositoryFilters = Required<
+  Pick<FilterData, 'search' | 'arches' | 'versions' | 'statuses' | 'feature_products'>
+>;
 
 export const initialFilters: RepositoryFilters = {
   search: '',
   arches: [],
   versions: [], // API-friendly versions e.g., ["9", "9.4", "10"]
   statuses: [],
+  feature_products: [],
 };
 
 const statusFilterOptions: DataViewFilterOption[] = Object.keys(StatusDisplayMap).map(
@@ -48,6 +52,7 @@ export const useContentListFilters = () => {
       distribution_arches = [],
       distribution_versions = [],
       distribution_minor_versions = [],
+      feature_products = [],
     } = {},
   } = useRepositoryParams();
 
@@ -101,11 +106,27 @@ export const useContentListFilters = () => {
     [distribution_arches],
   );
 
+  const productFilterOptions: DataViewFilterOption[] = useMemo(
+    () =>
+      feature_products
+        .map((product: NameLabel) => ({
+          label: product.label,
+          value: product.name,
+        }))
+        .sort((a, b) => a.label.length - b.label.length),
+    [feature_products],
+  );
+
   // Versions are excluded from debouncing because DataViewTreeFilter clears all checkboxes when
   // it receives an empty selection. Debouncing causes a brief [] state that triggers this clear
   // before the real selection arrives
   const debouncedFilters = useDebounce<Omit<RepositoryFilters, 'versions'>>(
-    { search: filters.search, arches: filters.arches, statuses: filters.statuses },
+    {
+      search: filters.search,
+      arches: filters.arches,
+      statuses: filters.statuses,
+      feature_products: filters.feature_products,
+    },
     200,
   );
 
@@ -113,6 +134,7 @@ export const useContentListFilters = () => {
     debouncedFilters.search !== '' ||
     debouncedFilters.arches.length > 0 ||
     debouncedFilters.statuses.length > 0 ||
+    debouncedFilters.feature_products.length > 0 ||
     filters.versions.length > 0;
 
   return {
@@ -123,5 +145,6 @@ export const useContentListFilters = () => {
     archFilterOptions,
     statusFilterOptions,
     osFilterOptions,
+    productFilterOptions,
   };
 };
