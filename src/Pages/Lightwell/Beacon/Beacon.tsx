@@ -43,7 +43,14 @@ import {
   PageChromeSlots,
   PageTitleStack,
 } from 'kit/components/assemblies';
-import { LwButton, LwEmptyState, LwMenu, LwPopover, LwSkeleton } from 'kit/components/primitives';
+import {
+  LwButton,
+  LwEmptyState,
+  LwList,
+  LwMenu,
+  LwPopover,
+  LwSkeleton,
+} from 'kit/components/primitives';
 
 import type { LwStepIconColorKey } from 'kit/lightwell.config';
 import {
@@ -55,6 +62,7 @@ import {
   statusLabel,
   UNREMEDIATED_STATUS,
 } from './constants';
+import { SLA_POLICY_HEADER, SLA_POLICY_ITEMS } from './slaPolicyItems';
 import type { Severity, Status } from './types';
 import { ExportMenu } from './components/ExportMenu';
 import { VulnerabilityTable } from './components/VulnerabilityTable';
@@ -294,6 +302,7 @@ const Beacon = () => {
   });
 
   const showCustomerEmpty = !selectedCustomerId && !isLoadingCustomers;
+  const slaPolicyBody = <LwList items={SLA_POLICY_ITEMS} />;
 
   return (
     <>
@@ -357,30 +366,8 @@ const Beacon = () => {
                 hasHeader={`Status Summary${activeFilterCount > 0 ? ' (filtered)' : ''}`}
                 hasAction={
                   <LwPopover
-                    hasHeader='SLA Policy'
-                    hasBody={
-                      <Content>
-                        <p>
-                          <strong>Submit</strong> vulnerabilities to the clearinghouse at any time.
-                        </p>
-                        <p>
-                          <strong>Triage within 48 hours.</strong>
-                        </p>
-                        <p>
-                          <strong>Priority is yours.</strong> Your severity sets the default order.
-                          Adjust at any time.
-                        </p>
-                        <p>
-                          A fix is complete when a patched artifact is published in the repository
-                          (or when it gets to the Lightwell Network).
-                        </p>
-                        <br />
-                        <p>
-                          SLA applies to up to 25 findings per member per week. All other findings
-                          are worked continuously on a best-effort basis.
-                        </p>
-                      </Content>
-                    }
+                    hasHeader={SLA_POLICY_HEADER}
+                    hasBody={slaPolicyBody}
                     hasTrigger={
                       <LwButton isCircle variant='plain' aria-label='SLA help'>
                         <HelpIcon />
