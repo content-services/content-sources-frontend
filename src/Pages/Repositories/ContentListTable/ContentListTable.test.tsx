@@ -359,3 +359,36 @@ it('filters the table by major and minor OS versions', async () => {
   expect(await screen.findByText(defaultEUSRepository.name!)).toBeInTheDocument();
   expect(await screen.findByText(defaultRedHatRepository.name!)).toBeInTheDocument();
 });
+
+it('filters the table by product', async () => {
+  (useContentListQuery as jest.Mock).mockImplementation((_page, _limit, filterData) => {
+    const onlyArm64 = filterData?.feature_products?.length === 1 &&
+      filterData.feature_products[0] === 'RHEL-OS-aarch64';
+    const data = onlyArm64
+      ? [defaultRedHatRepository]
+      : [defaultRedHatRepository, defaultEPELRepository];
+    return { isLoading: false, data: { data, meta: { count: data.length, limit: 20, offset: 0 } } };
+  });
+
+  renderContentListTable();
+
+  // Initially, there should be two rows (one for each repository)
+  let rows = document.querySelectorAll('tbody tr');
+  expect(rows.length).toBe(2);
+
+  const user = userEvent.setup();
+
+  const toolbar = screen.getByTestId('content-list-toolbar');
+  await user.click(within(toolbar).getByRole('button', { name: 'Name' }));
+  await user.click(within(screen.getByRole('menu')).getByRole('menuitem', { name: 'Product' }));
+  await user.click(within(screen.getByTestId('filter-products')).getByRole('button'));
+  await user.click(screen.getByLabelText('Red Hat Enterprise Linux for ARM 64'));
+
+  // After filtering by product, there should be one row (for the filtered repository)
+  await waitFor(() => {
+    rows = document.querySelectorAll('tbody tr');
+    expect(rows.length).toBe(1);
+  });
+  expect(await screen.findByText(defaultRedHatRepository.name!)).toBeInTheDocument();
+  expect(screen.queryByText(defaultEPELRepository.name!)).not.toBeInTheDocument();
+});
