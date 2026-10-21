@@ -269,6 +269,47 @@ it('clears the ticket filter when the customer changes and keeps other filters',
   ).toBe(true);
 });
 
+it('always renders the title and description before a customer is selected', async () => {
+  renderBeacon();
+
+  await waitFor(() => {
+    expect(
+      screen.getByText(
+        'Select a customer ID first to view the status of their Lightwell submissions.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  expect(screen.getByRole('heading', { name: 'Beacon' })).toBeInTheDocument();
+  expect(
+    screen.getByText(/Understand the status of your Lightwell submissions/),
+  ).toBeInTheDocument();
+});
+
+it('always renders the title and description while metrics are loading', async () => {
+  (useCustomerIdsQuery as jest.Mock).mockReturnValue({
+    isLoading: false,
+    data: ['CID-01'],
+  });
+  (useBeaconData as jest.Mock).mockReturnValue({
+    isLoading: true,
+    isError: false,
+    error: null,
+    data: undefined,
+  });
+
+  renderBeacon();
+
+  await waitFor(() => {
+    expect(screen.getByText('Status Summary')).toBeInTheDocument();
+  });
+
+  expect(screen.getByRole('heading', { name: 'Beacon' })).toBeInTheDocument();
+  expect(
+    screen.getByText(/Understand the status of your Lightwell submissions/),
+  ).toBeInTheDocument();
+});
+
 it('keeps the status summary card header while metrics are loading', async () => {
   (useCustomerIdsQuery as jest.Mock).mockReturnValue({
     isLoading: false,
