@@ -42,7 +42,7 @@ describe('BeaconPdfTemplate', () => {
     expect(pipeline.querySelectorAll('.beacon-pdf-status-card')).toHaveLength(5);
     expect(pipeline.querySelectorAll('.beacon-pdf-pipeline-arrow')).toHaveLength(4);
     expect(pipeline).toHaveTextContent('Submitted');
-    expect(pipeline).toHaveTextContent('Lightwell Network');
+    expect(pipeline).toHaveTextContent('Available in Lightwell Network');
     expect(pipeline).not.toHaveTextContent('No remediation');
     const vulnTable = screen.getByLabelText('Lightwell vulnerabilities');
     expect(vulnTable).not.toHaveClass('pf-m-grid-md', 'pf-m-grid-lg');

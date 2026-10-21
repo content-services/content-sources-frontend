@@ -181,7 +181,7 @@ const BeaconPdfTemplate = ({ asyncData, additionalData }: BeaconPdfTemplateProps
             {STATUSES.map((status, idx) => (
               <div key={status} className='beacon-pdf-pipeline-item' role='listitem'>
                 <div className='beacon-pdf-status-card'>
-                  <div className='beacon-pdf-status-label'>{status}</div>
+                  <div className='beacon-pdf-status-label'>{statusLabel(status)}</div>
                   <div className='beacon-pdf-status-count'>{statusCounts[status] ?? 0}</div>
                 </div>
                 {idx < STATUSES.length - 1 ? (
