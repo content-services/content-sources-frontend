@@ -16,6 +16,9 @@ export type { LwEmptyStateProps } from './empty-state/empty-state';
 export { LwIcon } from './icon/icon';
 export type { LwIconProps } from './icon/icon';
 
+export { LwList } from './list/list';
+export type { LwListProps, LwListItem } from './list/list';
+
 export { LwMenu } from './menu/menu';
 export type { LwMenuProps, LwMenuItem, LwMenuToggleProps } from './menu/menu';
 
