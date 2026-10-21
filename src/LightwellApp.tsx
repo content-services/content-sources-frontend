@@ -21,6 +21,7 @@ import LightwellNotFound from 'Pages/Lightwell/components/LightwellNotFound';
 import { LightwellDemoLayout } from 'Pages/Lightwell/LightwellDemoContext';
 import LightwellLayout from 'Pages/Lightwell/LightwellLayout';
 import { lightwellConfig } from 'kit/lightwell.config';
+import { isFeatureOn } from 'services/Features/FeatureApi';
 import { useAppContext } from './middleware/AppContext';
 import CoverageReport from 'Pages/Lightwell/Lens/CoverageReport';
 import ManifestUpload from 'Pages/Lightwell/Lens/ManifestUpload';
@@ -137,7 +138,9 @@ export default function LightwellApp() {
           {/* Live routes share LightwellLayout which renders the subnav inside pf-v6-c-page__main */}
           <Route element={<LightwellLayout />}>
             <Route index element={<RepositoriesTable />} />
-            {features?.lightwellbeacon?.enabled && features?.lightwellbeacon?.accessible ? (
+            {isFeatureOn(features?.lightwellbeacon) ||
+            isFeatureOn(features?.lightwellclearinghouse) ||
+            isFeatureOn(features?.lightwellclearinghouseread) ? (
               <Route path='beacon' element={<Beacon />} />
             ) : null}
             {features?.lightwelllens?.enabled && features?.lightwelllens?.accessible ? (

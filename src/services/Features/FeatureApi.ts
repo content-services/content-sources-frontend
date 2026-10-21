@@ -15,9 +15,15 @@ export interface Features {
   lightwellbeaconandlens?: Feature;
   lightwellbeacon?: Feature;
   lightwelllens?: Feature;
+  lightwellclearinghouse?: Feature;
+  lightwellclearinghouseread?: Feature;
   /** PLACEHOLDER: Hardcoded to false until backend feature flag is implemented */
   partnerrepos?: Feature;
 }
+
+/** A feature is usable only when the backend reports it both enabled and accessible. */
+export const isFeatureOn = (feature?: Feature): boolean =>
+  !!feature?.enabled && !!feature?.accessible;
 
 export const getFeatures: () => Promise<Features> = async () => {
   const { data } = await axios.get('/api/content-sources/v1/features/');
