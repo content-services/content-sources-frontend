@@ -13,11 +13,11 @@ reimplementing the workaround independently.
 
 ## What it can do
 
-| Capability | Notes |
-| ---------- | ----- |
-| Filters / actions | Pass through to `DataViewToolbar`'s own `filters` / `actions` props |
-| Pagination | Rendered via an end-aligned `ToolbarItem`, not `DataViewToolbar`'s `pagination` prop — fixes a PF alignment bug (see [`ROADMAP.md`](./ROADMAP.md)) |
-| Everything else | Any other `DataViewToolbar` prop (`bulkSelect`, `toggleGroup`, `clearAllFilters`, …) passes straight through |
+| Capability        | Notes                                                                                                                                              |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Filters / actions | Pass through to `DataViewToolbar`'s own `filters` / `actions` props                                                                                |
+| Pagination        | Rendered via an end-aligned `ToolbarItem`, not `DataViewToolbar`'s `pagination` prop — fixes a PF alignment bug (see [`ROADMAP.md`](./ROADMAP.md)) |
+| Everything else   | Any other `DataViewToolbar` prop (`bulkSelect`, `toggleGroup`, `clearAllFilters`, …) passes straight through                                       |
 
 ## How it works
 
@@ -38,13 +38,13 @@ import { LwDataViewToolbar } from 'kit/components/assemblies';
 />
 ```
 
-| Prop | Role |
-| ---- | ---- |
-| `filters?` | Filter controls, rendered first |
-| `actions?` | Non-filter actions, rendered between filters and pagination |
-| `pagination?` | Pagination control, rendered end-aligned via the PF workaround |
+| Prop                   | Role                                                                                                                                               |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filters?`             | Filter controls, rendered first                                                                                                                    |
+| `actions?`             | Non-filter actions, rendered between filters and pagination                                                                                        |
+| `pagination?`          | Pagination control, rendered end-aligned via the PF workaround                                                                                     |
 | `paginationItemProps?` | Extra props for the pagination `ToolbarItem` (e.g. `visibility` to hide top pagination on small screens); `variant`/`align` are owned by this unit |
-| ...rest | Forwarded to `DataViewToolbar` (minus its own `pagination` prop) |
+| ...rest                | Forwarded to `DataViewToolbar` (minus its own `pagination` prop)                                                                                   |
 
 ## Out of scope
 

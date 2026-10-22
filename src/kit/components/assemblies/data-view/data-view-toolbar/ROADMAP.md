@@ -24,6 +24,7 @@ sites pass filter config and pagination state.
 family) — logic/composition harness, not a from-scratch toolbar.
 
 **Generalizes from (read before implementing, don't reinvent):**
+
 - `src/Pages/Repositories/ContentListTable/ContentListTable.tsx` — most complete
   reference: `DataViewToolbar` + `DataViewFilters` (`DataViewTextFilter`,
   `DataViewTreeFilter`, `DataViewCheckboxFilter`) + bulk actions + top/bottom
