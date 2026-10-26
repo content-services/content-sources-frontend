@@ -106,7 +106,7 @@ export const useContentListFilters = () => {
     [distribution_arches],
   );
 
-  const productFilterOptions: DataViewFilterOption[] = useMemo(
+  const productFilterOptions = useMemo(
     () =>
       feature_products
         .map((product: NameLabel) => ({
@@ -146,5 +146,7 @@ export const useContentListFilters = () => {
     statusFilterOptions,
     osFilterOptions,
     productFilterOptions,
+    // The controlled Product filter updates immediately; requests keep using debounced filters.
+    selectedProducts: filters.feature_products,
   };
 };

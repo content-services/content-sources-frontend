@@ -61,6 +61,7 @@ import DeleteKebab from '../../../components/DeleteKebab/DeleteKebab';
 import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
 import { useContentListFilters, FilterLabelsMap } from './hooks/useContentListFilters';
 import ContentOriginFilter from './components/ContentOriginFilter';
+import DataViewTypeaheadCheckboxFilter from 'components/DataViewTypeaheadCheckboxFilter/DataViewTypeaheadCheckboxFilter';
 import EmptyTableDataView from 'components/EmptyTableDataView/EmptyTableDataView';
 import {
   hasOrigin,
@@ -171,6 +172,7 @@ const ContentListTable = () => {
     archFilterOptions,
     statusFilterOptions,
     productFilterOptions,
+    selectedProducts,
     isFiltered,
   } = useContentListFilters();
 
@@ -613,7 +615,7 @@ const ContentListTable = () => {
                   onSetFilters(newValues);
                   setPage(1);
                 }}
-                values={filters}
+                values={{ ...filters, feature_products: selectedProducts }}
               >
                 <DataViewTextFilter
                   key={`search-${filtersActiveAttributeResetKey}`}
@@ -661,13 +663,15 @@ const ContentListTable = () => {
                   placeholder='Filter by status'
                   options={statusFilterOptions}
                 />
-                <DataViewCheckboxFilter
+                <DataViewTypeaheadCheckboxFilter
                   filterId='feature_products'
                   ouiaId='filter-products'
                   aria-label='filter products'
                   title={FilterLabelsMap.Products}
-                  placeholder='Filter by product'
+                  placeholder='Filter by Red Hat product'
                   options={productFilterOptions}
+                  isDisabled={isLoading}
+                  noResultsMessage='No products found'
                 />
               </DataViewFilters>
               <ContentOriginFilter
