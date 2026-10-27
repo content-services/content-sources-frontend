@@ -229,7 +229,7 @@ export const DataViewTypeaheadCheckboxFilter: FC<DataViewTypeaheadCheckboxFilter
             isScrollable
             role='listbox'
           >
-            <MenuContent maxMenuHeight='400px'>
+            <MenuContent maxMenuHeight='300px'>
               <MenuList
                 id={listId}
                 isAriaMultiselectable
