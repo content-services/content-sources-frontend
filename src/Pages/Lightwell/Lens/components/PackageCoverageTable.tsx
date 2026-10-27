@@ -1,17 +1,28 @@
 import { useEffect } from 'react';
-import { Flex, FlexItem, Label, LabelColor, Pagination, Tooltip } from '@patternfly/react-core';
+import {
+  Flex,
+  FlexItem,
+  Label,
+  LabelColor,
+  Pagination,
+  ToolbarItem,
+  ToolbarItemVariant,
+  Tooltip,
+} from '@patternfly/react-core';
 import { SkeletonTableBody, ErrorState } from '@patternfly/react-component-groups';
-import type {
+import { DataView } from '@patternfly/react-data-view/dist/dynamic/DataView';
+import {
+  DataViewTable,
   DataViewTh,
   DataViewTrObject,
 } from '@patternfly/react-data-view/dist/dynamic/DataViewTable';
+import { DataViewToolbar } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
 import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
 import { DataViewTextFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewTextFilter';
 import { DataViewCheckboxFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewCheckboxFilter';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import EmptyTableDataView from 'components/EmptyTableDataView/EmptyTableDataView';
 import useTableActiveState from 'Hooks/tables/useTableActiveState';
-import { LwDataView, LwDataViewToolbar } from 'kit/components/assemblies';
 import { LIGHTWELL_LENS_USE_MOCK } from 'Pages/Lightwell/constants';
 import {
   getMockCoveragePackagesList,
@@ -239,40 +250,10 @@ const PackageCoverageTable = ({
   );
 
   return (
-    <LwDataView
-      activeState={activeState}
-      aria-label='Package coverage table'
-      ouiaId={ouiaId}
-      isCompact
-      columns={dataViewColumns}
-      rows={dataViewRows}
-      bodyStates={{
-        empty: (
-          <EmptyTableDataView
-            ouiaId={ouiaId}
-            variant={isFiltered ? 'filtered' : 'zero'}
-            itemName='packages'
-            zeroBody='No packages were found in this manifest.'
-            colSpan={columns.length}
-            onClearFilters={clearAllFiltersAndResetPage}
-          />
-        ),
-        loading: <SkeletonTableBody rowsCount={perPage} columnsCount={columns.length} />,
-        error: (
-          <ErrorState
-            titleText='Unable to load packages'
-            bodyText='There was an error retrieving data. Check your connection and reload the page.'
-            // Pass fragment to avoid rendering the default footer with a CTA button
-            customFooter={<></>}
-          />
-        ),
-      }}
-      footer={<LwDataViewToolbar pagination={bottomPagination} />}
-    >
-      <LwDataViewToolbar
+    <DataView data-ouia-component-id={ouiaId} activeState={activeState}>
+      <DataViewToolbar
         ouiaId='lightwell-package-coverage-toolbar'
         clearAllFilters={clearAllFiltersAndResetPage}
-        pagination={topPagination}
         filters={
           <DataViewFilters onChange={handleFilterChange} values={filters}>
             <DataViewTextFilter
@@ -298,8 +279,41 @@ const PackageCoverageTable = ({
             />
           </DataViewFilters>
         }
+      >
+        <ToolbarItem variant={ToolbarItemVariant.pagination} align={{ default: 'alignEnd' }}>
+          {topPagination}
+        </ToolbarItem>
+      </DataViewToolbar>
+      <DataViewTable
+        aria-label='Package coverage table'
+        ouiaId={ouiaId}
+        variant='compact'
+        columns={dataViewColumns}
+        rows={dataViewRows}
+        bodyStates={{
+          empty: (
+            <EmptyTableDataView
+              ouiaId={ouiaId}
+              variant={isFiltered ? 'filtered' : 'zero'}
+              itemName='packages'
+              zeroBody='No packages were found in this manifest.'
+              colSpan={columns.length}
+              onClearFilters={clearAllFiltersAndResetPage}
+            />
+          ),
+          loading: <SkeletonTableBody rowsCount={perPage} columnsCount={columns.length} />,
+          error: (
+            <ErrorState
+              titleText='Unable to load packages'
+              bodyText='There was an error retrieving data. Check your connection and reload the page.'
+              // Pass fragment to avoid rendering the default footer with a CTA button
+              customFooter={<></>}
+            />
+          ),
+        }}
       />
-    </LwDataView>
+      <DataViewToolbar pagination={bottomPagination} />
+    </DataView>
   );
 };
 

@@ -27,7 +27,7 @@ const openPackagesModal = async (page: Page, repoName: string) => {
   await row.getByTestId('package_count_button').click();
   const packagesModal = page.getByRole('dialog', { name: 'Packages' });
   await expect(packagesModal).toBeVisible();
-  await expect(packagesModal.getByTestId('packages_table-stack')).toBeVisible();
+  await expect(packagesModal.getByTestId('packages_table')).toBeVisible();
   return packagesModal;
 };
 
@@ -152,14 +152,14 @@ test.describe('PackageModal delete packages', () => {
 
       await expect(
         packagesModal
-          .getByTestId('packages_table-stack')
+          .getByTestId('packages_table')
           .getByRole('row')
           .filter({ has: page.getByRole('gridcell') })
           .first(),
       ).toBeVisible();
       await expect(
         packagesModal
-          .getByTestId('packages_table-stack')
+          .getByTestId('packages_table')
           .getByRole('row')
           .filter({ has: page.getByRole('gridcell') })
           .first()

@@ -23,8 +23,8 @@ src/kit/
         stat-item/                    LwStatItem (compact value + label)
       data-view/                      List/collection table surfaces (toolbar + table)
         ROADMAP.md                    Family inventory / shared config / sequencing
-        table/                        LwDataView (README + unit roadmap first)
-        toolbar/                      LwDataViewToolbar (README + unit roadmap first)
+        data-view.tsx                 LwDataView (flat at family root — see ROADMAP § rehome)
+        data-view-toolbar/            LwDataViewToolbar (README + unit roadmap)
       …                               (LwButtonGroup, …)
     components.config.ts              Prop / behavior defaults for both tiers
     components.config.css             Domain presentational baseline
@@ -34,7 +34,7 @@ src/kit/
 ```
 
 Assemblies require **README + roadmap before code** (family + unit roadmaps must
-not overlap). See `.cursor/skills/scaffold-outline`.
+not overlap). See `.cursor/skills/kit`.
 
 ## Importing
 
@@ -116,5 +116,5 @@ Intentional fills for missing PF APIs (e.g. MenuToggle `size="lg"`) are tracked 
 
 ## Skills
 
-`.cursor/skills/scaffold-outline` — operating perspective, Rule 0, config cascade,
+`.cursor/skills/kit` — operating perspective, Rule 0, config cascade,
 logic passthrough, page-header (hero surface), naming conventions.

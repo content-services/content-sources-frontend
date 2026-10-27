@@ -14,6 +14,7 @@ import {
   type ProgressStepperProps,
   type SkeletonProps,
   type TitleProps,
+  type ToolbarItemProps,
   type TooltipProps,
 } from '@patternfly/react-core';
 import type { DataViewTableBasicProps } from '@patternfly/react-data-view/dist/dynamic/DataViewTableBasic';
@@ -41,6 +42,39 @@ import { lightwellConfig, type LwStepIconColorKey } from '../lightwell.config';
 
 // Re-export tenant identity so consumers can reference it from one place.
 export { lightwellConfig };
+
+// ─── Shared viewport breakpoints ─────────────────────────────────────────────
+
+/**
+ * PF v6 viewport breakpoints — shared by kit components and hooks.
+ * Values match the PatternFly SCSS vars (`$pf-v6-global--breakpoint--*`)
+ * and the rem comment map in `components.config.css`.
+ *
+ * Use in `matchMedia` hooks (TS track). CSS `@media` queries copy the rem
+ * directly — they cannot use CSS custom properties.
+ */
+export const lwBreakpoints = {
+  sm: '36rem',
+  md: '48rem',
+  lg: '62rem',
+  xl: '75rem',
+  '2xl': '90.625rem',
+} as const;
+
+export type LwBreakpointKey = keyof typeof lwBreakpoints;
+
+/** Ordered breakpoint names — smallest to largest. For ordinal comparison. */
+export const LW_BREAKPOINT_ORDER: readonly LwBreakpointKey[] = ['sm', 'md', 'lg', 'xl', '2xl'];
+
+/** True when `current` is at or above `target` in the breakpoint scale.
+ * 'xs' (below sm) is below everything. */
+export function isBreakpointAtLeast(
+  current: LwBreakpointKey | 'xs',
+  target: LwBreakpointKey,
+): boolean {
+  if (current === 'xs') return false;
+  return LW_BREAKPOINT_ORDER.indexOf(current) >= LW_BREAKPOINT_ORDER.indexOf(target);
+}
 
 // ─── Shared merge constraint ─────────────────────────────────────────────────
 
@@ -178,6 +212,48 @@ export type LwMetricsCountConfig = {
 /** Owned defaults for `LwMetricsCard`. */
 export type LwMetricsCardConfig = object;
 
+// ─── Primitive: LwContent ─────────────────────────────────────────────────────
+
+/** Defaults for `LwContent` — Content host; call-site wins via merge. */
+export type LwContentConfig = Partial<
+  Omit<import('@patternfly/react-core').ContentProps, 'children' | 'ref'>
+>;
+
+// ─── Primitive: LwSearchInput ────────────────────────────────────────────────
+
+/** Defaults for `LwSearchInput` — SearchInput host; call-site wins via merge. */
+export type LwSearchInputConfig = Partial<
+  Omit<import('@patternfly/react-core').SearchInputProps, 'ref'>
+>;
+
+// ─── Primitive: LwPagination ─────────────────────────────────────────────────
+
+/** Defaults for `LwPagination` — Pagination host; call-site wins via merge. */
+export type LwPaginationConfig = Partial<
+  Omit<import('@patternfly/react-core').PaginationProps, 'ref'>
+>;
+
+// ─── Primitive: LwDrawer ─────────────────────────────────────────────────────
+
+/** Defaults for `LwDrawer` — Drawer host; call-site wins via merge. */
+export type LwDrawerConfig = Partial<
+  Omit<import('@patternfly/react-core').DrawerProps, 'children' | 'ref'>
+>;
+
+// ─── Primitive: LwCheckbox ────────────────────────────────────────────────────
+
+/** Defaults for `LwCheckbox` — Checkbox host; call-site wins via merge. */
+export type LwCheckboxConfig = Partial<
+  Omit<import('@patternfly/react-core').CheckboxProps, 'id' | 'onChange' | 'ref'>
+>;
+
+// ─── Primitive: LwForm ───────────────────────────────────────────────────────
+
+/** Defaults for `LwForm` — Form host; call-site wins via merge. */
+export type LwFormConfig = Partial<
+  Omit<import('@patternfly/react-core').FormProps, 'children' | 'ref'>
+>;
+
 // ─── Assembly: LwDataView (DataView + DataViewTable) ─────────────────────────
 
 /** PF `DataViewTable` props forwarded by `LwDataView` (kit builds variant/columns/rows/bodyStates/headStates/isSticky; isTreeTable not supported). */
@@ -192,12 +268,36 @@ export type LwDataViewPassthroughProps = Omit<
  */
 export type LwDataViewConfig = Partial<LwDataViewPassthroughProps> & {
   isCompact?: boolean;
+  /**
+   * `false` (default) wraps `LwDataView` in a `Card` — `CardHeader` hosts the
+   * built-in toolbar, `CardBody` hosts the full data-view surface. Set `true`
+   * to opt out for pages that already provide their own container chrome.
+   */
+  isCardless?: boolean;
+  /**
+   * Starting `perPage` for uncontrolled pagination (when `pagination` is set
+   * but `page`/`perPage`/`onSetPage`/`onPerPageSelect` are omitted — `LwDataView`
+   * owns page state internally in that case). Has no effect on controlled
+   * pagination, which always uses the call site's own `perPage`.
+   */
+  defaultPerPage?: number;
+  /**
+   * `ToolbarItem` props applied to the top pagination item in the built-in toolbar.
+   * Default: hides on small screens and shows at `md`+, matching standard responsive
+   * table patterns. Call-site-supplied `paginationItemProps` on a standalone
+   * `LwDataViewToolbar` takes precedence.
+   */
+  builtInPaginationItemProps?: Omit<ToolbarItemProps, 'variant' | 'align'>;
 };
 
 // ─── Assembly: LwDataViewToolbar (DataViewToolbar) ───────────────────────────
 
-/** PF `DataViewToolbar` props forwarded by `LwDataViewToolbar` (its own `pagination` prop is superseded by the kit's `pagination` slot). */
-export type LwDataViewToolbarPassthroughProps = Omit<DataViewToolbarProps, 'pagination'>;
+/** PF `DataViewToolbar` props forwarded by `LwDataViewToolbar` (its own `pagination`,
+ * `filters`, and `actions` props are superseded by the kit's owned slots). */
+export type LwDataViewToolbarPassthroughProps = Omit<
+  DataViewToolbarProps,
+  'pagination' | 'filters' | 'actions'
+>;
 
 /** Defaults for `LwDataViewToolbar` — `DataViewToolbar` host; call-site wins via merge. */
 export type LwDataViewToolbarConfig = Partial<LwDataViewToolbarPassthroughProps>;
@@ -229,13 +329,19 @@ export interface LwComponentsConfig {
   skeleton: LwSkeletonConfig;
   title: LwTitleConfig;
   icon: LwIconConfig;
+  checkbox: LwCheckboxConfig;
   clipboardCopy: LwClipboardCopyConfig;
+  content: LwContentConfig;
+  drawer: LwDrawerConfig;
+  form: LwFormConfig;
   pageHeader: LwPageHeaderConfig;
   pageHeaderHero: LwPageHeaderHeroConfig;
   buttonGroup: LwButtonGroupConfig;
   metricsStepper: LwMetricsStepperConfig;
   metricsCount: LwMetricsCountConfig;
   metricsCard: LwMetricsCardConfig;
+  pagination: LwPaginationConfig;
+  searchInput: LwSearchInputConfig;
   loaded: LwLoadedConfig;
   dataView: LwDataViewConfig;
   dataViewToolbar: LwDataViewToolbarConfig;
@@ -254,6 +360,15 @@ export const componentsConfig: LwComponentsConfig = {
   card: {
     // Lightwell surfaces use glass cards by default.
     isGlass: true,
+  },
+  checkbox: {
+    // No Lightwell-specific Checkbox defaults yet.
+  },
+  content: {
+    // No Lightwell-specific Content defaults yet.
+  },
+  drawer: {
+    isPill: true,
   },
   menu: {
     // No Lightwell-specific Dropdown defaults yet — position / plain land here when decided.
@@ -279,6 +394,9 @@ export const componentsConfig: LwComponentsConfig = {
   },
   icon: {
     // No Lightwell-specific size yet — page title rows pass size from PageTitleStack.
+  },
+  form: {
+    // No Lightwell-specific Form defaults yet.
   },
   clipboardCopy: {
     isReadOnly: true,
@@ -316,10 +434,30 @@ export const componentsConfig: LwComponentsConfig = {
     fontSize: 'md',
     screenreaderText: 'Loading',
   },
+  pagination: {
+    // No Lightwell-specific Pagination defaults yet.
+  },
+  searchInput: {
+    // No Lightwell-specific SearchInput defaults yet.
+  },
   dataView: {
     // Primary pages default to non-compact density; compact is an explicit
     // opt-in reserved for drawers/modals (flagged 2026-10-08).
     isCompact: false,
+    // Card wrapper on by default (D19) — opt out via isCardless for pages
+    // that already provide their own container chrome.
+    isCardless: false,
+    // Starting perPage for uncontrolled pagination (page state owned by
+    // LwDataView when the call site doesn't supply page/onSetPage).
+    defaultPerPage: 10,
+    // Responsive grid breakpoint — collapse to stacked mobile layout at lg.
+    gridBreakPoint: 'grid-lg' as const,
+    // Striped rows for legibility on dense tables.
+    isStriped: true,
+    // Flat table surface — avoids double background on pages with PF plain chrome.
+    isNoPlainOnGlass: true,
+    // Built-in toolbar: hide top pagination on small screens; reveal at md+.
+    builtInPaginationItemProps: { visibility: { default: 'hidden', md: 'visible' } },
   },
   dataViewToolbar: {
     // No Lightwell-specific DataViewToolbar defaults yet.
@@ -373,6 +511,22 @@ export function getLwIconDefaults(): LwIconConfig {
   return { ...componentsConfig.icon };
 }
 
+export function getLwCheckboxDefaults(): LwCheckboxConfig {
+  return { ...componentsConfig.checkbox };
+}
+
+export function getLwContentDefaults(): LwContentConfig {
+  return { ...componentsConfig.content };
+}
+
+export function getLwDrawerDefaults(): LwDrawerConfig {
+  return { ...componentsConfig.drawer };
+}
+
+export function getLwFormDefaults(): LwFormConfig {
+  return { ...componentsConfig.form };
+}
+
 export function getLwClipboardCopyDefaults(): LwClipboardCopyConfig {
   return { ...componentsConfig.clipboardCopy };
 }
@@ -399,6 +553,14 @@ export function getLwMetricsCountDefaults(): LwMetricsCountConfig {
 
 export function getLwMetricsCardDefaults(): LwMetricsCardConfig {
   return { ...componentsConfig.metricsCard };
+}
+
+export function getLwPaginationDefaults(): LwPaginationConfig {
+  return { ...componentsConfig.pagination };
+}
+
+export function getLwSearchInputDefaults(): LwSearchInputConfig {
+  return { ...componentsConfig.searchInput };
 }
 
 export function getLwLoadedDefaults(): LwLoadedConfig {

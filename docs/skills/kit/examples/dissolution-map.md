@@ -44,6 +44,15 @@ checklist for the dissolve sweep.
 | `src/Pages/Lightwell/Beacon/components/PipelineView.tsx` | `LwMetricsStepper` on Beacon | No remaining page imports |
 | `src/Pages/Lightwell/Beacon/components/StatusCard.tsx` | `LwMetricsStepper` step cells | Only referenced by unused `PipelineView` |
 | `src/Pages/Lightwell/Beacon/components/CustomerIdSelect.tsx` | Beacon page: `LwMenu` + `LwSkeleton` + fetch | No special behavior; page owns composition |
+| `styles/lightwell-beacon.scss` → `.lightwell-help-btn` | Circle plain `LwButton` / `LwTooltip` | Orphan CSS |
+| `styles/lightwell-beacon.scss` → `.lightwell-pipeline`, `.lightwell-pipeline-arrow` | Metrics stepper layout | Orphan CSS |
+| `styles/lightwell-beacon.scss` → `.lightwell-status-card*` | Metrics stepper / count chrome | Orphan CSS |
+| `styles/lightwell-beacon.scss` → `.lightwell-stat-number`, `.lightwell-stat--critical` | `LwMetricsCount` | Orphan CSS |
+| `src/Pages/Lightwell/Beacon/components/VulnerabilityTable.tsx` | Beacon page: `LwDataView` + `LwDataViewToolbar` + `LwDrawer` responsive panel | Cell renderer extracted to `utils/vulnerabilityTableCells.tsx`; file + test left on disk (D12) |
+| `src/Pages/Lightwell/Beacon/components/VulnerabilityTable.test.tsx` | Tests for above | Tests still pass standalone — exercise the old component, not the page |
+| `styles/lightwell-beacon.scss` → `.lightwell-filter-panel`, `.lightwell-filter-panel-header` | `LwDrawer` panel via `LwDataView` | Orphan CSS — sidebar sticky layout replaced by drawer |
+| `styles/lightwell-beacon.scss` → `.lightwell-beacon-layout` | `LwDrawer` inline layout | Orphan CSS — Flex sidebar layout replaced by responsive drawer |
+| `styles/lightwell-beacon.scss` → `.lightwell-beacon-table-area`, `.lightwell-beacon-table-area > .pf-v6-c-stack`, `.lightwell-beacon-table-area .pf-v6-c-card` | `LwDataView` (no card wrapper) | Orphan CSS — card + flex-item sizing replaced by direct table rendering |
 
 ### Not on this map (still live)
 
@@ -56,7 +65,7 @@ checklist for the dissolve sweep.
 
 ```scss
 /* UNUSED — successor: <kit root / call-site pattern>.
- * Slated for dissolution sweep. See scaffold-outline/examples/dissolution-map.md */
+ * Slated for dissolution sweep. See kit/examples/dissolution-map.md */
 ```
 
 When dissolving: delete the file/rules, drop the row from this table, and confirm no remaining imports / class references.

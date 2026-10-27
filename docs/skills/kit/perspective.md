@@ -316,6 +316,50 @@ Rule 0 applies at both primitive and assembly tiers.
 
 ---
 
+## Assembly completeness — hydrate, don't implement
+
+**The test:** a page configures an assembly using only hydration — data,
+flags, domain copy. If a page writes presentational or interaction *logic*
+instead (active-state derivation, sort reordering, panel-expand state,
+toolbar assembly, filter wiring), the assembly is not finished. Extend the
+assembly; do not let the page compensate.
+
+`LwDataView` is the flagship case: a page hands it rows, columns, and the
+handful of domain decisions only the page can make (is this cell's content
+comparable, what does this status mean) — the assembly owns everything
+else: loading/empty derivation, sort, pagination chrome, panel expand/collapse,
+toolbar layout. A page hand-rolling a breakpoint effect for panel state, or
+wiring raw PF filter components, or computing its own active-state from a
+loading flag, is not "this page's business logic" — it is a Kit gap wearing
+a page's clothes. `LwDataView` will be a whole assembly where pages hydrate
+it, or the assembly has failed at its one job.
+
+**Signal: convergent reimplementation.** When independent, unrelated
+consumers of the same assembly write the same kind of workaround for the
+same gap, that is proof the capability belongs in the assembly — not
+evidence each page legitimately needed its own version. Three pages
+inventing three copies of the same missing piece do not have three
+different problems; they have one, and it belongs to the assembly.
+
+**Sequencing rule: finish before you re-point.** Do not swap a consumer
+onto an assembly before the specific capability that consumer needs is
+complete in the assembly. Re-pointing early does not merely risk
+inconsistency — it *manufactures* page-local logic as a side effect,
+because the consumer has to patch the gap somewhere, and "somewhere" is
+always the page. That patch then reads as legitimate page-specific need the
+next time someone touches the file, and the next re-point copies it as "the
+pattern." Build the capability in Kit first, fully, documented; the
+re-point itself should then be a near-mechanical diff — delete the bespoke
+block, pass data.
+
+**Boundary while building:** a Kit effort touches only Kit and the page/view
+consuming it. An existing non-Kit component or utility module that a page
+already imports does not become fair game for new logic just because it's
+already in the dependency chain — new logic goes in Kit or in the page,
+never into a pre-existing third file.
+
+---
+
 ## Cross-cutting
 
 `ouiaId`, error boundaries, telemetry: **once in the harness** — inherited by every
@@ -346,5 +390,8 @@ lightwell.config.ts
 5. Logic passthrough — children compose; slot args build; one cascade per assembly.
 6. One page header — hero is surface pre-config (`hero`), same composition grammar.
 7. Domain wiring is not a kit tier — stays with the product until extracted.
+8. Assembly completeness — pages hydrate, they do not implement. Convergent
+   reimplementation across consumers proves a gap belongs in the assembly;
+   finish the assembly before re-pointing the next consumer onto it.
 
 Operate from this perspective.

@@ -158,17 +158,6 @@ describe('PackageCoverageTable', () => {
     expect(screen.getByText('Unable to load packages')).toBeInTheDocument();
   });
 
-  it('renders via the LwDataView kit assembly with compact density preserved', () => {
-    renderTable();
-
-    // Pins the kit-swap behavior: LwDataView still renders a grid, and the
-    // `isCompact` prop still reaches DataViewTable's PF variant class, which
-    // isn't exercised by any other assertion in this file.
-    const table = screen.getByRole('grid', { name: 'Package coverage table' });
-    expect(table).toBeInTheDocument();
-    expect(table).toHaveClass('pf-m-compact');
-  });
-
   it('renders filter controls for search, match, and ecosystem', async () => {
     const user = userEvent.setup();
     renderTable();

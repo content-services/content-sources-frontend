@@ -1,10 +1,11 @@
+import { DataViewToolbar } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
 import {
+  DataViewTable,
   DataViewTr,
   DataViewTh,
   DataViewTrObject,
 } from '@patternfly/react-data-view/dist/dynamic/DataViewTable';
-import { DataViewState } from '@patternfly/react-data-view/dist/dynamic/DataView';
-import { LwDataView, LwDataViewToolbar } from 'kit/components/assemblies';
+import { DataView, DataViewState } from '@patternfly/react-data-view/dist/dynamic/DataView';
 import useTableActiveState from '../../../Hooks/tables/useTableActiveState';
 import { DataViewTextFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewTextFilter';
 import { DataViewCheckboxFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewCheckboxFilter';
@@ -29,7 +30,15 @@ import {
   IntrospectRepositoryRequestItem,
 } from '../../../services/Content/ContentApi';
 import { useAppContext } from '../../../middleware/AppContext';
-import { Pagination, Button, EmptyStateActions, Flex, FlexItem } from '@patternfly/react-core';
+import {
+  Pagination,
+  Button,
+  EmptyStateActions,
+  Flex,
+  FlexItem,
+  ToolbarItem,
+  ToolbarItemVariant,
+} from '@patternfly/react-core';
 import useDistributionDetails from '../../../Hooks/useDistributionDetails';
 import { useSearchParams, useNavigate, Outlet, useOutletContext } from 'react-router-dom';
 import Hide from 'components/Hide/Hide';
@@ -586,60 +595,13 @@ const ContentListTable = () => {
 
   return (
     <>
-      <LwDataView
-        containerOuiaId='content-list-page'
+      <DataView
+        ouiaId='content-list-page'
         activeState={activeState}
         {...(shouldEnableSelection && { selection: selectionWithDisabledRows })}
-        wrapperClassName={`${spacing.pxLg} ${spacing.ptMd} ${flex.flexDirectionColumn}`}
-        aria-label='Repositories table'
-        ouiaId={ouiaId}
-        isCompact
-        columns={dataViewColumns}
-        rows={rows}
-        bodyStates={{
-          empty: (
-            <EmptyTableDataView
-              ouiaId={ouiaId}
-              variant={isFiltered ? 'filtered' : 'zero'}
-              itemName='repositories'
-              zeroBody='To get started, create a custom repository.'
-              colSpan={columns.length}
-              onClearFilters={resetFiltersAndPagination}
-              actions={
-                <EmptyStateActions>
-                  <ConditionalTooltip
-                    content='You do not have the required permissions to perform this action.'
-                    show={!rbac?.repoWrite}
-                    setDisabled
-                  >
-                    <Button
-                      variant='primary'
-                      onClick={() => navigate(ADD_ROUTE)}
-                      isDisabled={isLoading || isRedHatOrCommunity}
-                    >
-                      Add repositories
-                    </Button>
-                  </ConditionalTooltip>
-                </EmptyStateActions>
-              }
-            />
-          ),
-          loading: <SkeletonTableBody rowsCount={perPage} columnsCount={columns.length} />,
-        }}
-        footer={
-          <LwDataViewToolbar
-            pagination={
-              <Pagination
-                id='bottom-pagination-id'
-                widgetId='bottomPaginationWidgetId'
-                {...paginationProps}
-                variant='bottom'
-              />
-            }
-          />
-        }
+        className={`${spacing.pxLg} ${spacing.ptMd} ${flex.flexDirectionColumn}`}
       >
-        <LwDataViewToolbar
+        <DataViewToolbar
           ouiaId='content-list-toolbar'
           clearAllFilters={resetFiltersAndPagination}
           filters={
@@ -796,16 +758,64 @@ const ContentListTable = () => {
               </FlexItem>
             </Flex>
           }
-          pagination={
+        >
+          <ToolbarItem variant={ToolbarItemVariant.pagination} align={{ default: 'alignEnd' }}>
             <Pagination
               id='top-pagination-id'
               widgetId='topPaginationWidgetId'
               {...paginationProps}
               isCompact
             />
+          </ToolbarItem>
+        </DataViewToolbar>
+        <DataViewTable
+          aria-label='Repositories table'
+          ouiaId={ouiaId}
+          variant='compact'
+          columns={dataViewColumns}
+          rows={rows}
+          bodyStates={{
+            empty: (
+              <EmptyTableDataView
+                ouiaId={ouiaId}
+                variant={isFiltered ? 'filtered' : 'zero'}
+                itemName='repositories'
+                zeroBody='To get started, create a custom repository.'
+                colSpan={columns.length}
+                onClearFilters={resetFiltersAndPagination}
+                actions={
+                  <EmptyStateActions>
+                    <ConditionalTooltip
+                      content='You do not have the required permissions to perform this action.'
+                      show={!rbac?.repoWrite}
+                      setDisabled
+                    >
+                      <Button
+                        variant='primary'
+                        onClick={() => navigate(ADD_ROUTE)}
+                        isDisabled={isLoading || isRedHatOrCommunity}
+                      >
+                        Add repositories
+                      </Button>
+                    </ConditionalTooltip>
+                  </EmptyStateActions>
+                }
+              />
+            ),
+            loading: <SkeletonTableBody rowsCount={perPage} columnsCount={columns.length} />,
+          }}
+        />
+        <DataViewToolbar
+          pagination={
+            <Pagination
+              id='bottom-pagination-id'
+              widgetId='bottomPaginationWidgetId'
+              {...paginationProps}
+              variant='bottom'
+            />
           }
         />
-      </LwDataView>
+      </DataView>
       {/* This ensures that the modal doesn't temporarily flash on the initial render */}
       <Hide hide={isLoading}>
         <Outlet

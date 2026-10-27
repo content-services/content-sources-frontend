@@ -10,20 +10,22 @@ import {
   BulkSelectValue,
 } from '@patternfly/react-component-groups/dist/dynamic/BulkSelect';
 
+import { DataView } from '@patternfly/react-data-view/dist/dynamic/DataView';
 import {
+  DataViewTable,
   DataViewTh,
   DataViewTrObject,
 } from '@patternfly/react-data-view/dist/dynamic/DataViewTable';
 
 import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
+import { DataViewToolbar } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
 import { DataViewTextFilter } from '@patternfly/react-data-view/dist/dynamic/DataViewTextFilter';
-import { LwDataView, LwDataViewToolbar } from 'kit/components/assemblies';
 
 import EmptyTableDataView from 'components/EmptyTableDataView/EmptyTableDataView';
 import { useNavigate } from 'react-router-dom';
 import { DELETE_ROUTE } from 'Routes/constants';
 
-import { Pagination } from '@patternfly/react-core';
+import { Pagination, ToolbarItem, ToolbarItemVariant } from '@patternfly/react-core';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { FilterProps } from 'components/Tables/Packages/hooks/usePackageTableFilters';
 import { PaginationLocalStorage } from 'Hooks/tables/usePaginationLocalStorage';
@@ -237,26 +239,31 @@ const PackagesTableWithToolbars = ({
   );
 
   return (
-    <LwDataView
-      containerOuiaId='packages_table'
+    <DataView
+      data-ouia-component-id='packages_table'
       activeState={activeState}
       {...(enabledBulkDelete && activeState === undefined ? { selection } : {})}
-      aria-label='Packages table'
-      ouiaId={ouiaId}
-      isCompact
-      columns={dataViewColumns}
-      rows={dataViewRows}
-      bodyStates={{ empty: emptyStateTable, loading: loadingStateTable }}
-      footer={<LwDataViewToolbar pagination={bottomPagination} />}
     >
-      <LwDataViewToolbar
+      <DataViewToolbar
         className={spacing.pSm}
         {...(enabledBulkDelete ? { ...bulkDeleteProps } : {})}
         clearAllFilters={clearAllFiltersAndResetPage}
         filters={searchFilter}
-        pagination={topPagination}
+      >
+        <ToolbarItem variant={ToolbarItemVariant.pagination} align={{ default: 'alignEnd' }}>
+          {topPagination}
+        </ToolbarItem>
+      </DataViewToolbar>
+      <DataViewTable
+        aria-label='Packages table'
+        ouiaId={ouiaId}
+        variant='compact'
+        columns={dataViewColumns}
+        rows={dataViewRows}
+        bodyStates={{ empty: emptyStateTable, loading: loadingStateTable }}
       />
-    </LwDataView>
+      <DataViewToolbar pagination={bottomPagination} />
+    </DataView>
   );
 };
 
