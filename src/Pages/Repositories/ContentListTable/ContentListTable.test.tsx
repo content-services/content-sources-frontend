@@ -363,6 +363,12 @@ it('filters the table by major and minor OS versions', async () => {
 });
 
 it('filters the table by product', async () => {
+  (useAppContext as jest.Mock).mockReturnValue({
+    features: { snapshots: { accessible: true } },
+    rbac: { repoWrite: true, repoRead: true },
+    contentOrigin: [ContentOrigin.REDHAT],
+    setContentOrigin: () => {},
+  });
   (useContentListQuery as jest.Mock).mockImplementation((_page, _limit, filterData) => {
     const onlyArm64 =
       filterData?.feature_products?.length === 1 &&
@@ -403,6 +409,12 @@ it('filters the table by product', async () => {
 it('keeps rapid product selections while debouncing repository requests', async () => {
   jest.useFakeTimers();
   try {
+    (useAppContext as jest.Mock).mockReturnValue({
+      features: { snapshots: { accessible: true } },
+      rbac: { repoWrite: true, repoRead: true },
+      contentOrigin: [ContentOrigin.REDHAT],
+      setContentOrigin: () => {},
+    });
     (useContentListQuery as jest.Mock).mockReturnValue({
       isLoading: false,
       data: {
@@ -437,4 +449,29 @@ it('keeps rapid product selections while debouncing repository requests', async 
     act(() => jest.runOnlyPendingTimers());
     jest.useRealTimers();
   }
+});
+
+it('disables the product filter when Red Hat is not a selected origin', async () => {
+  (useAppContext as jest.Mock).mockReturnValue({
+    features: { snapshots: { accessible: true } },
+    rbac: { repoWrite: true, repoRead: true },
+    contentOrigin: [ContentOrigin.COMMUNITY, ContentOrigin.CUSTOM],
+    setContentOrigin: () => {},
+  });
+  (useContentListQuery as jest.Mock).mockReturnValue({
+    isLoading: false,
+    data: {
+      data: [defaultEPELRepository],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+  });
+
+  const user = userEvent.setup();
+  renderContentListTable();
+
+  const toolbar = screen.getByTestId('content-list-toolbar');
+  await user.click(within(toolbar).getByRole('button', { name: 'Name' }));
+  await user.click(within(screen.getByRole('menu')).getByRole('menuitem', { name: 'Product' }));
+
+  expect(screen.getByRole('combobox', { name: 'filter products' })).toBeDisabled();
 });

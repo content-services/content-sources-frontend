@@ -61,7 +61,6 @@ import DeleteKebab from '../../../components/DeleteKebab/DeleteKebab';
 import { DataViewFilters } from '@patternfly/react-data-view/dist/dynamic/DataViewFilters';
 import { useContentListFilters, FilterLabelsMap } from './hooks/useContentListFilters';
 import ContentOriginFilter from './components/ContentOriginFilter';
-import DataViewTypeaheadCheckboxFilter from 'components/DataViewTypeaheadCheckboxFilter/DataViewTypeaheadCheckboxFilter';
 import EmptyTableDataView from 'components/EmptyTableDataView/EmptyTableDataView';
 import {
   hasOrigin,
@@ -74,6 +73,7 @@ import {
   useToggleAsPartnerMutate,
 } from 'services/AdminPartnerRepos/AdminPartnerReposQueries';
 import { useRepositoryPublishSnapshotPolling } from 'Hooks/snapshotActions/usePublishSnapshot';
+import ProductFilter from './components/ProductFilter/ProductFilter';
 
 export const perPageKey = 'contentListPerPage';
 
@@ -596,6 +596,15 @@ const ContentListTable = () => {
     [numberOfRowsSelected],
   );
 
+  const isRedHatOriginAvailable =
+    contentOrigin.length === 0 || contentOrigin.includes(ContentOrigin.REDHAT);
+
+  useEffect(() => {
+    if (!isRedHatOriginAvailable && selectedProducts.length > 0) {
+      onSetFilters({ feature_products: [] });
+    }
+  }, [isRedHatOriginAvailable, selectedProducts.length, onSetFilters]);
+
   return (
     <>
       <DataView
@@ -663,7 +672,7 @@ const ContentListTable = () => {
                   placeholder='Filter by status'
                   options={statusFilterOptions}
                 />
-                <DataViewTypeaheadCheckboxFilter
+                <ProductFilter
                   filterId='feature_products'
                   ouiaId='filter-products'
                   aria-label='filter products'
