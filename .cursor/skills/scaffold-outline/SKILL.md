@@ -545,3 +545,4 @@ Structure review without smoke is incomplete.
 | [assemblies/loaded/](../../../src/kit/components/assemblies/loaded) | `LwLoaded` — loading surface pre-config (keep chrome mounted) |
 | [assemblies/metrics/stat-item/](../../../src/kit/components/assemblies/metrics/stat-item) | `LwStatItem` README (metrics family; not a primitive) |
 | [assemblies/metrics/stepper/](../../../src/kit/components/assemblies/metrics/stepper) | `LwMetricsStepper` README + unit roadmap |
+| [assemblies/data-view/](../../../src/kit/components/assemblies/data-view) | `LwDataView` family — ROADMAP + table/toolbar README, unit roadmaps |

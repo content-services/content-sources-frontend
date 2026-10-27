@@ -16,6 +16,8 @@ import {
   type TitleProps,
   type TooltipProps,
 } from '@patternfly/react-core';
+import type { DataViewTableBasicProps } from '@patternfly/react-data-view/dist/dynamic/DataViewTableBasic';
+import type { DataViewToolbarProps } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
 
 import { lightwellConfig, type LwStepIconColorKey } from '../lightwell.config';
 
@@ -176,6 +178,30 @@ export type LwMetricsCountConfig = {
 /** Owned defaults for `LwMetricsCard`. */
 export type LwMetricsCardConfig = object;
 
+// ─── Assembly: LwDataView (DataView + DataViewTable) ─────────────────────────
+
+/** PF `DataViewTable` props forwarded by `LwDataView` (kit builds variant/columns/rows/bodyStates/headStates/isSticky; isTreeTable not supported). */
+export type LwDataViewPassthroughProps = Omit<
+  DataViewTableBasicProps,
+  'variant' | 'columns' | 'rows' | 'bodyStates' | 'headStates' | 'isSticky' | 'isTreeTable'
+>;
+
+/**
+ * Defaults for `LwDataView` — `DataViewTable` host; call-site wins via merge.
+ * `isCompact` is kit-owned (maps to PF's `variant`, not a literal pass-through prop).
+ */
+export type LwDataViewConfig = Partial<LwDataViewPassthroughProps> & {
+  isCompact?: boolean;
+};
+
+// ─── Assembly: LwDataViewToolbar (DataViewToolbar) ───────────────────────────
+
+/** PF `DataViewToolbar` props forwarded by `LwDataViewToolbar` (its own `pagination` prop is superseded by the kit's `pagination` slot). */
+export type LwDataViewToolbarPassthroughProps = Omit<DataViewToolbarProps, 'pagination'>;
+
+/** Defaults for `LwDataViewToolbar` — `DataViewToolbar` host; call-site wins via merge. */
+export type LwDataViewToolbarConfig = Partial<LwDataViewToolbarPassthroughProps>;
+
 // ─── Assembly: LwLoaded (loading / loaded surface) ───────────────────────────
 
 /** Defaults for `LwLoaded` — default loading surface is PF `Skeleton` (text line). */
@@ -211,6 +237,8 @@ export interface LwComponentsConfig {
   metricsCount: LwMetricsCountConfig;
   metricsCard: LwMetricsCardConfig;
   loaded: LwLoadedConfig;
+  dataView: LwDataViewConfig;
+  dataViewToolbar: LwDataViewToolbarConfig;
 }
 
 export const componentsConfig: LwComponentsConfig = {
@@ -287,6 +315,14 @@ export const componentsConfig: LwComponentsConfig = {
     // pass `fallback` matching the loaded layout (see Beacon status summary).
     fontSize: 'md',
     screenreaderText: 'Loading',
+  },
+  dataView: {
+    // Primary pages default to non-compact density; compact is an explicit
+    // opt-in reserved for drawers/modals (flagged 2026-10-08).
+    isCompact: false,
+  },
+  dataViewToolbar: {
+    // No Lightwell-specific DataViewToolbar defaults yet.
   },
 };
 
@@ -367,6 +403,14 @@ export function getLwMetricsCardDefaults(): LwMetricsCardConfig {
 
 export function getLwLoadedDefaults(): LwLoadedConfig {
   return { ...componentsConfig.loaded };
+}
+
+export function getLwDataViewDefaults(): LwDataViewConfig {
+  return { ...componentsConfig.dataView };
+}
+
+export function getLwDataViewToolbarDefaults(): LwDataViewToolbarConfig {
+  return { ...componentsConfig.dataViewToolbar };
 }
 
 // ─── Merge utilities ─────────────────────────────────────────────────────────

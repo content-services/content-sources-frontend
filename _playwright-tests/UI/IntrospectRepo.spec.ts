@@ -61,7 +61,7 @@ test.describe('Introspect Repositories', () => {
       await Promise.all([
         expect(
           modal
-            .getByTestId('packages_table')
+            .getByTestId('packages_table-stack')
             .getByRole('row')
             .filter({
               has: page.getByRole('gridcell'),
