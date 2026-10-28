@@ -51,6 +51,7 @@ export function useLwBreakpoint(): LwActiveBreakpoint {
     const update = () => setBp(resolveBreakpoint());
 
     queries.forEach((q) => q.mql.addEventListener('change', update));
+    update(); // catch any viewport change between the initial render and listener attachment
     return () => queries.forEach((q) => q.mql.removeEventListener('change', update));
   }, []);
 
