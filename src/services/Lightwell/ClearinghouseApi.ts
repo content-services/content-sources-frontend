@@ -20,8 +20,8 @@ export type ClearinghouseSubmission = {
   created_at: string;
   // Author of the submission (backend field `username`).
   username: string;
-  // Original uploaded report filename (e.g. "RHOSE-4.9.json"); stored as submission.json.
-  filename?: string;
+  // Original uploaded report name (e.g. "RHOSE-4.9.json"); stored as submission.json.
+  name?: string;
   org_id?: string;
   files?: ClearinghouseSubmissionFile[];
   vulnerability_count?: number;
@@ -39,18 +39,28 @@ export type ClearinghouseSubmissionListResponse = {
   links: Links;
 };
 
+/** Read a file's contents as text (File.text() isn't available in all environments). */
+const readFileAsText = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
+  });
+
 /**
- * Create an uploading submission from a single JSON file. The backend stores the
- * uploaded file as `submission.json` and returns the new submission's metadata,
- * including the author's username.
+ * Create an uploading submission from a single JSON file. The file's contents are
+ * posted as the JSON request body with the uploaded filename added as a top-level
+ * `name`; the backend returns the new submission's metadata, including the author's
+ * username.
  */
 export const createSubmission = async (file: File): Promise<ClearinghouseSubmission> => {
-  const formData = new FormData();
-  formData.append('file', file);
+  const contents = await readFileAsText(file);
+  const payload = { ...JSON.parse(contents), name: file.name };
 
   const { data } = await axios.post<ClearinghouseSubmission>(
     `${CLEARINGHOUSE_SUBMISSIONS_PATH}/create`,
-    formData,
+    payload,
   );
   return data;
 };

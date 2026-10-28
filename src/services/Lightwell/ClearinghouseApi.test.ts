@@ -24,19 +24,16 @@ const submission = {
 };
 
 describe('createSubmission', () => {
-  it('posts the file as multipart form-data to the create endpoint', async () => {
+  it('posts the file contents plus the filename as `name` to the create endpoint', async () => {
     const post = jest.spyOn(axios, 'post').mockResolvedValue({ data: submission });
 
-    const file = new File(['{}'], 'submission.json', { type: 'application/json' });
+    const file = new File(['{"hello":"world"}'], 'RHOSE-4.9.json', { type: 'application/json' });
     await expect(createSubmission(file)).resolves.toEqual(submission);
 
-    expect(post).toHaveBeenCalledWith(
-      `${CLEARINGHOUSE_SUBMISSIONS_PATH}/create`,
-      expect.any(FormData),
-    );
-
-    const [, formData] = post.mock.calls[0] as [string, FormData];
-    expect(formData.get('file')).toBe(file);
+    expect(post).toHaveBeenCalledWith(`${CLEARINGHOUSE_SUBMISSIONS_PATH}/create`, {
+      hello: 'world',
+      name: 'RHOSE-4.9.json',
+    });
 
     post.mockRestore();
   });

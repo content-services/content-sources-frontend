@@ -41,7 +41,7 @@ const UploadSuccessStep = ({
   onSubmitted,
   onReproducersUploaded,
 }: UploadSuccessStepProps) => {
-  const { isLoading, isError, mainFile, submit } = useSubmissionDetail({
+  const { isLoading, isError, submission, mainFile, submit } = useSubmissionDetail({
     uuid,
     onSubmitted,
   });
@@ -84,7 +84,8 @@ const UploadSuccessStep = ({
           </FlexItem>
           <FlexItem>
             <Content component='p'>
-              <code>{mainFile.filename}</code> was successfully uploaded and saved
+              <code>{submission?.name}</code> was successfully uploaded and
+              saved
             </Content>
           </FlexItem>
         </Flex>

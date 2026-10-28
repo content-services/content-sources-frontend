@@ -40,7 +40,7 @@ import { useCurrentUsername } from '../hooks/useCurrentUsername';
 
 const SUBMISSION_MAIN_FILENAME = 'submission.json';
 
-const baseColumnHeaders = ['Filename', 'Status', 'Created', 'Submitted', 'Processed'];
+const baseColumnHeaders = ['Name', 'Status', 'Created', 'Submitted', 'Processed'];
 
 const statusColor: Record<SubmissionStatus, 'blue' | 'green' | 'grey'> = {
   uploading: 'blue',
@@ -49,7 +49,7 @@ const statusColor: Record<SubmissionStatus, 'blue' | 'green' | 'grey'> = {
 };
 
 const getFilename = (submission: ClearinghouseSubmission) => {
-  if (submission.filename) return submission.filename;
+  if (submission.name) return submission.name;
   const files = submission.files ?? [];
   const main = files.find((file) => file.filename === SUBMISSION_MAIN_FILENAME) ?? files[0];
   return main?.filename ?? SUBMISSION_MAIN_FILENAME;

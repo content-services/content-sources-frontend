@@ -50,10 +50,10 @@ export const useSubmissionDetail = ({
   const submitMutation = useSubmitSubmissionMutation(uuid);
   const processMutation = useProcessSubmissionMutation(uuid);
 
-  // The main report is identified by the submission's top-level `filename`
+  // The main report is identified by the submission's top-level `name`
   // (the original uploaded name the backend now preserves); the rest are reproducers.
   const files = submission?.files ?? [];
-  const mainFile = files.find((file) => file.filename === submission?.filename) ?? files[0];
+  const mainFile = files.find((file) => file.filename === 'submission.json') ?? files[0];
   const reproducerFiles = files.filter((file) => file !== mainFile);
 
   const status = submission?.status;

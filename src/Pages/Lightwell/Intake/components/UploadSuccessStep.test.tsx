@@ -19,7 +19,8 @@ const mockSetPending = jest.fn();
 const buildHook = (overrides = {}) => ({
   isLoading: false,
   isError: false,
-  mainFile: { uuid: 'f-0', filename: 'RHOSE-4.9.json' },
+  submission: { uuid: 'sub-1', name: 'RHOSE-4.9.json' },
+  mainFile: { uuid: 'f-0', filename: 'submission.json' },
   submit: jest.fn(),
   ...overrides,
 });
@@ -37,7 +38,7 @@ beforeEach(() => {
 });
 
 describe('UploadSuccessStep', () => {
-  it('shows the success header with the main filename', () => {
+  it('shows the success header with the submission name', () => {
     render(<UploadSuccessStep uuid='sub-1' />);
 
     expect(screen.getByText('RHOSE-4.9.json')).toBeInTheDocument();
