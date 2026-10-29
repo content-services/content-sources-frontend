@@ -12,6 +12,8 @@ export type ClearinghouseSubmissionFile = {
   // Author of this file (backend field `username`).
   username: string;
   created_at: string;
+  // True for the main report file; the rest are reproducers.
+  submission?: boolean;
 };
 
 export type ClearinghouseSubmission = {

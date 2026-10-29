@@ -63,6 +63,7 @@ const uploadingSubmission: ClearinghouseSubmission = {
       filename: 'RHOSE-4.9.json',
       username: 'author@example.com',
       created_at: '2026-10-20T10:00:00Z',
+      submission: true,
     },
     {
       uuid: 'f-1',
