@@ -43,9 +43,31 @@ const SUBMISSION_MAIN_FILENAME = 'submission.json';
 const baseColumnHeaders = ['Name', 'Status', 'Created', 'Submitted', 'Processed'];
 
 const statusColor: Record<SubmissionStatus, 'blue' | 'green' | 'grey'> = {
-  uploading: 'blue',
+  pending: 'blue',
   submitted: 'green',
   processed: 'grey',
+};
+
+/**
+ * After deleting rows, clamp the current page to the last page that still holds
+ * rows. Without this, deleting the only row on a later page leaves the list query
+ * pinned to a now-empty offset: the response reads as an empty list and the
+ * pagination that would get the user back is hidden. Mirrors
+ * TemplateSystemsTab's calculatePageAfterSystemsDelete.
+ */
+export const calculatePageAfterDelete = (
+  currentPage: number,
+  perPage: number,
+  totalItems: number,
+  deletedItemsCount: number,
+) => {
+  if (deletedItemsCount <= 0) {
+    return currentPage;
+  }
+
+  const nextTotalItems = Math.max(0, totalItems - deletedItemsCount);
+  const maxPage = Math.max(1, Math.ceil(nextTotalItems / perPage));
+  return Math.min(currentPage, maxPage);
 };
 
 const getFilename = (submission: ClearinghouseSubmission) => {
@@ -88,7 +110,7 @@ const DateAuthorCell = ({
  * filename opens that submission in a SubmissionDrawer (an overlay drawer, like
  * the Packages advisory details drawer); the open submission is tracked in the
  * `?submission=<uuid>` URL param. Each row's action column offers downloading the
- * whole submission as a zip and (for the author, while uploading) deleting it; the
+ * whole submission as a zip and (for the author, while pending) deleting it; the
  * column is hidden entirely when no visible row supports either action.
  */
 const SubmissionsTable = () => {
@@ -108,12 +130,15 @@ const SubmissionsTable = () => {
 
   const submissions = data?.data ?? [];
   const count = data?.meta?.count ?? 0;
-  const isEmpty = !isLoading && !isError && submissions.length === 0;
+  // Emptiness is derived from the total count, not the current page: a later page
+  // can come back empty after its last row is deleted while earlier pages still
+  // have rows, and that must not read as "no submissions".
+  const isEmpty = !isLoading && !isError && count === 0;
 
-  // Delete is author-only while uploading; downloading the archive is restricted to
+  // Delete is author-only while pending; downloading the archive is restricted to
   // clearinghouse read users, once the submission is submitted or processed.
   const canDeleteRow = (submission: ClearinghouseSubmission) =>
-    hasWrite && submission.status === 'uploading';
+    hasWrite && submission.status === 'pending';
   const canDownloadRow = (submission: ClearinghouseSubmission) =>
     hasRead && (submission.status === 'submitted' || submission.status === 'processed');
   const showActions = submissions.some(
@@ -131,7 +156,11 @@ const SubmissionsTable = () => {
 
   const handleDelete = (submission: ClearinghouseSubmission) =>
     deleteMutation.mutate(submission.uuid, {
-      onSuccess: () => notify({ variant: AlertVariant.success, title: 'Submission deleted' }),
+      onSuccess: () => {
+        // Clamp before the list refetches, so it never requests a now-empty offset.
+        setPage((current) => calculatePageAfterDelete(current, perPage, count, 1));
+        notify({ variant: AlertVariant.success, title: 'Submission deleted' });
+      },
       onError: () =>
         notify({
           variant: AlertVariant.danger,

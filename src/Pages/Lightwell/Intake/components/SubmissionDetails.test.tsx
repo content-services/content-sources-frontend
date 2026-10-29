@@ -15,7 +15,7 @@ jest.mock('../hooks/useCurrentUsername', () => ({
 const buildHook = (overrides = {}) => ({
   submission: {
     uuid: 'sub-1',
-    status: 'uploading',
+    status: 'pending',
     created_at: '2026-10-20T10:00:00Z',
     username: 'author@example.com',
     name: 'RHOSE-4.9.json',

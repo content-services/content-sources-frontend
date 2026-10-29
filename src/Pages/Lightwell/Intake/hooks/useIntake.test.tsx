@@ -16,7 +16,7 @@ const jsonFile = () => new File(['{}'], 'submission.json', { type: 'application/
 
 const createdSubmission = {
   uuid: 'sub-1',
-  status: 'uploading',
+  status: 'pending',
   created_at: '2026-10-20T10:00:00Z',
   username: 'author@example.com',
 };
@@ -62,7 +62,7 @@ describe('useIntake', () => {
 
   it('never renders "undefined" in the success toast when the author is missing', async () => {
     const post = jest.spyOn(axios, 'post').mockResolvedValue({
-      data: { uuid: 'sub-2', status: 'uploading', created_at: '2026-10-20T10:00:00Z' },
+      data: { uuid: 'sub-2', status: 'pending', created_at: '2026-10-20T10:00:00Z' },
     });
     const { result } = renderIntake();
 

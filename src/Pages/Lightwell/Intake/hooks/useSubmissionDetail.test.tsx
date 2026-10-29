@@ -51,9 +51,9 @@ jest.mock('services/Lightwell/ClearinghouseApi', () => ({
   },
 }));
 
-const uploadingSubmission: ClearinghouseSubmission = {
+const pendingSubmission: ClearinghouseSubmission = {
   uuid: 'sub-1',
-  status: 'uploading',
+  status: 'pending',
   created_at: '2026-10-20T10:00:00Z',
   username: 'author@example.com',
   name: 'RHOSE-4.9.json',
@@ -79,29 +79,29 @@ const render = (opts: Parameters<typeof useSubmissionDetail>[0]) =>
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockSubmission = uploadingSubmission;
+  mockSubmission = pendingSubmission;
   mockIsLoading = false;
   mockIsError = false;
   mockFeatures = { lightwellclearinghouse: ON, lightwellclearinghouseread: ON };
 });
 
 describe('useSubmissionDetail', () => {
-  it('can edit only while uploading and only with the write feature', () => {
+  it('can edit only while pending and only with the write feature', () => {
     const { result, rerender } = render({ uuid: 'sub-1' });
     expect(result.current.canEdit).toBe(true);
 
-    mockSubmission = { ...uploadingSubmission, status: 'submitted' };
+    mockSubmission = { ...pendingSubmission, status: 'submitted' };
     rerender();
     expect(result.current.canEdit).toBe(false);
 
-    mockSubmission = uploadingSubmission;
+    mockSubmission = pendingSubmission;
     mockFeatures = { lightwellclearinghouseread: ON };
     rerender();
     expect(result.current.canEdit).toBe(false);
   });
 
   it('can process only a submitted submission and only with the read feature', () => {
-    mockSubmission = { ...uploadingSubmission, status: 'submitted' };
+    mockSubmission = { ...pendingSubmission, status: 'submitted' };
     const { result, rerender } = render({ uuid: 'sub-1' });
     expect(result.current.canProcess).toBe(true);
 
@@ -109,7 +109,7 @@ describe('useSubmissionDetail', () => {
     rerender();
     expect(result.current.canProcess).toBe(false);
 
-    mockSubmission = uploadingSubmission;
+    mockSubmission = pendingSubmission;
     mockFeatures = { lightwellclearinghouseread: ON };
     rerender();
     expect(result.current.canProcess).toBe(false);
@@ -118,33 +118,33 @@ describe('useSubmissionDetail', () => {
   it('gates download to read users on submitted/processed submissions', () => {
     // The author (write only) can never download, regardless of status.
     mockFeatures = { lightwellclearinghouse: ON };
-    mockSubmission = { ...uploadingSubmission, status: 'uploading' };
+    mockSubmission = { ...pendingSubmission, status: 'pending' };
     const { result, rerender } = render({ uuid: 'sub-1' });
     expect(result.current.canDownload).toBe(false);
 
-    mockSubmission = { ...uploadingSubmission, status: 'submitted' };
+    mockSubmission = { ...pendingSubmission, status: 'submitted' };
     rerender();
     expect(result.current.canDownload).toBe(false);
 
-    // Read users cannot download while uploading...
+    // Read users cannot download while pending...
     mockFeatures = { lightwellclearinghouseread: ON };
-    mockSubmission = { ...uploadingSubmission, status: 'uploading' };
+    mockSubmission = { ...pendingSubmission, status: 'pending' };
     rerender();
     expect(result.current.canDownload).toBe(false);
 
     // ...but can once submitted or processed.
-    mockSubmission = { ...uploadingSubmission, status: 'submitted' };
+    mockSubmission = { ...pendingSubmission, status: 'submitted' };
     rerender();
     expect(result.current.canDownload).toBe(true);
 
-    mockSubmission = { ...uploadingSubmission, status: 'processed' };
+    mockSubmission = { ...pendingSubmission, status: 'processed' };
     rerender();
     expect(result.current.canDownload).toBe(true);
   });
 
   it('processes the submission through the process mutation', () => {
     mockProcessMutate.mockImplementation((_variables, opts) => opts?.onSuccess?.());
-    mockSubmission = { ...uploadingSubmission, status: 'submitted' };
+    mockSubmission = { ...pendingSubmission, status: 'submitted' };
     const { result } = render({ uuid: 'sub-1' });
 
     result.current.process();

@@ -28,11 +28,11 @@ type UseSubmissionDetailOptions = {
 /**
  * Drives the SubmissionDetail view: fetches a submission, splits its main
  * report from reproducer files, and exposes add / delete / submit / process /
- * download actions. `canEdit` (uploading + clearinghouse write) gates the
+ * download actions. `canEdit` (pending + clearinghouse write) gates the
  * add/delete/submit controls; `canProcess` (submitted + clearinghouse read) gates
  * the "Mark as processed" control; `canDownload` gates the per-file / archive
  * download controls, mirroring the backend authorization (author while
- * uploading/submitted, read while submitted/processed). Callers hide controls
+ * pending/submitted, read while submitted/processed). Callers hide controls
  * accordingly.
  */
 export const useSubmissionDetail = ({
@@ -59,7 +59,7 @@ export const useSubmissionDetail = ({
   const status = submission?.status;
   const hasWrite = isFeatureOn(features?.lightwellclearinghouse);
   const hasRead = isFeatureOn(features?.lightwellclearinghouseread);
-  const canEdit = status === 'uploading' && hasWrite;
+  const canEdit = status === 'pending' && hasWrite;
   const canProcess = status === 'submitted' && hasRead;
   // Downloading any file (per-file or the full archive) is restricted to
   // clearinghouse read (STAM / processor) users, and only once the submission is

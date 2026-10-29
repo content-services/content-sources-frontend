@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import SubmissionsTable from './SubmissionsTable';
+import SubmissionsTable, { calculatePageAfterDelete } from './SubmissionsTable';
 import {
   useDeleteSubmissionMutation,
   useSubmissionsListQuery,
@@ -53,7 +53,7 @@ const renderWithRouter = (route = '/') =>
 
 const submission = {
   uuid: 'sub-1',
-  status: 'uploading',
+  status: 'pending',
   created_at: '2026-10-20T10:00:00Z',
   username: 'author@example.com',
   name: 'RHOSE-4.9.json',
@@ -87,7 +87,7 @@ describe('SubmissionsTable', () => {
     renderWithRouter();
 
     expect(screen.getByText('RHOSE-4.9.json')).toBeInTheDocument();
-    expect(screen.getByText(/uploading/i)).toBeInTheDocument();
+    expect(screen.getByText(/pending/i)).toBeInTheDocument();
     expect(screen.getByText('20 Oct 2026')).toBeInTheDocument();
     expect(screen.getByText(/author@example.com/)).toBeInTheDocument();
   });
@@ -149,7 +149,7 @@ describe('SubmissionsTable', () => {
   it('shows dashes for the submitted/processed columns when not yet set', () => {
     renderWithRouter();
 
-    // The uploading submission has no submitted/processed info, so those cells are dashes.
+    // The pending submission has no submitted/processed info, so those cells are dashes.
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1);
   });
 
@@ -163,6 +163,21 @@ describe('SubmissionsTable', () => {
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText('RHOSE-4.9.json')).not.toBeInTheDocument();
+  });
+
+  it('does not show the empty state when the current page is empty but the total count is positive', () => {
+    // A later page can return no rows right after its last row is deleted while
+    // earlier pages still have rows: emptiness is derived from the count, so the
+    // empty state stays hidden and the pagination remains available.
+    mockedList.mockReturnValue(buildQuery({ data: { data: [], meta: { count: 25 } } }));
+    renderWithRouter();
+
+    expect(
+      screen.queryByText(
+        'No submissions yet. Submit a vulnerability findings JSON payload to see it listed here.',
+      ),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: /pagination/i })).toBeInTheDocument();
   });
 
   it('shows a reader-oriented empty state for read-only users', () => {
@@ -210,11 +225,11 @@ describe('SubmissionsTable', () => {
     expect(screen.getByText(/Could not load submissions/i)).toBeInTheDocument();
   });
 
-  it('shows a delete action for an uploading submission the author can manage', () => {
+  it('shows a delete action for a pending submission the author can manage', () => {
     renderWithRouter();
 
     expect(screen.getByRole('button', { name: /Delete RHOSE-4.9.json/i })).toBeInTheDocument();
-    // Download is read-only on submitted/processed, so an uploading row has none.
+    // Download is read-only on submitted/processed, so a pending row has none.
     expect(
       screen.queryByRole('button', { name: /Download RHOSE-4.9.json/i }),
     ).not.toBeInTheDocument();
@@ -281,5 +296,24 @@ describe('SubmissionsTable', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Delete all' }));
 
     expect(mockDeleteMutate).toHaveBeenCalledWith('sub-1', expect.any(Object));
+  });
+});
+
+describe('calculatePageAfterDelete', () => {
+  it('keeps the current page when nothing was deleted', () => {
+    expect(calculatePageAfterDelete(3, 20, 50, 0)).toBe(3);
+  });
+
+  it('clamps to the last remaining page when the current page becomes empty', () => {
+    // Deleting the only row on page 2 (21 total, 20 per page) leaves one full page.
+    expect(calculatePageAfterDelete(2, 20, 21, 1)).toBe(1);
+  });
+
+  it('stays on the current page when it still holds rows after deletion', () => {
+    expect(calculatePageAfterDelete(2, 20, 41, 1)).toBe(2);
+  });
+
+  it('never returns a page below 1, even when every row is deleted', () => {
+    expect(calculatePageAfterDelete(1, 20, 1, 1)).toBe(1);
   });
 });

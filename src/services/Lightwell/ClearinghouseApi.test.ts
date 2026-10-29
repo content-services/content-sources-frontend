@@ -17,7 +17,7 @@ import {
 
 const submission = {
   uuid: 'sub-1',
-  status: 'uploading' as const,
+  status: 'pending' as const,
   created_at: '2026-10-20T10:00:00Z',
   username: 'author@example.com',
   files: [{ uuid: 'f-1', filename: 'submission.json' }],

@@ -4,7 +4,7 @@ import { Links, Meta } from './types';
 
 export const CLEARINGHOUSE_SUBMISSIONS_PATH = '/api/lightwell/v0.1/clearinghouse/submissions';
 
-export type SubmissionStatus = 'uploading' | 'submitted' | 'processed';
+export type SubmissionStatus = 'pending' | 'submitted' | 'processed';
 
 export type ClearinghouseSubmissionFile = {
   uuid: string;
@@ -28,7 +28,7 @@ export type ClearinghouseSubmission = {
   files?: ClearinghouseSubmissionFile[];
   vulnerability_count?: number;
   error_message?: string;
-  // Recorded when the author finalizes the submission (`uploading` → `submitted`).
+  // Recorded when the author finalizes the submission (`pending` → `submitted`).
   submitted_at?: string;
   submitted_by?: string;
   processed_at?: string;
@@ -51,7 +51,7 @@ const readFileAsText = (file: File): Promise<string> =>
   });
 
 /**
- * Create an uploading submission from a single JSON file. The file's contents are
+ * Create a pending submission from a single JSON file. The file's contents are
  * posted as the JSON request body with the uploaded filename added as a top-level
  * `name`; the backend returns the new submission's metadata, including the author's
  * username.
@@ -87,7 +87,7 @@ export const getSubmission = async (uuid: string): Promise<ClearinghouseSubmissi
   return data;
 };
 
-/** Add one or more files (e.g. reproducers) to an uploading submission. */
+/** Add one or more files (e.g. reproducers) to a pending submission. */
 export const addSubmissionFiles = async (
   uuid: string,
   files: File[],
@@ -103,7 +103,7 @@ export const addSubmissionFiles = async (
 };
 
 /**
- * Delete a single file from an uploading submission. Deleting `submission.json`
+ * Delete a single file from a pending submission. Deleting `submission.json`
  * removes the whole submission.
  */
 export const deleteSubmissionFile = async (uuid: string, filename: string): Promise<void> => {
@@ -112,12 +112,12 @@ export const deleteSubmissionFile = async (uuid: string, filename: string): Prom
   );
 };
 
-/** Delete a whole uploading submission and all of its files. */
+/** Delete a whole pending submission and all of its files. */
 export const deleteSubmission = async (uuid: string): Promise<void> => {
   await axios.delete(`${CLEARINGHOUSE_SUBMISSIONS_PATH}/${uuid}`);
 };
 
-/** Finalize an uploading submission (`uploading` → `submitted`). */
+/** Finalize a pending submission (`pending` → `submitted`). */
 export const submitSubmission = async (uuid: string): Promise<ClearinghouseSubmission> => {
   const { data } = await axios.post<ClearinghouseSubmission>(
     `${CLEARINGHOUSE_SUBMISSIONS_PATH}/${uuid}/submit`,

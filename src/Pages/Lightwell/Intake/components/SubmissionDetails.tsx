@@ -48,7 +48,7 @@ type ConfirmState = {
 };
 
 const statusColor: Record<SubmissionStatus, 'blue' | 'green' | 'grey'> = {
-  uploading: 'blue',
+  pending: 'blue',
   submitted: 'green',
   processed: 'grey',
 };

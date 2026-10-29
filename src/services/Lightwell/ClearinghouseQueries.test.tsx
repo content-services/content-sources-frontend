@@ -21,7 +21,7 @@ const mockedApi = api as jest.Mocked<typeof api>;
 
 const submission = {
   uuid: 'sub-1',
-  status: 'uploading' as const,
+  status: 'pending' as const,
   created_at: '2026-10-20T10:00:00Z',
   username: 'author@example.com',
 };
