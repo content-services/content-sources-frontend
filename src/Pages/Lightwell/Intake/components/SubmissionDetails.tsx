@@ -256,7 +256,7 @@ const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsPr
               justifyContent={{ default: 'justifyContentSpaceBetween' }}
             >
               <FlexItem>
-                <code>{mainFile.filename}</code>
+                <code>{canDownload ? mainFile.filename : submission.name}</code>
               </FlexItem>
               {canDownload ? (
                 <FlexItem>

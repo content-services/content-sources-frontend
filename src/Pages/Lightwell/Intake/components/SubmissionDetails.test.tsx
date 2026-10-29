@@ -125,6 +125,20 @@ describe('SubmissionDetails', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('shows the submission name instead of the filename when the user cannot download', () => {
+    mockedHook.mockReturnValue(
+      buildHook({
+        canDownload: false,
+        submission: { ...buildHook().submission, name: 'My submission' },
+        mainFile: { uuid: 'f-0', filename: 'secret-internal.json' },
+      }),
+    );
+    render(<SubmissionDetails uuid='sub-1' />);
+
+    expect(screen.getByText('My submission')).toBeInTheDocument();
+    expect(screen.queryByText('secret-internal.json')).not.toBeInTheDocument();
+  });
+
   it('shows skeleton rows while reproducers are uploading', () => {
     mockedHook.mockReturnValue(buildHook({ isAddingFiles: true, addingCount: 2 }));
     render(<SubmissionDetails uuid='sub-1' />);
