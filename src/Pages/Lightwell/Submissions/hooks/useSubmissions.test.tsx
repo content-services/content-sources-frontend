@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import axios from 'axios';
 
 import { ReactQueryTestWrapper } from 'testingHelpers';
-import { useIntake } from './useIntake';
+import { useSubmissions } from './useSubmissions';
 
 const mockNotify = jest.fn();
 jest.mock('Hooks/useNotification', () => () => ({ notify: mockNotify }));
@@ -21,17 +21,18 @@ const createdSubmission = {
   username: 'author@example.com',
 };
 
-const renderIntake = () => renderHook(() => useIntake(), { wrapper: ReactQueryTestWrapper });
+const renderSubmissions = () =>
+  renderHook(() => useSubmissions(), { wrapper: ReactQueryTestWrapper });
 
 beforeEach(() => {
   mockNotify.mockClear();
   mockCurrentUsername = undefined;
 });
 
-describe('useIntake', () => {
+describe('useSubmissions', () => {
   it('rejects a non-json file on selection without calling the API', async () => {
     const post = jest.spyOn(axios, 'post');
-    const { result } = renderIntake();
+    const { result } = renderSubmissions();
 
     act(() => {
       result.current.onDropAccepted([new File([''], 'report.yaml')]);
@@ -48,7 +49,7 @@ describe('useIntake', () => {
 
   it('auto-creates the submission on valid file selection (no submit button)', async () => {
     const post = jest.spyOn(axios, 'post').mockResolvedValue({ data: createdSubmission });
-    const { result } = renderIntake();
+    const { result } = renderSubmissions();
 
     act(() => {
       result.current.onDropAccepted([jsonFile()]);
@@ -64,7 +65,7 @@ describe('useIntake', () => {
     const post = jest.spyOn(axios, 'post').mockResolvedValue({
       data: { uuid: 'sub-2', status: 'pending', created_at: '2026-10-20T10:00:00Z' },
     });
-    const { result } = renderIntake();
+    const { result } = renderSubmissions();
 
     act(() => {
       result.current.onDropAccepted([jsonFile()]);
@@ -80,7 +81,7 @@ describe('useIntake', () => {
   it('omits the author in the success toast when the submission is by the current user', async () => {
     mockCurrentUsername = createdSubmission.username;
     const post = jest.spyOn(axios, 'post').mockResolvedValue({ data: createdSubmission });
-    const { result } = renderIntake();
+    const { result } = renderSubmissions();
 
     act(() => {
       result.current.onDropAccepted([jsonFile()]);
@@ -95,7 +96,7 @@ describe('useIntake', () => {
 
   it('returns to select and keeps the file when creation fails', async () => {
     const post = jest.spyOn(axios, 'post').mockRejectedValue(new Error('boom'));
-    const { result } = renderIntake();
+    const { result } = renderSubmissions();
 
     act(() => {
       result.current.onDropAccepted([jsonFile()]);
@@ -115,7 +116,7 @@ describe('useIntake', () => {
     const post = jest.spyOn(axios, 'post').mockRejectedValue({
       response: { data: { errors: [{ status: 400, detail: 'You can attach at most 20 files.' }] } },
     });
-    const { result } = renderIntake();
+    const { result } = renderSubmissions();
 
     act(() => {
       result.current.onDropAccepted([jsonFile()]);
@@ -135,7 +136,7 @@ describe('useIntake', () => {
 
   it('resets back to the select step', async () => {
     const post = jest.spyOn(axios, 'post').mockResolvedValue({ data: createdSubmission });
-    const { result } = renderIntake();
+    const { result } = renderSubmissions();
 
     act(() => {
       result.current.onDropAccepted([jsonFile()]);

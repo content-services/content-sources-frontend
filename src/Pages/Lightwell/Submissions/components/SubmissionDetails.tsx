@@ -85,7 +85,7 @@ const useStyles = createUseStyles({
  * footer offers delete-all/submit while editable and "Mark as processed" while
  * submitted (read), and is hidden entirely when no action is available.
  *
- * On mount it also consumes any reproducer files handed over from the Intake hero
+ * On mount it also consumes any reproducer files handed over from the Submissions hero
  * (via PendingReproducersContext) and uploads them, showing skeleton rows.
  */
 const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsProps) => {

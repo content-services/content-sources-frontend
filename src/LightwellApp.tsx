@@ -26,7 +26,7 @@ import { useAppContext } from './middleware/AppContext';
 import CoverageReport from 'Pages/Lightwell/Lens/CoverageReport';
 import ManifestUpload from 'Pages/Lightwell/Lens/ManifestUpload';
 import TermsGuard from 'Pages/Lightwell/components/TermsGuard';
-import Intake from 'Pages/Lightwell/Intake/Intake';
+import Submissions from 'Pages/Lightwell/Submissions/Submissions';
 
 export default function LightwellApp() {
   const pageSafe = usePageSafe();
@@ -144,7 +144,7 @@ export default function LightwellApp() {
         ) : null}
         {isFeatureOn(features?.lightwellclearinghouse) ||
         isFeatureOn(features?.lightwellclearinghouseread) ? (
-          <Route path='intake' element={<Intake />} />
+          <Route path='submissions' element={<Submissions />} />
         ) : null}
         {features?.lightwelllens?.enabled && features?.lightwelllens?.accessible ? (
           <>

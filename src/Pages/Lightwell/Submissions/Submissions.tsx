@@ -21,18 +21,18 @@ import FileUploadCard from '../components/FileUploadCard';
 import UploadSuccessStep from './components/UploadSuccessStep';
 import SubmissionsTable from './components/SubmissionsTable';
 import { PendingReproducersProvider } from './components/PendingReproducersContext';
-import { useIntake } from './hooks/useIntake';
+import { useSubmissions } from './hooks/useSubmissions';
 
 // Writers submit; read-only (TAM) users review what customers have submitted, so
 // the hero copy is framed differently for each.
-const INTAKE_DESCRIPTION_WRITE =
+const SUBMISSIONS_DESCRIPTION_WRITE =
   'Submit vulnerability findings using the shared JSON / OpenAPI intake contract—without emailing files to your STAM.';
-const INTAKE_DESCRIPTION_READ =
+const SUBMISSIONS_DESCRIPTION_READ =
   'Review vulnerability findings submitted by customers through the shared JSON / OpenAPI intake contract.';
 
 const DROP_LAST_CHROME_SEGMENT_OPTIONS = { dropLastChromeSegment: true };
 
-const IntakeHelpPopover = () => (
+const SubmissionsHelpPopover = () => (
   <LwPopover
     hasHeader='Vulnerability report intake'
     hasBody={
@@ -45,7 +45,7 @@ const IntakeHelpPopover = () => (
       </Content>
     }
     hasTrigger={
-      <LwButton isCircle variant='plain' aria-label='Intake help'>
+      <LwButton isCircle variant='plain' aria-label='Submissions help'>
         <HelpIcon />
       </LwButton>
     }
@@ -53,21 +53,21 @@ const IntakeHelpPopover = () => (
 );
 
 /**
- * Clearinghouse intake page, routed at `/intake` for users with
+ * Clearinghouse submissions page, routed at `/submissions` for users with
  * `lightwellclearinghouse` or `lightwellclearinghouseread`. A Lens-style hero:
  * title + description on the left; on the right the JSON upload form (always
  * visible for writers) which swaps in place for the created submission's detail
  * after an upload. The submissions table sits below the hero in its own section.
  */
-const Intake = () => {
-  const { step, file, fileError, createdUuid, onDropAccepted, reset } = useIntake();
+const Submissions = () => {
+  const { step, file, fileError, createdUuid, onDropAccepted, reset } = useSubmissions();
   const queryClient = useQueryClient();
   const { features } = useAppContext();
 
   const rootPath = useLightwellRootPath();
   const appBreadcrumbsEnabled = useFlag('platform.chrome.app-breadcrumbs');
   const breadcrumbs = useMemo(
-    () => [{ pathname: `${rootPath}/intake`, title: 'Lightwell Intake' }],
+    () => [{ pathname: `${rootPath}/submissions`, title: 'Lightwell Submissions' }],
     [rootPath],
   );
 
@@ -99,9 +99,9 @@ const Intake = () => {
         <PageChromeSlots>
           <PageChromeSlot>
             <PageTitleStack
-              title='Intake'
-              description={canUpload ? INTAKE_DESCRIPTION_WRITE : INTAKE_DESCRIPTION_READ}
-              ouiaId='lightwell-beacon-intake-header'
+              title='Submissions'
+              description={canUpload ? SUBMISSIONS_DESCRIPTION_WRITE : SUBMISSIONS_DESCRIPTION_READ}
+              ouiaId='lightwell-beacon-submissions-header'
             />
           </PageChromeSlot>
 
@@ -116,7 +116,7 @@ const Intake = () => {
             {showForm ? (
               <FileUploadCard
                 title='Select vulnerability report to upload'
-                action={<IntakeHelpPopover />}
+                action={<SubmissionsHelpPopover />}
                 dropzoneTitle='Drag and drop findings JSON file'
                 infoText='.json required · attach reproducers after selection'
                 file={file}
@@ -145,4 +145,4 @@ const Intake = () => {
   );
 };
 
-export default Intake;
+export default Submissions;

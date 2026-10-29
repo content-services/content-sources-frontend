@@ -33,10 +33,10 @@ export const useSubmissionQuery = (uuid: string) =>
     enabled: !!uuid,
   });
 
-// Errors are handled inline by the calling hook (useIntake) so it can
+// Errors are handled inline by the calling hook (useSubmissions) so it can
 // surface a toast and keep the intake form open for a retry. The list is NOT
 // invalidated here on purpose: the new submission should only appear in the
-// table once the author saves it for later (Intake handles that).
+// table once the author saves it for later (Submissions handles that).
 export const useCreateSubmissionMutation = () =>
   useMutation({ mutationFn: (file: File) => createSubmission(file) });
 

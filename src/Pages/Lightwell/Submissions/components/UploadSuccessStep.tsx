@@ -29,7 +29,7 @@ export type UploadSuccessStepProps = {
 };
 
 /**
- * Post-upload confirmation step shown inline in the Intake hero right after a
+ * Post-upload confirmation step shown inline in the Submissions hero right after a
  * report is created. It confirms the main report was saved, then offers two
  * mutually-exclusive next moves: upload optional reproducer file(s) — which hands
  * the chosen files to the submission drawer (where the upload actually happens and
@@ -84,8 +84,7 @@ const UploadSuccessStep = ({
           </FlexItem>
           <FlexItem>
             <Content component='p'>
-              <code>{submission?.name}</code> was successfully uploaded and
-              saved
+              <code>{submission?.name}</code> was successfully uploaded and saved
             </Content>
           </FlexItem>
         </Flex>

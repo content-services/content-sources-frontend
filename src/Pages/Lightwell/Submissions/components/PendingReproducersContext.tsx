@@ -15,14 +15,14 @@ type PendingReproducersContextValue = {
 };
 
 // Default no-op so components (and their unit tests) render without a provider;
-// the real hand-off only happens when Intake wraps the page in the provider.
+// the real hand-off only happens when Submissions wraps the page in the provider.
 const PendingReproducersContext = createContext<PendingReproducersContextValue>({
   setPending: () => undefined,
   takePending: () => undefined,
 });
 
 /**
- * Carries reproducer File objects from the Intake hero (UploadSuccessStep) to the
+ * Carries reproducer File objects from the Submissions hero (UploadSuccessStep) to the
  * submission drawer (SubmissionDetails). The drawer is opened via the URL param
  * `?submission=<uuid>`, which can't carry File objects, so the hero stashes the
  * chosen files here and the drawer consumes them on mount to perform the upload.

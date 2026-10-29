@@ -7,7 +7,7 @@ import { useCreateSubmissionMutation } from 'services/Lightwell/ClearinghouseQue
 import { validateSubmissionFile } from '../utils/validateSubmissionFile';
 import { useCurrentUsername } from './useCurrentUsername';
 
-export type IntakeStep = 'select' | 'uploading' | 'detail';
+export type SubmissionsStep = 'select' | 'uploading' | 'detail';
 
 /**
  * Drives the clearinghouse intake flow. Selecting a valid JSON file validates it
@@ -15,11 +15,11 @@ export type IntakeStep = 'select' | 'uploading' | 'detail';
  * view moves to `detail` with the new submission's uuid. On failure it returns to
  * `select`, keeping the file so the author can retry.
  */
-export const useIntake = () => {
+export const useSubmissions = () => {
   const { notify } = useNotification();
   const currentUsername = useCurrentUsername();
   const createSubmission = useCreateSubmissionMutation();
-  const [step, setStep] = useState<IntakeStep>('select');
+  const [step, setStep] = useState<SubmissionsStep>('select');
   const [file, setFile] = useState<File | undefined>();
   const [fileError, setFileError] = useState<string | undefined>();
   const [createdUuid, setCreatedUuid] = useState<string | undefined>();
