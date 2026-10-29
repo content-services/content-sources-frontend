@@ -145,7 +145,9 @@ describe('downloadBlob', () => {
 
     downloadBlob(blob, 'report.json');
 
-    expect(createObjectURL).toHaveBeenCalledWith(blob);
+    // The blob is re-typed to a non-renderable binary before the URL is created.
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    expect((createObjectURL.mock.calls[0][0] as Blob).type).toBe('application/octet-stream');
     expect(click).toHaveBeenCalledTimes(1);
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
 
@@ -167,7 +169,7 @@ describe('downloadSubmissionFile', () => {
     expect(get).toHaveBeenCalledWith(`${CLEARINGHOUSE_SUBMISSIONS_PATH}/sub-1/files/a.jpg`, {
       responseType: 'blob',
     });
-    expect(createObjectURL).toHaveBeenCalledWith(blob);
+    expect((createObjectURL.mock.calls[0][0] as Blob).type).toBe('application/octet-stream');
 
     get.mockRestore();
     click.mockRestore();
@@ -190,7 +192,7 @@ describe('downloadSubmissionArchive', () => {
     expect(get).toHaveBeenCalledWith(`${CLEARINGHOUSE_SUBMISSIONS_PATH}/sub-1/archive`, {
       responseType: 'blob',
     });
-    expect(createObjectURL).toHaveBeenCalledWith(blob);
+    expect((createObjectURL.mock.calls[0][0] as Blob).type).toBe('application/octet-stream');
     expect(anchor.download).toBe('sub-1.zip');
 
     get.mockRestore();

@@ -137,8 +137,13 @@ const SubmissionsTable = () => {
 
   // Delete is author-only while pending; downloading the archive is restricted to
   // clearinghouse read users, once the submission is submitted or processed.
+  // Mirrors `canManage` in SubmissionDetails: fails closed until the username
+  // resolves so a row is never deletable by a non-author.
   const canDeleteRow = (submission: ClearinghouseSubmission) =>
-    hasWrite && submission.status === 'pending';
+    hasWrite &&
+    submission.status === 'pending' &&
+    !!currentUsername &&
+    submission.username === currentUsername;
   const canDownloadRow = (submission: ClearinghouseSubmission) =>
     hasRead && (submission.status === 'submitted' || submission.status === 'processed');
   const showActions = submissions.some(

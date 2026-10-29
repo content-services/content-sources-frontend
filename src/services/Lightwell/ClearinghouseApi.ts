@@ -138,7 +138,14 @@ export const processSubmission = async (uuid: string): Promise<ClearinghouseSubm
 
 /** Trigger a browser download of a blob under the given filename. */
 export const downloadBlob = (blob: Blob, filename: string): void => {
-  const url = URL.createObjectURL(blob);
+  // Re-type the blob as a neutral, non-renderable binary before creating the
+  // object URL. The `download` attribute below already forces a save rather than
+  // navigation, so the blob is never loaded as a document in our origin; forcing
+  // `application/octet-stream` is defense-in-depth that also clears Snyk's
+  // createObjectURL finding. `slice` returns a view, so no bytes are copied, and
+  // the saved content and filename/extension (driven by `download`) are unchanged.
+  const safeBlob = blob.slice(0, blob.size, 'application/octet-stream');
+  const url = URL.createObjectURL(safeBlob);
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = filename;

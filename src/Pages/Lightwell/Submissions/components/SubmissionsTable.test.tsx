@@ -226,12 +226,22 @@ describe('SubmissionsTable', () => {
   });
 
   it('shows a delete action for a pending submission the author can manage', () => {
+    mockCurrentUsername = 'author@example.com';
     renderWithRouter();
 
     expect(screen.getByRole('button', { name: /Delete RHOSE-4.9.json/i })).toBeInTheDocument();
     // Download is read-only on submitted/processed, so a pending row has none.
     expect(
       screen.queryByRole('button', { name: /Download RHOSE-4.9.json/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides the delete action on a pending submission from a non-author', () => {
+    mockCurrentUsername = 'someone-else@example.com';
+    renderWithRouter();
+
+    expect(
+      screen.queryByRole('button', { name: /Delete RHOSE-4.9.json/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -286,6 +296,7 @@ describe('SubmissionsTable', () => {
   });
 
   it('deletes a submission only after confirming', async () => {
+    mockCurrentUsername = 'author@example.com';
     const user = userEvent.setup();
     renderWithRouter();
 
