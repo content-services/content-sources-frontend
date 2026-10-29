@@ -4,6 +4,7 @@ import { useRemoteHook } from '@scalprum/react-core';
 import { useFlag } from '@unleash/proxy-client-react';
 import { Bullseye, CardBody, Content, PageSection, Spinner } from '@patternfly/react-core';
 import HelpIcon from '@patternfly/react-icons/dist/esm/icons/help-icon';
+import ExclamationTriangleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-triangle-icon';
 
 import { useLightwellRootPath } from '../../../Hooks/Lightwell/navigation/useLightwellRootPath';
 import {
@@ -122,6 +123,20 @@ const Submissions = () => {
                 file={file}
                 fileError={fileError}
                 onDropAccepted={onDropAccepted}
+                footer={
+                  <Content
+                    component='small'
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--pf-t--global--spacer--xs)',
+                      marginTop: 'var(--pf-t--global--spacer--md)',
+                    }}
+                  >
+                    <ExclamationTriangleIcon />
+                    All submitted files are saved for up to 90 days.
+                  </Content>
+                }
               />
             ) : null}
 

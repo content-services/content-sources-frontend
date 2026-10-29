@@ -105,6 +105,12 @@ describe('Submissions', () => {
     expect(screen.queryByRole('button', { name: /close upload form/i })).not.toBeInTheDocument();
   });
 
+  it('notes the 90-day retention policy under the upload form', () => {
+    renderSubmissions();
+
+    expect(screen.getByText(/saved for up to 90 days/i)).toBeInTheDocument();
+  });
+
   it('hides the upload form for users without the write feature, keeping the table', () => {
     mockFeatures = { lightwellclearinghouseread: ON };
     renderSubmissions();
