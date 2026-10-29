@@ -17,6 +17,8 @@ import {
   useProcessSubmissionMutation,
 } from 'services/Lightwell/ClearinghouseQueries';
 
+import { useCurrentUsername } from './useCurrentUsername';
+
 type UseSubmissionDetailOptions = {
   uuid: string;
   /** Called after the whole submission is deleted (e.g. to collapse the view). */
@@ -29,10 +31,12 @@ type UseSubmissionDetailOptions = {
  * Drives the SubmissionDetail view: fetches a submission, splits its main
  * report from reproducer files, and exposes add / delete / submit / process /
  * download actions. `canEdit` (pending + clearinghouse write) gates the
- * add/delete/submit controls; `canProcess` (submitted + clearinghouse read) gates
+ * "add reproducers" control; `canManage` additionally requires that the current
+ * user is the submission's author and gates the submit / delete-file /
+ * delete-submission controls; `canProcess` (submitted + clearinghouse read) gates
  * the "Mark as processed" control; `canDownload` gates the per-file / archive
- * download controls, mirroring the backend authorization (author while
- * pending/submitted, read while submitted/processed). Callers hide controls
+ * download controls, mirroring the backend authorization (author may submit /
+ * delete while pending, read while submitted/processed). Callers hide controls
  * accordingly.
  */
 export const useSubmissionDetail = ({
@@ -42,6 +46,7 @@ export const useSubmissionDetail = ({
 }: UseSubmissionDetailOptions) => {
   const { notify } = useNotification();
   const { features } = useAppContext();
+  const currentUsername = useCurrentUsername();
   const { data: submission, isLoading, isError } = useSubmissionQuery(uuid);
 
   const addFilesMutation = useAddSubmissionFilesMutation(uuid);
@@ -60,6 +65,11 @@ export const useSubmissionDetail = ({
   const hasWrite = isFeatureOn(features?.lightwellclearinghouse);
   const hasRead = isFeatureOn(features?.lightwellclearinghouseread);
   const canEdit = status === 'pending' && hasWrite;
+  // Only the submission's author may submit or delete (individual files or the
+  // whole submission); any clearinghouse-write user can still add reproducers
+  // while the submission is pending. Fails closed until the username resolves.
+  const isAuthor = !!currentUsername && submission?.username === currentUsername;
+  const canManage = canEdit && isAuthor;
   const canProcess = status === 'submitted' && hasRead;
   // Downloading any file (per-file or the full archive) is restricted to
   // clearinghouse read (STAM / processor) users, and only once the submission is
@@ -150,6 +160,7 @@ export const useSubmissionDetail = ({
     isLoading,
     isError,
     canEdit,
+    canManage,
     canProcess,
     canDownload,
     mainFile,

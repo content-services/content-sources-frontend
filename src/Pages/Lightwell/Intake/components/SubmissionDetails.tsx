@@ -94,6 +94,7 @@ const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsPr
     isLoading,
     isError,
     canEdit,
+    canManage,
     canProcess,
     canDownload,
     mainFile,
@@ -222,7 +223,7 @@ const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsPr
             </LwButton>
           </FlexItem>
         ) : null}
-        {canEdit ? (
+        {canManage ? (
           <FlexItem>
             <LwButton
               variant='plain'
@@ -239,7 +240,7 @@ const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsPr
     );
   };
 
-  const showFooter = canEdit || canProcess || canDownload;
+  const showFooter = canManage || canProcess || canDownload;
 
   return (
     <div className={classes.root} data-ouia-component-id='submission-details'>
@@ -345,7 +346,7 @@ const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsPr
             alignItems={{ default: 'alignItemsCenter' }}
             spaceItems={{ default: 'spaceItemsSm' }}
           >
-            {canEdit ? (
+            {canManage ? (
               <FlexItem>
                 <LwButton
                   variant='danger'
@@ -357,7 +358,7 @@ const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsPr
                 </LwButton>
               </FlexItem>
             ) : null}
-            {canEdit ? (
+            {canManage ? (
               <FlexItem>
                 <LwButton
                   variant='primary'

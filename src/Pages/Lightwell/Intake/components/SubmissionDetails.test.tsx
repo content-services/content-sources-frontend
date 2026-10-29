@@ -23,6 +23,7 @@ const buildHook = (overrides = {}) => ({
   isLoading: false,
   isError: false,
   canEdit: true,
+  canManage: true,
   canProcess: false,
   canDownload: true,
   mainFile: { uuid: 'f-0', filename: 'RHOSE-4.9.json' },
@@ -169,8 +170,21 @@ describe('SubmissionDetails', () => {
     expect(screen.getByRole('button', { name: /Delete repro.jpg/i })).toBeInTheDocument();
   });
 
+  it('lets a non-author write user add reproducers but hides submit/delete controls', () => {
+    // canEdit (pending + write) but canManage false: the viewer is not the author.
+    mockedHook.mockReturnValue(buildHook({ canEdit: true, canManage: false }));
+    render(<SubmissionDetails uuid='sub-1' />);
+
+    // Adding reproducers stays available to any write user while pending.
+    expect(screen.getByRole('button', { name: 'Add more reproducers' })).toBeInTheDocument();
+    // Author-only controls are hidden.
+    expect(screen.queryByRole('button', { name: 'Delete all' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Submit' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Delete repro.jpg/i })).not.toBeInTheDocument();
+  });
+
   it('shows only downloads for a read-only viewer who cannot edit or process', () => {
-    mockedHook.mockReturnValue(buildHook({ canEdit: false, canProcess: false }));
+    mockedHook.mockReturnValue(buildHook({ canEdit: false, canManage: false, canProcess: false }));
     render(<SubmissionDetails uuid='sub-1' />);
 
     expect(screen.queryByRole('button', { name: 'Add more reproducers' })).not.toBeInTheDocument();
@@ -185,7 +199,7 @@ describe('SubmissionDetails', () => {
 
   it('hides the footer entirely when no edit/process/download actions are available', () => {
     mockedHook.mockReturnValue(
-      buildHook({ canEdit: false, canProcess: false, canDownload: false }),
+      buildHook({ canEdit: false, canManage: false, canProcess: false, canDownload: false }),
     );
     render(<SubmissionDetails uuid='sub-1' />);
 
@@ -198,7 +212,7 @@ describe('SubmissionDetails', () => {
   });
 
   it('shows "Mark as processed" in the footer when canProcess', () => {
-    mockedHook.mockReturnValue(buildHook({ canEdit: false, canProcess: true }));
+    mockedHook.mockReturnValue(buildHook({ canEdit: false, canManage: false, canProcess: true }));
     render(<SubmissionDetails uuid='sub-1' />);
 
     expect(screen.getByRole('button', { name: 'Mark as processed' })).toBeInTheDocument();
@@ -276,7 +290,9 @@ describe('SubmissionDetails', () => {
 
   it('marks as processed only after confirming', async () => {
     const process = jest.fn();
-    mockedHook.mockReturnValue(buildHook({ canEdit: false, canProcess: true, process }));
+    mockedHook.mockReturnValue(
+      buildHook({ canEdit: false, canManage: false, canProcess: true, process }),
+    );
     const user = userEvent.setup();
     render(<SubmissionDetails uuid='sub-1' />);
 

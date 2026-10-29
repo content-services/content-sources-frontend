@@ -6,6 +6,11 @@ import { useSubmissionDetail } from './useSubmissionDetail';
 const mockNotify = jest.fn();
 jest.mock('Hooks/useNotification', () => () => ({ notify: mockNotify }));
 
+let mockCurrentUsername: string | undefined = 'author@example.com';
+jest.mock('./useCurrentUsername', () => ({
+  useCurrentUsername: () => mockCurrentUsername,
+}));
+
 let mockSubmission: ClearinghouseSubmission | undefined;
 let mockIsLoading = false;
 let mockIsError = false;
@@ -83,6 +88,7 @@ beforeEach(() => {
   mockIsLoading = false;
   mockIsError = false;
   mockFeatures = { lightwellclearinghouse: ON, lightwellclearinghouseread: ON };
+  mockCurrentUsername = 'author@example.com';
 });
 
 describe('useSubmissionDetail', () => {
@@ -98,6 +104,30 @@ describe('useSubmissionDetail', () => {
     mockFeatures = { lightwellclearinghouseread: ON };
     rerender();
     expect(result.current.canEdit).toBe(false);
+  });
+
+  it('can manage (submit/delete) only when the current user is the submission author', () => {
+    // Author of a pending submission with write access: can manage.
+    const { result, rerender } = render({ uuid: 'sub-1' });
+    expect(result.current.canEdit).toBe(true);
+    expect(result.current.canManage).toBe(true);
+
+    // A different write user can still edit (add reproducers) but cannot manage.
+    mockCurrentUsername = 'someone-else@example.com';
+    rerender();
+    expect(result.current.canEdit).toBe(true);
+    expect(result.current.canManage).toBe(false);
+
+    // Fails closed before the username resolves.
+    mockCurrentUsername = undefined;
+    rerender();
+    expect(result.current.canManage).toBe(false);
+
+    // The author of a non-pending submission cannot manage it.
+    mockCurrentUsername = 'author@example.com';
+    mockSubmission = { ...pendingSubmission, status: 'submitted' };
+    rerender();
+    expect(result.current.canManage).toBe(false);
   });
 
   it('can process only a submitted submission and only with the read feature', () => {
