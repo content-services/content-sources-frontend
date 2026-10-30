@@ -12,6 +12,7 @@ import { LwCard } from 'kit/components/primitives';
 import { useManifestUpload } from './hooks/useManifestUpload';
 import AnalysisProgress from './components/AnalysisProgress';
 import ManifestFormatPopover from './components/ManifestFormatPopover';
+import GeneratePomSbomPopover from './components/PomAnalysisWarning';
 import FileUploadCard from '../components/FileUploadCard';
 import { useLightwellRootPath } from '../../../Hooks/Lightwell/navigation/useLightwellRootPath';
 
@@ -72,6 +73,11 @@ const ManifestUpload = () => {
         <PageChromeSlot>
           <Content>
             Supported formats: CSV, CycloneDX, SPDX, POM, requirements.txt
+            <br />
+            Analysis of a pom.xml is not accurate by itself, because it does not include all
+            dependencies.
+            <br />
+            Upload an SBOM for a more accurate analysis. <GeneratePomSbomPopover />
             <br />
             File size limit: Up to 10MB for POM files. Up to 15MB for all other supported formats.
           </Content>
