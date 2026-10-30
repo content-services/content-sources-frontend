@@ -7,12 +7,14 @@ import {
   testEUSRepositoryParamsResponse,
   defaultEUSRepository,
 } from 'testingHelpers';
-import { render, waitFor, screen, within } from '@testing-library/react';
+import { act, render, waitFor, screen, within } from '@testing-library/react';
 import ContentListTable from './ContentListTable';
 import { useContentListQuery, useRepositoryParams } from 'services/Content/ContentQueries';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import { useAppContext } from 'middleware/AppContext';
 import userEvent from '@testing-library/user-event';
+
+jest.unmock('Hooks/useDebounce');
 
 jest.mock('services/Content/ContentQueries', () => ({
   useRepositoryParams: jest.fn(),
@@ -358,4 +360,118 @@ it('filters the table by major and minor OS versions', async () => {
   });
   expect(await screen.findByText(defaultEUSRepository.name!)).toBeInTheDocument();
   expect(await screen.findByText(defaultRedHatRepository.name!)).toBeInTheDocument();
+});
+
+it('filters the table by product', async () => {
+  (useAppContext as jest.Mock).mockReturnValue({
+    features: { snapshots: { accessible: true } },
+    rbac: { repoWrite: true, repoRead: true },
+    contentOrigin: [ContentOrigin.REDHAT],
+    setContentOrigin: () => {},
+  });
+  (useContentListQuery as jest.Mock).mockImplementation((_page, _limit, filterData) => {
+    const onlyArm64 =
+      filterData?.feature_products?.length === 1 &&
+      filterData.feature_products[0] === 'RHEL-OS-aarch64';
+    const data = onlyArm64
+      ? [defaultRedHatRepository]
+      : [defaultRedHatRepository, defaultEPELRepository];
+    return { isLoading: false, data: { data, meta: { count: data.length, limit: 20, offset: 0 } } };
+  });
+
+  renderContentListTable();
+
+  // Initially, there should be two rows (one for each repository)
+  let rows = document.querySelectorAll('tbody tr');
+  expect(rows.length).toBe(2);
+
+  const user = userEvent.setup();
+
+  const toolbar = screen.getByTestId('content-list-toolbar');
+  await user.click(within(toolbar).getByRole('button', { name: 'Name' }));
+  await user.click(within(screen.getByRole('menu')).getByRole('menuitem', { name: 'Product' }));
+  await user.type(screen.getByRole('combobox', { name: 'filter products' }), 'ARM');
+  expect(screen.queryByLabelText('Red Hat Enterprise Linux for x86_64')).not.toBeInTheDocument();
+  await user.click(screen.getByLabelText('Red Hat Enterprise Linux for ARM 64'));
+
+  // After filtering by product, there should be one row (for the filtered repository)
+  await waitFor(() => {
+    rows = document.querySelectorAll('tbody tr');
+    expect(rows.length).toBe(1);
+  });
+  expect(await screen.findByText(defaultRedHatRepository.name!)).toBeInTheDocument();
+  expect(screen.queryByText(defaultEPELRepository.name!)).not.toBeInTheDocument();
+
+  await user.click(screen.getByRole('button', { name: 'Clear filters' }));
+  expect(await screen.findByText(defaultEPELRepository.name!)).toBeInTheDocument();
+});
+
+it('keeps rapid product selections while debouncing repository requests', async () => {
+  jest.useFakeTimers();
+  try {
+    (useAppContext as jest.Mock).mockReturnValue({
+      features: { snapshots: { accessible: true } },
+      rbac: { repoWrite: true, repoRead: true },
+      contentOrigin: [ContentOrigin.REDHAT],
+      setContentOrigin: () => {},
+    });
+    (useContentListQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: {
+        data: [defaultRedHatRepository, defaultEPELRepository],
+        meta: { count: 2, limit: 20, offset: 0 },
+      },
+    });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    renderContentListTable();
+
+    const toolbar = screen.getByTestId('content-list-toolbar');
+    await user.click(within(toolbar).getByRole('button', { name: 'Name' }));
+    await user.click(within(screen.getByRole('menu')).getByRole('menuitem', { name: 'Product' }));
+    await user.click(screen.getByRole('combobox', { name: 'filter products' }));
+    const arm = screen.getByRole('checkbox', { name: 'Red Hat Enterprise Linux for ARM 64' });
+    const x86 = screen.getByRole('checkbox', { name: 'Red Hat Enterprise Linux for x86_64' });
+
+    await user.click(arm);
+    expect(arm).toBeChecked();
+    act(() => jest.advanceTimersByTime(50));
+    await user.click(x86);
+    expect(arm).toBeChecked();
+    expect(x86).toBeChecked();
+    expect((useContentListQuery as jest.Mock).mock.calls.at(-1)[2].feature_products).toEqual([]);
+
+    act(() => jest.advanceTimersByTime(200));
+    expect((useContentListQuery as jest.Mock).mock.calls.at(-1)[2].feature_products).toEqual([
+      'RHEL-OS-aarch64',
+      'RHEL-OS-x86_64',
+    ]);
+  } finally {
+    act(() => jest.runOnlyPendingTimers());
+    jest.useRealTimers();
+  }
+});
+
+it('disables the product filter when Red Hat is not a selected origin', async () => {
+  (useAppContext as jest.Mock).mockReturnValue({
+    features: { snapshots: { accessible: true } },
+    rbac: { repoWrite: true, repoRead: true },
+    contentOrigin: [ContentOrigin.COMMUNITY, ContentOrigin.CUSTOM],
+    setContentOrigin: () => {},
+  });
+  (useContentListQuery as jest.Mock).mockReturnValue({
+    isLoading: false,
+    data: {
+      data: [defaultEPELRepository],
+      meta: { count: 1, limit: 20, offset: 0 },
+    },
+  });
+
+  const user = userEvent.setup();
+  renderContentListTable();
+
+  const toolbar = screen.getByTestId('content-list-toolbar');
+  await user.click(within(toolbar).getByRole('button', { name: 'Name' }));
+  await user.click(within(screen.getByRole('menu')).getByRole('menuitem', { name: 'Product' }));
+
+  expect(screen.getByRole('combobox', { name: 'filter products' })).toBeDisabled();
 });
