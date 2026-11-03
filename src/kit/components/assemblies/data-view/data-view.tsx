@@ -205,9 +205,20 @@ type LwDataViewOwnedProps = {
   bodyStates?: Partial<Record<DataViewState, ReactNode>>;
   headStates?: Partial<Record<DataViewState, ReactNode>>;
   /**
-   * Default empty-state rendered **below the table headers**, outside the
-   * horizontal scroll container, when `activeState` is `DataViewState.empty`.
-   * Falls back to a generic "No results found" when absent.
+   * Default empty state, rendered when `activeState` is `DataViewState.empty`
+   * (and no `bodyStates[DataViewState.empty]` override is given). Falls back to a
+   * generic "No results found" when absent. Two layouts:
+   *
+   * - **Filtered-to-zero** (`emptyState.onClearFilters` is supplied, or
+   *   `search.value` is non-empty, or `pagination.itemCount > 0`): rendered
+   *   **below the table headers**, outside the horizontal scroll container, with
+   *   the built-in toolbar and `panel` kept so the user can recover.
+   * - **True empty** (none of the above): rendered **alone** — no table
+   *   headers, built-in toolbar (including `toolbarSlot`) or `panel`, since
+   *   there is nothing to filter. A caller that needs the toolbar or panel
+   *   to stay visible while empty must supply `onClearFilters`, or use
+   *   `bodyStates[DataViewState.empty]`.
+   *
    * Use `bodyStates[DataViewState.empty]` for a fully custom in-table override.
    */
   emptyState?: LwDataViewEmptyStateConfig;
@@ -624,7 +635,13 @@ export function LwDataView({
   // chrome (toolbar + panel) is meaningless there, so it is not rendered. A
   // caller signals "filters are active" by supplying `emptyState.onClearFilters`
   // (or a non-empty `search.value`); otherwise the zero rows are the real data.
-  const isTrueEmpty = useExternalEmptyState && !emptyState?.onClearFilters && !search?.value;
+  // A positive `pagination.itemCount` means results exist beyond this (empty)
+  // page, so the pagination controls must stay reachable.
+  const isTrueEmpty =
+    useExternalEmptyState &&
+    !emptyState?.onClearFilters &&
+    !search?.value &&
+    !((pagination?.itemCount ?? 0) > 0);
   // Pass activeState=undefined so PF renders an empty tbody (headers stay visible)
   // rather than activating the in-table body-state slot.
   const tableActiveState = useExternalEmptyState ? undefined : resolvedActiveState;

@@ -259,6 +259,7 @@ const Beacon = () => {
   const {
     data: displayData,
     isLoading: isLoadingDisplay,
+    isPlaceholderData,
     isError,
     error,
   } = useBeaconData(selectedCustomerId, queryFilters, pagination);
@@ -315,8 +316,18 @@ const Beacon = () => {
     (searchQuery ? 1 : 0);
 
   const itemCount = displayMeta?.count ?? 0;
-  // No rows and no filters to clear: nothing to filter or export.
-  const isTrueEmpty = !isLoading && itemCount === 0 && activeFilterCount === 0;
+  // Same predicate `queryFilters` uses: a search under 2 characters is not sent to the API,
+  // so it must not make an unfiltered empty dataset look filtered.
+  const isSearchApplied = searchQuery.trim().length >= 2;
+  const hasAppliedFilters =
+    selectedSeverities.size > 0 ||
+    selectedStatuses.size > 0 ||
+    selectedLtwlsuptTickets.size > 0 ||
+    showDuplicates ||
+    isSearchApplied;
+  // No rows, no applied filters, and a settled response (not the previous query's placeholder,
+  // which stays at 0 rows right after Reset until the refetch lands): nothing to filter or export.
+  const isTrueEmpty = !isLoading && !isPlaceholderData && itemCount === 0 && !hasAppliedFilters;
 
   const visibleColumns = useMemo(
     () =>
@@ -531,16 +542,16 @@ const Beacon = () => {
             rows={dataViewRows}
             isLoading={isLoading}
             emptyState={
-              activeFilterCount > 0
+              isTrueEmpty
                 ? {
-                    titleText: 'No results match the current filters',
-                    bodyText: 'Reset filters to show more results.',
-                    onClearFilters: resetFilters,
-                  }
-                : {
                     titleText: 'No submissions yet',
                     bodyText:
                       'Vulnerabilities will appear here once this customer has submissions.',
+                  }
+                : {
+                    titleText: 'No results match the current filters',
+                    bodyText: 'Reset filters to show more results.',
+                    onClearFilters: resetFilters,
                   }
             }
             search={{

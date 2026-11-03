@@ -143,9 +143,15 @@ it('renders the default empty state below the table headers when zero rows are c
   );
 
   // Table headers still present
-  expect(screen.getByRole('grid', { name: 'Empty table' })).toBeInTheDocument();
-  // Default empty state visible
-  expect(screen.getByText('No results found')).toBeInTheDocument();
+  const grid = screen.getByRole('grid', { name: 'Empty table' });
+  expect(grid).toBeInTheDocument();
+  // Default empty state visible, rendered AFTER the table and not inside it
+  const emptyState = screen.getByText('No results found').closest('.pf-v6-c-empty-state');
+  expect(emptyState).toBeInTheDocument();
+  expect(grid.compareDocumentPosition(emptyState as Element)).toBe(
+    Node.DOCUMENT_POSITION_FOLLOWING,
+  );
+  expect(grid).not.toContainElement(emptyState as HTMLElement);
 });
 
 it('renders only the empty state, without table headers, when true empty', () => {
@@ -181,6 +187,11 @@ it('nests the default empty state inside the drawer, as a sibling of the table, 
   // sibling of the whole drawer+panel row — otherwise it loses its coupling
   // to the table's column width once a panel is present.
   expect(within(drawer as HTMLElement).getByText('No results found')).toBeInTheDocument();
+  // Direct sibling of the table (same parent, after it) — not nested in the table.
+  const grid = within(drawer as HTMLElement).getByRole('grid', { name: 'Empty table' });
+  const emptyState = container.querySelector('.pf-v6-c-empty-state') as HTMLElement;
+  expect(emptyState.parentElement).toBe(grid.parentElement);
+  expect(grid.compareDocumentPosition(emptyState)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
 });
 
 it('renders custom titleText when emptyState.titleText is provided', () => {
@@ -1041,9 +1052,28 @@ it('hides the toolbar and panel when there are no rows and no active filters', (
 
   expect(screen.getByText('No submissions yet')).toBeInTheDocument();
   expect(screen.queryByRole('textbox', { name: 'Filter rows' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Toggle filters' })).not.toBeInTheDocument();
+  expect(container.querySelector('.pf-v6-c-toolbar')).not.toBeInTheDocument();
   expect(screen.queryByText('Panel body')).not.toBeInTheDocument();
   expect(container.querySelector('.pf-v6-c-drawer')).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+});
+
+it('keeps the toolbar and headers when the current page is empty but results exist (pagination.itemCount > 0)', () => {
+  render(
+    <LwDataView
+      aria-label='Stale page table'
+      columns={columns}
+      rows={[]}
+      activeState={DataViewState.empty}
+      pagination={{ ...paginationProps, page: 3, itemCount: 40 }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByRole('grid', { name: 'Stale page table' })).toBeInTheDocument();
+  expect(screen.getByRole('textbox', { name: 'Filter rows' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Toggle filters' })).toBeInTheDocument();
 });
 
 it('keeps the toolbar and panel when zero rows are caused by active filters (onClearFilters)', async () => {

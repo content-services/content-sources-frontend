@@ -101,6 +101,7 @@ beforeEach(() => {
 
   (useBeaconData as jest.Mock).mockReturnValue({
     isLoading: false,
+    isPlaceholderData: false,
     isError: false,
     error: null,
     data: mockBeaconData,
@@ -350,4 +351,79 @@ it('keeps the filters, table headers and Export when filters narrow the results 
 
   await user.click(screen.getByRole('button', { name: 'Reset filters' }));
   expect(await screen.findByText(mockVulnerabilities[0].vulnerabilityId)).toBeInTheDocument();
+});
+
+it('keeps the filtered view, not "No submissions yet", while Reset refetches (placeholder data)', async () => {
+  let isRefetchingAfterReset = false;
+  (useBeaconData as jest.Mock).mockImplementation(
+    (_customerId: string, filters?: { severities?: string[] }) => {
+      if (filters?.severities?.length) {
+        return {
+          isLoading: false,
+          isPlaceholderData: false,
+          isError: false,
+          error: null,
+          data: emptyBeaconData,
+        };
+      }
+      // Filters cleared: react-query keeps the previous (empty) response as placeholder data
+      // until the unfiltered refetch lands.
+      return {
+        isLoading: false,
+        isPlaceholderData: isRefetchingAfterReset,
+        isError: false,
+        error: null,
+        data: isRefetchingAfterReset ? emptyBeaconData : mockBeaconData,
+      };
+    },
+  );
+
+  renderBeacon();
+  const user = await selectCustomer('CID-01');
+
+  const filterPanel = await screen.findByRole('form', { name: 'Filter categories' });
+  await user.click(within(filterPanel).getByText('Critical'));
+  expect(await screen.findByText('No results match the current filters')).toBeInTheDocument();
+
+  isRefetchingAfterReset = true;
+  await user.click(screen.getByRole('button', { name: 'Reset filters' }));
+
+  expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+  expect(screen.getByRole('form', { name: 'Filter categories' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument();
+});
+
+it('only treats a search of 2+ characters as an applied filter for the empty state', async () => {
+  let isDatasetEmpty = false;
+  (useBeaconData as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    isPlaceholderData: false,
+    isError: false,
+    error: null,
+    data: isDatasetEmpty ? emptyBeaconData : mockBeaconData,
+  }));
+
+  renderBeacon();
+  const user = await selectCustomer('CID-01');
+  const search = await screen.findByRole('textbox', {
+    name: 'Filter vulnerabilities by ID, package, or title',
+  });
+
+  // One character is not sent to the API, so an empty result is "no data", not "filtered".
+  isDatasetEmpty = true;
+  await user.type(search, 'a');
+  expect(await screen.findByText('No submissions yet')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument();
+  // The search box stays so the user can keep typing.
+  expect(
+    screen.getByRole('textbox', { name: 'Filter vulnerabilities by ID, package, or title' }),
+  ).toHaveValue('a');
+
+  // Two characters is an applied filter: filtered-to-zero copy, Export and Reset available.
+  await user.type(
+    screen.getByRole('textbox', { name: 'Filter vulnerabilities by ID, package, or title' }),
+    'b',
+  );
+  expect(await screen.findByText('No results match the current filters')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument();
 });
