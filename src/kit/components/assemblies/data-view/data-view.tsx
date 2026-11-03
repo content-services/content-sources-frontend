@@ -143,7 +143,12 @@ export type LwDataViewEmptyStateConfig = {
   titleText?: string;
   /** Description text rendered inside the empty state. Omit for no body. */
   bodyText?: string;
-  /** When provided, renders a "Reset filters" primary button. */
+  /**
+   * Renders a "Reset filters" primary button AND signals that filters are
+   * active. Omit it when no filters are active: with zero rows that is a
+   * true-empty state, and `LwDataView` hides the toolbar and `panel` since
+   * there is nothing to filter.
+   */
   onClearFilters?: () => void;
 };
 
@@ -615,6 +620,11 @@ export function LwDataView({
     ...otherBodyStates
   } = bodyStates ?? {};
   const useExternalEmptyState = resolvedActiveState === DataViewState.empty && !callerEmptyBody;
+  // True empty = nothing to show AND nothing the user could clear. Filtering
+  // chrome (toolbar + panel) is meaningless there, so it is not rendered. A
+  // caller signals "filters are active" by supplying `emptyState.onClearFilters`
+  // (or a non-empty `search.value`); otherwise the zero rows are the real data.
+  const isTrueEmpty = useExternalEmptyState && !emptyState?.onClearFilters && !search?.value;
   // Pass activeState=undefined so PF renders an empty tbody (headers stay visible)
   // rather than activating the in-table body-state slot.
   const tableActiveState = useExternalEmptyState ? undefined : resolvedActiveState;
@@ -687,7 +697,7 @@ export function LwDataView({
   const isLoadingState = resolvedActiveState === DataViewState.loading;
 
   const builtInToolbarNode =
-    hasBuiltInToolbar && !isLoadingState ? (
+    hasBuiltInToolbar && !isLoadingState && !isTrueEmpty ? (
       <LwDataViewToolbar
         search={search}
         pagination={resolvedPagination ? { isCompact: true, ...resolvedPagination } : undefined}
@@ -769,9 +779,13 @@ export function LwDataView({
   // (it doesn't need horizontal scroll), but still part of the same table
   // surface, so it stays coupled to the table's column width rather than
   // the full drawer+panel row's width once a `panel` is present.
-  const tableNode = <DataViewTable {...tableProps} />;
+  const tableNode = isTrueEmpty ? null : <DataViewTable {...tableProps} />;
 
-  const tableAndEmptyState = isSticky ? (
+  // True empty: no rows and nothing to clear — column headers would only label
+  // an empty grid, so render the empty state alone.
+  const tableAndEmptyState = isTrueEmpty ? (
+    emptyStateNode
+  ) : isSticky ? (
     <OuterScrollContainer>
       <InnerScrollContainer>{tableNode}</InnerScrollContainer>
       {emptyStateNode}
@@ -783,22 +797,23 @@ export function LwDataView({
     </>
   );
 
-  const tableSurface = panel ? (
-    <LwDrawer
-      isExpanded={resolvedIsPanelExpanded}
-      isInline={!resolvedResponsive}
-      position='start'
-      panelContent={panel}
-      panelHead={panelHead}
-      onPanelClose={resolvedOnPanelClose}
-      panelProps={panelProps}
-      responsive={resolvedResponsive}
-    >
-      {tableAndEmptyState}
-    </LwDrawer>
-  ) : (
-    tableAndEmptyState
-  );
+  const tableSurface =
+    panel && !isTrueEmpty ? (
+      <LwDrawer
+        isExpanded={resolvedIsPanelExpanded}
+        isInline={!resolvedResponsive}
+        position='start'
+        panelContent={panel}
+        panelHead={panelHead}
+        onPanelClose={resolvedOnPanelClose}
+        panelProps={panelProps}
+        responsive={resolvedResponsive}
+      >
+        {tableAndEmptyState}
+      </LwDrawer>
+    ) : (
+      tableAndEmptyState
+    );
 
   // PF's DataView wraps every top-level child in a StackItem via
   // Children.map, including falsy ones (`false`, `undefined`) — an absent

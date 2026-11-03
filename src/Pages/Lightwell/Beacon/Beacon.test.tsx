@@ -296,3 +296,58 @@ it('keeps the status summary card header while metrics are loading', async () =>
   expect(screen.getByText('Customer ID')).toBeInTheDocument();
   expect(screen.getByText('Filters')).toBeInTheDocument();
 });
+
+const emptyBeaconData = {
+  vulnerabilities: [],
+  meta: { count: 0, criticalCount: 0, statusCounts: {} },
+};
+
+it('hides the filters, table headers and Export when the customer has no data', async () => {
+  (useBeaconData as jest.Mock).mockReturnValue({
+    isLoading: false,
+    isError: false,
+    error: null,
+    data: emptyBeaconData,
+  });
+
+  renderBeacon();
+  await selectCustomer('CID-01');
+
+  expect(await screen.findByText('No submissions yet')).toBeInTheDocument();
+  expect(screen.queryByRole('form', { name: 'Filter categories' })).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('textbox', { name: 'Filter vulnerabilities by ID, package, or title' }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('grid', { name: 'Vulnerability tracking table' }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+  // The customer selector stays available so the user can switch customers.
+  expect(screen.getByRole('button', { name: 'CID-01' })).toBeInTheDocument();
+});
+
+it('keeps the filters, table headers and Export when filters narrow the results to zero', async () => {
+  (useBeaconData as jest.Mock).mockImplementation(
+    (_customerId: string, filters?: { severities?: string[] }) => ({
+      isLoading: false,
+      isError: false,
+      error: null,
+      data: filters?.severities?.length ? emptyBeaconData : mockBeaconData,
+    }),
+  );
+
+  renderBeacon();
+  const user = await selectCustomer('CID-01');
+
+  const filterPanel = await screen.findByRole('form', { name: 'Filter categories' });
+  await user.click(within(filterPanel).getByText('Critical'));
+
+  expect(await screen.findByText('No results match the current filters')).toBeInTheDocument();
+  expect(screen.getByRole('form', { name: 'Filter categories' })).toBeInTheDocument();
+  expect(screen.getByRole('grid', { name: 'Vulnerability tracking table' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument();
+
+  await user.click(screen.getByRole('button', { name: 'Reset filters' }));
+  expect(await screen.findByText(mockVulnerabilities[0].vulnerabilityId)).toBeInTheDocument();
+});

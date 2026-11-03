@@ -315,6 +315,8 @@ const Beacon = () => {
     (searchQuery ? 1 : 0);
 
   const itemCount = displayMeta?.count ?? 0;
+  // No rows and no filters to clear: nothing to filter or export.
+  const isTrueEmpty = !isLoading && itemCount === 0 && activeFilterCount === 0;
 
   const visibleColumns = useMemo(
     () =>
@@ -490,14 +492,16 @@ const Beacon = () => {
               isDisabled={customerIdMenuItems.length === 0}
               items={customerIdMenuItems}
             />
-            <LwMenu
-              label='Export'
-              busyLabel='Exporting'
-              isBusy={isExportBusy}
-              toggleProps={{ variant: 'secondary', ouiaId: 'lightwell-beacon-export-toggle' }}
-              popperProps={{ position: 'right' }}
-              items={exportItems}
-            />
+            {isTrueEmpty ? null : (
+              <LwMenu
+                label='Export'
+                busyLabel='Exporting'
+                isBusy={isExportBusy}
+                toggleProps={{ variant: 'secondary', ouiaId: 'lightwell-beacon-export-toggle' }}
+                popperProps={{ position: 'right' }}
+                items={exportItems}
+              />
+            )}
           </LwButtonGroup>
         ) : null}
       </PageSection>
@@ -526,11 +530,19 @@ const Beacon = () => {
             columns={dataViewColumns}
             rows={dataViewRows}
             isLoading={isLoading}
-            emptyState={{
-              titleText: 'No results match the current filters',
-              bodyText: 'Reset filters to show more results.',
-              onClearFilters: resetFilters,
-            }}
+            emptyState={
+              activeFilterCount > 0
+                ? {
+                    titleText: 'No results match the current filters',
+                    bodyText: 'Reset filters to show more results.',
+                    onClearFilters: resetFilters,
+                  }
+                : {
+                    titleText: 'No submissions yet',
+                    bodyText:
+                      'Vulnerabilities will appear here once this customer has submissions.',
+                  }
+            }
             search={{
               value: searchQuery,
               onChange: setSearchQuery,
