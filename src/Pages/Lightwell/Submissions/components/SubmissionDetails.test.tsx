@@ -51,6 +51,9 @@ const buildHook = (overrides = {}) => ({
   isAddingFiles: false,
   addingCount: 0,
   isMutating: false,
+  isSubmitting: false,
+  isProcessing: false,
+  isDownloadingArchive: false,
   ...overrides,
 });
 
@@ -114,6 +117,33 @@ describe('SubmissionDetails', () => {
     await user.click(screen.getByRole('button', { name: 'Download all' }));
 
     expect(downloadArchive).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables "Download all" and shows a spinner while the archive downloads', () => {
+    mockedHook.mockReturnValue(buildHook({ isDownloadingArchive: true }));
+    render(<SubmissionDetails uuid='sub-1' />);
+
+    const button = screen.getByRole('button', { name: /Download all/ });
+    expect(button).toBeDisabled();
+    expect(within(button).getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('disables Submit without a spinner while another action (e.g. adding files) runs', () => {
+    mockedHook.mockReturnValue(buildHook({ isMutating: true }));
+    render(<SubmissionDetails uuid='sub-1' />);
+
+    const submit = screen.getByRole('button', { name: 'Submit' });
+    expect(submit).toBeDisabled();
+    expect(within(submit).queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
+  it('shows a spinner on Submit only while submitting', () => {
+    mockedHook.mockReturnValue(buildHook({ isMutating: true, isSubmitting: true }));
+    render(<SubmissionDetails uuid='sub-1' />);
+
+    expect(
+      within(screen.getByRole('button', { name: /Submit/ })).getByRole('progressbar'),
+    ).toBeInTheDocument();
   });
 
   it('hides the header downloads when the user cannot download', () => {

@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 import type { ClearinghouseSubmission } from 'services/Lightwell/ClearinghouseApi';
 import { useSubmissionDetail } from './useSubmissionDetail';
@@ -44,16 +44,13 @@ jest.mock('middleware/AppContext', () => ({
 }));
 
 const mockDownloadSubmissionFile = jest.fn();
-const mockDownloadSubmissionArchive = jest.fn();
+const mockDownloadSubmissionArchive = jest.fn<Promise<void>, unknown[]>(() => Promise.resolve());
 jest.mock('services/Lightwell/ClearinghouseApi', () => ({
   downloadSubmissionFile: (...args: unknown[]) => {
     mockDownloadSubmissionFile(...args);
     return Promise.resolve();
   },
-  downloadSubmissionArchive: (...args: unknown[]) => {
-    mockDownloadSubmissionArchive(...args);
-    return Promise.resolve();
-  },
+  downloadSubmissionArchive: (...args: unknown[]) => mockDownloadSubmissionArchive(...args),
 }));
 
 const pendingSubmission: ClearinghouseSubmission = {
@@ -283,5 +280,20 @@ describe('useSubmissionDetail', () => {
     result.current.downloadArchive();
 
     expect(mockDownloadSubmissionArchive).toHaveBeenCalledWith('sub-1');
+  });
+
+  it('flags the archive download as in progress until it settles', async () => {
+    let finish: () => void = () => {};
+    mockDownloadSubmissionArchive.mockImplementationOnce(
+      () => new Promise<void>((resolve) => (finish = resolve)),
+    );
+    const { result } = render({ uuid: 'sub-1' });
+    expect(result.current.isDownloadingArchive).toBe(false);
+
+    act(() => result.current.downloadArchive());
+    expect(result.current.isDownloadingArchive).toBe(true);
+
+    act(() => finish());
+    await waitFor(() => expect(result.current.isDownloadingArchive).toBe(false));
   });
 });

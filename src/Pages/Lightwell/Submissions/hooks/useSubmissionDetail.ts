@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AlertVariant } from '@patternfly/react-core';
 
 import useNotification from 'Hooks/useNotification';
@@ -139,8 +140,14 @@ export const useSubmissionDetail = ({
     );
   };
 
+  // Large archives take a few seconds to build and download, so track the
+  // request to give the "Download all" button visible feedback.
+  const [isDownloadingArchive, setIsDownloadingArchive] = useState(false);
   const downloadArchive = () => {
-    downloadSubmissionArchive(uuid).catch((err) => notifyError('Could not download archive', err));
+    setIsDownloadingArchive(true);
+    downloadSubmissionArchive(uuid)
+      .catch((err) => notifyError('Could not download archive', err))
+      .finally(() => setIsDownloadingArchive(false));
   };
 
   // `addFilesMutation.variables` is the File[] handed to `mutate`, so while the
@@ -175,5 +182,8 @@ export const useSubmissionDetail = ({
     isAddingFiles,
     addingCount,
     isMutating,
+    isSubmitting: submitMutation.isPending,
+    isProcessing: processMutation.isPending,
+    isDownloadingArchive,
   };
 };

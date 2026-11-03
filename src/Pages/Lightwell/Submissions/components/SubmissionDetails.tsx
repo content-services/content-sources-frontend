@@ -109,6 +109,9 @@ const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsPr
     isAddingFiles,
     addingCount,
     isMutating,
+    isSubmitting,
+    isProcessing,
+    isDownloadingArchive,
   } = useSubmissionDetail({ uuid, onDeleted, onSubmitted });
 
   const { takePending } = usePendingReproducers();
@@ -362,7 +365,7 @@ const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsPr
               <FlexItem>
                 <LwButton
                   variant='primary'
-                  isLoading={isMutating}
+                  isLoading={isSubmitting}
                   isDisabled={isMutating}
                   onClick={confirmSubmit}
                   ouiaId='submit-for-validation'
@@ -375,7 +378,9 @@ const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsPr
               <FlexItem>
                 <LwButton
                   variant='secondary'
-                  icon={<DownloadIcon />}
+                  icon={isDownloadingArchive ? undefined : <DownloadIcon />}
+                  isLoading={isDownloadingArchive}
+                  isDisabled={isDownloadingArchive}
                   onClick={downloadArchive}
                   ouiaId='download-archive'
                 >
@@ -387,7 +392,7 @@ const SubmissionDetails = ({ uuid, onDeleted, onSubmitted }: SubmissionDetailsPr
               <FlexItem>
                 <LwButton
                   variant='primary'
-                  isLoading={isMutating}
+                  isLoading={isProcessing}
                   isDisabled={isMutating}
                   onClick={confirmProcess}
                   ouiaId='mark-processed'

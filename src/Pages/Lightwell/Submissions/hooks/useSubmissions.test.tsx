@@ -94,7 +94,7 @@ describe('useSubmissions', () => {
     post.mockRestore();
   });
 
-  it('returns to select and keeps the file when creation fails', async () => {
+  it('returns to select and clears the file when creation fails', async () => {
     const post = jest.spyOn(axios, 'post').mockRejectedValue(new Error('boom'));
     const { result } = renderSubmissions();
 
@@ -107,7 +107,8 @@ describe('useSubmissions', () => {
     );
     expect(result.current.step).toBe('select');
     expect(result.current.createdUuid).toBeUndefined();
-    expect(result.current.file?.name).toBe('submission.json');
+    // A rejected file must not linger as "selected" (green check) next to the error toast.
+    expect(result.current.file).toBeUndefined();
 
     post.mockRestore();
   });
