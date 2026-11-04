@@ -66,7 +66,8 @@ export const useKesselWorkspace = (enabled: boolean) => {
           setWorkspaceId(ws.id);
         }
       })
-      .catch(() => {
+      .catch((err: unknown) => {
+        console.error('Failed to fetch default Kessel workspace', err);
         if (!cancelled) {
           setWorkspaceId(undefined);
           setError(true);
@@ -138,6 +139,12 @@ export const useKesselRbac = (
     error: kesselError,
   } = useSelfAccessCheck(params as BulkSelfAccessCheckNestedRelationsParams);
 
+  useEffect(() => {
+    if (kesselError) {
+      console.error('Kessel self access check failed', kesselError);
+    }
+  }, [kesselError]);
+
   // A failed workspace lookup produces an empty resources array, which resolves
   // the bulk check immediately with no data — indistinguishable from "no
   // permissions" unless we track the workspace failure separately. Treat either
@@ -181,7 +188,10 @@ export const useTraditionalRbac = (
             });
           }),
         )
-        .catch(() => setError(true));
+        .catch((err: unknown) => {
+          console.error('Failed to fetch RBAC v1 permissions', err);
+          setError(true);
+        });
     }
   }, [!!chrome, isFeaturesSettled, enabled, rbac, error]);
 
