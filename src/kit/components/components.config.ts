@@ -20,6 +20,7 @@ import {
 } from '@patternfly/react-core';
 import type { DataViewTableBasicProps } from '@patternfly/react-data-view/dist/dynamic/DataViewTableBasic';
 import type { DataViewToolbarProps } from '@patternfly/react-data-view/dist/dynamic/DataViewToolbar';
+import type { ErrorStateProps } from '@redhat-cloud-services/frontend-components/ErrorState';
 
 import { lightwellConfig, type LwStepIconColorKey } from '../lightwell.config';
 
@@ -142,6 +143,11 @@ export type LwListConfig = Partial<LwListPassthroughProps>;
 
 /** Defaults for `LwEmptyState` — EmptyState root; Footer/Actions/Body stay call-site children. */
 export type LwEmptyStateConfig = Partial<EmptyStateProps>;
+
+// ─── Primitive: LwErrorState (root only) ─────────────────────────────────────
+
+/** Defaults for `LwErrorState` — ErrorState root; call-site wins via merge. */
+export type LwErrorStateConfig = Partial<ErrorStateProps>;
 
 // ─── Primitive: LwSkeleton (root only) ───────────────────────────────────────
 
@@ -336,6 +342,7 @@ export interface LwComponentsConfig {
   tooltip: LwTooltipConfig;
   list: LwListConfig;
   emptyState: LwEmptyStateConfig;
+  errorState: LwErrorStateConfig;
   skeleton: LwSkeletonConfig;
   title: LwTitleConfig;
   icon: LwIconConfig;
@@ -394,6 +401,9 @@ export const componentsConfig: LwComponentsConfig = {
   },
   emptyState: {
     // Root-only harness — no Lightwell-specific EmptyState defaults yet.
+  },
+  errorState: {
+    // Root-only harness — no Lightwell-specific ErrorState defaults yet.
   },
   skeleton: {
     // Root-only harness — no Lightwell-specific Skeleton defaults yet.
@@ -507,6 +517,10 @@ export function getLwListDefaults(): LwListConfig {
 
 export function getLwEmptyStateDefaults(): LwEmptyStateConfig {
   return { ...componentsConfig.emptyState };
+}
+
+export function getLwErrorStateDefaults(): LwErrorStateConfig {
+  return { ...componentsConfig.errorState };
 }
 
 export function getLwSkeletonDefaults(): LwSkeletonConfig {

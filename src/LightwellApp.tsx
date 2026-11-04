@@ -7,6 +7,7 @@ import '../styles/lightwell-chrome-overrides.scss';
 import '../styles/lightwell-clipboard-copy.scss';
 import '../styles/lightwell-coverage-charts.scss';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
+import { Button } from '@patternfly/react-core';
 import { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Loader from 'components/Loader';
@@ -27,11 +28,13 @@ import CoverageReport from 'Pages/Lightwell/Lens/CoverageReport';
 import ManifestUpload from 'Pages/Lightwell/Lens/ManifestUpload';
 import TermsGuard from 'Pages/Lightwell/components/TermsGuard';
 import Submissions from 'Pages/Lightwell/Submissions/Submissions';
+import { LwErrorState } from 'kit/components/primitives';
+import { LwPageHeader } from 'kit/components/assemblies';
 
 export default function LightwellApp() {
   const pageSafe = usePageSafe();
   const { hideGlobalFilter } = useChrome();
-  const { features, isFetchingPermissions } = useAppContext();
+  const { features, isFetchingPermissions, permissionsError } = useAppContext();
 
   useEffect(() => {
     hideGlobalFilter(true);
@@ -162,7 +165,19 @@ export default function LightwellApp() {
 
   return (
     <ErrorPage>
-      {isFetchingPermissions ? (
+      {permissionsError ? (
+        <LwPageHeader hero>
+          <LwErrorState
+            titleText='Unable to load permissions'
+            bodyText='We could not verify your access. Check your connection and try again.'
+            customFooter={
+              <Button variant='primary' onClick={() => window.location.reload()}>
+                Retry
+              </Button>
+            }
+          />
+        </LwPageHeader>
+      ) : isFetchingPermissions ? (
         <Loader />
       ) : termsEnabled ? (
         <TermsGuard>{routes}</TermsGuard>

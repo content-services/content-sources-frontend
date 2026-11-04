@@ -2,7 +2,7 @@ import '@redhat-cloud-services/frontend-components-utilities/styles/_all';
 import 'react18-json-view/src/style.css';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 
-import { Bullseye, Spinner } from '@patternfly/react-core';
+import { Bullseye, Button, Spinner } from '@patternfly/react-core';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { last } from 'lodash';
@@ -16,9 +16,11 @@ import { CONTENT_ROUTE, REPOSITORIES_ROUTE, TEMPLATES_ROUTE } from './Routes/con
 import usePageSafe from 'Hooks/usePageSafe';
 import { TemplateFilterData } from './services/Templates/TemplateApi';
 import { useTemplateList } from './services/Templates/TemplateQueries';
+import { LwErrorState } from 'kit/components/primitives';
 
 export default function App() {
-  const { rbac, isFetchingPermissions, zeroState, setZeroState } = useAppContext();
+  const { rbac, isFetchingPermissions, permissionsError, zeroState, setZeroState } =
+    useAppContext();
   const storedPerPage = Number(localStorage.getItem(perPageKey)) || 20;
   const { pathname } = useLocation();
   const pageSafe = usePageSafe();
@@ -78,6 +80,20 @@ export default function App() {
       setZeroState(false);
     }
   }, [data.data.length, templateData.meta.count, zeroState, isDefaultRoute, setZeroState]);
+
+  if (permissionsError) {
+    return (
+      <LwErrorState
+        titleText='Unable to load permissions'
+        bodyText='We could not verify your access. Check your connection and try again.'
+        customFooter={
+          <Button variant='primary' onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        }
+      />
+    );
+  }
 
   if (!rbac || isFetchingPermissions || isLoading || isLoadingTemplates) {
     return (
