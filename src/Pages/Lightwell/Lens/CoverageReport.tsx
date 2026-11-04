@@ -20,6 +20,10 @@ import {
   CardBody,
   Content,
   Flex,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalVariant,
   PageSection,
   Title,
   Truncate,
@@ -30,7 +34,8 @@ import PackageCoverageTable from './components/PackageCoverageTable';
 import CveFixesBlock from './components/CveFixesBlock';
 import ManifestFormatPopover from './components/ManifestFormatPopover';
 import { fetchAllCoveragePackages } from './components/ExportMenu';
-import { buildCoveragePdfPayload } from './pdf/coveragePdf';
+import { buildCoveragePdfPayload, COVERAGE_PDF_MAX_PACKAGES } from './pdf/coveragePdf';
+import { getCoverageReportPackages } from 'services/Lightwell/CoverageReportsApi';
 import { useCoverageReport } from './hooks/useCoverageReport';
 import { usePackageCoverageTable } from './hooks/usePackageCoverageTable';
 import Loader from 'components/Loader';
@@ -49,7 +54,7 @@ import {
   exportToJson,
   type ExportFormat,
 } from '../utils/exportUtils';
-import { LwButton, LwCard, LwMenu, LwTitle } from 'kit/components/primitives';
+import { LwButton, LwCard, LwMenu, LwModal, LwTitle } from 'kit/components/primitives';
 import { useContainerWidth } from '../hooks/useContainerWidth';
 import {
   COVERAGE_DONUT_WIDTH,
@@ -101,6 +106,7 @@ const CoverageReport = () => {
   const table = usePackageCoverageTable(ecosystems);
 
   const [isExporting, setIsExporting] = useState(false);
+  const [isPdfLimitModalOpen, setIsPdfLimitModalOpen] = useState(false);
   const { notify } = useNotification();
   const errorNotifier = useErrorNotification();
   const { requestPdf } = useChrome();
@@ -168,17 +174,31 @@ const CoverageReport = () => {
   const inCatalog = report.exact_matches + report.partial_matches;
   const skippedEntries = report.skipped_entries ?? 0;
 
-  const handleExport = async (format: ExportFormat) => {
+  const handleExport = async (format: ExportFormat, overviewOnly = false) => {
     if (isExporting) return;
     setIsExporting(true);
     try {
       if (format === 'pdf') {
+        if (!overviewOnly) {
+          // Read the count for the exact export filters, never placeholder table data.
+          const { meta } = await getCoverageReportPackages(
+            report.uuid,
+            1,
+            1,
+            table.debouncedFilters,
+          );
+          if (meta.count > COVERAGE_PDF_MAX_PACKAGES) {
+            setIsPdfLimitModalOpen(true);
+            return;
+          }
+        }
         notify(PDF_GENERATING_NOTIFICATION);
         const payload = buildCoveragePdfPayload({
           uuid: report.uuid,
           filename,
           filters: table.debouncedFilters,
           includeCveData: hasCveData,
+          includePackages: !overviewOnly,
         }) as unknown as PDFRequestPayload;
         await requestPdf({ filename: `lightwell-match-analysis-${report.uuid}.pdf`, payload });
         notify(PDF_READY_NOTIFICATION);
@@ -378,6 +398,62 @@ const CoverageReport = () => {
           </CardBody>
         </LwCard>
       </PageSection>
+      <LwModal
+        variant={ModalVariant.medium}
+        position='top'
+        isOpen={isPdfLimitModalOpen}
+        onClose={() => setIsPdfLimitModalOpen(false)}
+        aria-labelledby='lightwell-coverage-pdf-too-large-title'
+        ouiaId='lightwell-coverage-pdf-too-large'
+      >
+        <ModalHeader
+          title='Package list exceeds PDF export limit'
+          labelId='lightwell-coverage-pdf-too-large-title'
+        />
+        <ModalBody>
+          <Content component='p'>
+            This list exceeds the {COVERAGE_PDF_MAX_PACKAGES.toLocaleString()}-package PDF limit.
+            You can export the overview as a PDF, or filter the list to{' '}
+            {COVERAGE_PDF_MAX_PACKAGES.toLocaleString()} packages or fewer.
+          </Content>
+          <Content component='p'>To export the current package list, use CSV or JSON.</Content>
+        </ModalBody>
+        <ModalFooter>
+          <LwButton
+            variant='primary'
+            ouiaId='lightwell-coverage-pdf-export-overview'
+            onClick={() => {
+              setIsPdfLimitModalOpen(false);
+              void handleExport('pdf', true);
+            }}
+          >
+            Export overview PDF
+          </LwButton>
+          <LwButton
+            variant='secondary'
+            ouiaId='lightwell-coverage-pdf-export-csv'
+            onClick={() => {
+              setIsPdfLimitModalOpen(false);
+              void handleExport('csv');
+            }}
+          >
+            Export CSV
+          </LwButton>
+          <LwButton
+            variant='secondary'
+            ouiaId='lightwell-coverage-pdf-export-json'
+            onClick={() => {
+              setIsPdfLimitModalOpen(false);
+              void handleExport('json');
+            }}
+          >
+            Export JSON
+          </LwButton>
+          <LwButton variant='link' onClick={() => setIsPdfLimitModalOpen(false)}>
+            Cancel
+          </LwButton>
+        </ModalFooter>
+      </LwModal>
     </>
   );
 };

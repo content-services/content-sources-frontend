@@ -1,5 +1,6 @@
 import { EXPORT_PAGE_SIZE } from '../../utils/exportUtils';
 import {
+  COVERAGE_PDF_MAX_PACKAGES,
   buildCoveragePackagesQueryParams,
   buildCoveragePdfPayload,
   fetchData,
@@ -102,6 +103,17 @@ describe('fetchData', () => {
     });
     expect(result.packages).toEqual([]);
     expect(result.report).toEqual(defaultCoverageReportItem);
+  });
+
+  it('rejects an oversized package list before fetching further pages', async () => {
+    const createAsyncRequest = jest.fn().mockResolvedValue({
+      ...packagesCollection,
+      meta: { ...packagesCollection.meta, count: COVERAGE_PDF_MAX_PACKAGES + 1 },
+    });
+    await expect(fetchData(createAsyncRequest, { uuid: 'report-uuid' })).rejects.toThrow(
+      '1500-package limit',
+    );
+    expect(createAsyncRequest).toHaveBeenCalledTimes(1);
   });
 
   it('requires a uuid', async () => {

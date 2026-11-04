@@ -263,6 +263,11 @@ export type LwFormConfig = Partial<
   Omit<import('@patternfly/react-core').FormProps, 'children' | 'ref'>
 >;
 
+/** Defaults for the PF Modal root; call-site props win. */
+export type LwModalConfig = Partial<
+  Omit<import('@patternfly/react-core').ModalProps, 'children' | 'ref'>
+>;
+
 // ─── Assembly: LwDataView (DataView + DataViewTable) ─────────────────────────
 
 /** PF `DataViewTable` props forwarded by `LwDataView` (kit builds variant/columns/rows/bodyStates/headStates/isSticky; isTreeTable not supported). */
@@ -332,6 +337,7 @@ export interface LwComponentsConfig {
   button: LwButtonConfig;
   card: LwCardConfig;
   menu: LwMenuConfig;
+  modal: LwModalConfig;
   popover: LwPopoverConfig;
   tooltip: LwTooltipConfig;
   list: LwListConfig;
@@ -411,6 +417,7 @@ export const componentsConfig: LwComponentsConfig = {
   form: {
     // No Lightwell-specific Form defaults yet.
   },
+  modal: {},
   clipboardCopy: {
     isReadOnly: true,
     hoverTip: 'Copy',
@@ -538,6 +545,10 @@ export function getLwContentDefaults(): LwContentConfig {
 
 export function getLwFormDefaults(): LwFormConfig {
   return { ...componentsConfig.form };
+}
+
+export function getLwModalDefaults(): LwModalConfig {
+  return { ...componentsConfig.modal };
 }
 
 export function getLwClipboardCopyDefaults(): LwClipboardCopyConfig {
