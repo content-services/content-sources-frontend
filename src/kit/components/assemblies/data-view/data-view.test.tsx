@@ -692,22 +692,31 @@ it('toolbarSlot content is rendered inside the built-in toolbar', () => {
 });
 
 // ─── Sort ────────────────────────────────────────────────────────────────────
-// Sort is always on by default — no prop required.
+// Sort is off by default (D27) — a column must opt in via `isSortable: true`.
+// A half-working sort (client-side only, against a server-paginated dataset)
+// silently produces wrong cross-page ordering, so the safe default is off.
 
-it('injects sort props into all columns by default', () => {
-  render(<LwDataView aria-label='Sortable table' columns={columns} rows={rows} />);
+it('skips sort injection for all columns by default', () => {
+  render(<LwDataView aria-label='Unsortable table' columns={columns} rows={rows} />);
 
-  // PF renders sort buttons inside each sortable Th
-  const sortButtons = screen.getAllByRole('button', { name: /Name|Status/i });
-  expect(sortButtons.length).toBe(columns.length);
+  // No column opted in — no sort buttons anywhere.
+  expect(screen.queryAllByRole('button', { name: /Name|Status/i })).toHaveLength(0);
 });
 
-it('skips sort injection for columns with isSortable: false', () => {
+it('skips sort injection for columns with isSortable: false, same as omitting it', () => {
   const mixedColumns = [{ cell: 'Name' }, { cell: 'Status', props: { isSortable: false } }];
+
+  render(<LwDataView aria-label='Unsortable table' columns={mixedColumns} rows={rows} />);
+
+  expect(screen.queryAllByRole('button', { name: /Name|Status/i })).toHaveLength(0);
+});
+
+it('injects sort props only for columns with isSortable: true', () => {
+  const mixedColumns = [{ cell: 'Name', props: { isSortable: true } }, { cell: 'Status' }];
 
   render(<LwDataView aria-label='Partial sort table' columns={mixedColumns} rows={rows} />);
 
-  // Only "Name" gets a sort button; "Status" does not
+  // Only "Name" opted in and gets a sort button; "Status" does not.
   expect(screen.getByRole('button', { name: /Name/i })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: /Status/i })).not.toBeInTheDocument();
 });
@@ -715,11 +724,12 @@ it('skips sort injection for columns with isSortable: false', () => {
 it('calls onSortChange with columnIndex and direction when a column header is clicked', async () => {
   const user = userEvent.setup();
   const handleSort = jest.fn();
+  const sortableColumn = [{ cell: 'Name', props: { isSortable: true } }, { cell: 'Status' }];
 
   render(
     <LwDataView
       aria-label='Clickable sort table'
-      columns={columns}
+      columns={sortableColumn}
       rows={rows}
       onSortChange={handleSort}
     />,
@@ -741,7 +751,10 @@ function getBodyRowFirstCellTexts() {
     .map((row) => within(row).getAllByRole('cell')[0].textContent);
 }
 
-const sortableColumns = [{ cell: 'Name' }, { cell: 'Score' }];
+const sortableColumns = [
+  { cell: 'Name', props: { isSortable: true } },
+  { cell: 'Score', props: { isSortable: true } },
+];
 const sortableRows = [
   [{ cell: 'Charlie' }, { cell: 9 }],
   [{ cell: 'Alice' }, { cell: 20 }],
@@ -798,7 +811,10 @@ it('sorts numeric cell content numerically, not lexicographically', async () => 
 
 it('sorts by an explicit sortValue when the rendered cell is not directly comparable', async () => {
   const user = userEvent.setup();
-  const rankedColumns = [{ cell: 'Name' }, { cell: 'Severity' }];
+  const rankedColumns = [
+    { cell: 'Name', props: { isSortable: true } },
+    { cell: 'Severity', props: { isSortable: true } },
+  ];
   const rankedRows = [
     [{ cell: 'Low issue' }, { cell: <span>Minor</span>, props: { sortValue: 3 } }],
     [{ cell: 'High issue' }, { cell: <span>Critical</span>, props: { sortValue: 0 } }],

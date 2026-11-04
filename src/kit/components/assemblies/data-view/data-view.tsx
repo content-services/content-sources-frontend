@@ -69,12 +69,15 @@ import './data-view.css';
 
 /**
  * `LwDataView` column definition — extends PF `ThProps` with a
- * Lightwell-owned `isSortable` opt-out.
+ * Lightwell-owned `isSortable` opt-in.
  *
  * Preserves full PF `Th` prop type-safety (`sort`, `isStickyColumn`, `modifier`,
- * `width`, etc.) while adding one Lightwell-owned field. All columns receive
- * sort props automatically by default; set `props.isSortable: false` on any
- * column to opt that header out of sort injection.
+ * `width`, etc.) while adding one Lightwell-owned field. Columns are **not**
+ * sortable by default — a half-working sort (client-side only, against a
+ * server-paginated dataset) silently produces wrong cross-page ordering. Set
+ * `props.isSortable: true` on a column only once the call site can actually
+ * guarantee correct ordering — a fully resident dataset, or an `onSortChange`
+ * wired to re-fetch sorted data from the API.
  */
 export type LwDataViewTh = {
   cell: ReactNode;
@@ -86,8 +89,10 @@ export type LwDataViewTh = {
   key?: string;
   props?: ThProps & {
     /**
-     * `false` opts this column out of automatic sort injection.
-     * Omit (or set `true`) to get sort on this header by default.
+     * `true` opts this column in to automatic sort injection. Omit (or set
+     * `false`) to leave the header unsortable — the default, since sort is
+     * only correct when the call site owns full-dataset ordering (resident
+     * data, or API-driven sort via `onSortChange`).
      * Stripped from props before PF sees the column definition.
      */
     isSortable?: boolean;
@@ -182,7 +187,8 @@ type LwDataViewOwnedProps = {
   activeState?: DataViewState;
   /**
    * Column definitions. Accepts `LwDataViewTh` (Lightwell extension of PF `DataViewTh`).
-   * Add `props.isSortable: false` to opt a specific column out of automatic sort injection.
+   * Add `props.isSortable: true` to opt a specific column in to automatic sort
+   * injection — sort is off by default (see `LwDataViewTh`).
    */
   columns: LwDataViewTh[];
   /** Row definitions. Accepts `LwDataViewTr` (Lightwell extension of PF `DataViewTr`).
@@ -204,8 +210,8 @@ type LwDataViewOwnedProps = {
    * Optional callback invoked when the user sorts a column. The assembly manages
    * sort UI state (active column indicator) internally — `onSortChange` is only
    * needed when the call site must react to sort changes (e.g., to re-fetch with
-   * API sort params). All column headers are sortable by default; opt out
-   * per-column via `LwDataViewTh.props.isSortable = false`.
+   * API sort params). Column headers are not sortable by default; opt in
+   * per-column via `LwDataViewTh.props.isSortable = true`.
    */
   onSortChange?: (columnIndex: number, direction: 'asc' | 'desc') => void;
   /**
@@ -390,9 +396,11 @@ function stripRowSortValues(row: LwDataViewTr): DataViewTr {
  * - **State** — pass `isLoading` and let the assembly derive `loading` / `empty`
  *   states automatically. Explicit `activeState` available for callers using
  *   `useTableActiveState` hooks or needing error state.
- * - **Sort** — always on by default; all headers sortable. Opt out per-column
- *   via `LwDataViewTh.props.isSortable = false`. Pass `onSortChange` to react
- *   to sort changes (e.g., for API-driven sort).
+ * - **Sort** — off by default (a half-working sort against server-paginated
+ *   data silently produces wrong cross-page ordering). Opt in per-column via
+ *   `LwDataViewTh.props.isSortable = true` once the call site owns correct
+ *   full-dataset ordering. Pass `onSortChange` to react to sort changes
+ *   (e.g., for API-driven sort).
  * - **Empty state** — built-in when `rows` is empty and not loading; configure
  *   copy and clear-filters via `emptyState`. Override in-table via `bodyStates`.
  * - **Loading skeleton** — built-in: `SkeletonTableBody` renders automatically
@@ -459,10 +467,12 @@ export function LwDataView({
   const resolvedActiveState = activeState ?? derivedActiveState;
 
   // ─── Sort state (internal) ────────────────────────────────────────────────
-  // Sort is always on — all columns sortable by default; call sites opt out
-  // per-column via `LwDataViewTh.props.isSortable = false`. The assembly owns
-  // the sort indicator state; `onSortChange` is the optional escape hatch for
-  // call sites that need to react (e.g., API-driven sort).
+  // Sort is off by default — call sites opt in per-column via
+  // `LwDataViewTh.props.isSortable = true`, only once they own correct
+  // full-dataset ordering (resident data, or API-driven sort via
+  // `onSortChange`). The assembly owns the sort indicator state;
+  // `onSortChange` is the optional escape hatch for call sites that need to
+  // react (e.g., to re-fetch sorted data from an API).
   const [activeSort, setActiveSort] = useState<
     | {
         columnIndex: number;
@@ -480,7 +490,7 @@ export function LwDataView({
   );
 
   // ─── Sort injection ───────────────────────────────────────────────────────
-  // Injects PF sort props into every column that has `isSortable !== false`.
+  // Injects PF sort props only into columns with `isSortable === true`.
   // Strips `isSortable` before PF sees the column definitions.
   const processedColumns: DataViewTh[] = useMemo(
     () =>
@@ -489,8 +499,8 @@ export function LwDataView({
           return col as unknown as DataViewTh;
         }
         const { isSortable, ...colProps } = col.props ?? {};
-        if (isSortable === false) {
-          // Opt-out: strip `isSortable` flag, pass other props through.
+        if (isSortable !== true) {
+          // Default: not opted in — strip `isSortable` flag, pass other props through.
           return { cell: col.cell, props: colProps } as DataViewTh;
         }
         return {
