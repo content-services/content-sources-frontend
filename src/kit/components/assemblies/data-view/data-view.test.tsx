@@ -1107,3 +1107,94 @@ it('keeps the toolbar when zero rows follow a non-empty search value', () => {
 
   expect(screen.getByRole('textbox', { name: 'Filter rows' })).toBeInTheDocument();
 });
+
+it('keeps the chrome when hasActiveFilters is set even without onClearFilters', () => {
+  const { container } = render(
+    <LwDataView
+      aria-label='Has active filters table'
+      columns={columns}
+      rows={[]}
+      emptyState={{ titleText: 'No results match', hasActiveFilters: true }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByText('No results match')).toBeInTheDocument();
+  expect(screen.getByRole('textbox', { name: 'Filter rows' })).toBeInTheDocument();
+  expect(container.querySelector('.pf-v6-c-drawer')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+});
+
+it('treats hasActiveFilters: false as true empty even when onClearFilters is supplied', () => {
+  render(
+    <LwDataView
+      aria-label='Inactive filters table'
+      columns={columns}
+      rows={[]}
+      emptyState={{
+        titleText: 'No results match',
+        hasActiveFilters: false,
+        onClearFilters: jest.fn(),
+      }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.queryByRole('textbox', { name: 'Filter rows' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+});
+
+it('uses noData copy for true empty and titleText/bodyText for filtered-to-zero', () => {
+  const emptyState = {
+    titleText: 'No results match',
+    bodyText: 'Reset filters to show more results.',
+    noData: { titleText: 'No submissions yet', bodyText: 'Nothing submitted.' },
+  };
+  const { rerender } = render(
+    <LwDataView
+      aria-label='Copy table'
+      columns={columns}
+      rows={[]}
+      emptyState={emptyState}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByText('No submissions yet')).toBeInTheDocument();
+  expect(screen.getByText('Nothing submitted.')).toBeInTheDocument();
+  expect(screen.queryByText('No results match')).not.toBeInTheDocument();
+
+  rerender(
+    <LwDataView
+      aria-label='Copy table'
+      columns={columns}
+      rows={[]}
+      emptyState={{ ...emptyState, hasActiveFilters: true }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByText('No results match')).toBeInTheDocument();
+  expect(screen.getByText('Reset filters to show more results.')).toBeInTheDocument();
+  expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+});
+
+it('never classifies placeholder rows as true empty and keeps the toolbar mounted', () => {
+  render(
+    <LwDataView
+      aria-label='Placeholder table'
+      columns={columns}
+      rows={[]}
+      isPlaceholderData
+      emptyState={{
+        titleText: 'No results match',
+        noData: { titleText: 'No submissions yet' },
+      }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByRole('textbox', { name: 'Filter rows' })).toBeInTheDocument();
+  expect(screen.getByText('No results match')).toBeInTheDocument();
+  expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+});

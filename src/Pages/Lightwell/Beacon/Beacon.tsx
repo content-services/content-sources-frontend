@@ -316,18 +316,9 @@ const Beacon = () => {
     (searchQuery ? 1 : 0);
 
   const itemCount = displayMeta?.count ?? 0;
-  // Same predicate `queryFilters` uses: a search under 2 characters is not sent to the API,
-  // so it must not make an unfiltered empty dataset look filtered.
-  const isSearchApplied = searchQuery.trim().length >= 2;
-  const hasAppliedFilters =
-    selectedSeverities.size > 0 ||
-    selectedStatuses.size > 0 ||
-    selectedLtwlsuptTickets.size > 0 ||
-    showDuplicates ||
-    isSearchApplied;
-  // No rows, no applied filters, and a settled response (not the previous query's placeholder,
-  // which stays at 0 rows right after Reset until the refetch lands): nothing to filter or export.
-  const isTrueEmpty = !isLoading && !isPlaceholderData && itemCount === 0 && !hasAppliedFilters;
+  // Export has nothing to export at 0 settled rows. Placeholder data keeps the previous count, so
+  // Export doesn't flicker while a refetch is in flight; stay visible while the first load runs.
+  const showExport = isLoading || itemCount > 0;
 
   const visibleColumns = useMemo(
     () =>
@@ -503,7 +494,7 @@ const Beacon = () => {
               isDisabled={customerIdMenuItems.length === 0}
               items={customerIdMenuItems}
             />
-            {isTrueEmpty ? null : (
+            {showExport ? (
               <LwMenu
                 label='Export'
                 busyLabel='Exporting'
@@ -512,7 +503,7 @@ const Beacon = () => {
                 popperProps={{ position: 'right' }}
                 items={exportItems}
               />
-            )}
+            ) : null}
           </LwButtonGroup>
         ) : null}
       </PageSection>
@@ -541,19 +532,17 @@ const Beacon = () => {
             columns={dataViewColumns}
             rows={dataViewRows}
             isLoading={isLoading}
-            emptyState={
-              isTrueEmpty
-                ? {
-                    titleText: 'No submissions yet',
-                    bodyText:
-                      'Vulnerabilities will appear here once this customer has submissions.',
-                  }
-                : {
-                    titleText: 'No results match the current filters',
-                    bodyText: 'Reset filters to show more results.',
-                    onClearFilters: resetFilters,
-                  }
-            }
+            isPlaceholderData={isPlaceholderData}
+            emptyState={{
+              hasActiveFilters: activeFilterCount > 0,
+              titleText: 'No results match the current filters',
+              bodyText: 'Reset filters to show more results.',
+              onClearFilters: resetFilters,
+              noData: {
+                titleText: 'No submissions yet',
+                bodyText: 'Vulnerabilities will appear here once this customer has submissions.',
+              },
+            }}
             search={{
               value: searchQuery,
               onChange: setSearchQuery,

@@ -347,7 +347,8 @@ it('keeps the filters, table headers and Export when filters narrow the results 
   expect(await screen.findByText('No results match the current filters')).toBeInTheDocument();
   expect(screen.getByRole('form', { name: 'Filter categories' })).toBeInTheDocument();
   expect(screen.getByRole('grid', { name: 'Vulnerability tracking table' })).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument();
+  // Nothing to export at 0 rows, filtered or not.
+  expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument();
 
   await user.click(screen.getByRole('button', { name: 'Reset filters' }));
   expect(await screen.findByText(mockVulnerabilities[0].vulnerabilityId)).toBeInTheDocument();
@@ -390,10 +391,14 @@ it('keeps the filtered view, not "No submissions yet", while Reset refetches (pl
 
   expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
   expect(screen.getByRole('form', { name: 'Filter categories' })).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument();
+  expect(
+    screen.getByRole('textbox', { name: 'Filter vulnerabilities by ID, package, or title' }),
+  ).toBeInTheDocument();
+  // Placeholder rows still carry the previous 0 count, so there is nothing to export yet.
+  expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument();
 });
 
-it('only treats a search of 2+ characters as an applied filter for the empty state', async () => {
+it('keeps the status summary badge and the empty-state copy in agreement for a short search', async () => {
   let isDatasetEmpty = false;
   (useBeaconData as jest.Mock).mockImplementation(() => ({
     isLoading: false,
@@ -405,25 +410,40 @@ it('only treats a search of 2+ characters as an applied filter for the empty sta
 
   renderBeacon();
   const user = await selectCustomer('CID-01');
-  const search = await screen.findByRole('textbox', {
-    name: 'Filter vulnerabilities by ID, package, or title',
-  });
+  const searchName = 'Filter vulnerabilities by ID, package, or title';
+  const search = await screen.findByRole('textbox', { name: searchName });
+  expect(screen.getByText('Status Summary')).toBeInTheDocument();
 
-  // One character is not sent to the API, so an empty result is "no data", not "filtered".
+  // Any search text counts as a filter everywhere (badge, Filters count, empty-state copy),
+  // so the page never says "filtered" and "no data" at once. LwDataView keeps the search box.
   isDatasetEmpty = true;
   await user.type(search, 'a');
-  expect(await screen.findByText('No submissions yet')).toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument();
-  // The search box stays so the user can keep typing.
-  expect(
-    screen.getByRole('textbox', { name: 'Filter vulnerabilities by ID, package, or title' }),
-  ).toHaveValue('a');
-
-  // Two characters is an applied filter: filtered-to-zero copy, Export and Reset available.
-  await user.type(
-    screen.getByRole('textbox', { name: 'Filter vulnerabilities by ID, package, or title' }),
-    'b',
-  );
   expect(await screen.findByText('No results match the current filters')).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument();
+  expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+  expect(screen.getByText('Status Summary (filtered)')).toBeInTheDocument();
+  expect(screen.getByRole('textbox', { name: searchName })).toHaveValue('a');
+  expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument();
+});
+
+it('keeps the search box mounted while a search refetches in filtered-to-zero', async () => {
+  const searchName = 'Filter vulnerabilities by ID, package, or title';
+  (useBeaconData as jest.Mock).mockImplementation(() => ({
+    isLoading: false,
+    isPlaceholderData: true,
+    isError: false,
+    error: null,
+    data: emptyBeaconData,
+  }));
+
+  renderBeacon();
+  const user = await selectCustomer('CID-01');
+  const search = await screen.findByRole('textbox', { name: searchName });
+
+  await user.type(search, 'ab');
+
+  // Same node, still focused: the toolbar never unmounted during the placeholder refetch.
+  expect(screen.getByRole('textbox', { name: searchName })).toBe(search);
+  expect(search).toHaveFocus();
+  expect(search).toHaveValue('ab');
+  expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
 });

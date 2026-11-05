@@ -139,17 +139,31 @@ export type LwDataViewTr =
  * directly (that path renders in-table and overrides this config entirely).
  */
 export type LwDataViewEmptyStateConfig = {
-  /** Title text. Defaults to `'No results found'`. */
+  /** Title text for the filtered-to-zero state. Defaults to `'No results found'`. */
   titleText?: string;
-  /** Description text rendered inside the empty state. Omit for no body. */
+  /** Description text for the filtered-to-zero state. Omit for no body. */
   bodyText?: string;
   /**
-   * Renders a "Reset filters" primary button AND signals that filters are
-   * active. Omit it when no filters are active: with zero rows that is a
-   * true-empty state, and `LwDataView` hides the toolbar and `panel` since
-   * there is nothing to filter.
+   * Whether any caller-owned filter is active (e.g. checkbox filters in the
+   * `panel`) — a fact about the page's filter state, not an empty-state
+   * decision. `LwDataView` combines it with a non-empty `search.value` and
+   * `pagination.itemCount` to classify true empty vs filtered-to-zero itself.
+   * Defaults to `Boolean(onClearFilters)`.
+   */
+  hasActiveFilters?: boolean;
+  /**
+   * Renders a "Reset filters" primary button in the filtered-to-zero state.
+   * Never rendered in true empty (there is nothing to reset).
    */
   onClearFilters?: () => void;
+  /**
+   * Copy for the true-empty state (no rows and nothing to clear). Each field
+   * falls back to `titleText` / `bodyText` when omitted.
+   */
+  noData?: {
+    titleText?: string;
+    bodyText?: string;
+  };
 };
 
 // Re-exported for callers that need PF's column-management shape directly.
@@ -184,6 +198,14 @@ type LwDataViewOwnedProps = {
    */
   isLoading?: boolean;
   /**
+   * `true` while `rows` are the previous query's result, shown until the next
+   * one lands (e.g. react-query placeholder data). Unlike `isLoading` it keeps
+   * the toolbar and `panel` mounted, but it is never classified as true empty:
+   * a stale 0-row result must not flash the "no data" state (or unmount the
+   * search box) while a refetch is in flight.
+   */
+  isPlaceholderData?: boolean;
+  /**
    * Explicit loading/error/empty state override. Prefer `isLoading` for the common
    * case — the assembly derives `loading` and `empty` states automatically from
    * `isLoading` and `rows`. Use this only when finer control is needed (e.g., error
@@ -209,15 +231,20 @@ type LwDataViewOwnedProps = {
    * (and no `bodyStates[DataViewState.empty]` override is given). Falls back to a
    * generic "No results found" when absent. Two layouts:
    *
-   * - **Filtered-to-zero** (`emptyState.onClearFilters` is supplied, or
-   *   `search.value` is non-empty, or `pagination.itemCount > 0`): rendered
-   *   **below the table headers**, outside the horizontal scroll container, with
-   *   the built-in toolbar and `panel` kept so the user can recover.
+   * - **Filtered-to-zero** (`emptyState.hasActiveFilters` is true — defaults to
+   *   `Boolean(onClearFilters)` — or `search.value` is non-empty, or
+   *   `pagination.itemCount > 0`): rendered **below the table headers**,
+   *   outside the horizontal scroll container, with the built-in toolbar and
+   *   `panel` kept so the user can recover. Uses `titleText` / `bodyText` and
+   *   the Reset button (when `onClearFilters` is supplied).
    * - **True empty** (none of the above): rendered **alone** — no table
    *   headers, built-in toolbar (including `toolbarSlot`) or `panel`, since
-   *   there is nothing to filter. A caller that needs the toolbar or panel
-   *   to stay visible while empty must supply `onClearFilters`, or use
-   *   `bodyStates[DataViewState.empty]`.
+   *   there is nothing to filter. Uses `noData` copy and no Reset button. A
+   *   caller that needs the toolbar or panel to stay visible while empty must
+   *   set `hasActiveFilters`, or use `bodyStates[DataViewState.empty]`.
+   *
+   * The caller passes facts (`hasActiveFilters`, copy for each case); the
+   * classification lives here so pages don't re-derive it.
    *
    * Use `bodyStates[DataViewState.empty]` for a fully custom in-table override.
    */
@@ -430,6 +457,7 @@ function stripRowSortValues(row: LwDataViewTr): DataViewTr {
  */
 export function LwDataView({
   isLoading,
+  isPlaceholderData,
   activeState,
   columns,
   rows,
@@ -633,13 +661,17 @@ export function LwDataView({
   const useExternalEmptyState = resolvedActiveState === DataViewState.empty && !callerEmptyBody;
   // True empty = nothing to show AND nothing the user could clear. Filtering
   // chrome (toolbar + panel) is meaningless there, so it is not rendered. A
-  // caller signals "filters are active" by supplying `emptyState.onClearFilters`
-  // (or a non-empty `search.value`); otherwise the zero rows are the real data.
-  // A positive `pagination.itemCount` means results exist beyond this (empty)
-  // page, so the pagination controls must stay reachable.
+  // caller signals "filters are active" via `emptyState.hasActiveFilters`
+  // (defaulting to `onClearFilters` presence), or a non-empty `search.value`;
+  // otherwise the zero rows are the real data. A positive
+  // `pagination.itemCount` means results exist beyond this (empty) page, so
+  // the pagination controls must stay reachable. Placeholder rows are never
+  // the real data, so they are not true empty either.
+  const hasActiveFilters = emptyState?.hasActiveFilters ?? Boolean(emptyState?.onClearFilters);
   const isTrueEmpty =
     useExternalEmptyState &&
-    !emptyState?.onClearFilters &&
+    !isPlaceholderData &&
+    !hasActiveFilters &&
     !search?.value &&
     !((pagination?.itemCount ?? 0) > 0);
   // Pass activeState=undefined so PF renders an empty tbody (headers stay visible)
@@ -686,15 +718,21 @@ export function LwDataView({
     ...(callerEmptyBody ? { [DataViewState.empty]: callerEmptyBody } : {}),
   };
 
+  const emptyTitleText =
+    (isTrueEmpty ? emptyState?.noData?.titleText : undefined) ??
+    emptyState?.titleText ??
+    'No results found';
+  const emptyBodyText =
+    (isTrueEmpty ? emptyState?.noData?.bodyText : undefined) ?? emptyState?.bodyText;
   const emptyStateNode = useExternalEmptyState ? (
     <LwEmptyState
       headingLevel='h2'
       icon={SearchIcon}
-      titleText={emptyState?.titleText ?? 'No results found'}
+      titleText={emptyTitleText}
       variant={EmptyStateVariant.sm}
     >
-      {emptyState?.bodyText ? <EmptyStateBody>{emptyState.bodyText}</EmptyStateBody> : null}
-      {emptyState?.onClearFilters ? (
+      {emptyBodyText ? <EmptyStateBody>{emptyBodyText}</EmptyStateBody> : null}
+      {!isTrueEmpty && emptyState?.onClearFilters ? (
         <EmptyStateFooter>
           <EmptyStateActions>
             <LwButton variant='primary' onClick={emptyState.onClearFilters}>
