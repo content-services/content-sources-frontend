@@ -33,6 +33,8 @@ export type ClearinghouseSubmission = {
   submitted_by?: string;
   processed_at?: string;
   processed_by?: string;
+  // Customer identifier. Populated on list and get only for clearinghouse read users.
+  cid?: string;
 };
 
 export type ClearinghouseSubmissionListResponse = {

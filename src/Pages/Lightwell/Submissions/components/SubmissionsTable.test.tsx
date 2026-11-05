@@ -146,6 +146,48 @@ describe('SubmissionsTable', () => {
     expect(screen.getByText(/submitter@example.com/)).toBeInTheDocument();
   });
 
+  it('shows a CID column for users with the read feature', () => {
+    mockedList.mockReturnValue(
+      buildQuery({
+        data: {
+          data: [{ ...submission, cid: 'CID-00000' }],
+          meta: { count: 1 },
+        },
+      }),
+    );
+    renderWithRouter();
+
+    const headers = screen.getAllByRole('columnheader').map((header) => header.textContent);
+    const row = screen.getByRole('row', { name: /RHOSE-4.9.json/ });
+
+    expect(within(row).getAllByRole('cell')[headers.indexOf('CID')]).toHaveTextContent('CID-00000');
+  });
+
+  it('shows a dash in the CID column when the identifier is missing', () => {
+    renderWithRouter();
+
+    const headers = screen.getAllByRole('columnheader').map((header) => header.textContent);
+    const row = screen.getByRole('row', { name: /RHOSE-4.9.json/ });
+
+    expect(within(row).getAllByRole('cell')[headers.indexOf('CID')]).toHaveTextContent('—');
+  });
+
+  it('hides the CID column from users without the read feature', () => {
+    mockFeatures = { lightwellclearinghouse: ON };
+    mockedList.mockReturnValue(
+      buildQuery({
+        data: {
+          data: [{ ...submission, cid: 'CID-00000' }],
+          meta: { count: 1 },
+        },
+      }),
+    );
+    renderWithRouter();
+
+    expect(screen.queryByRole('columnheader', { name: 'CID' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('cell', { name: 'CID-00000' })).not.toBeInTheDocument();
+  });
+
   it('shows dashes for the submitted/processed columns when not yet set', () => {
     renderWithRouter();
 
