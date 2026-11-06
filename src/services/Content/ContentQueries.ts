@@ -97,7 +97,7 @@ const buildContentListKey = (
     '',
   )}${filterData?.versions?.join('')}${filterData?.urls?.join('')}${filterData?.uuids?.join(
     '',
-  )}${filterData?.statuses?.join('')}${filterData?.availableForArch}${filterData?.availableForVersion}${filterData?.search}${filterData?.name}${filterData?.extended_release}${filterData?.extended_release_version}${filterData?.feature_name}${filterData?.partner}`;
+  )}${filterData?.statuses?.join('')}${filterData?.availableForArch}${filterData?.availableForVersion}${filterData?.search}${filterData?.name}${filterData?.extended_release}${filterData?.extended_release_version}${filterData?.feature_products?.join('')}${filterData?.partner}`;
 
 export const useFetchContent = (uuid: string, enabled = true) =>
   useQuery({

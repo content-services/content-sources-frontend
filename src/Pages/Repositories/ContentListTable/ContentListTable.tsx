@@ -73,6 +73,7 @@ import {
   useToggleAsPartnerMutate,
 } from 'services/AdminPartnerRepos/AdminPartnerReposQueries';
 import { useRepositoryPublishSnapshotPolling } from 'Hooks/snapshotActions/usePublishSnapshot';
+import ProductFilter from './components/ProductFilter/ProductFilter';
 
 export const perPageKey = 'contentListPerPage';
 
@@ -170,6 +171,8 @@ const ContentListTable = () => {
     osFilterOptions,
     archFilterOptions,
     statusFilterOptions,
+    productFilterOptions,
+    selectedProducts,
     isFiltered,
   } = useContentListFilters();
 
@@ -593,6 +596,15 @@ const ContentListTable = () => {
     [numberOfRowsSelected],
   );
 
+  const isRedHatOriginAvailable =
+    contentOrigin.length === 0 || contentOrigin.includes(ContentOrigin.REDHAT);
+
+  useEffect(() => {
+    if (!isRedHatOriginAvailable && selectedProducts.length > 0) {
+      onSetFilters({ feature_products: [] });
+    }
+  }, [isRedHatOriginAvailable, selectedProducts.length, onSetFilters]);
+
   return (
     <>
       <DataView
@@ -612,7 +624,7 @@ const ContentListTable = () => {
                   onSetFilters(newValues);
                   setPage(1);
                 }}
-                values={filters}
+                values={{ ...filters, feature_products: selectedProducts }}
               >
                 <DataViewTextFilter
                   key={`search-${filtersActiveAttributeResetKey}`}
@@ -659,6 +671,16 @@ const ContentListTable = () => {
                   title={FilterLabelsMap.Statuses}
                   placeholder='Filter by status'
                   options={statusFilterOptions}
+                />
+                <ProductFilter
+                  filterId='feature_products'
+                  ouiaId='filter-products'
+                  aria-label='filter products'
+                  title={FilterLabelsMap.Products}
+                  placeholder='Filter by Red Hat product'
+                  options={productFilterOptions}
+                  isDisabled={isLoading}
+                  noResultsMessage='No products found'
                 />
               </DataViewFilters>
               <ContentOriginFilter

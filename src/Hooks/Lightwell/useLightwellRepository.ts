@@ -25,7 +25,7 @@ const useLightwellRepository = (repoSlug: string): UseLightwellRepositoryResult 
   const { data, isLoading, isError, error } = useContentListQuery(
     1,
     1,
-    { feature_name: featureName, name: repositoryName },
+    { feature_products: [featureName], name: repositoryName },
     '',
     [],
     !!repositoryName && !LIGHTWELL_USE_MOCK,

@@ -97,7 +97,7 @@ const RepositoriesTable = () => {
   const storedPerPage = Number(localStorage.getItem(lightwellReposPerPageKey)) || 20;
   const [perPage, setPerPage] = useState(storedPerPage);
   const filters: FilterData = {
-    feature_name: isDemo ? LIGHTWELL_DEMO_FEATURE_NAME : LIGHTWELL_FEATURE_NAME,
+    feature_products: isDemo ? [LIGHTWELL_DEMO_FEATURE_NAME] : [LIGHTWELL_FEATURE_NAME],
   };
 
   const appBreadcrumbsEnabled = useFlag('platform.chrome.app-breadcrumbs');
