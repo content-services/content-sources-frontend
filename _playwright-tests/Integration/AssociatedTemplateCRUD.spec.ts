@@ -50,6 +50,7 @@ test.describe('Associated Template CRUD', () => {
     });
 
     await test.step('Navigate to templates and create a new template', async () => {
+      await ensureValidToken(page, 'ADMIN_TOKEN.json');
       await navigateToTemplates(page);
       await closeGenericPopupsIfExist(page);
 
@@ -82,6 +83,7 @@ test.describe('Associated Template CRUD', () => {
     });
 
     await test.step('Verify system is attached to template', async () => {
+      await ensureValidToken(page, 'ADMIN_TOKEN.json');
       await waitInPatch(page, hostname, true);
     });
 
@@ -147,10 +149,16 @@ test.describe('Associated Template CRUD', () => {
 
     await test.step('Wait for system to be removed from inventory', async () => {
       await expect
-        .poll(async () => await isInInventory(page, hostname), {
-          message: 'System still found in inventory',
-          timeout: 600_000,
-        })
+        .poll(
+          async () => {
+            await ensureValidToken(page, 'ADMIN_TOKEN.json');
+            return isInInventory(page, hostname);
+          },
+          {
+            message: 'System still found in inventory',
+            timeout: 600_000,
+          },
+        )
         .toBe(0);
     });
 
@@ -159,11 +167,17 @@ test.describe('Associated Template CRUD', () => {
       expect(templateUuid, 'template UUID should be resolvable').toBeTruthy();
 
       await expect
-        .poll(async () => await getTemplateSystemsCount(page, templateUuid!), {
-          message: 'Template still has associated systems in Patch',
-          timeout: INVENTORY_PATCH_POLL_TIMEOUT_MS,
-          intervals: [...CONTENT_PROPAGATION_POLL.intervals],
-        })
+        .poll(
+          async () => {
+            await ensureValidToken(page, 'ADMIN_TOKEN.json');
+            return getTemplateSystemsCount(page, templateUuid!);
+          },
+          {
+            message: 'Template still has associated systems in Patch',
+            timeout: INVENTORY_PATCH_POLL_TIMEOUT_MS,
+            intervals: [...CONTENT_PROPAGATION_POLL.intervals],
+          },
+        )
         .toBe(0);
     });
 
