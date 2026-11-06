@@ -43,6 +43,8 @@ export type ClearinghouseSubmission = {
   can_add_reproducers: boolean;
   can_submit: boolean;
   can_process: boolean;
+  // Customer identifier. Populated on list and get only for clearinghouse read users.
+  cid?: string;
 };
 
 export type ClearinghouseSubmissionListResponse = {
