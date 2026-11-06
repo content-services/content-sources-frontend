@@ -67,6 +67,7 @@ it('nests the default empty state inside the outer scroll wrapper, as a sibling 
       columns={columns}
       rows={[]}
       activeState={DataViewState.empty}
+      emptyState={{ hasActiveFilters: true, onClearFilters: jest.fn() }}
       isSticky
     />,
   );
@@ -130,19 +131,41 @@ it('renders no CardHeader when there is no built-in toolbar', () => {
 
 // ─── Default empty state ─────────────────────────────────────────────────────
 
-it('renders the default empty state below the table headers when activeState is empty', () => {
+it('renders the default empty state below the table headers when zero rows are caused by active filters', () => {
   render(
     <LwDataView
       aria-label='Empty table'
       columns={columns}
       rows={[]}
       activeState={DataViewState.empty}
+      emptyState={{ hasActiveFilters: true, onClearFilters: jest.fn() }}
     />,
   );
 
   // Table headers still present
-  expect(screen.getByRole('grid', { name: 'Empty table' })).toBeInTheDocument();
-  // Default empty state visible
+  const grid = screen.getByRole('grid', { name: 'Empty table' });
+  expect(grid).toBeInTheDocument();
+  // Default empty state visible, rendered AFTER the table and not inside it
+  const emptyState = screen.getByText('No results found').closest('.pf-v6-c-empty-state');
+  expect(emptyState).toBeInTheDocument();
+  expect(grid.compareDocumentPosition(emptyState as Element)).toBe(
+    Node.DOCUMENT_POSITION_FOLLOWING,
+  );
+  expect(grid).not.toContainElement(emptyState as HTMLElement);
+});
+
+it('renders only the empty state, without table headers, when true empty', () => {
+  render(
+    <LwDataView
+      aria-label='True empty table'
+      columns={columns}
+      rows={[]}
+      activeState={DataViewState.empty}
+    />,
+  );
+
+  expect(screen.queryByRole('grid', { name: 'True empty table' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('columnheader')).not.toBeInTheDocument();
   expect(screen.getByText('No results found')).toBeInTheDocument();
 });
 
@@ -153,6 +176,7 @@ it('nests the default empty state inside the drawer, as a sibling of the table, 
       columns={columns}
       rows={[]}
       activeState={DataViewState.empty}
+      emptyState={{ hasActiveFilters: true, onClearFilters: jest.fn() }}
       panel={<div>Panel body</div>}
     />,
   );
@@ -163,6 +187,11 @@ it('nests the default empty state inside the drawer, as a sibling of the table, 
   // sibling of the whole drawer+panel row — otherwise it loses its coupling
   // to the table's column width once a panel is present.
   expect(within(drawer as HTMLElement).getByText('No results found')).toBeInTheDocument();
+  // Direct sibling of the table (same parent, after it) — not nested in the table.
+  const grid = within(drawer as HTMLElement).getByRole('grid', { name: 'Empty table' });
+  const emptyState = container.querySelector('.pf-v6-c-empty-state') as HTMLElement;
+  expect(emptyState.parentElement).toBe(grid.parentElement);
+  expect(grid.compareDocumentPosition(emptyState)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
 });
 
 it('renders custom titleText when emptyState.titleText is provided', () => {
@@ -172,7 +201,10 @@ it('renders custom titleText when emptyState.titleText is provided', () => {
       columns={columns}
       rows={[]}
       activeState={DataViewState.empty}
-      emptyState={{ titleText: 'No vulnerabilities match the current filters' }}
+      emptyState={{
+        titleText: 'No vulnerabilities match the current filters',
+        hasActiveFilters: true,
+      }}
     />,
   );
 
@@ -186,7 +218,7 @@ it('renders bodyText when emptyState.bodyText is provided', () => {
       columns={columns}
       rows={[]}
       activeState={DataViewState.empty}
-      emptyState={{ bodyText: 'Reset filters to show more results.' }}
+      emptyState={{ bodyText: 'Reset filters to show more results.', hasActiveFilters: true }}
     />,
   );
 
@@ -203,7 +235,7 @@ it('renders a Reset filters button and calls onClearFilters when clicked', async
       columns={columns}
       rows={[]}
       activeState={DataViewState.empty}
-      emptyState={{ onClearFilters: handleClear }}
+      emptyState={{ hasActiveFilters: true, onClearFilters: handleClear }}
     />,
   );
 
@@ -629,6 +661,7 @@ it('suppresses bottom pagination when itemCount is 0', () => {
       columns={columns}
       rows={[]}
       activeState={DataViewState.empty}
+      emptyState={{ hasActiveFilters: true, onClearFilters: jest.fn() }}
       pagination={{ ...paginationProps, itemCount: 0 }}
     />,
   );
@@ -944,7 +977,7 @@ it('derives empty state from isLoading=false + empty rows', () => {
       columns={columns}
       rows={[]}
       isLoading={false}
-      emptyState={{ titleText: 'Nothing here' }}
+      emptyState={{ titleText: 'Nothing here', hasActiveFilters: true }}
     />,
   );
 
@@ -996,4 +1029,279 @@ it('caller bodyStates[loading] overrides the default skeleton', () => {
   );
 
   expect(screen.getByText('Custom loading…')).toBeInTheDocument();
+});
+
+// ─── True empty vs filtered-to-zero ──────────────────────────────────────────
+// Zero rows with nothing to clear is real "no data": filtering chrome (toolbar +
+// panel) is hidden. `emptyState.hasActiveFilters` / a non-empty `search.value`
+// signal active filters, which keeps the chrome so the user can recover.
+
+const filterChrome = {
+  search: { value: '', onChange: jest.fn(), placeholder: 'Filter rows', ariaLabel: 'Filter rows' },
+  panelToggle: {},
+  panel: <div>Panel body</div>,
+};
+
+it('hides the toolbar and panel when there are no rows and no active filters', () => {
+  const { container } = render(
+    <LwDataView
+      aria-label='True empty table'
+      columns={columns}
+      rows={[]}
+      emptyState={{ noData: { titleText: 'No submissions yet' } }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByText('No submissions yet')).toBeInTheDocument();
+  expect(screen.queryByRole('textbox', { name: 'Filter rows' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Toggle filters' })).not.toBeInTheDocument();
+  expect(container.querySelector('.pf-v6-c-toolbar')).not.toBeInTheDocument();
+  expect(screen.queryByText('Panel body')).not.toBeInTheDocument();
+  expect(container.querySelector('.pf-v6-c-drawer')).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+});
+
+it('keeps the toolbar and headers when the current page is empty but results exist (pagination.itemCount > 0)', () => {
+  render(
+    <LwDataView
+      aria-label='Stale page table'
+      columns={columns}
+      rows={[]}
+      activeState={DataViewState.empty}
+      pagination={{ ...paginationProps, page: 3, itemCount: 40 }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByRole('grid', { name: 'Stale page table' })).toBeInTheDocument();
+  expect(screen.getByRole('textbox', { name: 'Filter rows' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Toggle filters' })).toBeInTheDocument();
+});
+
+it('keeps the toolbar and panel when zero rows are caused by active filters (onClearFilters)', async () => {
+  const onClearFilters = jest.fn();
+  const { container } = render(
+    <LwDataView
+      aria-label='Filtered empty table'
+      columns={columns}
+      rows={[]}
+      emptyState={{ titleText: 'No results match', hasActiveFilters: true, onClearFilters }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByRole('textbox', { name: 'Filter rows' })).toBeInTheDocument();
+  expect(container.querySelector('.pf-v6-c-drawer')).toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Reset filters' }));
+  expect(onClearFilters).toHaveBeenCalledTimes(1);
+});
+
+it('keeps the toolbar when zero rows follow a non-empty search value', () => {
+  render(
+    <LwDataView
+      aria-label='Searched empty table'
+      columns={columns}
+      rows={[]}
+      {...filterChrome}
+      search={{ ...filterChrome.search, value: 'nothing-matches' }}
+    />,
+  );
+
+  expect(screen.getByRole('textbox', { name: 'Filter rows' })).toBeInTheDocument();
+});
+
+it('keeps the chrome when hasActiveFilters is set even without onClearFilters', () => {
+  const { container } = render(
+    <LwDataView
+      aria-label='Has active filters table'
+      columns={columns}
+      rows={[]}
+      emptyState={{ titleText: 'No results match', hasActiveFilters: true }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByText('No results match')).toBeInTheDocument();
+  expect(screen.getByRole('textbox', { name: 'Filter rows' })).toBeInTheDocument();
+  expect(container.querySelector('.pf-v6-c-drawer')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+});
+
+it('treats hasActiveFilters: false as true empty even when onClearFilters is supplied', () => {
+  render(
+    <LwDataView
+      aria-label='Inactive filters table'
+      columns={columns}
+      rows={[]}
+      emptyState={{
+        titleText: 'No results match',
+        hasActiveFilters: false,
+        onClearFilters: jest.fn(),
+      }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.queryByRole('textbox', { name: 'Filter rows' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+});
+
+it('uses noData copy for true empty and titleText/bodyText for filtered-to-zero', () => {
+  const emptyState = {
+    titleText: 'No results match',
+    bodyText: 'Reset filters to show more results.',
+    noData: { titleText: 'No submissions yet', bodyText: 'Nothing submitted.' },
+  };
+  const { rerender } = render(
+    <LwDataView
+      aria-label='Copy table'
+      columns={columns}
+      rows={[]}
+      emptyState={emptyState}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByText('No submissions yet')).toBeInTheDocument();
+  expect(screen.getByText('Nothing submitted.')).toBeInTheDocument();
+  expect(screen.queryByText('No results match')).not.toBeInTheDocument();
+
+  rerender(
+    <LwDataView
+      aria-label='Copy table'
+      columns={columns}
+      rows={[]}
+      emptyState={{ ...emptyState, hasActiveFilters: true }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByText('No results match')).toBeInTheDocument();
+  expect(screen.getByText('Reset filters to show more results.')).toBeInTheDocument();
+  expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+});
+
+it('never classifies placeholder rows as true empty and keeps the toolbar mounted', () => {
+  render(
+    <LwDataView
+      aria-label='Placeholder table'
+      columns={columns}
+      rows={[]}
+      isPlaceholderData
+      emptyState={{
+        titleText: 'No results match',
+        noData: { titleText: 'No submissions yet' },
+      }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByRole('textbox', { name: 'Filter rows' })).toBeInTheDocument();
+  expect(screen.getByText('No results match')).toBeInTheDocument();
+  expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+});
+
+it('does not borrow filtered-to-zero copy in true empty when noData is omitted', () => {
+  render(
+    <LwDataView
+      aria-label='No fallback table'
+      columns={columns}
+      rows={[]}
+      emptyState={{
+        titleText: 'No results match',
+        bodyText: 'Reset filters to show more results.',
+        hasActiveFilters: false,
+        onClearFilters: jest.fn(),
+      }}
+      {...filterChrome}
+    />,
+  );
+
+  expect(screen.getByText('No results found')).toBeInTheDocument();
+  expect(screen.queryByText('No results match')).not.toBeInTheDocument();
+  expect(screen.queryByText(/Reset filters to show more results/)).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+});
+
+describe('focus when the toolbar unmounts into true empty', () => {
+  const filtered = {
+    titleText: 'No results match',
+    hasActiveFilters: true,
+    onClearFilters: jest.fn(),
+    noData: { titleText: 'No submissions yet' },
+  } as const;
+  const settled = { ...filtered, hasActiveFilters: false };
+
+  it('moves focus to the empty state when the focused Reset button disappears', () => {
+    const { rerender } = render(
+      <LwDataView
+        aria-label='Focus table'
+        columns={columns}
+        rows={[]}
+        emptyState={filtered}
+        {...filterChrome}
+      />,
+    );
+    const reset = screen.getByRole('button', { name: 'Reset filters' });
+    reset.focus();
+    expect(reset).toHaveFocus();
+
+    rerender(
+      <LwDataView
+        aria-label='Focus table'
+        columns={columns}
+        rows={[]}
+        emptyState={settled}
+        {...filterChrome}
+      />,
+    );
+
+    expect(screen.getByText('No submissions yet').closest('.pf-v6-c-empty-state')).toHaveFocus();
+  });
+
+  it('does not take focus when the first render is already true empty', () => {
+    render(
+      <LwDataView
+        aria-label='Focus table'
+        columns={columns}
+        rows={[]}
+        emptyState={settled}
+        {...filterChrome}
+      />,
+    );
+
+    expect(document.body).toHaveFocus();
+  });
+
+  it('does not steal focus that is already somewhere else', () => {
+    const { rerender } = render(
+      <>
+        <button type='button'>Elsewhere</button>
+        <LwDataView
+          aria-label='Focus table'
+          columns={columns}
+          rows={[]}
+          emptyState={filtered}
+          {...filterChrome}
+        />
+      </>,
+    );
+    screen.getByRole('button', { name: 'Elsewhere' }).focus();
+
+    rerender(
+      <>
+        <button type='button'>Elsewhere</button>
+        <LwDataView
+          aria-label='Focus table'
+          columns={columns}
+          rows={[]}
+          emptyState={settled}
+          {...filterChrome}
+        />
+      </>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Elsewhere' })).toHaveFocus();
+  });
 });
