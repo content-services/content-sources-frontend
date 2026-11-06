@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import Beacon from './Beacon';
@@ -21,6 +21,20 @@ jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
     requestPdf: jest.fn(),
   }),
 }));
+
+// config/setupAfterEnv.ts mocks useDebounce as identity. Keep that by default, but let a test opt
+// into the real debounce (the real hook is always called so hook order stays stable).
+const mockDebounce = { isReal: false };
+jest.mock('Hooks/useDebounce', () => {
+  const actual = jest.requireActual('Hooks/useDebounce').default;
+  return {
+    __esModule: true,
+    default: <T,>(value: T, delay?: number): T => {
+      const debounced = actual(value, delay);
+      return mockDebounce.isReal ? debounced : value;
+    },
+  };
+});
 
 jest.mock('./hooks/useBeaconData', () => ({
   useBeaconData: jest.fn(),
@@ -241,7 +255,7 @@ it('shows support ticket IDs from the dedicated API instead of vulnerability row
   expect(within(filterPanel).queryByText('batch-2')).not.toBeInTheDocument();
 });
 
-it('clears the ticket filter when the customer changes and keeps other filters', async () => {
+it('clears every filter when the customer changes', async () => {
   renderBeacon();
   const user = await selectCustomer('CID-01');
 
@@ -262,11 +276,11 @@ it('clears the ticket filter when the customer changes and keeps other filters',
 
   expect(screen.getByRole('button', { name: 'CID-214' })).toBeInTheDocument();
   expect(within(filterPanel).getByRole('checkbox', { name: /batch-1/i })).not.toBeChecked();
-  expect(within(filterPanel).getByRole('checkbox', { name: /critical/i })).toBeChecked();
+  expect(within(filterPanel).getByRole('checkbox', { name: /critical/i })).not.toBeChecked();
   expect(
     (useBeaconData as jest.Mock).mock.calls
       .filter(([customerId]) => customerId === 'CID-214')
-      .every(([, filters]) => !filters?.ltwlsuptTicketIds?.length),
+      .every(([, filters]) => !filters?.ltwlsuptTicketIds?.length && !filters?.severities?.length),
   ).toBe(true);
 });
 
@@ -398,7 +412,7 @@ it('keeps the filtered view, not "No submissions yet", while Reset refetches (pl
   expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument();
 });
 
-it('keeps the status summary badge and the empty-state copy in agreement for a short search', async () => {
+it('does not count a 1-character search as an applied filter in the status summary badge', async () => {
   let isDatasetEmpty = false;
   (useBeaconData as jest.Mock).mockImplementation(() => ({
     isLoading: false,
@@ -414,14 +428,14 @@ it('keeps the status summary badge and the empty-state copy in agreement for a s
   const search = await screen.findByRole('textbox', { name: searchName });
   expect(screen.getByText('Status Summary')).toBeInTheDocument();
 
-  // Any search text counts as a filter everywhere (badge, Filters count, empty-state copy),
-  // so the page never says "filtered" and "no data" at once. LwDataView keeps the search box.
+  // A 1-character search is never sent to the API, so it is not an applied filter: no
+  // "(filtered)" badge. LwDataView still keeps the search box mounted for any non-empty value
+  // so the input can't vanish mid-typing.
   isDatasetEmpty = true;
   await user.type(search, 'a');
-  expect(await screen.findByText('No results match the current filters')).toBeInTheDocument();
-  expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
-  expect(screen.getByText('Status Summary (filtered)')).toBeInTheDocument();
-  expect(screen.getByRole('textbox', { name: searchName })).toHaveValue('a');
+  expect(await screen.findByRole('textbox', { name: searchName })).toHaveValue('a');
+  expect(screen.getByText('Status Summary')).toBeInTheDocument();
+  expect(screen.queryByText('Status Summary (filtered)')).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument();
 });
 
@@ -446,4 +460,71 @@ it('keeps the search box mounted while a search refetches in filtered-to-zero', 
   expect(search).toHaveFocus();
   expect(search).toHaveValue('ab');
   expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+});
+
+// The search is debounced, so for one commit after Reset/clear the UI state is already empty while
+// the displayed rows are still the filtered result. That must stay "filtered to zero" (toolbar and
+// Reset mounted), never flash "No submissions yet" or drop focus.
+describe('clearing a search-only filter that returned zero rows', () => {
+  const searchName = 'Filter vulnerabilities by ID, package, or title';
+
+  const setUpFilteredToZero = async () => {
+    mockDebounce.isReal = true;
+    (useBeaconData as jest.Mock).mockImplementation(
+      (_customerId: string, filters?: { search?: string }) => ({
+        isLoading: false,
+        isPlaceholderData: false,
+        isError: false,
+        error: null,
+        data: filters?.search ? emptyBeaconData : mockBeaconData,
+      }),
+    );
+
+    renderBeacon();
+    const user = await selectCustomer('CID-01');
+    await user.type(await screen.findByRole('textbox', { name: searchName }), 'zz');
+    expect(await screen.findByText('No results match the current filters')).toBeInTheDocument();
+
+    // Switch to fake timers only now so the next debounce tick is under test control. Use
+    // `fireEvent` below, not userEvent: its async wrapper advances fake timers by 0 after every
+    // action, which would run the debounce tick before the assertion.
+    jest.useFakeTimers();
+  };
+
+  const expectStillFilteredToZero = () => {
+    expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+    expect(screen.getByText('No results match the current filters')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: searchName })).toBeInTheDocument();
+  };
+
+  afterEach(() => {
+    jest.useRealTimers();
+    mockDebounce.isReal = false;
+  });
+
+  it('keeps the filtered view when Reset filters is clicked', async () => {
+    await setUpFilteredToZero();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reset filters' }));
+    expectStillFilteredToZero();
+
+    act(() => {
+      jest.advanceTimersByTime(0);
+    });
+    expect(await screen.findByText(mockVulnerabilities[0].vulnerabilityId)).toBeInTheDocument();
+    expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+  });
+
+  it('keeps the filtered view when the search is cleared', async () => {
+    await setUpFilteredToZero();
+
+    fireEvent.change(screen.getByRole('textbox', { name: searchName }), { target: { value: '' } });
+    expectStillFilteredToZero();
+
+    act(() => {
+      jest.advanceTimersByTime(0);
+    });
+    expect(await screen.findByText(mockVulnerabilities[0].vulnerabilityId)).toBeInTheDocument();
+    expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+  });
 });
