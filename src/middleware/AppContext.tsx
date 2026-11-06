@@ -17,6 +17,10 @@ export interface AppContextInterface {
   rbac?: Record<keyof typeof RbacPermissions, boolean>;
   features: Features | null;
   isFetchingPermissions: boolean;
+  /** True once permission lookup has failed outright (RBAC/Kessel unreachable or
+   * erroring) rather than merely still loading. `rbac` will never resolve in
+   * this state. */
+  permissionsError: boolean;
   subscriptions?: Subscriptions;
   contentOrigin: ContentOrigin[];
   setContentOrigin: React.Dispatch<React.SetStateAction<ContentOrigin[]>>;
@@ -31,6 +35,11 @@ export const AppContext = createContext({} as AppContextInterface);
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [zeroState, setZeroState] = useState(true);
   const [features, setFeatures] = useState<Features | null>(null);
+  // `useFetchFeaturesQuery`'s `isLoading` starts `false` before the fetch is
+  // even kicked off below, which is indistinguishable from "fetch settled."
+  // Track that distinctly so RBAC v1 doesn't fire before we know which
+  // permission system (Kessel vs traditional) this tenant should use.
+  const [featuresSettled, setFeaturesSettled] = useState(false);
   const [contentOrigin, setContentOrigin] = useState<ContentOrigin[]>([
     ContentOrigin.EXTERNAL,
     ContentOrigin.UPLOAD,
@@ -46,17 +55,23 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const useKessel = !!(features?.kessel?.enabled && features.kessel?.accessible);
 
   // Fetch workspace and permissions based on the enabled system
-  const { workspaceId, loading: workspaceLoading } = useKesselWorkspace(useKessel);
-  const kesselPermissions = useKesselRbac(workspaceId, workspaceLoading);
-  const traditionalPermissions = useTraditionalRbac(chrome, features, !useKessel);
+  const {
+    workspaceId,
+    loading: workspaceLoading,
+    error: workspaceError,
+  } = useKesselWorkspace(useKessel);
+  const kesselPermissions = useKesselRbac(workspaceId, workspaceLoading, workspaceError);
+  const traditionalPermissions = useTraditionalRbac(chrome, featuresSettled, !useKessel);
 
   // Select the appropriate RBAC and loading state
   const rbac = useKessel ? kesselPermissions.rbac : traditionalPermissions.rbac;
   const rbacLoading = useKessel ? kesselPermissions.loading : traditionalPermissions.loading;
+  const permissionsError = useKessel ? kesselPermissions.error : traditionalPermissions.error;
 
   useEffect(() => {
     (async () => {
       setFeatures(await fetchFeatures());
+      setFeaturesSettled(true);
     })();
   }, []);
 
@@ -66,6 +81,7 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
         rbac,
         features,
         isFetchingPermissions: isFetchingFeatures || isFetchingSubscriptions || rbacLoading,
+        permissionsError,
         subscriptions,
         contentOrigin,
         setContentOrigin,

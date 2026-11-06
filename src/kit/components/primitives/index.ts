@@ -22,6 +22,9 @@ export type { LwDrawerProps, LwDrawerResponsiveConfig } from './drawer/drawer';
 export { LwEmptyState } from './empty-state/empty-state';
 export type { LwEmptyStateProps } from './empty-state/empty-state';
 
+export { LwErrorState } from './error-state/error-state';
+export type { LwErrorStateProps } from './error-state/error-state';
+
 export { LwForm } from './form/form';
 export type { LwFormProps } from './form/form';
 
