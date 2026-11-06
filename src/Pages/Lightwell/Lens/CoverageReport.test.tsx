@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CoverageReport from './CoverageReport';
 import { useCoverageReport } from './hooks/useCoverageReport';
@@ -10,9 +10,25 @@ import {
 import { useLightwellNavigateTo } from 'Hooks/Lightwell/navigation/useLightwellNavigateTo';
 import { useCoverageReportPackagesQuery } from 'services/Lightwell/CoverageReportsQueries';
 
+const mockRequestPdf = jest.fn();
+const mockExportCsv = jest.fn();
+const mockExportJson = jest.fn();
+
+jest.mock('../utils/exportUtils', () => ({
+  ...jest.requireActual('../utils/exportUtils'),
+  exportToCsv: (...args) => mockExportCsv(...args),
+  exportToJson: (...args) => mockExportJson(...args),
+}));
+
+import { getCoverageReportPackages } from 'services/Lightwell/CoverageReportsApi';
+jest.mock('services/Lightwell/CoverageReportsApi', () => ({
+  ...jest.requireActual('services/Lightwell/CoverageReportsApi'),
+  getCoverageReportPackages: jest.fn(),
+}));
+
 jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
   useChrome: () => ({
-    requestPdf: jest.fn(),
+    requestPdf: mockRequestPdf,
   }),
 }));
 
@@ -63,6 +79,11 @@ const renderCoverageReport = () =>
 
 describe('CoverageReport', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+    (getCoverageReportPackages as jest.Mock).mockResolvedValue({
+      data: defaultCoverageReportPackagesItem,
+      meta: { count: 1500 },
+    });
     (useCoverageReport as jest.Mock).mockReturnValue({
       filename: 'test-sbom.json',
       report: defaultCoverageReportItem,
@@ -81,6 +102,99 @@ describe('CoverageReport', () => {
     (useLightwellNavigateTo as jest.Mock).mockReturnValue({
       navigateTo: mockNavigateTo,
     });
+  });
+
+  const selectPdf = async () => {
+    await userEvent.click(screen.getByRole('button', { name: 'Export as' }));
+    await userEvent.click(screen.getByRole('menuitem', { name: 'PDF' }));
+  };
+
+  const oversizedReport = () => {
+    (getCoverageReportPackages as jest.Mock).mockResolvedValue({
+      data: [],
+      meta: { count: 1501 },
+    });
+    renderCoverageReport();
+  };
+
+  it('exports the full PDF at the 1,500-package boundary through the page menu', async () => {
+    renderCoverageReport();
+    await selectPdf();
+    await waitFor(() => expect(mockRequestPdf).toHaveBeenCalledTimes(1));
+    expect(mockRequestPdf.mock.calls[0][0].payload[0].fetchDataParams).toMatchObject({
+      includePackages: true,
+    });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('checks the export filters rather than the table count and allows cancellation', async () => {
+    oversizedReport();
+    await selectPdf();
+    expect(await screen.findByRole('dialog')).toHaveAccessibleName(
+      'Package list exceeds PDF export limit',
+    );
+    expect(getCoverageReportPackages).toHaveBeenCalledWith(defaultCoverageReportItem.uuid, 1, 1, {
+      search: '',
+      match_status: [],
+      ecosystem: [],
+    });
+    expect(mockRequestPdf).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(mockRequestPdf).not.toHaveBeenCalled();
+  });
+
+  it('checks and exports the filtered list after narrowing an oversized report', async () => {
+    oversizedReport();
+    await userEvent.type(screen.getByPlaceholderText('Search packages...'), 'spring');
+    await waitFor(() =>
+      expect(useCoverageReportPackagesQuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.any(Number),
+        expect.any(Number),
+        expect.objectContaining({ search: 'spring' }),
+        expect.any(Boolean),
+      ),
+    );
+    (getCoverageReportPackages as jest.Mock).mockResolvedValue({ data: [], meta: { count: 12 } });
+    await selectPdf();
+    await waitFor(() => expect(mockRequestPdf).toHaveBeenCalledTimes(1));
+    expect(getCoverageReportPackages).toHaveBeenCalledWith(
+      defaultCoverageReportItem.uuid,
+      1,
+      1,
+      expect.objectContaining({ search: 'spring' }),
+    );
+    expect(mockRequestPdf.mock.calls[0][0].payload[0].fetchDataParams).toMatchObject({
+      filters: { search: 'spring' },
+      includePackages: true,
+    });
+  });
+
+  it('exports only the overview after the oversized-list warning', async () => {
+    oversizedReport();
+    await selectPdf();
+    await userEvent.click(await screen.findByRole('button', { name: 'Export overview PDF' }));
+    await waitFor(() => expect(mockRequestPdf).toHaveBeenCalledTimes(1));
+    expect(getCoverageReportPackages).toHaveBeenCalledTimes(1);
+    expect(mockRequestPdf.mock.calls[0][0].payload[0]).toMatchObject({
+      fetchDataParams: { includePackages: false, includeSummary: true },
+      additionalData: { includePackages: false, includeSummary: true },
+    });
+  });
+
+  it.each(['CSV', 'JSON'])('exports %s from the oversized-list warning', async (format) => {
+    oversizedReport();
+    await selectPdf();
+    await screen.findByRole('dialog');
+    (getCoverageReportPackages as jest.Mock).mockResolvedValue({
+      data: defaultCoverageReportPackagesItem,
+    });
+    await userEvent.click(screen.getByRole('button', { name: `Export ${format}` }));
+    const exportRows = format === 'CSV' ? mockExportCsv : mockExportJson;
+    await waitFor(() => expect(exportRows).toHaveBeenCalledTimes(1));
+    expect(exportRows.mock.calls[0][0]).toEqual(defaultCoverageReportPackagesItem);
+    expect(mockRequestPdf).not.toHaveBeenCalled();
   });
 
   it('shows "New analysis" when a report is complete', () => {

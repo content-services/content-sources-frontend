@@ -136,6 +136,13 @@ export const fetchData = async (
       throw new Error('Unexpected coverage report packages response');
     }
 
+    if (
+      packagesResponse.meta.count > COVERAGE_PDF_MAX_PACKAGES ||
+      packages.length + packagesResponse.data.length > COVERAGE_PDF_MAX_PACKAGES
+    ) {
+      throw new Error(`Coverage PDF export exceeds the ${COVERAGE_PDF_MAX_PACKAGES}-package limit`);
+    }
+
     packages.push(...packagesResponse.data);
     meta = packagesResponse.meta;
 
