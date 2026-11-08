@@ -14,6 +14,7 @@
     "start": "fec dev-proxy",
     "start:stage": "fec dev-proxy --clouddotEnv=stage",
     "start:prod": "fec dev-proxy --clouddotEnv=prod",
+    "start:static": "NODE_ENV=production npx --no-install fec static",
     "start:verbose": "VERBOSE=true fec dev-proxy",
     "local": "BACKEND_PORT=8000 yarn start",
     "local:coverage": "COVERAGE=true BACKEND_PORT=8000 fec dev-proxy --config $(pwd)/webpack.dev-coverage.config.js",
