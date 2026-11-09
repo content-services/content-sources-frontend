@@ -34,6 +34,9 @@ export type { LwListProps, LwListItem } from './list/list';
 export { LwMenu } from './menu/menu';
 export type { LwMenuProps, LwMenuItem, LwMenuToggleProps } from './menu/menu';
 
+export { LwModal } from './modal/modal';
+export type { LwModalProps } from './modal/modal';
+
 export { LwPopover } from './popover/popover';
 export type { LwPopoverProps } from './popover/popover';
 

@@ -20,7 +20,6 @@ import {
   CardBody,
   Content,
   Flex,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -55,7 +54,7 @@ import {
   exportToJson,
   type ExportFormat,
 } from '../utils/exportUtils';
-import { LwButton, LwCard, LwMenu, LwTitle } from 'kit/components/primitives';
+import { LwButton, LwCard, LwMenu, LwModal, LwTitle } from 'kit/components/primitives';
 import { useContainerWidth } from '../hooks/useContainerWidth';
 import {
   COVERAGE_DONUT_WIDTH,
@@ -399,7 +398,7 @@ const CoverageReport = () => {
           </CardBody>
         </LwCard>
       </PageSection>
-      <Modal
+      <LwModal
         variant={ModalVariant.medium}
         position='top'
         isOpen={isPdfLimitModalOpen}
@@ -454,7 +453,7 @@ const CoverageReport = () => {
             Cancel
           </LwButton>
         </ModalFooter>
-      </Modal>
+      </LwModal>
     </>
   );
 };
