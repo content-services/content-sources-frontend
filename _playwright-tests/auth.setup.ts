@@ -13,7 +13,6 @@ import { test, expect } from '@playwright/test';
 import {
   ensureNotInPreview,
   storeStorageStateAndToken,
-  logout,
   logInWithUsernameAndPassword,
 } from './authHelpers';
 import { closeGenericPopupsIfExist } from './UI/helpers/helpers';
@@ -185,7 +184,7 @@ test.describe('Setup Authentication States', () => {
     test(`Authenticate ${user.key} user and save state`, async ({ page }) => {
       test.setTimeout(60_000);
 
-      // Block TrustArc cookie consent so it does not overlay the UI during login & logout
+      // Block TrustArc cookie consent so it does not overlay the UI during login
       await page.route('https://consent.trustarc.com/**', (route) => route.abort());
       await page.route('https://consent-pref.trustarc.com/**', (route) => route.abort());
 
@@ -199,10 +198,8 @@ test.describe('Setup Authentication States', () => {
       await storeStorageStateAndToken(page, user.tokenEnvVar);
       expect(process.env[user.tokenEnvVar]).toBeDefined();
 
-      // Logout unless it's the admin (last user)
-      if (user.key !== ADMIN_KEY) {
-        await logout(page);
-      }
+      // Each setup test has an isolated browser context. Keep the saved SSO session
+      // active so integration tests can refresh its token after the context closes.
     });
   }
 });
