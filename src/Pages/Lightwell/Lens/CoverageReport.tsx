@@ -106,7 +106,10 @@ const CoverageReport = () => {
   const table = usePackageCoverageTable(ecosystems);
 
   const [isExporting, setIsExporting] = useState(false);
-  const [isPdfLimitModalOpen, setIsPdfLimitModalOpen] = useState(false);
+  // Holds the report the warning was raised for, not just "is it open". The count
+  // request is async, so navigating to another report mid-flight would otherwise
+  // leave the old report's warning on screen wired to the new report's export.
+  const [pdfLimitReportUuid, setPdfLimitReportUuid] = useState<string | null>(null);
   const { notify } = useNotification();
   const errorNotifier = useErrorNotification();
   const { requestPdf } = useChrome();
@@ -177,34 +180,33 @@ const CoverageReport = () => {
   const handleExport = async (format: ExportFormat, overviewOnly = false) => {
     if (isExporting) return;
     setIsExporting(true);
+    // Pin the export to the report and filters it started on: both can change
+    // under us while the requests below are in flight.
+    const exportUuid = report.uuid;
+    const exportFilters = table.debouncedFilters;
     try {
       if (format === 'pdf') {
         if (!overviewOnly) {
           // Count against the export's own filters, not the table's loaded page.
-          const { meta } = await getCoverageReportPackages(
-            report.uuid,
-            1,
-            1,
-            table.debouncedFilters,
-          );
+          const { meta } = await getCoverageReportPackages(exportUuid, 1, 1, exportFilters);
           if (meta.count > COVERAGE_PDF_MAX_PACKAGES) {
-            setIsPdfLimitModalOpen(true);
+            setPdfLimitReportUuid(exportUuid);
             return;
           }
         }
         notify(PDF_GENERATING_NOTIFICATION);
         const payload = buildCoveragePdfPayload({
-          uuid: report.uuid,
+          uuid: exportUuid,
           filename,
-          filters: table.debouncedFilters,
+          filters: exportFilters,
           includeCveData: hasCveData,
           includePackages: !overviewOnly,
         }) as unknown as PDFRequestPayload;
-        await requestPdf({ filename: `lightwell-match-analysis-${report.uuid}.pdf`, payload });
+        await requestPdf({ filename: `lightwell-match-analysis-${exportUuid}.pdf`, payload });
         notify(PDF_READY_NOTIFICATION);
         return;
       }
-      const packages = await fetchAllCoveragePackages(report.uuid, table.debouncedFilters);
+      const packages = await fetchAllCoveragePackages(exportUuid, exportFilters);
       const rows = hasCveData
         ? packages
         : packages.map(({ cve_count, cve_range, ...rest }) => {
@@ -213,9 +215,9 @@ const CoverageReport = () => {
             return rest;
           });
       if (format === 'csv') {
-        exportToCsv(rows, `lightwell-match-analysis-${report.uuid}.csv`);
+        exportToCsv(rows, `lightwell-match-analysis-${exportUuid}.csv`);
       } else {
-        exportToJson(rows, `lightwell-match-analysis-${report.uuid}.json`);
+        exportToJson(rows, `lightwell-match-analysis-${exportUuid}.json`);
       }
     } catch (err) {
       errorNotifier(
@@ -401,8 +403,8 @@ const CoverageReport = () => {
       <LwModal
         variant={ModalVariant.medium}
         position='top'
-        isOpen={isPdfLimitModalOpen}
-        onClose={() => setIsPdfLimitModalOpen(false)}
+        isOpen={pdfLimitReportUuid === report.uuid}
+        onClose={() => setPdfLimitReportUuid(null)}
         aria-labelledby='lightwell-coverage-pdf-too-large-title'
         ouiaId='lightwell-coverage-pdf-too-large'
       >
@@ -423,7 +425,7 @@ const CoverageReport = () => {
             variant='primary'
             ouiaId='lightwell-coverage-pdf-export-overview'
             onClick={() => {
-              setIsPdfLimitModalOpen(false);
+              setPdfLimitReportUuid(null);
               void handleExport('pdf', true);
             }}
           >
@@ -433,7 +435,7 @@ const CoverageReport = () => {
             variant='secondary'
             ouiaId='lightwell-coverage-pdf-export-csv'
             onClick={() => {
-              setIsPdfLimitModalOpen(false);
+              setPdfLimitReportUuid(null);
               void handleExport('csv');
             }}
           >
@@ -443,13 +445,13 @@ const CoverageReport = () => {
             variant='secondary'
             ouiaId='lightwell-coverage-pdf-export-json'
             onClick={() => {
-              setIsPdfLimitModalOpen(false);
+              setPdfLimitReportUuid(null);
               void handleExport('json');
             }}
           >
             Export JSON
           </LwButton>
-          <LwButton variant='link' onClick={() => setIsPdfLimitModalOpen(false)}>
+          <LwButton variant='link' onClick={() => setPdfLimitReportUuid(null)}>
             Cancel
           </LwButton>
         </ModalFooter>
