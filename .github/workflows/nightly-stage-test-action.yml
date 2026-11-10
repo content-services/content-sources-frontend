@@ -15,6 +15,8 @@ concurrency:
 jobs:
   playwright-integration-test:
     if: ${{ ! contains(github.event.pull_request.labels.*.name, 'skip-integration-tests') }}
+    env:
+      CONTENT_PUBLIC_HOST: packages.stage.redhat.com
     runs-on:
       - codebuild-content-services-int-repo-${{ github.run_id }}-${{ github.run_attempt }}
       - instance-size:large
@@ -126,6 +128,18 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: docker run -d --network=host -e HTTPS_PROXY=$RH_PROXY_URL -e ROUTES_JSON_PATH=/config/routes-ci-integration.json -v "$(pwd)/config:/config:ro,Z" --name frontend-development-proxy quay.io/redhat-user-workloads/hcc-platex-services-tenant/frontend-development-proxy:latest
       ### End of pull request specific steps ###
+
+      - name: Resolve public content endpoint for RHC containers
+        shell: bash
+        run: |
+          public_ip=$(dig @1.1.1.1 "$CONTENT_PUBLIC_HOST" A +short +time=5 +tries=2 |
+            awk -F. 'NF == 4 && /^[0-9.]+$/ && $1 <= 255 && $2 <= 255 && $3 <= 255 && $4 <= 255 { print; exit }')
+          if [[ -z "$public_ip" ]]; then
+            echo "::error::Public DNS returned no IPv4 address for $CONTENT_PUBLIC_HOST"
+            exit 1
+          fi
+          echo "CONTENT_PUBLIC_IP=$public_ip" >> "$GITHUB_ENV"
+          echo "RHC containers will connect directly to $CONTENT_PUBLIC_HOST at $public_ip"
 
       - name: Run Playwright tests
         env:

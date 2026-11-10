@@ -1,6 +1,7 @@
 import Dockerode, { Container } from 'dockerode';
 import { PassThrough } from 'stream';
 import { finished } from 'stream/promises';
+import { isIPv4 } from 'net';
 
 const docker = () => new Dockerode({ socketPath: process.env.DOCKER_SOCKET! });
 
@@ -26,12 +27,26 @@ async function sleep(ms: number): Promise<void> {
  * @returns
  */
 const startContainer = async (containerName: string, imageName: string) => {
+  const contentHost = process.env.CONTENT_PUBLIC_HOST;
+  const publicIp = process.env.CONTENT_PUBLIC_IP;
+  if (publicIp && !contentHost) {
+    throw new Error('CONTENT_PUBLIC_HOST is required when CONTENT_PUBLIC_IP is set');
+  }
+  if (publicIp && !isIPv4(publicIp)) {
+    throw new Error('CONTENT_PUBLIC_IP must be an IPv4 address');
+  }
+  const noProxy = [process.env.no_proxy, process.env.NO_PROXY, contentHost]
+    .filter(Boolean)
+    .join(',');
   await pullImage(imageName);
   console.log('starting container ' + containerName);
   const container = await docker().createContainer({
     Image: imageName,
     name: containerName,
+    // DNF must bypass Squid for this host so the container's hosts entry is used.
+    ...(publicIp && { Env: [`no_proxy=${noProxy}`, `NO_PROXY=${noProxy}`] }),
     HostConfig: {
+      ...(publicIp && { ExtraHosts: [`${contentHost}:${publicIp}`] }),
       Privileged: true,
       Binds: ['/sys/fs/cgroup:/sys/fs/cgroup:rw'],
       Tmpfs: {
