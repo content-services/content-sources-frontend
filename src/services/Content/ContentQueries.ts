@@ -4,7 +4,6 @@ import {
   keepPreviousData,
   QueryClient,
   useMutation,
-  useQueries,
   useQuery,
   useQueryClient,
   UseQueryOptions,
@@ -49,11 +48,6 @@ import {
   getLatestRepoConfigFile,
   PopularRepository,
   bulkRemoveRepositoryRpms,
-  getLightwellRepositoryPackages,
-  getPythonPackageDetail,
-  getPythonPackageVersions,
-  getMavenPackageDetail,
-  getMavenPackageVersionsList,
 } from './ContentApi';
 import { ADMIN_TASK_LIST_KEY } from '../Admin/AdminTaskQueries';
 import useErrorNotification from 'Hooks/useErrorNotification';
@@ -71,11 +65,6 @@ export const POPULAR_REPOSITORIES_LIST_KEY = 'POPULAR_REPOSITORIES_LIST_KEY';
 export const REPOSITORY_PARAMS_KEY = 'REPOSITORY_PARAMS_KEY';
 export const CREATE_PARAMS_KEY = 'CREATE_PARAMS_KEY';
 export const PACKAGES_KEY = 'PACKAGES_KEY';
-export const LIGHTWELL_REPOSITORY_PACKAGES_KEY = 'LIGHTWELL_REPOSITORY_PACKAGES_KEY';
-export const MAVEN_PACKAGE_DETAIL_KEY = 'MAVEN_PACKAGE_DETAIL_KEY';
-export const MAVEN_PACKAGE_VERSIONS_LIST_KEY = 'MAVEN_PACKAGE_VERSIONS_LIST_KEY';
-export const PYTHON_PACKAGE_DETAIL_KEY = 'PYTHON_PACKAGE_DETAIL_KEY';
-export const PYTHON_PACKAGE_VERSIONS_KEY = 'PYTHON_PACKAGE_VERSIONS_KEY';
 export const SNAPSHOT_PACKAGES_KEY = 'SNAPSHOT_PACKAGES_KEY';
 export const SNAPSHOT_ERRATA_KEY = 'SNAPSHOT_ERRATA_KEY';
 export const LIST_SNAPSHOTS_KEY = 'LIST_SNAPSHOTS_KEY';
@@ -700,113 +689,6 @@ export const useGetPackagesQuery = (
     meta: {
       title: 'Unable to find packages with the given UUID.',
       id: 'packages-list-error',
-    },
-  });
-
-export const useLightwellRepositoryPackagesQuery = (
-  uuid: string,
-  page: number,
-  limit: number,
-  search = '',
-  sortBy?: string,
-  enabled = true,
-) =>
-  useQuery({
-    queryKey: [LIGHTWELL_REPOSITORY_PACKAGES_KEY, uuid, page, limit, search, sortBy],
-    queryFn: () => getLightwellRepositoryPackages(uuid, page, limit, search, sortBy),
-    // Keep rows across search, sort, and page changes. Another repository must not show those rows.
-    placeholderData: (previousData, previousQuery) =>
-      previousQuery?.queryKey[1] === uuid ? previousData : undefined,
-    staleTime: 60000,
-    enabled: enabled && !!uuid,
-    meta: {
-      title: 'Unable to find packages for the repository.',
-      id: 'lightwell-repository-packages-list-error',
-    },
-  });
-
-export const useMavenPackageDetailQuery = (
-  uuid: string,
-  group: string,
-  name: string,
-  version: string,
-  enabled = true,
-) =>
-  useQuery({
-    queryKey: [MAVEN_PACKAGE_DETAIL_KEY, uuid, group, name, version],
-    queryFn: () => getMavenPackageDetail(uuid, group, name, version),
-    staleTime: 60000,
-    enabled: enabled && !!uuid && !!group && !!name && !!version,
-    meta: {
-      title: 'Unable to load package details.',
-      id: 'maven-package-detail-error',
-    },
-  });
-
-export const useMavenPackageVersionsPreload = (
-  uuid: string,
-  group: string,
-  name: string,
-  versions: string[],
-  enabled = true,
-) =>
-  useQueries({
-    queries: versions.map((version) => ({
-      queryKey: [MAVEN_PACKAGE_DETAIL_KEY, uuid, group, name, version],
-      queryFn: () => getMavenPackageDetail(uuid, group, name, version),
-      staleTime: 60000,
-      enabled: enabled && !!uuid && !!group && !!name && !!version,
-      meta: {
-        title: 'Unable to load package details.',
-        id: 'maven-package-detail-error',
-      },
-    })),
-  });
-
-export const useMavenPackageVersionsListQuery = (
-  uuid: string,
-  group: string,
-  name: string,
-  enabled = true,
-) =>
-  useQuery({
-    queryKey: [MAVEN_PACKAGE_VERSIONS_LIST_KEY, uuid, group, name],
-    queryFn: () => getMavenPackageVersionsList(uuid, group, name),
-    staleTime: 60000,
-    enabled: enabled && !!uuid && !!group && !!name,
-    meta: {
-      title: 'Unable to load package versions.',
-      id: 'maven-package-versions-list-error',
-    },
-  });
-
-export const usePythonPackageDetailQuery = (
-  uuid: string,
-  name: string,
-  version: string,
-  enabled = true,
-) =>
-  useQuery({
-    queryKey: [PYTHON_PACKAGE_DETAIL_KEY, uuid, name, version],
-    queryFn: () => getPythonPackageDetail(uuid, name, version),
-    staleTime: 60000,
-    placeholderData: keepPreviousData,
-    enabled: enabled && !!uuid && !!name && !!version,
-    meta: {
-      title: 'Unable to load package details.',
-      id: 'python-package-detail-error',
-    },
-  });
-
-export const usePythonPackageVersionsQuery = (uuid: string, name: string, enabled = true) =>
-  useQuery({
-    queryKey: [PYTHON_PACKAGE_VERSIONS_KEY, uuid, name],
-    queryFn: () => getPythonPackageVersions(uuid, name),
-    staleTime: 60000,
-    enabled: enabled && !!uuid && !!name,
-    meta: {
-      title: 'Unable to load package versions.',
-      id: 'python-package-versions-error',
     },
   });
 
