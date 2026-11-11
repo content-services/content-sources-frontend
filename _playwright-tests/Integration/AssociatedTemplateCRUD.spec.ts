@@ -66,18 +66,21 @@ test.describe('Associated Template CRUD', () => {
       hostname = await setupSystemWithTemplate({ regClient, templateName });
     });
 
-    await test.step('Verify template uses correct certificate URL', async () => {
+    await test.step('Verify template uses correct content URL', async () => {
       const repoConfig = await regClient.Exec(['cat', '/etc/yum.repos.d/redhat.repo'], 10000);
 
-      const expectedCertHost =
-        process.env.PROD === 'true' ? 'cert.console.redhat.com' : 'cert.console.stage.redhat.com';
+      const expectedContentHost =
+        process.env.PROD === 'true' ? 'packages.redhat.com' : 'packages.stage.redhat.com';
 
       // Match baseurl with optional spaces around '=' and ignore the path after hostname
-      const baseurlPattern = new RegExp(`^baseurl\\s*=\\s*https://${expectedCertHost}/`, 'm');
+      const baseurlPattern = new RegExp(
+        `^baseurl\\s*=\\s*https://${expectedContentHost.replaceAll('.', '\\.')}/`,
+        'm',
+      );
 
       expect(
         repoConfig?.stdout,
-        `template should configure baseurl with certificate host ${expectedCertHost}`,
+        `template should configure baseurl with content host ${expectedContentHost}`,
       ).toMatch(baseurlPattern);
     });
 
