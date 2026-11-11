@@ -28,13 +28,6 @@ export interface ContentItem {
   origin?: ContentOrigin;
   last_snapshot_task?: AdminTask;
   last_introspection_status: string;
-  content_type?: string;
-  description?: string;
-  ecosystem?: string;
-  security_level?: string;
-  published_distribution_url?: string;
-  build_count?: number;
-  version_count?: number;
   partner?: boolean;
   snapshot_publish_state?: {
     publishing: boolean;
@@ -241,79 +234,6 @@ export type PackagesWithUUIDResponse = {
   meta: Meta;
 };
 
-export interface RepositoryPackageReleaseInfo {
-  version: string;
-  release: string;
-  created_at: string;
-}
-
-export interface RepositoryPackageItem {
-  group: string;
-  name: string;
-  versions: string[];
-  latest_releases: RepositoryPackageReleaseInfo[];
-}
-
-export type RepositoryPackagesResponse = {
-  results: RepositoryPackageItem[];
-  total: number;
-  limit: number;
-  offset: number;
-};
-
-export interface PackageDetailResponse {
-  group: string;
-  name: string;
-  version: string;
-  builds: RepositoryPackageReleaseInfo[];
-  summary?: string;
-  license?: string;
-  project_url?: string;
-  author?: string;
-}
-
-export interface MavenPackageVersionsListResponse {
-  group: string;
-  name: string;
-  versions: PackageDetailResponse[];
-}
-
-export interface PythonPackageAuthor {
-  name: string;
-  email?: string;
-}
-
-export interface PythonDistribution {
-  name: string;
-  filename: string;
-  packagetype: string;
-  python_version: string;
-  sha256: string;
-  size: number;
-  created_at: string;
-}
-
-export interface PythonPackageDetailResponse {
-  name: string;
-  version: string;
-  // Absent or empty while the backend still returns one row per stored version.
-  // A non-empty list matches Java: one row per upstream version, releases in `builds`.
-  builds?: RepositoryPackageReleaseInfo[];
-  summary: string;
-  description: string;
-  last_updated: string;
-  license: string;
-  author: PythonPackageAuthor;
-  upstream_versions: string[];
-  project_url: string;
-  distributions: PythonDistribution[];
-}
-
-export interface PythonPackageVersionsResponse {
-  name: string;
-  versions: PythonPackageDetailResponse[];
-}
-
 export type ErrataResponse = {
   data: ErrataItem[];
   links: Links;
@@ -448,7 +368,6 @@ export enum ContentOrigin {
   COMMUNITY = 'community',
   CUSTOM = 'external,upload',
   ALL = 'red_hat,external,upload,community',
-  LIGHTWELL = 'lightwell',
 }
 
 export const getContentList: (
@@ -594,24 +513,6 @@ export const getPackages: (
     `/api/content-sources/v1.0/repositories/${uuid}/rpms?${objectToUrlParams({
       offset: ((page - 1) * limit).toString(),
       limit: limit?.toString(),
-      search,
-      sort_by: sortBy,
-    })}`,
-  );
-  return data;
-};
-
-export const getLightwellRepositoryPackages: (
-  uuid: string,
-  page: number,
-  limit: number,
-  search?: string,
-  sortBy?: string,
-) => Promise<RepositoryPackagesResponse> = async (uuid, page, limit, search = '', sortBy) => {
-  const { data } = await axios.get(
-    `/api/content-sources/v1/repositories/${uuid}/packages?${objectToUrlParams({
-      offset: ((page - 1) * limit).toString(),
-      limit: limit.toString(),
       search,
       sort_by: sortBy,
     })}`,
@@ -774,50 +675,6 @@ export const bulkRemoveRepositoryRpms: (
   const { data } = await axios.post(
     `/api/content-sources/v1.0/repositories/${repoUuid}/rpms/bulk_remove/`,
     { rpm_uuids },
-  );
-  return data;
-};
-
-export const getMavenPackageDetail: (
-  uuid: string,
-  group: string,
-  name: string,
-  version: string,
-) => Promise<PackageDetailResponse> = async (uuid, group, name, version) => {
-  const { data } = await axios.get(
-    `/api/content-sources/v1/repositories/${uuid}/java_packages/${group}/${name}/${version}`,
-  );
-  return data;
-};
-
-export const getPythonPackageDetail: (
-  uuid: string,
-  name: string,
-  version: string,
-) => Promise<PythonPackageDetailResponse> = async (uuid, name, version) => {
-  const { data } = await axios.get(
-    `/api/content-sources/v1/repositories/${uuid}/python_packages/${name}/${version}`,
-  );
-  return data;
-};
-
-export const getPythonPackageVersions: (
-  uuid: string,
-  name: string,
-) => Promise<PythonPackageVersionsResponse> = async (uuid, name) => {
-  const { data } = await axios.get(
-    `/api/content-sources/v1/repositories/${uuid}/python_packages/${name}`,
-  );
-  return data;
-};
-
-export const getMavenPackageVersionsList: (
-  uuid: string,
-  group: string,
-  name: string,
-) => Promise<MavenPackageVersionsListResponse> = async (uuid, group, name) => {
-  const { data } = await axios.get(
-    `/api/content-sources/v1/repositories/${uuid}/java_packages/${group}/${name}`,
   );
   return data;
 };

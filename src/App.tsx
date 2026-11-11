@@ -1,5 +1,6 @@
 import '@redhat-cloud-services/frontend-components-utilities/styles/_all';
 import 'react18-json-view/src/style.css';
+import ErrorState from '@redhat-cloud-services/frontend-components/ErrorState';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 
 import { Bullseye, Button, Spinner } from '@patternfly/react-core';
@@ -16,7 +17,6 @@ import { CONTENT_ROUTE, REPOSITORIES_ROUTE, TEMPLATES_ROUTE } from './Routes/con
 import usePageSafe from 'Hooks/usePageSafe';
 import { TemplateFilterData } from './services/Templates/TemplateApi';
 import { useTemplateList } from './services/Templates/TemplateQueries';
-import { LwErrorState } from 'kit/components/primitives';
 
 export default function App() {
   const { rbac, isFetchingPermissions, permissionsError, zeroState, setZeroState } =
@@ -83,7 +83,7 @@ export default function App() {
 
   if (permissionsError) {
     return (
-      <LwErrorState
+      <ErrorState
         titleText='Unable to load permissions'
         bodyText='We could not verify your access. Check your connection and try again.'
         customFooter={

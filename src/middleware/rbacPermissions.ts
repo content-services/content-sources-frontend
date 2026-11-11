@@ -1,4 +1,4 @@
-/** RBAC permission keys for the content-sources / Lightwell app.
+/** RBAC permission keys for the content-sources app.
  * Standalone so rbacHelpers can import it without cycling through AppContext.
  * AppContext re-exports this for existing call sites. */
 export enum RbacPermissions {
