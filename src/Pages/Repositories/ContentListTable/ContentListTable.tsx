@@ -74,6 +74,7 @@ import {
 } from 'services/AdminPartnerRepos/AdminPartnerReposQueries';
 import { useRepositoryPublishSnapshotPolling } from 'Hooks/snapshotActions/usePublishSnapshot';
 import ProductFilter from './components/ProductFilter/ProductFilter';
+import { usePartnerFeatures } from 'Hooks/featureFlags';
 
 export const perPageKey = 'contentListPerPage';
 
@@ -81,13 +82,13 @@ const communityAndCustomReposTooltipCopy = 'No custom repositories on this page 
 
 const ContentListTable = () => {
   const { contentOrigin, setContentOrigin, features, rbac } = useAppContext();
-  const usePartnerTerminology =
-    features?.partnerrepos?.enabled && features.partnerrepos?.accessible;
-  const communityLabel = usePartnerTerminology ? 'Partner' : 'Community';
-  const readOnlyReposTooltipCopy = `Red Hat and ${communityLabel} repositories are read-only and cannot be manipulated.`;
+  const { partnerReposOn } = usePartnerFeatures();
+
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const readOnlyReposTooltipCopy = `Red Hat and ${partnerReposOn ? 'Partner' : 'Community'} repositories are read-only and cannot be manipulated.`;
 
   const {
     getArchName,

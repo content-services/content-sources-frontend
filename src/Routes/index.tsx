@@ -23,6 +23,7 @@ import {
   UPLOAD_ROUTE,
 } from './constants';
 import { useAppContext } from 'middleware/AppContext';
+import { usePartnerFeatures } from 'Hooks/featureFlags';
 import TemplateDetails from 'Pages/Templates/TemplateDetails/TemplateDetails';
 import { AddOrEditTemplateModal } from '../Pages/Templates/TemplatesTable/components/AddOrEditTemplateModal/AddOrEditTemplateModal';
 import TemplatesTable from 'Pages/Templates/TemplatesTable/TemplatesTable';
@@ -51,6 +52,7 @@ import MarkAsPartnerModal from 'Pages/Repositories/ContentListTable/components/A
 export default function RepositoriesRoutes() {
   const key = useMemo(() => Math.random(), []);
   const { zeroState, features, rbac, subscriptions } = useAppContext();
+  const { isPartnerAdmin } = usePartnerFeatures();
 
   return (
     <ErrorPage>
@@ -79,8 +81,7 @@ export default function RepositoriesRoutes() {
                   element={<UploadContent />}
                 />
                 <Route key={DELETE_ROUTE} path={DELETE_ROUTE} element={<DeleteContentModal />} />
-                {features?.adminpartnerrepositories?.enabled &&
-                features.adminpartnerrepositories?.accessible ? (
+                {isPartnerAdmin ? (
                   <Route
                     key={`:repoUUID/${PARTNER_REPO_ROUTE}`}
                     path={`:repoUUID/${PARTNER_REPO_ROUTE}`}

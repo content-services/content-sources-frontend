@@ -2,6 +2,7 @@ import { ToggleGroup, ToggleGroupItem } from '@patternfly/react-core';
 import { ContentOrigin } from '../../../../services/Content/ContentApi';
 import React from 'react';
 import { useAppContext } from '../../../../middleware/AppContext';
+import { usePartnerFeatures } from 'Hooks/featureFlags';
 
 interface Props {
   contentOrigin: ContentOrigin[];
@@ -13,9 +14,7 @@ const COMMUNITY_ORIGIN = ContentOrigin.COMMUNITY;
 
 const ContentOriginFilter = ({ contentOrigin, setContentOrigin }: Props) => {
   const { features } = useAppContext();
-  const usePartnerTerminology =
-    features?.partnerrepos?.enabled && features.partnerrepos?.accessible;
-  const communityLabel = usePartnerTerminology ? 'Partner' : 'EPEL';
+  const { partnerReposOn } = usePartnerFeatures();
 
   return features?.snapshots?.accessible ? (
     <ToggleGroup aria-label='Default with single selectable'>
@@ -41,7 +40,7 @@ const ContentOriginFilter = ({ contentOrigin, setContentOrigin }: Props) => {
         }}
       />
       <ToggleGroupItem
-        text={communityLabel}
+        text={partnerReposOn ? 'Partner' : 'EPEL'}
         buttonId='partner-repositories-toggle-button'
         data-ouia-component-id='partner-repositories-toggle'
         isSelected={contentOrigin.includes(COMMUNITY_ORIGIN)}
