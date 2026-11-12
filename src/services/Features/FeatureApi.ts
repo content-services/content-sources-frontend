@@ -11,13 +11,6 @@ export interface Features {
   kessel?: Feature;
   extendedreleaserepos?: Feature;
   adminpartnerrepositories?: Feature;
-  lightwellnotifications?: Feature;
-  lightwellbeaconandlens?: Feature;
-  lightwellbeacon?: Feature;
-  lightwelllens?: Feature;
-  lightwellterms?: Feature;
-  lightwellclearinghouse?: Feature;
-  lightwellclearinghouseread?: Feature;
   /** PLACEHOLDER: Hardcoded to false until backend feature flag is implemented */
   partnerrepos?: Feature;
 }
