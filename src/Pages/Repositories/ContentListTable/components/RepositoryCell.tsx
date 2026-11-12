@@ -5,7 +5,9 @@ import { ContentItem, ContentOrigin } from 'services/Content/ContentApi';
 import Hide from 'components/Hide/Hide';
 import UrlWithExternalIcon from 'components/UrlWithLinkIcon/UrlWithLinkIcon';
 import ChangedArrows from './SnapshotListModal/components/ChangedArrows';
-import { RepositoryLabels } from './RepositoryLabels/RepositoryLabels';
+import MarkAsPartneredInProgressLabel from 'components/RepositoryLabels/MarkPartnerInProgressLabel';
+import PartneredLabel from 'components/RepositoryLabels/PartneredLabel';
+import { PublishLabels } from 'components/RepositoryLabels/PublishLabels';
 
 interface Props {
   rowData: Pick<
@@ -20,16 +22,19 @@ const RepositoryCell = memo(
   ({ rowData, snapshotsAccessible, isRepoBeingMarkedAsPartner }: Props) => {
     const { name, url, last_snapshot, origin, partner, snapshot_publish_state } = rowData;
 
+    const showPartnerAdminLabels = origin === ContentOrigin.UPLOAD;
+
     return (
       <Flex direction={{ default: 'column' }}>
-        <Flex gap={{ default: 'gapXs' }} alignItems={{ default: 'alignItemsCenter' }}>
+        <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }}>
           <FlexItem>{name}</FlexItem>
-          <RepositoryLabels
-            origin={origin}
-            isRepoBeingMarkedAsPartner={isRepoBeingMarkedAsPartner}
-            isPartner={partner}
-            publishState={snapshot_publish_state}
-          />
+          {showPartnerAdminLabels ? (
+            <Flex gap={{ default: 'gapXs' }} alignItems={{ default: 'alignItemsCenter' }}>
+              {isRepoBeingMarkedAsPartner && <MarkAsPartneredInProgressLabel />}
+              {partner && <PartneredLabel />}
+              <PublishLabels publishState={snapshot_publish_state} />
+            </Flex>
+          ) : null}
         </Flex>
 
         <Hide hide={origin === ContentOrigin.UPLOAD || partner === true}>

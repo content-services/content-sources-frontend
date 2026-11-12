@@ -34,10 +34,10 @@ import { ADD_ROUTE, REPOSITORIES_ROUTE } from 'Routes/constants';
 import TdWithTooltip from 'components/TdWithTooltip/TdWithTooltip';
 import ConditionalTooltip from 'components/ConditionalTooltip/ConditionalTooltip';
 import { reduceStringToCharsWithEllipsis } from 'helpers';
-import UploadRepositoryLabel from 'components/RepositoryLabels/UploadRepositoryLabel';
-import PartnerRepositoryLabel from 'components/RepositoryLabels/PartnerRepositoryLabel';
+import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { isEPELRepository } from 'Pages/Repositories/helpers';
 import { usePartnerFeatures } from 'Hooks/featureFlags';
+import TypeLabel from 'components/RepositoryLabels/TypeLabel/TypeLabel';
 
 const useStyles = createUseStyles({
   topBottomContainers: {
@@ -162,7 +162,7 @@ export default function CustomRepositoriesStep() {
       </Flex>
       <Flex direction={{ default: 'row' }}>
         <Content component={ContentVariants.p} className={classes.reduceTrailingMargin}>
-          Select custom or {partnerReposOn ? 'Partner' : 'EPEL'} repositories.
+          Select custom or {partnerReposOn ? 'partner' : 'EPEL'} repositories.
         </Content>
         <UrlWithExternalIcon
           href={pathname + '/' + REPOSITORIES_ROUTE}
@@ -310,10 +310,17 @@ export default function CustomRepositoriesStep() {
                           <>
                             {reduceStringToCharsWithEllipsis(name, 60)}
                             <Hide hide={origin !== ContentOrigin.UPLOAD}>
-                              <UploadRepositoryLabel />
+                              <TypeLabel type='upload' className={spacing.mlSm} hideTooltip />
                             </Hide>
                             <Hide hide={origin !== ContentOrigin.COMMUNITY}>
-                              <PartnerRepositoryLabel />
+                              <TypeLabel
+                                type='partner'
+                                className={spacing.mlSm}
+                                {...(!partnerReposOn && {
+                                  label: 'Community',
+                                  tooltip: 'This EPEL repository is shared across organizations.',
+                                })}
+                              />
                             </Hide>
                           </>
                         </ConditionalTooltip>

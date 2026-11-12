@@ -17,7 +17,7 @@ export interface Features {
 
 /** A feature is usable only when the backend reports it both enabled and accessible. */
 export const isFeatureOn = (feature?: Feature): boolean =>
-  !!feature?.enabled && !!feature?.accessible;
+  !!(feature?.enabled && feature?.accessible);
 
 export const getFeatures: () => Promise<Features> = async () => {
   const { data } = await axios.get('/api/content-sources/v1/features/');
