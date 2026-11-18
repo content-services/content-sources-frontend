@@ -1,21 +1,20 @@
+import { usePartnerFeatures } from 'Hooks/featureFlags';
 import { useAppContext } from 'middleware/AppContext';
 import { useCallback, useEffect } from 'react';
 import { ContentOrigin, SnapshotItem } from 'services/Content/ContentApi';
 import { useFetchContent } from 'services/Content/ContentQueries';
 
 export const useRepositoryType = (repoUUID: string) => {
-  const { features, rbac } = useAppContext();
+  const { rbac } = useAppContext();
   const { data: repository, isError } = useFetchContent(repoUUID);
+  const { isPartnerAdmin } = usePartnerFeatures();
 
   const isRepositoryReadOnly =
     repository?.origin === ContentOrigin.REDHAT || repository?.origin === ContentOrigin.COMMUNITY;
   const canModify = !isRepositoryReadOnly && !!rbac?.repoWrite;
 
   const isPartnerRepo = !!repository?.partner;
-  const canPublish =
-    isPartnerRepo &&
-    !!features?.adminpartnerrepositories?.enabled &&
-    !!features?.adminpartnerrepositories?.accessible;
+  const canPublish = isPartnerRepo && isPartnerAdmin;
 
   return {
     repositoryName: repository?.name,

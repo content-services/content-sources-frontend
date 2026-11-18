@@ -33,6 +33,7 @@ jest.mock('middleware/AppContext', () => ({
     contentOrigin: [ContentOrigin.EXTERNAL, ContentOrigin.UPLOAD],
     features: {
       snapshots: { enabled: true, accessible: true },
+      partnerrepos: { enabled: true, accessible: true },
       adminpartnerrepositories: { enabled: true, accessible: true },
     },
     setContentOrigin: jest.fn(),
