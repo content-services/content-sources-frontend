@@ -5,7 +5,8 @@ import { TooltipPosition } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { ContentOrigin } from 'services/Content/ContentApi';
 import { useAppContext } from 'middleware/AppContext';
-import { EDIT_ROUTE, UPLOAD_ROUTE, DELETE_ROUTE, PARTNER_REPO_ROUTE } from 'Routes/constants';
+import { usePartnerFeatures } from 'Hooks/featureFlags';
+import { DELETE_ROUTE, EDIT_ROUTE, PARTNER_REPO_ROUTE, UPLOAD_ROUTE } from 'Routes/constants';
 import type { ActionRowData } from '../components/RepositoryActionCell';
 
 const useStyles = createUseStyles({
@@ -33,20 +34,17 @@ export default function useRowActions({
   const navigate = useNavigate();
   const { rbac, features } = useAppContext();
   const classes = useStyles();
+  const { isPartnerAdmin } = usePartnerFeatures();
 
   const rowActions = useCallback(
     (rowData: ActionRowData): IAction[] => {
       // admin partner repository
-      const isMarkRepoAsPartnerAllowed = (repository: ActionRowData) => {
-        const isAllowed =
-          features?.adminpartnerrepositories?.accessible &&
-          features?.adminpartnerrepositories?.enabled &&
-          repository.origin === ContentOrigin.UPLOAD &&
-          // disable unmarking partner repo when it is already marked partnered
-          repository.partner === false &&
-          isMarkingPartner === false;
-        return isAllowed;
-      };
+      const isMarkRepoAsPartnerAllowed = (repository: ActionRowData) =>
+        isPartnerAdmin &&
+        repository.origin === ContentOrigin.UPLOAD &&
+        // disable unmarking partner repo when it is already marked partnered
+        repository.partner === false &&
+        !isMarkingPartner;
 
       const markRepoAsPartnerAction = {
         isDisabled: rowData?.status === 'Pending',
@@ -124,7 +122,7 @@ export default function useRowActions({
                           title: 'Trigger snapshot',
                           ouiaId: 'kebab-trigger-snapshots',
                           onClick: () => {
-                            triggerIntrospectionAndSnapshot(rowData?.uuid);
+                            void triggerIntrospectionAndSnapshot(rowData?.uuid);
                           },
                           tooltipProps: !rowData.snapshot
                             ? {
@@ -167,7 +165,7 @@ export default function useRowActions({
     [
       isRedHatRepository,
       features?.snapshots?.accessible,
-      features?.adminpartnerrepositories?.accessible,
+      isPartnerAdmin,
       rbac?.repoWrite,
       navigate,
       triggerIntrospectionAndSnapshot,
