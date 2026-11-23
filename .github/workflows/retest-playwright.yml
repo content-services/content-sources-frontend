@@ -1,0 +1,43 @@
+# Relays /retest-playwright PR comments into a pull_request labeled event
+# so UI project tests attach checks to the PR head (issue_comment cannot).
+name: Retest Playwright
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  add-retest-label:
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/retest-playwright') &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Toggle retest-playwright label
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const issue_number = context.issue.number;
+            const label = 'retest-playwright';
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                name: label,
+              });
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+            }
+            await github.rest.issues.addLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              labels: [label],
+            });
