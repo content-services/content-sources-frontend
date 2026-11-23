@@ -16,7 +16,7 @@ import { t_global_font_size_400, t_global_icon_size_lg } from '@patternfly/react
 import { DestinationKey } from 'Hooks/navigation/navigationPaths';
 import { ComponentClass, createElement } from 'react';
 import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
-import { useAppContext } from 'middleware/AppContext';
+import { usePartnerFeatures } from 'Hooks/featureFlags';
 
 const RepositoriesCardHeader = () => (
   <>
@@ -77,10 +77,7 @@ const RepositoryCount = ({ count, label, type }: RepositoryCountProps) => {
 const RepositoriesCard = () => {
   const redirect = useNavigateTo('allRepositories');
   const { redhatCount, partnerCount, customCount, isLoading } = useCountEachRepositoryType();
-  const { features } = useAppContext();
-  const usePartnerTerminology =
-    features?.partnerrepos?.enabled && features.partnerrepos?.accessible;
-  const communityLabel = usePartnerTerminology ? 'Partner repositories' : 'Community repositories';
+  const { partnerReposOn } = usePartnerFeatures();
 
   if (isLoading) {
     return (
@@ -99,7 +96,7 @@ const RepositoriesCard = () => {
             <FlexItem>
               <Skeleton
                 width='10rem'
-                screenreaderText={`Loading ${communityLabel} count`}
+                screenreaderText={`Loading ${partnerReposOn ? 'Partner' : 'Community'} repositories count`}
                 role='progressbar'
               />
             </FlexItem>
@@ -132,7 +129,11 @@ const RepositoriesCard = () => {
             </FlexItem>
             <Divider orientation={{ default: 'horizontal', md: 'vertical' }} />
             <FlexItem>
-              <RepositoryCount count={partnerCount} label={communityLabel} type='partner' />
+              <RepositoryCount
+                count={partnerCount}
+                label={`${partnerReposOn ? 'Partner' : 'Community'} repositories`}
+                type='partner'
+              />
             </FlexItem>
             <Divider orientation={{ default: 'horizontal', md: 'vertical' }} />
             <FlexItem>

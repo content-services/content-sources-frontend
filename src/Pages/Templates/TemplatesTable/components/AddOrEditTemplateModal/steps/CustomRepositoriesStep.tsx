@@ -37,7 +37,7 @@ import { reduceStringToCharsWithEllipsis } from 'helpers';
 import UploadRepositoryLabel from 'components/RepositoryLabels/UploadRepositoryLabel';
 import PartnerRepositoryLabel from 'components/RepositoryLabels/PartnerRepositoryLabel';
 import { isEPELRepository } from 'Pages/Repositories/helpers';
-import { useAppContext } from 'middleware/AppContext';
+import { usePartnerFeatures } from 'Hooks/featureFlags';
 
 const useStyles = createUseStyles({
   topBottomContainers: {
@@ -57,13 +57,10 @@ export default function CustomRepositoriesStep() {
   const path = useHref('content');
   const pathname = path.split('content')[0] + 'content';
 
+  const { partnerReposOn } = usePartnerFeatures();
+
   const { queryClient, templateRequest, selectedCustomRepos, setSelectedCustomRepos } =
     useAddOrEditTemplateContext();
-
-  const { features } = useAppContext();
-  const usePartnerTerminology =
-    features?.partnerrepos?.enabled && features.partnerrepos?.accessible;
-  const communityLabel = usePartnerTerminology ? 'Partner' : 'EPEL';
 
   const [toggled, setToggled] = useState(false);
 
@@ -165,7 +162,7 @@ export default function CustomRepositoriesStep() {
       </Flex>
       <Flex direction={{ default: 'row' }}>
         <Content component={ContentVariants.p} className={classes.reduceTrailingMargin}>
-          Select custom or {communityLabel} repositories.
+          Select custom or {partnerReposOn ? 'Partner' : 'EPEL'} repositories.
         </Content>
         <UrlWithExternalIcon
           href={pathname + '/' + REPOSITORIES_ROUTE}
