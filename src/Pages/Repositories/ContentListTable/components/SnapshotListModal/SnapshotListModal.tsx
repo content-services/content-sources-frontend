@@ -23,6 +23,8 @@ import {
   useRepositoryType,
   usePublishSnapshotPolling,
 } from 'Hooks/snapshotActions/usePublishSnapshot';
+import LatestRepoConfig from './components/LatestRepoConfig';
+import { css } from '@patternfly/react-styles';
 
 const useStyles = createUseStyles({
   modalTableScope: modalTableSurfaceStyles,
@@ -113,7 +115,8 @@ const SnapshotListModal = () => {
           descriptorId='snapshot-list-modal-description'
         />
         <InnerScrollContainer>
-          <div className={`${classes.modalTableScope} ${spacing.pSm}`}>
+          <div className={css(spacing.pSm, classes.modalTableScope)}>
+            {count > 0 && <LatestRepoConfig repoUUID={repoUUID} className={spacing.mxSm} />}
             <SnapshotsTableWithToolbars
               snapshotsList={snapshotsList}
               paginationData={paginationData}

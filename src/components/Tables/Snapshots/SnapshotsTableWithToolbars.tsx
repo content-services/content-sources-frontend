@@ -193,7 +193,7 @@ const SnapshotsTableWithToolbars = ({
               ),
             },
             {
-              cell: <RepoConfig repoUUID={repoUUID} snapUUID={snapUuid} latest={false} />,
+              cell: <RepoConfig repoUUID={repoUUID} snapUUID={snapUuid} />,
             },
             ...kebab(snapshot),
           ],
