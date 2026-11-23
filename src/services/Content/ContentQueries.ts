@@ -828,37 +828,22 @@ export const useIntrospectRepositoryMutate = (
   });
 };
 
-export const useGetRepoConfigFileQuery = (repo_uuid: string, snapshot_uuid: string) => {
+/** Fetches config for a specific snapshot or for the latest snapshot when `snapshot_uuid` is omitted. */
+export const useGetRepoConfigFileQuery = (repo_uuid: string, snapshot_uuid?: string) => {
   const errorNotifier = useErrorNotification();
   return useMutation({
-    mutationKey: [REPO_CONFIG_FILE_KEY, repo_uuid, snapshot_uuid],
-    mutationFn: async () => await getRepoConfigFile(snapshot_uuid),
+    mutationKey: snapshot_uuid
+      ? [REPO_CONFIG_FILE_KEY, repo_uuid, snapshot_uuid]
+      : [LATEST_REPO_CONFIG_FILE_KEY, repo_uuid],
+    mutationFn: () =>
+      snapshot_uuid ? getRepoConfigFile(snapshot_uuid) : getLatestRepoConfigFile(repo_uuid),
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       errorNotifier(
         'Unable to find config.repo with the given UUID.',
         'An error occurred',
         err,
-        'repo-config-error',
-      );
-    },
-  });
-};
-
-export const useGetLatestRepoConfigFileQuery = (repo_uuid: string) => {
-  const errorNotifier = useErrorNotification();
-  return useMutation({
-    mutationKey: [LATEST_REPO_CONFIG_FILE_KEY, repo_uuid],
-    mutationFn: async () => await getLatestRepoConfigFile(repo_uuid),
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (err: any) => {
-      errorNotifier(
-        'Unable to find config.repo with the given UUID.',
-        'An error occurred',
-        err,
-        'repo-config-error',
+        'repo-config-fetch-error',
       );
     },
   });
@@ -921,8 +906,6 @@ export const useBulkDeleteSnapshotsMutate = (
       queryClient.invalidateQueries({ queryKey: [LIST_SNAPSHOTS_KEY] });
       queryClient.invalidateQueries({ queryKey: [SNAPSHOT_ERRATA_KEY] });
       queryClient.invalidateQueries({ queryKey: [SNAPSHOT_PACKAGES_KEY] });
-      queryClient.invalidateQueries({ queryKey: [REPO_CONFIG_FILE_KEY] });
-      queryClient.invalidateQueries({ queryKey: [LATEST_REPO_CONFIG_FILE_KEY] });
       queryClient.invalidateQueries({ queryKey: [REPO_COUNT_KEY] });
     },
 

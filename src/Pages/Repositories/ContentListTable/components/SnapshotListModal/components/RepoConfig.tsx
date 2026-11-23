@@ -2,12 +2,8 @@ import { Button, Flex, FlexItem, Icon } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { t_global_color_disabled_100 as global_disabled_color_100 } from '@patternfly/react-tokens';
 
-import {
-  useGetRepoConfigFileQuery,
-  useGetLatestRepoConfigFileQuery,
-} from 'services/Content/ContentQueries';
-
 import { CopyIcon, DownloadIcon } from '@patternfly/react-icons';
+import { useRepoConfig } from '../hooks/useRepoConfig';
 
 const useStyles = createUseStyles({
   text: {
@@ -22,30 +18,11 @@ const useStyles = createUseStyles({
 interface Props {
   repoUUID: string;
   snapUUID: string;
-  latest: boolean;
 }
 
-const RepoConfig = ({ repoUUID, snapUUID, latest }: Props) => {
+const RepoConfig = ({ repoUUID, snapUUID }: Props) => {
   const classes = useStyles();
-
-  const { mutateAsync } = latest
-    ? useGetLatestRepoConfigFileQuery(repoUUID)
-    : useGetRepoConfigFileQuery(repoUUID, snapUUID);
-
-  const copyConfigFile = async () => {
-    const data = await mutateAsync();
-    navigator.clipboard.writeText(data);
-  };
-
-  const downloadConfigFile = async () => {
-    const data = await mutateAsync();
-    const element = document.createElement('a');
-    const file = new Blob([data], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = 'config.repo';
-    document.body.appendChild(element);
-    element.click();
-  };
+  const { copyRepoConfig, downloadRepoConfig } = useRepoConfig(repoUUID, snapUUID);
 
   return (
     <Flex>
@@ -60,7 +37,7 @@ const RepoConfig = ({ repoUUID, snapUUID, latest }: Props) => {
           aria-label='Copy repository config'
           variant='link'
           className={classes.link}
-          onClick={() => copyConfigFile()}
+          onClick={copyRepoConfig}
           data-uuid={snapUUID}
         ></Button>
       </FlexItem>
@@ -75,7 +52,7 @@ const RepoConfig = ({ repoUUID, snapUUID, latest }: Props) => {
           aria-label='Download repository config'
           variant='link'
           className={classes.link}
-          onClick={() => downloadConfigFile()}
+          onClick={downloadRepoConfig}
           data-uuid={snapUUID}
         ></Button>
       </FlexItem>

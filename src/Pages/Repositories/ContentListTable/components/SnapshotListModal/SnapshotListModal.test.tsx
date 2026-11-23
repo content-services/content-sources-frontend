@@ -8,6 +8,7 @@ import {
 } from 'testingHelpers';
 import { useFetchContent, useGetSnapshotList } from 'services/Content/ContentQueries';
 import { ContentOrigin } from 'services/Content/ContentApi';
+import { usePartnerFeatures } from 'Hooks/featureFlags';
 
 jest.mock('Hooks/useRootPath', () => () => 'someUrl');
 
@@ -15,7 +16,6 @@ jest.mock('services/Content/ContentQueries', () => ({
   useFetchContent: jest.fn(),
   useGetSnapshotList: jest.fn(),
   useGetRepoConfigFileQuery: () => ({ mutateAsync: jest.fn() }),
-  useGetLatestRepoConfigFileQuery: () => ({ mutateAsync: jest.fn() }),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -31,14 +31,18 @@ jest.mock('middleware/AppContext', () => ({
   useAppContext: () => ({
     rbac: { repoRead: true, repoWrite: true },
     contentOrigin: [ContentOrigin.EXTERNAL, ContentOrigin.UPLOAD],
-    features: {
-      snapshots: { enabled: true, accessible: true },
-      partnerrepos: { enabled: true, accessible: true },
-      adminpartnerrepositories: { enabled: true, accessible: true },
-    },
     setContentOrigin: jest.fn(),
   }),
 }));
+
+jest.mock('Hooks/featureFlags', () => ({
+  usePartnerFeatures: jest.fn(),
+}));
+
+const mockPartnerFeatures = (isPartnerAdmin = false) =>
+  (usePartnerFeatures as jest.Mock).mockReturnValue({ partnerReposOn: true, isPartnerAdmin });
+
+beforeEach(() => mockPartnerFeatures());
 
 it('Render 1 item', () => {
   (useFetchContent as jest.Mock).mockImplementation(() => ({
@@ -142,6 +146,7 @@ it('Render empty state', () => {
 });
 
 it('Shows Published label when snapshot is published', () => {
+  mockPartnerFeatures(true); // Only partner admins see publishing UI
   const publishedSnapshot = {
     ...defaultSnapshotItem,
     published: true,
@@ -169,6 +174,7 @@ it('Shows Published label when snapshot is published', () => {
 });
 
 it('Shows Publishing in progress label when publish task is in progress', () => {
+  mockPartnerFeatures(true);
   const publishingSnapshot = {
     ...defaultSnapshotItem,
     published: true,
@@ -196,6 +202,7 @@ it('Shows Publishing in progress label when publish task is in progress', () => 
 });
 
 it('Shows no publish label when snapshot is not published', () => {
+  mockPartnerFeatures(true);
   const unpublishedSnapshot = { ...defaultSnapshotItem, published: false };
   (useFetchContent as jest.Mock).mockImplementation(() => ({
     data: defaultContentItemWithSnapshot,
@@ -220,6 +227,7 @@ it('Shows no publish label when snapshot is not published', () => {
 });
 
 it('Hides publish actions when repository is not a partner', () => {
+  mockPartnerFeatures(true);
   (useFetchContent as jest.Mock).mockImplementation(() => ({
     data: { ...defaultContentItemWithSnapshot, partner: false },
   }));
@@ -240,4 +248,36 @@ it('Hides publish actions when repository is not a partner', () => {
 
   expect(screen.queryByText('Publish')).not.toBeInTheDocument();
   expect(screen.queryByText('Unpublish')).not.toBeInTheDocument();
+});
+
+it.each([
+  ContentOrigin.EXTERNAL,
+  ContentOrigin.UPLOAD,
+  ContentOrigin.REDHAT,
+  ContentOrigin.COMMUNITY,
+])('shows the latest snapshot config to consuming organizations for %s repositories', (origin) => {
+  (useFetchContent as jest.Mock).mockImplementation(() => ({
+    data: { ...defaultContentItemWithSnapshot, origin },
+  }));
+  (useGetSnapshotList as jest.Mock).mockImplementation(() => ({
+    data: {
+      meta: { ...defaultMetaItem, count: 1 },
+      data: [defaultSnapshotItem],
+    },
+    isLoading: false,
+    isFetching: false,
+  }));
+
+  render(
+    <ReactQueryTestWrapper>
+      <SnapshotListModal />
+    </ReactQueryTestWrapper>,
+  );
+
+  // Should be visible across all repository types to consuming organizations
+  expect(screen.getByTestId('latest-snapshot-config')).toHaveTextContent(
+    /Configure your host with this .repo file to always use the latest content/,
+  );
+  expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
 });
