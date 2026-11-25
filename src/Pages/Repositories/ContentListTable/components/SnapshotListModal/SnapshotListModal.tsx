@@ -1,3 +1,5 @@
+import { createUseStyles } from 'react-jss';
+import { modalTableSurfaceStyles } from 'helpers';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet, useOutletContext } from 'react-router-dom';
 
@@ -22,9 +24,14 @@ import {
   usePublishSnapshotPolling,
 } from 'Hooks/snapshotActions/usePublishSnapshot';
 
+const useStyles = createUseStyles({
+  modalTableScope: modalTableSurfaceStyles,
+});
+
 const perPageKey = 'snapshotPerPage';
 
 const SnapshotListModal = () => {
+  const classes = useStyles();
   const repoUUID = useSafeUUIDParam('repoUUID');
 
   const onClose = useNavigateTo('repositories');
@@ -106,7 +113,7 @@ const SnapshotListModal = () => {
           descriptorId='snapshot-list-modal-description'
         />
         <InnerScrollContainer>
-          <div className={spacing.pSm}>
+          <div className={`${classes.modalTableScope} ${spacing.pSm}`}>
             <SnapshotsTableWithToolbars
               snapshotsList={snapshotsList}
               paginationData={paginationData}
