@@ -1,3 +1,5 @@
+import { createUseStyles } from 'react-jss';
+import { modalTableSurfaceStyles } from 'helpers';
 import { Button, Modal, ModalFooter, ModalHeader, ModalVariant } from '@patternfly/react-core';
 import { InnerScrollContainer } from '@patternfly/react-table';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -13,9 +15,14 @@ import { useEnableDelete } from './hooks/useEnableDelete';
 import { useDataViewSelection } from '@patternfly/react-data-view/dist/dynamic/Hooks';
 import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
 
+const useStyles = createUseStyles({
+  modalTableScope: modalTableSurfaceStyles,
+});
+
 const perPageKey = 'packagePerPage';
 
 export default function PackageModal() {
+  const classes = useStyles();
   const repoUUID = useSafeUUIDParam('repoUUID');
 
   const onClose = useNavigateTo('repositories');
@@ -79,7 +86,7 @@ export default function PackageModal() {
           descriptorId='rpm-package-modal-description'
         />
         <InnerScrollContainer>
-          <div className={spacing.pSm}>
+          <div className={`${classes.modalTableScope} ${spacing.pSm}`}>
             <PackagesTableWithToolbars
               packagesList={packagesList}
               paginationData={paginationData}
