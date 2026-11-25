@@ -476,6 +476,7 @@ const ContentListTable = () => {
                     }}
                     snapshotsAccessible={snapshotsAccessible}
                     isRepoBeingMarkedAsPartner={isRepoBeingMarkedAsPartner(uuid)}
+                    isPartnerAdmin={isPartnerAdmin}
                   />
                 ),
               },

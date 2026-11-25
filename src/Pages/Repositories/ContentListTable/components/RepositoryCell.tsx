@@ -16,13 +16,14 @@ interface Props {
   >;
   snapshotsAccessible: boolean;
   isRepoBeingMarkedAsPartner: boolean;
+  isPartnerAdmin: boolean;
 }
 
 const RepositoryCell = memo(
-  ({ rowData, snapshotsAccessible, isRepoBeingMarkedAsPartner }: Props) => {
+  ({ rowData, snapshotsAccessible, isRepoBeingMarkedAsPartner, isPartnerAdmin }: Props) => {
     const { name, url, last_snapshot, origin, partner, snapshot_publish_state } = rowData;
 
-    const showPartnerAdminLabels = origin === ContentOrigin.UPLOAD;
+    const showPartnerAdminLabels = origin === ContentOrigin.UPLOAD && isPartnerAdmin;
 
     return (
       <Flex direction={{ default: 'column' }}>
