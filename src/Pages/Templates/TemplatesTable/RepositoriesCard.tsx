@@ -8,7 +8,7 @@ import {
   FlexItem,
   Skeleton,
 } from '@patternfly/react-core';
-import { RedhatIcon, DatabaseIcon, RhUiFoldersFillIcon } from '@patternfly/react-icons';
+import { RedhatIcon, RhUiStorageFillIcon, RhUiFoldersFillIcon } from '@patternfly/react-icons';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { useCountEachRepositoryType } from 'Hooks/useCountEachRepositoryType';
 import { useNavigateTo } from 'Hooks/navigation/useNavigateTo';
@@ -44,7 +44,7 @@ const repositoryTypes: Record<
   },
   custom: {
     target: 'customRepositories',
-    icon: DatabaseIcon,
+    icon: RhUiStorageFillIcon,
   },
 };
 

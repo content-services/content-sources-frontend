@@ -75,6 +75,7 @@ import {
 import { useRepositoryPublishSnapshotPolling } from 'Hooks/snapshotActions/usePublishSnapshot';
 import ProductFilter from './components/ProductFilter/ProductFilter';
 import { usePartnerFeatures } from 'Hooks/featureFlags';
+import RepositoryTypeCell from './components/RepositoryTypeCell';
 
 export const perPageKey = 'contentListPerPage';
 
@@ -82,7 +83,7 @@ const communityAndCustomReposTooltipCopy = 'No custom repositories on this page 
 
 const ContentListTable = () => {
   const { contentOrigin, setContentOrigin, features, rbac } = useAppContext();
-  const { partnerReposOn } = usePartnerFeatures();
+  const { partnerReposOn, isPartnerAdmin } = usePartnerFeatures();
 
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -117,6 +118,7 @@ const ContentListTable = () => {
   // Selection is handled by DataView selection system, not individual columns
   const columns = [
     { name: 'Name', sortAttribute: 'name' },
+    ...(partnerReposOn ? [{ name: 'Type', sortAttribute: null }] : []), // As of now, type isn't sortable
     { name: 'Architecture', sortAttribute: 'distribution_arch' },
     { name: 'OS', sortAttribute: 'distribution_versions' },
     { name: 'Packages', sortAttribute: 'package_count' },
@@ -474,9 +476,23 @@ const ContentListTable = () => {
                     }}
                     snapshotsAccessible={snapshotsAccessible}
                     isRepoBeingMarkedAsPartner={isRepoBeingMarkedAsPartner(uuid)}
+                    isPartnerAdmin={isPartnerAdmin}
                   />
                 ),
               },
+              ...(partnerReposOn
+                ? [
+                    {
+                      cell: (
+                        <RepositoryTypeCell
+                          origin={origin}
+                          partner={partner}
+                          isPartnerAdmin={isPartnerAdmin}
+                        />
+                      ),
+                    },
+                  ]
+                : []),
               { cell: getArchName(distribution_arch) },
               {
                 cell: extended_release_version
@@ -533,6 +549,8 @@ const ContentListTable = () => {
       introspectRepoForUuid,
       isRedHatRepository,
       isRepoBeingMarkedAsPartner,
+      partnerReposOn,
+      isPartnerAdmin,
     ],
   );
 

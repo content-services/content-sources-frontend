@@ -108,11 +108,15 @@ export default function RepositoriesRoutes() {
                         path={DELETE_ROUTE}
                         element={<DeleteSnapshotsModal />}
                       />
-                      <Route
-                        key={PUBLISH_ROUTE}
-                        path={PUBLISH_ROUTE}
-                        element={<PublishSnapshotModal />}
-                      />
+                      {isPartnerAdmin ? (
+                        <Route
+                          key={PUBLISH_ROUTE}
+                          path={PUBLISH_ROUTE}
+                          element={<PublishSnapshotModal />}
+                        />
+                      ) : (
+                        ''
+                      )}
                     </>
                   ) : (
                     ''
