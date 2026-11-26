@@ -10,7 +10,11 @@ const downloadRepoConfig = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (useRepoConfig as jest.Mock).mockReturnValue({ copyRepoConfig, downloadRepoConfig });
+  (useRepoConfig as jest.Mock).mockReturnValue({
+    copyRepoConfig,
+    downloadRepoConfig,
+    copied: false,
+  });
 });
 
 describe('LatestRepoConfig', () => {
@@ -20,7 +24,17 @@ describe('LatestRepoConfig', () => {
 
     expect(useRepoConfig).toHaveBeenCalledWith('repo-1');
     expect(copyRepoConfig).toHaveBeenCalled();
-    expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
+  });
+
+  it('shows copied feedback after a successful copy', () => {
+    (useRepoConfig as jest.Mock).mockReturnValue({
+      copyRepoConfig,
+      downloadRepoConfig,
+      copied: true,
+    });
+    render(<LatestRepoConfig repoUUID='repo-1' />);
+
+    expect(screen.getByRole('button', { name: 'Copied' })).toBeInTheDocument();
   });
 
   it('downloads the latest config', async () => {

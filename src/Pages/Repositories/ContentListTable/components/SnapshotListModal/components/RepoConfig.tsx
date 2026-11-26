@@ -2,7 +2,7 @@ import { Button, Flex, FlexItem, Icon } from '@patternfly/react-core';
 import { createUseStyles } from 'react-jss';
 import { t_global_color_disabled_100 as global_disabled_color_100 } from '@patternfly/react-tokens';
 
-import { CopyIcon, DownloadIcon } from '@patternfly/react-icons';
+import { CheckIcon, CopyIcon, DownloadIcon } from '@patternfly/react-icons';
 import { useRepoConfig } from '../hooks/useRepoConfig';
 
 const useStyles = createUseStyles({
@@ -22,19 +22,15 @@ interface Props {
 
 const RepoConfig = ({ repoUUID, snapUUID }: Props) => {
   const classes = useStyles();
-  const { copyRepoConfig, downloadRepoConfig } = useRepoConfig(repoUUID, snapUUID);
+  const { copyRepoConfig, downloadRepoConfig, copied } = useRepoConfig(repoUUID, snapUUID);
 
   return (
     <Flex>
       <FlexItem>
         <Button
-          icon={
-            <Icon>
-              <CopyIcon />
-            </Icon>
-          }
+          icon={<Icon>{copied ? <CheckIcon /> : <CopyIcon />}</Icon>}
           ouiaId='repo_config_file_copy_button'
-          aria-label='Copy repository config'
+          aria-label={copied ? 'Copied' : 'Copy repository config'}
           variant='link'
           className={classes.link}
           onClick={copyRepoConfig}
